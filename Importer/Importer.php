@@ -165,6 +165,7 @@ class Importer
     }
     
     /**
+     * @codeCoverageIgnore
      * @return /BackBuilder/BBApplication
      */
     final public function getApplication()
@@ -172,28 +173,51 @@ class Importer
         return $this->_application;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $string
+     * @return array
+     */
     final public function find($string)
     {
         return $this->_connector->find($string);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     final protected function _loadRelataions()
     {
        return $this->getConfig()->getSection('relations');
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     final protected function getConfig()
     {
         return $this->_config;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return IConverter
+     */
     final protected function getConverter()
     {
         return $this->_converter;
     }
     
+    /**
+     * return
+     * @param IConverter $converter
+     * @return \BackBuilder\Importer\Importer
+     */
     final protected function setConverter($converter)
     {
-        return $this->_converter = $converter;
+        $this->_converter = $converter;
+        return $this;
     }
 }

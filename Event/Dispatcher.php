@@ -105,6 +105,7 @@ class Dispatcher extends EventDispatcher
 
     /**
      * Return the current instance of BBapplication
+     * @codeCoverageIgnore
      * @return \Backbuilder\BBApplication
      */
     public function getApplication() {

@@ -115,6 +115,7 @@ class AutoLoader
 
     /**
      * Sets the Backbuilder Application
+     * @codeCoverageIgnore
      * @param \BackBuilder\BBApplication $application
      * @return \BackBuilder\AutoLoader\AutoLoader The current autoloader
      */
@@ -126,6 +127,7 @@ class AutoLoader
 
     /**
      * Sets the events dispatcher
+     * @codeCoverageIgnore
      * @param \BackBuilder\Event\Dispatcher $dispatcher
      * @return \BackBuilder\AutoLoader\AutoLoader The current autoloader
      */
@@ -137,6 +139,7 @@ class AutoLoader
 
     /**
      * Sets the logger engine
+     * @codeCoverageIgnore
      * @param \BackBuilder\Logging\Logger $logger
      * @return \BackBuilder\AutoLoader\AutoLoader The current autoloader
      */
@@ -317,6 +320,7 @@ class AutoLoader
 
     /**
      * Returns the current BackBuilder application if defined, NULL otherwise
+     * @codeCoverageIgnore
      * @return \BackBuilder\BBApplication | NULL
      */
     public function getApplication()
@@ -326,6 +330,7 @@ class AutoLoader
 
     /**
      * Returns the events dispatcher if defined, NULL otherwise
+     * @codeCoverageIgnore
      * @return \BackBuilder\Event\Dispatcher | NULL
      */
     public function getEventDispatcher()
@@ -335,6 +340,7 @@ class AutoLoader
 
     /**
      * Returns the logging engine if defined, NULL otherwise
+     * @codeCoverageIgnore
      * @return \BackBuilder\Logging\Logger | NULL
      */
     public function getLogger()

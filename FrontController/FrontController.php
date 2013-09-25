@@ -67,6 +67,7 @@ class FrontController implements HttpKernelInterface
     /**
      * Class constructor
      *
+     * @codeCoverageIgnore
      * @access public
      * @param \BackBuilder\BBApplication $application The current BBapplication
      */
@@ -186,6 +187,7 @@ class FrontController implements HttpKernelInterface
     /**
      * Returns current Backbuilder application
      *
+     * @codeCoverageIgnore
      * @access public
      * @return BBApplication
      */
@@ -376,7 +378,7 @@ class FrontController implements HttpKernelInterface
 
     /**
      * Handles a themes resources files request
-     *
+     * @codeCoverageIgnore
      * @access public
      * @param string $filename The media file to provide
      * @throws FrontControllerException
@@ -518,6 +520,11 @@ class FrontController implements HttpKernelInterface
         }
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param function $handler
+     * @param string $action
+     */
     public function addAction($handler, $action)
     {
         $this->_actions[$action] = $handler;

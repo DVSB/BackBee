@@ -235,6 +235,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Return the first subcontent of the set
+     * @codeCoverageIgnore
      * @return AClassContent the first element
      */
     public function first()

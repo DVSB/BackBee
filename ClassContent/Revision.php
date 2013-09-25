@@ -239,6 +239,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the current accepted subcontent
+     * @codeCoverageIgnore
      * @return array
      */
     public function getAccept() {
@@ -247,6 +248,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the entity target content classname
+     * @codeCoverageIgnore
      * @return string
      */
     public function getClassname() {
@@ -255,6 +257,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the revisionned content
+     * @codeCoverageIgnore
      * @return BackBuilder\ClassContent\AClassContent
      */
     public function getContent() {
@@ -263,6 +266,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the creation date of the revision
+     * @codeCoverageIgnore
      * @return DateTime
      */
     public function getCreated() {
@@ -333,6 +337,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Returns the raw datas array of the revision
+     * @codeCoverageIgnore
      * @return array
      */
     public function getDataToObject() {
@@ -341,6 +346,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the label of the revision
+     * @codeCoverageIgnore
      * @return string
      */
     public function getLabel() {
@@ -349,6 +355,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Get the maxentry of the revision
+     * @codeCoverageIgnore
      * @return array
      */
     public function getMaxEntry() {
@@ -357,6 +364,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Get the minentry of the revision
+     * @codeCoverageIgnore
      * @return array
      */
     public function getMinEntry() {
@@ -365,6 +373,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the last modification date of the revision
+     * @codeCoverageIgnore
      * @return DateTime
      */
     public function getModified() {
@@ -373,6 +382,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the owner of the revision
+     * @codeCoverageIgnore
      * @return Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
      */
     public function getOwner() {
@@ -404,6 +414,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the revision number of the revision
+     * @codeCoverageIgnore
      * @return int
      */
     public function getRevision() {
@@ -412,6 +423,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the state of the revision
+     * @codeCoverageIgnore
      * @return int
      */
     public function getState() {
@@ -420,6 +432,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the unique identifier of the revision
+     * @codeCoverageIgnore
      * @return string
      */
     public function getUid() {
@@ -428,6 +441,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Checks for state of the revsion before rendering it
+     * @codeCoverageIgnore
      * @return boolean Always false, a revision can not be rendered
      */
     public function isRenderable() {
@@ -465,6 +479,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the acceptable classnmae for value
+     * @codeCoverageIgnore
      * @param array $accept
      * @return AClassContent the current instance content
      */
@@ -475,6 +490,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the entity target content classname
+     * @codeCoverageIgnore
      * @param string $classname
      * @return AClassContent the current instance content
      */
@@ -502,6 +518,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set creation date
+     * @codeCoverageIgnore
      * @param DateTime $created
      * @return AClassContent the current instance content
      */
@@ -512,6 +529,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the whole revision datas
+     * @codeCoverageIgnore
      * @param array $data
      * @return AClassContent the current instance content
      */
@@ -522,6 +540,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the label
+     * @codeCoverageIgnore
      * @param string $label
      * @return AClassContent the current instance content
      */
@@ -532,6 +551,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the maximum number of items for elements
+     * @codeCoverageIgnore
      * @param array $maxentry
      * @return AClassContent the current instance content
      */
@@ -542,6 +562,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the minimum number of items for elements
+     * @codeCoverageIgnore
      * @param array $minentry
      * @return AClassContent the current instance content
      */
@@ -552,6 +573,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the last modification date
+     * @codeCoverageIgnore
      * @param DateTime $modified
      * @return AClassContent the current instance content
      */
@@ -562,6 +584,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the owner of the revision
+     * @codeCoverageIgnore
      * @param UserInterface $user
      * @return AClassContent the current instance content
      */
@@ -597,6 +620,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the revision number of the revision
+     * @codeCoverageIgnore
      * @param int $revision
      * @return AClassContent the current instance content
      */
@@ -607,6 +631,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Set the state of the revision
+     * @codeCoverageIgnore
      * @param int $state
      * @return AClassContent the current instance content
      */
@@ -753,6 +778,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
 
     /**
      * Return the first subcontent of the set
+     * @codeCoverageIgnore
      * @return AClassContent the first element
      */
     public function first() {
@@ -791,7 +817,7 @@ class Revision implements IRenderable, \Iterator, \Countable {
      * @return AClassContent the last element
      */
     public function last() {
-        return $this->getData($this->count()-1);
+        return $this->getData($this->count() - 1);
     }
 
     /**

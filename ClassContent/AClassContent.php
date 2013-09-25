@@ -733,6 +733,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Add a new revision to the collection
+     * @codeCoverageIgnore
      * @param Revision $revisions
      * @return AClassContent the current instance
      */
@@ -843,6 +844,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Returns the parameters as defined in Yaml
+     * @codeCoverageIgnore
      * @return array
      */
     public function getDefaultParameters()
@@ -852,6 +854,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Return the user draft of this content if exists
+     * @codeCoverageIgnore
      * @return Revision the current draft if exists NULL otherwise
      */
     public function getDraft()
@@ -868,12 +871,17 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
         return (NULL !== $this->getDraft()) ? $this->getDraft()->getLabel() : $this->_label;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getIndexation() {
         return $this->_indexation;
     }
 
     /**
      * Return the associated page of the content
+     * @codeCoverageIgnore
      * @return Page
      */
     public function getMainNode()
@@ -938,6 +946,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Return the current parent content if exists
+     * @codeCoverageIgnore
      * @return AClassContent The parent content if exists, NULL otherwise
      */
     public function getParentContent()
@@ -974,6 +983,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Return the collection of revisions of the content
+     * @codeCoverageIgnore
      * @return ArrayCollection
      */
     public function getRevisions()
@@ -992,6 +1002,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Return the unique identifier of the content
+     * @codeCoverageIgnore
      * @return string
      */
     public function getUid()
@@ -1001,6 +1012,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Return TRUE if the content is an entity managed by doctrine
+     * @codeCoverageIgnore
      * @return boolean
      */
     public function isLoaded()
@@ -1073,6 +1085,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Unset current user draft
+     * @codeCoverageIgnore
      * @return AClassContent the current instance
      */
     public function releaseDraft()
@@ -1140,6 +1153,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Associated an user draft to this content
+     * @codeCoverageIgnore
      * @param Revision $draft
      * @return AClassContent the current instance
      */
@@ -1149,6 +1163,11 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $label
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
     public function setLabel($label)
     {
         $this->_label = $label;
@@ -1224,6 +1243,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Set the revision number of the content
+     * @codeCoverageIgnore
      * @param int $revision
      * @return AClassContent the current instance
      */
@@ -1235,6 +1255,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Set the state of the content
+     * @codeCoverageIgnore
      * @param int $state
      * @return AClassContent the current instance
      */
@@ -1302,6 +1323,7 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
 
     /**
      * Returns a unique identifier for this domain object
+     * @codeCoverageIgnore
      * @return string
      */
     public function getObjectIdentifier()

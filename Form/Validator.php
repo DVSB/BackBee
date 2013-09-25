@@ -32,6 +32,7 @@ class Validator
     }
 
     /**
+     * @codeCoverageIgnore
      * @return array
      */
     public function getViolations()
@@ -39,6 +40,11 @@ class Validator
         return $this->_context->getViolations();
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param string $message
+     * @param string $key
+     */
     public function addViolation($message, $key)
     {
         $this->_context->addCustomViolation($message, $key);
