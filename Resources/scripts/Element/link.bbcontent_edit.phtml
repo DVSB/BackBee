@@ -1,0 +1,94 @@
+<fieldset class="bb5-form-editcontent-link" id="<?php echo $this->getObject()->getUid(); ?>_container">
+        <input type="hidden" id="<?php echo $this->getObject()->getUid(); ?>_type" name="<?php echo $this->getObject()->getUid(); ?>_type"  value="<?php echo get_class($this->getObject()); ?>" />
+        <p class="bb5-form-group">
+                <label><?php echo $this->getObject()->getLabel(); ?></label>
+                <input class="bb5-form-editcontent-inputtext" id="<?php echo $this->getObject()->getUid(); ?>" name="<?php echo $this->getObject()->getUid(); ?>" value="<?php echo $this->getObject()->value; ?>" />
+                <a href="#" class="bb5-button bb5-ico-tree bb5-button-link bb5-button-thick bb5-button-outline bb5-ShowBBSelector" data-uid="<?php echo $this->getObject()->getUid(); ?>">Parcourir</a>
+                <span class="bb5-form-editcontent-delete"><input type="checkbox" id="<?php echo $this->getObject()->getUid(); ?>_delete" <?php if (!$this->getObject()->isLoaded()) :?>checked="checked"<?php endif;?>><label for="<?php echo $this->getObject()->getUid(); ?>_delete">Supprimer</label></span>
+        </p>
+        <p class="bb5-form-group parameter" data-param="target">
+        <!-- -->
+                <span class="bb5-form-label">Ouverture en "_blank" :</span>
+                <label for="link-is-blank1" class="bb5-form-label-chkbx">Oui</label>
+                <input type="radio" class="bb5-plugin-form-chkbx param" name="<?php echo $this->getObject()->getUid(); ?>"
+                    <?php $target_a = $this->getObject()->getParam('target'); ?>
+                    <?php if ("_blank" ==  end($target_a)): ?>
+                        checked="1"
+                    <?php endif; ?>
+                id="link-is-blank1" value="_blank"> &nbsp;&nbsp;&nbsp;
+                <label for="link-is-blank0" class="bb5-form-label-chkbx">Non</label>
+                <input type="radio" class="bb5-plugin-form-chkbx param" name="<?php echo $this->getObject()->getUid(); ?>"
+                        <?php if ("_self" ==  end($target_a)): ?>
+                        checked="1"
+                    <?php endif; ?>
+                id="link-is-blank0" value="_self">
+        <!-- -->
+        </p>
+</fieldset>
+
+
+
+
+
+
+
+
+
+
+<!--
+<p class="bb5-form-group">
+<input type="hidden" id="<?php echo $this->getObject()->getUid(); ?>_type" name="<?php echo $this->getObject()->getUid(); ?>_type"  value="<?php echo get_class($this->getObject()); ?>" />
+<div id="<?php echo $this->getObject()->getUid(); ?>_container">
+    
+    <label><?php echo $this->getObject()->getLabel(); ?></label>
+    <input class="bb5-form-editcontent-inputtext" id="<?php echo $this->getObject()->getUid(); ?>" name="<?php echo $this->getObject()->getUid(); ?>" value="<?php echo $this->getObject()->value; ?>" />
+    <a href="#" class="bb5-button bb5-ico-tree bb5-button-link bb5-button-thick bb5-button-outline bb5-ShowBBSelector" data-uid="<?php echo $this->getObject()->getUid(); ?>">Parcourir</a>
+    <span class="bb5-form-editcontent-delete"><input type="checkbox" id="<?php echo $this->getObject()->getUid(); ?>_delete" <?php if (!$this->getObject()->isLoaded()) :?>checked="checked"<?php endif;?>><label for="<?php echo $this->getObject()->getUid(); ?>_delete">Supprimer</label></span>
+    
+</div>
+</p>
+<p class="bb5-form-group">
+<span class="parameter" data-param="target">
+_Blank: 
+Oui
+<input type="radio" class="param" 
+        name="<?php echo $this->getObject()->getUid(); ?>" 
+        <?php if (end($this->getObject()->getParam('target')) == "_blank"): ?>
+            checked="1"
+        <?php endif; ?>
+        value="_blank" />Non
+<input type="radio" class="param" 
+        name="<?php echo $this->getObject()->getUid(); ?>" 
+        <?php if (end($this->getObject()->getParam('target')) == '_self'): ?>
+            checked="1"
+        <?php endif; ?>
+        value="_self" />
+</span>
+</p -->
+
+
+
+<!-- input type="hidden" id="<?php echo $this->getObject()->getUid(); ?>_type" name="<?php echo $this->getObject()->getUid(); ?>_type"  value="<?php echo get_class($this->getObject()); ?>" />
+<label for="<?php echo $this->getObject()->getUid(); ?>" style="font-weight: bold;"><?php echo $this->getObject()->getLabel(); ?></label>
+<div style="text-align: right;"><input id="<?php echo $this->getObject()->getUid(); ?>_delete" type="checkbox" <?php if (!$this->getObject()->isLoaded()) :?>checked="checked"<?php endif;?>><label for="<?php echo $this->getObject()->getUid(); ?>_delete" style="min-width: 0px;">&nbsp;Supprimer</label></div>
+<div id="<?php echo $this->getObject()->getUid(); ?>_container">
+    <label class="parameter" data-param="target">
+    <input id="<?php echo $this->getObject()->getUid(); ?>" name="<?php echo $this->getObject()->getUid(); ?>" value="<?php echo $this->getObject()->value; ?>" />
+    _Blank: 
+    Oui
+    <input type="radio" id="<?php echo $this->getObject()->getUid(); ?>"
+           name="<?php echo $this->getObject()->getUid(); ?>" 
+           <?php $target_a = $this->getObject()->getParam('target'); ?>
+           <?php if ("_blank" ==  end($target_a)): ?>
+                checked="1"
+            <?php endif; ?>
+           value="_blank" />Non
+    <input type="radio" id="<?php echo $this->getObject()->getUid(); ?>" 
+           name="<?php echo $this->getObject()->getUid(); ?>" 
+           <?php $target_r = $this->getObject()->getParam('target'); ?>
+           <?php if ("_self" ==  end($target_r)): ?>
+                checked="1"
+            <?php endif; ?>
+           value="_self" />
+    </label>
+</div -->

@@ -1,0 +1,4 @@
+<input type="hidden" id="<?php echo $this->getObject()->getUid(); ?>_type" name="<?php echo $this->getObject()->getUid(); ?>_type"  value="<?php echo get_class($this->getObject()); ?>" />
+<label for="<?php echo $this->getObject()->getUid(); ?>" style="font-weight: bold;"><?php echo $this->getObject()->getLabel(); ?></label>
+<div style="text-align: right;"><input id="<?php echo $this->getObject()->getUid(); ?>_delete" type="checkbox" <?php if (!$this->getObject()->isLoaded()) : ?>checked="checked"<?php endif; ?>><label for="<?php echo $this->getObject()->getUid(); ?>_delete" style="min-width: 0px;">&nbsp;Supprimer</label></div>
+<div id="<?php echo $this->getObject()->getUid(); ?>"><?php print (isset($this->keyword)) ? $this->keyword->getKeyWord() : ""; ?><input type="hidden" data-uid-keyword="<?php echo $this->getObject()->getUid(); ?>" name="keywords" value="<?php print $this->getObject()->value; /* $this->keyword->getUid() */ ?>"/></div>

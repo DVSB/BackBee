@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>
+<?php echo $this->getNode()->getTitle(); ?></title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+	<script src="<?php echo $this->getUri('js/libs/jquery-1.7.2.min.js'); ?>"></script>
+	<!-- Reset by BoilerPlate -->
+	<link rel="stylesheet" href="<?php echo $this->getUri('css/style_reset.css'); ?>">
+	<link rel="stylesheet" href="<?php echo $this->getUri('css/bootstrap.min.css'); ?>">
+	<link rel="stylesheet" href="<?php echo $this->getUri('css/gen-revenu.css'); ?>">
+</head>
+<body>
+    <?php echo $this->bb5toolbar(); ?>
+
+        <!-- Container -->
+        <div id="bb5-site-wrapper" class="container">
+            <?php echo $this->partial('Partials/header.phtml'); ?>
+            <?php echo $this->partial('Partials/navbar.phtml'); ?>
+
+            <!--mainLayoutRow-->
+            <div class="row" id="bb5-mainLayoutRow">
+<div class="span8"><?php echo $this->container()->first(); ?></div>
+<div class="span4"><?php echo $this->container()->next(); ?></div>
+</div>
+
+            <?php echo $this->partial('Partials/footer.phtml'); ?>
+        </div>
+        <!-- end Container -->
+
+
+        <!-- Le javascript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="<?php echo $this->getUri('js/bootstrap.js'); ?>"></script><!-- --><script type="text/javascript">
+            $(document).ready(function() {
+                // Handler for .ready() called.
+                $('.carousel').carousel();
+                $('.dropdown-toggle').dropdown();
+                $(".collapse").collapse();
+            });
+        </script><!-- Time --><script src="<?php echo $this->getUri('js/jquery.jclock.js'); ?>"></script><script type="text/javascript">
+            $(function($) {
+                var options3 = {
+                    format: '%A %d %B %Y ' // Day Nth Month year
+                }
+                $('.ed-date b').jclock(options3);
+            });
+        </script>
+</body>
+</html>

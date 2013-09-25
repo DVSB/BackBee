@@ -1,0 +1,122 @@
+/*
+ * jsTree classic theme 1.0
+ * Supported features: dots/no-dots, icons/no-icons, focused, loading
+ * Supported plugins: ui (hovered, clicked), checkbox, contextmenu, search
+ */
+
+ .ui-layout-pane .jstree {white-space:normal;}
+ .ui-layout-pane .jstree a {height: auto; white-space:normal; padding:1px 8px 1px 15px;} 
+ .jstree a {color: #54648A; }
+
+.jstree-bb li[rel="root"] > a > .jstree-icon {
+    background-image: url("world.png");
+    background-position: 0 0;
+}
+
+.jstree-bb li, 
+.jstree-bb ins { background-image:url(d.png); background-repeat:no-repeat; background-color:transparent; }
+.jstree-bb li { background-position:-90px 0; background-repeat:repeat-y;  }
+.jstree-bb li.jstree-last { background:transparent; }
+.jstree-bb .jstree-open > ins { background-position:-72px 0; }
+.jstree-bb .jstree-closed > ins { background-position:-54px 0; }
+.jstree-bb .jstree-leaf > ins { background-position:-36px 0; }
+
+.jstree-bb .jstree-hovered { background:#FAFAFB; border:1px solid #FAFAFB; padding:0 2px 0 1px; }
+.jstree-bb .jstree-clicked { background:#FAFAFB; border:1px solid #FAFAFB; padding:0 2px 0 1px; font-weight: bold;}
+.jstree-bb a .jstree-icon { background-position:-56px -19px; }
+.jstree-bb .jstree-open > a .jstree-icon { background-position:-56px -36px; }
+.jstree-bb a.jstree-loading .jstree-icon { background:url("throbber.gif") center center no-repeat !important; }
+
+.jstree-bb.jstree-focused { /*background:white;*/ }
+
+.jstree-bb .jstree-no-dots li, 
+.jstree-bb .jstree-no-dots .jstree-leaf > ins { background:transparent; }
+.jstree-bb .jstree-no-dots .jstree-open > ins { background-position:-18px 0; }
+.jstree-bb .jstree-no-dots .jstree-closed > ins { background-position:0 0; }
+
+.jstree-bb .jstree-no-icons a .jstree-icon { display:none; }
+
+.jstree-bb .jstree-search { font-style:italic; }
+
+.jstree-bb .jstree-no-icons .jstree-checkbox { display:inline-block; }
+.jstree-bb .jstree-no-checkboxes .jstree-checkbox { display:none !important; }
+.jstree-bb .jstree-checked > a > .jstree-checkbox { background-position:-38px -19px; }
+.jstree-bb .jstree-unchecked > a > .jstree-checkbox { background-position:-2px -19px; }
+.jstree-bb .jstree-undetermined > a > .jstree-checkbox { background-position:-20px -19px; }
+.jstree-bb .jstree-checked > a > .jstree-checkbox:hover { background-position:-38px -37px; }
+.jstree-bb .jstree-unchecked > a > .jstree-checkbox:hover { background-position:-2px -37px; }
+.jstree-bb .jstree-undetermined > a > .jstree-checkbox:hover { background-position:-20px -37px; }
+
+#vakata-dragged.jstree-bb {z-index: 650000;}
+#vakata-dragged.jstree-bb ins { background:transparent !important;}
+#vakata-dragged.jstree-bb .jstree-ok { background:url("d.png") -2px -53px no-repeat !important; }
+#vakata-dragged.jstree-bb .jstree-invalid { background:url("d.png") -18px -53px no-repeat !important; }
+#jstree-marker.jstree-bb { background:url("d.png") -41px -57px no-repeat !important; text-indent:-100px; }
+
+#jstree-marker {z-index: 650000;}
+#jstree-marker-line {z-index: 650000;}
+
+.jstree-bb a.jstree-search { color:aqua; }
+.jstree-bb .jstree-locked a { color:silver; cursor:default; }
+
+#vakata-contextmenu.jstree-bb-context {z-index: 650000;}
+#vakata-contextmenu.jstree-bb-context li ul { background:#f0f0f0; border:1px solid #979797; -moz-box-shadow: 1px 1px 2px #999; -webkit-box-shadow: 1px 1px 2px #999; box-shadow: 1px 1px 2px #999; }
+#vakata-contextmenu.jstree-bb-context li { }
+#vakata-contextmenu.jstree-bb-context a { color:black; }
+	/*Patched : color + padding*/
+#vakata-contextmenu.jstree-bb-context a:hover, 
+#vakata-contextmenu.jstree-bb-context .vakata-hover > a { padding:1px 6px; background:#E3E6EE; border:1px solid aecff7; color:black;/* -moz-border-radius:2px; -webkit-border-radius:2px; border-radius:2px; */}
+#vakata-contextmenu.jstree-bb-context li.jstree-contextmenu-disabled a, 
+#vakata-contextmenu.jstree-bb-context li.jstree-contextmenu-disabled a:hover { color:silver; background:transparent; border:0; padding:1px 4px; }
+#vakata-contextmenu.jstree-bb-context li.vakata-separator { background:white; border-top:1px solid #e0e0e0; margin:0; }
+#vakata-contextmenu.jstree-bb-context li ul { margin-left:-4px; }
+
+/* IE6 BEGIN */
+.jstree-bb li, 
+.jstree-bb ins,
+#vakata-dragged.jstree-bb .jstree-invalid, 
+#vakata-dragged.jstree-bb .jstree-ok, 
+#jstree-marker.jstree-bb { _background-image:url("d.gif");}
+.jstree-bb .jstree-open ins { _background-position:-72px 0; }
+.jstree-bb .jstree-closed ins { _background-position:-54px 0; }
+.jstree-bb .jstree-leaf ins { _background-position:-36px 0; }
+.jstree-bb .jstree-open a ins.jstree-icon { _background-position:-56px -36px; }
+.jstree-bb .jstree-closed a ins.jstree-icon { _background-position:-56px -19px; }
+.jstree-bb .jstree-leaf a ins.jstree-icon { _background-position:-56px -19px; }
+#vakata-contextmenu.jstree-bb-context ins { _display:none; }
+#vakata-contextmenu.jstree-bb-context li { _zoom:1; }
+.jstree-bb .jstree-undetermined a .jstree-checkbox { _background-position:-20px -19px; }
+.jstree-bb .jstree-checked a .jstree-checkbox { _background-position:-38px -19px; }
+.jstree-bb .jstree-unchecked a .jstree-checkbox { _background-position:-2px -19px; }
+/* IE6 END */
+
+
+/*PATCH*/
+	/*rename input position*/
+.jstree-rename-input {margin-left:11px !important;}
+	/*tree*/
+.jstree-bb li ins {background:transparent url(../../../img/ico_tiles.png) no-repeat scroll 0 0; }
+.jstree-bb a .jstree-icon {background-position:-54px -37px;}
+.jstree-bb .jstree-open > a .jstree-icon {background-position:-54px -18px;}
+.jstree-bb .jstree-no-dots .jstree-open > ins {background-position:-18px -90px; }
+.jstree-bb .jstree-no-dots .jstree-closed > ins {background-position:-0px -90px; }
+		/*Ok Forbidden*/
+#vakata-dragged.jstree-bb .jstree-ok, #vakata-dragged.jstree-bb .jstree-invalid, #jstree-marker.jstree-bb {background:transparent url(../../../img/ico_tiles.png) no-repeat scroll 0 0 !important;}
+#vakata-dragged.jstree-bb .jstree-ok {background-position:-36px -90px !important;}
+#vakata-dragged.jstree-bb .jstree-invalid {background-position:-54px -90px !important;}
+#jstree-marker {z-index:200100;}
+#jstree-marker.jstree-bb {background-position:-72px -91px !important; width:18px !important; height:18px !important; text-shadow:none !important;}
+#jstree-marker-line {margin-top:2px !important; background-color:#716F64; border-width:0 !important;}
+		/*root*/
+.jstree-bb li[rel="root"] > a > .jstree-icon {background:transparent url(../../../img/ico_tiles.png) no-repeat scroll -91px -91px;}
+	/*contextual menu*/
+#vakata-contextmenu li {font-size:90%;}
+#vakata-contextmenu li ins {margin-right:3px /*2px*/;}
+#vakata-contextmenu ins {background-color:transparent; background-image: url(../../../img/ico_tiles.png); background-repeat:no-repeat; background-attachment:scroll; } /*default*/
+#vakata-contextmenu ins.create {background-position:-54px -37px;}
+#vakata-contextmenu ins.rename {background-position:0px -54px;}
+#vakata-contextmenu ins.remove {background-position:-38px -36px;}
+#vakata-contextmenu ins.create_media {background-position:-109px -36px;} /*Ajouter un média*/
+#vakata-contextmenu ins.create_media+a+ul li ins {background-position:-72px -36px;}
+#vakata-contextmenu ins.import_media {background-position:-127px -36px;} /*Importer depuis le serveur*/
+#vakata-contextmenu ins.flyto {background-position: -72px -90px;}

@@ -1,0 +1,23 @@
+/*
+ * jQuery UI Selectgroup @VERSION
+ *
+ * Copyright 2011, George Paterson
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ */
+
+.ui-selectgroup {z-index:601100; display: block; overflow: hidden; position: relative; width:95% /*200px*/; text-decoration: none;}
+.ui-selectgroup-copy {display: block; padding:2px/*5*/;}
+.ui-selectgroup-icon {position: absolute; top: 5px; right: 0;}
+.ui-selectgroup-group {width:95% /*200px*/;}
+.ui-selectgroup-group {z-index:601100; position: absolute;}
+.ui-selectgroup-list {list-style: none; padding: 0; margin: 0;}
+.ui-selectgroup-list li {border-top: 1px dotted transparent; border-bottom: 1px dotted transparent;}
+.ui-selectgroup-list .ui-state-hover {border-right: none; border-left: none; font-weight: normal;}
+.ui-selectgroup-list .ui-state-active {border-right: none; border-left: none; font-weight: normal;}
+.ui-selectgroup-list a {display: block; padding:2px /*5*/; text-decoration: none;}
+.ui-selectgroup-optgroup {padding: 0 0 0 5px;}
+.ui-selectgroup-optgroup span {display: block; padding: 5px 0;}
+.ui-selectgroup-optgroup ul {list-style: none; padding: 0;margin: 0; }
+.ui-selectgroup-optgroup li {padding: 0 0 0 10px; margin: 0 0 0 -5px;}

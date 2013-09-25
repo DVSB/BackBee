@@ -1,0 +1,8 @@
+attachment:
+  extends: \BackBuilder\ClassContent\Element\file
+  properties:
+    name: Attachment
+    description: An attachment
+  parameters:
+    mimetype: !!scalar
+    authorized: !!array

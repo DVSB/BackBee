@@ -1,0 +1,137 @@
+<?php
+
+namespace BackBuilder\Exception;
+
+/**
+ * BackBuilder parent class exception
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\Exception
+ * @copyright   Lp digital system
+ * @author      c.rouillon
+ */
+class BBException extends \Exception
+{
+
+    /**
+     * Unknown error
+     * @var int
+     */
+    const UNKNOWN_ERROR = 1000;
+
+    /**
+     * Invalid argument provided
+     * @var int
+     */
+    const INVALID_ARGUMENT = 1001;
+
+    /**
+     * None Backbuilder application available
+     * @var int
+     */
+    const MISSING_APPLICATION = 1002;
+
+    /**
+     * The default error code
+     * @var int
+     */
+    private $_code = self::UNKNOWN_ERROR;
+
+    /**
+     * The last source file before the exception thrown
+     * @var string
+     */
+    private $_source;
+
+    /**
+     * The line of the source file where the exception thrown
+     * @var int
+     */
+    private $_seek;
+
+    /**
+     * The error message
+     * @var type 
+     */
+    private $_message;
+
+    /**
+     * Class constructor
+     * @param type $message The error message
+     * @param type $code The error code
+     * @param \Exception $previous Optional, the previous exception generated
+     * @param type $source Optional, the last source file before the exception thrown
+     * @param type $seek Optional, the line of the source file where the exception trown
+     */
+    public function __construct($message = "", $code = 0, \Exception $previous = null, $source = null, $seek = null)
+    {
+        if (0 !== $code) {
+            $this->_code = $code;
+        }
+
+        parent::__construct($message, $this->_code, $previous);
+
+        $this->_message = $message;
+
+        $this->setSource($source)
+                ->setSeek($seek);
+    }
+
+    /**
+     * Returns the last source file before the exception thrown
+     * @return string
+     */
+    public function getSource()
+    {
+        return $this->_source;
+    }
+
+    /**
+     * Returns the line of the source file where the exception thrown
+     * @return int
+     */
+    public function getSeek()
+    {
+        return $this->_seek;
+    }
+
+    /**
+     * Sets the last source file before the exception thrown
+     * @param string $source
+     * @return \BackBuilder\Exception\BBException
+     */
+    public function setSource($source)
+    {
+        $this->_source = $source;
+        return $this->_updateMessage();
+    }
+
+    /**
+     * Sets the line of the source file where the exception thrown
+     * @param type $seek
+     * @return \BackBuilder\Exception\BBException
+     */
+    public function setSeek($seek)
+    {
+        $this->_seek = $seek;
+        return $this->_updateMessage();
+    }
+
+    /**
+     * Updates the error message according to the source and seek provided
+     * @return \BackBuilder\Exception\BBException
+     */
+    private function _updateMessage()
+    {
+        $this->message = $this->_message;
+
+        if (null !== $this->_source && null !== $this->_seek) {
+            $this->message .= sprintf(' in %s at %d.', $this->_source, $this->_seek);
+        } else if (null !== $this->_source) {
+            $this->message .= sprintf(' : %s.', $this->_source);
+        }
+
+        return $this;
+    }
+
+}

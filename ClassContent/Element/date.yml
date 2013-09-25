@@ -1,0 +1,6 @@
+date:
+  properties:
+    name: Date
+    description: An attached date
+  elements:
+    value: !!scalar

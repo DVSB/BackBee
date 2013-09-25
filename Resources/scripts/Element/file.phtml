@@ -1,0 +1,7 @@
+<div <?php echo $this->datacontent(); ?>>
+    <?php if ($this->path): ?>
+    <a href="<?php echo $this->getUri("/media/".$this->path);?>" target="_blank">> <?php echo ($this->getParam('title')) ? $this->getParam('title') : $this->originalname; ?></a>
+    <?php elseif (null !== $this->getApplication()->getBBUserToken()): ?>
+    <p>Cliquez ici pour associer un fichier</p>
+    <?php endif; ?>
+</div>

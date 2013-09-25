@@ -1,0 +1,92 @@
+/*!
+* Aloha Editor
+* Author & Copyright (c) 2010 Gentics Software GmbH
+* aloha-sales@gentics.com
+* Licensed unter the terms of http://www.aloha-editor.com/license.html
+*/
+
+
+
+button.aloha-button-infobulle { background: url(../img/infobulle.png) no-repeat 0px 0px !important; }
+button.aloha-button-infopopup { background: url(../img/wordinfo.png) no-repeat 0px 0px !important; }
+button.aloha-button-infocadre { background: url(../img/wordinfo.png) no-repeat 0px 0px !important; }
+
+/*
+.aloha-wordinfo p, .aloha-wordinfo pre,
+	.aloha-wordinfo h1, .aloha-wordinfo h2,
+	.aloha-wordinfo h3, .aloha-wordinfo h4,
+	.aloha-wordinfo h5, .aloha-wordinfo h6,
+	.aloha-wordinfo blockquote, .aloha-wordinfo ol,
+	.aloha-wordinfo ul, .aloha-wordinfo div,
+	.aloha-wordinfo dl, .aloha-wordinfo dt,
+	.aloha-wordinfo dd, .aloha-wordinfo td,
+	.aloha-wordinfo th, .aloha-wordinfo table,
+.aloha-wordinfo caption {
+	background: white no-repeat 2px 2px;
+	padding: 8px 5px 5px;
+	margin: 10px;
+	border: 1px solid #ddd;
+	min-height: 1em;
+}
+
+.aloha-wordinfo caption { margin-bottom:0px; }
+
+/* IE HACK START - IE RENDERS FUNNY BOXES WHEN SOMETHING IN A CONTENTEDITABLE HAS A MIN-HEIGHT SET*/
+/*
+* .aloha-wordinfo p,	 * .aloha-wordinfo pre,
+	* .aloha-wordinfo h1,	 * .aloha-wordinfo h2,
+	* .aloha-wordinfo h3,	 * .aloha-wordinfo h4,
+	* .aloha-wordinfo h5, * .aloha-wordinfo h6,
+	* .aloha-wordinfo blockquote, * .aloha-wordinfo ol,
+	* .aloha-wordinfo ul, * .aloha-wordinfo div,
+	* .aloha-wordinfo dl, * .aloha-wordinfo dt,
+	* .aloha-wordinfo dd, * .aloha-wordinfo td,
+	* .aloha-wordinfo th, * .aloha-wordinfo table,
+* .aloha-wordinfo caption {
+	min-height: auto;
+}
+
+/* IE HACK END*/
+
+
+/* HTML ELEMENTS*/
+/*.aloha-wordinfo ul, .aloha-wordinfo ol { border-left: 20px solid #ddd; padding: 0px 5px; }
+
+.aloha-wordinfo p { background-image: url(../img/p.png); }
+.aloha-wordinfo pre { background-image: url(../img/pre.png); }
+.aloha-wordinfo h1 { background-image: url(../img/h1.png); }
+.aloha-wordinfo h2 { background-image: url(../img/h2.png); }
+.aloha-wordinfo h3 { background-image: url(../img/h3.png); }
+.aloha-wordinfo h4 { background-image: url(../img/h4.png); }
+.aloha-wordinfo h5 { background-image: url(../img/h5.png); }
+.aloha-wordinfo h6 { background-image: url(../img/h6.png); }
+.aloha-wordinfo blockquote { background-image: url(../img/blockquote.png); }
+.aloha-wordinfo div { background-image: url(../img/div.png); }
+.aloha-wordinfo dl { background-image: url(../img/dl.png); }
+.aloha-wordinfo dt { background-image: url(../img/dt.png); }
+.aloha-wordinfo dd { background-image: url(../img/dd.png); }
+.aloha-wordinfo td { background-image: url(../img/td.png); }
+.aloha-wordinfo th { background-image: url(../img/th.png); }
+.aloha-wordinfo table { background-image: url(../img/table.png); }
+.aloha-wordinfo caption { background-image: url(../img/caption.png); }*/
+/*
+.aloha-wordinfo abbr[title], .aloha-wordinfo dfn[title] { border-bottom: 1px dotted; cursor: help; }
+.aloha-wordinfo [lang] { padding-left: 20px; border: 1px dotted #ddd; background-color: #ccc; background-repeat: no-repeat; background-position: left center;}
+/*
+/* LANGUAGE FLAGS */
+/*.aloha-wordinfo [lang="de"] { background-image:url(../../flag-icons/img/flags/de.png); }
+.aloha-wordinfo [lang="en"] { background-image:url(../../flag-icons/img/flags/en.png); }*/
+/*.aloha-wordinfo [lang="fr"] { background-image:url(../../flag-icons/img/flags/fr.png); }
+/*.aloha-wordinfo [lang="es"] { background-image:url(../../flag-icons/img/flags/es.png); }
+.aloha-wordinfo [lang="it"] { background-image:url(../../flag-icons/img/flags/it.png); }
+.aloha-wordinfo [lang="nl"] { background-image:url(../../flag-icons/img/flags/nl.png); }
+.aloha-wordinfo [lang="no"] { background-image:url(../../flag-icons/img/flags/no.png); }
+.aloha-wordinfo [lang="pl"] { background-image:url(../../flag-icons/img/flags/pl.png); }
+.aloha-wordinfo [lang="rs"] { background-image:url(../../flag-icons/img/flags/rs.png); }*/
+/*
+.aloha-wordinfo q { background-image:url(../img/icon_cite.png); padding-left: 20px; border: 1px dotted #ddd; background-color: #ccc; background-repeat: no-repeat; background-position: left center;}
+
+.aloha-wordinfo a { background-image:url(../img/anchor.png); padding-left: 20px; border: 1px dotted #ddd; background-color: #ccc; background-repeat: no-repeat; background-position: left center;}
+
+/* EXCEPTION FOR TABLE PLUGIN ELEMENTS*/
+

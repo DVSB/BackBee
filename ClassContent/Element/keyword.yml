@@ -1,0 +1,7 @@
+keyword:
+  repository: \BackBuilder\ClassContent\Repository\Element\keywordRepository
+  properties:
+    name: Keyword
+    description: An attached keywords
+  elements:
+    value: !!scalar

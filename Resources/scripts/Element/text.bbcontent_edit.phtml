@@ -1,0 +1,15 @@
+<input type="hidden" id="<?php echo $this->getObject()->getUid(); ?>_type" name="<?php echo $this->getObject()->getUid(); ?>_type"  value="<?php echo get_class($this->getObject()); ?>" />
+<label for="<?php echo $this->getObject()->getUid(); ?>" style="font-weight: bold;"><?php echo $this->getObject()->getLabel(); ?></label>
+<div style="text-align: right;">
+<?php if (false === $this->getParam('disabled')): ?>
+    <input id="<?php echo $this->getObject()->getUid(); ?>_delete" type="checkbox" <?php if (!$this->getObject()->isLoaded()) :?>checked="checked"<?php endif;?>><label for="<?php echo $this->getObject()->getUid(); ?>_delete" style="min-width: 0px;">&nbsp;Supprimer</label>
+<?php endif; ?>
+</div>
+<div id="<?php echo $this->getObject()->getUid(); ?>_container">
+    <?php if (true === $this->getParam('disabled')): ?>
+    <input type="hidden" id="<?php echo $this->getObject()->getUid(); ?>" name="<?php echo $this->getObject()->getUid(); ?>" value="<?php echo htmlentities($this->value, ENT_QUOTES, "UTF-8"); ?>" />
+    <p><?php echo $this->value; ?></p>
+    <?php else: ?>
+    <textarea id="<?php echo $this->getObject()->getUid(); ?>" name="<?php echo $this->getObject()->getUid(); ?>" style="width: 100%; height: 100px; margin-bottom: 10px;"><?php echo htmlentities($this->value, ENT_QUOTES, "UTF-8"); ?></textarea>
+    <?php endif; ?>
+</div>

@@ -1,0 +1,350 @@
+/*!
+ * Bootstrap v2.0.4 // EDITED by Groupe Lp -> deletion of "non grid" rules
+ *
+ * Copyright 2012 Twitter, Inc
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Designed and built with all the love in the world @twitter by @mdo and @fat.
+ */
+@media screen {
+/**/
+ 
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+.clearfix:after {
+  clear: both;
+}
+.hide-text {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+.input-block-level {
+/**/
+}
+/*Update 12nov2012*/
+.row {
+  margin-left: -10px;
+  *zoom: 1;
+}
+.row:before,
+.row:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.row:after {
+  clear: both;
+}
+[class*="span"] {
+  float: left;
+  min-height: 1px;
+  margin-left: 10px;
+}
+.container,
+.navbar-static-top .container,
+.navbar-fixed-top .container,
+.navbar-fixed-bottom .container {
+  width: 986px;
+}
+.span12 {
+  width: 986px;
+}
+.span11 {
+  width: 903px;
+}
+.span10 {
+  width: 820px;
+}
+.span9 {
+  width: 737px;
+}
+.span8 {
+  width: 654px;
+}
+.span7 {
+  width: 571px;
+}
+.span6 {
+  width: 488px;
+}
+.span5 {
+  width: 405px;
+}
+.span4 {
+  width: 322px;
+}
+.span3 {
+  width: 239px;
+}
+.span2 {
+  width: 156px;
+}
+.span1 {
+  width: 73px;
+}
+.offset12 {
+  margin-left: 1006px;
+}
+.offset11 {
+  margin-left: 923px;
+}
+.offset10 {
+  margin-left: 840px;
+}
+.offset9 {
+  margin-left: 757px;
+}
+.offset8 {
+  margin-left: 674px;
+}
+.offset7 {
+  margin-left: 591px;
+}
+.offset6 {
+  margin-left: 508px;
+}
+.offset5 {
+  margin-left: 425px;
+}
+.offset4 {
+  margin-left: 342px;
+}
+.offset3 {
+  margin-left: 259px;
+}
+.offset2 {
+  margin-left: 176px;
+}
+.offset1 {
+  margin-left: 93px;
+}
+.row-fluid {
+  width: 100%;
+  *zoom: 1;
+}
+.row-fluid:before,
+.row-fluid:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.row-fluid:after {
+  clear: both;
+}
+.row-fluid [class*="span"] {
+  display: block;
+  width: 100%;
+  min-height: 1px;	/*Update min-height: 30px;*/
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  float: left;
+  margin-left: 1.0141987829614605%;
+  *margin-left: 0.9634888438133875%;
+}
+.row-fluid [class*="span"]:first-child {
+  margin-left: 0;
+}
+.row-fluid .controls-row [class*="span"] + [class*="span"] {
+  margin-left: 1.0141987829614605%;
+}
+.row-fluid .span12 {
+  width: 100.00000000000001%;
+  *width: 99.94929006085194%;
+}
+.row-fluid .span11 {
+  width: 91.58215010141988%;
+  *width: 91.5314401622718%;
+}
+.row-fluid .span10 {
+  width: 83.16430020283977%;
+  *width: 83.11359026369169%;
+}
+.row-fluid .span9 {
+  width: 74.74645030425964%;
+  *width: 74.69574036511156%;
+}
+.row-fluid .span8 {
+  width: 66.32860040567952%;
+  *width: 66.27789046653145%;
+}
+.row-fluid .span7 {
+  width: 57.910750507099394%;
+  *width: 57.86004056795132%;
+}
+.row-fluid .span6 {
+  width: 49.49290060851928%;
+  *width: 49.44219066937121%;
+}
+.row-fluid .span5 {
+  width: 41.07505070993915%;
+  *width: 41.02434077079108%;
+}
+.row-fluid .span4 {
+  width: 32.65720081135903%;
+  *width: 32.60649087221096%;
+}
+.row-fluid .span3 {
+  width: 24.23935091277891%;
+  *width: 24.188640973630836%;
+}
+.row-fluid .span2 {
+  width: 15.821501014198784%;
+  *width: 15.770791075050711%;
+}
+.row-fluid .span1 {
+  width: 7.403651115618662%;
+  *width: 7.352941176470589%;
+}
+.row-fluid .offset12 {
+  margin-left: 102.02839756592293%;
+  *margin-left: 101.92697768762677%;
+}
+.row-fluid .offset12:first-child {
+  margin-left: 101.01419878296147%;
+  *margin-left: 100.91277890466532%;
+}
+.row-fluid .offset11 {
+  margin-left: 93.6105476673428%;
+  *margin-left: 93.50912778904664%;
+}
+.row-fluid .offset11:first-child {
+  margin-left: 92.59634888438134%;
+  *margin-left: 92.49492900608519%;
+}
+.row-fluid .offset10 {
+  margin-left: 85.19269776876268%;
+  *margin-left: 85.09127789046653%;
+}
+.row-fluid .offset10:first-child {
+  margin-left: 84.17849898580123%;
+  *margin-left: 84.07707910750507%;
+}
+.row-fluid .offset9 {
+  margin-left: 76.77484787018255%;
+  *margin-left: 76.6734279918864%;
+}
+.row-fluid .offset9:first-child {
+  margin-left: 75.7606490872211%;
+  *margin-left: 75.65922920892494%;
+}
+.row-fluid .offset8 {
+  margin-left: 68.35699797160244%;
+  *margin-left: 68.25557809330628%;
+}
+.row-fluid .offset8:first-child {
+  margin-left: 67.34279918864098%;
+  *margin-left: 67.24137931034483%;
+}
+.row-fluid .offset7 {
+  margin-left: 59.93914807302232%;
+  *margin-left: 59.837728194726175%;
+}
+.row-fluid .offset7:first-child {
+  margin-left: 58.92494929006085%;
+  *margin-left: 58.82352941176471%;
+}
+.row-fluid .offset6 {
+  margin-left: 51.5212981744422%;
+  *margin-left: 51.41987829614606%;
+}
+.row-fluid .offset6:first-child {
+  margin-left: 50.507099391480736%;
+  *margin-left: 50.405679513184594%;
+}
+.row-fluid .offset5 {
+  margin-left: 43.10344827586207%;
+  *margin-left: 43.00202839756593%;
+}
+.row-fluid .offset5:first-child {
+  margin-left: 42.089249492900606%;
+  *margin-left: 41.987829614604465%;
+}
+.row-fluid .offset4 {
+  margin-left: 34.685598377281956%;
+  *margin-left: 34.584178498985814%;
+}
+.row-fluid .offset4:first-child {
+  margin-left: 33.67139959432049%;
+  *margin-left: 33.56997971602435%;
+}
+.row-fluid .offset3 {
+  margin-left: 26.267748478701833%;
+  *margin-left: 26.16632860040568%;
+}
+.row-fluid .offset3:first-child {
+  margin-left: 25.25354969574037%;
+  *margin-left: 25.152129817444223%;
+}
+.row-fluid .offset2 {
+  margin-left: 17.849898580121703%;
+  *margin-left: 17.748478701825558%;
+}
+.row-fluid .offset2:first-child {
+  margin-left: 16.835699797160245%;
+  *margin-left: 16.734279918864097%;
+}
+.row-fluid .offset1 {
+  margin-left: 9.432048681541584%;
+  *margin-left: 9.330628803245437%;
+}
+.row-fluid .offset1:first-child {
+  margin-left: 8.417849898580123%;
+  *margin-left: 8.316430020283976%;
+}
+[class*="span"].hide,
+.row-fluid [class*="span"].hide {
+  display: none;
+}
+[class*="span"].pull-right,
+.row-fluid [class*="span"].pull-right {
+  float: right;
+}
+/*End update 12nov2012*/
+
+/*Added manually*/
+.container {
+  margin-right: auto;
+  margin-left: auto;
+  *zoom: 1;
+}
+
+.container:before,
+.container:after {
+  display: table;
+  content: "";
+}
+
+.container:after {
+  clear: both;
+}
+
+.container-fluid {
+  padding-right: 10px;
+  padding-left: 10px;
+  *zoom: 1;
+}
+
+.container-fluid:before,
+.container-fluid:after {
+  display: table;
+  content: "";
+}
+
+.container-fluid:after {
+  clear: both;
+}
+
+
+/**/
+}

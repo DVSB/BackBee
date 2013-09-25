@@ -1,0 +1,36 @@
+/*!
+ * Groupe LP v1.0.0
+ *
+ * Custom stylesheet LESS: BLOG 03 - ROCK CSS
+ *
+ */
+
+@bodyBackground : #FF0000;
+@textColor : #F000FF;
+@linkColor : tan;
+/*
+@linkColorHover : ;*/
+@baseFontFamily : Georgia, "Times New Roman", Times, serif;
+@navbarBackground : salmon;
+@navbarLinkColor : #000000;
+@navbarLinkColorHover : gold ;
+
+@navbarBackgroundHighlight : #1076C9;
+/*
+@navbarLinkColor : ;
+@dropdownLinkBackgroundHover : ;
+*/
+@media (max-width: 480px) {
+nav ul#nav-mobile li a, 
+nav ul#nav-primary li a:hover,
+nav ul#nav-primary li.nav-selected a {
+background: @navbarBackgroundHighlight;
+background: -moz-linear-gradient(top, @navbarBackgroundHighlight 40%, mix(@navbarBackgroundHighlight, white, 60%) 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(40%,@navbarBackgroundHighlight), color-stop(100%,mix(@navbarBackgroundHighlight, white, 60%)));
+background: -webkit-linear-gradient(top, @navbarBackgroundHighlight 40%, mix(@navbarBackgroundHighlight, white, 60%) 100%);
+background: -o-linear-gradient(top, @navbarBackgroundHighlight 40%,mix(@navbarBackgroundHighlight, white, 60%) 100%);
+background: -ms-linear-gradient(top, @navbarBackgroundHighlight 40%,mix(@navbarBackgroundHighlight, white, 60%) 100%);
+background: linear-gradient(to bottom, @navbarBackgroundHighlight 40%,mix(@navbarBackgroundHighlight, white, 60%) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='@navbarBackgroundHighlight', endColorstr='mix(@navbarBackgroundHighlight, white, 60%)',GradientType=0 ); 
+}
+}

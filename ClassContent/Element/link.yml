@@ -1,0 +1,8 @@
+link:
+  properties:
+    name: Link
+    description: A link address
+  elements:
+    value: !!scalar
+  parameters:
+    target: !!scalar _self

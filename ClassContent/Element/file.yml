@@ -1,0 +1,10 @@
+file:
+  repository: \BackBuilder\ClassContent\Repository\Element\fileRepository
+  properties:
+    name: File
+    description: An attached file
+  elements:
+    path: !!scalar
+    originalname: !!scalar
+  parameters:
+    stat: !!array

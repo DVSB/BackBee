@@ -1,0 +1,81 @@
+<?php // T4_1 ?>
+<div class="bb5-tabarea-41">
+    <fieldset>
+        <legend data-i18n="toolbar.editing.pages">Gestion des pages</legend>
+        <div class="bb5-tabarea_content">
+            <p><button class="bb5-button bb5-ico-new" data-i18n="toolbar.editing.new_page">Nouvelle page</button></p>
+            <p><button class="bb5-button bb5-ico-clone" data-i18n="toolbar.editing.clone_page">Dupliquer</button></p>
+            <p><button class="bb5-button bb5-ico-del" data-i18n="toolbar.editing.delete_page">Supprimer</button></p>
+        </div>
+    </fieldset>
+</div>
+<?php // T4_2 ?>
+<div class="bb5-tabarea-42">
+    <fieldset>
+        <legend class="visuallyhidden" data-i18n="toolbar.editing.content_edition">Edition des contenus</legend>
+        <?php // EDITING: HRZ tabs ?>
+        <div id="bb5-edittabs">
+            <ul class="bb5-tabs">
+                <li><a href="#bb5-edit-tabs-data" data-i18n="toolbar.editing.contents">Contenus</a></li>
+                <li><a href="#bb5-edit-tabs-blocks" data-i18n="toolbar.editing.blocks">Blocs</a></li>
+                <li><a href="#bb5-edit-tabs-page"><i class="jstree-icon bb5-bg-clr01"></i><span data-i18n="toolbar.editing.page">Page</span></a></li>
+            </ul>
+            <div id="bb5-edit-tabs-data" >
+                <div id="aloha" class="bb5-tabarea_content"></div>
+            </div>
+            <div id="bb5-edit-tabs-blocks" >
+                <div class="bb5-tabarea_content">
+                    <select id="bb5-contentCatContainer" style="margin:auto;" size="5"></select>
+                    <div class="bb5-slider-blocks-wrapper slider-fx">
+                        <p data-i18n="toolbar.editing.block_select">Sélectionner un bloc de contribution</p>
+                        <ul id="bb5-slider-blocks"></ul>
+                    </div>
+                </div>
+                <div class="bb5-tabarea_content">
+                    <p><label><input class="bb5-onlyShowBlocksBtn" type="checkbox" name="tips"> <span data-i18n="toolbar.editing.show_zones">Afficher</span></label></p>
+                </div>
+            </div>
+            <div id="bb5-edit-tabs-page">
+                <div class="bb5-tabarea_content">
+                    <fieldset>
+                        <legend data-i18n="toolbar.editing.status">Statut de la page</legend>
+                        <p><span class="bb5-button-selector"><button class="bb5-button bb5-ico-arrow_w bb5-button-square bb5-button-solid bb5-status-down"></button> <span class="bb5-button-selector-status bb5-bg-clr01" data-i18n="toolbar.editing.states">Statut N6</span> <button class="bb5-button bb5-ico-arrow_e bb5-button-square bb5-button-solid bb5-status-up"></button></span></p>
+                    </fieldset>
+                    <fieldset>
+                        <legend data-i18n="toolbar.status.page_visible">Visible dans les menus</legend>
+                        <p><button class="bb5-button bb5-button-outline bb5-button-dual bb5-switch-hidden"><span class="bb5-page-visible" data-i18n="toolbar.editing.states.visible">Activer</span> <span class="bb5-page-hidden" data-i18n="toolbar.editing.states.hidden">Désactiver</span></button></p>
+                    </fieldset>
+                    <p><strong data-i18n="toolbar.editing.scheduling">Etat&nbsp;:&nbsp;</strong><span class="bb5-scheduling" data-i18n="toolbar.editing.no_scheduling"></span></p>
+                    <!-- begin tabdrawer -->
+                    <div class="bb5-tabdrawer-wrapper"><label><button class="bb5-button bb5-button-outline bb5-button-square bb5-tabdrawer-toggle"><span data-i18n="toolbar.editing.schedule">Programmer la publication/l'archivage</span></button></label>
+                        <div class="bb5-tabdrawer-data" style="display: none;">
+                        <div class="bb5-tabdrawer-padding">
+                        <!-- -->
+                            <p><label><span data-i18n="toolbar.editing.schedule_publishing">Publication programmée le&nbsp;:</span><input type="text" placeholder="jj/mm/aaaa" size="16" maxlength="16" data-i18n="placeholder:toolbar.selector.datetime_format" class="bb5-page-publishing-date"></label></p>
+                            <p><label><span data-i18n="toolbar.editing.schedule_archiving">Archivage programmé le&nbsp;:</span><input type="text" placeholder="jj/mm/aaaa" size="16" maxlength="16" data-i18n="placeholder:toolbar.selector.datetime_format" class="bb5-page-archiving-date"></label></p>
+                            <p class="bb5-txt-align-right"><button class="bb5-button bb5-button-square bb5-schedule-publishing-validate" data-i18n="popupmanager.button.ok">Ok</button></p>
+                        <!-- -->
+                        </div>
+                        </div>
+                    </div>
+                    <!-- end tabdrawer -->
+                </div>
+                <div class="bb5-tabarea_content">
+                    <p><button class="bb5-button bb5-ico-edit bb5-metadata-edit" data-i18n="toolbar.editing.SEO">SEO de la page</button></p>
+                </div>	
+            </div>
+        </div>
+        <?php // END EDITING: HRZ tabs ?>
+    </fieldset>
+</div>
+<?php // T4_3 ?>
+<div class="bb5-tabarea-43">
+    <fieldset>
+        <legend data-i18n="toolbar.editing.sitemap_search">Arborescence/ recherche</legend>
+        <div class="bb5-tabarea_content">
+            <p><button class="bb5-button bb5-ico-tree" data-i18n="toolbar.editing.sitemap">Arborescence</button></p>
+            <p><button class="bb5-button bb5-ico-lib" data-i18n="toolbar.editing.medias">Médiathèque</button></p>
+            <p style=""><button class="bb5-button bb5-ico-keyword-tree" data-i18n="toolbar.editing.keywords">Keywords</button></p>
+        </div>
+    </fieldset>
+</div>

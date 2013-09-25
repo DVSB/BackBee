@@ -1,0 +1,578 @@
+<div style="display:none">
+
+    <!-- Dialog: popin -->
+    <div id="dialog-confirm" class="bbPopinContainer bbPopinConfirm" title="">
+        <p>Voulez vous ajouter ce modèle à la liste de vos gabarits&nbsp;?</p>
+    </div>
+    <!-- End popin -------------------------------------------------------------------------------------------------------------->
+
+    <!-- bb-ui-bbpagebrowser: dialog -->
+    <div id="bb5-dialog-treeview" class="bbPopinContainer" title="Arborescence" data-i18n="title:toolbar.editing.sitemap">
+        <div class="filetree" id="browser"></div>
+    </div>
+    <!-- end bb-ui-bbpagebrowser: dialog ---------------------------------------------------------------------------------------->
+
+    <!-- bb-ui-bbselector: dialog for media -->
+    <div id="bb5-dialog-media-selector" class="bbPopinContainer" title="Sélecteur" data-i18n="title:toolbar.editing.medias">
+        <!-- dialog tabs -->
+        <div id="bbDialogTabsWrapper">
+            <ul></ul>
+            <div class="clearfix" id="bbDialogTabsPanels"></div>
+        </div>
+        <!-- End dialog dialog for media ----------------------------------------------------------------------------------------->
+    </div>
+
+
+    <div id="bb5-dialog-content-selector"></div>
+
+
+    <!-- end bb-ui-bbselector: dialog -------------------------------------------------------------------------------------------->
+
+    <!-- bb-ui-bbpagebrowser: form -->
+    <div id="bb-ui-bbpagebrowser-form" class="bbPopinContainer" title="">
+        <form>
+            <fieldset>
+                <label for="bb-ui-bbpagebrowser-form-title" data-i18n="toolbar.pagebrowser.title">Titre</label>
+                <input type="text" id="bb-ui-bbpagebrowser-form-title" name="title" value="" style="width: 100%; margin-bottom: 10px;" />
+
+                <label for="bb-ui-bbpagebrowser-form-url" data-i18n="toolbar.pagebrowser.url">URL</label>
+                <input type="text" id="bb-ui-bbpagebrowser-form-url" name="url" value="" style="width: 100%; margin-bottom: 10px;" />
+                
+                <label for="bb-ui-bbpagebrowser-form-target" data-i18n="toolbar.pagebrowser.target">Target</label>
+                <select id="bb-ui-bbpagebrowser-form-target" name="target" style="width: 100%; margin-bottom: 10px;">
+                    <option value="_blank">_blank</option>
+                    <option value="_self">_self</option>
+                    <option value="_parent">_parent</option>
+                    <option value="_top">_top</option>
+                </select>
+                
+                <label for="bb-ui-bbpagebrowser-form-redirect" data-i18n="toolbar.pagebrowser.forward">Redirection vers</label>
+                <input type="text" id="bb-ui-bbpagebrowser-form-redirect" name="redirect" value="" style="width: 100%; margin-bottom: 10px;" />
+
+                <label for="bb-ui-bbpagebrowser-form-layout" data-i18n="toolbar.pagebrowser.template">Gabarit</label>
+                <select id="bb-ui-bbpagebrowser-form-layout" name="layout" style="width: 100%; margin-bottom: 10px;"></select>
+
+            </fieldset>
+        </form>
+    </div>
+    <!-- end bb-ui-bbpagebrowser: form ---------------------------------------------------------------------------------------------->
+
+    <!-- bb-ui-bbselector: dialog for link -->
+    <div id="bb5-dialog-link-selector" class="bbPopinContainer" title="Sélecteur" data-i18n="title:toolbar.selector.title">
+        <!-- dialog tabs -->
+        <div id="bbDialogTabsWrapper">
+            <ul></ul>
+            <div class="clearfix" id="bbDialogTabsPanels">
+            </div>
+        </div>
+        <!-- End dialog dialog for link ----------------------------------------------------------------------------------------------->
+    </div>
+    <!-- end bb-ui-bbselector: dialog -->
+    
+    <!-- bb-ui-bbselector: tabs -->
+    <div id="bb-ui-bbselector-tabs-tpl" style="display:none;">
+        <li><a href="#bbLinkInternal" data-i18n="toolbar.selector.internal_links">Liens internes</a></li>
+        <li><a href="#bbLinkExternal" data-i18n="toolbar.selector.external_links">Liens externes</a></li>
+        <li><a href="#bbMedia" data-i18n="toolbar.selector.medias">Média</a></li>
+    </div>
+    <!-- end bb-ui-bbselector: tabs ---------------------------------------------------------------------------------------------------->
+
+    <!-- bb-ui-bbpageselector: panel -->
+    <div id="bb-ui-bbpageselector-panel-tpl" style="display:none;">
+        <!-- -->
+        <div class="bbArea_linkInt">
+            <!-- -->
+            <div class="bbPaneWrapper">
+                <div class="bbPaneTree">
+                    <!-- :nth-child(1) -->
+                    <p>
+                        <select>
+                            <option value="" data-i18n="toolbar.selector.select_site">Sélectionner un site ...</option>
+                        </select>
+                    </p>
+                    <!-- tree links -->
+                    <div class="filetree" id="browserLinks"></div>
+                    <!-- end tree links -->
+                    <!-- end :nth-child(1) -->
+                </div>
+                <div class="bbPaneMain"></div>
+            </div>
+            <!-- -->
+        </div>
+        <!-- -->
+    </div>
+    <!-- end bb-ui-bbpageselector: panel -------------------------------------------------------------------------------------------------->
+
+    <!-- bb-ui-bbpageselector: view -->
+    <div id="bb-ui-bbpageselector-view-tpl" style="display:none;">
+        <p class="bbSortWrapper"><button class="bbBtn_square bbBtnSortList bbBtnDisabled"><span></span></button> <select title="Nombre d'items à l'affichage" data-i18n="title:toolbar.selector.num_items"><option>20</option><option>50</option></select></p>
+        <table class="tableData0x">
+            <caption>&nbsp;</caption>
+            <thead>
+                <tr>
+                    <th title="Lancer le tri" class="sort_title" data-i18n="toolbar.selector.folder_sort">Répertoire courant</th>
+                    <th title="Lancer le tri" class="sort_created" data-i18n="toolbar.selector.created_sort">Date de création</th>
+                    <th title="Lancer le tri" class="sort_modified" data-i18n="toolbar.selector.modified_sort">Date de modification</th>
+                    <th data-i18n="toolbar.selector.actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+        <!-- end :nth-child(2) -->
+    </div>
+    <!-- end bb-ui-bbpageselector: view -->
+
+    <!-- bb-ui-bbpageselector: viewrow -->
+    <div id="bb-ui-bbpageselector-viewrow-tpl" style="display:none;">
+        <table>
+            <tbody>
+                <tr>
+                    <td><a href="" target="_blank"><span></span>${title}</a></td>
+                    <td>${created}</td>
+                    <td>${modified}</td>
+                    <td><button value="${uid}" class="bbBtn_square" data-i18n="toolbar.selector.select">Sélectionner</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- end bb-ui-bbpageselector: viewrow -->
+
+    <!-- bb-ui-bblinkselector: panel -->
+    <div id="bb-ui-bblinkselector-panel-tpl" style="display:none;">
+        <div class="bbArea_linkExt">
+            <!-- -->
+            <div class="bbArea_linkExt">
+                <fieldset>
+                    <legend data-i18n="toolbar.selector.select_external_link">Sélectionner un lien externe</legend>
+                    <p>
+                        <label for="bbForm001" data-i18n="toolbar.selector.link_url">Lien : </label>
+                        <input type="text" id="bbForm001" />
+                    </p>
+                    <p>
+                        <label for="bbForm002" data-i18n="toolbar.selector.link_title">Titre : </label>
+                        <input type="text" id="bbForm002" />
+                    </p>
+                    <p>
+                        <button class="bbBtn_square bbBtnAdd"><span></span>Sélectionner</button>
+                    </p>
+                </fieldset>
+            </div>
+            <!-- -->
+        </div>
+        <!-- -->
+    </div>
+    <!-- end bb-ui-bblinkselector: panel -->
+
+    <!-- bb-ui-bbmediaselector: panel -->
+    <div id="bb-ui-bbmediaselector-panel-tpl" style="display:none;">
+        <!-- -->
+        <div class="bbArea_media">
+            <!-- -->
+            <div class="bbPaneWrapper">
+                <div class="bbPaneTree">
+                    <!-- tree media -->
+                    <div class="filetree" id="browserMedia"></div>
+                    <!-- end tree media -->
+                    <!-- end :nth-child(1) -->
+                </div>
+                <div class="bbPaneMain"></div>
+            </div>
+            <!-- -->
+        </div>
+        <!-- -->
+    </div>
+    <!-- end bb-ui-bbmediaselector: panel -->
+
+    <!-- bb-ui-bbmediaselector: view -->
+    <div id="bb-ui-bbmediaselector-view-tpl" style="display:none;">
+        <!-- :nth-child(2) -->
+        <p class="bbActionWrapper">
+            <button class="bbBtn_square bbBtnEdit"><span></span>Modifier le dossier</button>
+            <button class="bbBtn_square bbBtnDel"><span></span>Supprimer le dossier</button>
+            <button class="bbBtn_square bbBtnDir"><span></span>Ajouter le dossier</button>
+            <button class="bbBtn_square bbBtnMedia"><span></span>Ajouter un media</button>
+            <button class="bbBtn_square bbBtnServer"><span></span>Importer depuis le serveur</button>
+        </p>
+
+        <div class="bbToolbarWrapper">
+            <p class="bbToolbarCaption"></p>
+            <p class="bbToolbarNav"></p>
+            <p class="bbSortWrapper"><button class="bbBtn_square bbBtnSortGrid"><span></span></button> <button class="bbBtn_square bbBtnSortList"><span></span></button> <select title="Nombre d'items à l'affichage" data-i18n="title:toolbar.selector.num_items"><option>20</option><option>50</option></select></p>
+        </div>
+    </div>
+    <!-- end bb-ui-bbmediaselector: view -->
+
+    <!-- bb-ui-bbmediaselector: viewgrid -->
+    <div id="bb-ui-bbmediaselector-viewgrid-tpl" style="display:none;">
+        <ul class="bbListMedia bbListMediaIsGrid clearfix"></ul>
+    </div>
+    <!-- end bb-ui-bbmediaselector: viewgrid -->
+
+    <!-- bb-ui-bbmediaselector: viewlist -->
+    <div id="bb-ui-bbmediaselector-viewlist-tpl" style="display:none;">
+        <ul class="bbListMedia bbListMediaIsList clearfix"></ul>
+    </div>
+    <!-- end bb-ui-bbm-->
+
+
+
+    <!-----------BB5 SelectorTab BB5 ------->
+    <!-- Begin selector tabs -->
+    <div id="bb5-selectortabs-tpl" class="bb5-tabs-wrapper">
+        <ul class="bb5-tabs">
+            <li><a href="#bb5-selectortabs-tab1" class="" data-i18n="title:toolbar.selector.internal_links">Liens internes</a></li>
+            <li><a href="#bb5-selectortabs-tab2" class="" data-i18n="title:toolbar.selector.external_links">Liens externes</a></li>
+            <li><a href="#bb5-selectortabs-tab3" class="" data-i18n="title:toolbar.selector.medias">Média</a></li>
+            <li><a href="#bb5-selectortabs-tab4" class="" data-i18n="title:toolbar.selector.contents">Sélecteur de contenus</a></li>
+        </ul>
+
+        <div class="bbLinkInternalContainer" id="bb5-selectortabs-tab1">
+            <div class="linksTree"></div>
+        </div>
+        <div class="bbLinkInExternalContainer" id="bb5-selectortabs-tab2"></div>
+        <div class="bbMediaContainer" id="bb5-selectortabs-tab3"></div>
+        <div class="bbContentsSelectorContainer" id="bb5-selectortabs-tab4"></div>
+    </div>
+    <!-- End selector tabs -->
+</div>
+
+
+
+
+
+<!------ BB5 template ----------------->
+<div id="bb5-bbexterneLinks-tpl" style="min-height:400px;display:none">
+    <div id="bb5-selectortabs-tab2">
+        <fieldset>
+            <legend data-i18n="toolbar.selector.select_external_link">Sélectionner un lien externe</legend>
+            <p>
+                <label for="bb5-form001" data-i18n="toolbar.selector.link_url">Lien : </label>
+                <input type="text" id="bb5-form001">
+            </p>
+            <p>
+                <label for="bb5-form002" data-i18n="toolbar.selector.link_title">Titre : </label>
+                <input type="text" id="bb5-form002">
+            </p>
+            <p>
+                <button class="bb5-button bb5-ico-select" data-i18n="toolbar.selector.select">Sélectionner</button>
+            </p>
+        </fieldset>
+    </div>
+
+</div>
+
+<!---------Dialog------>
+<div id="bb5-zonelayout-properties" style="display:none;">
+    <form>
+        <label for="bb5-zonelayout-property-ismainzone">
+            <span data-i18n="toolbar.templates.main_area">Main layout zone:</span>
+            <input type="checkbox" id="bb5-zonelayout-property-ismainzone" value="1" />
+        </label>
+        <label for="bb5-zonelayout-property-accept">
+            <span data-i18n="toolbar.templates.accepted_contents">Accepted content type(s):</span>
+            <select id="bb5-zonelayout-property-accept" multiple="multiple">
+                <option value="" data-i18n="toolbar.templates.all_contents">All</option>
+            </select>
+        </label>
+        <label for="bb5-zonelayout-property-maxentry">
+            <span data-i18n="toolbar.templates.max_entry">Max accepted entries: <br/><em>(leave empty for unlimited)</em>:</span>
+            <input type="text" id="bb5-zonelayout-property-maxentry" />
+        </label>
+        <label for="bb5-zonelayout-property-defaultcontent">
+            <span data-i18n="toolbar.templates.default_content">Default content:</span>
+            <select id="bb5-zonelayout-property-defaultcontent">
+                <option value="" data-i18n="toolbar.templates.none_default">None</option>
+                <option value="inherited" data-i18n="toolbar.templates.inherited_default">Same as parent</option>
+            </select>
+        </label>
+    </form>
+</div>
+
+
+<div id="bb5-dialog-info" class="bb5-dialog-info" style="display:none;">
+    <p class="bb5-dialog-visualclue-x"><i></i></p>
+    <!-- bb5 info desc -->
+    <div class="bb5-dialog-info-desc">
+        <p><strong>Article</strong></p>
+        <p><em data-i18n="toolbar.contents.desc">Descriptif :</em> <br>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+        <p><em data-i18n="toolbar.templates.container">Container(s) :</em> <br>ContentSet, Bloc de remontées auto multi-pages, Bloc de remontées manuelle et blocs ???</p>
+        <p><em data-i18n="toolbar.templates.content">Contenu :</em> <br>Titre, Date de publication, Permanent ID (pour Google News), Abstract (chapô), Body, Image (1 image), Related (liens d'articles liés), Keywords et Signature</p>
+        <p><em data-i18n="toolbar.templates.parameters">Paramètre(s) :</em> <br>0</p>
+    </div>
+    <!-- end bb5 info desc -->
+</div>
+
+
+
+
+<!-----BB5 template panel BB5----------->
+<div id="bb5-ui-bbmediaselector-panel-tpl" class="bb5-windowpane-wrapper" style="min-height: 400px; display:none">
+
+    <!-- left panel [tree view and search & engine] -->
+    <div class="bb5-windowpane-tree">
+        <!-- begin pane: tree-->
+        <div class="bb5-windowpane-tree-inner" style="padding-top: 0;">
+            <!-- tree pane: tree wrapper -->
+            <div class="bb5-windowpane-treewrapper">
+                <p><strong data-i18n="toolbar.selector.select_folder">Sélectionner une rubrique</strong></p>
+                <div class="bb5-windowpane-treewrapper-inner"></div>
+            </div>			
+            <!-- end tree pane: tree wrapper -->
+        </div>
+        <!-- end pane: tree-->
+    </div>
+
+    <!-- right panel [tree view and media grid & engine] -->
+    <div class="bb5-windowpane-main">
+        <!-- begin pane: main -->
+        <div class="bb5-windowpane-main-toolbar-wrapper">
+
+            <!--
+            <p class="bb5-windowpane-main-toolbar-screener-toggle"><a href="javascript:;">Affiner la recherche</a></p>
+            search engine-->
+            <div class="searchEgine bb5-windowpane-main-toolbar-screener"></div>
+            <p class="bb5-windowpane-main-toolbar-caption"></p>
+
+            <div class="bb5-windowpane-main-toobar-container">
+                <p class="bb5-windowpane-main-toolbar-nav"></p>
+                <p class="bb5-windowpane-main-toolbar-sort-wrapper">
+                    <button class="bb5-button bb5-ico-sortasgrid bb5-button-square bb5-button-selected"></button>
+                    <button class="bb5-button bb5-ico-sortaslist bb5-button-square"></button>
+                    <!-- select here-->
+                </p>
+            </div>
+        </div>
+
+        <!-- media list:grid|list-->
+        <div class="bb5-listContainer">
+            <ul class="bb5-list-media bb5-list-media-is-grid clearfix"></ul>
+            <ul class="bb5-list-media bb5-list-media-is-list clearfix"></ul>
+        </div>       <!-- end media list as list--> 
+
+        <!-- end pane: main --> 
+    </div>
+</div>
+
+
+<!--------------------------BB5 Content Selector---------------------------------->
+<div id="bb5-ui-bbcontentselector-panel-tpl" class="bb5-windowpane-wrapper" style="min-height: 400px; display:none">
+    <!-- left panel [tree view and search & engine] -->
+    <div class="bb5-windowpane-tree">
+        <!-- begin pane: tree-->
+
+        <div class="bb5-windowpane-tree-inner" style="padding-top: 0;">
+            
+            <div class="bb5-tabs-wrapper bb5-contentdialog-tab-wrapper">
+
+                <ul class="bb5-tabs">
+                    <li><a href="#bb5-tabs-contentdialog-contentType" class="bb5-tabs-active" data-i18n="toolbar.selector.content_type">Type de contenu</a></li>
+                    <li><a href="#bb5-tabs-contentdialog-pageTree" class="" data-i18n="toolbar.selector.sitemap">Arborescence</a></li>
+                </ul>
+
+                <div id="bb5-tabs-contentdialog-contentType" style="" class="bb5-windowpane-treewrapper">
+                    <div class="bb5-windowpane-treewrapper-inner"></div>
+                </div>
+
+                <div id="bb5-tabs-contentdialog-pageTree" class="bb5-windowpane-treewrapper" style="display:none">
+                    <div class="bb5-windowpane-pagetreewrapper-inner"><div id="browser"></div></div>
+                </div>
+            </div>
+            <!-- end tree pane: tree wrapper -->
+
+            <!-- end pane: tree-->
+        </div>
+
+        <!-- end pane: tree-->
+    </div>
+
+    <!-- right panel [tree view and content grid & engine] -->
+    <div class="bb5-windowpane-main">
+        <!-- begin pane: main -->
+        <div class="bb5-windowpane-main-toolbar-wrapper">
+
+            <div class="bb5-basket-wrapper">
+                <div class="bb5-basket-wrapper-inner">
+                    <p class="bb5-basket-toggle">
+                        <button class="bb5-button bb5-ico-basket bb5-button-outline"><span data-i18n="toolbar.selector.selection">Ma sélection</span> (<span class="bb5-selectedItemsNbs" style="font-weight:bolder">0</span>)</button>
+                    </p>
+                    <div class="bb5-basket-wrapper-innest hidden" style="display:none">
+                        <p style="border-bottom: 1px solid gray"><strong data-i18n="toolbar.selector.selected_contents">Contenus Selectionnés</strong></p>
+                        <ul class="bb5-content-selection"></ul>
+                        <p>
+                            <button href="javascript:;" class="bb5-button bb5-ico-save bb5-button-thick bb5-button-outline bb5-button-confirmSelections" data-i18n="toolbar.selector.selection_select">Valider</button>
+                            <button href="javascript:;" class="bb5-button bb5-ico-close bb5-button-thick bb5-button-outline bb5-button-closeList" data-i18n="toolbar.selector.selection_close">Fermer</button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <p class="bb5-windowpane-main-toolbar-caption"></p>
+            <p class="bb5-windowpane-main-toolbar-screener-toggle"><a href="javascript:;" data-i18n="toolbar.selector.advanced_search">Affiner la recherche</a></p>
+
+
+
+            <!--search engine-->
+            <div class="bb5-windowpane-main-toolbar-screener"></div>
+
+            <div class="bb5-windowpane-main-toobar-container">
+                <p class="bb5-windowpane-main-toolbar-nav"></p>
+                <p class="bb5-windowpane-main-toolbar-sort-wrapper">
+                    <button class="bb5-button bb5-ico-sortasgrid bb5-button-square bb5-viewMode"></button>
+                    <button class="bb5-button bb5-ico-sortaslist bb5-button-square bb5-viewMode"></button>
+                </p>
+            </div>
+
+
+        </div>
+
+        <!-- media list:grid|list-->
+        <div class="bb5-listContainer">
+            <ul class="bb5-list-media bb5-list-media-is-grid clearfix"></ul>
+            <ul class="bb5-list-media bb5-list-media-is-list clearfix"></ul>
+        </div>       <!-- end media list as list--> 
+
+        <!-- end pane: main --> 
+    </div>
+</div>
+
+<!--------------------------- Link selector ------------------------------------->
+<!-- bb5-selectortabs-tab1 -->
+<!-- begin selector 1: links -->
+<div id="bb5-ui-linksselector-panel-tpl" class="bb5-windowpane-wrapper"  style="height: 100%; display:none">
+    <div class="bb5-windowpane-tree">
+        <!-- begin pane: tree-->
+        <div class="bb5-windowpane-tree-inner" style="padding-top: 0;">
+            <!-- tree pane: search wrapper -->
+            <div class="bb5-windowpane-searchwrapper">
+                <!-- site picker -->
+                <fieldset>
+                    <legend class="visuallyhidden" data-i18n="toolbar.selector.select_internal_link">Liens internes</legend>
+                    <p>
+                        <label data-i18n="toolbar.selector.select_a_site">Sélectionner un site</label><br>
+                        <select class="bb5-available-sites"><option></option></select>
+                    </p>
+                </fieldset>
+                <!-- end site picker -->
+            </div>
+
+            <!-- end tree pane: search wrapper -->
+            <!-- tree pane: tree wrapper -->
+            <div class="bb5-windowpane-treewrapper">
+                <p><strong data-i18n="toolbar.selector.select_folder">Sélectionner une rubrique</strong></p>
+                <!-- tree media -->
+                <div id="bb5-tabs-contentdialog-contentLink" style=""><!-- class="bb5-windowpane-treewrapper" -->
+                    <div class="bb5-windowpane-treewrapper-inner"></div>
+                </div>
+                <!-- end tree media -->
+            </div>			
+            <!-- end tree pane: tree wrapper -->
+        </div>
+        <!-- end pane: tree-->
+    </div>
+    <div class="bb5-windowpane-main">
+        <!-- begin pane: main -->
+        <div class="bb5-windowpane-main-toolbar-wrapper">
+            <!-- <div class="bb5-basket-wrapper">basket</div>-->
+            <p class="bb5-windowpane-main-toolbar-caption"></p>
+            <p class="bb5-windowpane-main-toolbar-screener-toggle"><a href="javascript:;" data-i18n="toolbar.selector.advanced_search">Affiner la recherche</a></p>
+            <!--search engine-->
+            <div class="bb5-windowpane-main-toolbar-screener"></div>
+
+            <div class="bb5-windowpane-main-toobar-container">
+                <p class="bb5-windowpane-main-toolbar-nav"></p>
+                <p class="bb5-windowpane-main-toolbar-sort-wrapper">
+                <div style="display:none;">
+                    <button class="bb5-button bb5-ico-sortasgrid bb5-button-square bb5-viewMode"></button>
+                    <button class="bb5-button bb5-ico-sortaslist bb5-button-square bb5-viewMode"></button>
+                </div>
+                </p>
+            </div>
+        </div>
+
+        <div class="bb5-listContainer" style="">
+            <!-- link list as table -->
+            <table class="bb5-table-data0x">            
+                <thead>
+                    <tr>
+                        <th title="Lancer le tri" class="sort_title" data-i18n="toolbar.selector.folder_sort">Répertoire courant</th>
+                        <th title="Lancer le tri" class="sort_created" data-i18n="toolbar.selector.created_sort">Date de création</th>
+                        <th title="Lancer le tri" class="sort_modified" data-i18n="toolbar.selector.modified_sort">Date de modification</th>
+                        <th class="header"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <!-- end link list as table -->
+    </div>
+    <!-- end pane: main --> 
+</div>
+
+<!-- end selector 1: links -->
+
+
+<!-- search engine -->
+<div id="searchEngine-tpl" style="display:none" class="searchEgine bb5-windowpane-main-toolbar-screener">
+    <form class="searchengine-form">
+        <p><label data-i18n="toolbar.selector.search">Rechercher</label><input data-field-name="searchField" class="searchengineField searchField" value="" type="text"></p>
+        <p><label data-i18n="toolbar.selector.type_status">Type / Statut</label><select data-field-name="typeField" class="searchengineField typeField"><option data-i18n="toolbar.selector.all">Tous</option><option>Lorem iridium 01</option><option>Lorem iridium 02</option></select></p>
+        <p><label data-i18n="toolbar.selector.after">Après le</label><input data-field-name="afterPubdateField" type="text" class="searchengineField afterPubdateField" size="10" maxlength="10" value="" class="bb5-timepicker" placeholder="jj/mm/aaaa" data-i18n="placeholder:toolbar.selector.date_format"></p>
+        <p><label data-i18n="toolbar.selector.before">Avant le</label><input data-field-name="beforePubdateField" type="text" class="searchengineField beforePubdateField" size="10" maxlength="10" value="" class="bb5-timepicker" placeholder="jj/mm/aaaa" data-i18n="placeholder:toolbar.selector.date_format"></p>
+        <p><button class="bb5-button bb5-ico-search bb5-button-square bb5-button-outline bb5-button-selected" title="Lancer la recherche" data-i18n="toolbar.selector.search">Rechercher</button></p>
+        <input data-field-name="selectedpageField" type="hidden" class="searchengineField selectedpageField"></input>
+    </form>
+</div>
+
+<!---FORM PLUGINS--->
+<div class="form-plugins" style="display:none">
+    <div class="node-selector-form-tpl">
+        <p class="fieldWrapper">
+            <label>Page:</label>
+            <button class="bb5-button bb5-ico-tree parentnode-tree bb5-button-thick bb5-button-outline">Parcourir</button>
+            <input class="bb5-plugin-form-field bb5-form-input-tree" data-key="parentnode" data-fieldValue="" type="text" value="" readonly="" />
+        </p>
+
+        <p class="fieldWrapper">
+            <label>Type de Contenu à afficher:</label>
+            <button class="bb5-button bb5-ico-tree classcontent-tree bb5-button-thick bb5-button-outline">Parcourir</button>
+            <input class="bb5-plugin-form-field bb5-form-input-tree" data-key="classcontent" data-fieldValue="" type="text" value="" readonly="" />
+        </p>
+
+        <p class="fieldWrapper">
+            <label>Nombre d'éléments à afficher:</label>
+            <input data-key="limit" data-fieldValue="" class="bb5-plugin-form-field" type="text" pattern="[0-9]+" />
+        </p>
+    </div>
+
+    <div class="link-list-from-tpl">
+        <div class="fieldWrapper">
+            <label>Ajouter des liens</label>
+            <ul class="linksContainer" style="list-style:none; padding: 5px; max-height:269px; overflow: auto">
+                <li class="linkItem-tpl bb5-form-group">
+                    <p class="btnContainer" style="display:none"><button class="bb5-button bb5-ico-del bb5-button-square" title="Supprimer"></button></p>
+                    <div class="link-wrapper">
+                        <span class="bb5-form-label">lien <span class="linkos"></span><input type="text" class="link"></span></input>
+                        <span class="bb5-form-label"> titre</label>
+                            <input type="text" class="title"></input>
+                            <p class="parameter">
+                                <span class="bb5-form-label">Ouvrir le lien en "_blank":</span>
+                                <label class="bb5-form-label-chkbx">Oui</label><input class="bb5-plugin-form-chkbx target targetBlank" name="targettype" type="radio" checked="1" value="_blank" />
+                                <label class="bb5-form-label-chkbx">Non</label><input class="bb5-plugin-form-chkbx target targetSelf" name="targettype" type="radio" value="_self" />
+                            </p>
+                    </div>
+                </li>
+            </ul>
+            <div class="actionCnt">
+                <a href="javascript:;" class="bb5-button bb5-ico-tree bb5-button-link bb5-button-thick bb5-button-outline addLinkBtn bb5-ShowLinksSelector">Ajouter un lien</a>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+
+
