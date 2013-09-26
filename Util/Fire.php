@@ -1,4 +1,5 @@
 <?php
+
 namespace BackBuilder\Util;
 
 /**
@@ -9,9 +10,15 @@ namespace BackBuilder\Util;
  */
 class Fire
 {
+
+    /**
+     * @codeCoverageIgnore
+     * @param type $var
+     */
     public static function log($var)
     {
         $firePHP = \FirePHP::getInstance(true);
         $firePHP->log($var);
     }
+
 }

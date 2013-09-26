@@ -106,6 +106,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the unique identifier
+     * @codeCoverageIgnore
      * @return string
      */
     public function getUid()
@@ -115,6 +116,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the label
+     * @codeCoverageIgnore
      * @return string
      */
     public function getLabel()
@@ -124,6 +126,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the associated server name
+     * @codeCoverageIgnore
      * @return string|NULL
      */
     public function getServerName()
@@ -133,6 +136,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Return the default defined extension.
+     * @codeCoverageIgnore
      * @return string
      */
     public function getDefaultExtension()
@@ -151,6 +155,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the default metadatas set for the pages of this wesite.
+     * @codeCoverageIgnore
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getMetadata()
@@ -171,6 +176,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Adds a new metadata set to the collection of the website.
+     * @codeCoverageIgnore
      * @param \BackBuilder\Site\Metadata\Metadata $metadata
      * @return \BackBuilder\Site\Site
      */

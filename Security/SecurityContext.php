@@ -185,6 +185,10 @@ class SecurityContext extends sfSecurityContext {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getACLProvider()
     {
         return $this->_aclprovider;
@@ -248,27 +252,52 @@ class SecurityContext extends sfSecurityContext {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param string $name
+     * @param \Symfony\Component\Security\Core\User\UserProviderInterface $provider
+     */
     public function addUserProvider($name, UserProviderInterface $provider) {
         $this->_userproviders[$name] = $provider;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $requestMatcher
+     * @param type $listeners
+     */
     public function addFirewall($requestMatcher, $listeners) {
         $this->_firewallmap->add($requestMatcher, $listeners, NULL);
     }
     
+    /**
+     * @codeCoverageIgnore
+     */
     private function _registerFirewall() {
         $this->_firewall = new Firewall($this->_firewallmap, $this->_dispatcher);
         $this->_dispatcher->addListener('frontcontroller.request', array($this->_firewall, 'onKernelRequest'));
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return BBApplication
+     */
     public function getApplication() {
         return $this->_application;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getUserProviders() {
         return $this->_userproviders;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getAuthenticationManager()
     {
         return $this->_authmanager;

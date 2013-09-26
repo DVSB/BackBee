@@ -1,4 +1,5 @@
 <?php
+
 namespace BackBuilder\Util;
 
 /**
@@ -9,6 +10,7 @@ namespace BackBuilder\Util;
  */
 class Dir
 {
+
     /**
      * Recursive path copy for php.
      *
@@ -21,10 +23,10 @@ class Dir
         $return = mkdir($copy_path, $dir_mode);
         $files = self::getContent($start_path);
         foreach ($files as $file) {
-            if (is_dir($start_path.DIRECTORY_SEPARATOR.$file)) {
-                $return = self::copy($start_path.DIRECTORY_SEPARATOR.$file, $copy_path.DIRECTORY_SEPARATOR.$file, $dir_mode);
+            if (is_dir($start_path . DIRECTORY_SEPARATOR . $file)) {
+                $return = self::copy($start_path . DIRECTORY_SEPARATOR . $file, $copy_path . DIRECTORY_SEPARATOR . $file, $dir_mode);
             } else {
-                $return = copy($start_path.DIRECTORY_SEPARATOR.$file, $copy_path.DIRECTORY_SEPARATOR.$file);
+                $return = copy($start_path . DIRECTORY_SEPARATOR . $file, $copy_path . DIRECTORY_SEPARATOR . $file);
             }
         }
         return $return;
@@ -40,10 +42,10 @@ class Dir
     {
         $files = self::getContent($path);
         foreach ($files as $file) {
-            if (is_dir($path.DIRECTORY_SEPARATOR.$file)) {
-                self::delete($path.DIRECTORY_SEPARATOR.$file);
+            if (is_dir($path . DIRECTORY_SEPARATOR . $file)) {
+                self::delete($path . DIRECTORY_SEPARATOR . $file);
             } else {
-                @unlink($path.DIRECTORY_SEPARATOR.$file);
+                @unlink($path . DIRECTORY_SEPARATOR . $file);
             }
         }
         return @rmdir($path);
@@ -58,7 +60,7 @@ class Dir
     public static function getContent($path)
     {
         if (is_dir($path)) {
-            $files = array_diff(scandir($path), array('.','..'));
+            $files = array_diff(scandir($path), array('.', '..'));
             return $files;
         } else {
             throw new \Exception('Incorect path name in ' . __FILE__ . ' at line ' . __LINE__);
@@ -101,11 +103,13 @@ class Dir
                     return call_user_func_array(array($callback[0], $callback[1]));
                 }
                 if (count($callback) == 3) {
-                    return  call_user_func_array(array($callback[0], $callback[1]), $callback[2]);;
+                    return call_user_func_array(array($callback[0], $callback[1]), $callback[2]);
+                    ;
                 }
             } catch (\Exception $e) {
                 unset($e);
             }
         }
     }
+
 }

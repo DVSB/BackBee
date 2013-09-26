@@ -17,6 +17,9 @@ class LessTheme {
     public static $lessRootPathTheme    = null;
     public static $nodePathBin          = null;
     
+    /**
+     * @codeCoverageIgnore
+     */
     private function __construct() {
         ;
     }
