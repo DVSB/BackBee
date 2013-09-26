@@ -53,4 +53,26 @@ class BBUserToken extends AbstractToken {
         parent::setUser($user);
         return $this;
     }
+    
+        /**
+     * {@inheritdoc}
+     */
+    public function serialize()
+    {
+        $serialized = unserialize(parent::serialize());
+        $serialized[] = $this->_nonce;
+        
+        return serialize($serialized);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function unserialize($serialized)
+    {
+        $array = unserialize($serialized);
+        $this->_nonce = array_pop($array);
+        
+        parent::unserialize(serialize($array));
+    }
 }

@@ -55,10 +55,9 @@ class User extends AbstractServiceLocal
         if (NULL !== $this->bbapp->getEventDispatcher()) {
             $event = new \Symfony\Component\HttpKernel\Event\GetResponseEvent($this->bbapp->getController(), $this->bbapp->getController()->getRequest(), 1);
             $this->bbapp->getEventDispatcher()->dispatch('frontcontroller.request.logout', $event);
-
-            if ($event->hasResponse())
-                $event->getResponse()->send();
         }
+        
+        return NULL;
     }
 
     /**
