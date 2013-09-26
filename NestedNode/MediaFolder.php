@@ -96,6 +96,7 @@ class MediaFolder extends ANestedNode
 
     /**
      * Returns the title
+     * @codeCoverageIgnore
      * @return string
      */
     public function getTitle()
@@ -105,6 +106,7 @@ class MediaFolder extends ANestedNode
 
     /**
      * Returns the URL of the media folder
+     * @codeCoverageIgnore
      * @return string
      */
     public function getUrl()
@@ -114,6 +116,7 @@ class MediaFolder extends ANestedNode
 
     /**
      * Returns a collection of media
+     * @codeCoverageIgnore
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getMedias()
@@ -123,6 +126,7 @@ class MediaFolder extends ANestedNode
 
     /**
      * Returns an array representation of the media folder.
+     * @codeCoverageIgnore
      * @return array
      */
     public function toArray()
@@ -136,6 +140,7 @@ class MediaFolder extends ANestedNode
 
     /**
      * Sets the title.
+     * @codeCoverageIgnore
      * @param string $title
      * @return \BackBuilder\NestedNode\MediaFolder
      */
@@ -147,6 +152,7 @@ class MediaFolder extends ANestedNode
 
     /**
      * Sets the URL
+     * @codeCoverageIgnore
      * @param type $url
      * @return \BackBuilder\NestedNode\MediaFolder
      */

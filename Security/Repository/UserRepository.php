@@ -11,10 +11,23 @@ use Doctrine\ORM\EntityRepository;
 /**
  */
 class UserRepository extends EntityRepository implements UserProviderInterface, UserCheckerInterface {
+    /**
+     * @codeCoverageIgnore
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     */
     public function checkPreAuth(UserInterface $user) { }
     
+    /**
+     * @codeCoverageIgnore
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     */
     public function checkPostAuth(UserInterface $user) { }
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $username
+     * @return type
+     */
     public function loadUserByUsername($username) {
         return $this->findOneBy(array('_login' => $username));
     }
@@ -27,6 +40,11 @@ class UserRepository extends EntityRepository implements UserProviderInterface, 
         return $user;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $class
+     * @return type
+     */
     public function supportsClass($class) {
         return ($class == 'BackBuilder\Security\User');
     }

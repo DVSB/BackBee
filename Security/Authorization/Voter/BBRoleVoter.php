@@ -33,6 +33,7 @@ class BBRoleVoter implements VoterInterface
     /**
      * Constructor.
      *
+     * @codeCoverageIgnore
      * @param string $prefix The role prefix
      */
     public function __construct(IRoleReaderAdaptator $adaptator, $prefix = 'BB_')
@@ -43,6 +44,7 @@ class BBRoleVoter implements VoterInterface
     }
 
     /**
+     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function supportsAttribute($attribute)
@@ -51,6 +53,7 @@ class BBRoleVoter implements VoterInterface
     }
 
     /**
+     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function supportsClass($class)
@@ -82,6 +85,11 @@ class BBRoleVoter implements VoterInterface
         return $result;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @return type
+     */
     protected function extractRoles(TokenInterface $token)
     {
         return $this->_adaptator->extractRoles($token);

@@ -47,8 +47,8 @@ class Route extends sfRoute {
      *
      * This method implements a fluent interface.
      *
+     * @codeCoverageIgnore
      * @param array $requirements The requirements
-     *
      * @return Route The current Route instance
      */
     public function addRequirements(array $requirements)

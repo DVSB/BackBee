@@ -17,6 +17,10 @@ class SudoVoter implements VoterInterface
     private $_application;
     private $_sudoers;
     
+    /**
+     * @codeCoverageIgnore
+     * @param \BackBuilder\BBApplication $application
+     */
     public function __construct(BBApplication $application)
     {
         $this->_application = $application;
@@ -24,6 +28,7 @@ class SudoVoter implements VoterInterface
     }
 
     /**
+     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function supportsAttribute($attribute)
@@ -32,6 +37,7 @@ class SudoVoter implements VoterInterface
     }
 
     /**
+     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function supportsClass($class)

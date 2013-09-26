@@ -22,6 +22,7 @@ class LogoutSuccessHandler implements LogoutSuccessHandlerInterface
 
     /**
      * Class constructor
+     * @codeCoverageIgnore
      * @param HttpUtils $httpUtils
      * @param string    $targetUrl
      */
@@ -32,6 +33,7 @@ class LogoutSuccessHandler implements LogoutSuccessHandlerInterface
     }
 
     /**
+     * @codeCoverageIgnore
      * {@inheritDoc}
      */
     public function onLogoutSuccess(Request $request)

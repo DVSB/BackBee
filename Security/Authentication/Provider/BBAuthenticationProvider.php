@@ -111,6 +111,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Checks whether this provider supports the given token.
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return boolean
      */

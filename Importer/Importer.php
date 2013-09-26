@@ -211,7 +211,7 @@ class Importer
     }
     
     /**
-     * return
+     * @codeCoverageIgnore
      * @param IConverter $converter
      * @return \BackBuilder\Importer\Importer
      */

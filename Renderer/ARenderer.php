@@ -118,6 +118,7 @@ abstract class ARenderer implements IRenderer {
     /**
      * Add new helpre directory in the choosen position.
      *
+     * @codeCoverageIgnore
      * @param string $new_dir location of the new directory
      * @param integer $position position in the array
      */
@@ -130,6 +131,7 @@ abstract class ARenderer implements IRenderer {
     /**
      * Add new layout directory in the choosen position.
      *
+     * @codeCoverageIgnore
      * @param string $new_dir location of the new directory
      * @param integer $position position in the array
      */
@@ -141,6 +143,7 @@ abstract class ARenderer implements IRenderer {
     /**
      * Add new script directory in the choosen position.
      *
+     * @codeCoverageIgnore
      * @param strimg $new_dir location of the new directory
      * @param integer $position position in the array
      */
@@ -237,6 +240,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Magic method to test the setting of an assign var
+     * @codeCoverageIgnore
      * @param string $var the name of the variable
      * @return boolean
      */
@@ -246,6 +250,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Magic method to assign a var
+     * @codeCoverageIgnore
      * @param string $var the name of the variable
      * @param mixed $value the value of the variable
      * @return ARenderer the current renderer
@@ -307,11 +312,19 @@ abstract class ARenderer implements IRenderer {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return \BackBuilder\Renderer\ARenderer
+     */
     private function _resetVars() {
         $this->_vars = array();
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return \BackBuilder\Renderer\ARenderer
+     */
     private function _resetParams() {
         $this->_params = array();
         return $this;
@@ -339,6 +352,7 @@ abstract class ARenderer implements IRenderer {
     }
     
     /**
+     * @codeCoverageIgnore
      * @return \BackBuilder\BBApplication
      */
     public function getApplication() {
@@ -347,16 +361,25 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Return the assigned variables
+     * @codeCoverageIgnore
      * @return array Array of assigned variables
      */
     public function getAssignedVars() {
         return $this->_vars;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getClassContainer() {
         return $this->__object;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getCurrentElement() {
         return $this->__currentelement;
     }
@@ -401,36 +424,51 @@ abstract class ARenderer implements IRenderer {
         return $url;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getMaxEntry() {
         return $this->_maxentry;
     }
     
     /**
      * Return the current rendering mode
+     * @codeCoverageIgnore
      * @return string
      */
     public function getMode() {
         return $this->_mode;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getNode() {
         return $this->_node;
     }
     
     /**
      * Return the object to be rendered
+     * @codeCoverageIgnore
      * @return IRenderable
      */
     public function getObject() {
         return $this->_object;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getParentUid() {
         return $this->_parentuid;
     }
     
     /**
      * Return the previous object to be rendered
+     * @codeCoverageIgnore
      * @return IRenderable or NULL
      */
     public function getPreviousObject() {
@@ -439,6 +477,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Return the current page to be rendered
+     * @codeCoverageIgnore
      * @return null|BackBuilder\NestedNode\Page
      */
     public function getCurrentPage() {
@@ -463,6 +502,7 @@ abstract class ARenderer implements IRenderer {
 
     /**
      * return the current rendered site
+     * @codeCoverageIgnore
      * @return null|BackBuilder\Site\Site
      */
     public function getCurrentSite() {
@@ -524,6 +564,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Set the rendering mode
+     * @codeCoverageIgnore
      * @param string $mode
      * @return ARenderer The current renderer
      */
@@ -532,6 +573,11 @@ abstract class ARenderer implements IRenderer {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param \BackBuilder\NestedNode\ANestedNode $node
+     * @return \BackBuilder\Renderer\ARenderer
+     */
     public function setNode(ANestedNode $node) {
         $this->_node = $node;
         return $this;
@@ -588,6 +634,11 @@ abstract class ARenderer implements IRenderer {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $render
+     * @return \BackBuilder\Renderer\ARenderer
+     */
     public function setRender($render) {
         $this->__render = $render;
         return $this;
@@ -660,6 +711,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Return the current token
+     * @codeCoverageIgnore
      * @return \Symfony\Component\Security\Core\Authentication\Token\AbstractToken
      */
     public function getToken()

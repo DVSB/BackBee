@@ -27,6 +27,7 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Class constructor
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
      */
     public function __construct(UserProviderInterface $userProvider)
@@ -75,6 +76,7 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Checks whether this provider supports the given token.
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return Boolean true if the implementation supports the Token, false otherwise
      */

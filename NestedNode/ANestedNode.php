@@ -114,6 +114,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns te unique identifier.
+     * @codeCoverageIgnore
      * @return string
      */
     public function getUid()
@@ -123,6 +124,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns the root node.
+     * @codeCoverageIgnore
      * @return \BackBuilder\NestedNode\ANestedNode
      */
     public function getRoot()
@@ -132,6 +134,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns the parent node, NULL if this node is root
+     * @codeCoverageIgnore
      * @return \BackBuilder\NestedNode\ANestedNode|NULL
      */
     public function getParent()
@@ -141,6 +144,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns the nested node left position.
+     * @codeCoverageIgnore
      * @return int
      */
     public function getLeftnode()
@@ -150,6 +154,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns the nested node right position.
+     * @codeCoverageIgnore
      * @return int
      */
     public function getRightnode()
@@ -168,6 +173,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns the level of the node in the tree, 0 for root node
+     * @codeCoverageIgnore
      * @return int
      */
     public function getLevel()
@@ -177,6 +183,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns the creation date.
+     * @codeCoverageIgnore
      * @return \DateTime
      */
     public function getCreated()
@@ -186,6 +193,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns the last modified date.
+     * @codeCoverageIgnore
      * @return \DateTime
      */
     public function getModified()
@@ -195,6 +203,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns a collection of descendant nodes
+     * @codeCoverageIgnore
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getDescendants()
@@ -204,6 +213,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Returns a collection of direct children nodes
+     * @codeCoverageIgnore
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getChildren()
@@ -213,6 +223,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Is the node is a root ?
+     * @codeCoverageIgnore
      * @return Boolean TRUE if the node is root of tree, FALSE otherwise
      */
     public function isRoot()
@@ -269,6 +280,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Sets the root node.
+     * @codeCoverageIgnore
      * @param \BackBuilder\NestedNode\ANestedNode $root
      * @return \BackBuilder\NestedNode\ANestedNode
      */
@@ -280,6 +292,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Sets the parent node.
+     * @codeCoverageIgnore
      * @param \BackBuilder\NestedNode\ANestedNode $parent
      * @return \BackBuilder\NestedNode\ANestedNode
      */
@@ -339,6 +352,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Sets the creation date
+     * @codeCoverageIgnore
      * @param \DateTime $created
      * @return \BackBuilder\NestedNode\ANestedNode
      */
@@ -350,6 +364,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 
     /**
      * Sets the last modified date
+     * @codeCoverageIgnore
      * @param \DateTime $modified
      * @return \BackBuilder\NestedNode\ANestedNode
      */

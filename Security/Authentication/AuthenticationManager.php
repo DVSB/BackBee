@@ -32,11 +32,21 @@ class AuthenticationManager implements AuthenticationManagerInterface {
         $this->_eraseCredentials = (Boolean) $eraseCredentials;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
+     * @return \BackBuilder\Security\Authentication\AuthenticationManager
+     */
     public function setEventDispatcher(EventDispatcherInterface $dispatcher) {
         $this->_eventDispatcher = $dispatcher;
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param \Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface $provider
+     * @return \BackBuilder\Security\Authentication\AuthenticationManager
+     */
     public function addProvider(AuthenticationProviderInterface $provider) {
         $this->_providers[] = $provider;
         return $this;

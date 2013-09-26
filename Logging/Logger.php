@@ -111,6 +111,11 @@ class Logger implements LoggerInterface, SQLLogger
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param \BackBuilder\Logging\Appender\IAppender $appender
+     * @return \BackBuilder\Logging\Logger
+     */
     public function addAppender(IAppender $appender)
     {
         $this->_appenders[] = $appender;
@@ -273,11 +278,21 @@ class Logger implements LoggerInterface, SQLLogger
         $this->log(self::DEBUG, $buffer . ' in ' . (microtime(true) - $this->_start) . 'ms');
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function emergency($message, array $context = array())
     {
         $this->log(self::ERROR, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function alert($message, array $context = array())
     {
         $this->log(self::WARNING, $message, $context);
@@ -288,26 +303,51 @@ class Logger implements LoggerInterface, SQLLogger
         $this->log(self::ERROR, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function error($message, array $context = array())
     {
         $this->log(self::ERROR, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function warning($message, array $context = array())
     {
         $this->log(self::WARNING, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function notice($message, array $context = array())
     {
         $this->log(self::NOTICE, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function info($message, array $context = array())
     {
         $this->log(self::INFO, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function debug($message, array $context = array())
     {
         $this->log(self::DEBUG, $message, $context);

@@ -19,6 +19,7 @@ class BBLogoutSuccessHandler implements LogoutSuccessHandlerInterface
 
     /**
      * Resend the current Uri
+     * @codeCoverageIgnore
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */

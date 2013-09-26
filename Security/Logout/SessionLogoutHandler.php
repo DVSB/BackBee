@@ -26,6 +26,7 @@ class SessionLogoutHandler implements LogoutHandlerInterface
     /**
      * Invalidate the current session
      *
+     * @codeCoverageIgnore
      * @param Request        $request
      * @param Response       $response
      * @param TokenInterface $token

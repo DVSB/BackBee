@@ -20,6 +20,7 @@ class RequestMatcher extends sfRequestMatcher {
     /**
      * Adds a check for header attribute.
      *
+     * @codeCoverageIgnore
      * @param string $key    The header attribute name
      * @param string $regexp A Regexp
      */
