@@ -93,11 +93,11 @@ class SecurityContext extends sfSecurityContext {
                                             new RoleHierarchy( array() ),
                                             $trustResolver
                                     ),
-                                    new \Symfony\Component\Security\Acl\Permission\BasicPermissionMap(),
+                                    new Acl\Permission\PermissionMap(),
                                     $this->getApplication()->getLogging(),
                                     false
                                 );
-                $voters[] = new RoleVoter();
+//                $voters[] = new RoleVoter();
             }
 
             $accessDecisionManager = new DecisionManager($voters);
@@ -151,6 +151,11 @@ class SecurityContext extends sfSecurityContext {
             $this->_authmanager->addProvider($this->_authproviders['bb_auth']);
             $listener = new BBAuthenticationListener($this, $this->_authmanager, $this->_logger);
             $listeners[] = $listener;
+            
+            $logout_listener = new LogoutListener($this, $httpUtils = new HttpUtils(), new Logout\BBLogoutSuccessHandler($httpUtils));
+            $logout_listener->addHandler(new Logout\BBLogoutHandler($this->_authproviders['bb_auth']));
+            
+            $this->_dispatcher->addListener('frontcontroller.request.logout', array($logout_listener, 'handle'));
         }
         
         if (array_key_exists('form_login', $config)) {

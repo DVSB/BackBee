@@ -434,7 +434,7 @@ class ContentBlocks extends AbstractServiceLocal
                 $result->bb5_form->$key->bb5_uid = array();
 
                 if (NULL === $content->$key) {
-                    $newContent = $content->getType($key);
+                    $newContent = $content->getAcceptedType($key);
                     $subcontent = new $newContent();
                 }
 
@@ -558,7 +558,7 @@ class ContentBlocks extends AbstractServiceLocal
 
                 if (true === property_exists($value, 'form') && true === is_object($value->form)) {
                     if (true === property_exists($value, 'delete') && true === $value->delete) {
-                        $newContent = $content->getType($key);
+                        $newContent = $content->getAcceptedType($key);
                         $subcontent = new $newContent();
                         $this->em->persist($subcontent);
                         $newvalues[] = $subcontent;
@@ -588,7 +588,7 @@ class ContentBlocks extends AbstractServiceLocal
 
                         // Create a new content if null
                         if (null === $subcontent) {
-                            $newContent = $content->getType($key);
+                            $newContent = $content->getAcceptedType($key);
                             $subcontent = new $newContent();
                             $this->em->persist($subcontent);
                         }
