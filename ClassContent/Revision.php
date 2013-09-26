@@ -126,6 +126,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Returns the revisionned content
      * @return \BackBuilder\ClassContent\AClassContent
+     * @codeCoverageIgnore
      */
     public function getContent()
     {
@@ -135,6 +136,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Returns the entity target content classname
      * @return string
+     * @codeCoverageIgnore
      */
     public function getClassname()
     {
@@ -144,6 +146,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Returns the owner of the revision
      * @return \Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
+     * @codeCoverageIgnore
      */
     public function getOwner()
     {
@@ -153,6 +156,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Returns the comment
      * @return string
+     * @codeCoverageIgnore
      */
     public function getComment()
     {
@@ -163,6 +167,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * Sets the whole datas of the revision
      * @param array $data
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @codeCoverageIgnore
      */
     public function setData(array $data)
     {
@@ -190,6 +195,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * Sets the entity target content classname
      * @param string $classname
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @codeCoverageIgnore
      */
     public function setClassname($classname)
     {
@@ -201,6 +207,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * Sets the owner of the revision
      * @param \Symfony\Component\Security\Core\User\UserInterface $user
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @codeCoverageIgnore
      */
     public function setOwner(UserInterface $user)
     {
@@ -212,6 +219,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * Sets the comment associated to the revision
      * @param string $comment
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @codeCoverageIgnore
      */
     public function setComment($comment)
     {
@@ -222,6 +230,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Returns the revision content
      * @return \BackBuilder\ClassContent\AClassContent
+     * @codeCoverageIgnore
      */
     protected function _getContentInstance()
     {
@@ -235,8 +244,9 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     protected function _setOptions($options = null)
     {
-        if ($options instanceof TokenInterface)
+        if ($options instanceof TokenInterface) {
             $this->_owner = UserSecurityIdentity::fromToken($options);
+        }
 
         return $this;
     }

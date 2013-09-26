@@ -224,6 +224,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Returns the unique identifier
      * @return string
+     * @codeCoverageIgnore
      */
     public function getUid()
     {
@@ -233,6 +234,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Returns the label
      * @return string
+     * @codeCoverageIgnore
      */
     public function getLabel()
     {
@@ -242,6 +244,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Return the current accepted subcontents
      * @return array
+     * @codeCoverageIgnore
      */
     public function getAccept()
     {
@@ -251,6 +254,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Returns the raw datas array
      * @return array
+     * @codeCoverageIgnore
      */
     public function getDataToObject()
     {
@@ -260,6 +264,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Gets the maxentry
      * @return array
+     * @codeCoverageIgnore
      */
     public function getMaxEntry()
     {
@@ -269,6 +274,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Gets the minentry
      * @return array
+     * @codeCoverageIgnore
      */
     public function getMinEntry()
     {
@@ -278,6 +284,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Returns the creation date
      * @return DateTime
+     * @codeCoverageIgnore
      */
     public function getCreated()
     {
@@ -287,6 +294,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Returns the last modified date
      * @return DateTime
+     * @codeCoverageIgnore
      */
     public function getModified()
     {
@@ -296,6 +304,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Returns the revision number
      * @return int
+     * @codeCoverageIgnore
      */
     public function getRevision()
     {
@@ -305,6 +314,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Returns the state
      * @return int
+     * @codeCoverageIgnore
      */
     public function getState()
     {
@@ -315,6 +325,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Sets the label
      * @param string $label
      * @return \BackBuilder\ClassContent\AContent The current instance
+     * @codeCoverageIgnore
      */
     public function setLabel($label)
     {
@@ -326,6 +337,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Set the acceptable classname
      * @param array $accept
      * @return \BackBuilder\ClassContent\AContent The current instance
+     * @codeCoverageIgnore
      */
     public function setAccept($accept)
     {
@@ -369,6 +381,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Sets the maximum number of items for elements
      * @param array $maxentry
      * @return \BackBuilder\ClassContent\AContent The current instance
+     * @codeCoverageIgnore
      */
     public function setMaxEntry(array $maxentry)
     {
@@ -380,6 +393,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Sets the minimum number of items for elements
      * @param array $minentry
      * @return \BackBuilder\ClassContent\AContent The current instance
+     * @codeCoverageIgnore
      */
     public function setMinEntry(array $minentry)
     {
@@ -391,6 +405,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Sets creation date
      * @param \DateTime $created Current date time by default
      * @return \BackBuilder\ClassContent\AContent The current instance
+     * @codeCoverageIgnore
      */
     public function setCreated(\DateTime $created = null)
     {
@@ -402,6 +417,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Sets the last modification date
      * @param DateTime $modified Current date time by default
      * @return \BackBuilder\ClassContent\AContent The current instance
+     * @codeCoverageIgnore
      */
     public function setModified(\DateTime $modified = null)
     {
@@ -413,6 +429,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Sets the revision number
      * @param int $revision
      * @return \BackBuilder\ClassContent\AContent The current instance
+     * @codeCoverageIgnore
      */
     public function setRevision($revision)
     {
@@ -424,6 +441,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Sets the state
      * @param int $state
      * @return \BackBuilder\ClassContent\AContent The current instance
+     * @codeCoverageIgnore
      */
     public function setState($state)
     {
@@ -434,6 +452,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Is this content is a primary content ?
      * @return Boolean TRUE if the content is a primary content
+     * @codeCoverageIgnore
      */
     public function isElementContent()
     {
@@ -481,6 +500,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Returns the content
      * @return \BackBuilder\ClassContent\AClassContent
+     * @codeCoverageIgnore
      */
     protected function _getContentInstance()
     {
@@ -561,6 +581,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Adds a subcontent to the colection.
      * @param \BackBuilder\ClassContent\AClassContent $value
      * @return string the unique identifier of the add subcontent
+     * @codeCoverageIgnore
      */
     protected function _addSubcontent(AClassContent $value)
     {
@@ -570,6 +591,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Removes the association with subcontents of the element $var
      * @param string $var
+     * @codeCoverageIgnore
      */
     protected function _removeSubcontent($var)
     {
@@ -604,6 +626,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Returns a unique identifier for this domain object.
      * @return string
      * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
+     * @codeCoverageIgnore
      */
     public function getObjectIdentifier()
     {
@@ -614,6 +637,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Returns the unique identifier for this object. 
      * @return string
      * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
+     * @codeCoverageIgnore
      */
     public function getIdentifier()
     {
@@ -624,6 +648,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * Returns the PHP class name of the object.
      * @return string
      * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
+     * @codeCoverageIgnore
      */
     public function getType()
     {
@@ -635,6 +660,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * @param \BackBuilder\Security\Acl\Domain\IObjectIdentifiable $identity
      * @return Boolean
      * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
+     * @codeCoverageIgnore
      */
     public function equals(IObjectIdentifiable $identity)
     {
@@ -735,6 +761,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * Checks for state of the content before rendering it
      * @return Boolean Always FALSE by default
+     * @codeCoverageIgnore
      */
     public function isRenderable()
     {

@@ -32,11 +32,11 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 abstract class AClassContent extends AContent
 {
+
     /**
      * New content, revision number to 0
      * @var int
      */
-
     const STATE_NEW = 1000;
 
     /**
@@ -147,6 +147,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the associated page of the content if exists
      * @return \BackBuilder\NestedNode\Page|NULL
+     * @codeCoverageIgnore
      */
     public function getMainNode()
     {
@@ -157,6 +158,7 @@ abstract class AClassContent extends AContent
      * Set the main page to this content
      * @param \BackBuilder\NestedNode\Page $node
      * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @codeCoverageIgnore
      */
     public function setMainNode(Page $node = null)
     {
@@ -167,6 +169,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the parent collection of the content if exists
      * @return \Doctrine\Common\Collections\ArrayCollection|NULL
+     * @codeCoverageIgnore
      */
     public function getParentContent()
     {
@@ -176,6 +179,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the collection of revisions of the content
      * @return \Doctrine\Common\Collections\ArrayCollection
+     * @codeCoverageIgnore
      */
     public function getRevisions()
     {
@@ -186,6 +190,7 @@ abstract class AClassContent extends AContent
      * Add a new revision to the collection
      * @param \BackBuilder\ClassContent\Revision $revisions
      * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @codeCoverageIgnore
      */
     public function addRevision(Revision $revision)
     {
@@ -196,6 +201,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the collection of indexed values
      * @return \Doctrine\Common\Collections\ArrayCollection
+     * @codeCoverageIgnore
      */
     public function getIndexation()
     {
@@ -239,6 +245,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the parameters as defined in Yaml
      * @return array
+     * @codeCoverageIgnore
      */
     public function getDefaultParameters()
     {
@@ -248,6 +255,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the user draft of this content if exists
      * @return \BackBuilder\ClassContent\Revision The current draft if exists, NULL otherwise
+     * @codeCoverageIgnore
      */
     public function getDraft()
     {
@@ -257,6 +265,7 @@ abstract class AClassContent extends AContent
     /**
      * Unsets current user draft
      * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @codeCoverageIgnore
      */
     public function releaseDraft()
     {
@@ -268,6 +277,7 @@ abstract class AClassContent extends AContent
      * Associates an user's draft to this content
      * @param \BackBuilder\ClassContent\Revision $draft
      * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @codeCoverageIgnore
      */
     public function setDraft(Revision $draft)
     {
@@ -320,6 +330,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns TRUE if the content is an entity managed by doctrine
      * @return Boolean
+     * @codeCoverageIgnore
      */
     public function isLoaded()
     {
@@ -328,6 +339,7 @@ abstract class AClassContent extends AContent
 
     /**
      * Initialized datas on postLoad doctrine event
+     * @codeCoverageIgnore
      */
     public function postLoad()
     {
@@ -390,6 +402,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the content revision
      * @return \BackBuilder\ClassContent\AClassContent
+     * @codeCoverageIgnore
      */
     protected function _getContentInstance()
     {
@@ -437,6 +450,7 @@ abstract class AClassContent extends AContent
      * Sets a collection of datas
      * Has to be overwritten by generalizations
      * @return void
+     * @codeCoverageIgnore
      */
     protected function _initData()
     {
@@ -625,6 +639,7 @@ abstract class AClassContent extends AContent
      * @param mixed $value The value to set
      * @return \BackBuilder\ClassContent\AClassContent The current instance content
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
+     * @codeCoverageIgnore
      */
     public function __set($var, $value)
     {
@@ -634,6 +649,7 @@ abstract class AClassContent extends AContent
     /**
      * Magical function to check the setting of an element
      * @param string $var the name of the element
+     * @codeCoverageIgnore
      */
     public function __isset($var)
     {
@@ -643,6 +659,7 @@ abstract class AClassContent extends AContent
     /**
      * Magical function to unset an element
      * @param string $var The name of the element to unset
+     * @codeCoverageIgnore
      */
     public function __unset($var)
     {
@@ -652,6 +669,7 @@ abstract class AClassContent extends AContent
     /**
      * Return the label of the content
      * @return string
+     * @codeCoverageIgnore
      */
     public function getLabel()
     {
@@ -661,6 +679,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the current accepted subcontents
      * @return array
+     * @codeCoverageIgnore
      */
     public function getAccept()
     {
@@ -670,6 +689,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the raw datas array of the content
      * @return array
+     * @codeCoverageIgnore
      */
     public function getDataToObject()
     {
@@ -679,6 +699,7 @@ abstract class AClassContent extends AContent
     /**
      * Get the maxentry of the content
      * @return array
+     * @codeCoverageIgnore
      */
     public function getMaxEntry()
     {
@@ -688,6 +709,7 @@ abstract class AClassContent extends AContent
     /**
      * Gets the minentry of the content
      * @return array
+     * @codeCoverageIgnore
      */
     public function getMinEntry()
     {
@@ -697,6 +719,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the creation date of the content
      * @return DateTime
+     * @codeCoverageIgnore
      */
     public function getCreated()
     {
@@ -706,6 +729,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the last modified date of the content
      * @return DateTime
+     * @codeCoverageIgnore
      */
     public function getModified()
     {
@@ -715,6 +739,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the revision number of the content
      * @return int
+     * @codeCoverageIgnore
      */
     public function getRevision()
     {
@@ -724,6 +749,7 @@ abstract class AClassContent extends AContent
     /**
      * Returns the state of the content
      * @return int
+     * @codeCoverageIgnore
      */
     public function getState()
     {
@@ -736,6 +762,7 @@ abstract class AClassContent extends AContent
      * @param mixed $values the parameter value or all the parameters if $var is NULL
      * @param string $type the optionnal casting type of the value
      * @return \BackBuilder\ClassContent\AClassContent The current instance
+     * @codeCoverageIgnore
      */
     public function setParam($var = null, $values = null, $type = null)
     {
@@ -746,6 +773,7 @@ abstract class AClassContent extends AContent
      * Checks if the element accept subcontent
      * @param string $var the element
      * @return Boolean TRUE if a subcontents are accepted, FALSE otherwise
+     * @codeCoverageIgnore
      */
     public function acceptSubcontent($var)
     {
@@ -765,6 +793,7 @@ abstract class AClassContent extends AContent
      * @return mixed Could be either one or array of scalar, array, AClassContent instance
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
+     * @codeCoverageIgnore
      */
     public function getData($var = NULL, $forceArray = false)
     {
@@ -776,6 +805,7 @@ abstract class AClassContent extends AContent
      * @param string $var The parameter to be return, if NULL, all parameters are returned
      * @param string $type The casting type of the parameter
      * @return mixed the parameter value or NULL if unfound
+     * @codeCoverageIgnore
      */
     public function getParam($var = null, $type = null)
     {
@@ -785,6 +815,7 @@ abstract class AClassContent extends AContent
     /**
      * Checks for state of the content before rendering it
      * @return Boolean
+     * @codeCoverageIgnore
      */
     public function isRenderable()
     {

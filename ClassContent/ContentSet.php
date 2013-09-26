@@ -190,6 +190,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Countable::count()
+     * @codeCoverageIgnore
      */
     public function count()
     {
@@ -198,6 +199,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::current()
+     * @codeCoverageIgnore
      */
     public function current()
     {
@@ -207,6 +209,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Return the first subcontent of the set
      * @return AClassContent the first element
+     * @codeCoverageIgnore
      */
     public function first()
     {
@@ -312,6 +315,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::key()
+     * @codeCoverageIgnore
      */
     public function key()
     {
@@ -321,6 +325,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Return the last subcontent of the set
      * @return AClassContent the last element
+     * @codeCoverageIgnore
      */
     public function last()
     {
@@ -329,6 +334,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::next()
+     * @codeCoverageIgnore
      */
     public function next()
     {
@@ -446,6 +452,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::valid()
+     * @codeCoverageIgnore
      */
     public function valid()
     {
