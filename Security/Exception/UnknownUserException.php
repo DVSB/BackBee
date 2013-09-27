@@ -17,6 +17,6 @@ class UnknownUserException extends SecurityException
      * The default error code
      * @var int
      */
-    private $_code = self::UNKNOWN_USER;
+    protected $_code = self::UNKNOWN_USER;
 
 }

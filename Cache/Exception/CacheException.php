@@ -10,7 +10,7 @@ use BackBuilder\Exception\BBException;
  * @category    BackBuilder
  * @package     BackBuilder\Cache\Exception
  * @copyright   Lp digital system
- * @author      c.rouillon
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  */
 class CacheException extends BBException
 {
@@ -25,6 +25,6 @@ class CacheException extends BBException
      * The default error code
      * @var int
      */
-    private $_code = self::CACHE_ERROR;
+    protected $_code = self::CACHE_ERROR;
 
 }

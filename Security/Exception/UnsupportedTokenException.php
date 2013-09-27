@@ -17,6 +17,6 @@ class UnsupportedTokenException extends SecurityException
      * The default error code
      * @var int
      */
-    private $_code = self::UNSUPPORTED_TOKEN;
+    protected $_code = self::UNSUPPORTED_TOKEN;
 
 }

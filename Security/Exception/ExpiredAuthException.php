@@ -17,6 +17,6 @@ class ExpiredAuthException extends SecurityException
      * The default error code
      * @var int
      */
-    private $_code = self::EXPIRED_AUTH;
+    protected $_code = self::EXPIRED_AUTH;
 
 }

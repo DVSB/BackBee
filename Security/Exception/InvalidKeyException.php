@@ -17,6 +17,6 @@ class InvalidKeyException extends SecurityException
      * The default error code
      * @var int
      */
-    private $_code = self::INVALID_CREDENTIALS;
+    protected $_code = self::INVALID_CREDENTIALS;
 
 }

@@ -17,6 +17,6 @@ class ForbiddenAccessException extends SecurityException
      * The default error code
      * @var int
      */
-    private $_code = self::FORBIDDEN_ACCESS;
+    protected $_code = self::FORBIDDEN_ACCESS;
 
 }

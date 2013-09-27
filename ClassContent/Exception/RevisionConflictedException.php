@@ -17,6 +17,6 @@ class RevisionConflictedException extends ClassContentException
      * The default error code
      * @var int
      */
-    private $_code = self::REVISION_CONFLICTED;
+    protected $_code = self::REVISION_CONFLICTED;
 
 }

@@ -17,6 +17,6 @@ class ExpiredTokenException extends SecurityException
      * The default error code
      * @var int
      */
-    private $_code = self::EXPIRED_TOKEN;
+    protected $_code = self::EXPIRED_TOKEN;
 
 }

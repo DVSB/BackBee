@@ -35,7 +35,7 @@ class BBException extends \Exception
      * The default error code
      * @var int
      */
-    private $_code = self::UNKNOWN_ERROR;
+    protected $_code = self::UNKNOWN_ERROR;
 
     /**
      * The last source file before the exception thrown
