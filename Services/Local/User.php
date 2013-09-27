@@ -34,13 +34,6 @@ class User extends AbstractServiceLocal
     {
         $securityContext = $this->bbapp->getSecurityContext();
         if (NULL !== $token = $securityContext->getToken()) {
-            if (false === $securityContext->isGranted('VIEW', $this->bbapp->getsite())) {
-                $response = new \Symfony\Component\HttpFoundation\Response();
-                $response->setStatusCode(403);
-                $response->send();
-                die();
-            }
-
             return json_decode($token->getUser()->serialize());
         }
 

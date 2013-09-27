@@ -180,6 +180,16 @@ bb.authmanager = (function($,gExport){
         return new Date();
     };
 	
+    var _resetToken = function() {
+        _username = null;
+        _nonce = null;
+        _secret = null;
+        
+        if (null != sessionStorage) {
+            sessionStorage.removeItem('bb5-session-auth');
+        }
+    };
+        
     var _getToken = function() {
         if (null != sessionStorage) {
             bbauth = sessionStorage.getItem('bb5-session-auth');
@@ -336,11 +346,12 @@ bb.authmanager = (function($,gExport){
         return false;
     };
 	
-    var _onAuthForbidden = function (event) {
-        if (null != _popupDialog) {
-            if (null != sessionStorage) 
-                sessionStorage.removeItem('bb5-session-auth');
-                
+    var _onAuthForbidden = function (event, token) {
+        if (null == token) {
+            _resetToken();
+        }
+        
+        if (null != _popupDialog || null == token) { 
             $(_popupDialog.dialog).dialog('close');
         }
         
@@ -359,7 +370,7 @@ bb.authmanager = (function($,gExport){
             }
         });
         
-        _forbiddenPopup.setContent("<div class='bb5-ui bb5-dialog-authentication'><div class='bb5-alert'>"+bb.i18n.__('authmanager.error.9008')+"</div></div>");
+        _forbiddenPopup.setContent("<div class='bb5-ui bb5-dialog-authentication'><div class='bb5-alert'>"+bb.i18n.__('authmanager.error.9007')+"</div></div>");
         
         $(_forbiddenPopup.dialog).dialog('open');
         _forbiddenPopup.show();

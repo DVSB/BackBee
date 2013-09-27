@@ -7,21 +7,23 @@ use BackBuilder\BBApplication,
     BackBuilder\Services\Utils\Error,
     BackBuilder\Event\Event,
     BackBuilder\Exception\BBException,
-    BackBuilder\Security\Exception\ForbidenAccessException,
+    BackBuilder\Exception\MissingApplicationException,
+    BackBuilder\Security\Exception\UnknownUserException,
+    BackBuilder\Security\Exception\ForbiddenAccessException,
     BackBuilder\Services\Rpc\Annotation;
-
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\DependencyInjection\ContainerBuilder;
-
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
 
 class JsonRPCServer
 {
+
     /**
      * @var \BackBuilder\BBApplication
      */
     protected $_application;
+
     /**
      * @var \Symfony\Component\DependencyInjection\ContainerBuilder 
      */
@@ -45,11 +47,11 @@ class JsonRPCServer
     static public function isRPCInvokedMethodSecured(Request $request, $request_payload = NULL)
     {
         $self = new self();
-       
+
         if (NULL === $request_payload) {
             $request_payload = json_decode(file_get_contents("php://input"), true);
         }
-        
+
         $self->_validateRequest($request);
         $requestArray = $self->_validateRequestPayload($request_payload);
 
@@ -72,11 +74,11 @@ class JsonRPCServer
     {
         $response = new Response();
         $response->headers->set('content-type', 'application/json');
-        
+
         try {
             $this->_validateRequest($request);
             $requestArray = $this->_validateRequestPayload($request_payload);
-            
+
             $nameClass = $requestArray[0];
             $namespaceClass = $this->_getClassname($nameClass);
             $method = $requestArray[1];
@@ -84,7 +86,7 @@ class JsonRPCServer
             $reflectionMethod = $this->_validateMethodService($namespaceClass, $method);
 
             $this->_registerAnnotations($reflectionMethod);
-            
+
             if (false === $this->isExposed())
                 throw new RpcException("Method:" . $method . " not exposed");
 
@@ -100,17 +102,19 @@ class JsonRPCServer
 
             $params = (isset($request_payload['params']) ? $request_payload['params'] : array());
 
-            if (NULL !== $dispatcher) {
-                $event = new Event($object, array('method' => $method, 'params' => $params));
-                $dispatcher->dispatch($dispatcher->getEventNamePrefix($object) . 'precall', $event);
-                $params = $event->getArgument('params', $params);
-            }
-            
+            $this->_checkSecuredAccess();
+
             if ($this->isRestrict()) {
                 if (!$this->_application->getSecurityContext()->isGranted($this->_annotations->get('restrict')->roles)) {
                     $this->_application->warning(sprintf('User %s has try to acces at %s`.', $this->_application->getBBUserToken()->getUsername(), $method));
                     throw new ForbidenAccessException('Invalid role', ForbidenAccessException::UNAUTHORIZED_USER);
                 }
+            }
+
+            if (NULL !== $dispatcher) {
+                $event = new Event($object, array('method' => $method, 'params' => $params));
+                $dispatcher->dispatch($dispatcher->getEventNamePrefix($object) . 'precall', $event);
+                $params = $event->getArgument('params', $params);
             }
 
             if ($this->isLogable()) {
@@ -131,9 +135,9 @@ class JsonRPCServer
                 'result' => $result,
                 'error' => NULL,
             );
-        } catch (ForbidenAccessException $e) {
+        } catch (ForbiddenAccessException $e) {
             $response->setStatusCode(403);
-            $content = array('jsonrpc' => '2.0', 'id' => $request_payload['id'], 'result' => NULL, 'error' => true);
+            $content = array('jsonrpc' => '2.0', 'id' => $request_payload['id'], 'result' => NULL, 'error' => new Error($e));
         } catch (\Exception $e) {
             $content = array('jsonrpc' => '2.0', 'id' => $request_payload['id'], 'result' => NULL, 'error' => new Error($e));
         }
@@ -157,7 +161,6 @@ class JsonRPCServer
                 $response->headers->set('content-type', 'application/json');
                 $response->setContent($return);
                 exit();
-
             } catch (BBException $e) {
                 
             }
@@ -204,7 +207,7 @@ class JsonRPCServer
     {
         return $this->_annotations->has('exposed') ? $this->_annotations->get('exposed')->secured : true;
     }
-    
+
     /**
      * @return boolean
      */
@@ -212,7 +215,7 @@ class JsonRPCServer
     {
         return $this->_annotations->has('log') ? true : false;
     }
-    
+
     /**
      * @return boolean
      */
@@ -220,7 +223,7 @@ class JsonRPCServer
     {
         return $this->_annotations->has('restrict') ? true : false;
     }
-    
+
     /**
      * @param string $classname
      * @param string $method
@@ -230,20 +233,20 @@ class JsonRPCServer
     {
         $entity = null;
         if (
-            $this->_annotations->get('log')->entity !== null &&
-            $this->_annotations->get('log')->param !== null &&
-            array_key_exists($this->_annotations->get('log')->param, $params)
+                $this->_annotations->get('log')->entity !== null &&
+                $this->_annotations->get('log')->param !== null &&
+                array_key_exists($this->_annotations->get('log')->param, $params)
         ) {
             $entity = $this->_application
-                           ->getEntityManager()
-                           ->find($this->_annotations->get('log')->entity, $params[$this->_annotations->get('log')->param]);
+                    ->getEntityManager()
+                    ->find($this->_annotations->get('log')->entity, $params[$this->_annotations->get('log')->param]);
         }
-        
+
         $this->_application->getEntityManager()
-                           ->getRepository('BackBuilder\Logging\AdminLog')
-                           ->log($this->_application->getBBUserToken()->getUser(), $classname, $method, $entity);
+                ->getRepository('BackBuilder\Logging\AdminLog')
+                ->log($this->_application->getBBUserToken()->getUser(), $classname, $method, $entity);
     }
-    
+
     /**
      * 
      * @param string $request_method
@@ -253,7 +256,7 @@ class JsonRPCServer
     {
         return "\\" . str_replace("_", "\\", $request_method);
     }
-    
+
     /**
      * @param \ReflectionMethod $method
      */
@@ -261,11 +264,11 @@ class JsonRPCServer
     {
         $reader = new SimpleAnnotationReader();
         $reader->addNamespace('BackBuilder\Services\Rpc\Annotation');
-        $this->_annotations->set('exposed',  $reader->getMethodAnnotation($method, new Annotation\Exposed()));
-        $this->_annotations->set('log',  $reader->getMethodAnnotation($method, new Annotation\Log()));
-        $this->_annotations->set('restrict',  $reader->getMethodAnnotation($method, new Annotation\Restrict()));
+        $this->_annotations->set('exposed', $reader->getMethodAnnotation($method, new Annotation\Exposed()));
+        $this->_annotations->set('log', $reader->getMethodAnnotation($method, new Annotation\Log()));
+        $this->_annotations->set('restrict', $reader->getMethodAnnotation($method, new Annotation\Restrict()));
     }
-    
+
     /**
      * @param type $request
      * @throws UploadException
@@ -304,21 +307,21 @@ class JsonRPCServer
         } catch (\ReflectionException $e) {
             throw new RpcException(sprintf('JsonRpcServer: unknown method `%s` for `%s` service', $method, $classname));
         }
-        
+
         return $reflectionMethod;
     }
-    
-   /**
-    * @param type $request_payload
-    * @return array
-    * @throws RpcException
-    */
+
+    /**
+     * @param type $request_payload
+     * @return array
+     * @throws RpcException
+     */
     protected function _validateRequestPayload($request_payload)
     {
         if (empty($request_payload['id'])) {
             throw new RpcException("id not set");
         }
-        
+
         if (false === is_array($request_payload) || false === array_key_exists('method', $request_payload)) {
             throw new RpcException("Invalid RPC request");
         }
@@ -326,7 +329,31 @@ class JsonRPCServer
         if (!isset($requestArray[1])) {
             throw new RpcException("Service not specified");
         }
-        
+
         return $requestArray;
     }
+
+    /**
+     * Checks for a valid BackBuilder5 user on the current Site
+     * @return \BackBuilder\Services\Rpc\JsonRPCServer
+     * @throws MissingApplicationException Occurs none BackBuilder application is defined
+     * @throws ForbiddenAccessException Occurs if the user can not admin the current Site
+     */
+    protected function _checkSecuredAccess()
+    {
+        if (null === $this->_application) {
+            throw new MissingApplicationException('None BackBuilder application defined');
+        }
+
+        if (true === $this->isSecured()) {
+            $securityContext = $this->_application->getSecurityContext();
+
+            if (false === $securityContext->isGranted('VIEW', $this->_application->getsite())) {
+                throw new ForbiddenAccessException('Forbidden acces');
+            }
+        }
+
+        return $this;
+    }
+
 }

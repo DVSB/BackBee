@@ -264,8 +264,7 @@
             '9004': 'Invalid key',
             '9005': 'Expired authentication',
             '9006': 'Expired token',
-            '9007': 'Unauthorized user',
-            '9008': 'Permission denied'
+            '9007': 'Permission denied'
         },
         forbidden_access: 'Forbidden access'
     },
