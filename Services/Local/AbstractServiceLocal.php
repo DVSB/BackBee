@@ -27,12 +27,14 @@ class AbstractServiceLocal implements IServiceLocal
 
     /**
      * Class constructor
+     * @codeCoverageIgnore
      */
     public function __construct() {}
     
     /**
      * @deprecated since version 1.0
      * @param \BackBuilder\BBApplication $application
+     * @codeCoverageIgnore
      */
     public function __onInit(BBApplication $application)
     {
@@ -41,6 +43,7 @@ class AbstractServiceLocal implements IServiceLocal
     
     /**
      * @param \BackBuilder\BBApplication $application
+     * @codeCoverageIgnore
      */
     public function initService(BBApplication $application)
     {

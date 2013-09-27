@@ -194,6 +194,7 @@ class JsonRPCServer
 
     /**
      * @return boolean
+     * @codeCoverageIgnore
      */
     protected function isExposed()
     {
@@ -251,6 +252,7 @@ class JsonRPCServer
      * 
      * @param string $request_method
      * @return string
+     * @codeCoverageIgnore
      */
     protected function _getClassname($request_method)
     {

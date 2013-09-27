@@ -1,15 +1,15 @@
 <?php
+
 namespace BackBuilder\Util;
 
 use BackBuilder\Exception\BBException;
-
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser,
     Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 
-class ExtensionMimeTypeGuesser implements MimeTypeGuesserInterface {
-    
+class ExtensionMimeTypeGuesser implements MimeTypeGuesserInterface
+{
+
     private $_default = 'application/octet-stream';
-    
     private $_extensions = array(
         '.3dm' => 'x-world/x-3dmf',
         '.3dmf' => 'x-world/x-3dmf',
@@ -478,8 +478,9 @@ class ExtensionMimeTypeGuesser implements MimeTypeGuesserInterface {
         '.zoo' => 'application/octet-stream',
         '.zsh' => 'text/x-script.zsh'
     );
-    
-    public function guess($path) {
+
+    public function guess($path)
+    {
         if (!is_file($path)) {
             throw new BBException(sprintf('Unable to find `%s` file.', $path));
         }
@@ -487,40 +488,51 @@ class ExtensionMimeTypeGuesser implements MimeTypeGuesserInterface {
         if (!is_readable($path)) {
             throw new BBException(sprintf('Unable to read `%s` file.', $path));
         }
-        
+
         $mimetype = $this->_default;
-        
+
         $extension = substr($path, strrpos($path, '.'));
         if (array_key_exists($extension, $this->_extensions))
             $mimetype = $this->_extensions[$extension];
-            
+
         return $mimetype;
     }
+
 }
 
-class MimeType {
+class MimeType
+{
+
     /**
      * The singleton instance
      * @var MimeTypeGuesser
      */
     static private $instance = null;
-
     static private $guesser = null;
-    
-    private function __construct() {
+
+    private function __construct()
+    {
         self::$guesser = MimeTypeGuesser::getInstance();
         self::$guesser->register(new ExtensionMimeTypeGuesser());
     }
-    
-    static public function getInstance() {
+
+    static public function getInstance()
+    {
         if (null === self::$instance) {
             self::$instance = new self();
         }
 
         return self::$instance;
     }
-    
-    public function guess($path) {
+
+    /**
+     * @codeCoverageIgnore
+     * @param type $path
+     * @return type
+     */
+    public function guess($path)
+    {
         return self::$guesser->guess($path);
     }
+
 }

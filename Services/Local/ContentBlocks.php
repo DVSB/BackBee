@@ -618,6 +618,7 @@ class ContentBlocks extends AbstractServiceLocal
 
     /**
      * @exposed(secured=true)
+     * @codeCoverageIgnore
      */
     public function handleContentChange($contentsArr = array())
     {

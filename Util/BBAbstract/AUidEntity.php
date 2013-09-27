@@ -35,12 +35,19 @@ abstract class AUidEntity implements DomainObjectInterface
         $this->_uid = $uid;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function isNew()
     {
         return $this->_is_new;
     }
     
-        
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getObjectIdentifier()
     {
         return $this->_uid;
