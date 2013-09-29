@@ -25,6 +25,8 @@ class ClassContent extends AbstractServiceLocal {
         if (NULL === $content)
             throw new ServicesException(sprintf('Unable to find content for `%s` uid', $uid));
 
+        $this->isGranted('VIEW', $content);
+        
         $content = json_decode($content->serialize());
 
         return $content;
@@ -99,6 +101,9 @@ class ClassContent extends AbstractServiceLocal {
             $classname = 'BackBuilder\ClassContent\\' . $srzContent->type;
             $content = new $classname($srzContent->uid);
         }
+        
+        $this->isGranted('VIEW', $content);
+        
         $srzContent->data = null;
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
             $content->setDraft($draft);
@@ -140,6 +145,8 @@ class ClassContent extends AbstractServiceLocal {
             $em->persist($content);
         }
 
+        $this->isGranted('EDIT', $content);
+        
         //Find a draft for content if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
             $content->setDraft($draft);
@@ -207,6 +214,8 @@ class ClassContent extends AbstractServiceLocal {
             $contentNode = new $contentTypeClass($contentUid);
         }
 
+        $this->isGranted('VIEW', $contentNode);
+        
         $default = $contentNode->getDefaultParameters();
 
         // Find a draft if exists

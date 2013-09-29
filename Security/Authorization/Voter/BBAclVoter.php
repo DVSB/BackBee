@@ -2,7 +2,8 @@
 
 namespace BackBuilder\Security\Authorization\Voter;
 
-use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\NestedNode\ANestedNode,
+    BackBuilder\ClassContent\AClassContent;
 use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Security\Acl\Voter\AclVoter,
     Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -29,6 +30,8 @@ class BBAclVoter extends AclVoter
     {
         if ($object instanceof ANestedNode) {
             return $this->_voteForNestedNode($token, $object, $attributes);
+        } elseif ($object instanceof AClassContent) {
+            return $this->_voteForClassContent($token, $object, $attributes);
         }
 
         return $this->_vote($token, $object, $attributes);
@@ -63,6 +66,31 @@ class BBAclVoter extends AclVoter
         if (self::ACCESS_DENIED === $result = $this->_vote($token, $node, $attributes)) {
             if (null !== $node->getParent()) {
                 $result = $this->_voteForNestedNode($token, $node->getParent(), $attributes);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns the vote for class content object, recursively till AClassContent
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param array $attributes
+     * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
+     */
+    private function _voteForClassContent(TokenInterface $token, AClassContent $content, array $attributes)
+    {
+        if (null === $content->getProperty('category')) {
+            return self::ACCESS_GRANTED;
+        }
+
+        if (self::ACCESS_DENIED === $result = $this->_vote($token, $content, $attributes)) {
+            if (false !== $parent_class = get_parent_class($content)) {
+                if ('BackBuilder\ClassContent\AClassContent' !== $parent_class) {
+                    $parent_class = NAMESPACE_SEPARATOR . $parent_class;
+                    $result = $this->_voteForClassContent($token, new $parent_class('*'), $attributes);
+                }
             }
         }
 

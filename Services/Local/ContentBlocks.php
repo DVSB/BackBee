@@ -339,6 +339,8 @@ class ContentBlocks extends AbstractServiceLocal
             $contentNode = new $contentTypeClass($contentUid);
         }
 
+        $this->isGranted('VIEW', $contentNode);
+        
         // Find a draft if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken()))
             $contentNode->setDraft($draft);
@@ -364,6 +366,8 @@ class ContentBlocks extends AbstractServiceLocal
             $contentNode = new $contentTypeClass($contentUid);
             $em->persist($contentNode);
         }
+        
+        $this->isGranted('EDIT', $contentNode);
 
         // Find a draft if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true))
@@ -407,6 +411,8 @@ class ContentBlocks extends AbstractServiceLocal
         if (null === $content = $this->em->find($content_classname, $contentUid)) {
             $content = new $content_classname($contentUid);
         }
+        
+        $this->isGranted('EDIT', $content);
 
         // Find a draft if exists
         if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
@@ -491,6 +497,9 @@ class ContentBlocks extends AbstractServiceLocal
             $content = new $content_classname($contentUid);
             $this->em->persist($content);
         }
+        
+        $this->isGranted('EDIT', $content);
+        
         //json_decode($contentValues);
         $content = $this->_postContent($content, json_decode($contentValues));
 
@@ -536,6 +545,8 @@ class ContentBlocks extends AbstractServiceLocal
                 return $content;
             }
         }
+        
+        $this->isGranted('EDIT', $content);
 
         // Find a draft, checkout it if not exists
         if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {

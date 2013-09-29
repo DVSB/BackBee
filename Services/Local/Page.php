@@ -5,7 +5,6 @@ namespace BackBuilder\Services\Local;
 use BackBuilder\BBApplication,
     BackBuilder\MetaData\MetaDataBag,
     BackBuilder\NestedNode\Page as NestedPage,
-    BackBuilder\Services\Local\AbstractServiceLocal,
     BackBuilder\Exception\InvalidArgumentException;
 
 /**
