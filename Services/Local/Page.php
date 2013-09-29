@@ -3,15 +3,17 @@
 namespace BackBuilder\Services\Local;
 
 use BackBuilder\BBApplication,
+    BackBuilder\MetaData\MetaDataBag,
     BackBuilder\NestedNode\Page as NestedPage,
     BackBuilder\Services\Local\AbstractServiceLocal,
     BackBuilder\Exception\InvalidArgumentException;
 
 /**
- * Description of Page
- *
- * @copyright   Lp system
- * @author      m.baptista
+ * RPC services for NestedNode\Page
+ * @category    BackBuilder
+ * @package     BackBuilder\Services\Local
+ * @copyright   Lp digital system
+ * @author      m.baptista <michel.baptista@lp-digital.fr>
  */
 class Page extends AbstractServiceLocal
 {
@@ -23,18 +25,22 @@ class Page extends AbstractServiceLocal
     private $_repo;
 
     /**
+     * Initialize the service
      * @param \BackBuilder\BBApplication $application
      * @codeCoverageIgnore
      */
     public function initService(BBApplication $application)
     {
         parent::initService($application);
-        $this->_repo = $this->getEntityManager()->getRepository('\BackBuilder\NestedNode\Page');
+
+        $this->_repo = $this->getEntityManager()
+                ->getRepository('\BackBuilder\NestedNode\Page');
     }
 
     /**
-     * 
+     * Returns the available states for NestedNode\Page
      * @exposed(secured=true)
+     * @codeCoverageIgnore
      */
     public function getListAvailableStatus()
     {
@@ -59,12 +65,12 @@ class Page extends AbstractServiceLocal
         $this->isGranted('VIEW', $page);
 
         $opage = json_decode($page->serialize());
-        if (NULL !== $this->bbapp->getRenderer()) {
-            $opage->url = $this->bbapp->getRenderer()->getUri($opage->url);
-            $opage->redirect = $this->bbapp->getRenderer()->getUri($opage->redirect);
+        if (null !== $this->getApplication()->getRenderer()) {
+            $opage->url = $this->getApplication()->getRenderer()->getUri($opage->url);
+            $opage->redirect = $this->getApplication()->getRenderer()->getUri($opage->redirect);
         }
 
-        $defaultmeta = new \BackBuilder\MetaData\MetaDataBag($this->bbapp->getConfig()->getSection('metadata'));
+        $defaultmeta = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
         $opage->metadata = (null === $opage->metadata) ? $defaultmeta->toArray() : array_merge($defaultmeta->toArray(), $page->getMetadata()->toArray());
 
         return $opage;
@@ -107,7 +113,7 @@ class Page extends AbstractServiceLocal
                     ->getRenderer()
                     ->getRelativeUrl($object->url);
 
-            if ('/' === $redirect = $this->bbapp->getRenderer()->getRelativeUrl($object->redirect)) {
+            if ('/' === $redirect = $this->getApplication()->getRenderer()->getRelativeUrl($object->redirect)) {
                 $object->redirect = null;
             }
         }
@@ -178,60 +184,6 @@ class Page extends AbstractServiceLocal
         }
 
         return $tree;
-    }
-
-    /**
-     * @exposed(secured=true)
-     */
-    public function insertBBBrowserTree($title, $root_uid)
-    {
-        $em = $this->bbapp->getEntityManager();
-
-        $root = $em->find('\BackBuilder\NestedNode\Page', $root_uid);
-        if (NULL !== $root) {
-            $page = new \BackBuilder\NestedNode\Page();
-            $page->setTitle($title)
-                    ->setSite($root->getSite())
-                    ->setRoot($root->getRoot())
-                    ->setParent($root)
-                    ->setLayout($root->getLayout())
-                    ->setState(\BackBuilder\NestedNode\Page::STATE_HIDDEN);
-
-            $page = $em->getRepository('\BackBuilder\NestedNode\Page')->insertNodeAsLastChildOf($page, $root);
-
-            $em->persist($page);
-            $em->flush();
-
-            $leaf = new \stdClass();
-            $leaf->attr = json_decode($page->serialize());
-            $leaf->data = $page->getTitle();
-            $leaf->state = 'leaf';
-
-            return $leaf;
-        }
-
-        return false;
-    }
-
-    /**
-     * @exposed(secured=true)
-     */
-    public function renameBBBrowserTree($title, $page_uid)
-    {
-        $em = $this->bbapp->getEntityManager();
-
-        $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
-
-        if ($page) {
-            $page->setTitle($title);
-
-            $em->persist($page);
-            $em->flush();
-
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -362,6 +314,105 @@ class Page extends AbstractServiceLocal
     }
 
     /**
+     * Returns the serialize page to edit it
+     * @param string $page_uid The unique identifier of the page
+     * @return \stdClass
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @exposed(secured=true)
+     */
+    public function getBBSelectorForm($page_uid)
+    {
+        if (null === $page = $this->_repo->find(strval($page_uid))) {
+            $page = new \BackBuilder\NestedNode\Page();
+            $page->setSite($this->getApplication()->getSite());
+        } else {
+            // User must have edit permission on page
+            $this->isGranted('EDIT', $page);
+
+            // If the page is online, user must have publish permission on it
+            if ($page->isOnline(true)) {
+                $this->isGranted('PUBLISH', $page);
+            }
+        }
+
+        return json_decode($page->serialize());
+    }
+
+    /**
+     * Inserts or updates a Page from the posted BBSelector form
+     * @param string $page_uid The unique identifier of the page
+     * @param string $parent_uid The unique identifier of the parent of the page
+     * @param string $title The title
+     * @param string $url The url (currently unused)
+     * @param string $target The target is redirect is defined
+     * @param string $redirect  The permananet redirect URL
+     * @param string $layout_uid The unique identifier of the layout to use
+     * @return \stdClass
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the layout is undefined
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @exposed(secured=true)
+     */
+    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid)
+    {
+        if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', strval($layout_uid))) {
+            throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
+        }
+
+        // User must have view permission on choosen layout
+        $this->isGranted('VIEW', $layout);
+
+        $parent = $this->_repo->find(strval($parent_uid));
+        if (null !== $page = $this->_repo->find(strval($page_uid))) {
+            $this->isGranted('EDIT', $page);
+
+            // If the page is online, user must have publish permission on it
+            if ($page->isOnline(true)) {
+                $this->isGranted('PUBLISH', $page);
+            }
+
+            if (null !== $parent && false === $page->getParent()->equals($parent)) {
+                // User must have edit permission on parent
+                $this->isGranted('EDIT', $parent);
+                $this->_repo->moveAsFirstChildOf($page, $parent);
+            }
+        } else {
+            $page = new NestedPage();
+            $this->getEntityManager()->persist($page);
+
+            if (null !== $parent) {
+                // User must have edit permission on parent
+                $page->setParent($parent);
+                $this->isGranted('CREATE', $page);
+                $this->isGranted('EDIT', $parent);
+
+                $this->_repo->insertNodeAsFirstChildOf($page, $parent);
+            } else {
+                // User must have edit permission on site to add a new root
+                $this->isGranted('CREATE', $page);
+                $this->isGranted('EDIT', $this->getApplication()->getSite());
+
+                $page->setSite($this->getApplication()->getSite());
+            }
+        }
+
+        $page->setTitle($title)
+                ->setTarget($target)
+                ->setRedirect('' === $redirect ? null : $redirect)
+                ->setLayout($layout);
+
+        $this->getEntityManager()->flush($page);
+
+        $leaf = new \stdClass();
+        $leaf->attr = json_decode($page->serialize());
+        $leaf->data = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
+        $leaf->state = 'closed';
+
+        return $leaf;
+    }
+
+    /**
      * @exposed(secured=true)
      */
     public function getBBSelectorTree($site_uid, $root_uid)
@@ -477,102 +528,57 @@ class Page extends AbstractServiceLocal
     }
 
     /**
-     * Returns the serialize page to edit it
-     * @param string $page_uid The unique identifier of the page
-     * @return \stdClass
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function getBBSelectorForm($page_uid)
+    public function insertBBBrowserTree($title, $root_uid)
     {
-        if (null === $page = $this->_repo->find(strval($page_uid))) {
-            $page = new \BackBuilder\NestedNode\Page();
-            $page->setSite($this->getApplication()->getSite());
-        } else {
-            // User must have edit permission on page
-            $this->isGranted('EDIT', $page);
+        $em = $this->bbapp->getEntityManager();
 
-            // If the page is online, user must have publish permission on it
-            if ($page->isOnline(true)) {
-                $this->isGranted('PUBLISH', $page);
-            }
+        $root = $em->find('\BackBuilder\NestedNode\Page', $root_uid);
+        if (NULL !== $root) {
+            $page = new \BackBuilder\NestedNode\Page();
+            $page->setTitle($title)
+                    ->setSite($root->getSite())
+                    ->setRoot($root->getRoot())
+                    ->setParent($root)
+                    ->setLayout($root->getLayout())
+                    ->setState(\BackBuilder\NestedNode\Page::STATE_HIDDEN);
+
+            $page = $em->getRepository('\BackBuilder\NestedNode\Page')->insertNodeAsLastChildOf($page, $root);
+
+            $em->persist($page);
+            $em->flush();
+
+            $leaf = new \stdClass();
+            $leaf->attr = json_decode($page->serialize());
+            $leaf->data = $page->getTitle();
+            $leaf->state = 'leaf';
+
+            return $leaf;
         }
 
-        return json_decode($page->serialize());
+        return false;
     }
 
     /**
-     * Inserts or updates a Page from the posted BBSelector form
-     * @param string $page_uid The unique identifier of the page
-     * @param string $parent_uid The unique identifier of the parent of the page
-     * @param string $title The title
-     * @param string $url The url (currently unused)
-     * @param string $target The target is redirect is defined
-     * @param string $redirect  The permananet redirect URL
-     * @param string $layout_uid The unique identifier of the layout to use
-     * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the layout is undefined
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid)
+    public function renameBBBrowserTree($title, $page_uid)
     {
-        if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', strval($layout_uid))) {
-            throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
+        $em = $this->bbapp->getEntityManager();
+
+        $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
+
+        if ($page) {
+            $page->setTitle($title);
+
+            $em->persist($page);
+            $em->flush();
+
+            return true;
         }
 
-        // User must have view permission on choosen layout
-        $this->isGranted('VIEW', $layout);
-
-        $parent = $this->_repo->find(strval($parent_uid));
-        if (null !== $page = $this->_repo->find(strval($page_uid))) {
-            $this->isGranted('EDIT', $page);
-
-            // If the page is online, user must have publish permission on it
-            if ($page->isOnline(true)) {
-                $this->isGranted('PUBLISH', $page);
-            }
-
-            if (null !== $parent && false === $page->getParent()->equals($parent)) {
-                // User must have edit permission on parent
-                $this->isGranted('EDIT', $parent);
-                $this->_repo->moveAsFirstChildOf($page, $parent);
-            }
-        } else {
-            $page = new \BackBuilder\NestedNode\Page();
-            $this->getEntityManager()->persist($page);
-
-            if (null !== $parent) {
-                // User must have edit permission on parent
-                $page->setParent($parent);
-                $this->isGranted('CREATE', $page);
-                $this->isGranted('EDIT', $parent);
-
-                $this->_repo->insertNodeAsFirstChildOf($page, $parent);
-            } else {
-                // User must have edit permission on site to add a new root
-                $this->isGranted('CREATE', $page);
-                $this->isGranted('EDIT', $this->getApplication()->getSite());
-
-                $page->setSite($this->getApplication()->getSite());
-            }
-        }
-
-        $page->setTitle($title)
-                ->setTarget($target)
-                ->setRedirect('' === $redirect ? null : $redirect)
-                ->setLayout($layout);
-
-        $this->getEntityManager()->flush($page);
-
-        $leaf = new \stdClass();
-        $leaf->attr = json_decode($page->serialize());
-        $leaf->data = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
-        $leaf->state = 'closed';
-
-        return $leaf;
+        return false;
     }
 
 }
