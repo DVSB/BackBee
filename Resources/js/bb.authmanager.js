@@ -347,14 +347,6 @@ bb.authmanager = (function($,gExport){
     };
 	
     var _onAuthForbidden = function (event, token) {
-        if (null == token) {
-            _resetToken();
-        }
-        
-        if (null != _popupDialog || null == token) { 
-            $(_popupDialog.dialog).dialog('close');
-        }
-        
         var forbiddenPopup = bb.PopupManager.init({});
         _forbiddenPopup = forbiddenPopup.create('authenticationDialog',{
             dialogType : forbiddenPopup.dialogType.ALERT,

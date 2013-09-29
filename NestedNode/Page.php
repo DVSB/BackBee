@@ -530,14 +530,20 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Is the page online ?
+     * @param Boolean $ignoreSchedule
      * @return Boolean TRUE if the page is online, FALSE otherwise
      */
-    public function isOnline()
+    public function isOnline($ignoreSchedule = false)
     {
-        return (($this->getState() & self::STATE_ONLINE)
-                && !($this->getState() & self::STATE_DELETED)
-                && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
-                && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert));
+        if (true === $ignoreSchedule) {
+            return (($this->getState() & self::STATE_ONLINE)
+                    && !($this->getState() & self::STATE_DELETED));
+        } else {
+            return (($this->getState() & self::STATE_ONLINE)
+                    && !($this->getState() & self::STATE_DELETED)
+                    && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
+                    && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert));
+        }
     }
 
     /**
@@ -910,6 +916,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         $result['publishing'] = (null !== $this->getPublishing()) ? $this->getPublishing()->getTimestamp() : null;
         $result['archiving'] = (null !== $this->getArchiving()) ? $this->getArchiving()->getTimestamp() : null;
         $result['metadata'] = (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null;
+        $result['layout_uid'] = (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null;
 
         return $result;
     }

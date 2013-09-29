@@ -3,11 +3,9 @@
 namespace BackBuilder\Services\Local;
 
 use BackBuilder\BBApplication,
-    BackBuilder\Services\Rpc\Exception\UndefinedLayoutException;
-use BackBuilder\Services\Exception\ServicesException;
-use BackBuilder\Services\Local\AbstractServiceLocal;
-use BackBuilder\Util\String;
-use BackBuilder\NestedNode\Page as NestedPage;
+    BackBuilder\NestedNode\Page as NestedPage,
+    BackBuilder\Services\Local\AbstractServiceLocal,
+    BackBuilder\Exception\InvalidArgumentException;
 
 /**
  * Description of Page
@@ -44,31 +42,21 @@ class Page extends AbstractServiceLocal
     }
 
     /**
-     * Duplicate a page
+     * Get the page info
+     * @param string $page_uid The unique identifier of the page
+     * @return \stdClass
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid is invalid
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function duplicate($uid)
+    public function find($page_uid)
     {
-        $em = $this->bbapp->getEntityManager();
-        $page = $em->getRepository('\BackBuilder\NestedNode\Page')->find($uid);
+        if (null === $page = $this->_repo->find(strval($page_uid))) {
+            throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $page_uid));
+        }
 
-        if (NULL === $page)
-            throw new ServicesException(sprintf('Unable to find page for `%s` uid', $uid));
-
-        $newpage = clone $page;
-    }
-
-    /**
-     * Return the serialized form of a page
-     * @exposed(secured=true)
-     */
-    public function find($uid)
-    {
-        $em = $this->bbapp->getEntityManager();
-        $page = $em->getRepository('\BackBuilder\NestedNode\Page')->find($uid);
-
-        if (NULL === $page)
-            throw new ServicesException(sprintf('Unable to find page for `%s` uid', $uid));
+        $this->isGranted('VIEW', $page);
 
         $opage = json_decode($page->serialize());
         if (NULL !== $this->bbapp->getRenderer()) {
@@ -83,49 +71,77 @@ class Page extends AbstractServiceLocal
     }
 
     /**
-     * Update a page
+     * Updates a page
+     * @param string $serialized The serialized page
+     * @return \stdClass
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $serialized is not valid
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function update($serialized)
     {
-        $object = json_decode($serialized);
-        if (FALSE === property_exists($object, 'uid'))
-            throw new ServicesException('An uid has to be provied');
-
-        if (TRUE === property_exists($object, 'url') && NULL !== $this->bbapp->getRenderer()) {
-            $object->url = $this->bbapp->getRenderer()->getRelativeUrl($object->url);
-
-            if ('/' == $redirect = $this->bbapp->getRenderer()->getRelativeUrl($object->redirect))
-                $object->redirect = null;
+        if (null === $object = json_decode($serialized)) {
+            throw new InvalidArgumentException('Can not decode serialized data.');
         }
 
-        $em = $this->bbapp->getEntityManager();
-        $page = $em->getRepository('\BackBuilder\NestedNode\Page')->find($object->uid);
-        if (NULL === $page)
-            throw new ServicesException(sprintf('Unable to find page for `%s` uid', $object->uid));
+        if (false === property_exists($object, 'uid')) {
+            throw new InvalidArgumentException('An uid has to be provided');
+        }
+
+        if (null === $page = $this->_repo->find(strval($object->uid))) {
+            throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $object->uid));
+        }
+
+        // User must have edit permission on page
+        $this->isGranted('EDIT', $page);
+
+        // If the page is online, user must have publish permission on it
+        if ($page->isOnline(true)) {
+            $this->isGranted('PUBLISH', $page);
+        }
+
+        if (true === property_exists($object, 'url')
+                && null !== $this->getApplication()->getRenderer()) {
+            $object->url = $this->getApplication()
+                    ->getRenderer()
+                    ->getRelativeUrl($object->url);
+
+            if ('/' === $redirect = $this->bbapp->getRenderer()->getRelativeUrl($object->redirect)) {
+                $object->redirect = null;
+            }
+        }
 
         $page->unserialize($object);
-        $em->flush();
+        $this->getEntityManager()->flush();
 
         return array('url' => $page->getUrl(), 'state' => $page->getState());
     }
 
     /**
+     * Returns a part of the site tree
+     * @param string $site_uid The unique identifier of the site
+     * @param string $page_uid The parent uid of the part of the tree
+     * @param string $current_uid
+     * @return \stdClass
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $site_uid is not valid
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function getBBBrowserTree($site_uid, $root_uid, $current_uid = null)
+    public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null)
     {
-        $em = $this->bbapp->getEntityManager();
-
-        $site = $em->find('\BackBuilder\Site\Site', $site_uid);
-
-        if (NULL === $site)
-            return false;
+        if (null === $site = $this->getEntityManager()->find('\BackBuilder\Site\Site', strval($site_uid))) {
+            throw new InvalidArgumentException(sprintf('Site with uid `%s` does not exist', $site_uid));
+        }
 
         $tree = array();
 
-        if (NULL === $root_uid) {
-            $page = $em->getRepository('\BackBuilder\NestedNode\Page')->getRoot($site);
+        if (null === $page = $this->_repo->find(strval($page_uid))) {
+            // @todo strange call to this service with another site
+            //$this->isGranted('VIEW', $site);
+
+            $page = $this->_repo->getRoot($site);
 
             $leaf = new \stdClass();
             $leaf->attr = json_decode($page->serialize());
@@ -135,27 +151,29 @@ class Page extends AbstractServiceLocal
 
             $tree[] = $leaf;
         } else {
-            $page = $em->find('\BackBuilder\NestedNode\Page', $root_uid);
+            try {
+                $this->isGranted('VIEW', $page);
 
-            if (NULL === $page)
-                return false;
+                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"));
+                foreach ($children as $child) {
+                    $leaf = new \stdClass();
+                    $leaf->attr = json_decode($child->serialize());
+                    $leaf->data = $child->getTitle();
+                    $leaf->state = $child->isLeaf() ? 'leaf' : 'closed';
 
-            //$children = $em->getRepository('\BackBuilder\NestedNode\Page')->getNotDeletedDescendants($page, 1, FALSE, array(\BackBuilder\NestedNode\Page::STATE_ONLINE, \BackBuilder\NestedNode\Page::STATE_OFFLINE, \BackBuilder\NestedNode\Page::STATE_HIDDEN));
-            $children = $em->getRepository('\BackBuilder\NestedNode\Page')->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"));
-            foreach ($children as $child) {
-                $leaf = new \stdClass();
-                $leaf->attr = json_decode($child->serialize());
-                $leaf->data = $child->getTitle();
-                $leaf->state = $child->isLeaf() ? 'leaf' : 'closed';
-
-                if (!$child->isLeaf() && NULL !== $current_uid && NULL !== $current = $em->getRepository('\BackBuilder\NestedNode\Page')->find($current_uid)) {
-                    if ($child->isAncestorOf($current)) {
-                        $leaf->children = $this->getBBBrowserTree($site_uid, $child->getUid(), $current_uid, array("field" => "leftnode", "sort" => "asc"));
-                        $leaf->state = 'open';
+                    if (false === $child->isLeaf()
+                            && null !== $current_uid
+                            && null !== $current = $this->_repo->find(strval($current_uid))) {
+                        if ($child->isAncestorOf($current)) {
+                            $leaf->children = $this->getBBBrowserTree($site_uid, $child->getUid(), $current_uid, array("field" => "leftnode", "sort" => "asc"));
+                            $leaf->state = 'open';
+                        }
                     }
-                }
 
-                $tree[] = $leaf;
+                    $tree[] = $leaf;
+                }
+            } catch (\BackBuilder\Security\Exception\ForbiddenAccessException $e) {
+                // Ignore it
             }
         }
 
@@ -217,22 +235,37 @@ class Page extends AbstractServiceLocal
     }
 
     /**
+     * Duplicate the page in the tree
+     * @param string $page_uid The unique identifier of the page
+     * @param string $title The title of the clone
+     * @return \stdClass
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid is invalid
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function cloneBBPage($page_uid, $title)
     {
-        set_time_limit(0);
-
-        $em = $this->bbapp->getEntityManager();
-        /* @var $page \BackBuilder\NestedNode\Page */
-        $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
-
-        if (NULL === $page) {
-            throw new ServicesException(sprintf('Unable to find page for `%s` uid', $page_uid));
+        if (null === $page = $this->_repo->find(strval($page_uid))) {
+            throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $page_uid));
         }
 
-        $new_page = $em->getRepository('\BackBuilder\NestedNode\Page')
-                ->duplicate($page, $title, $page->getParent(), true, $this->bbapp->getBBUserToken());
+        // User must have view permission on choosen layout
+        $this->isGranted('VIEW', $page->getLayout());
+
+        // User must have create permission on page
+        $this->isGranted('CREATE', $page);
+
+        if (null !== $page->getParent()) {
+            // User must have edit permission on parent
+            $this->isGranted('EDIT', $page->getParent());
+        } else {
+            // User must have edit permission on site to add a new root
+            $this->isGranted('EDIT', $this->getApplication()->getSite());
+        }
+
+        set_time_limit(0);
+        $new_page = $this->_repo->duplicate($page, $title, $page->getParent(), true, $this->bbapp->getBBUserToken());
 
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
@@ -245,58 +278,87 @@ class Page extends AbstractServiceLocal
     }
 
     /**
+     * Moves the page in the tree
+     * @param string $page_uid The unique identifier of the page
+     * @param string $parent_uid The unique identifier of the new parent page
+     * @param string $next_uid Optional, the unique identifier of the previous sibling
+     * @return \stdClass
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid or $parent_uid are invalid
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function moveBBBrowserTree($page_uid, $root_uid, $next_uid)
+    public function moveBBBrowserTree($page_uid, $parent_uid, $next_uid)
     {
-        set_time_limit(0);
-
-        $em = $this->bbapp->getEntityManager();
-
-        $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
-        $root = $em->find('\BackBuilder\NestedNode\Page', $root_uid);
-
-        if (!is_null($root) && !is_null($page)) {
-            if (null === $next_uid) {
-                $em->getRepository('\BackBuilder\NestedNode\Page')->moveAsLastChildOf($page, $root);
-                $em->flush();
-            } else if (null !== $next = $em->find('\BackBuilder\NestedNode\Page', $next_uid)) {
-                $em->getRepository('\BackBuilder\NestedNode\Page')->moveAsNextSiblingOf($page, $next);
-                $em->flush();
-            }
-
-            $em->getRepository('\BackBuilder\NestedNode\Page')->updateHierarchicalDatas($root, $root->getLeftnode(), $root->getLevel());
-            $em->refresh($page);
-
-            /* check if page has children */
-            $leaf = new \stdClass();
-            $leaf->attr = new \stdClass();
-            $leaf->attr->rel = 'folder';
-            $leaf->attr->id = 'node_' . $page->getUid();
-            $leaf->data = $page->getTitle();
-            $leaf->state = 'closed';
-            return $leaf;
+        if (null === $page = $this->_repo->find(strval($page_uid))) {
+            throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $page_uid));
         }
 
-        return false;
+        if (null === $parent = $this->_repo->find(strval($parent_uid))) {
+            throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $parent_uid));
+        }
+
+        // User must have edit permission on both page and parent
+        $this->isGranted('EDIT', $page);
+        $this->isGranted('EDIT', $parent);
+
+        // If the page is online, user must have publish permission on it
+        if ($page->isOnline(true)) {
+            $this->isGranted('PUBLISH', $page);
+        }
+
+        if (null === $next = $this->_repo->find(strval($next_uid))) {
+            $this->_repo->moveAsFirstChildOf($page, $parent);
+        } else {
+            if (false === $next->getParent()->equals($parent)) {
+                throw new InvalidArgumentException('Previous sibling must have the same parent node');
+            }
+
+            $this->_repo->moveAsNextSiblingOf($page, $next);
+        }
+
+        $this->getEntityManager()->flush($page);
+
+        $leaf = new \stdClass();
+        $leaf->attr = new \stdClass();
+        $leaf->attr->rel = 'folder';
+        $leaf->attr->id = 'node_' . $page->getUid();
+        $leaf->data = $page->getTitle();
+        $leaf->state = 'closed';
+
+        return $leaf;
     }
 
     /**
+     * Removes the page off the tree
+     * @param string $page_uid The unique identifier of the page
+     * @return \stdClass The serialized parent
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid is invalid or page is root
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function delete($uid)
+    public function delete($page_uid)
     {
-        $em = $this->bbapp->getEntityManager();
-
-        if (NULL !== $page = $em->find('\BackBuilder\NestedNode\Page', $uid)) {
-            if ($page->isRoot())
-                throw new ServicesException('Can not remove root page of the site');
-
-            $em->getRepository('\BackBuilder\NestedNode\Page')->toTrash($page);
-            return json_decode($page->getParent()->serialize());
+        if (null === $page = $this->_repo->find(strval($page_uid))) {
+            throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $page_uid));
         }
 
-        return false;
+        if (true === $page->isRoot()) {
+            throw new InvalidArgumentException('Can not remove root page of a site');
+        }
+
+        // User must have edit permission on parent
+        $this->isGranted('EDIT', $page->getParent());
+
+        // If the page is online, user must have publish permission on it
+        if ($page->isOnline(true)) {
+            $this->isGranted('PUBLISH', $page);
+        }
+
+        $this->_repo->toTrash($page);
+
+        return json_decode($page->getParent()->serialize());
     }
 
     /**
@@ -415,93 +477,63 @@ class Page extends AbstractServiceLocal
     }
 
     /**
+     * Returns the serialize page to edit it
+     * @param string $page_uid The unique identifier of the page
+     * @return \stdClass
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function getBBSelectorForm($page_uid)
     {
-        $em = $this->bbapp->getEntityManager();
+        if (null === $page = $this->_repo->find(strval($page_uid))) {
+            $page = new \BackBuilder\NestedNode\Page();
+            $page->setSite($this->getApplication()->getSite());
+        } else {
+            // User must have edit permission on page
+            $this->isGranted('EDIT', $page);
 
-        $page = new \stdClass();
-        $page->uid = null;
-        $page->title = null;
-        $page->url = null;
-        $page->target = \BackBuilder\NestedNode\Page::DEFAULT_TARGET;
-        $page->layout_uid = null;
-
-        if ($page_uid) {
-            $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
-
-            if ($page) {
-                $page->uid = $page->getUid();
-                $page->title = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
-                $page->url = $page->getUrl();
-                $page->target = $page->getTarget();
-                $page->redirect = $page->getRedirect();
-                $page->layout_uid = $page->getLayout()->getUid();
+            // If the page is online, user must have publish permission on it
+            if ($page->isOnline(true)) {
+                $this->isGranted('PUBLISH', $page);
             }
         }
 
-        return $page;
-    }
-
-    private function _isGrantedForPage($attribute, $page)
-    {
-        $isGranted = false;
-        foreach ($this->_repo->getAncestors($page, null, true) as $ancestor) {
-
-            try {
-                if (true === $isGranted = $this->isGranted($attribute, $ancestor)) {
-                    break;
-                }
-            } catch (\BackBuilder\Security\Exception\ForbiddenAccessException $e) {
-                continue;
-            }
-        }
-
-        if (false === $isGranted) {
-            throw new \BackBuilder\Security\Exception\ForbiddenAccessException();
-        }
-
-        return true;
-    }
-
-    private function _isGrantedToCreatePage($page, $parent = null)
-    {
-        $this->isGranted('CREATE', $page);
-
-        if (null !== $parent) {
-            $this->_isGrantedToEditPage($parent);
-        }
-
-        return true;
+        return json_decode($page->serialize());
     }
 
     /**
-     * Inserts or updates a new Page from the posted BBSelector form
-     * @param string $page_uid
-     * @param string $root_uid
-     * @param string $title
-     * @param string $url
-     * @param string $target
-     * @param string $redirect
-     * @param string $layout_uid
-     * @param string $flag
+     * Inserts or updates a Page from the posted BBSelector form
+     * @param string $page_uid The unique identifier of the page
+     * @param string $parent_uid The unique identifier of the parent of the page
+     * @param string $title The title
+     * @param string $url The url (currently unused)
+     * @param string $target The target is redirect is defined
+     * @param string $redirect  The permananet redirect URL
+     * @param string $layout_uid The unique identifier of the layout to use
      * @return \stdClass
-     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the layout is undefined
+     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid, $flag)
+    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid)
     {
-        if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', $layout_uid)) {
-            throw new UndefinedLayoutException('Undefined layout');
+        if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', strval($layout_uid))) {
+            throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
         }
 
-        // User must have permission on choosen layout
+        // User must have view permission on choosen layout
         $this->isGranted('VIEW', $layout);
 
         $parent = $this->_repo->find(strval($parent_uid));
         if (null !== $page = $this->_repo->find(strval($page_uid))) {
             $this->isGranted('EDIT', $page);
+
+            // If the page is online, user must have publish permission on it
+            if ($page->isOnline(true)) {
+                $this->isGranted('PUBLISH', $page);
+            }
 
             if (null !== $parent && false === $page->getParent()->equals($parent)) {
                 // User must have edit permission on parent
@@ -512,15 +544,18 @@ class Page extends AbstractServiceLocal
             $page = new \BackBuilder\NestedNode\Page();
             $this->getEntityManager()->persist($page);
 
-            $this->isGranted('CREATE', $page);
-
             if (null !== $parent) {
                 // User must have edit permission on parent
+                $page->setParent($parent);
+                $this->isGranted('CREATE', $page);
                 $this->isGranted('EDIT', $parent);
+
                 $this->_repo->insertNodeAsFirstChildOf($page, $parent);
             } else {
-                // User must have edit permission on site to add root
+                // User must have edit permission on site to add a new root
+                $this->isGranted('CREATE', $page);
                 $this->isGranted('EDIT', $this->getApplication()->getSite());
+
                 $page->setSite($this->getApplication()->getSite());
             }
         }
@@ -538,16 +573,6 @@ class Page extends AbstractServiceLocal
         $leaf->state = 'closed';
 
         return $leaf;
-    }
-
-    /**
-     * @exposed(secured=true)
-     */
-    public function searchPage($parameters = array())
-    {
-        $searchField = (isset($parameters['searchField'])) ? $parameters['searchField'] : NULL;
-        $searchField = (isset($parameters['searchField'])) ? $parameters['searchField'] : NULL;
-        $searchField = (isset($parameters['searchField'])) ? $parameters['searchField'] : NULL;
     }
 
 }
