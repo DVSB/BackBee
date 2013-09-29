@@ -2,6 +2,8 @@
 
 namespace BackBuilder\Services\Local;
 
+use BackBuilder\BBApplication,
+    BackBuilder\Services\Rpc\Exception\UndefinedLayoutException;
 use BackBuilder\Services\Exception\ServicesException;
 use BackBuilder\Services\Local\AbstractServiceLocal;
 use BackBuilder\Util\String;
@@ -15,6 +17,22 @@ use BackBuilder\NestedNode\Page as NestedPage;
  */
 class Page extends AbstractServiceLocal
 {
+
+    /**
+     * Page entities repository
+     * @var \BackBuilder\NestedNode\Repository\PageRepository 
+     */
+    private $_repo;
+
+    /**
+     * @param \BackBuilder\BBApplication $application
+     * @codeCoverageIgnore
+     */
+    public function initService(BBApplication $application)
+    {
+        parent::initService($application);
+        $this->_repo = $this->getEntityManager()->getRepository('\BackBuilder\NestedNode\Page');
+    }
 
     /**
      * 
@@ -204,7 +222,7 @@ class Page extends AbstractServiceLocal
     public function cloneBBPage($page_uid, $title)
     {
         set_time_limit(0);
-        
+
         $em = $this->bbapp->getEntityManager();
         /* @var $page \BackBuilder\NestedNode\Page */
         $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
@@ -215,7 +233,7 @@ class Page extends AbstractServiceLocal
 
         $new_page = $em->getRepository('\BackBuilder\NestedNode\Page')
                 ->duplicate($page, $title, $page->getParent(), true, $this->bbapp->getBBUserToken());
-        
+
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
         $leaf->attr->rel = 'leaf';
@@ -232,7 +250,7 @@ class Page extends AbstractServiceLocal
     public function moveBBBrowserTree($page_uid, $root_uid, $next_uid)
     {
         set_time_limit(0);
-        
+
         $em = $this->bbapp->getEntityManager();
 
         $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
@@ -244,12 +262,12 @@ class Page extends AbstractServiceLocal
                 $em->flush();
             } else if (null !== $next = $em->find('\BackBuilder\NestedNode\Page', $next_uid)) {
                 $em->getRepository('\BackBuilder\NestedNode\Page')->moveAsNextSiblingOf($page, $next);
-                $em->flush();                
+                $em->flush();
             }
-             
+
             $em->getRepository('\BackBuilder\NestedNode\Page')->updateHierarchicalDatas($root, $root->getLeftnode(), $root->getLevel());
             $em->refresh($page);
-            
+
             /* check if page has children */
             $leaf = new \stdClass();
             $leaf->attr = new \stdClass();
@@ -402,7 +420,7 @@ class Page extends AbstractServiceLocal
     public function getBBSelectorForm($page_uid)
     {
         $em = $this->bbapp->getEntityManager();
-        
+
         $page = new \stdClass();
         $page->uid = null;
         $page->title = null;
@@ -426,56 +444,100 @@ class Page extends AbstractServiceLocal
         return $page;
     }
 
-    /**
-     * @exposed(secured=true)
-     */
-    public function postBBSelectorForm($page_uid, $root_uid, $title, $url, $target, $redirect, $layout_uid, $flag)
+    private function _isGrantedForPage($attribute, $page)
     {
-        $em = $this->bbapp->getEntityManager();
+        $isGranted = false;
+        foreach ($this->_repo->getAncestors($page, null, true) as $ancestor) {
 
-        $layout = null;
-        $root = null;
-        $page = null;
-
-        if ($layout_uid !== null)
-            $layout = $em->find('\BackBuilder\Site\Layout', $layout_uid);
-        if ($root_uid !== null)
-            $root = $em->find('\BackBuilder\NestedNode\Page', $root_uid);
-
-        if ($layout) {
-            if ($page_uid !== null) {
-                $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
-                if ($page) {
-                    $page->setTitle($title);
-                    $page->setTarget($target);
-                    $page->setLayout($layout);
-                    $page->setRedirect('' == $redirect ? NULL : $redirect);
-
-                    $em->flush();
+            try {
+                if (true === $isGranted = $this->isGranted($attribute, $ancestor)) {
+                    break;
                 }
-            } else if ($root) {
-                $page = new \BackBuilder\NestedNode\Page();
-                $page->setTitle($title);
-                $page->setTarget($target);
-                $page = $em->getRepository('\BackBuilder\NestedNode\Page')->insertNodeAsFirstChildOf($page, $root);
-                $page->setRedirect('' == $redirect ? NULL : $redirect);
-                $page->setLayout($layout)
-                        ->setState(\BackBuilder\NestedNode\Page::STATE_HIDDEN);
-
-                $em->flush();
-            }
-
-            if (null !== $page) {
-                $leaf = new \stdClass();
-                $leaf->attr = json_decode($page->serialize());
-                $leaf->data = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
-                $leaf->state = 'closed';
-
-                return $leaf;
+            } catch (\BackBuilder\Security\Exception\ForbiddenAccessException $e) {
+                continue;
             }
         }
 
-        throw new \Symfony\Component\Config\Definition\Exception\Exception('Undefined root/layout provided');
+        if (false === $isGranted) {
+            throw new \BackBuilder\Security\Exception\ForbiddenAccessException();
+        }
+
+        return true;
+    }
+
+    private function _isGrantedToCreatePage($page, $parent = null)
+    {
+        $this->isGranted('CREATE', $page);
+
+        if (null !== $parent) {
+            $this->_isGrantedToEditPage($parent);
+        }
+
+        return true;
+    }
+
+    /**
+     * Inserts or updates a new Page from the posted BBSelector form
+     * @param string $page_uid
+     * @param string $root_uid
+     * @param string $title
+     * @param string $url
+     * @param string $target
+     * @param string $redirect
+     * @param string $layout_uid
+     * @param string $flag
+     * @return \stdClass
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     * @exposed(secured=true)
+     */
+    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid, $flag)
+    {
+        if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', $layout_uid)) {
+            throw new UndefinedLayoutException('Undefined layout');
+        }
+
+        // User must have permission on choosen layout
+        $this->isGranted('VIEW', $layout);
+
+        $parent = $this->_repo->find(strval($parent_uid));
+        if (null !== $page = $this->_repo->find(strval($page_uid))) {
+            $this->isGranted('EDIT', $page);
+
+            if (null !== $parent && false === $page->getParent()->equals($parent)) {
+                // User must have edit permission on parent
+                $this->isGranted('EDIT', $parent);
+                $this->_repo->moveAsFirstChildOf($page, $parent);
+            }
+        } else {
+            $page = new \BackBuilder\NestedNode\Page();
+            $this->getEntityManager()->persist($page);
+
+            $this->isGranted('CREATE', $page);
+
+            if (null !== $parent) {
+                // User must have edit permission on parent
+                $this->isGranted('EDIT', $parent);
+                $this->_repo->insertNodeAsFirstChildOf($page, $parent);
+            } else {
+                // User must have edit permission on site to add root
+                $this->isGranted('EDIT', $this->getApplication()->getSite());
+                $page->setSite($this->getApplication()->getSite());
+            }
+        }
+
+        $page->setTitle($title)
+                ->setTarget($target)
+                ->setRedirect('' === $redirect ? null : $redirect)
+                ->setLayout($layout);
+
+        $this->getEntityManager()->flush($page);
+
+        $leaf = new \stdClass();
+        $leaf->attr = json_decode($page->serialize());
+        $leaf->data = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
+        $leaf->state = 'closed';
+
+        return $leaf;
     }
 
     /**

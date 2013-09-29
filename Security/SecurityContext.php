@@ -86,7 +86,7 @@ class SecurityContext extends sfSecurityContext {
             $voters[] = new AuthenticatedVoter($trustResolver);    
             
             if (null !== $this->_aclprovider) {
-                $voters[] = new \Symfony\Component\Security\Acl\Voter\AclVoter(
+                $voters[] = new Authorization\Voter\BBAclVoter(
                                     $this->_aclprovider,
                                     new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
                                     new \Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(

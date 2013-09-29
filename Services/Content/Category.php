@@ -191,7 +191,8 @@ class Category
     {
         $categories = array("tous" => new Category("Tous", $application, true));
         foreach ($application->getClassContentDir() as $classcontentdir) {
-            $files = self::globRecursive($classcontentdir . DIRECTORY_SEPARATOR . '*.yml');
+            //$files = self::globRecursive($classcontentdir . DIRECTORY_SEPARATOR . '*.yml');
+            $files = glob($classcontentdir. DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]', GLOB_BRACE);
             if (is_array($files)) {
                 $categories = array_merge($categories, self::getFilesCategory($files));
             }
