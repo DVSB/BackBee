@@ -100,7 +100,8 @@ class SecurityContext extends sfSecurityContext {
 //                $voters[] = new RoleVoter();
             }
 
-            $accessDecisionManager = new DecisionManager($voters);
+            $accessDecisionManager = new DecisionManager($voters, 'affirmative', false, true, true);
+            $accessDecisionManager->setApplication($this->_application);
         }
         
         parent::__construct($this->_authmanager, $accessDecisionManager);

@@ -145,7 +145,7 @@ class ClassContent extends AbstractServiceLocal {
         }
 
         $this->isGranted('EDIT', $content);
-        
+
         //Find a draft for content if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
             $content->setDraft($draft);

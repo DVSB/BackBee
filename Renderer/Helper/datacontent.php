@@ -28,8 +28,8 @@ class datacontent extends AHelper
                 $application = $this->_renderer->getApplication();
                 $securityContext = $application->getSecurityContext();
 
-//                if (null === $securityContext->getACLProvider()
-//                        || true === $securityContext->isGranted('VIEW', $object)) {
+                if (null === $securityContext->getACLProvider()
+                        || true === $securityContext->isGranted('VIEW', $object)) {
                     if (!array_key_exists('class', $datacontent))
                         $datacontent['class'] = '';
                     $datacontent['class'] = trim(implode(' ', array_unique(array_merge(explode(' ', $datacontent['class']), array('contentAloha')))));
@@ -139,7 +139,7 @@ class datacontent extends AHelper
                         $datacontent['data-library'] = $em->getRepository('BackBuilder\ClassContent\Element\file')->isInMediaLibrary($object);
                     }
                 }
-//            }
+            }
         }
 
         $map_function = array_map(function($k, $v) {
