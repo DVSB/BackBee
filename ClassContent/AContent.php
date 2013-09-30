@@ -694,7 +694,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
         }
 
         if (false === array_key_exists($var, $this->_data)) {
-            throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this)));
+            if ($this->_getContentInstance() instanceof ContentSet) {
+                return null;
+            } else {
+                throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this)));
+            }
         }
 
         $data = array();
@@ -840,7 +844,6 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
             $property = '_' . $property;
 
             if (true === in_array($property, array('_created', '_modified'))
-                    || true === property_exists($this, $property)
                     || null === $value) {
                 continue;
             } else if ("_param" === $property) {
@@ -853,7 +856,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
                 }
             } else if ("_value" === $property) {
                 $this->value = $value;
-            } else if (true === $strict) {
+            } else if (false === property_exists($this, $property) && true === $strict) {
                 throw new Exception\UnknownPropertyException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this->_getContentInstance())));
             }
         }

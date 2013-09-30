@@ -377,6 +377,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     {
         if (NULL !== $this->getDraft())
             return $this->getDraft()->push($var);
+        
         if ($this->_isAccepted($var)) {
             if (
                     (!$this->_maxentry && !$this->_minentry) ||
@@ -505,19 +506,18 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             $property = '_' . $property;
 
             if (true === in_array($property, array('_created', '_modified'))
-                    || true === property_exists($this, $property)
                     || null === $value) {
                 continue;
-            } else if ("_param" === $property) {
+            } else if ('_param' === $property) {
                 foreach ($value as $param => $paramvalue) {
                     $this->setParam($param, $paramvalue);
                 }
-            } else if ("_data" === $property) {
+            } else if ('_data' === $property) {
                 $this->clear();
                 foreach ($value as $val) {
                     $this->push($val);
                 }
-            } else if (true === $strict) {
+            } else if (false === property_exists($this, $property) && true === $strict) {
                 throw new Exception\UnknownPropertyException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this->_getContentInstance())));
             }
         }

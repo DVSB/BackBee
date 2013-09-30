@@ -84,20 +84,20 @@ class Revision extends AbstractServiceLocal
         $result = array();
         $revisions = $this->em->getRepository('\BackBuilder\ClassContent\Revision')->getAllDrafts($token);
         foreach ($revisions as $revision) {
-            try {
+            //try {
                 $this->bbapp->getEventDispatcher()->triggerEvent('commit', $revision->getContent());
-                $this->em->flush();
+                //$this->em->flush();
 
                 $result[] = array('commited' => true,
                     'content' => json_decode($revision->getContent()->serialize()));
-            } catch (ClassContentException $e) {
-                $result[] = array('error' => $e->getCode(),
-                    'message' => $e->getMessage(),
-                    'content' => json_decode($revision->getContent()->serialize()));
-            } catch (\Exception $e) {
-                $result[] = array('error' => $e->getCode(),
-                    'message' => $e->getMessage());
-            }
+//            } catch (ClassContentException $e) {
+//                $result[] = array('error' => $e->getCode(),
+//                    'message' => $e->getMessage(),
+//                    'content' => json_decode($revision->getContent()->serialize()));
+//            } catch (\Exception $e) {
+//                $result[] = array('error' => $e->getCode(),
+//                    'message' => $e->getMessage());
+//            }
         }
 
         return $result;

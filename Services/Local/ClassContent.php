@@ -37,13 +37,12 @@ class ClassContent extends AbstractServiceLocal {
         $result = array();
         $em = $this->bbapp->getEntityManager();
 
-        //print_r($accept);
-        //print_r($datas);
         if (is_array($datas) && count($datas)) {
             foreach ($datas as $key => $contentInfo) {
                 //var_dump($key);
                 if ($accept && is_array($accept) && count($accept) && !array_key_exists($key, $accept))
                     continue;
+
                 $createDraft = true;
                 if ($isParentAContentSet) {
                     $contentInfo = (object) $contentInfo;
@@ -155,6 +154,7 @@ class ClassContent extends AbstractServiceLocal {
         if (!is_null($srzContent->data)) {
             $srzContent->data = $this->prepareContentData($content, $srzContent->data, $srzContent->accept, $srzContent->isAContentSet, $persist);
         }
+
         $result = $content->unserialize($srzContent);
         $this->_processedContent[$srzContent->uid] = $result; //notify that content is already processed
 
