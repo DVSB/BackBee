@@ -46,6 +46,13 @@ abstract class ARenderer implements IRenderer {
      */
     protected $_mode;
     
+    /**
+     * Ignore the rendering if specified render mode is not 
+     * available if TRUE, use the default template otherwise
+     * @var Boolean
+     */
+    protected $_ignoreIfRenderModeNotAvailable;
+    
     protected $_node;
     
     /**
@@ -529,9 +536,11 @@ abstract class ARenderer implements IRenderer {
      * @param string $mode The rendering mode
      * @param array $params  A force set of parameters
      * @param string $template A force template script to be rendered
+     * @param Boolean $ignoreIfRenderModeNotAvailable Ignore the rendering if specified render mode is not 
+     *                                                available if TRUE, use the default template otherwise
      * @return string The view script output
      */
-    public function render(IRenderable $content = NULL, $mode = NULL, $params = NULL, $template = NULL) {
+    public function render(IRenderable $content = NULL, $mode = NULL, $params = NULL, $template = NULL, $ignoreIfRenderModeNotAvailable = true) {
         // Nothing to do
     }
     
@@ -566,10 +575,13 @@ abstract class ARenderer implements IRenderer {
      * Set the rendering mode
      * @codeCoverageIgnore
      * @param string $mode
+     * @param Boolean $ignoreIfRenderModeNotAvailable Ignore the rendering if specified render mode is not 
+     *                                                available if TRUE, use the default template otherwise
      * @return ARenderer The current renderer
      */
-    public function setMode($mode = NULL) {
+    public function setMode($mode = NULL, $ignoreIfRenderModeNotAvailable = true) {
         $this->_mode = $mode;
+        $this->_ignoreIfRenderModeNotAvailable = $ignoreIfRenderModeNotAvailable;
         return $this;
     }
     
@@ -734,5 +746,15 @@ abstract class ARenderer implements IRenderer {
         unset($template);
         
         return $templates;
+    }
+    
+    /**
+     * Returns the ignore state of rendering if render mode is not available
+     * @return Boolean
+     * @codeCoverageIgnore
+     */
+    public function getIgnoreIfNotAvailable()
+    {
+        return $this->_ignoreIfRenderModeNotAvailable;
     }
 }
