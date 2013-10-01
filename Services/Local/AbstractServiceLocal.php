@@ -95,9 +95,11 @@ class AbstractServiceLocal implements IServiceLocal
 
         $securityContext = $this->_application->getSecurityContext();
 
-        if (null !== $securityContext->getACLProvider()
-                && false === $securityContext->isGranted($attributes, $object)) {
-            throw new \BackBuilder\Security\Exception\ForbiddenAccessException('Forbidden acces');
+        if (false === $securityContext->isGranted('sudo')) {
+            if (null !== $securityContext->getACLProvider()
+                    && false === $securityContext->isGranted($attributes, $object)) {
+                throw new \BackBuilder\Security\Exception\ForbiddenAccessException('Forbidden acces');
+            }
         }
 
         return true;

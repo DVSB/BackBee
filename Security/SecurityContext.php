@@ -95,13 +95,13 @@ class SecurityContext extends sfSecurityContext {
                                     ),
                                     new Acl\Permission\PermissionMap(),
                                     $this->getApplication()->getLogging(),
-                                    false
+                                    false,
+                                    $this->getApplication()
                                 );
 //                $voters[] = new RoleVoter();
             }
 
-            $accessDecisionManager = new DecisionManager($voters, 'affirmative', false, true, true);
-            $accessDecisionManager->setApplication($this->_application);
+            $accessDecisionManager = new DecisionManager($voters, 'affirmative', false, true);
         }
         
         parent::__construct($this->_authmanager, $accessDecisionManager);

@@ -4,8 +4,13 @@ namespace BackBuilder\Security\Authorization\Voter;
 
 use BackBuilder\NestedNode\ANestedNode,
     BackBuilder\ClassContent\AClassContent;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Security\Acl\Voter\AclVoter,
+    Symfony\Component\Security\Acl\Permission\PermissionMapInterface,
+    Symfony\Component\Security\Acl\Model\AclProviderInterface,
+    Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface,
+    Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface,
     Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
@@ -20,6 +25,18 @@ class BBAclVoter extends AclVoter
 {
 
     /**
+     * The current BackBuilder application
+     * @var \BackBuilder\BBApplication 
+     */
+    private $_application;
+
+    public function __construct(AclProviderInterface $aclProvider, ObjectIdentityRetrievalStrategyInterface $oidRetrievalStrategy, SecurityIdentityRetrievalStrategyInterface $sidRetrievalStrategy, PermissionMapInterface $permissionMap, LoggerInterface $logger = null, $allowIfObjectIdentityUnavailable = true, \BackBuilder\BBApplication $application = null)
+    {
+        parent::__construct($aclProvider, $oidRetrievalStrategy, $sidRetrievalStrategy, $permissionMap, $logger, $allowIfObjectIdentityUnavailable);
+        $this->_application = $application;
+    }
+
+    /**
      * Returns the vote for the given parameters.
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token A TokenInterface instance
      * @param object $object The object to secure
@@ -28,6 +45,12 @@ class BBAclVoter extends AclVoter
      */
     public function vote(TokenInterface $token, $object, array $attributes)
     {
+        if (false === ($token instanceof \BackBuilder\Security\Token\BBUserToken)
+                && (null === $this->_application
+                || null === $token = $this->_application->getBBUserToken())) {
+            return self::ACCESS_DENIED;
+        }
+
         if ($object instanceof ANestedNode) {
             return $this->_voteForNestedNode($token, $object, $attributes);
         } elseif ($object instanceof AClassContent) {

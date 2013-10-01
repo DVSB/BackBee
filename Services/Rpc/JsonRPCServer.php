@@ -295,7 +295,7 @@ class JsonRPCServer
         if (null === $request_payload) {
             $request_payload = json_decode(file_get_contents("php://input"), true);
         }
-        
+
         $requestArray = $this->_validateRequestPayload($request_payload);
 
         $nameClass = $requestArray[0];
@@ -388,9 +388,11 @@ class JsonRPCServer
         if (true === $this->isSecured()) {
             $securityContext = $this->_application->getSecurityContext();
 
-            if (null !== $securityContext->getACLProvider()
-                    && false === $securityContext->isGranted('VIEW', $this->_application->getsite())) {
-                throw new ForbiddenAccessException('Forbidden acces');
+            if (false === $securityContext->isGranted('sudo')) {
+                if (null !== $securityContext->getACLProvider()
+                        && false === $securityContext->isGranted('VIEW', $this->_application->getsite())) {
+                    throw new ForbiddenAccessException('Forbidden acces');
+                }
             }
         }
 

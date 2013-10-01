@@ -28,7 +28,8 @@ class datacontent extends AHelper
                 $application = $this->_renderer->getApplication();
                 $securityContext = $application->getSecurityContext();
 
-                if (null === $securityContext->getACLProvider()
+                if (true === $securityContext->isGranted('sudo')
+                        || null === $securityContext->getACLProvider()
                         || true === $securityContext->isGranted('VIEW', $object)) {
                     if (!array_key_exists('class', $datacontent))
                         $datacontent['class'] = '';
