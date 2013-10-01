@@ -89,7 +89,7 @@ class SecurityContext extends sfSecurityContext {
                 $voters[] = new Authorization\Voter\BBAclVoter(
                                     $this->_aclprovider,
                                     new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
-                                    new \Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
+                                    new \BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
                                             new RoleHierarchy( array() ),
                                             $trustResolver
                                     ),

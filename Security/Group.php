@@ -1,4 +1,5 @@
 <?php
+
 namespace BackBuilder\Security;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -9,9 +10,11 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity()
- * @Table(name="group")
+ * @Table(name="groups")
  */
-class Group {
+class Group
+{
+
     /**
      * Unique identifier of the group
      * @var integer
@@ -19,21 +22,21 @@ class Group {
      * @GeneratedValue(strategy="IDENTITY")
      */
     protected $_id;
-    
+
     /**
      * Group name
      * @var string
-     * @Column(type="varchar", name="name")
+     * @Column(type="string", name="name")
      */
     protected $_name;
-    
+
     /**
      * Group name identifier
      * @var string
-     * @Column(type="varchar", name="identifier")
+     * @Column(type="string", name="identifier")
      */
     protected $_identifier;
-    
+
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection
      * @ManyToMany(targetEntity="BackBuilder\Security\User", inversedBy="_groups")
@@ -44,7 +47,15 @@ class Group {
      * )
      */
     protected $_users;
-    
+
+    /**
+     * Optional site.
+     * @var \BackBuilder\Site\Site
+     * @ManyToOne(targetEntity="BackBuilder\Site\Site")
+     * @JoinColumn(name="site_uid", referencedColumnName="uid")
+     */
+    protected $_site;
+
     /**
      * @codeCoverageIgnore 
      */
@@ -143,4 +154,27 @@ class Group {
         $this->_users->add($user);
         return $this;
     }
+
+    /**
+     * Returns the optional site
+     * @return \BackBuilder\Site\Site|NULL
+     * @codeCoverageIgnore
+     */
+    public function getSite()
+    {
+        return $this->_site;
+    }
+
+    /**
+     * Sets the optional site
+     * @param \BackBuilder\Site\Site $site
+     * @return \BackBuilder\Security\Group
+     * @codeCoverageIgnore
+     */
+    public function setSite(\BackBuilder\Site\Site $site = null)
+    {
+        $this->_site = $site;
+        return $this;
+    }
+
 }
