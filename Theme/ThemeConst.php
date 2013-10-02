@@ -6,7 +6,6 @@ namespace BackBuilder\Theme;
  * @package     BackBuilder\Theme
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
-
  */
 abstract class ThemeConst {
     /**
