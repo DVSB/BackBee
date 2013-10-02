@@ -26,26 +26,23 @@ class AdminLogRepository extends EntityRepository
     
     public function countOtherUserInTheSamePage($controller, $action, $entity) 
     {
-        $query = $this->createQueryBuilder('al')
-                      ->select('al._owner, al._entity')
-                      ->where('al._controller = :controller')
-                      ->setParameter(':controller', $controller)
-                      ->andWhere('al._action = :action')
-                      ->setParameter(':action', $action)
-                      ->andWhere('al._entity = :entity')
-                      ->setParameter(':entity', ObjectIdentity::fromDomainObject($entity))
-                      ->andWhere('al._created_at > :date')
-                      ->setParameter(':date', new \DateTime('@' . strtotime('-30 minutes')))
-                      ->orderBy('al._created_at', 'DESC')
-                      ->groupBy('al._owner')
-                      ->getQuery();
+        $date =  new \DateTime('@' . strtotime('-30 minutes'));
+        $from = 'SELECT owner, entity FROM admin_log '.
+                'WHERE created_at > "' . $date->format('Y-m-d H:i:s') . '" '.
+                'AND controller = "\\\\' . str_replace('\\', '\\\\', $controller) . '" '.
+                'AND action = "' . $action . '" '.
+                'AND entity = "' . str_replace('\\', '\\\\', (string)ObjectIdentity::fromDomainObject($entity)) . '" '.
+                'ORDER BY created_at DESC';
+        
+        $sql  = 'SELECT owner, entity FROM (' . $from . ') AS orderer_log GROUP BY owner';
+        $result = $this->getEntityManager()->getConnection()->executeQuery($sql);
         
         $verif = $this->_getActualAdminEdition();
-        $return = $query->getResult();
+        $return = $result->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($return as $key => $result) {
             if (
-                array_key_exists($result['_owner'], $verif) &&
-                $verif[$result['_owner']] != $result['_entity']
+                array_key_exists($result['owner'], $verif) &&
+                $verif[$result['owner']] != $result['entity']
             ) {
                 unset($return[$key]);
             }
@@ -66,16 +63,14 @@ class AdminLogRepository extends EntityRepository
     
     private function _getActualAdminEdition()
     {
-        $query = $this->createQueryBuilder('al')
-                      ->select('al._owner, al._entity')
-                      ->andWhere('al._created_at > :date')
-                      ->setParameter(':date', new \DateTime('@' . strtotime('-30 minutes')))
-                      ->orderBy('al._created_at', 'DESC')
-                      ->groupBy('al._owner')
-                      ->getQuery();
+        $date =  new \DateTime('@' . strtotime('-30 minutes'));
+        $from = 'SELECT owner, entity FROM admin_log WHERE created_at > "' . $date->format('Y-m-d H:i:s') . '" ORDER BY created_at DESC';
+        $sql  = 'SELECT owner, entity FROM (' . $from . ') AS orderer_log GROUP BY owner';
+        $result = $this->getEntityManager()->getConnection()->executeQuery($sql);
+        
         $verif = array();
-        foreach ($query->getResult() as $result) {
-            $verif[$result['_owner']] = $result['_entity'];
+        foreach ($result->fetchAll(\PDO::FETCH_ASSOC) as $result) {
+            $verif[$result['owner']] = $result['entity'];
         }
         return $verif;
     }
