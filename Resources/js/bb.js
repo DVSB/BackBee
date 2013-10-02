@@ -64,6 +64,7 @@ $.loadScript = function(url, options) {
             'js/bb.ui.bbContentSelector.js',
             'js/bb.ui.bbMediaImageUpload.js',
             'js/bb.ui.bbContentTypeBrowser.js',
+            'js/bb.contentPluginManager.js',
             'js/bb.ContentWrapper.js',
             'js/bb.UserPreferences.js',
             'js/lpTab.js',
