@@ -8,15 +8,15 @@ namespace BackBuilder\Exception;
  * @category    BackBuilder
  * @package     BackBuilder\Exception
  * @copyright   Lp digital system
- * @author      c.rouillon
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  */
-class InvalidArgumentException extends BBException
+class MissingApplicationException extends BBException
 {
 
     /**
      * The default error code
      * @var int
      */
-    private $_code = self::MISSING_APPLICATION;
+    protected $_code = self::MISSING_APPLICATION;
 
 }

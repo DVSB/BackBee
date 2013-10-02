@@ -249,6 +249,7 @@
         authentication_required: 'Identification requise',
         connect: 'Connexion',
         abort: 'Annuler',
+        close: 'Fermer',
         try_remaining: '(%1 essai restant)',
         tries_remaining: '(%1 essais restants)',
         username: 'Identifiant :',
@@ -261,8 +262,9 @@
             '9004': 'Clé invalide',
             '9005': 'Identification expirée',
             '9006': 'Jeton expiré',
-            '9007': 'Utilisateur invalide'
-        }
+            '9007': 'Permission refusée'
+        },
+        forbidden_access: 'Accès interdit'
     },
     contenttypebrowser: {
         title: 'Sélecteur de contenu'

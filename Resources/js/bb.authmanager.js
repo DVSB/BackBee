@@ -180,6 +180,16 @@ bb.authmanager = (function($,gExport){
         return new Date();
     };
 	
+    var _resetToken = function() {
+        _username = null;
+        _nonce = null;
+        _secret = null;
+        
+        if (null != sessionStorage) {
+            sessionStorage.removeItem('bb5-session-auth');
+        }
+    };
+        
     var _getToken = function() {
         if (null != sessionStorage) {
             bbauth = sessionStorage.getItem('bb5-session-auth');
@@ -193,9 +203,9 @@ bb.authmanager = (function($,gExport){
         _updDigest();
 		
         return _pattern.replace('#username#', ('undefined' == typeof(_username)) ? '' : _username)
-                       .replace('#digest#', ('undefined' == typeof(_digest)) ? '' : _digest)
-                       .replace('#nonce#', ('undefined' == typeof(_nonce)) ? '' : _nonce)
-                       .replace('#created#', ('undefined' == typeof(_created)) ? '' : _created);
+        .replace('#digest#', ('undefined' == typeof(_digest)) ? '' : _digest)
+        .replace('#nonce#', ('undefined' == typeof(_nonce)) ? '' : _nonce)
+        .replace('#created#', ('undefined' == typeof(_created)) ? '' : _created);
     };
 	
     var _parseToken = function(token) {
@@ -232,11 +242,6 @@ bb.authmanager = (function($,gExport){
 
                 bb.wsCacheManager.getInstance().clean(1);
                 document.location.reload();
-//                //bb.wsCacheManager.getInstance().clean(2,"userSession");
-//                bb.wsCacheManager.getInstance().clean(1);
-//                setTimeout(function(){
-//                    document.location.reload();
-//                },700); //wait before reload
             }
         });
     };
@@ -280,7 +285,7 @@ bb.authmanager = (function($,gExport){
             return $(self).trigger("bb-auth-forbidden");
         
         if (_maxtries <= _numtries)
-            return $(self).trigger("bb-auth-forbidden");
+            return self.logoff();
         
         var infos = _parseToken(token);
         
@@ -305,7 +310,7 @@ bb.authmanager = (function($,gExport){
                                 request.headers['X-BB-AUTH'] = self.authenticate( username, password);
                                 $.ajax(request);
                                 
-				 if (0 < $('#bb5-toolbar-wrapper').length) $(this).dialog('close');
+                                if (0 < $('#bb5-toolbar-wrapper').length) $(this).dialog('close');
                             }
                         }
                     },
@@ -313,7 +318,7 @@ bb.authmanager = (function($,gExport){
                         text: bb.i18n.__('authmanager.abort'),
                         click: function() { 
                             $(this).dialog('close');
-                            return $(self).trigger("bb-auth-forbidden");
+                            return self.logoff();
                         }
                     }
                 },
@@ -341,14 +346,26 @@ bb.authmanager = (function($,gExport){
         return false;
     };
 	
-    var _onAuthForbidden = function (event) {
+    var _onAuthForbidden = function (event, token) {
         var forbiddenPopup = bb.PopupManager.init({});
         _forbiddenPopup = forbiddenPopup.create('authenticationDialog',{
             dialogType : forbiddenPopup.dialogType.ALERT,
-            title: bb.i18n.__('authmanager.forbiden_access'),
+            title: bb.i18n.__('authmanager.forbidden_access'),
+            buttons:{
+                popupBtnClose: {
+                    text: bb.i18n.__('authmanager.close'),
+                    click: function() { 
+                        $(this).dialog('close');
+                        $(this).dialog('destroy');
+                    }
+                }
+            }
         });
+        
+        _forbiddenPopup.setContent("<div class='bb5-ui bb5-dialog-authentication'><div class='bb5-alert'>"+bb.i18n.__('authmanager.error.9007')+"</div></div>");
+        
         $(_forbiddenPopup.dialog).dialog('open');
-         _forbiddenPopup.show();
+        _forbiddenPopup.show();
         
         return false;
     };

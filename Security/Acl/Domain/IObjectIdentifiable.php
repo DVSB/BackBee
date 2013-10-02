@@ -16,12 +16,6 @@ interface IObjectIdentifiable extends DomainObjectInterface
 {
 
     /**
-     * Returns a unique identifier for this domain object.
-     * @return string
-     */
-    public function getObjectIdentifier();
-
-    /**
      * Checks for an explicit objects equality.
      * @param \BackBuilder\Security\Acl\Domain\IObjectIdentifiable $identity
      * @return Boolean

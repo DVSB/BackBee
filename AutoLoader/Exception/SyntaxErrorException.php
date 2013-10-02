@@ -8,7 +8,7 @@ namespace BackBuilder\AutoLoader\Exception;
  * @category    BackBuilder
  * @package     BackBuilder\AutoLoader\Exception
  * @copyright   Lp digital system
- * @author      c.rouillon
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  */
 class SyntaxErrorException extends AutoloaderException
 {
@@ -17,6 +17,6 @@ class SyntaxErrorException extends AutoloaderException
      * The default error code
      * @var int
      */
-    private $_code = self::INVALID_OPCODE;
+    protected $_code = self::INVALID_OPCODE;
 
 }

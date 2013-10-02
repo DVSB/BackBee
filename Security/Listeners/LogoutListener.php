@@ -73,7 +73,7 @@ class LogoutListener implements ListenerInterface
         }
 
         // handle multiple logout attempts gracefully
-        if ($token = $this->securityContext->getToken()) {
+        if (null !== $token = $this->securityContext->getToken()) {
             foreach ($this->handlers as $handler) {
                 $handler->logout($request, $response, $token);
             }

@@ -253,16 +253,16 @@ class NestedNodeRepository extends EntityRepository {
                         ->getSingleResult();
     }
 
-    protected function _getAncestorsQuery(ANestedNode $node, $depth = NULL) {
+    protected function _getAncestorsQuery(ANestedNode $node, $depth = NULL, $includeNode = FALSE) {
         $q = $this->createQueryBuilder('n')
                 ->andWhere('n._root = :root')
                 ->andWhere('n._leftnode < :leftnode')
                 ->andWhere('n._rightnode > :rightnode')
-                ->orderBy('n._leftnode', 'asc')
+                ->orderBy('n._rightnode', 'desc')
                 ->setParameters(array(
             'root' => $node->getRoot(),
-            'leftnode' => $node->getLeftnode(),
-            'rightnode' => $node->getRightnode()
+            'leftnode' => $node->getLeftnode() + ($includeNode ? 1 : 0),
+            'rightnode' => $node->getRightnode() - ($includeNode ? 1 : 0)
                 ));
 
         if (!is_null($depth) && is_int($depth) && depth > 0) {
@@ -273,8 +273,8 @@ class NestedNodeRepository extends EntityRepository {
         return $q;
     }
 
-    public function getAncestors(ANestedNode $node, $depth = NULL) {
-        return $this->_getAncestorsQuery($node, $depth)
+    public function getAncestors(ANestedNode $node, $depth = NULL, $includeNode = FALSE) {
+        return $this->_getAncestorsQuery($node, $depth, $includeNode)
                         ->getQuery()
                         ->getResult();
     }
