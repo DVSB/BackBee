@@ -6,7 +6,6 @@ use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken as sfAno
 class AnonymousToken extends sfAnonymousToken {
     /**
      * Constructor.
-     * @codeCoverageIgnore
      * @param string          $key   The key shared with the authentication provider
      * @param string          $user  The user
      * @param RoleInterface[] $roles An array of roles

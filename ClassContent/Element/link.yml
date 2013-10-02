@@ -6,3 +6,5 @@ link:
     value: !!scalar
   parameters:
     target: !!scalar _self
+    title: !!scalar link title
+

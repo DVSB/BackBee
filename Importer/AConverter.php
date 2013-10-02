@@ -25,8 +25,6 @@ abstract class AConverter implements IConverter
 
     /**
      * Class constructor
-     * 
-     * @codeCoverageIgnore
      * @param \BackBuilder\Importer\Importer $importer
      */
     public function __construct(Importer $importer = null) {
@@ -35,8 +33,7 @@ abstract class AConverter implements IConverter
     
     /**
      * return the BackBuilder Entity Object
-     * 
-     * @codeCoverageIgnore
+     *
      * @return Object
      */
     public function getBBEntity()
@@ -47,7 +44,6 @@ abstract class AConverter implements IConverter
     /**
      * Set BackBuilder Entity Object
      *
-     * @codeCoverageIgnore
      * @param Object $entity
      * @return \BackBuilder\Importer\AConverter
      */
@@ -57,18 +53,8 @@ abstract class AConverter implements IConverter
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param \BackBuilder\Importer\Importer $importer
-     * @param array $config
-     */
     public function beforeImport(Importer $importer, array $config) {}
 
-    /**
-     * @codeCoverageIgnore
-     * @param \BackBuilder\Importer\Importer $importer
-     * @param array $entities
-     */
     public function afterEntitiesFlush(Importer $importer, array $entities) {}
 
     /**
@@ -96,7 +82,6 @@ abstract class AConverter implements IConverter
     
     /**
      * Set the value of an scalar element
-     * @codeCoverageIgnore
      */
     protected function _setScalar(AClassContent $element, $var, $value)
     {

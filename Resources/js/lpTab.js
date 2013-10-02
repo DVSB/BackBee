@@ -141,79 +141,81 @@ var LpTabs = function(userConfig){
             }    
         });
         
-        /*selectionner le premier non masqué*/
-        //if(!this.selectedTab){}  
+    /*selectionner le premier non masqué*/
+    //if(!this.selectedTab){}  
     }
    
 
     
     
-LpTabs.prototype._bindEvents = function(){
-    var self = this;
-    $(this.tabLinks).bind("click",function(e){
-        var currentTab = $(this).attr("data-tabno") || null;
-        if(currentTab){
-            self.selectTab(currentTab);
-        }      
-    });    
-}
+    LpTabs.prototype._bindEvents = function(){
+        var self = this;
+        $(this.tabLinks).bind("click",function(e){
+            var currentTab = $(this).attr("data-tabno") || null;
+            if(currentTab){
+                self.selectTab(currentTab);
+            }      
+        });    
+    }
    
-LpTabs.prototype.destroy = function(){
-    $(this.tabLinks).unbind();
-    this.tab = null;      
+    LpTabs.prototype.destroy = function(){
+        $(this.tabLinks).unbind();
+        this.tab = null;      
       
-}
+    }
     
-LpTabs.prototype.selectTab = function(tabToselect){
-    var previous = $(this.selectedTab).attr("data-tabno");
-    if(tabToselect==previous) return false;
+    LpTabs.prototype.selectTab = function(tabToselect){
+        var previous = $(this.selectedTab).attr("data-tabno");
+        if(tabToselect==previous) return false;
        
-    /*hideCurrent*/
-    var currentTab = tabToselect;
-    $(this.selectedTab).removeClass(this._settings.activeTabCls);
-    var content =  $(this.tab).find($(this.selectedTab).attr(CONTENT_KEY)) || null;
-    if(content){
-        $(content).hide();
-    }
-    /*show new*/
-    var tabToSelect = $(this.tab).find("[data-tabno='"+tabToselect+"']") || null;
-    if(!tabToSelect.length) throw " can't find tab no "+tabToSelect;
-    tabToSelect = tabToSelect[0];
-    this.selectedTab = tabToSelect;
-    this._settings.selected = previous;
+        /*hideCurrent*/
+        var currentTab = tabToselect;
+        $(this.selectedTab).removeClass(this._settings.activeTabCls);
+        var content =  $(this.tab).find($(this.selectedTab).attr(CONTENT_KEY)) || null;
+        if(content){
+            $(content).hide();
+        }
+        /*show new*/
+        var tabToSelect = $(this.tab).find("[data-tabno='"+tabToselect+"']") || null;
+        if(!tabToSelect.length) throw " can't find tab no "+tabToSelect;
+        tabToSelect = tabToSelect[0];
+        this.selectedTab = tabToSelect;
+        this._settings.selected = previous;
        
        
-    $(this.selectedTab).addClass(this._settings.activeTabCls);
-    var content = $(this.tab).find($(this.selectedTab).attr(CONTENT_KEY)) || null;
-    if(content){
-        $(content).show();
-    }
+        $(this.selectedTab).addClass(this._settings.activeTabCls);
+        var content = $(this.tab).find($(this.selectedTab).attr(CONTENT_KEY)) || null;
+        if(content){
+            $(content).show();
+        }
        
-    /*callback:selected*/
-    var ui= {
-        panel:content
-    };  
-    this.onSelect.call(this,{
-        type:"tabSelected"
-    },ui);
+        /*callback:selected*/
+        var ui= {
+            panel:content
+        };  
+        this.onSelect.call(this,{
+            type:"tabSelected"
+        },ui);
         
-    this.onShow.call(this,{
-        type:"tabShow"
-    },ui);
-}
+        this.onShow.call(this,{
+            type:"tabShow"
+        },ui);
+    }
     
-LpTabs.prototype.getSelectedTab = function(){
-    return {
-        el:$(this.selectedTab), 
-        tabNo :  this._settings.selected,
-        tabPanel : $($(this.selectedTab).attr(CONTENT_KEY)) 
-    }; 
-}
-LpTabs.prototype.getTab = function(){
-    return this.tab;
-}  
+    LpTabs.prototype.getSelectedTab = function(){
+        return {
+            el:$(this.selectedTab), 
+            tabNo :  this._settings.selected,
+            tabPanel : $($(this.selectedTab).attr(CONTENT_KEY)) 
+        }; 
+    }
+    LpTabs.prototype.getTab = function(){
+        return this.tab;
+    }  
     
-this._init(userConfig);
+    LpTabs.prototype.addTab = function(){ } 
+    
+    this._init(userConfig);
 
 }
 

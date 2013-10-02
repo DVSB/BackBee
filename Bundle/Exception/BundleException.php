@@ -9,5 +9,5 @@ class BundleException extends BBException {
     const START_ERROR         = 20002;
     const RUN_ERROR           = 20003;
     
-    protected $_code = self::UNKNOWN_ERROR;
+    private $_code = self::UNKNOWN_ERROR;
 }

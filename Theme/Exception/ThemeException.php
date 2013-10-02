@@ -12,5 +12,5 @@ class ThemeException extends BBException {
     const THEME_ALREADY_EXISTANT = 12005;
 
 
-    protected $_code = self::UNKNOWN_ERROR;
+    private $_code = self::UNKNOWN_ERROR;
 }

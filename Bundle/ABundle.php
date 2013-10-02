@@ -61,55 +61,30 @@ abstract class ABundle implements \Serializable {
         return $this;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return BBApplication
-     */
     public function getApplication() {
         return $this->_application;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return \Doctrine\ORM\EntityManager
-     */
     public function getEntityManager() {
         return $this->_em;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return Logger
-     */
     public function getLogger() {
         return $this->_logger;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return path
-     */
     public function getBaseDir() {
         return $this->_basedir;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return path
-     */
     public function getResourcesDir() {
         return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return integer
-     */
     public function getId() {
         return $this->_id;
     }
 
-    
     public function getRouting() {
         if (NULL === $this->_routing)
             $this->_initRouting();

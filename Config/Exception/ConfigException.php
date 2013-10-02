@@ -7,5 +7,5 @@ class ConfigException extends BBException {
 	const UNKNOWN_ERROR     = 4000;
 	const UNABLE_TO_PARSE   = 4001;
 	
-	protected $_code = self::UNKNOWN_ERROR;
+	private $_code = self::UNKNOWN_ERROR;
 }

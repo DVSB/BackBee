@@ -95,7 +95,7 @@ class String
                     'extension' => '',
                     'spacereplace' => NULL,
                     'lengthlimit' => 250
-        ));
+                ));
 
         $str = trim(preg_replace('/(?:[^\w\-\.~\+% ]+|%(?![A-Fa-f0-9]{2}))/', '', self::toASCII($str, $charset)));
         $str = preg_replace('/\s+/', NULL === $options['spacereplace'] ? '' : $options['spacereplace'], $str);
@@ -123,7 +123,7 @@ class String
                     'separators' => '/[.\'’ ]+/',
                     'spacereplace' => '-',
                     'lengthlimit' => 250
-        ));
+                ));
 
         $str = str_replace(array('%', '€', '“', '”', '…'), array('percent', 'euro', '"', '"', '...'), $str);
         $str = preg_replace($options['separators'], ' ', $str);
@@ -139,6 +139,7 @@ class String
     public static function toXmlCompliant($str, $striptags = true)
     {
         if (true === $striptags) {
+            
             $str = strip_tags($str);
         }
 
@@ -146,6 +147,15 @@ class String
         $str = str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), $str);
 
         return $str;
+    }
+
+    /**
+     * Inserts newlines before all HTML line breaks in a string 
+     * @param string $str
+     * @return string The string
+     */
+    public static function br2nl($str) {
+        return preg_replace('/<br\\s*?\/??>/i', "\r\n", $str);
     }
 
     /**

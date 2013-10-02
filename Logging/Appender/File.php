@@ -39,11 +39,6 @@ class File implements IAppender {
             fclose($this->_fhandler);
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param \BackBuilder\Logging\Formatter\IFormatter $formatter
-     * @return \BackBuilder\Logging\Appender\File
-     */
     public function setFormatter(IFormatter $formatter) {
         $this->_formatter = $formatter;
         return $this;

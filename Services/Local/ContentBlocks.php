@@ -339,8 +339,6 @@ class ContentBlocks extends AbstractServiceLocal
             $contentNode = new $contentTypeClass($contentUid);
         }
 
-        $this->isGranted('VIEW', $contentNode);
-        
         // Find a draft if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken()))
             $contentNode->setDraft($draft);
@@ -366,8 +364,6 @@ class ContentBlocks extends AbstractServiceLocal
             $contentNode = new $contentTypeClass($contentUid);
             $em->persist($contentNode);
         }
-        
-        $this->isGranted('EDIT', $contentNode);
 
         // Find a draft if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true))
@@ -411,8 +407,6 @@ class ContentBlocks extends AbstractServiceLocal
         if (null === $content = $this->em->find($content_classname, $contentUid)) {
             $content = new $content_classname($contentUid);
         }
-        
-        $this->isGranted('EDIT', $content);
 
         // Find a draft if exists
         if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
@@ -440,7 +434,7 @@ class ContentBlocks extends AbstractServiceLocal
                 $result->bb5_form->$key->bb5_uid = array();
 
                 if (NULL === $content->$key) {
-                    $newContent = $content->getAcceptedType($key);
+                    $newContent = $content->getType($key);
                     $subcontent = new $newContent();
                 }
 
@@ -497,9 +491,6 @@ class ContentBlocks extends AbstractServiceLocal
             $content = new $content_classname($contentUid);
             $this->em->persist($content);
         }
-        
-        $this->isGranted('EDIT', $content);
-        
         //json_decode($contentValues);
         $content = $this->_postContent($content, json_decode($contentValues));
 
@@ -545,8 +536,6 @@ class ContentBlocks extends AbstractServiceLocal
                 return $content;
             }
         }
-        
-        $this->isGranted('EDIT', $content);
 
         // Find a draft, checkout it if not exists
         if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
@@ -554,6 +543,7 @@ class ContentBlocks extends AbstractServiceLocal
         }
 
         $maxentries = $content->getMaxEntry();
+        /* key: title || content */
         foreach ($contentValues as $key => $attributeArray) {
             $maxentry = (true === array_key_exists($key, $maxentries)) ? $maxentries[$key] : 0;
             $newvalues = array();
@@ -569,7 +559,7 @@ class ContentBlocks extends AbstractServiceLocal
 
                 if (true === property_exists($value, 'form') && true === is_object($value->form)) {
                     if (true === property_exists($value, 'delete') && true === $value->delete) {
-                        $newContent = $content->getAcceptedType($key);
+                        $newContent = $content->getType($key);
                         $subcontent = new $newContent();
                         $this->em->persist($subcontent);
                         $newvalues[] = $subcontent;
@@ -585,12 +575,12 @@ class ContentBlocks extends AbstractServiceLocal
                         $newvalues[] = html_entity_decode($value->value, ENT_COMPAT, 'UTF-8');
                     } else {
                         $subcontent = $content->$key;
-
                         if (true === is_array($subcontent)) {
                             $subcontent = (true === array_key_exists($index, $subcontent)) ? $subcontent[$index] : null;
                         } elseif (0 < $index) {
                             $subcontent = null;
                         }
+                      
 
                         // Attach the subcontent if not
                         if (null !== $subcontent && false === $this->em->contains($subcontent)) {
@@ -599,7 +589,7 @@ class ContentBlocks extends AbstractServiceLocal
 
                         // Create a new content if null
                         if (null === $subcontent) {
-                            $newContent = $content->getAcceptedType($key);
+                            $newContent = $content->getType($key);
                             $subcontent = new $newContent();
                             $this->em->persist($subcontent);
                         }
@@ -621,7 +611,7 @@ class ContentBlocks extends AbstractServiceLocal
                     }
                 }
 
-                $content->$key = $newvalues;
+                $content->$key = $newvalues;               
             }
         }
         return $content;
@@ -629,7 +619,6 @@ class ContentBlocks extends AbstractServiceLocal
 
     /**
      * @exposed(secured=true)
-     * @codeCoverageIgnore
      */
     public function handleContentChange($contentsArr = array())
     {

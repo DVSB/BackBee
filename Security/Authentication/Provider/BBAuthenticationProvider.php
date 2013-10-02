@@ -104,15 +104,13 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         $validToken = new BBUserToken($user->getRoles());
-        $validToken->setUser($user)
-                ->setNonce($token->getNonce());
+        $validToken->setUser($user);
 
         return $validToken;
     }
 
     /**
      * Checks whether this provider supports the given token.
-     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return boolean
      */

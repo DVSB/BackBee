@@ -9,5 +9,5 @@ class RewritingException extends BBException
     const UNKNOWN_ERROR  = 15000;
     const MISSING_SCHEME = 15001;
 
-    protected $_code = self::UNKNOWN_ERROR;    
+    private $_code = self::UNKNOWN_ERROR;    
 }

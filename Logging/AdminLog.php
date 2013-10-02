@@ -55,7 +55,6 @@ class AdminLog {
 
     /**
      * Get the owner of the log
-     * @codeCoverageIgnore
      * @return UserInterface
      */
     public function getOwner() {
@@ -64,7 +63,6 @@ class AdminLog {
     
     /**
      * Set the owner of the log
-     * @codeCoverageIgnore
      * @param UserInterface $user
      * @return AdminLog
      */
@@ -75,7 +73,6 @@ class AdminLog {
 
     /**
      * Get the controller
-     * @codeCoverageIgnore
      * @return String
      */
     public function getController() {
@@ -84,7 +81,6 @@ class AdminLog {
     
     /**
      * Set the controller
-     * @codeCoverageIgnore
      * @param string $controller
      * @return AdminLog
      */
@@ -95,7 +91,6 @@ class AdminLog {
 
     /**
      * Get the action call in the controller
-     * @codeCoverageIgnore
      * @return String
      */
     public function getAction() {
@@ -104,7 +99,6 @@ class AdminLog {
     
     /**
      * Set the action call in the controller
-     * @codeCoverageIgnore
      * @param String $action
      * @return AdminLog
      */
@@ -115,7 +109,6 @@ class AdminLog {
 
     /**
      * Set the entity call in the controller
-     * @codeCoverageIgnore
      * @return Object
      */
     public function getEntity() {
@@ -124,7 +117,6 @@ class AdminLog {
     
     /**
      * Set the entity call in the controller
-     * @codeCoverageIgnore
      * @param Object $entity
      * @return AdminLog
      */
@@ -135,7 +127,6 @@ class AdminLog {
 
     /**
      * Get the datetime of the log
-     * @codeCoverageIgnore
      * @return \DateTime
      */
     public function getCreatedAt() {

@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
  * @category    BackBuilder
  * @package     BackBuilder\FrontController\Exception
  * @copyright   Lp system
- * @author      c.rouillon <rouillon.charles@gmail.com>
+ * @author      c.rouillon
  */
 class FrontControllerException extends BBException {
     const UNKNOWN_ERROR     = 6000;
@@ -20,7 +20,7 @@ class FrontControllerException extends BBException {
     const NOT_FOUND         = 6404;
     const INTERNAL_ERROR    = 6500;
 
-    protected $_code = self::UNKNOWN_ERROR;
+    private $_code = self::UNKNOWN_ERROR;
 
     /**
      * The current request handled

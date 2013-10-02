@@ -433,9 +433,9 @@ BB4.ToolsbarManager.register("editiontb",{
                     });
                 }
                 
-                //open: $.proxy(self.bbSelectorHandlers.openHandler,self,"bbLinkInternalContainer"),
-                //resizeStart: $.proxy(this.bbSelectorHandlers.resizeStartHandler,this,"bbLinkInternalContainer"),
-                //resize : $.proxy(this.bbSelectorHandlers.resizeHandler,this,"bbLinkInternalContainer")
+            //open: $.proxy(self.bbSelectorHandlers.openHandler,self,"bbLinkInternalContainer"),
+            //resizeStart: $.proxy(this.bbSelectorHandlers.resizeStartHandler,this,"bbLinkInternalContainer"),
+            //resize : $.proxy(this.bbSelectorHandlers.resizeHandler,this,"bbLinkInternalContainer")
             });
         }
       
@@ -562,21 +562,21 @@ BB4.ToolsbarManager.register("editiontb",{
             return false;
         });
         
-//        $('img[data-type="Element\\\\image"][data-library=""]').each(function () {
-//            self.mediaImageUploadFn(this)
-//        });
-//        
-//        $('p[data-type="Media\\\\image"]').each(function () {
-//            self.mediaImageUploadFn(this)
-//        });
-//        
-//        $('img[data-type="Element\\\\file"][data-library=""]').each(function () {
-//            self.mediaImageUploadFn(this)
-//        });
-//        
-//        $('p[data-type="Media\\\\file"]').each(function () {
-//            self.mediaImageUploadFn(this)
-//        });
+        //        $('img[data-type="Element\\\\image"][data-library=""]').each(function () {
+        //            self.mediaImageUploadFn(this)
+        //        });
+        //        
+        //        $('p[data-type="Media\\\\image"]').each(function () {
+        //            self.mediaImageUploadFn(this)
+        //        });
+        //        
+        //        $('img[data-type="Element\\\\file"][data-library=""]').each(function () {
+        //            self.mediaImageUploadFn(this)
+        //        });
+        //        
+        //        $('p[data-type="Media\\\\file"]').each(function () {
+        //            self.mediaImageUploadFn(this)
+        //        });
         
         $('*[data-type="Media\\\\image"]').each(function () {
             self.mediaImageUploadFn(this)
@@ -878,15 +878,31 @@ BB4.ToolsbarManager.register("editiontb",{
                                                     values[index][i].type = $(dialog).find('[id="' + value.bb5_uid[i] + '_type"]').val();
                                                     values[index][i].value = $(dialog).find('[id="' + value.bb5_uid[i] + '"]').val();
                                                     values[index][i]['delete'] = $(dialog).find('#[id="' + value.bb5_uid[i] + '_delete"]').is(':checked');
-                                                    values[index][i]['parameters'] = {};
+                                                    values[index][i]['parameters'] = [];
                                                     //console.log(values[index][i]['parameters'], 'id="' + value.bb5_uid[i] + '_container');
-                                                    if ($(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter').attr('data-param')) {
+                                                    var paramfields = $(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter');
+                                                    var key = i;
+                                                    jQuery.each(paramfields,function(i,field){
+                                                        var fieldParams = {};
+                                                        fieldParams.name = $(field).attr("data-param");
+                                                        var inputField = $(field).find("input.param");
+                                                        var value = "";
+                                                        if(inputField.length > 1){
+                                                            value = $(inputField).filter(":checked").val(); 
+                                                        }else{
+                                                            value = inputField.val();  
+                                                        }
+                                                        fieldParams.value = value;
+                                                        values[index][key]['parameters'].push(fieldParams);
+                                                    });
+                                                    
+                                                /*if ($(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter').attr('data-param')) {
                                                         values[index][i]['parameters'] = {
                                                             'name': $(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter').attr('data-param'), 
                                                             'value': $(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter input:checked.param').val()
                                                         };
                                                     //console.log(values[index][i]['parameters']);
-                                                    }
+                                                    }*/
                                                 }
                                             } else {
                                                 values[index][0] = {};
@@ -906,7 +922,7 @@ BB4.ToolsbarManager.register("editiontb",{
                                                 values[index][i] = {};
                                                 values[index][i].type = $(dialog).find('[id="' + bb5_element.bb5_uid + '_type"]').val();
                                                 values[index][i]['delete'] = $(dialog).find('[id="' + bb5_element.bb5_uid + '_delete"]').is(':checked');
-//                                              values[index][i].form = serialize(bb5_element.bb5_form);
+                                            //                                              values[index][i].form = serialize(bb5_element.bb5_form);
                                             });
                                             values[index][0].form = serialize(value.bb5_value);
                                         }
@@ -1089,7 +1105,7 @@ BB4.ToolsbarManager.register("editiontb",{
         var myself = this;
         var cpt = 0;
         $('input.typeahead').bind('keyup', function () {
-           var inputVal = $(this).val();
+            var inputVal = $(this).val();
 
             if (inputVal.length >= 2) {
               
@@ -1108,7 +1124,7 @@ BB4.ToolsbarManager.register("editiontb",{
                     return false;
                     },
                     focus:function(ev,ui){
-                        return false;
+                    return false;
                     }
                     }).data( "autocomplete" )._renderItem = function( ul, item ) {
                     return $( "<li class=\"keywordSelected\"></li>" )

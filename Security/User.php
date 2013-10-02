@@ -99,7 +99,6 @@ class User implements UserInterface
      * Stringify the user object
      *
      * @return string
-     * @codeCoverageIgnore
      */
     public function __toString()
     {

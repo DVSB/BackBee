@@ -26,10 +26,6 @@ class MetaData implements \IteratorAggregate, \Countable
         $this->_isComputed = array();
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return string
-     */
     public function getName()
     {
         return $this->_name;
@@ -45,11 +41,6 @@ class MetaData implements \IteratorAggregate, \Countable
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param string $attribute
-     * @return boolean
-     */
     public function hasAttribute($attribute)
     {
         return array_key_exists($attribute, $this->_attributes);
@@ -144,7 +135,6 @@ class MetaData implements \IteratorAggregate, \Countable
     
     /**
      * Returns the number of attributes.
-     * @codeCoverageIgnore
      * @return int
      */
     public function count()
@@ -154,7 +144,6 @@ class MetaData implements \IteratorAggregate, \Countable
 
     /**
      * Returns an iterator for attributes.
-     * @codeCoverageIgnore
      * @return \ArrayIterator
      */
     public function getIterator()

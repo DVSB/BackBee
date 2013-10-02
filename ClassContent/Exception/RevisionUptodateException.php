@@ -17,6 +17,6 @@ class RevisionUptodateException extends ClassContentException
      * The default error code
      * @var int
      */
-    protected $_code = self::REVISION_UPTODATE;
+    private $_code = self::REVISION_UPTODATE;
 
 }

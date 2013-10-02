@@ -76,7 +76,6 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Class constructor
-     * @codeCoverageIgnore
      * @param string $uid The unique identifier of the keyword
      */
     public function __construct($uid = NULL)
@@ -88,7 +87,6 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Returns the keyword
-     * @codeCoverageIgnore
      * @return string
      */
     public function getKeyWord()
@@ -98,7 +96,6 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Returns a collection of indexed AClassContent
-     * @codeCoverageIgnore
      * @return Doctrine\Common\Collections\Collection
      */
     public function getContent()
@@ -108,7 +105,6 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Sets the keyword
-     * @codeCoverageIgnore
      * @param string $keyWord
      * @return \BackBuilder\NestedNode\KeyWord
      */
@@ -120,7 +116,6 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Adds a content to the collection
-     * @codeCoverageIgnore
      * @param BackBuilder\ClassContent\AClassContent $content
      * @return \BackBuilder\NestedNode\KeyWord
      */
@@ -132,7 +127,6 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Removes a content from the collection
-     * @codeCoverageIgnore
      * @param \BackBuilder\ClassContent\AClassContent $content
      */
     public function removeContent(AClassContent $content)
@@ -198,7 +192,6 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Returns TRUE if the page can be rendered.
-     * @codeCoverageIgnore
      * @return Boolean
      */
     public function isRenderable()

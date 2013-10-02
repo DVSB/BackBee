@@ -53,7 +53,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
 
     /**
      * Returns the current bundle config
-     * @codeCoverageIgnore
+     *
      * @return \BackBuilder\Config\Config
      */
     public function getConfig()
@@ -63,7 +63,6 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
 
     /**
      * Return the bundle
-     * @codeCoverageIgnore
      * @return \BackBuilder\Bundle\ABundle
      */
     public function getBundle()
@@ -73,12 +72,17 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     
     /**
      * Returns the current renderer
-     * @codeCoverageIgnore
+     *
      * @return \BackBuilder\Renderer\ARenderer
      */
     public function getRenderer()
     {
         return $this->_renderer;
+    }
+
+    protected function rendererOverloaded()
+    {
+        $this->_renderer;
     }
 
     /**

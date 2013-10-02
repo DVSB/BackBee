@@ -67,7 +67,6 @@ class ExecutionContext implements \Symfony\Component\Validator\ExecutionContextI
     }
 
     /**
-     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function getViolations()
@@ -75,52 +74,15 @@ class ExecutionContext implements \Symfony\Component\Validator\ExecutionContextI
         return $this->globalContext;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * {@inheritdoc}
-     */
     public function addViolationAt($subPath, $message, array $params = array(), $invalidValue = null, $pluralization = null, $code = null){}
-    /**
-     * @codeCoverageIgnore
-     */
     public function getRoot(){}
-    /**
-     * @codeCoverageIgnore
-     * {@inheritdoc}
-     */
     public function getPropertyPath($subPath = ''){}
-    /**
-     * @codeCoverageIgnore
-     */
     public function getClassName(){}
-    /**
-     * @codeCoverageIgnore
-     */
     public function getPropertyName(){}
-    /**
-     * @codeCoverageIgnore
-     */
     public function getValue(){}
-    /**
-     * @codeCoverageIgnore
-     */
     public function getGroup(){}
-    /**
-     * @codeCoverageIgnore
-     */
     public function getMetadata(){}
-    /**
-     * @codeCoverageIgnore
-     * {@inheritdoc}
-     */
     public function validate($value, $subPath = '', $groups = null, $traverse = false, $deep = false){}
-    /**
-     * @codeCoverageIgnore
-     * {@inheritdoc}
-     */
     public function validateValue($value, $constraints, $subPath = '', $groups = null){}
-    /**
-     * @codeCoverageIgnore
-     */
     public function getMetadataFactory(){}
 }

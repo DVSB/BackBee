@@ -17,6 +17,6 @@ class UnknownMethodException extends ClassContentException
      * The default error code
      * @var int
      */
-    protected $_code = self::UNKNOWN_METHOD;
+    private $_code = self::UNKNOWN_METHOD;
 
 }

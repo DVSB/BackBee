@@ -17,6 +17,6 @@ class RevisionMissingException extends ClassContentException
      * The default error code
      * @var int
      */
-    protected $_code = self::REVISION_MISSING;
+    private $_code = self::REVISION_MISSING;
 
 }

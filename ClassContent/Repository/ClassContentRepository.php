@@ -646,16 +646,28 @@ class ClassContentRepository extends EntityRepository
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
     {
-        if (true === property_exists($value, 'parameters') && true === is_object($value->parameters)) {
-            if (true === property_exists($value->parameters, 'name') && true === property_exists($value->parameters, 'value')) {
-                $content->setParam($value->parameters->name, $value->parameters->value);
+
+        /** enable form to edit more than one parameter */
+        if (true === (property_exists($value, "parameters"))) {
+            $parameters = (is_object($value->parameters)) ? array($value->parameters) : $value->parameters;
+            if (is_array($parameters) && !empty($parameters)) {
+                foreach ($parameters as $param) {
+                    if (is_object($param)) {
+                        if (true === property_exists($param, 'name') && true === property_exists($param, 'value')) {
+                            $content->setParam($param->name, $param->value);
+                        }
+                    }
+                }
             }
         }
-
+        /* if (true === property_exists($value, 'parameters') && true === is_object($value->parameters)) {
+          if (true === property_exists($value->parameters, 'name') && true === property_exists($value->parameters, 'value')) {
+          $content->setParam($value->parameters->name, $value->parameters->value);
+          }
+          } */
         try {
             $content->value = $this->formatPost($content, $value);
             $content->value = html_entity_decode($content->value, ENT_COMPAT, 'UTF-8');
-            
         } catch (\Exception $e) {
             // Nothing to do
         }
@@ -669,9 +681,10 @@ class ClassContentRepository extends EntityRepository
      * @param stdClass $value
      * @return string
      */
-    public function formatPost(AClassContent $content, $value) {
+    public function formatPost(AClassContent $content, $value)
+    {
         $val = $value->value;
-        
+
         switch (get_class($content)) {
             case 'BackBuilder\ClassContent\Element\text':
                 //nettoyage des images => div aloha
@@ -683,10 +696,10 @@ class ClassContentRepository extends EntityRepository
                 }
                 break;
         }
-        
+
         return $val;
     }
-    
+
     /**
      * Do stuf removing content from the content editing form
      * @param \BackBuilder\ClassContent\AClassContent $content

@@ -92,7 +92,8 @@ $.loadScript = function(url, options) {
             maxFileSize: 10,
             mediaFileSize:{
                 pdf: 15,
-                image: 10
+                image: 10,
+                flash: 15
             }
         },
         

@@ -32,7 +32,6 @@ bb.ContentWrapper = (function($,global){
     
     /*Get contentBy ref*/
     var _getContentByRef = function(ref){
-        
         return _contentsCollection.get(ref);
     }
     

@@ -1361,9 +1361,7 @@ FormBuilder.createSubformRenderer = function(paramName,paramsOption,mainFormId){
         var cleanParams = {};
         cleanParams[paramName] = paramsWithArr;
     }
-    else{
-    
-    }
+   
     
     /*paramsOption*/
     var fieldInfos = {};

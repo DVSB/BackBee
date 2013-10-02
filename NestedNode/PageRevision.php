@@ -73,100 +73,51 @@ class PageRevision {
         $this->_version = PageRevision::VERSION_DRAFT;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param \BackBuilder\Security\User $user
-     * @return \BackBuilder\NestedNode\PageRevision
-     */
     public function setUser(\BackBuilder\Security\User $user) {
         $this->_user = $user;
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param \BackBuilder\NestedNode\Page $page
-     * @return \BackBuilder\NestedNode\PageRevision
-     */
     public function setPage(\BackBuilder\NestedNode\Page $page) {
         $this->_page = $page;
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param type $content
-     * @return \BackBuilder\NestedNode\PageRevision
-     */
     public function setContent($content) {
         $this->_content = $content;
         return $this;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param type $date
-     * @return \BackBuilder\NestedNode\PageRevision
-     */
     public function setDate($date) {
         $this->_date = $date;
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param type $version
-     * @return \BackBuilder\NestedNode\PageRevision
-     */
     public function setVersion($version) {
         $this->_version = $version;
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getId() {
         return $this->_id;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getUser() {
         return $this->_user;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getPage() {
         return $this->_page;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getContent() {
         return $this->_content;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getDate() {
         return $this->_date;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getVersion() {
         return $this->_version;
     }
