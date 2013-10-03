@@ -2,7 +2,76 @@ var bb = bb || {};
 bb.contentPluginsManager = (function(){
     var pluginsContainer = {}; 
     var pluginsInstanceContainer = {}; 
-    var _settings = { pluginPath:"/js/bb5contentplugins/" };           
+    var _settings = {
+        pluginPath: "/js/bb5contentplugins/"
+    }; 
+    var cache = {};
+    var _selectedContent = null;
+       
+    /* move to an other class */
+    var _watchContent = function(){
+        $(document).bind("bbcontent:clicked",function(e,data){
+            //use cache
+            //if(_selectedContent == data.content) return false;
+            _selectedContent = data.content;
+            var contentActions = _getPluginActions(_selectedContent);
+            if(jQuery.isArray(contentActions)){
+                /* ask the contentEdition  */
+                var cm = bb.ManagersContainer.getInstance().getManager("ContentEditionManager");
+                if(cm){
+                   cm.handlePluginsActions(contentActions); 
+                }
+              /*  var actionBtn = _buildActionButton(contentActions);
+                $(".bb5-content-actions").prepend($(actionBtn)); //handle condition on btns
+                */
+            }
+        }); 
+    }
+    
+    var _buildActionButton = function(actions){
+        var actionsFrag = document.createDocumentFragment();
+        $.each(actions,function(i,actionInfos){
+            var btnClass = "bb5-button #cls# bb5-button-square bb5-invert";
+            btnClass = btnClass.replace("#cls#",actionInfos.icoCls);
+            var btn = $("<button/>").clone();
+            $(btn).attr("title",actionInfos.label);
+            $(btn).bind('click',actionInfos.command.execute);
+            $(btn).addClass(btnClass);
+            actionsFrag.appendChild($(btn).get(0)); 
+        });
+        return actionsFrag;
+    }
+    
+    var _getPluginActions = function(content){
+        var contentPlugins = content.get("contentplugins");
+        if(!(typeof contentPlugins=="string")) return;
+        contentPlugins = contentPlugins.split(",");
+        if(!jQuery.isArray(contentPlugins))return;
+        var actions = []; 
+        jQuery.each(contentPlugins,function(i,pluginName){
+            bb.Utils.ScriptLoader.loadScript({
+                scriptname:_settings.pluginPath+pluginName+".plugin.js"
+            });
+            try{
+                var plugin = bb.contentPluginsManager.getInstanceByName(pluginName); 
+                if(typeof plugin =="object"){
+                    var pluginsActions = plugin.setNode(content).getActions();
+                    if($.isPlainObject(pluginsActions)){
+                        jQuery.each(pluginsActions, function(i,pluginAction){
+                            actions.push(pluginAction);
+                        });
+                    }
+                }
+            }catch(e){
+               
+            }
+        });
+        /* instance */
+        return actions; 
+        
+    } 
+    
+    var _
     /* Abstract and default method */
     var _checkParameter = function(actionParams){
         var isValid = true;
@@ -22,7 +91,8 @@ bb.contentPluginsManager = (function(){
         } 
         this.init(settings); 
     }
-                
+    
+    /* plugins abstract */
     var PluginAbstract = {
                    
         /*onCreate enable us to declare default property */
@@ -58,7 +128,6 @@ bb.contentPluginsManager = (function(){
         },
                     
         getActions: function(){
-            alert("this it");
             if(!this.canApplyOn(this.node)) return;
             return this.actions;
         },
@@ -127,14 +196,18 @@ bb.contentPluginsManager = (function(){
         /* save plugin ref */
         pluginsContainer[pluginsName] = _mock;
     }
-                
+        
+    /* retrieve the plugin */
     var _getPlugin = function(name){
-        var pluginsIntance = pluginsInstanceContainer[name] || false;
-        if(!pluginsIntance){
-            pluginsIntance = new pluginsContainer[name];
-            pluginsInstanceContainer[name] = pluginsIntance;
+        var pluginsInstance = pluginsInstanceContainer[name] || false;
+        if(!pluginsInstance){
+            if(typeof pluginsContainer[name]!= "undefined"){
+                pluginsInstance = new pluginsContainer[name];
+                pluginsInstanceContainer[name] = pluginsInstance;
+            }
         }
-        return pluginsIntance;
+        if(!pluginsInstance) throw "NoPluginError";
+        return pluginsInstance;
     }
                 
     var _getAllPlugins = function(){
@@ -145,11 +218,17 @@ bb.contentPluginsManager = (function(){
     return {
         registerPlugins : _registerPlugins,
         getInstanceByName: _getPlugin,
-        getPlugins: _getAllPlugins
+        getPlugins: _getAllPlugins,
+        watchContents : _watchContent
     }
 })(window);
 
-/*Plugin contentManager */
+
+
+/**
+ *A simple object to apply 
+ *
+ **/
 var ContentsManager = function(){
     this.init = function(){
         this.contentPlugins = {};  
@@ -201,17 +280,10 @@ var ContentsManager = function(){
         }
         return actionsFrag;
     }
-               
-    this.displayContentActions = function(actions){}
-    /*addContent*/
-    this.addContent = function(content){
-        this.contents.push(content); 
-    }
-                
-    /*how to delay to*/
-    this.registerPlugins = function(name,plugin){
-        this.contentPlugins[name] = new plugin;
-    }
     this.init();
 }
-var content = new ContentsManager();
+$(function(){
+    bb.contentPluginsManager.watchContents();
+});
+
+/**/
