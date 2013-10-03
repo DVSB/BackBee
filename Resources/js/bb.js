@@ -86,7 +86,7 @@ $.loadScript = function(url, options) {
             'js/bb.FormBuilder.plugins.js',
             'js/FrontApplication.js', 
             'js/i18n/fr.js',
-            'js/min/bb.notify.min.js'
+            'js/min/bb.Notify.js'
         ],
         
         config: {
