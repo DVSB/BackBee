@@ -23,7 +23,6 @@
             content = content[0];
             content.innerHTML = text;
             wrapper.appendChild(box);
-            wrapper.className = 'annimated';
             setTimeout(this.clearNotification, 5000, wrapper, box);
         },
 
