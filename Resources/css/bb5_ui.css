@@ -1222,7 +1222,7 @@ Twitter //zindex causing trouble with bb5 contextual menu
 #bb5-site-wrapper .twtr-timeline {z-index:auto;}
 
 /* bb notify css start */
-#bb-box-wrapper{position:fixed;right:20px;bottom:0}
+#bb-box-wrapper{position:fixed;right:20px;bottom:0;z-index:750000}
 #bb-box-wrapper .bb-box-notify{width:360px;position:relative;margin:0 auto 20px;padding:25px 15px;text-align:left;border-radius:5px;box-shadow:0 1px 1px rgba(0,0,0,.1),inset 0 1px 0 rgba(255,255,255,.6);opacity:0;-ms-filter:"alpha(Opacity=0)";filter:alpha(opacity=0);cursor:default;display:none}
 #bb-box-wrapper .bb-box-notify p{font-weight:700;font-size:16px;margin:0;padding:0 10px 0 60px;text-shadow:0 1px 1px rgba(255,255,255,.6)}
 #bb-box-wrapper .bb-box-notify p:before{text-align:center;border:3px solid rgba(255,255,255,1);margin-top:-17px;top:50%;left:20px;width:30px;content:'i';font-size:30px;color:rgba(255,255,255,1);position:absolute;height:30px;line-height:30px;border-radius:50%;text-shadow:1px 1px 1px rgba(0,0,0,.1);box-shadow:1px 1px 1px rgba(0,0,0,.1)}
