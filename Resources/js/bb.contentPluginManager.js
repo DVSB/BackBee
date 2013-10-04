@@ -3,7 +3,10 @@ bb.contentPluginsManager = (function(){
     var pluginsContainer = {}; 
     var pluginsInstanceContainer = {}; 
     var _settings = {
-        pluginPath: "/js/bb5contentplugins/"
+        pluginPath: "/js/bb5contentplugins/",
+        actionContainerClass: ".bb5-content-actions",
+        pluginActionCls: "plugin-action"
+
     }; 
     var cache = {};
     var _selectedContent = null;
@@ -11,24 +14,29 @@ bb.contentPluginsManager = (function(){
     /* move to an other class */
     var _watchContent = function(){
         $(document).bind("bbcontent:clicked",function(e,data){
-            //use cache
+            /* remove previous action here */
             //if(_selectedContent == data.content) return false;
             _selectedContent = data.content;
             var contentActions = _getPluginActions(_selectedContent);
             if(jQuery.isArray(contentActions)){
-                /* ask the contentEdition  */
+                /* 1 ask the contentEdition  */
                 var cm = bb.ManagersContainer.getInstance().getManager("ContentEditionManager");
                 if(cm){
-                   cm.handlePluginsActions(contentActions); 
+                    cm.handlePluginsActions(contentActions); 
                 }
-              /*  var actionBtn = _buildActionButton(contentActions);
-                $(".bb5-content-actions").prepend($(actionBtn)); //handle condition on btns
-                */
+            /*var actionBtn = _buildPluginsButtons(contentActions);
+                console.log(actionBtn);
+                $(".bb5-content-actions").prepend($(actionBtn)); //handle condition on btns*/
+                
             }
         }); 
     }
     
-    var _buildActionButton = function(actions){
+    var _cleanpluginsActions = function(){
+       $(_settings.pluginActionCls).remove(); 
+    } 
+    
+    var _buildPluginsButtons = function(actions){
         var actionsFrag = document.createDocumentFragment();
         $.each(actions,function(i,actionInfos){
             var btnClass = "bb5-button #cls# bb5-button-square bb5-invert";
@@ -37,6 +45,7 @@ bb.contentPluginsManager = (function(){
             $(btn).attr("title",actionInfos.label);
             $(btn).bind('click',actionInfos.command.execute);
             $(btn).addClass(btnClass);
+            $(btn).addClass(_settings.pluginActionCls);
             actionsFrag.appendChild($(btn).get(0)); 
         });
         return actionsFrag;
