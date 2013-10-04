@@ -5,6 +5,8 @@ namespace BackBuilder\Site;
 use Symfony\Component\Security\Core\User\UserInterface,
     Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+
 
 /**
  * UserPreferences object in BackBuilder 5
