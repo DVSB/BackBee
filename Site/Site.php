@@ -98,8 +98,10 @@ class Site extends AObjectIdentifiable implements IJson
         $this->_layouts = new ArrayCollection();
         $this->_metadata = new ArrayCollection();
 
-        if (true === is_array($options)
-                && true === array_key_exists('label', $options)) {
+        if (
+            true === is_array($options) && 
+            true === array_key_exists('label', $options)
+        ) {
             $this->setLabel($options['label']);
         }
     }
@@ -146,6 +148,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the collection of layouts available for this website.
+     * @codeCoverageIgnore
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getLayouts()
