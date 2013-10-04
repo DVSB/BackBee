@@ -18,7 +18,8 @@ use Symfony\Component\Security\Core\User\UserInterface,
  * @Entity(repositoryClass="BackBuilder\Site\Repository\UserPreferencesRepository")
  * @Table(name="user_preferences")
  */
-class UserPreferences {
+class UserPreferences 
+{
     /**
      * Unique identifier of the revision
      * @var string
@@ -48,11 +49,13 @@ class UserPreferences {
      * @param string $uid The unique identifier of the revision
      * @param TokenInterface $token The current auth token
      */
-    public function __construct($uid = NULL, $token = NULL) {
+    public function __construct($uid = NULL, $token = NULL)
+    {
         $this->_uid = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
 
-        if ($token instanceof TokenInterface)
+        if ($token instanceof TokenInterface) {
             $this->_owner = UserSecurityIdentity::fromToken($token);
+        }
     }
     
     /**
@@ -60,7 +63,8 @@ class UserPreferences {
      *
      * @return String
      */
-    public function getUid() {
+    public function getUid()
+    {
         return $this->_uid;
     }
 
@@ -69,7 +73,8 @@ class UserPreferences {
      *
      * @return Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
      */
-    public function getOwner() {
+    public function getOwner() 
+    {
         return $this->_owner;
     }
 
@@ -78,7 +83,8 @@ class UserPreferences {
      *
      * @return text
      */
-    public function getPreferences() {
+    public function getPreferences() 
+    {
         return $this->_preferences;
     }
 
@@ -88,7 +94,8 @@ class UserPreferences {
      * @param string $uid
      * @return \BackBuilder\Site\UserPreferences
      */
-    public function setUid($uid) {
+    public function setUid($uid) 
+    {
         $this->_uid = $uid;
         return $this;
     }
@@ -99,7 +106,8 @@ class UserPreferences {
      * @param \Symfony\Component\Security\Core\User\UserInterface $user
      * @return \BackBuilder\Site\UserPreferences
      */
-    public function setOwner(UserInterface $user) {
+    public function setOwner(UserInterface $user) 
+    {
         $this->_owner = UserSecurityIdentity::fromAccount($user);
         return $this;
     }
@@ -110,7 +118,8 @@ class UserPreferences {
      * @param mixed $preferences
      * @return \BackBuilder\Site\UserPreferences
      */
-    public function setPreferences($preferences) {
+    public function setPreferences($preferences) 
+    {
         if (is_array($preferences) || is_object($preferences)) {
             $preferences = json_encode($preferences);
         }
