@@ -47,6 +47,33 @@ class Page extends AbstractServiceLocal
     }
 
     /**
+     * Returns the available workflow states for NestedNode\Page and Site\Layout
+     * @param string $layout_uid
+     * @return array
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $layout_uid is invalid
+     * @exposed(secured=true)
+     */
+    public function getWorkflowStatus($layout_uid)
+    {
+        if (null === $layout = $this->getEntityManager()->find('BackBuilder\Site\Layout', strval($layout_uid))) {
+            throw new InvalidArgumentException(sprintf('None layout exists with uid `%s`.', $layout_uid));
+        }
+
+        $this->isGranted('VIEW', $layout);
+
+        $layout_states = $this->getEntityManager()
+                ->getRepository('BackBuilder\WorkFlow\State')
+                ->getWorkflowStatesForLayout($layout);
+
+        $result = array();
+        foreach ($layout_states as $state) {
+            $result[$state->getCode()] = $state->toArray();
+        }
+
+        return $result;
+    }
+
+    /**
      * Get the page info
      * @param string $page_uid The unique identifier of the page
      * @return \stdClass
@@ -114,6 +141,21 @@ class Page extends AbstractServiceLocal
 
             if ('/' === $redirect = $this->getApplication()->getRenderer()->getRelativeUrl($object->redirect)) {
                 $object->redirect = null;
+            }
+        }
+
+        if (null === $object->workflow_state) {
+            $page->setWorkflowState(null);
+        } else {
+            $layout_states = $this->getEntityManager()
+                    ->getRepository('BackBuilder\WorkFlow\State')
+                    ->getWorkflowStatesForLayout($page->getLayout());
+
+            foreach ($layout_states as $state) {
+                if ($state->getCode() === $object->workflow_state) {
+                    $object->workflow_state = $state;
+                    break;
+                }
             }
         }
 
