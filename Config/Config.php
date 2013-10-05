@@ -104,7 +104,11 @@ class Config {
      * @param string $section
      * @return array|NULL
      */
-    public function getSection($section) {
+    public function getSection($section = null) {
+        if (null === $section) {
+            return $this->_parameters;
+        }
+        
         return (isset($this->_parameters[$section])) ? $this->_parameters[$section] : NULL;
     }
     
