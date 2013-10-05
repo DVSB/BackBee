@@ -1,12 +1,17 @@
 <?php
+
 namespace BackBuilder\Bundle;
 
 use BackBuilder\BBApplication,
     BackBuilder\Config\Config,
     BackBuilder\Routing\RouteCollection as Routing,
-    BackBuilder\Logging\Logger;
+    BackBuilder\Logging\Logger,
+    BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
-abstract class ABundle implements \Serializable {
+abstract class ABundle implements IObjectIdentifiable, \Serializable
+{
+
     private $_id;
     private $_application;
     private $_em;
@@ -15,42 +20,46 @@ abstract class ABundle implements \Serializable {
     private $_config;
     private $_properties;
     private $_routing;
-    
-    public function __call($method, $args) {
+
+    public function __call($method, $args)
+    {
         if (NULL !== $this->getLogger()) {
             if (true === is_array($args) && 0 < count($args)) {
                 $args[0] = sprintf('[%s] %s', $this->getId(), $args[0]);
             }
-            
+
             call_user_func_array(array($this->getLogger(), $method), $args);
         }
     }
-    
-    public function __construct(BBApplication $application, Logger $logger = null) {
+
+    public function __construct(BBApplication $application, Logger $logger = null)
+    {
         $this->_application = $application;
-        
+
         // To do : check for a specific EntityManager
         $this->_em = $this->_application->getEntityManager();
-        
+
         $r = new \ReflectionObject($this);
         $this->_basedir = dirname($r->getFileName());
         $this->_id = basename($this->_basedir);
-        
+
         $this->_logger = $logger;
         if (NULL === $this->_logger)
             $this->_logger = $this->_application->getLogging();
     }
-    
-    private function _initConfig($configdir = null) {
+
+    private function _initConfig($configdir = null)
+    {
         if (is_null($configdir))
             $configdir = $this->getResourcesDir();
 
         $this->_config = new Config($configdir);
-        
+
         return $this;
     }
 
-    private function _initRouting() {
+    private function _initRouting()
+    {
         $routing = $this->getConfig()->getRoutingConfig();
         if (is_null($routing))
             $this->_routing = false;
@@ -60,57 +69,63 @@ abstract class ABundle implements \Serializable {
 
         return $this;
     }
-    
+
     /**
      * @codeCoverageIgnore
      * @return BBApplication
      */
-    public function getApplication() {
+    public function getApplication()
+    {
         return $this->_application;
     }
-    
+
     /**
      * @codeCoverageIgnore
      * @return \Doctrine\ORM\EntityManager
      */
-    public function getEntityManager() {
+    public function getEntityManager()
+    {
         return $this->_em;
     }
-    
+
     /**
      * @codeCoverageIgnore
      * @return Logger
      */
-    public function getLogger() {
+    public function getLogger()
+    {
         return $this->_logger;
     }
-    
+
     /**
      * @codeCoverageIgnore
      * @return path
      */
-    public function getBaseDir() {
+    public function getBaseDir()
+    {
         return $this->_basedir;
     }
-    
+
     /**
      * @codeCoverageIgnore
      * @return path
      */
-    public function getResourcesDir() {
+    public function getResourcesDir()
+    {
         return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
     }
-    
+
     /**
      * @codeCoverageIgnore
      * @return integer
      */
-    public function getId() {
+    public function getId()
+    {
         return $this->_id;
     }
 
-    
-    public function getRouting() {
+    public function getRouting()
+    {
         if (NULL === $this->_routing)
             $this->_initRouting();
 
@@ -122,56 +137,117 @@ abstract class ABundle implements \Serializable {
      * @access public
      * @return Request
      */
-    public function getRequest() {
+    public function getRequest()
+    {
         if (NULL === $this->_request)
             $this->_request = Request::createFromGlobals();
 
         return $this->_request;
     }
 
-    public function getConfig() {
+    public function getConfig()
+    {
         if (NULL === $this->_config)
             $this->_initConfig();
-        
+
         return $this->_config;
     }
-    
-    public function getProperty($key = null) {
+
+    public function getProperty($key = null)
+    {
         if (NULL === $this->_properties) {
             $this->_properties = $this->getConfig()->getSection('bundle');
             if (NULL === $this->_properties)
                 $this->_properties = array();
         }
-        
+
         if (NULL === $key)
             return $this->_properties;
-        
+
         if (array_key_exists($key, $this->_properties))
             return $this->_properties[$key];
-        
+
         return NULL;
     }
-    
-    public function setLogger(Logger $logger) {
+
+    public function setLogger(Logger $logger)
+    {
         $this->_logger = $logger;
         return $this;
     }
-    
-    public function serialize() {
+
+    public function serialize()
+    {
         $obj = new \stdClass();
         $obj->id = $this->getId();
-        
-        foreach($this->getProperty() as $key => $value)
+
+        foreach ($this->getProperty() as $key => $value)
             $obj->$key = $value;
-        
+
         return json_encode($obj);
     }
-    
-    public function unserialize($serialized) {
+
+    public function unserialize($serialized)
+    {
         
     }
-    
+
     abstract function init();
+
     abstract function start();
+
     abstract function stop();
+
+    /*     * **************************************************************** */
+    /*                                                                        */
+    /*               Implementation of IObjectIdentifiable                    */
+    /*                                                                        */
+    /*     * **************************************************************** */
+
+    /**
+     * Returns a unique identifier for this domain object.
+     * @return string
+     * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
+     * @codeCoverageIgnore
+     */
+    public function getObjectIdentifier()
+    {
+        return $this->getType() . '(' . $this->getIdentifier() . ')';
+    }
+
+    /**
+     * Returns the unique identifier for this object. 
+     * @return string
+     * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
+     * @codeCoverageIgnore
+     */
+    public function getIdentifier()
+    {
+        return $this->getId();
+    }
+
+    /**
+     * Returns the PHP class name of the object.
+     * @return string
+     * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
+     * @codeCoverageIgnore
+     */
+    public function getType()
+    {
+        return ClassUtils::getRealClass($this);
+    }
+
+    /**
+     * Checks for an explicit objects equality.
+     * @param \BackBuilder\Security\Acl\Domain\IObjectIdentifiable $identity
+     * @return Boolean
+     * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
+     * @codeCoverageIgnore
+     */
+    public function equals(IObjectIdentifiable $identity)
+    {
+        return ($this->getType() === $identity->getType()
+                && $this->getIdentifier() === $identity->getIdentifier());
+    }
+
 }
