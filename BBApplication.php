@@ -144,9 +144,15 @@ class BBApplication
     {
         if (false === $this->getContainer()->has('mailer')) {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
-                $transport = \Swift_SmtpTransport::newInstance($mailer_config['smtp'], $mailer_config['port']);
+                $smtp = (is_array($mailer_config['smtp'])) ? reset($mailer_config['smtp']) : $mailer_config['smtp'];
+                $port = (is_array($mailer_config['port'])) ? reset($mailer_config['port']) : $mailer_config['port'];
+                    
+                $transport = \Swift_SmtpTransport::newInstance($smtp, $port);
                 if (array_key_exists('username', $mailer_config) && array_key_exists('password', $mailer_config)) {
-                    $transport->setUsername($mailer_config['username'])->setPassword($mailer_config['password']);
+                    $username = (is_array($mailer_config['username'])) ? reset($mailer_config['username']) : $mailer_config['username'];
+                    $password = (is_array($mailer_config['password'])) ? reset($mailer_config['password']) : $mailer_config['password'];
+                    
+                    $transport->setUsername($username)->setPassword($password);
                 }
                 $this->getContainer()->set('mailer', \Swift_Mailer::newInstance($transport));
             }

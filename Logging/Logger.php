@@ -366,6 +366,9 @@ class Logger implements LoggerInterface, SQLLogger
             $mailerconfig = $application->getConfig()->getMailerConfig();
             $from = isset($mailerconfig['from']) ? $mailerconfig['from'] : 'no-reply@anonymous.com';
             $from_name = isset($mailerconfig['from_name']) ? $mailerconfig['from_name'] : null;
+            
+            if (is_array($from)) $from = reset($from);
+            if (is_array($from_name)) $from = reset($from_name);
 
             $mail = \Swift_Message::newInstance($subject, $message, 'text/html', 'utf-8');
             $mail->addFrom($from, $from_name);
