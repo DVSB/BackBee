@@ -17,11 +17,11 @@ use Symfony\Component\Yaml\Exception\ParseException,
  */
 class Config
 {
-
     /**
      * Default config file to look for
      * @var string
      */
+
     const CONFIG_FILE = 'config.yml';
 
     /**
@@ -92,13 +92,12 @@ class Config
     private function _loadFromCache($basedir)
     {
         if (null !== $this->_cache) {
-            if (false !== $parameters = $this->_cache->load($this->_getCacheId($basedir), false, $this->_getCacheExpire())) {
+            if (false !== $parameters = $this->_cache->load($this->_getCacheId($basedir), false, $this->_getCacheExpire($basedir))) {
                 $parameters = @unserialize($parameters);
                 if (true === is_array($parameters)) {
-                    $this->_parameters = $parameters;
-//                    foreach ($parameters as $section => $data) {
-//                        $this->setSection($section, $data, true);
-//                    }
+                    foreach ($parameters as $section => $data) {
+                        $this->setSection($section, $data, true);
+                    }
 
                     return true;
                 }
@@ -123,17 +122,28 @@ class Config
     }
 
     /**
-     * Returns a cache expiration date time
-     * @param int $timelife The time life in seconds, 3600 by default
+     * Returns a cache expiration date time (the newer modification date of files)
+     * @param string $basedir The base directory
      * @return \DateTime
      */
-    private function _getCacheExpire($timelife = 3600)
+    private function _getCacheExpire($basedir)
     {
-        $expire = new \DateTime();
-        $expire->setTimestamp(time() - $timelife);
-        return $expire;
+        $expire = 0;
+        foreach($this->_getYmlFiles($basedir) as $file) {
+            $stat = @stat($file);
+            if ($expire < $stat['mtime']) {
+                $expire = $stat['mtime'];
+            }
+        }
+        
+        $date = new \DateTime();
+        if (0 !== $expire) {
+            $date->setTimestamp($expire);
+        }
+        
+        return $date;
     }
-    
+
     /**
      * Returns a cache id for the current instance
      * @param string $basedir The base directory
@@ -145,18 +155,30 @@ class Config
     }
 
     /**
+     * Returns an array of YAML files in the directory
+     * @param string $basedir
+     * @param string $basedir The base directory
+     * @return array
+     * @throws \BackBuilder\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
+     */
+    private function _getYmlFiles($basedir)
+    {
+        if (false === is_readable($basedir)) {
+            throw new Exception\InvalidBaseDirException(sprintf('Cannot read the directory %s', $basedir));
+        }
+
+        $pattern = $basedir . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]';
+        return glob($pattern, GLOB_BRACE);
+    }
+
+    /**
      * Loads the config files from the base directory
      * @param string $basedir The base directory
      * @throws \BackBuilder\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
     private function _loadFromBaseDir($basedir)
     {
-        if (!is_readable($basedir)) {
-            throw new Exception\InvalidBaseDirException(sprintf('Cannot read the directory %s', $basedir));
-        }
-
-        $pattern = $basedir . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]';
-        foreach (glob($pattern, GLOB_BRACE) as $filename) {
+        foreach ($this->_getYmlFiles($basedir) as $filename) {
             $this->_loadFromFile($filename);
         }
     }
