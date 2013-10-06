@@ -29,13 +29,15 @@ class MetaDataBag implements \IteratorAggregate, \Countable
                     }
                     
                     if (true === array_key_exists('default', $attrvalue)) {
-                        $metadata->setAttribute($attrname, $attrvalue['default'], $content);
+                        $value = (is_array($attrvalue['default'])) ? reset($attrvalue['default']) : $attrvalue['default'];
+                        $metadata->setAttribute($attrname, $value, $content);
                     }
                     
                     if (null !== $page && true === array_key_exists('layout', $attrvalue)) {
                         $layout_uid = $page->getLayout()->getUid();
                         if (true === array_key_exists($layout_uid, $attrvalue['layout'])) {
-                            $metadata->setAttribute($attrname, $attrvalue['layout'][$layout_uid], $content);
+                        $value = (is_array($attrvalue['layout'][$layout_uid])) ? reset($attrvalue['layout'][$layout_uid]) : $attrvalue['layout'][$layout_uid];
+                            $metadata->setAttribute($attrname, $value, $content);
                         }
                     }
                 }

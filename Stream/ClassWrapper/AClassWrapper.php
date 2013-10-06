@@ -140,7 +140,7 @@ class <classname> extends <extends> {
         }
 
         if (NULL !== $this->_autoloader && NULL !== $this->_autoloader->getApplication()) {
-            $this->_cache = new Cache($this->_autoloader->getApplication());
+            $this->_cache = $this->_autoloader->getApplication()->getBootstrapCache();
         }
     }
 

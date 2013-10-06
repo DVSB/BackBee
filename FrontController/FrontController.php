@@ -587,7 +587,7 @@ class FrontController implements HttpKernelInterface
             }
             if (count($contents)) {
                 /* save content here */
-                $cache = new Cache($this->_application);
+                $cache = $this->_application->getBootstrapCache();
                 $cache->save(Category::getCacheKey(), json_encode($contents));
                 $result = true;
             }

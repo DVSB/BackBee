@@ -24,7 +24,7 @@ class ContentBlocks extends AbstractServiceLocal
     public function getContentsByCategory($name = "tous")
     {
         $contents = array();
-        $cache = new Cache($this->bbapp);
+        $cache = $this->bbapp->getBootstrapCache();
         $cachedClassContents = $cache->load(Category::getCacheKey(), true);
 
         if ($name == "tous") {

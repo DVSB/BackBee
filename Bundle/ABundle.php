@@ -53,7 +53,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         if (is_null($configdir))
             $configdir = $this->getResourcesDir();
 
-        $this->_config = new Config($configdir);
+        $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
 
         return $this;
     }

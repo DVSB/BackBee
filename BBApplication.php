@@ -173,7 +173,7 @@ class BBApplication
         if (is_null($configdir))
             $configdir = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
 
-        $this->getContainer()->set('config', new Config($configdir));
+        $this->getContainer()->set('config', new Config($configdir, $this->getBootstrapCache()));
 
         return $this;
     }
@@ -438,6 +438,19 @@ class BBApplication
         return $this->getContainer()->get('cache-control');
     }
 
+    /**
+     * 
+     * @return \BackBuilder\Cache\ACache
+     */
+    public function getBootstrapCache()
+    {
+        if (!$this->getContainer()->has('cache.bootstrap')) {
+            $this->getContainer()->set('cache.bootstrap', new Cache\File\Cache($this));
+        }
+
+        return $this->getContainer()->get('cache.bootstrap');        
+    }
+    
     public function getCacheDir()
     {
         if (NULL === $this->_cachedir) {
