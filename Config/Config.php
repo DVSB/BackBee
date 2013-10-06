@@ -17,11 +17,11 @@ use Symfony\Component\Yaml\Exception\ParseException,
  */
 class Config
 {
+
     /**
      * Default config file to look for
      * @var string
      */
-
     const CONFIG_FILE = 'config.yml';
 
     /**
@@ -230,7 +230,7 @@ class Config
     public function setSection($section, array $config, $overwrite = false)
     {
         if (false === $overwrite && array_key_exists($section, $this->_parameters)) {
-            $this->_parameters[$section] = array_merge_recursive($this->_parameters[$section], $config);
+            $this->_parameters[$section] = array_replace_recursive($this->_parameters[$section], $config);
         } else {
             $this->_parameters[$section] = $config;
         }
