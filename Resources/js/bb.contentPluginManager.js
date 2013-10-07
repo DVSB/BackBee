@@ -24,7 +24,7 @@ bb.contentPluginsManager = (function(){
                 if(cm){
                     cm.handlePluginsActions(contentActions); 
                 }
-            /*var actionBtn = _buildPluginsButtons(contentActions);
+                /*var actionBtn = _buildPluginsButtons(contentActions);
                 console.log(actionBtn);
                 $(".bb5-content-actions").prepend($(actionBtn)); //handle condition on btns*/
                 
@@ -33,7 +33,7 @@ bb.contentPluginsManager = (function(){
     }
     
     var _cleanpluginsActions = function(){
-       $(_settings.pluginActionCls).remove(); 
+        $(_settings.pluginActionCls).remove(); 
     } 
     
     var _buildPluginsButtons = function(actions){
@@ -72,7 +72,7 @@ bb.contentPluginsManager = (function(){
                     }
                 }
             }catch(e){
-               
+                console.log(e);
             }
         });
         /* instance */
@@ -206,16 +206,21 @@ bb.contentPluginsManager = (function(){
         pluginsContainer[pluginsName] = _mock;
     }
         
-    /* retrieve the plugin */
     var _getPlugin = function(name){
-        var pluginsInstance = pluginsInstanceContainer[name] || false;
-        if(!pluginsInstance){
-            if(typeof pluginsContainer[name]!= "undefined"){
-                pluginsInstance = new pluginsContainer[name];
-                pluginsInstanceContainer[name] = pluginsInstance;
+        try{
+            var pluginsInstance = pluginsInstanceContainer[name] || false;
+            if(!pluginsInstance){
+                if(typeof pluginsContainer[name]!= "undefined"){
+                    pluginsInstance = new pluginsContainer[name];
+                    pluginsInstanceContainer[name] = pluginsInstance;
+                }
             }
+            if(!pluginsInstance) throw new Error("NoPluginError : plugins "+name+" can't be found");
+        }catch(e){
+            console.log(e);
+            throw e;
         }
-        if(!pluginsInstance) throw "NoPluginError";
+        
         return pluginsInstance;
     }
                 
@@ -278,7 +283,6 @@ var ContentsManager = function(){
     }
                  
     this.buildActionButton = function(actions){
-        console.log(actions);
         var actionsFrag = document.createDocumentFragment();
         for(var key in actions){ 
             var actionInfos = actions[key];

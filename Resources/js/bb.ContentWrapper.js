@@ -592,7 +592,6 @@ bb.ContentWrapper = (function($,global){
             
             
             this.append = function(params){
-                console.log(params);
                var self = this;
                 /*  params {content:content,
                  *   placeHolder:null,
