@@ -18,7 +18,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
     },
     
     onContentChange : function(){
-       console.log("");
+        console.log("");
     },
     
     _getAllowedNbItems: function(){
@@ -137,7 +137,8 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
             var contentUid = $.md5(new Date().toString() + i);
             var content = {
                 uid : contentUid, 
-                type:contentType
+                type:contentType,
+                rendermode: this.node.get("rendermode")
             };
             params.content.push(content);
         }

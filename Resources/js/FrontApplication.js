@@ -388,7 +388,7 @@ bb.frontApplication = (function($,gExport){
                     self.layoutToolsbar.removeTempTemplate();
                 });
 				
-                $(document).bind("content:ItemClicked",function(event,data){
+               $(document).bind("content:ItemClicked",function(event,data){
                     self.tabManager.updateContentPath(data);
                 });
             

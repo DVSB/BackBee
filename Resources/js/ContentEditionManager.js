@@ -744,9 +744,9 @@ var ContentEditionManager = (function(){
             var bbContent = $bb(e.currentTarget);
             var currentContent = e.currentTarget;
             _selectContent(currentContent);
-            $(document).trigger("bbcontent:clicked",{
+          /*  $(document).trigger("bbcontent:clicked",{
                 content : bbContent
-            });
+            });*/
             //_selectNodeContent(currentContent);
             return false;
         });
@@ -804,7 +804,7 @@ var ContentEditionManager = (function(){
             itemClass : ".contentNodeItem",
             itemIdKey : "data-uid"
         };
-        $(document).trigger("content:ItemClicked",[pathInfos]);
+        $(document).trigger("content:ItemClicked",[pathInfos,$bb(currentContent)]);
         return true;
     }
         
@@ -1149,7 +1149,7 @@ var ContentEditionManager = (function(){
         if(_isEnable) bb.Utils.scrollToContent($(node),1000,250);
         _selectNodeContent(node);
     }
-       
+    
     var publicApi = {
         enable : _enable,
         disable: _disable,

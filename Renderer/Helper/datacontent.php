@@ -70,7 +70,7 @@ class datacontent extends AHelper
                         $datacontent['class'] = '';
                     }
                     $datacontent['class'] = implode(' ', array_unique(array_merge(explode(' ', $datacontent['class']), array('bb5-droppable-item'))));
-                    /* add defaut content node plugins. Later move to plugins.yml */
+                    /* add defaut contentnode plugins. Later, move to plugins.yml */
                     $datacontent["data-contentplugins"] = "contentsetEdit";
                     /**
                      * itemcontainer is used when items in a contentset are not directly appended to the contentset 

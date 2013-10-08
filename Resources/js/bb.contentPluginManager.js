@@ -13,13 +13,13 @@ bb.contentPluginsManager = (function(){
        
     /* move to an other class */
     var _watchContent = function(){
-        $(document).bind("bbcontent:clicked",function(e,data){
+        $(document).bind("content:ItemClicked",function(e,data,bbContent){
+            
             /* remove previous action here */
-            //if(_selectedContent == data.content) return false;
-            _selectedContent = data.content;
+            if(_selectedContent == bbContent) return false;
+            _selectedContent = bbContent;
             var contentActions = _getPluginActions(_selectedContent);
             if(jQuery.isArray(contentActions)){
-                /* 1 ask the contentEdition  */
                 var cm = bb.ManagersContainer.getInstance().getManager("ContentEditionManager");
                 if(cm){
                     cm.handlePluginsActions(contentActions); 
@@ -27,7 +27,7 @@ bb.contentPluginsManager = (function(){
                 /*var actionBtn = _buildPluginsButtons(contentActions);
                 console.log(actionBtn);
                 $(".bb5-content-actions").prepend($(actionBtn)); //handle condition on btns*/
-                
+                _selectedContent = null;
             }
         }); 
     }
@@ -38,7 +38,7 @@ bb.contentPluginsManager = (function(){
     
     var _buildPluginsButtons = function(actions){
         var actionsFrag = document.createDocumentFragment();
-        $.each(actions,function(i,actionInfos){
+        jQuery.each(actions,function(i,actionInfos){
             var btnClass = "bb5-button #cls# bb5-button-square bb5-invert";
             btnClass = btnClass.replace("#cls#",actionInfos.icoCls);
             var btn = $("<button/>").clone();
