@@ -1,3 +1,12 @@
+/**
+ *@fixme 
+ * - onContentChanged should be call automatically
+ * - optionDialog should be called by the manager
+ * - action should be enabled on some condition
+ * - translate label
+ *
+ **/
+
 bb.contentPluginsManager.registerPlugins("contentsetEdit",{
     settings:{
         title: "Edit this content block",
@@ -22,7 +31,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
        return true;
     },
               
-    onContentChange : function(){
+    onContentChanged : function(){
         console.log("");
     },
     
