@@ -47,7 +47,7 @@ $.loadScript = function(url, options) {
             'js/script.js',
             'js/Utils.js',
             'js/dbmanager.js',
-            'js/bb.StateManager.js',
+            'js/min/bb.StateManager.js',
             'js/bb.upload.js',
             'js/bb.authmanager.js',
             'js/bb.webservice.js',
@@ -66,7 +66,7 @@ $.loadScript = function(url, options) {
             'js/bb.ui.bbContentTypeBrowser.js',
             'js/bb.contentPluginManager.js',
             'js/bb.ContentWrapper.js',
-            'js/bb.UserPreferences.js',
+            'js/min/bb.UserPreferences.js',
             'js/lpTab.js',
             'js/lpContextMenu.js',
             'js/bb.ManagersContainer.js',
@@ -86,7 +86,8 @@ $.loadScript = function(url, options) {
             'js/PopupManager.js',
             'js/bb.FormBuilder.plugins.js',
             'js/FrontApplication.js', 
-            'js/i18n/fr.js'
+            'js/i18n/fr.js',
+            'js/min/bb.Notify.js'
         ],
         
         config: {

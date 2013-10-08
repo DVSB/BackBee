@@ -9,7 +9,8 @@ use BackBuilder\Exception\BBException,
     BackBuilder\Renderer\IRenderable,
     BackBuilder\Site\Layout,
     BackBuilder\Site\Site,
-    BackBuilder\MetaData\MetaDataBag;
+    BackBuilder\MetaData\MetaDataBag,
+    BackBuilder\Workflow\State;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
@@ -188,6 +189,14 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @Column(type="datetime", name="archiving", nullable=true)
      */
     protected $_archiving;
+
+    /**
+     * The optional workflow state.
+     * @var \BackBuilder\Workflow\State
+     * @ManyToOne(targetEntity="BackBuilder\Workflow\State")
+     * @JoinColumn(name="workflow_state", referencedColumnName="uid")
+     */
+    protected $_workflow_state;
 
     /**
      * Descendants nodes.
@@ -487,6 +496,16 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Returns the worflow state if defined, NULL otherwise
+     * @return \BackBuilder\Workflow\State
+     * @codeCoverageIgnore
+     */
+    public function getWorkflowState()
+    {
+        return $this->_workflow_state;
+    }
+
+    /**
      * Returns TRUE if the page can be rendered.
      * @return Boolean
      */
@@ -724,6 +743,18 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Sets the workflow state
+     * @param \BackBuilder\Workflow\State $state
+     * @return \BackBuilder\NestedNode\Page
+     * @codeCoverageIgnore
+     */
+    public function setWorkflowState(State $state = null)
+    {
+        $this->_workflow_state = $state;
+        return $this;
+    }
+
+    /**
      * Returns the inherited zone according to the provided ContentSet
      * @param \BackBuilder\ClassContent\ContentSet $contentSet
      * @return \StdClass The inherited zone
@@ -885,6 +916,11 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         $result['publishing'] = (null !== $this->getPublishing()) ? $this->getPublishing()->getTimestamp() : null;
         $result['archiving'] = (null !== $this->getArchiving()) ? $this->getArchiving()->getTimestamp() : null;
         $result['metadata'] = (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null;
+<<<<<<< HEAD
+=======
+        $result['layout_uid'] = (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null;
+        $result['workflow_state'] = (null !== $this->getWorkflowState()) ? $this->getWorkflowState()->getCode() : null;
+>>>>>>> cc066bed9988841e71190dea520f6618f0a3b6ea
 
         return $result;
     }
@@ -903,7 +939,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
         foreach (get_object_vars($serialized) as $property => $value) {
             $property = '_' . $property;
-            if (in_array($property, array('_created', '_modified', '_publishing', '_archiving', '_metadata'))) {
+            if (in_array($property, array('_created', '_modified', '_publishing', '_archiving', '_metadata', '_workflow_state'))) {
                 continue;
             } else if (TRUE === property_exists($this, $property)) {
                 $this->$property = $value;
@@ -931,6 +967,14 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
         if (true === property_exists($serialized, 'metadata') && null !== $this->getMetaData()) {
             $this->setMetaData($this->getMetaData()->fromStdClass($serialized->metadata));
+        }
+
+        if (true === property_exists($serialized, 'workflow_state')) {
+            if (null === $serialized->workflow_state) {
+                $this->setWorkflowState(null);
+            } elseif ($serialized->workflow_state instanceof State) {
+                $this->setWorkflowState($serialized->workflow_state);
+            }
         }
 
         return $this;

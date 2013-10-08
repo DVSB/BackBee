@@ -56,7 +56,7 @@ class Importer
             \BackBuilder\Util\Buffer::dump('Importation of ' . count($values) . ' ' . $class . ' was started' . "\n");
             $i = 0;
             $entities = array();
-            if (count($values) == 0) return;
+            if (count($values) == 0) continue;
             foreach ($values as $value) {
                 if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
                     try {

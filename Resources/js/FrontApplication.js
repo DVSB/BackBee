@@ -526,7 +526,8 @@ bb.frontApplication = (function($,gExport){
                         case _settings.TAB_EDITION_PAGE:
                             if(!self.statusManager){
                                 self.statusManager = bb.StatusManager.init({
-                                    pageId: _settings.pageId
+                                    pageId: _settings.pageId,
+                                    layoutId: _settings.layoutId
                                 });
                             }
                             if(AlohaManager) AlohaManager.stop();
