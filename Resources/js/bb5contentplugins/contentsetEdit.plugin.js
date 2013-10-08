@@ -16,7 +16,12 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
     /* handle change on content too like change on content*/
     //this.bindEvents();
     },
-    
+     /* SHOULD NOT be applied on root contentset */
+     canApplyOn: function(){
+       if(this.node.isARootContentSet) return false;
+       return true;
+    },
+              
     onContentChange : function(){
         console.log("");
     },
@@ -161,11 +166,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
             
         }
     },
-              
-    canApplyOn: function(){
-        return true;
-    },
-              
+             
     exposeActions : function(){
         this.createAction({
             label:"add a new item to this container", 
