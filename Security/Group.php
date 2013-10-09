@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity()
- * @Table(name="group")
+ * @Table(name="groups")
  */
 class Group {
     /**
@@ -23,14 +23,14 @@ class Group {
     /**
      * Group name
      * @var string
-     * @Column(type="varchar", name="name")
+     * @Column(type="string", name="name")
      */
     protected $_name;
     
     /**
      * Group name identifier
      * @var string
-     * @Column(type="varchar", name="identifier")
+     * @Column(type="string", name="identifier")
      */
     protected $_identifier;
     
