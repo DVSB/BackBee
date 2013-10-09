@@ -426,7 +426,7 @@ class BBApplication {
     public function getBootstrapCache()
     {
         if (!$this->getContainer()->has('cache.bootstrap')) {
-            $this->getContainer()->set('cache.bootstrap', new Cache\File\Cache($this));
+            $this->getContainer()->set('cache.bootstrap', new Cache\File\Cache(array('cachedir' => $this->getCacheDir())));
         }
 
         return $this->getContainer()->get('cache.bootstrap');        
