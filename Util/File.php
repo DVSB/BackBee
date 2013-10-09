@@ -78,7 +78,8 @@ class File
                 $filename = $basedir . DIRECTORY_SEPARATOR . $filename;
             }
         }
-        if (FALSE !== $realname = realpath($filename, DIRECTORY_SEPARATOR, false))
+
+        if (FALSE !== $realname = realpath($filename))
             $filename = $realname;
     }
     

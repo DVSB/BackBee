@@ -9,7 +9,7 @@ namespace BackBuilder\Cache;
  * @category    BackBuilder
  * @package     BackBuilder\Cache
  * @copyright   Lp digital system
- * @author      c.rouillon
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  */
 abstract class AExtendedCache extends ACache
 {

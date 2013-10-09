@@ -69,34 +69,6 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
         return $this;
     }
-<<<<<<< HEAD
-    
-    public function getApplication() {
-        return $this->_application;
-    }
-    
-    public function getEntityManager() {
-        return $this->_em;
-    }
-    
-    public function getLogger() {
-        return $this->_logger;
-    }
-    
-    public function getBaseDir() {
-        return $this->_basedir;
-    }
-    
-    public function getResourcesDir() {
-        return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
-    }
-    
-    public function getId() {
-        return $this->_id;
-    }
-
-    public function getRouting() {
-=======
 
     /**
      * @codeCoverageIgnore
@@ -154,7 +126,6 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
     public function getRouting()
     {
->>>>>>> cc066bed9988841e71190dea520f6618f0a3b6ea
         if (NULL === $this->_routing)
             $this->_initRouting();
 

@@ -14,11 +14,11 @@ use BackBuilder\Exception\BBException;
  */
 class CacheException extends BBException
 {
-
     /**
      * Cache adapter can not be intialized
      * @var int
      */
+
     const CACHE_ERROR = 3001;
 
     /**

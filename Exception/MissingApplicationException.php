@@ -10,7 +10,7 @@ namespace BackBuilder\Exception;
  * @copyright   Lp digital system
  * @author      c.rouillon
  */
-class InvalidArgumentException extends BBException
+class MissingApplicationException extends BBException
 {
 
     /**
