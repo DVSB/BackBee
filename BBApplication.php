@@ -35,7 +35,7 @@ class BBApplication {
     private $_isinitialized;
     private $_isstarted;
     private $_autoloader;
-    private $_basedir;
+    private $_bbdir;
     private $_cachedir;
     private $_mediadir;
     private $_repository;
@@ -365,17 +365,23 @@ class BBApplication {
 
         return $this->_autoloader;
     }
+    
+    public function getBBDir()
+    {
+        if (NULL === $this->_bbdir) {
+            $r = new \ReflectionObject($this);
+            $this->_bbdir = dirname($r->getFileName());
+        }
+
+        return $this->_bbdir;
+    }
 
     /**
      * @return string
      */
-    public function getBaseDir() {
-        if (NULL === $this->_basedir) {
-            $r = new \ReflectionObject($this);
-            $this->_basedir = dirname($r->getFileName()) . DIRECTORY_SEPARATOR . '..';
-        }
-        
-        return $this->_basedir;
+    public function getBaseDir()
+    {
+        return dirname($this->getBBDir());
     }
     
     
