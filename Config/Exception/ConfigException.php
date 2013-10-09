@@ -4,13 +4,6 @@ namespace BackBuilder\Config\Exception;
 
 use BackBuilder\Exception\BBException;
 
-<<<<<<< HEAD
-class ConfigException extends BBException {
-	const UNKNOWN_ERROR     = 4000;
-	const UNABLE_TO_PARSE   = 4001;
-	
-	private $_code = self::UNKNOWN_ERROR;
-=======
 /**
  * Configuration exceptions
  *
@@ -39,5 +32,4 @@ class ConfigException extends BBException
      */
     const INVALID_BASE_DIR = 4002;
 
->>>>>>> cc066bed9988841e71190dea520f6618f0a3b6ea
 }

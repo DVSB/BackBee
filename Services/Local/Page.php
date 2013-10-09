@@ -41,9 +41,7 @@ class Page extends AbstractServiceLocal
     }
 
     /**
-<<<<<<< HEAD
      * Return the serialized form of a page
-=======
      * Returns the available workflow states for NestedNode\Page and Site\Layout
      * @param string $layout_uid
      * @return array
@@ -77,7 +75,6 @@ class Page extends AbstractServiceLocal
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid is invalid
      * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
->>>>>>> cc066bed9988841e71190dea520f6618f0a3b6ea
      * @exposed(secured=true)
      */
     public function find($uid)
@@ -117,12 +114,12 @@ class Page extends AbstractServiceLocal
                 $object->redirect = null;
         }
 
-<<<<<<< HEAD
+
         $em = $this->bbapp->getEntityManager();
         $page = $em->getRepository('\BackBuilder\NestedNode\Page')->find($object->uid);
         if (NULL === $page)
             throw new ServicesException(sprintf('Unable to find page for `%s` uid', $object->uid));
-=======
+
         if (null === $object->workflow_state) {
             $page->setWorkflowState(null);
         } else {
@@ -137,7 +134,6 @@ class Page extends AbstractServiceLocal
                 }
             }
         }
->>>>>>> cc066bed9988841e71190dea520f6618f0a3b6ea
 
         $page->unserialize($object);
         $em->flush();
