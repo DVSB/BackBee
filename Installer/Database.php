@@ -8,6 +8,12 @@ use Doctrine\ORM\Mapping\Entity,
     Doctrine\Common\Annotations\SimpleAnnotationReader,
     Doctrine\ORM\Tools\SchemaTool;
 
+/**
+ * @category    BackBuilder
+ * @package     BackBuilder\Installer
+ * @copyright   Lp system
+ * @author      nicolas dufreche <n.dufreche@lp-digital.fr>
+ */
 class Database
 {
     /**
