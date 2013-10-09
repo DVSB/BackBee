@@ -36,24 +36,32 @@ class Database
             $path = $this->_application->getBBDir();
         }
         foreach (Dir::getContent($path) as $content) {
-            if (is_dir($content)) {
-                $tmp = $this->_getEntities($path . DIRECTORY_SEPARATOR . $content);
-                array_merge($entities, $tmp);
+            $subpath = $path . DIRECTORY_SEPARATOR . $content;
+            if ($content == 'Resources') continue;
+            if (is_dir($subpath)) {
+                $entities = array_merge($entities, $this->_getEntities($subpath));
             } else {
-                $className = $this->_getClassName($content);
-                if ($this->_isEntity($className)) {
-                    $entities[] = $className; 
+                if (strpos($subpath, '.php')) {
+                    $namespace = $this->getNamespace($subpath);
+                    var_dump($namespace);
+                    $reflection = new \ReflectionClass($namespace);
+                    if ($this->_isEntity($reflection)) {
+                        $entities[] = $namespace; 
+                    }
                 }
             }
         }
         return $entities;
     }
     
-    private function _isEntity($className)
+    private function getNamespace($file)
     {
-        $annotation = $this->_getEntityAnnotation(new \ReflectionClass($className));
-        var_dump($annotation);
-        return $annotation;
+        return str_replace(array($this->_application->getBBDir(), '.php', '/'), array('BackBuilder', '', '\\'), $file);
+    }
+
+    private function _isEntity(\ReflectionClass $reflection)
+    {
+        return !is_null($this->_getEntityAnnotation($reflection));
     }
     
     private function _getEntityAnnotation($class)
