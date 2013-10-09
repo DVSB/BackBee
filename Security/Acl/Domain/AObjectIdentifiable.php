@@ -31,7 +31,6 @@ abstract class AObjectIdentifiable implements IObjectIdentifiable
 
     /**
      * Returns a unique identifier for this domain object.
-     * @codeCoverageIgnore
      * @return string
      */
     public function getObjectIdentifier()
@@ -40,8 +39,7 @@ abstract class AObjectIdentifiable implements IObjectIdentifiable
     }
 
     /**
-     * Returns the unique identifier for this object.
-     * @codeCoverageIgnore
+     * Returns the unique identifier for this object. 
      * @return string
      */
     public function getIdentifier()
@@ -51,7 +49,6 @@ abstract class AObjectIdentifiable implements IObjectIdentifiable
 
     /**
      * Returns the PHP class name of the object.
-     * @codeCoverageIgnore
      * @return string
      */
     public function getType()

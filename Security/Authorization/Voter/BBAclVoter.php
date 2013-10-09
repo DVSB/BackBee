@@ -2,7 +2,8 @@
 
 namespace BackBuilder\Security\Authorization\Voter;
 
-use BackBuilder\NestedNode\ANestedNode,
+use BackBuilder\Bundle\ABundle,
+    BackBuilder\NestedNode\ANestedNode,
     BackBuilder\ClassContent\AClassContent;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils,
@@ -55,6 +56,8 @@ class BBAclVoter extends AclVoter
             return $this->_voteForNestedNode($token, $object, $attributes);
         } elseif ($object instanceof AClassContent) {
             return $this->_voteForClassContent($token, $object, $attributes);
+        } elseif ($object instanceof ABundle) {
+            return parent::vote($token, $object, $attributes);
         }
 
         return $this->_vote($token, $object, $attributes);

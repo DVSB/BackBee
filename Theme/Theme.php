@@ -271,7 +271,7 @@ class Theme extends ThemeConst
         if (is_null($configdir))
             $configdir = $this->getDirectory();
 
-        $this->_config = new Config($configdir);
+        $this->_config = new Config($configdir, $this->_bbapp->getBootstrapCache());
 
         return $this;
     }

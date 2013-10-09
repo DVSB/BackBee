@@ -32,7 +32,6 @@ bb.ContentWrapper = (function($,global){
     
     /*Get contentBy ref*/
     var _getContentByRef = function(ref){
-        
         return _contentsCollection.get(ref);
     }
     
@@ -118,7 +117,7 @@ bb.ContentWrapper = (function($,global){
         if(!node) return false;
         var contentInfos = {};
         /*refparent is coupled with itemcontainer*/
-        var availableContentAttrs = ["uid","isloaded","rendermode","maxentry","refparent","type","accept","element","parent","draftuid","itemcontainer"];
+        var availableContentAttrs = ["uid","isloaded","rendermode","maxentry","refparent","type","accept","contentplugins","element","parent","draftuid","itemcontainer"];
         $.each(availableContentAttrs,function(i,attr){
             contentInfos[attr] = $(node).attr("data-"+attr)||false;
         });
@@ -367,6 +366,10 @@ bb.ContentWrapper = (function($,global){
             return this.get("uid");
         }
         
+        BbContentWrapper.prototype.getPlugins = function(){
+            return this.get("contentplugins");
+        }
+        
         BbContentWrapper.prototype.getContentParams = function(){
             var params = this.get("param") || false; 
             var self = this;
@@ -589,7 +592,7 @@ bb.ContentWrapper = (function($,global){
             
             
             this.append = function(params){
-                var self = this;
+               var self = this;
                 /*  params {content:content,
                  *   placeHolder:null,
                  *   beforeAppend : func

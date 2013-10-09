@@ -34,7 +34,6 @@ class AccessVoter implements VoterInterface
     }
 
     /**
-     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function supportsAttribute($attribute)
@@ -43,7 +42,6 @@ class AccessVoter implements VoterInterface
     }
 
     /**
-     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function supportsClass($class)
@@ -93,7 +91,6 @@ class AccessVoter implements VoterInterface
     }
 
     /**
-     * @codeCoverageIgnore
      * @param TokenInterface $token
      * @return array
      */

@@ -8,5 +8,5 @@ class ImporterException extends BBException {
     const INIT_ERROR          = 30001;
     const RUN_ERROR           = 30002;
     
-    protected $_code = self::UNKNOWN_ERROR;
+    private $_code = self::UNKNOWN_ERROR;
 }

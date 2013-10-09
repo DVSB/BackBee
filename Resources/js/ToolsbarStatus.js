@@ -36,10 +36,9 @@ BB4.ToolsbarManager.register('statustb',{
             $(this._settings.toolsbarContainer).find(this._settings.btnRevert).unbind('click').bind('click', function(e) { return self.onRevert(); });
 
             $(this._settings.toolsbarEdition).find(".bb5-tabdrawer-wrapper .bb5-tabdrawer-toggle").unbind('click').bind('click',function(){ return self.onTogglePublishingOptions(); });
-            $(this._settings.toolsbarEdition).find('.bb5-status-down').unbind('click').bind('click', function(e) { return self.onChangeOnline(false); });
-            $(this._settings.toolsbarEdition).find('.bb5-status-up').unbind('click').bind('click', function(e) { return self.onChangeOnline(true); });
+            $(this._settings.toolsbarEdition).find('.bb5-status-down').unbind('click').bind('click', function(e) { return self.onStateDown(); /*self.onChangeOnline(false);*/ });
+            $(this._settings.toolsbarEdition).find('.bb5-status-up').unbind('click').bind('click', function(e) { return self.onStateUp(); /*self.onChangeOnline(true);*/ });
             $(this._settings.toolsbarEdition).find(this._settings.switchHidden).unbind('click').bind('click', function(e) { return self.onChangeHidden( !bb.StatusManager.getInstance().getHidden() ); });
-            $(this._settings.toolsbarEdition).find('.bb5-status-up').unbind('click').bind('click', function(e) { return self.onChangeOnline(true); });
             $(this._settings.toolsbarEdition).find('.bb5-schedule-publishing-validate').unbind('click').bind('click', function(e) { self.onSchedule(); return self.onTogglePublishingOptions(); });
             $(this._settings.toolsbarEdition).find('.bb5-metadata-edit').unbind('click').bind('click', function(e) { return self.onEditMetadata(); });
             
@@ -118,6 +117,91 @@ BB4.ToolsbarManager.register('statustb',{
             }
             
             bb.StatusManager.getInstance().setTitle( $('.bb5-dialog-metadata-editor #bb5-meta-title').val() );
+        },
+        
+        onStateUp: function() {
+            var self = this;
+            var has_changed = false;
+            var current_state;
+            var workflow = bb.StatusManager.getInstance().getWorkflowStates();
+            
+            if (0 == workflow.length && !(currentPage.state & 1)) {
+                return self.onChangeOnline(true);
+            }
+            
+            if (currentPage.state & 1) {
+                current_state = (null == currentPage.workflow_state) ? 0 : currentPage.workflow_state;
+                $.each(workflow, function(code, state) {
+                    if (code > current_state) {
+                        $(self._settings.toolsbarEdition).find('.bb5-button-selector-status').attr('data-i18n', 'toolbar.editing.states.offline').empty().html(bb.i18n.__(state.label));
+                        bb.StatusManager.getInstance().setWorkflowState(state);
+                        has_changed = true;
+                        return false;
+                    }
+
+                    return true;
+                });
+            } else {
+                current_state = (null == currentPage.workflow_state) ? -1000000 : currentPage.workflow_state;
+                $.each(workflow, function(code, state) {
+                    if (0 > code && code > current_state) {
+                        $(self._settings.toolsbarEdition).find('.bb5-button-selector-status').attr('data-i18n', 'toolbar.editing.states.offline').empty().html(bb.i18n.__(state.label));
+                        bb.StatusManager.getInstance().setWorkflowState(state);
+                        has_changed = true;
+                        return false;
+                    }
+
+                    return true;
+                });
+                
+                if (!has_changed) {
+                    bb.StatusManager.getInstance().resetWorkflowState();
+                    self.onChangeOnline(true);
+                }
+            }
+        },
+        
+        onStateDown: function() {
+            var self = this;
+            var has_changed = false;
+            var current_state;
+            var workflow = bb.StatusManager.getInstance().getWorkflowStates();
+            
+            if (0 == workflow.length && (currentPage.state & 1)) {
+                return self.onChangeOnline(false);
+            }
+            
+            if (currentPage.state & 1) {
+                current_state = (null == currentPage.workflow_state) ? 0 : currentPage.workflow_state;
+                $(self._settings.toolsbarContainer).find(self._settings.checkboxOnline).val([0]).parent().removeClass('on');
+                
+                $.each(workflow, function(code, state) {
+                    if (code < current_state) {
+                        $(self._settings.toolsbarEdition).find('.bb5-button-selector-status').attr('data-i18n', 'toolbar.editing.states.offline').empty().html(bb.i18n.__(state.label));
+                        bb.StatusManager.getInstance().setOnline(code > 0);
+                        bb.StatusManager.getInstance().setWorkflowState(state);
+                        has_changed = (code > 0 || current_state == 0);
+                    }
+
+                    return true;
+                });
+            } else {
+                current_state = (null == currentPage.workflow_state) ? -1000000 : currentPage.workflow_state;
+                $.each(workflow, function(code, state) {
+                    if (0 > code && code < current_state) {
+                        $(self._settings.toolsbarEdition).find('.bb5-button-selector-status').attr('data-i18n', 'toolbar.editing.states.offline').empty().html(bb.i18n.__(state.label));
+                        bb.StatusManager.getInstance().setWorkflowStatus(state);
+                        has_changed = true;
+                    }
+
+                    return true;
+                });
+                
+                if (!has_changed) {
+                    bb.StatusManager.getInstance().resetWorkflowState();
+                    self.onChangeOnline(false);
+                }
+            }
         },
         
 	onChangeOnline: function(online) {
@@ -232,11 +316,24 @@ BB4.ToolsbarManager.register('statustb',{
 	},
 	
 	onPageLoad : function() {
-		currentPage = bb.StatusManager.getInstance().getCurrentPage();
+            var self = this;
+            currentPage = bb.StatusManager.getInstance().getCurrentPage();
 
-                this.onChangeOnline( (currentPage.state & 1) );
-                this.onChangeHidden( (currentPage.state & 2) );
-                this.onSchedule ( bb.StatusManager.getInstance().getPublishingDate(), bb.StatusManager.getInstance().getArchivingDate() )
+            this.onChangeOnline( (currentPage.state & 1) );
+            
+            if (null != currentPage.workflow_state) {
+                workflow = bb.StatusManager.getInstance().getWorkflowStates();
+                $.each(workflow, function(code, state) {
+                    if (code == currentPage.workflow_state) {
+                        $(self._settings.toolsbarEdition).find('.bb5-button-selector-status').attr('data-i18n', 'toolbar.editing.states.offline').empty().html(bb.i18n.__(state.label));
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            
+            this.onChangeHidden( (currentPage.state & 2) );
+            this.onSchedule ( bb.StatusManager.getInstance().getPublishingDate(), bb.StatusManager.getInstance().getArchivingDate() )
 //		if (currentPage.state & 1)
 //			$(this._settings.toolsbarContainer).find(this._settings.switchOnline).trigger('click');
 //		if (!(currentPage.state & 2))

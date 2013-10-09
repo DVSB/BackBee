@@ -56,7 +56,7 @@ class Importer
             \BackBuilder\Util\Buffer::dump('Importation of ' . count($values) . ' ' . $class . ' was started' . "\n");
             $i = 0;
             $entities = array();
-            if (count($values) == 0) return;
+            if (count($values) == 0) continue;
             foreach ($values as $value) {
                 if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
                     try {
@@ -165,7 +165,6 @@ class Importer
     }
     
     /**
-     * @codeCoverageIgnore
      * @return /BackBuilder/BBApplication
      */
     final public function getApplication()
@@ -173,51 +172,28 @@ class Importer
         return $this->_application;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param type $string
-     * @return array
-     */
     final public function find($string)
     {
         return $this->_connector->find($string);
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     final protected function _loadRelataions()
     {
        return $this->getConfig()->getSection('relations');
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     final protected function getConfig()
     {
         return $this->_config;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return IConverter
-     */
     final protected function getConverter()
     {
         return $this->_converter;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param IConverter $converter
-     * @return \BackBuilder\Importer\Importer
-     */
     final protected function setConverter($converter)
     {
-        $this->_converter = $converter;
-        return $this;
+        return $this->_converter = $converter;
     }
 }

@@ -2,6 +2,7 @@ $(function(){
     
     /*scalar type*/
     FormBuilder.registerRenderTypePlugin("date",{
+        name:"date",
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
             this.fieldWrapper = $("<p></p>");

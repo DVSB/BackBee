@@ -53,11 +53,6 @@ class MediaRepository extends EntityRepository {
         return $result;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param \BackBuilder\NestedNode\Media $media
-     * @return boolean
-     */
     public function delete(\BackBuilder\NestedNode\Media $media) {
         return false;
     }

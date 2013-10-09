@@ -115,7 +115,7 @@ bb.ContentManager =(function($,gExport){
         _initResizable();
         _enableContentSelection = true;
     }
-    /* itemdrop event added to*/
+    /* itemdrop event added to jquery*/
     var _extendSortable = function(){
         var _mouseStop = $.extend(true,{},$.ui.sortable.prototype)._mouseStop;
         var nwMouseStop = function(a,b){

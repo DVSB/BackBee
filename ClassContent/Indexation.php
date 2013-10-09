@@ -66,84 +66,43 @@ class Indexation {
              ->setCallback($callback);
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getField() {
         return $this->_field;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getCallback() {
         return $this->_callback;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getValue() {
         return $this->_value;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getContent()
     {
         return $this->_content;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param type $content
-     * @return \BackBuilder\ClassContent\Indexation
-     */
     public function setContent($content) {
         $this->_content = $content;
         return $this;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param type $field
-     * @return \BackBuilder\ClassContent\Indexation
-     */
     public function setField($field) {
         $this->_field = $field;
         return $this;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param type $owner
-     * @return \BackBuilder\ClassContent\Indexation
-     */
     public function setOwner($owner) {
         $this->_owner = $owner;
         return $this;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param type $value
-     * @return \BackBuilder\ClassContent\Indexation
-     */
     public function setValue($value) {
         $this->_value = $value;
         return $this;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param type $callback
-     * @return \BackBuilder\ClassContent\Indexation
-     */
     public function setCallback($callback) {
         $this->_callback = $callback;
         return $this;

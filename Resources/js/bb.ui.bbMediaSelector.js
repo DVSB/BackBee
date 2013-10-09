@@ -1029,7 +1029,16 @@
                 return preview;
             }
         },
-
+       
+        _createFlashPreview : function(file,dropbox){
+            if(file){
+                var context = this.getContext();
+                var preview = $($(context.mediaFormDialog.dialog).find("#swfbbselector-editpreview-tpl .preview").clone());
+                if("name" in file) $(preview).find(".filename").text(file.name);
+                return preview;
+            }
+        },
+                
         _createImagePreview : function(file,dropbox){
             if(file){
                 var context = this.getContext();

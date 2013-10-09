@@ -23,7 +23,7 @@ class MetaDataListener
     {
         $content = $event->getTarget();
         if (!($content instanceof AClassContent)) return;
-
+        
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
         $em = $application->getEntityManager();
@@ -36,17 +36,17 @@ class MetaDataListener
             self::onFlushPage($newEvent);
         }
 
-//        foreach($content->getParentContent() as $parent) {
-//            if (null !== $page = $parent->getMainNode()) {
-//                $newEvent = new Event($page, $parent);
-//                $newEvent->setDispatcher($event->getDispatcher());
-//                self::onFlushPage($newEvent);
-//            }
-//
-//            $newEvent = new Event($parent);
-//            $newEvent->setDispatcher($event->getDispatcher());
-//            self::onFlushContent($newEvent);
-//        }
+        foreach($content->getParentContent() as $parent) {
+            if (null !== $page = $parent->getMainNode()) {
+                $newEvent = new Event($page, $parent);
+                $newEvent->setDispatcher($event->getDispatcher());
+                self::onFlushPage($newEvent);
+            }
+
+            $newEvent = new Event($parent);
+            $newEvent->setDispatcher($event->getDispatcher());
+            self::onFlushContent($newEvent);
+        }
     }
 
     /**

@@ -64,6 +64,7 @@ $.loadScript = function(url, options) {
             'js/bb.ui.bbContentSelector.js',
             'js/bb.ui.bbMediaImageUpload.js',
             'js/bb.ui.bbContentTypeBrowser.js',
+            'js/bb.contentPluginManager.js',
             'js/bb.ContentWrapper.js',
             'js/min/bb.UserPreferences.js',
             'js/lpTab.js',
@@ -93,7 +94,8 @@ $.loadScript = function(url, options) {
             maxFileSize: 10,
             mediaFileSize:{
                 pdf: 15,
-                image: 10
+                image: 10,
+                flash: 15
             }
         },
         

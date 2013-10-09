@@ -7,6 +7,7 @@ bb.StatusManager = (function($,gExport){
     var currentPage = null;
     var popupDialog = null;
     var modified = false;
+    var workflow = [];
     
     var _settings = {
         states: {
@@ -19,7 +20,8 @@ bb.StatusManager = (function($,gExport){
             pageWs : "ws_local_page",
             revisionWs :"ws_local_revision"
         },
-        pageId: null
+        pageId: null,
+        layoutId: null
     };
     
     var _init = function(userSettings){
@@ -49,6 +51,16 @@ bb.StatusManager = (function($,gExport){
     
     var _getOnline = function() {
         return (currentPage.state & _settings.states.online);
+    };
+    
+    var _setWorkflowState = function(state) {
+        currentPage.workflow_state = state.code;
+        modified = true;
+    };
+    
+    var _resetWorkflowState = function() {
+        currentPage.workflow_state = null;
+        modified = true;
     };
     
     var _setOnline = function(online) {
@@ -161,6 +173,23 @@ bb.StatusManager = (function($,gExport){
     
     var _enable = function() {
         if (!currentPage) {
+            pageWebservice.request('getWorkflowStatus', {
+                params:{
+                    uid: _settings.layoutId
+                },
+                success:function(response){
+                    if (response.result) {
+                        workflow = response.result;
+                    } else {
+                        _displayError(bb.i18n.__('statusmanager.error.loading_page'), null, _enable);
+                    }
+                },
+                error:function(response){
+                    _displayError(bb.i18n.__('statusmanager.error.loading_page'), response.error, _enable);
+                    throw response.error;
+                }
+            });
+            
             pageWebservice.request('find', {
                 params:{
                     uid: _settings.pageId
@@ -199,7 +228,7 @@ bb.StatusManager = (function($,gExport){
                     "Cancel": {
                         text: bb.i18n.__('popupmanager.button.cancel'),
                         click: function(a){
-                            currentPage = null;
+                            _reset();
                             $(this).dialog("close");
                             return false;
                         }
@@ -215,6 +244,13 @@ bb.StatusManager = (function($,gExport){
         return (instance) ? instance : _init();
     };
 
+    var _reset = function() {
+        currentPage = null;
+        modified = false;
+        
+        return true;
+    };
+    
     var _update = function() {
         if (modified) {
             pageWebservice.request('update', {
@@ -443,6 +479,10 @@ bb.StatusManager = (function($,gExport){
             errorDialog.show();
     };
 
+    var _getWorkflowStates = function() {
+        return workflow;
+    };
+
     var _publicApi = {
         enable: _enable,
         disable: _disable,
@@ -452,6 +492,9 @@ bb.StatusManager = (function($,gExport){
             return currentPage;
         },
         getOnline: _getOnline,
+        setWorkflowState: _setWorkflowState,
+        resetWorkflowState: _resetWorkflowState,
+        getWorkflowStates: _getWorkflowStates,
         setOnline: _setOnline,
         getHidden: _getHidden,
         setHidden: _setHidden,

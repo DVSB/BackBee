@@ -201,6 +201,11 @@ bb.PopupManager = (function($,gExport){
      
     DialogItem.fn.setOption = function(key,value){
         $(this.dialog).dialog("option",key,value);
+        if(key == "buttons"){
+            /* fix buttons style */
+            var btnContainer = $(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
+            $(btnContainer).find("button").addClass("bb5-button bb5-button-square"); 
+        }
     };
     
     DialogItem.fn.isOpen = function(){

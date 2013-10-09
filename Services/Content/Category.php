@@ -16,17 +16,15 @@ use Symfony\Component\Yaml\Yaml as parserYaml,
  *
  * @author Nicolas BREMONT<nicolas.bremont@group-lp.com>
  */
-class Category
-{
+class Category {
 
     private $name;
     private $label;
     private $contents;
-    private $application;
+    private $bbapp;
     private $selected;
 
-    private function lowerCatNames($catArray)
-    {
+    private function lowerCatNames($catArray) {
         $result = array();
         $lambda = create_function('$cat', 'return strtolower($cat);');
         if (isset($catArray) && is_array($catArray)) {
@@ -37,10 +35,9 @@ class Category
         return $result;
     }
 
-    private function setContents()
-    {
+    private function setContents() {
         $contents = array();
-        foreach ($this->application->getClassContentDir() as $classcontentdir) {
+        foreach($this->bbapp->getClassContentDir() as $classcontentdir) {
             $files = self::globRecursive($classcontentdir . DIRECTORY_SEPARATOR . '*.yml');
             foreach ($files as $file) {
                 File::resolveFilepath($file);
@@ -52,7 +49,7 @@ class Category
                         $name = substr($str, 0, -4);
                         if ($name) {
                             $label = array_key_exists('name', $item['properties']) ? $item['properties']['name'] : $name;
-                            $contentRender = new ContentRender($name, $this->application, $this->name);
+                            $contentRender = new ContentRender($name, $this->bbapp, $this->name);
                             $contentRender->setLabel($label);
                             $contents[] = $contentRender;
                         }
@@ -63,136 +60,59 @@ class Category
         $this->contents = $contents;
     }
 
-    public function __construct($name, $application = null, $selected = false)
-    {
+    public function __construct($name, $bbapp = null, $selected = false) {
         $this->contents = array();
         $this->name = $name;
-        $this->application = $application;
+        $this->bbapp = $bbapp;
         $this->selected = $selected;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return string
-     */
-    static function getCacheKey()
-    {
+    static function getCacheKey() {
         return md5(__METHOD__);
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return string
-     */
-    public function getName()
-    {
+    public function getName() {
         return $this->name;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param string $name
-     * @return \BackBuilder\Services\Content\Category
-     */
-    public function setName($name)
-    {
+    public function setName($name) {
         $this->name = $name;
-        return $this;
     }
 
-    /**
-     * @deprecated since version 1.0
-     * @codeCoverageIgnore
-     * @return \BackBuilder\BBApplication
-     */
-    public function getBBapp()
-    {
-        return $this->application;
+    public function getBBapp() {
+        return $this->bbapp;
     }
 
-    /**
-     * return $this->application;
-     * @return \BackBuilder\BBApplication
-     */
-    public function getApplication()
-    {
-        return $this->application;
+    public function setBBapp($bbapp) {
+        $this->bbapp = $bbapp;
     }
 
-    /**
-     * @deprecated since version 1.0
-     * @codeCoverageIgnore
-     * @param \BackBuilder\BBApplication $application
-     */
-    public function setBBapp($application)
-    {
-        $this->application = $application;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @param \BackBuilder\BBApplication $application
-     * @return \BackBuilder\Services\Content\Category
-     */
-    public function setApplication($application)
-    {
-        $this->application = $application;
-        return $this;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
-    public function getSelected()
-    {
+    public function getSelected() {
         return $this->selected;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param type $selected
-     * @return \BackBuilder\Services\Content\Category
-     */
-    public function setSelected($selected)
-    {
+    public function setSelected($selected) {
         $this->selected = $selected;
-        return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @return string
-     */
-    public function getLabel()
-    {
+    public function getLabel() {
         return $this->label;
     }
 
-    /**
-     * @codeCoverageIgnore
-     * @param string $label
-     * @return \BackBuilder\Services\Content\Category
-     */
-    public function setLabel($label)
-    {
+    public function setLabel($label) {
         $this->label = $label;
-        return $this;
     }
 
-    public function getContents()
-    {
+    public function getContents() {
         if ($this->contents === array())
             $this->setContents();
         return $this->contents;
     }
 
-    public static function getCategories($application)
-    {
-        $categories = array("tous" => new Category("Tous", $application, true));
-        foreach ($application->getClassContentDir() as $classcontentdir) {
-            //$files = self::globRecursive($classcontentdir . DIRECTORY_SEPARATOR . '*.yml');
-            $files = glob($classcontentdir. DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]', GLOB_BRACE);
+    public static function getCategories($bbapp) {
+        $categories = array("tous" => new Category("Tous", $bbapp, true));
+        foreach($bbapp->getClassContentDir() as $classcontentdir) {
+            $files = self::globRecursive($classcontentdir . DIRECTORY_SEPARATOR . '*.yml');
             if (is_array($files)) {
                 $categories = array_merge($categories, self::getFilesCategory($files));
             }
@@ -200,8 +120,7 @@ class Category
         return $categories;
     }
 
-    static function getFilesCategory($files = array())
-    {
+    static function getFilesCategory($files = array()) {
         $categories = array();
         if (!isset($files) && !is_array($files))
             return;
@@ -220,19 +139,16 @@ class Category
         return $categories;
     }
 
-    public static function globRecursive($pattern, $flags = 0)
-    {
+    public static function globRecursive($pattern, $flags = 0) {
         $files = glob($pattern, $flags);
-        if (!$files)
-            $files = array();
+        if (!$files) $files = array();
         if (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT))
-            foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir)
-                $files = array_merge($files, self::globRecursive($dir . '/' . basename($pattern), $flags));
+                foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir)
+                        $files = array_merge($files, self::globRecursive($dir . '/' . basename($pattern), $flags));
         return $files;
     }
 
-    public function __toStdObject()
-    {
+    public function __toStdObject() {
         $stdClass = new \stdClass();
         $stdClass->name = $this->getname();
         $stdClass->uid = uniqid();

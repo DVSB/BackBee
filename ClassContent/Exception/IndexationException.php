@@ -16,6 +16,6 @@ class IndexationException extends BBException
 
     const UNKNOWN_ERROR = 10000;
 
-    protected $_code = self::UNKNOWN_ERROR;
+    private $_code = self::UNKNOWN_ERROR;
 
 }

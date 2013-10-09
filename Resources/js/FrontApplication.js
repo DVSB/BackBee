@@ -388,7 +388,7 @@ bb.frontApplication = (function($,gExport){
                     self.layoutToolsbar.removeTempTemplate();
                 });
 				
-                $(document).bind("content:ItemClicked",function(event,data){
+               $(document).bind("content:ItemClicked",function(event,data){
                     self.tabManager.updateContentPath(data);
                 });
             
@@ -526,7 +526,8 @@ bb.frontApplication = (function($,gExport){
                         case _settings.TAB_EDITION_PAGE:
                             if(!self.statusManager){
                                 self.statusManager = bb.StatusManager.init({
-                                    pageId: _settings.pageId
+                                    pageId: _settings.pageId,
+                                    layoutId: _settings.layoutId
                                 });
                             }
                             if(AlohaManager) AlohaManager.stop();

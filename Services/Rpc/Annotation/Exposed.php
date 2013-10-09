@@ -8,10 +8,6 @@ class Exposed
 {
     private $_secured;
     
-    /**
-     * @codeCoverageIgnore
-     * @param array $options
-     */
     public function __construct(array $options = array())
     {
         $this->_secured = (isset($options["secured"])) ? $options["secured"] : true;

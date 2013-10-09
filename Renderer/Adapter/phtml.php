@@ -74,13 +74,8 @@ class phtml extends ARenderer {
             $this->_templateFile = $template;
             if (NULL === $this->_templateFile && NULL !== $this->_object) {
                 $this->_templateFile = $this->_getTemplateFile($this->_object, $mode);
-                if (FALSE === $this->_templateFile) {
+                if (FALSE === $this->_templateFile)
                     $this->_templateFile = $this->_getTemplateFile($this->_object, $this->getMode());
-                }
-                if (false === $this->_templateFile && false === $this->_ignoreIfRenderModeNotAvailable) {
-                    $this->_templateFile = $this->_getTemplateFile($this->_object);
-                }
-                
             }
             File::resolveFilepath($this->_templateFile, NULL, array('include_path' => $this->_scriptdir));
             
@@ -98,7 +93,7 @@ class phtml extends ARenderer {
                     foreach($subcontents as $subcontent) {
                         if (is_a($subcontent, 'BackBuilder\Renderer\IRenderable')) {
                             $renderer = clone $this;
-                            if (FALSE === $subcontentrender = $renderer->render($subcontent, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable))
+                            if (FALSE === $subcontentrender = $renderer->render($subcontent, $this->getMode(), $params, $template))
                                 throw $e;
                             $this->_restore();
     
@@ -174,9 +169,7 @@ class phtml extends ARenderer {
                                                               'isRoot' => true,
                                                               'indexZone' => $indexZone++,
                                                               'isMainZone' => NULL !== $zone && property_exists($zone, 'mainZone') && TRUE === $zone->mainZone
-                                                          ),
-                                                          null,
-                                                          $this->_ignoreIfRenderModeNotAvailable));
+                                                          )));
                 }
             }
         }
@@ -220,7 +213,7 @@ class phtml extends ARenderer {
             return ob_get_clean();
         } catch (\Exception $e) {
             ob_end_clean();
-            throw new RendererException($e->getMessage() . ' in ' . $this->_templateFile, RendererException::RENDERING_ERROR, $e);
+            throw new RendererException($e->getMessage(), RendererException::RENDERING_ERROR, $e);
         }
     }
     
@@ -254,17 +247,17 @@ class phtml extends ARenderer {
     /**
      * @see BackBuilder\Renderer\ARenderer::render()
      */
-    public function render(IRenderable $object = NULL, $mode = NULL, $params = NULL, $template = NULL, $ignoreIfRenderModeNotAvailable = true) {
+    public function render(IRenderable $object = NULL, $mode = NULL, $params = NULL, $template = NULL) {
         if (NULL === $object) return;
         
         if (false === $object->isRenderable() && NULL === $this->getApplication()->getBBUserToken())
             return;
         
-        $this->getApplication()->debug(sprintf('Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($object), $object->getUid(), $mode, $ignoreIfRenderModeNotAvailable));
+        $this->getApplication()->debug(sprintf('Starting to render `%s(%s)` with mode `%s`.', get_class($object), $object->getUid(), $mode));
         
         $renderer = clone $this;
         $renderer->setObject($object)
-                 ->setMode($mode, $ignoreIfRenderModeNotAvailable)
+                 ->setMode($mode)
                  ->_triggerEvent('prerender');
         
         if (NULL === $renderer->__render) {

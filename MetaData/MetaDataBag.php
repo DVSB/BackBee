@@ -29,13 +29,15 @@ class MetaDataBag implements \IteratorAggregate, \Countable
                     }
                     
                     if (true === array_key_exists('default', $attrvalue)) {
-                        $metadata->setAttribute($attrname, $attrvalue['default'], $content);
+                        $value = (is_array($attrvalue['default'])) ? reset($attrvalue['default']) : $attrvalue['default'];
+                        $metadata->setAttribute($attrname, $value, $content);
                     }
                     
                     if (null !== $page && true === array_key_exists('layout', $attrvalue)) {
                         $layout_uid = $page->getLayout()->getUid();
                         if (true === array_key_exists($layout_uid, $attrvalue['layout'])) {
-                            $metadata->setAttribute($attrname, $attrvalue['layout'][$layout_uid], $content);
+                        $value = (is_array($attrvalue['layout'][$layout_uid])) ? reset($attrvalue['layout'][$layout_uid]) : $attrvalue['layout'][$layout_uid];
+                            $metadata->setAttribute($attrname, $value, $content);
                         }
                     }
                 }
@@ -56,22 +58,12 @@ class MetaDataBag implements \IteratorAggregate, \Countable
         return clone $this;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param \BackBuilder\MetaData\MetaData $metadata
-     * @return \BackBuilder\MetaData\MetaDataBag
-     */
     public function add(MetaData $metadata)
     {
         $this->_metadatas[$metadata->getName()] = $metadata;
         return $this;
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @param string $name
-     * @return boolean
-     */
     public function has($name)
     {
         return array_key_exists($name, $this->_metadatas);
@@ -111,7 +103,6 @@ class MetaDataBag implements \IteratorAggregate, \Countable
     
     /**
      * Returns the number of attributes.
-     * @codeCoverageIgnore
      * @return int
      */
     public function count()
@@ -121,7 +112,6 @@ class MetaDataBag implements \IteratorAggregate, \Countable
 
     /**
      * Returns an iterator for attributes.
-     * @codeCoverageIgnore
      * @return \ArrayIterator
      */
     public function getIterator()

@@ -88,7 +88,6 @@ class Event extends sfEvent
 
     /**
      * Add argument to event.
-     * @codeCoverageIgnore
      * @param string $key   Argument name.
      * @param mixed  $value Value.
      * @return GenericEvent
@@ -112,7 +111,6 @@ class Event extends sfEvent
 
     /**
      * Return the arguments passed to the event
-     * @codeCoverageIgnore
      * @return mixed|NULL
      */
     public function getEventArgs()

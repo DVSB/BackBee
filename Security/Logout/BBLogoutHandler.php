@@ -27,7 +27,6 @@ class BBLogoutHandler implements LogoutHandlerInterface
 
     /**
      * Class constructor
-     * @codeCoverageIgnore
      * @param \BackBuilder\Security\Authentication\Provider\BBAuthenticationProvider $authentication_provider
      */
     public function __construct(BBAuthenticationProvider $authentication_provider)
@@ -37,7 +36,6 @@ class BBLogoutHandler implements LogoutHandlerInterface
 
     /**
      * Invalidate the current BB connection
-     * @codeCoverageIgnore
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @param \Symfony\Component\HttpFoundation\Response $response
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token

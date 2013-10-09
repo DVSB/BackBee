@@ -15,7 +15,6 @@ class Group implements IRoleReaderAdaptator
 {
  
     /**
-     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function __construct(BBApplication $application) {}

@@ -22,7 +22,7 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
 <?php endforeach; ?>
 
 <?php if (NULL !== $this->getParam('token') && is_a($this->getParam('token'), 'BackBuilder\Security\Token\BBUserToken')): ?>
-    <script src="<?php echo $this->getUri('ressources/js/aloha/lib/aloha.js'); ?>" data-aloha-plugins="common/format, common/link, common/highlighteditables, common/paste, common/block, common/commands, extra/bbselector <?php echo (('' != $this->getParam('aloha_extraplugins')) ? (', ' . $this->getParam('aloha_extraplugins')) : '');?>" type="text/javascript"></script>
+    <script src="<?php echo $this->getUri('ressources/js/aloha/lib/aloha.js'); ?>" data-aloha-plugins="common/format, common/link, common/highlighteditables, common/paste, common/block, common/commands, extra/bbselector <?php echo (('' != $this->getParam('aloha_extraplugins')) ? (', ' . $this->getParam('aloha_extraplugins')) : ''); ?>" type="text/javascript"></script>
 
     <?php // BB5 interface ?>
     <link rel="stylesheet" href="<?php echo $this->getUri('ressources/css/jquery-ui-select.css'); ?>">
@@ -61,7 +61,10 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
             <?php // BB5 MAINTABS ?>
             <div id="bb5-maintabs">
                 <ul class='bb5-tabs'>
-                    <li>
+                    <li<?php if (false === $this->getApplication()->getSecurityContext()->isGranted('sudo')
+                && false === $this->getApplication()->getSecurityContext()->isGranted('EDIT', new \BackBuilder\Site\Layout('*')))
+            echo ' style="display:none;"';
+        ?>>
                         <a href='#bb5-grid' data-i18n="toolbar.templates.label">Gabarits</a>
                     </li>
                     <li style="display: none;">
@@ -73,7 +76,7 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
                     <li>
                         <a href='#bb5-editing' data-i18n="toolbar.edition">Edition</a>
                     </li>
-                    <li>
+                    <li style="display: none;">
                         <a href='#bb5-status' data-i18n="toolbar.status_title">Validation et statut</a>
                     </li>
                     <li>
@@ -85,42 +88,42 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
                 </ul>
                 <div id="bb5-grid" style="display:none">
                     <?php // Begin Tabbed Grid ?>
-                    <?php echo $this->partial('bb5/_bb5.tab.grid.phtml'); ?>
-                    <?php // End Tabbed Grid ?>
+    <?php echo $this->partial('bb5/_bb5.tab.grid.phtml'); ?>
+    <?php // End Tabbed Grid  ?>
                 </div>
                 <div id="bb5-blocks" style="display:none">
                     <p data-i18n="toolbar.blocks">Gestion des blocs - dev en cours - [bb5-blocks]</p>
                 </div>
                 <div id="bb5-theming" style="display:none">
                     <?php // Begin Tabbed Theming ?>
-                    <?php echo $this->partial('bb5/_bb5.tab.theming.phtml'); ?>
-                    <?php // End Tabbed Theming ?>
+    <?php echo $this->partial('bb5/_bb5.tab.theming.phtml'); ?>
+                    <?php // End Tabbed Theming  ?>
                 </div>
                 <div id='bb5-editing' style="display:none">
                     <?php // Begin Tabbed Editing ?>
-                    <?php echo $this->partial('bb5/_bb5.tab.editing.phtml'); ?>
-                    <?php // End Tabbed Editing ?>
+    <?php echo $this->partial('bb5/_bb5.tab.editing.phtml'); ?>
+                    <?php // End Tabbed Editing  ?>
                 </div>
                 <div id="bb5-status" style="display:none">
                     <?php // Begin Tabbed Status ?>
-                    <?php echo $this->partial('bb5/_bb5.tab.status.phtml'); ?>
-                    <?php // End Tabbed Status ?>
+    <?php echo $this->partial('bb5/_bb5.tab.status.phtml'); ?>
+                    <?php // End Tabbed Status  ?>
                 </div>
                 <div id="bb5-bundle" style="display:none;">
                     <?php // Begin Tabbed Extensions ?>
-                    <?php echo $this->partial('bb5/_bb5.tab.extensions.phtml'); ?>
-                    <?php // End Tabbed Extensions ?>
+    <?php echo $this->partial('bb5/_bb5.tab.extensions.phtml'); ?>
+    <?php // End Tabbed Extensions  ?>
                 </div>
                 <div id='bb5-personal' style="display:none">
                     <p>And this is the 5th tab.</p>
                 </div>
             </div>
-            <?php // END BB5 MAINTABS ?>
-            <?php // END INNER TOOLBAR ?>
+        <?php // END BB5 MAINTABS  ?>
+        <?php // END INNER TOOLBAR ?>
         </div>
         <?php // End toolbar wrapper ?>
 
-        <?php // Exam Path Wrapper ?>
+    <?php // Exam Path Wrapper  ?>
         <div id="bb5-exam-path-outter">
             <div id="bb5-exam-path-wrapper" style="display:none">
                 <div id="bb5-exam-path-inner">
@@ -130,8 +133,8 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
                 </div>
             </div>
         </div>
-        <?php // End Exam Path Wrapper ?>
-        <?php echo $this->partial('bb5/_bb5.widgets.templates.phtml'); ?>
+    <?php // End Exam Path Wrapper  ?>
+    <?php echo $this->partial('bb5/_bb5.widgets.templates.phtml'); ?>
     </div>
     <section id="bb-box-wrapper"></section>
 

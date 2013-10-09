@@ -70,7 +70,6 @@ class Arrays
      *     </multiTags>
      * </root>
      * 
-     * @codeCoverageIgnore
      * @param array $array
      * @return string
      */

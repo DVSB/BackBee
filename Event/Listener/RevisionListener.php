@@ -114,7 +114,7 @@ class RevisionListener {
         if (false === ($content instanceof ContentSet)) {
             foreach ($content->getData() as $key => $subcontent) {
                 if (NULL === $subcontent) {
-                    $contenttype = $content->getAcceptedType($key);
+                    $contenttype = $content->getType($key);
                     if (0 === strpos($contenttype, 'BackBuilder\ClassContent\\')) {
                         if (NULL === $content->getDraft()) {
                             $revision = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true);

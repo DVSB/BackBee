@@ -20,16 +20,11 @@ class UsernamePasswordToken extends AbstractToken {
         parent::setAuthenticated(count($roles) > 0);
     }
     
-    /**
-     * @codeCoverageIgnore
-     * @return type
-     */
     public function getCredentials() {
         return $this->_credentials;
     }
     
     /**
-     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function eraseCredentials()

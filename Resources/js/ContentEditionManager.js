@@ -55,7 +55,11 @@ var ContentEditionManager = (function(){
         useScroll : true
     };
     
-    /*content Actions*/
+    
+    /*content plugins*/
+    var _availablePluginsBtns = {};
+    
+    /*content default Actions*/
     var _availableBtns = {
         "bb5-ico-info" : {
             btnClass:"bb5-button bb5-ico-info bb5-button-square bb5-invert", 
@@ -515,8 +519,8 @@ var ContentEditionManager = (function(){
    
     var originalContainerHeight = null;
     var resizeStep = 0;
+    
     var _createContentsSelector = function(){
-      
         _context.contentSelector = $('#bb5-dialog-content-selector').bbSelector({
             popup: true,
             mediaSelector: false,
@@ -650,7 +654,7 @@ var ContentEditionManager = (function(){
         var filters = filters || [];
         var btnsContainer = $("<div></div>").clone();
         btnsContainer.addClass(_settings.actionCtnCls);
-       
+        
         $.each(_availableBtns,function(key,btnConfig){
             if($.inArray(key,filters) ==-1){
                 var btn = $("<button></button>").clone();
@@ -658,9 +662,44 @@ var ContentEditionManager = (function(){
                 $(btn).attr("data-type",key);
                 $(btnsContainer).append($(btn));
             }
-           
         });
+        /*show plugins action here*/
+        $.each(_availablePluginsBtns,function(key,btnConfig){
+            if($.inArray(key,filters) ==-1){
+                var btn = $("<button/>").clone();
+                $(btn).addClass(btnConfig.btnClass).attr("title",btnConfig.btnTitle);
+                $(btn).attr("data-type",key);
+                $(btn).bind("click",btnConfig.btnCallback);
+                $(btnsContainer).prepend($(btn));
+            }
+        });
+        
         return btnsContainer;
+    }
+    
+    /*put in a class */
+    var _handleContentPluginActions = function(pluginActions){
+      
+        var pluginActions = $.isArray(pluginActions) ? pluginActions : []; 
+        var actionsContainer = {}; 
+        
+        $.each(pluginActions,function(i,actionInfos){
+            var btnClass = "bb5-button #cls# bb5-button-square bb5-invert";
+            btnClass = btnClass.replace("#cls#",actionInfos.icoCls);
+            var action = {
+                btnClass:"", 
+                btnTitle:"", 
+                btnCallback:""
+            };
+            action.btnClass = btnClass;
+            action.btnTitle = actionInfos.label; 
+            action.btnCallback = actionInfos.command.execute;
+           _availablePluginsBtns[actionInfos.icoCls] = action;
+        });
+        /* refresh content actions */
+        _showActionsForContent(_selectedContent);
+        /*reset available*/
+        _availablePluginsBtns = {};
     }
     
     
@@ -705,6 +744,9 @@ var ContentEditionManager = (function(){
             var bbContent = $bb(e.currentTarget);
             var currentContent = e.currentTarget;
             _selectContent(currentContent);
+          /*  $(document).trigger("bbcontent:clicked",{
+                content : bbContent
+            });*/
             //_selectNodeContent(currentContent);
             return false;
         });
@@ -762,7 +804,7 @@ var ContentEditionManager = (function(){
             itemClass : ".contentNodeItem",
             itemIdKey : "data-uid"
         };
-        $(document).trigger("content:ItemClicked",[pathInfos]);
+        $(document).trigger("content:ItemClicked",[pathInfos,$bb(currentContent)]);
         return true;
     }
         
@@ -1007,7 +1049,7 @@ var ContentEditionManager = (function(){
         if(!bbContent.isContentSet || bbContent.isAnAutoBlock){
             filters.push("bb5-ico-lib");  
         }
-        
+        /* Le contentSet ne peut pas être effacer */
         if(bbContent && bbContent.isARootContentSet){
             filters.push("bb5-ico-del");
         }
@@ -1107,7 +1149,7 @@ var ContentEditionManager = (function(){
         if(_isEnable) bb.Utils.scrollToContent($(node),1000,250);
         _selectNodeContent(node);
     }
-       
+    
     var publicApi = {
         enable : _enable,
         disable: _disable,
@@ -1116,6 +1158,7 @@ var ContentEditionManager = (function(){
         hideContextMenu : _hideContextMenu,
         showContentParamsEditor : _showCurrentContentparams,
         toggleEditionMode: _toggleEditionMode,
+        handlePluginsActions: _handleContentPluginActions,
         getContextMenu : function(){
             return _contextMenu;
         }        
@@ -1127,7 +1170,7 @@ var ContentEditionManager = (function(){
        
 })();
 
-
+/* Form Builder to put to a file*/
 var FormBuilder = function(settings){
     this.settings = {
         formCls : "paramCls",
@@ -1361,9 +1404,7 @@ FormBuilder.createSubformRenderer = function(paramName,paramsOption,mainFormId){
         var cleanParams = {};
         cleanParams[paramName] = paramsWithArr;
     }
-    else{
-    
-    }
+   
     
     /*paramsOption*/
     var fieldInfos = {};

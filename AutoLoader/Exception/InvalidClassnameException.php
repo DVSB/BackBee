@@ -8,7 +8,7 @@ namespace BackBuilder\AutoLoader\Exception;
  * @category    BackBuilder
  * @package     BackBuilder\AutoLoader\Exception
  * @copyright   Lp digital system
- * @author      c.rouillon <rouillon.charles@gmail.com>
+ * @author      c.rouillon
  */
 class InvalidClassnameException extends AutoloaderException
 {
@@ -17,6 +17,6 @@ class InvalidClassnameException extends AutoloaderException
      * The default error code
      * @var int
      */
-    protected $_code = self::INVALID_CLASSNAME;
+    private $_code = self::INVALID_CLASSNAME;
 
 }

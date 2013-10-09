@@ -17,6 +17,6 @@ class UnknownPropertyException extends ClassContentException
      * The default error code
      * @var int
      */
-    protected $_code = self::UNKNOWN_PROPERTY;
+    private $_code = self::UNKNOWN_PROPERTY;
 
 }
