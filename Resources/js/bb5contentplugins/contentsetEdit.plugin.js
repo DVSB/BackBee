@@ -36,7 +36,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
     },
     
     _getAllowedNbItems: function(){
-        var maxentry = 5;//this.node.getMaxEntry();
+        var maxentry = this.node.getMaxEntry();
         var nbContent = this.node.getNbContent();
         var allowedMaxentry = ( maxentry == 9999 ) ? maxentry : maxentry - nbContent;
         return allowedMaxentry;

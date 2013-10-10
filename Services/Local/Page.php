@@ -117,12 +117,11 @@ class Page extends AbstractServiceLocal
                 $object->redirect = null;
         }
 
-<<<<<<< HEAD
         $em = $this->bbapp->getEntityManager();
         $page = $em->getRepository('\BackBuilder\NestedNode\Page')->find($object->uid);
         if (NULL === $page)
             throw new ServicesException(sprintf('Unable to find page for `%s` uid', $object->uid));
-=======
+
         if (null === $object->workflow_state) {
             $page->setWorkflowState(null);
         } else {
@@ -137,7 +136,6 @@ class Page extends AbstractServiceLocal
                 }
             }
         }
->>>>>>> cc066bed9988841e71190dea520f6618f0a3b6ea
 
         $page->unserialize($object);
         $em->flush();

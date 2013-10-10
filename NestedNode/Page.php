@@ -916,12 +916,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         $result['publishing'] = (null !== $this->getPublishing()) ? $this->getPublishing()->getTimestamp() : null;
         $result['archiving'] = (null !== $this->getArchiving()) ? $this->getArchiving()->getTimestamp() : null;
         $result['metadata'] = (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null;
-<<<<<<< HEAD
-=======
         $result['layout_uid'] = (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null;
         $result['workflow_state'] = (null !== $this->getWorkflowState()) ? $this->getWorkflowState()->getCode() : null;
->>>>>>> cc066bed9988841e71190dea520f6618f0a3b6ea
-
         return $result;
     }
 
