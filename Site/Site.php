@@ -20,7 +20,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      c.rouillon <rouillon.charles@gmail.com>
  * @Entity(repositoryClass="BackBuilder\Site\Repository\SiteRepository")
- * @Table(name="site")
+ * @Table(name="site", indexes={@Index(name="url", columns={"server_name"})})
  */
 class Site extends AObjectIdentifiable implements IJson
 {
