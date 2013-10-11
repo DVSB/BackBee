@@ -1,12 +1,9 @@
 <?php
 namespace BackBuilder\Installer;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Util\Dir;
+use BackBuilder\BBApplication;
 
-use Doctrine\ORM\Mapping\Entity,
-    Doctrine\Common\Annotations\SimpleAnnotationReader,
-    Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\ORM\Tools\SchemaTool;
 
 /**
  * @category    BackBuilder
@@ -25,13 +22,13 @@ class Database
      */
     private $_application;
     /**
-     * @var SimpleAnnotationReader 
-     */
-    private $_annotationReader;
-    /**
      * @var SchemaTool 
      */
     private $_schemaTool;
+    /**
+     * @var EntityFinder
+     */
+    private $_entityFinder;
 
     /**
      * @param \BackBuilder\BBApplication $application
@@ -41,6 +38,7 @@ class Database
         $this->_application = $application;
         $this->_em = $this->_application->getEntityManager();
         $this->_schemaTool = new SchemaTool($this->_em);
+        $this->_entityFinder = new EntityFinder($this->_application->getBaseDir());
     }
     
     /**
@@ -121,7 +119,7 @@ class Database
     private function _getBackbuilderSchema()
     {
         $classes = array();
-        foreach ($this->_getEntities($this->_application->getBBDir()) as $className) {
+        foreach ($this->_entityFinder->getEntities($this->_application->getBBDir()) as $className) {
             $classes[] = $this->_em->getClassMetadata($className);
         }
         return $classes;
@@ -135,65 +133,9 @@ class Database
     {
         $reflection = new \ReflectionClass(get_class($bundle));
         $classes = array();
-        foreach ($this->_getEntities(dirname($reflection->getFileName())) as $className) {
+        foreach ($this->_entityFinder->getEntities(dirname($reflection->getFileName())) as $className) {
             $classes[] = $this->_em->getClassMetadata($className);
         }
         return $classes;
-    }
-
-    /**
-     * @param string $path
-     * @return array
-     */
-    private function _getEntities($path)
-    {
-        $entities = array();
-        foreach (Dir::getContent($path) as $content) {
-            $subpath = $path . DIRECTORY_SEPARATOR . $content;
-            if ($content == 'Resources' || $content == 'Ressources' || $content == 'TestUnit') continue;
-            if (is_dir($subpath)) {
-                $entities = array_merge($entities, $this->_getEntities($subpath));
-            } else {
-                if (strpos($subpath, '.php')) {
-                    $namespace = $this->getNamespace($subpath);
-                    if ($this->_isEntity(new \ReflectionClass($namespace))) {
-                        $entities[] = $namespace; 
-                    }
-                }
-            }
-        }
-        return $entities;
-    }
-    
-    /**
-     * @param string $file
-     * @return string
-     */
-    private function getNamespace($file)
-    {
-        $classname = str_replace(array($this->_application->getBaseDir(), 'bundle', '.php', '/'), array('', 'Bundle', '', '\\'), $file);
-        return strpos('BackBuilder', $classname) ? $classname : 'BackBuilder' . $classname;
-    }
-
-    /**
-     * @param \ReflectionClass $reflection
-     * @return boolean
-     */
-    private function _isEntity(\ReflectionClass $reflection)
-    {
-        return !is_null($this->_getEntityAnnotation($reflection));
-    }
-    
-    /**
-     * @param \ReflectionClass $class
-     * @return Entity
-     */
-    private function _getEntityAnnotation(\ReflectionClass $class)
-    {
-        if (!$this->_annotationReader) {
-            $this->_annotationReader = new SimpleAnnotationReader();
-            $this->_annotationReader->addNamespace('Doctrine\ORM\Mapping');
-        }
-        return $this->_annotationReader->getClassAnnotation($class, new Entity());
     }
 }

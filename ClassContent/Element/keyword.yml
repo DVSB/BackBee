@@ -5,3 +5,5 @@ keyword:
     description: An attached keywords
   elements:
     value: !!scalar
+  fixture:
+    value: word

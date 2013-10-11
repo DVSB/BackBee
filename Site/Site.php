@@ -21,6 +21,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @author      c.rouillon <rouillon.charles@gmail.com>
  * @Entity(repositoryClass="BackBuilder\Site\Repository\SiteRepository")
  * @Table(name="site", indexes={@Index(name="url", columns={"server_name"})})
+ * @fixtures(qty=1)
  */
 class Site extends AObjectIdentifiable implements IJson
 {
@@ -29,6 +30,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The unique identifier of this website.
      * @var string
      * @Id @Column(type="string", name="uid")
+     * @fixture(type="md5")
      */
     protected $_uid;
 
@@ -36,6 +38,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The label of this website.
      * @var string
      * @Column(type="string", name="label", nullable=false)
+     * @fixture(type="domainWord")
      */
     protected $_label;
 
@@ -43,6 +46,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The creation datetime.
      * @var \DateTime
      * @Column(type="datetime", name="created", nullable=false)
+     * @fixture(type="dateTime")
      */
     protected $_created;
 
@@ -50,6 +54,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The last modification datetime.
      * @var \DateTime
      * @Column(type="datetime", name="modified", nullable=false)
+     * @fixture(type="dateTime")
      */
     protected $_modified;
 
@@ -57,6 +62,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The optional server name.
      * @var string
      * @Column(type="string", name="server_name", nullable=true)
+     * @fixture(type="domainWord")
      */
     protected $_server_name;
 

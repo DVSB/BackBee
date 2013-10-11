@@ -11,6 +11,7 @@ namespace BackBuilder\Site\Metadata;
  * @author      Nicolas BREMONT <nicolas.bremont@groupe-lp.com>
  * @Entity
  * @Table(name="metadata")
+ * @fixtures(qty=20)
  */
 class Metadata {
     
@@ -18,26 +19,27 @@ class Metadata {
      * The unique identifier
      * @Id
      * @Column(type="string")
+     * @fixture(type="md5")
      */
-    private $uid;
+    protected $uid;
     
     /**
-     * 
      * @Column(type="string")
+     * @fixture(type="word")
      */
-    private $attribute;
+    protected $attribute;
     
     /**
-     *
-     * @Column(type="string", name="attr_value") 
+     * @Column(type="string", name="attr_value")
+     * @fixture(type="word")
      */
-    private $attrValue;
+    protected $attrValue;
     
     /**
-     *
      * @Column(type="string")
+     * @fixture(type="sentence", value=6)
      */
-    private $content;
+    protected $content;
     
     
     function __construct($uid = NULL, $attribute = NULL, $attrValue = NULL, $content = NULL) {

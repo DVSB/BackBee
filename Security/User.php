@@ -16,6 +16,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @author      m.baptista
  * @Entity(repositoryClass="BackBuilder\Security\Repository\UserRepository")
  * @Table(name="user")
+ * @fixtures(qty=20)
  */
 class User implements UserInterface
 {
@@ -32,6 +33,7 @@ class User implements UserInterface
      * The login of this user
      * @var string
      * @Column(type="string", name="login")
+     * @fixture(type="word")
      */
     protected $_login;
 
@@ -39,6 +41,7 @@ class User implements UserInterface
      * The password of this user
      * @var string
      * @Column(type="string", name="password")
+     * @fixture(type="word")
      */
     protected $_password;
 
@@ -46,6 +49,7 @@ class User implements UserInterface
      * The access state
      * @var Boolean
      * @Column(type="boolean", name="activated")
+     * @fixture(type="boolean")
      */
     protected $_activated;
 
@@ -53,6 +57,7 @@ class User implements UserInterface
      * The firstame of this user
      * @var string
      * @Column(type="string", name="firstname")
+     * @fixture(type="firstName")
      */
     protected $_firstname;
 
@@ -60,6 +65,7 @@ class User implements UserInterface
      * The lastname of this user
      * @var string
      * @Column(type="string", name="lastname")
+     * @fixture(type="lastName")
      */
     protected $_lastname;
 
