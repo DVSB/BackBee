@@ -783,10 +783,12 @@
                     }
                     context.mediaFormDialog.setOption("title",context.availableMedias[media_classname].label);
                     context.mediaFormDialog.setContent($(result.result));
+                    
                     var dropbox = $(context.mediaFormDialog.dialog).find(".bbMediaPreview").eq(0);
                     var mediaType = $(dropbox).attr("data-mediatype") || null;
                     if(!mediaType) throw "Le type du média n'a pas pu être trouvé.";
                     var maxSize = (mediaType in bb.config.mediaFileSize) ? parseInt(bb.config.mediaFileSize[mediaType]) : 1;  
+
                     /*
                      *var mediaUploader = mediaUploader.init(type);
                     var mediaUploadhandler = mediaUpload.handler("pdf",{callback : function(){}});
@@ -1008,7 +1010,7 @@
         /* move outside*/
         _createPreview: function(file, dropbox) {
             dropbox.empty();
-            var fileType = (typeof $(dropbox).attr("data-mediatype")=="string") ? $(dropbox).attr("data-mediatype") : false;
+            var fileType = (typeof $(dropbox).attr("data-mediatype")=="string") ? $(dropbox).attr("data-mediatype") : false;  
             if(fileType) new Error("Le type du media n'a pas pu être trouvé.");
             var methodName = fileType.charAt(0).toUpperCase() + fileType.slice(1);
             var methodToCall = "_create{mediaType}Preview".replace("{mediaType}",methodName);
@@ -1021,6 +1023,15 @@
         },
 
         /* fixme Place preview here.. or in a class implementing an useful interface*/
+        _createZipPreview : function(file,dropbox){
+            if(file){
+                var context = this.getContext();
+                var preview = $($(context.mediaFormDialog.dialog).find("#filebbselector-editpreview-tpl .preview").clone());
+                if("name" in file) $(preview).find(".filename").text(file.name);
+                return preview;
+            }
+        },
+                
         _createPdfPreview : function(file,dropbox){
             if(file){
                 var context = this.getContext();
