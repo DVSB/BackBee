@@ -151,6 +151,7 @@ var AlohaManager = {
             /*use bb content uniqId*/
             var bbContentId = self.mainContainer.id;
             $.each(object, function (attr, value) {
+                /* Apply style here */
                 Aloha.settings.plugins.format.editables['[data-bbContentRef="'+bbContentId+'"][data-type="' + self._contentName + '"] [data-aloha="' + attr + '"]'] = value;
             });
         });
@@ -239,6 +240,7 @@ var AlohaManager = {
         
         Aloha.bind('aloha-editable-deactivated', function(e,editableContent) {
             var bbContent = $bb(editableContent.editable.obj);
+            console.log(editableContent.editable.getContents());
             bbContent.set("value",editableContent.editable.getContents());
             bbContent.parentNode.updateData();
             return false;
