@@ -29,6 +29,7 @@ class Revision extends AbstractServiceLocal
 
         $result = array();
         $revisions = $this->em->getRepository('\BackBuilder\ClassContent\Revision')->getAllDrafts($token);
+
         foreach ($revisions as $revision) {
             $result[] = json_decode($revision->serialize());
         }
@@ -64,7 +65,7 @@ class Revision extends AbstractServiceLocal
                 $result[] = array('error' => $e->getCode(),
                     'message' => $e->getMessage());
             }
-        }        
+        }
 
         return $result;
     }
@@ -88,8 +89,10 @@ class Revision extends AbstractServiceLocal
                 $this->bbapp->getEventDispatcher()->triggerEvent('commit', $revision->getContent());
                 $this->em->flush();
 
-                $result[] = array('commited' => true,
-                    'content' => json_decode($revision->getContent()->serialize()));
+                if (null !== $revision->getContent()) {
+                    $result[] = array('commited' => true,
+                        'content' => json_decode($revision->getContent()->serialize()));
+                }
             } catch (ClassContentException $e) {
                 $result[] = array('error' => $e->getCode(),
                     'message' => $e->getMessage(),
@@ -134,9 +137,9 @@ class Revision extends AbstractServiceLocal
                 break;
             }
         }
-        
+
         $this->em->getRepository('\BackBuilder\NestedNode\Page')->removeEmptyPages($this->bbapp->getSite());
-        $this->em>flush();
+        $this->em > flush();
 
         return $result;
     }

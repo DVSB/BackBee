@@ -483,7 +483,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      */
     public function postLoad()
     {
-        $this->_parameters = Parameter::paramsReplaceRecursive($this->_getContentInstance()->getDefaultParameters(), $this->getParam());
+        if (null !== $this->_getContentInstance()) {
+            $this->_parameters = Parameter::paramsReplaceRecursive($this->_getContentInstance()->getDefaultParameters(), $this->getParam());
+        }
     }
 
     /**
