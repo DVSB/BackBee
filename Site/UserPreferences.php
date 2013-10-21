@@ -57,7 +57,7 @@ class UserPreferences {
     
     /**
      * Return the uid user preferences
-     *
+     * @codeCoverageIgnore
      * @return String
      */
     public function getUid() {
@@ -66,7 +66,7 @@ class UserPreferences {
 
     /**
      * Return the owner of the user preferences
-     *
+     * @codeCoverageIgnore
      * @return Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
      */
     public function getOwner() {
@@ -75,7 +75,7 @@ class UserPreferences {
 
     /**
      * Return a json encoded string of user preferences
-     *
+     * @codeCoverageIgnore
      * @return text
      */
     public function getPreferences() {
@@ -84,7 +84,7 @@ class UserPreferences {
 
     /**
      * Set the user preferences UID
-     *
+     * @codeCoverageIgnore
      * @param string $uid
      * @return \BackBuilder\Site\UserPreferences
      */
@@ -95,7 +95,7 @@ class UserPreferences {
 
     /**
      * Set the owner of the user preferences
-     *
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\User\UserInterface $user
      * @return \BackBuilder\Site\UserPreferences
      */
@@ -105,7 +105,7 @@ class UserPreferences {
     }
 
     /**
-     *  Set the preferences of the user
+     * Set the preferences of the user
      *
      * @param mixed $preferences
      * @return \BackBuilder\Site\UserPreferences
