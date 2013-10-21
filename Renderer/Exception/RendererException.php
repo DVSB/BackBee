@@ -10,5 +10,5 @@ class RendererException extends BBException {
     const LAYOUT_ERROR     = 5003;
     const HELPER_ERROR     = 5004;
     
-    private $_code = self::UNKNOWN_ERROR;
+    protected $_code = self::UNKNOWN_ERROR;
 }
