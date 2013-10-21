@@ -2,9 +2,8 @@
 
 namespace BackBuilder\ClassContent;
 
-use BackBuilder\ClassContent\Exception\ClassContentException;
-use Doctrine\Common\Collections\ArrayCollection,
-    Doctrine\ORM\Mapping\PostLoad;
+use BackBuilder\NestedNode\Page,
+    BackBuilder\ClassContent\Exception\UnknownPropertyException;
 
 /**
  * A set of content objects in BackBuilder
@@ -12,9 +11,8 @@ use Doctrine\Common\Collections\ArrayCollection,
  *
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent
- * @copyright   Lp system
- * @author      c.rouillon
- *
+ * @copyright   Lp digital system
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\ClassContentRepository")
  * @Table(name="content")
  * @HasLifecycleCallbacks
@@ -37,142 +35,28 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     protected $_pages;
 
     /**
-     * Magical function to get value for given element
-     * @param string $var the name of the element
-     * @throws ClassContentException
+     * Initialized datas on postLoad doctrine event
      */
-    public function __get($var)
+    public function postLoad()
     {
-        throw new ClassContentException(sprintf('Unknown property %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
-    }
-
-    public function __isset($var)
-    {
-        throw new ClassContentException(sprintf('Unknown property %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
-    }
-
-    /**
-     * Magical function to set value to given element
-     * @param string $var the name of the element
-     * @param mixed $value the value to set
-     * @throws ClassContentException
-     */
-    public function __set($var, $value)
-    {
-        throw new ClassContentException(sprintf('Unknown property %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
-    }
-
-    /**
-     * Magical function to unset an element
-     * @param string $var the name of the element
-     */
-    public function __unset($var)
-    {
-        throw new ClassContentException(sprintf('Unknown property %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
-    }
-
-    /**
-     * Add a new accepted type to the element
-     * @param string $type the type to accept
-     * @param string $var ignore for a ContentSet
-     * @return AClassContent the current instance
-     */
-    protected function _addAcceptedType($type, $var = NULL)
-    {
-        $types = (array) $type;
-        foreach ($types as $type) {
-            $type = (NAMESPACE_SEPARATOR == $type[0]) ? substr($type, 1) : $type;
-            if (!in_array($type, $this->_accept))
-                $this->_accept[] = $type;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Dynamically add and set new element to this content
-     * @param string $var ignore for a ContentSet
-     * @param type $value the type
-     * @param array $options Initial options for the content (see this constructor)
-     * @param boolean $updateAccept dynamically accept or not the type for the new element
-     * @return AClassContent $this
-     */
-    protected function _defineData($var, $type = 'scalar', $options = NULL, $updateAccept = FALSE)
-    {
-        if ($updateAccept)
-            $this->_addAcceptedType($type, $var);
-
-        if (!is_null($options)) {
-            $options = (array) $options;
-            if (array_key_exists('default', $options)) {
-                $options['default'] = (array) $options['default'];
-                foreach ($options['default'] as $value) {
-                    $this->push($value);
-                }
+        // Ensure class content are known
+        $datas = (array) $this->_data;
+        foreach ($datas as $data) {
+            $type = @array_pop(array_flip($data));
+            if (0 === strpos($type, 'BackBuilder\ClassContent')) {
+                class_exists($type);
             }
         }
 
-        return $this;
+        parent::postLoad();
     }
 
     /**
-     * Check for an accepted type
-     * @param string $value the value from which the type will be checked
-     * @param string $var ignore for a ContentSet
-     * @return boolean
-     */
-    private function _isAccepted($value, $var = NULL)
-    {
-        if (!($value instanceof AClassContent))
-            return FALSE;
-
-        if (!isset($this->_accept) || 0 == count($this->_accept))
-            return true;
-
-        return in_array($this->_getType($value), $this->_accept);
-    }
-
-    /**
-     * Set options at the construction of a new instance
-     * @param array $options Initial options for the content:
-     *                         - label       the label of the content
-     *                         - maxentry    the maximum number of content accepted
-     *                         - minentry    the minimum number of content accepted
-     *                         - accept      an array of classname accepted
-     *                         - default     array default value for datas
-     */
-    protected function _setOptions($options = NULL)
-    {
-        if (!is_null($options)) {
-            $options = (array) $options;
-            if (array_key_exists('label', $options))
-                $this->_label = $options['label'];
-            if (array_key_exists('maxentry', $options))
-                $this->_maxentry = intval($options['maxentry']);
-            if (array_key_exists('minentry', $options))
-                $this->_minentry = intval($options['minentry']);
-            if (array_key_exists('accept', $options))
-                $this->_accept = (array) $options['accept'];
-            if (array_key_exists('default', $options)) {
-                $options['default'] = (array) $options['default'];
-                foreach ($options['default'] as $value) {
-                    $this->push($value);
-                }
-            }
-        }
-    }
-
-//    Entity of type Proxies\__CG__\BackBuilder\ClassContent\ContentSet is missing an assigned ID for
-//    field  '_uid'. The identifier generation strategy for this entity requires the ID field to be populated
-//    before EntityManager#persist() is called.
-//    If you want automatically generated identifiers instead you need to adjust the metadata mapping accordingly.
-
-    /**
-     * Alternative clone method, created because of problems related to doctrine clone method
+     * Alternative recursive clone method, created because of problems related to doctrine clone method
      * @param \BackBuilder\NestedNode\Page $origin_page
      * @return \BackBuilder\ClassContent\ContentSet
      */
-    public function createClone(\BackBuilder\NestedNode\Page $origin_page = null)
+    public function createClone(Page $origin_page = null)
     {
         $clone = parent::createClone($origin_page);
 
@@ -188,7 +72,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         foreach ($this as $subcontent) {
             if (!is_null($subcontent)) {
-                if ( $this->getProperty('clonemode') === 'none'
+                if ($this->getProperty('clonemode') === 'none'
                         || ($this->key() < count($zones) && $zones[$this->key()]->defaultClassContent === 'inherited')
                         || (null !== $subcontent->getMainNode() && $subcontent->getMainNode()->getUid() !== $mainnode_uid)
                 ) {
@@ -201,6 +85,93 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         }
 
         return $clone;
+    }
+
+    /**
+     * Sets options at the construction of a new instance
+     * @param array $options Initial options for the content:
+     *                         - label       the label of the content
+     *                         - maxentry    the maximum number of content accepted
+     *                         - minentry    the minimum number of content accepted
+     *                         - accept      an array of classname accepted
+     *                         - default     array default value for datas
+     * @return \BackBuilder\ClassContent\ContentSet
+     */
+    protected function _setOptions($options = null)
+    {
+        if (null !== $options) {
+            $options = (array) $options;
+            if (true === array_key_exists('label', $options)) {
+                $this->_label = $options['label'];
+            }
+
+            if (true === array_key_exists('maxentry', $options)) {
+                $this->_maxentry = intval($options['maxentry']);
+            }
+
+            if (true === array_key_exists('minentry', $options)) {
+                $this->_minentry = intval($options['minentry']);
+            }
+
+            if (true === array_key_exists('accept', $options)) {
+                $this->_accept = (array) $options['accept'];
+            }
+
+            if (true === array_key_exists('default', $options)) {
+                $options['default'] = (array) $options['default'];
+                foreach ($options['default'] as $value) {
+                    $this->push($value);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Dynamically adds and sets new element to this content
+     * @param string $var the name of the element
+     * @param string $type the type
+     * @param array $options Initial options for the content (see this constructor)
+     * @param Boolean $updateAccept dynamically accept or not the type for the new element
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     */
+    protected function _defineData($var, $type = 'scalar', $options = NULL, $updateAccept = FALSE)
+    {
+        if (true === $updateAccept) {
+            $this->_addAcceptedType($type, $var);
+        }
+
+        if (null !== $options) {
+            $options = (array) $options;
+            if (true === array_key_exists('default', $options)) {
+                $options['default'] = (array) $options['default'];
+                foreach ($options['default'] as $value) {
+                    $this->push($value);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Adds a new accepted type to the element
+     * @param string $type the type to accept
+     * @param string $var the element
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     */
+    protected function _addAcceptedType($type, $var = null)
+    {
+        $types = (array) $type;
+        foreach ($types as $type) {
+            $type = (NAMESPACE_SEPARATOR === substr($type, 0, 1)) ? substr($type, 1) : $type;
+            if (false === in_array($type, $this->_accept)) {
+                $this->_accept[] = $type;
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -219,6 +190,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Countable::count()
+     * @codeCoverageIgnore
      */
     public function count()
     {
@@ -227,6 +199,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::current()
+     * @codeCoverageIgnore
      */
     public function current()
     {
@@ -236,6 +209,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Return the first subcontent of the set
      * @return AClassContent the first element
+     * @codeCoverageIgnore
      */
     public function first()
     {
@@ -341,6 +315,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::key()
+     * @codeCoverageIgnore
      */
     public function key()
     {
@@ -350,6 +325,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Return the last subcontent of the set
      * @return AClassContent the last element
+     * @codeCoverageIgnore
      */
     public function last()
     {
@@ -358,6 +334,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::next()
+     * @codeCoverageIgnore
      */
     public function next()
     {
@@ -392,22 +369,6 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Initialized datas on postLoad doctrine event
-     */
-    public function postLoad()
-    {
-        // Ensure class content are known
-        $datas = (array) $this->_data;
-        foreach ($datas as $data) {
-            $type = @array_pop(array_flip($data));
-            if (0 === strpos($type, 'BackBuilder\ClassContent'))
-                $classtoload = class_exists($type);
-        }
-
-        parent::postLoad();
-    }
-
-    /**
      * Push one element onto the end of the set
      * @param AClassContent $var The pushed values
      * @return ContentSet The current content set
@@ -416,6 +377,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     {
         if (NULL !== $this->getDraft())
             return $this->getDraft()->push($var);
+        
         if ($this->_isAccepted($var)) {
             if (
                     (!$this->_maxentry && !$this->_minentry) ||
@@ -440,80 +402,6 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             $this->_index = 0;
         else
             $this->getDraft()->rewind();
-    }
-
-    /**
-     * Return the serialized string of the content
-     * @return string
-     */
-    public function serialize()
-    {
-        $serialized = new \stdClass();
-        $serialized->uid = $this->getUid();
-        $serialized->type = get_class($this);
-        $serialized->isdraft = (NULL !== $this->getDraft());
-        $serialized->draftuid = $serialized->isdraft ? $this->getDraft()->getUid() : NULL;
-        $serialized->label = $this->getLabel();
-        $serialized->revision = $this->getRevision();
-        $serialized->state = $this->getState();
-        $serialized->created = $this->getCreated();
-        $serialized->modified = $this->getModified();
-
-        $serialized->properties = new \stdClass();
-        if ($this->getProperty())
-            foreach ($this->getProperty() as $key => $value)
-                $serialized->properties->$key = $value;
-
-        $serialized->accept = $this->getAccept();
-        $serialized->maxentry = $this->getMaxEntry();
-        $serialized->minentry = $this->getMinEntry();
-
-        $tmp = array();
-        foreach ($this->getData() as $value)
-            $tmp[] = ($value instanceof AClassContent) ? $value->getUid() : $value;
-        $serialized->data = $tmp;
-
-        $serialized->param = new \stdClass();
-        if ($this->getParam())
-            foreach ($this->getParam() as $key => $value)
-                $serialized->param->$key = $value;
-
-        return json_encode($serialized);
-    }
-
-    /**
-     * Initialized the instance from a serialized string
-     * @param string $serialized
-     * @param boolean $strict If TRUE, all missing or additionnal element will generate an error
-     * @return AClassContent the current instance
-     */
-    public function unserialize($serialized, $strict = FALSE)
-    {
-        if (FALSE === is_object($serialized))
-            $serialized = json_decode($serialized);
-        foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
-            if (in_array($property, array('_created', '_modified'))) {
-                continue;
-            } else if ($property == "_param" && !is_null($value)) {
-                foreach ($value as $param => $paramvalue) {
-                    $this->setParam($param, $paramvalue);
-                }
-            } else if ($property == "_data" && !is_null($value)) {
-                $this->clear();
-                foreach ($value as $el => $val) {
-                    $this->push($val);
-                }
-            }
-            /* else if($property=="_value" && !is_null($value)){
-              $this->value = $value;
-              } */ else if (TRUE === property_exists($this, $property)) {
-                //$this->$property = $value;
-            } else if (TRUE === $strict)
-                throw new BBException(sprintf('Unknown property `%s` in %s.', $property, get_class($this)));
-        }
-
-        return $this;
     }
 
     /**
@@ -565,10 +453,76 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::valid()
+     * @codeCoverageIgnore
      */
     public function valid()
     {
         return (NULL === $this->getDraft()) ? isset($this->_data[$this->_index]) : $this->getDraft()->valid();
+    }
+
+    /*     * **************************************************************** */
+    /*                                                                        */
+    /*                   Implementation of IRenderable                        */
+    /*                                                                        */
+    /*     * **************************************************************** */
+
+    /**
+     * Return the data of this content
+     * @param $var string The element to be return, if NULL, all datas are returned
+     * @param $forceArray Boolean Force the return as array
+     * @return mixed Could be either NULL or one or array of scalar, array, AClassContent instance
+     * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
+     */
+    public function getData($var = null, $forceArray = false)
+    {
+        try {
+            return parent::getData($var, $forceArray);
+        } catch (UnknownPropertyException $e) {
+            return null;
+        }
+    }
+
+    /*     * **************************************************************** */
+    /*                                                                        */
+    /*                   Implementation of Serializable                       */
+    /*                                                                        */
+    /*     * **************************************************************** */
+
+    /**
+     * Initialized the instance from a serialized string
+     * @param string $serialized
+     * @param Boolean $strict If TRUE, all missing or additionnal element will generate an error
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a 
+     *                                                                      property does not match an element
+     */
+    public function unserialize($serialized, $strict = false)
+    {
+        if (false === is_object($serialized)) {
+            $serialized = json_decode($serialized);
+        }
+
+        foreach (get_object_vars($serialized) as $property => $value) {
+            $property = '_' . $property;
+
+            if (true === in_array($property, array('_created', '_modified'))
+                    || null === $value) {
+                continue;
+            } else if ('_param' === $property) {
+                foreach ($value as $param => $paramvalue) {
+                    $this->setParam($param, $paramvalue);
+                }
+            } else if ('_data' === $property) {
+                $this->clear();
+                foreach ($value as $val) {
+                    $this->push($val);
+                }
+            } else if (false === property_exists($this, $property) && true === $strict) {
+                throw new Exception\UnknownPropertyException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this->_getContentInstance())));
+            }
+        }
+
+        return $this;
     }
 
 }
