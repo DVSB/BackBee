@@ -601,23 +601,15 @@ BB4.ToolsbarManager.register("editiontb",{
             this._contextMenu.enable();
         }
 
-        // context menu
-        // $('body').append($('<div class="bb-edition-context-menu"/>'));
-            
-        // Actions
-        /*var actionContainer = $('<ul></ul>').clone();
-        actionContainer.append($('<li class=""><ins class="edit">&nbsp;</ins><a href="#" rel="edit">Edition</a></li>'));
-        $(actionContainer).find('a').attr('href', 'javascript:;');
-        $('.bb-edition-context-menu').append(actionContainer);
-        $('.bb-edition-context-menu').appendTo($('body'));
-        $('.bb-edition-context-menu').hide();
-        
-        this._context.contextMenu = $('.bb-edition-context-menu');
-            
-        $('.bb-edition-context-menu a[rel="edit"]').live('click', function(e) {
-            self._editContent(self._context.contextMenu.data('content'));
-        });*/
-         
+       /*get Rte here */
+       try{
+           var rte = bb.ManagersContainer.getInstance().getManager("RteAdapter"); 
+       }catch(e){
+           console.log("restau");
+           console.log(e);
+       }
+      
+       
         AlohaManager.applyAloha();
         this._context.isEnable = true;   
     },

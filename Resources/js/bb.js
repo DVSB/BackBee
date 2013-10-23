@@ -24,6 +24,9 @@ $.loadScript = function(url, options) {
         },
         
         libs: [
+            'js/libs/requirejs/require.js',
+            'js/bb.require.map.js',//js module
+            
             'js/libs/jquery.event.mousestop.js', //fix mouseenter/mouseleave when moving fast
             'js/libs/jquery-ui-1.8.24.custom.min.js',//to fix sortable jitter and flaky effects and fucking datepicker
             'js/libs/jquery.loadmask.min.js',
@@ -36,6 +39,7 @@ $.loadScript = function(url, options) {
             'js/libs/jquery.templates.js',
             'js/libs/jquery.layout-latest.min.js',
             'js/libs/jquery.fileDownload.js',
+            
             'js/colorpicker.js',
             'js/bb.i18n.js',
             'js/less-1.3.0.min.js',
@@ -46,6 +50,7 @@ $.loadScript = function(url, options) {
             'js/jquery.ui.selectgroup.js',
             'js/script.js',
             'js/Utils.js',
+            
             'js/dbmanager.js',
             'js/min/bb.StateManager.js',
             'js/bb.upload.js',
@@ -70,6 +75,7 @@ $.loadScript = function(url, options) {
             'js/lpTab.js',
             'js/lpContextMenu.js',
             'js/bb.ManagersContainer.js',
+            
             'js/AlohaManager.js',
             'js/FilterManager.js',
             'js/LayoutManager.js',

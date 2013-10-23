@@ -240,7 +240,6 @@ var AlohaManager = {
         
         Aloha.bind('aloha-editable-deactivated', function(e,editableContent) {
             var bbContent = $bb(editableContent.editable.obj);
-            console.log(editableContent.editable.getContents());
             bbContent.set("value",editableContent.editable.getContents());
             bbContent.parentNode.updateData();
             return false;
