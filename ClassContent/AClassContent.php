@@ -1319,14 +1319,10 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
         if (is_array($this->getParam('rendermode'))) {
             $rendermode = @array_pop($this->getParam('rendermode'));
 
-            if (isset($rendermode['rendertype']) && ('select' === $rendermode['rendertype'])) {
-                $rendermode = $rendermode['options'][$rendermode['selected']];
-            }
-
             if (isset($rendermode['rendertype'])) {
                 switch ($rendermode['rendertype']) {
                     case 'select':
-                        $rendermode = $rendermode['options'][$rendermode['selected']];
+                        $rendermode = $rendermode['selected'];
                         break;
                 }
             }
