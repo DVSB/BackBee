@@ -366,7 +366,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
 
                 // A surveiller cette partie pour les revisions
                 if (true === is_array($this->_parameters)
-                        && true === array_key_exists($var, $this->_parameters)) {
+                        && true === array_key_exists($var, $this->_parameters)
+                        && true === is_array($this->_parameters[$var])) {
                     $values = array_replace_recursive($this->_parameters[$var], $values);
                 }
             }
