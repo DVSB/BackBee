@@ -1,27 +1,34 @@
 (function($){
     
+    /*module exposes API. Api should be executed */
     bb.core.registerManager("content",{
         
-        defaultParams: { },
-        /*init must expose the api*/
+        /*initDefaultSettings : function(){
+            this._settings = {};
+        },*/
+        
         init : function(settings){
-            console.log(" thisisi ");
             var settings = settings || {};
-            $.extend({},this.defaultParams,settings);
+            this._settings = $.extend({},this._settings, settings);
             this.title = "parents";
             this.hour = " down south"; 
-            console.log("this is init");
+            console.log("init",this);
         },
-    
+        
         getHour: function(){
             console.log(new Date().getTime());
         },
     
         setHour: function(){
+            console.log("this",this);
             console.log("setHour");
         },
         
         enable: function(){
+            console.log("this",this);
+            this.setHour();
+            console.log(this._settings);
+            console.log(this.title);
             this.isEnable = true; 
         },
         
@@ -29,14 +36,20 @@
             this.isEnable = true;
         },
         
+        /*expose api context */
         getExposedApi: function(){
+            var self = this;
             return{
                 getTitle: function(){
-                    console.log(this.title);
+                    console.log("self",self);
+                    console.log("this",this);
+                    console.log(self.hour);
+                    console.log(self.title);
+                    self.setHour();
                 },
-                getHour: function(){},
-                disable: this.disable,
-                enable: this.enable
+                getHour: function(){},             
+                disable: $.proxy(self.disable,self),
+                enable: $.proxy(self.enable,self)
             }  
         }
     

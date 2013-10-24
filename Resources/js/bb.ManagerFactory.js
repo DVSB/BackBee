@@ -21,7 +21,7 @@ define(["jscore"], function(){
         var _handleModuleConfig = function(){
         
         }
-    
+   
         var _clearDefinition = function(definition){
             var forbiddenMethods = ["initialize"];
             var i;
@@ -36,18 +36,35 @@ define(["jscore"], function(){
     
         /* Abstract manager */
         var AbstactManager = new JS.Class({
-            initialize: function(params){
-                console.log("inside abstract");
+            
+            initDefaultSettings: function(){
+                this._settings = {
+                    "dead":"dyolè",
+                    "test":"sdsd"
+                };
             },
-            getExposedApi: function(){},
+            
+            initialize: function(){
+                this.initDefaultSettings(); //init default
+                this.isEnabled = true;
+            },
+            
+            getExposedApi: function(){
+                return {};
+            },
+            
+            getMedator: function(){},
+         
             enable: function(){},
+            
             disable: function(){},
+            
             saveState: function(){},
+            
             restoreState: function(){}
         }); 
         
         /* Abstract Module */
-                
         var PublicApi = new function(){
         
             /* register manager */
@@ -55,17 +72,14 @@ define(["jscore"], function(){
                 try{
                     if(typeof definition=="object"){
                         var cleanedDefinition = _clearDefinition(definition);
-                        var initFunc = {
-                            init : definition["init"]
-                        };
-                    
+                        
                         var Manager = new JS.Class(AbstactManager, cleanedDefinition);
-                    
-                        /* override getExposed */
+                        /* override getExposed and and the init method the api */
                         Manager.define('getPublicApi', function(){
+                            /*add init function the */
+                            var init = this.method("init");
                             var api = this.getExposedApi();
-                            jQuery.extend(api,initFunc);
-                            console.log("ap",api);
+                            api.init = init;
                             return api;
                         });
                         /* save Manager */
@@ -91,7 +105,8 @@ define(["jscore"], function(){
                         _managerInstances[name] = bbManager.getPublicApi();
                         /* new instance */
                         if(newInstance){
-                            return bbManager.getPublicApi();
+                            var manager =  new _managers[name];
+                            return manager.getPublicApi();
                         }
                         /* singleton -> oldInstance */
                         return _managerInstances[name];
