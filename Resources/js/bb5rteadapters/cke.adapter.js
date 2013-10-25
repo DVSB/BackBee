@@ -3,8 +3,8 @@ bb.rteManager.registerAdapter("cke",{
                 
     _settings: {
         inlineContentClass : ".contentAloha",
-        rteClass:"",
-        mainNodeClass:".mainContent"
+        rteClass: "",
+        mainNodeClass: ".mainContent"
     },
                 
     onInit: function(){

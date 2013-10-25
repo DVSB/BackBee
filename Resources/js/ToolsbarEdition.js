@@ -113,6 +113,7 @@ BB4.ToolsbarManager.register("editiontb",{
         var bbSelector = $(this._context.linkSelector).data('bbSelector');
         bbSelector.open();
     }, 
+    
     _initEditContentEvent : function(){
         /*moseover on content*/
         /*click on content edit-mode*/
@@ -601,16 +602,27 @@ BB4.ToolsbarManager.register("editiontb",{
             this._contextMenu.enable();
         }
 
-       /*get Rte here */
-       try{
-           var rte = bb.ManagersContainer.getInstance().getManager("RteAdapter"); 
-       }catch(e){
-           console.log("restau");
-           console.log(e);
-       }
+        /*get Rte here */
+        try{
+            var rte = bb.ManagersContainer.getInstance().getManager("RteAdapter"); 
+        }catch(e){
+            console.log(e);
+        }
       
        
-        AlohaManager.applyAloha();
+        //AlohaManager.applyAloha();
+        
+        /* handle rte manager here use deferred */
+        bb.require(["ManagerFactory"], function(){
+            try{
+                var contentManager = bb.core.getManager("rte");
+                contentManager.init();
+            }catch(e){
+                throw e;
+            }
+        });
+        
+        
         this._context.isEnable = true;   
     },
     
@@ -618,6 +630,7 @@ BB4.ToolsbarManager.register("editiontb",{
         var bbPrevContent = $bb(prevMedia);
         var prevContentClass = $(bbPrevContent.contentEl).attr("class");
         var newContent = $(newMedia);
+        
         newContent.attr("class",prevContentClass);
         var prevSrc = $(newContent).find("img").eq(0).attr("src");
         var ctime = new Date();

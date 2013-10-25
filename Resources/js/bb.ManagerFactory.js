@@ -1,7 +1,4 @@
 var bb = bb || {};
-bb.core = bb.core || {};
-
-
 /* bb Module factory don't load jsCore */
 var ManagerFactory = null;
 define(["jscore"], function(){
@@ -10,6 +7,8 @@ define(["jscore"], function(){
         var _managers = {};
         var _managerInstances = {};
         var _instance = null;
+        var _hasError = false; 
+        var _try = 0; 
         /* module config is used to handle dependencies
          * and others stuffs
          * put in a global config
@@ -20,7 +19,7 @@ define(["jscore"], function(){
         
         var _handleModuleConfig = function(){
         
-        }
+        };
    
         var _clearDefinition = function(definition){
             var forbiddenMethods = ["initialize"];
@@ -82,7 +81,6 @@ define(["jscore"], function(){
                             api.init = init;
                             return api;
                         });
-                        /* save Manager */
                         _managers[name] = Manager;
                     }  
                 }catch(e){
@@ -98,8 +96,8 @@ define(["jscore"], function(){
              */
             this.getManager = function(name,newInstance){   
                 var self = this;
-                var newInstance = (typeof newInstance =="boolean")? newInstance : false;
                 try{
+                    var newInstance = (typeof newInstance =="boolean")? newInstance : false;
                     if(typeof _managers[name] == "function"){
                         var bbManager = new _managers[name];
                         _managerInstances[name] = bbManager.getPublicApi();
@@ -112,8 +110,12 @@ define(["jscore"], function(){
                         return _managerInstances[name];
                     } 
                     else{
+                        if(_try != 0){
+                            _try = 0;
+                            throw "getManager: manager ["+name+"] can't be loaded!"; 
+                        }
                         var adapterPath = _settings.managerPath+name+".manager.js";
-                        /*sync */
+                        _try++;
                         bb.Utils.ScriptLoader.loadScript({
                             scriptname: adapterPath, 
                             async: true, 
@@ -121,11 +123,13 @@ define(["jscore"], function(){
                                 throw "error while loading";
                             }
                         });
+                        console.log("true");
                         return self.getManager(name);
                     }
-                  
                 }catch(e){
-                    throw e;  
+                    console.warn(e);
+                    throw e;
+                    
                 }
             }
         }

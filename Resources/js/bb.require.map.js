@@ -7,6 +7,7 @@ bb.require = (function(require){
 /* à éditer automatiquement */
 bb.require({
     baseUrl: "js/",
+    catchError:true,
     paths: {
         "RteManager" : "bb.RteManager",
         "ManagerFactory": "bb.ManagerFactory",
@@ -16,7 +17,7 @@ bb.require({
 });
 
 /* expected Api */
-bb.createManager("RteManager",{
+/*bb.createManager("RteManager",{
     
     moduleConfig: {
         alias: "RteManager",
@@ -39,7 +40,7 @@ bb.createManager("RteManager",{
         console.log("I'm in say Hello");
     },
    
-    /* mandatory */ 
+
     exposeMethods: function(){
         return {
             test1: this.sayHello,
@@ -67,7 +68,7 @@ bb.createManager("RteManager",{
 /*tranform */
 //require(["a","b","c","d"],function(){});
 
-
+/*
 var serviceConfig = {
     layoutManager: {
         params: {test:"tesit", second:""}
@@ -78,9 +79,9 @@ var serviceConfig = {
     }
 };
 
-/*user Defered */
+
 var rteManager = bb.ServiceManager.get("RteManager");
 console.log(rteManager.test1());
 console.log(rteManager.test2());
-
+*/
 
