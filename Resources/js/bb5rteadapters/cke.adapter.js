@@ -43,12 +43,11 @@ bb.rteManager.registerAdapter("cke",{
             console.log(self.getValue());
         });
     },
-                
+    
     applyInlineTo: function(node){
         var self = this;
         this.mainNode = $(node).parents(this._settings.mainNodeClass).eq(0); 
         var mainNodeUid = $(this.mainNode).attr("data-uid");
-        console.log(mainNodeUid);
         /*load Content params via the mainnode*/
         var contentParams = this._loadContentParams($(this.mainNode).attr("data-type"));
         /* apply cke to all the the fields*/

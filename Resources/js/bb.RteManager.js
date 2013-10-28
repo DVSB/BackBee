@@ -6,7 +6,6 @@ var module = {
     exports: {}
 };
 
-
 define(["jscore"], function(){
     
     return (function(global){
@@ -19,14 +18,13 @@ define(["jscore"], function(){
          **/
             initialize: function(){
                 this._callbacks = {
-                    "onReady" : function(){}
+                    "onReady" : function(){},
+                    "onEdit": function(){}
                 };
                 this.settings = {};
-            
                 this.isEnabled = false;
-            
                 this.isLoaded = false;
-            
+                this.contentConfig = {}; //key - config 
                 this.onCreate();
             },
             
@@ -46,24 +44,39 @@ define(["jscore"], function(){
                 this.onInit();  
             },
         
-            trigger : function(stage){
+            trigger : function(stage,data){
+                var data = (typeof data == "object") ? data : {};
                 if(typeof this._callbacks[stage]=="function"){
-                    this._callbacks[stage]();
-                    if(stage=="onReady") this.isLoaded = false;
+                    this._callbacks[stage](data);
+                    if(stage=="onReady") this.isLoaded = true;
+                    
                 }
             },
-        
+            
+            /* ne proposer*/
             onReady : function(callback,context){
                 if(typeof callback!="function"){
                     throw new Error("bb.RteAbstractAdapter onReady must be a function");
                 }
                 this._callbacks["onReady"] = (typeof context=="object") ? jQuery.proxy(callback,context) : jQuery.proxy(callback,this);
             },
+            
+            onEdit: function(callback,context){
+                if(typeof callback!="function"){
+                    throw new Error("bb.RteAbstractAdapter onReady must be a function");
+                }
+                this._callbacks["onEdit"] = (typeof context=="object") ? jQuery.proxy(callback,context) : jQuery.proxy(callback,this);
+            },
         
             loadPlugins: function(config){
                 console.log("execute loadPlugins");
             },
-        
+            
+            /* load rte save content */
+            loadContentParams : function(contentId,contentType){
+                
+            },
+
             enable: function(){
                 this.isEnabled = true 
             },
@@ -86,7 +99,7 @@ define(["jscore"], function(){
         });
  
 
-        bb.RteManager = (function(global){
+        global.RteManager = (function(global){
             /* adapter hash */
             var _adapters = {};
             var _settings = {
@@ -126,7 +139,7 @@ define(["jscore"], function(){
                             var adapter = new _adapters[adapterName];
                             return adapter;  
                         }catch(e){
-                            console.log(e);
+                            throw e;
                         }
                    
                     }else{
@@ -136,10 +149,7 @@ define(["jscore"], function(){
                             async : false
                         })
                         .fail(function(e){
-                            var error = {};
-                            error.exception = e;
-                            error.message =  "NotFoundAdapter ["+adapterName+"]";
-                            throw error;
+                            throw "NotFounRTEAdapter ["+adapterName+"]";
                         });
                         return self.use(adapterName);
                     }
@@ -152,7 +162,7 @@ define(["jscore"], function(){
                 
             return this.init();
         })(global);             
-        return bb.RteManager;   
+        return global.RteManager;   
     })(bb); 
 });
 

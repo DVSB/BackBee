@@ -64,7 +64,7 @@ Aloha.settings = {
                 meta: true,
                 margin: false,
                 crop: false,
-                resizable: true,
+                resizable: true
             },
             editables:{}
         },

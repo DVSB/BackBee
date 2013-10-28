@@ -123,7 +123,6 @@ define(["jscore"], function(){
                                 throw "error while loading";
                             }
                         });
-                        console.log("true");
                         return self.getManager(name);
                     }
                 }catch(e){
