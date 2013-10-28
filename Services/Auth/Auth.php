@@ -10,29 +10,34 @@ class Auth
     private $secret_key;
     private $validity_time;
     private $public_token;
-    private $bbapp;
+    private $application;
     private $request;
 
 
-    public function __construct(BBApplication $bbapp = null)
+    public function __construct(BBApplication $application = null)
     {
          try {
-            if (NULL === $bbapp)
+            if (NULL === $application)
                 throw new BBException("You must intanced Auth class with BBApplication object");
             else
-                $this->bbapp = $bbapp;
+                $this->application = $application;
         }catch(BBException $e){
             print $e->getMessage();
         }
         
-        $authConfig              = $this->bbapp->getConfig()->getAuthConfig();
-        $this->request          = $this->bbapp->getRequest();
+        $authConfig              = $this->application->getConfig()->getAuthConfig();
+        $this->request          = $this->application->getRequest();
         $this->secret_key       = $authConfig['secret'];
         $this->validity_time    = $authConfig['timevalidate'];
         
         $this->generatePublicToken();
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $id_user
+     * @return type
+     */
     public function getToken($id_user)
     {
         return  $this->initAuth($id_user);
@@ -46,14 +51,22 @@ class Auth
         $this->public_token = $publicToken;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $user_id
+     */
     public function initInformation($user_id)
     {
-        $this->bbapp->getSession()->set("session_informations", time()."-".$user_id);
+        $this->application->getSession()->set("session_informations", time()."-".$user_id);
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function encodeToken()
     {
-        return hash('sha256', $this->public_token.$this->bbapp->getSession()->get("session_informations"));
+        return hash('sha256', $this->public_token.$this->application->getSession()->get("session_informations"));
     }
     
     public function initAuth($id_user)
@@ -72,7 +85,7 @@ class Auth
         {
             // S'ils sont identiques on peut récupérer les informations
             //echo "signature ok<br>\n";
-            list($date, $user) = explode('-', $this->bbapp->getSession()->get("session_informations"));
+            list($date, $user) = explode('-', $this->application->getSession()->get("session_informations"));
 
             // On vérifie que la session n'est pas expirée
             if($date + $this->validity_time > time() AND $date <= time())

@@ -25,6 +25,8 @@ class ClassContent extends AbstractServiceLocal {
         if (NULL === $content)
             throw new ServicesException(sprintf('Unable to find content for `%s` uid', $uid));
 
+        $this->isGranted('VIEW', $content);
+        
         $content = json_decode($content->serialize());
 
         return $content;
@@ -35,13 +37,12 @@ class ClassContent extends AbstractServiceLocal {
         $result = array();
         $em = $this->bbapp->getEntityManager();
 
-        //print_r($accept);
-        //print_r($datas);
         if (is_array($datas) && count($datas)) {
             foreach ($datas as $key => $contentInfo) {
                 //var_dump($key);
                 if ($accept && is_array($accept) && count($accept) && !array_key_exists($key, $accept))
                     continue;
+
                 $createDraft = true;
                 if ($isParentAContentSet) {
                     $contentInfo = (object) $contentInfo;
@@ -99,6 +100,9 @@ class ClassContent extends AbstractServiceLocal {
             $classname = 'BackBuilder\ClassContent\\' . $srzContent->type;
             $content = new $classname($srzContent->uid);
         }
+        
+        $this->isGranted('VIEW', $content);
+        
         $srzContent->data = null;
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
             $content->setDraft($draft);
@@ -140,6 +144,8 @@ class ClassContent extends AbstractServiceLocal {
             $em->persist($content);
         }
 
+        $this->isGranted('EDIT', $content);
+
         //Find a draft for content if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
             $content->setDraft($draft);
@@ -148,6 +154,7 @@ class ClassContent extends AbstractServiceLocal {
         if (!is_null($srzContent->data)) {
             $srzContent->data = $this->prepareContentData($content, $srzContent->data, $srzContent->accept, $srzContent->isAContentSet, $persist);
         }
+
         $result = $content->unserialize($srzContent);
         $this->_processedContent[$srzContent->uid] = $result; //notify that content is already processed
 
@@ -207,6 +214,8 @@ class ClassContent extends AbstractServiceLocal {
             $contentNode = new $contentTypeClass($contentUid);
         }
 
+        $this->isGranted('VIEW', $contentNode);
+        
         $default = $contentNode->getDefaultParameters();
 
         // Find a draft if exists

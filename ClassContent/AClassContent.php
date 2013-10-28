@@ -3,25 +3,26 @@
 namespace BackBuilder\ClassContent;
 
 use BackBuilder\NestedNode\Page,
-    BackBuilder\Renderer\IRenderable,
-    BackBuilder\ClassContent\Exception\ClassContentException,
-    BackBuilder\Util\Parameter;
-
+    BackBuilder\ClassContent\Exception\ClassContentException;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 
-use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
-
 /**
- * Abstract class for content object in BackBuilder 4
+ * Abstract class for content object in BackBuilder
  *
- * Basicaly a BackBuilder content is a composite of AClassContent
+ * Basicaly every BackBuilder content extends AClassContent
  * A content is also an persistant Doctrine entity
  *
+ * A content has several states :
+ * 
+ * * STATE_NEW : new content, revision number to 0
+ * * STATE_NORMAL : last commited content
+ * * STATE_LOCKED : content locked on writing
+ * 
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent
- * @copyright   Lp system
- * @author      c.rouillon
- *
+ * @copyright   Lp digital system
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\ClassContentRepository")
  * @Table(name="content")
  * @HasLifecycleCallbacks
@@ -29,156 +30,30 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @DiscriminatorColumn(name="classname", type="string")
  * @DiscriminatorMap({"BackBuilder\ClassContent\ContentSet" = "BackBuilder\ClassContent\ContentSet"})
  */
-abstract class AClassContent implements IRenderable, \Serializable, DomainObjectInterface
+abstract class AClassContent extends AContent
 {
 
-
+    /**
+     * New content, revision number to 0
+     * @var int
+     */
     const STATE_NEW = 1000;
+
+    /**
+     * Last commited content
+     * @var int
+     */
     const STATE_NORMAL = 1001;
+
+    /**
+     * Content locked on writing
+     * @var int
+     */
     const STATE_LOCKED = 1002;
 
     /**
-     * The acceptable class name for values
-     * @var array
-     *
-     * @Column(type="array", name="accept")
-     */
-    protected $_accept;
-
-    /**
-     * The creation datetime
-     * @var DateTime
-     *
-     * @Column(type="datetime", name="created")
-     */
-    protected $_created;
-
-    /**
-     * A map of content
-     * @var mixed
-     *
-     * @Column(type="array", name="data")
-     */
-    protected $_data;
-
-    /**
-     * Yaml parameters
-     * @var array
-     */
-    protected $_defaultparameters = array();
-
-    /**
-     * The optionnal personnal draft of this content
-     * @var Revision
-     */
-    protected $_draft;
-
-    /**
-     * The indexed values of elements
-     * @var ArrayColection
-     *
-     * @OneToMany(targetEntity="BackBuilder\ClassContent\Indexation", mappedBy="_content", cascade={"all"})
-     */
-    protected $_indexation;
-
-    /**
-     * Is this content persisted
-     * @var boolean
-     */
-    protected $_isloaded;
-
-    /**
-     * The label of this content
-     * @var string
-     *
-     * @Column(type="string", name="label")
-     */
-    protected $_label;
-
-    /**
-     * The main nested node (page)
-     * @var Page
-     *
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page")
-     * @JoinColumn(name="node_uid", referencedColumnName="uid")
-     */
-    protected $_mainnode;
-
-    /**
-     * The maximal number of items for values
-     * @var array
-     *
-     * @Column(type="array", name="maxentry")
-     */
-    protected $_maxentry;
-
-    /**
-     * The minimal number of items for values
-     * @var array
-     *
-     * @Column(type="array", name="minentry")
-     */
-    protected $_minentry;
-
-    /**
-     * The last modification datetime
-     * @var DateTime
-     *
-     * @Column(type="datetime", name="modified")
-     */
-    protected $_modified;
-
-    /**
-     * The content's parameters
-     * @var array
-     *
-     * @Column(type="array", name="parameters")
-     */
-    protected $_parameters;
-
-    /**
-     * The many to many association between this content and its parent content
-     * @var AClassContent
-     *
-     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", mappedBy="_subcontent")
-     */
-    protected $_parentcontent;
-
-    /**
-     * The content's properties
-     * @var array
-     */
-    protected $_properties;
-
-    /**
-     * The revision number of the content
-     * @var int
-     *
-     * @Column(type="integer", name="revision")
-     */
-    protected $_revision;
-
-    /**
-     * The revisions of the content
-     * @var ArrayCollection
-     *
-     * @OneToMany(targetEntity="BackBuilder\ClassContent\Revision", mappedBy="_content", fetch="LAZY")
-     * @OrderBy({"_version" = "DESC"})
-     */
-    protected $_revisions;
-
-    /**
-     * State of this content
-     * @var int
-     *
-     * @Column(type="integer", name="state")
-     */
-    protected $_state;
-
-    /**
      * The many to many association between this content and its subcontent
-     * @var ArrayCollection
-     *
+     * @var \Doctrine\Common\Collections\ArrayCollection
      * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_parentcontent", cascade={"persist", "detach", "merge", "refresh"})
      * @JoinTable(name="content_has_subcontent",
      *   joinColumns={@JoinColumn(name="parent_uid", referencedColumnName="uid")},
@@ -188,18 +63,64 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
     public $_subcontent;
 
     /**
+     * The main nested node (page)
+     * @var \BackBuilder\NestedNode\Page
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page")
+     * @JoinColumn(name="node_uid", referencedColumnName="uid")
+     */
+    protected $_mainnode;
+
+    /**
+     * The many to many association between this content and its parent content
+     * @var \Doctrine\Common\Collections\ArrayCollection
+     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", mappedBy="_subcontent")
+     */
+    protected $_parentcontent;
+
+    /**
+     * The revisions of the content
+     * @var \Doctrine\Common\Collections\ArrayCollection
+     * @OneToMany(targetEntity="BackBuilder\ClassContent\Revision", mappedBy="_content", fetch="LAZY")
+     * @OrderBy({"_version" = "DESC"})
+     */
+    protected $_revisions;
+
+    /**
+     * The indexed values of elements
+     * @var \Doctrine\Common\Collections\ArrayCollection
+     * @OneToMany(targetEntity="BackBuilder\ClassContent\Indexation", mappedBy="_content", cascade={"all"})
+     */
+    protected $_indexation;
+
+    /**
+     * The content's properties as defined in yaml file
+     * @var array
+     */
+    protected $_properties = array();
+
+    /**
+     * Default parameters as defined in yaml file
+     * @var array
+     */
+    protected $_defaultparameters = array();
+
+    /**
      * Store the map associating content uid to subcontent index
      * @var array;
      */
     protected $_subcontentmap = array();
 
     /**
-     * Unique identifier of the content
-     * @var string
-     *
-     * @Id @Column(type="string", name="uid")
+     * The optionnal personnal draft of this content
+     * @var \BackBuilder\ClassContent\Revision
      */
-    protected $_uid;
+    protected $_draft;
+
+    /**
+     * Is this content persisted
+     * @var boolean
+     */
+    protected $_isloaded;
 
     /**
      * Class constructor
@@ -209,34 +130,232 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
      *                         - maxentry    int The maxentry in value
      *                         - default     array default value for datas
      */
-    public function __construct($uid = NULL, $options = NULL)
+    public function __construct($uid = null, $options = null)
     {
-        $this->_uid = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
-        $this->_created = new \DateTime();
-        $this->_modified = new \DateTime();
-        $this->_accept = array();
-        $this->_data = array();
-        $this->_maxentry = array();
-        $this->_minentry = array();
+        parent::__construct($uid, $options);
+
         $this->_indexation = new ArrayCollection();
         $this->_subcontent = new ArrayCollection();
         $this->_parentcontent = new ArrayCollection();
         $this->_revisions = new ArrayCollection();
-        $this->_isloaded = FALSE;
-        $this->_revision = 0;
+        $this->_isloaded = false;
         $this->_state = self::STATE_NEW;
-        $this->_defaultparameters = array();
+
         $this->_setOptions($options);
     }
 
     /**
-     * Alternative clone method, created because of problems related to doctrine clone method
+     * Returns the associated page of the content if exists
+     * @return \BackBuilder\NestedNode\Page|NULL
+     * @codeCoverageIgnore
+     */
+    public function getMainNode()
+    {
+        return $this->_mainnode;
+    }
+
+    /**
+     * Set the main page to this content
+     * @param \BackBuilder\NestedNode\Page $node
+     * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @codeCoverageIgnore
+     */
+    public function setMainNode(Page $node = null)
+    {
+        $this->_mainnode = $node;
+        return $this;
+    }
+
+    /**
+     * Returns the parent collection of the content if exists
+     * @return \Doctrine\Common\Collections\ArrayCollection|NULL
+     * @codeCoverageIgnore
+     */
+    public function getParentContent()
+    {
+        return $this->_parentcontent;
+    }
+
+    /**
+     * Returns the collection of revisions of the content
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     * @codeCoverageIgnore
+     */
+    public function getRevisions()
+    {
+        return $this->_revisions;
+    }
+
+    /**
+     * Add a new revision to the collection
+     * @param \BackBuilder\ClassContent\Revision $revisions
+     * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @codeCoverageIgnore
+     */
+    public function addRevision(Revision $revision)
+    {
+        $this->_revisions[] = $revision;
+        return $this;
+    }
+
+    /**
+     * Returns the collection of indexed values
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     * @codeCoverageIgnore
+     */
+    public function getIndexation()
+    {
+        return $this->_indexation;
+    }
+
+    /**
+     * Returns defined property of the content or all the properties
+     * @param $var string the property to be return, if NULL, all properties are returned
+     * @return mixed The property value or NULL if unfound
+     */
+    public function getProperty($var = null)
+    {
+        if (null == $var) {
+            return $this->_properties;
+        }
+
+        if (true === isset($this->_properties[$var])) {
+            return $this->_properties[$var];
+        }
+
+        return null;
+    }
+
+    /**
+     * Updates a non persistent property value for the current instance
+     * @param string $var the name of the property
+     * @param mixed $value the value of the property
+     * @return \BackBuilder\ClassContent\AClassContent the current instance
+     */
+    public function setProperty($var, $value)
+    {
+        if (false === is_array($this->_properties)) {
+            $this->_properties = array();
+        }
+
+        $this->_properties[$var] = $value;
+        return $this;
+    }
+
+    /**
+     * Returns the parameters as defined in Yaml
+     * @return array
+     * @codeCoverageIgnore
+     */
+    public function getDefaultParameters()
+    {
+        return $this->_defaultparameters;
+    }
+
+    /**
+     * Returns the user draft of this content if exists
+     * @return \BackBuilder\ClassContent\Revision The current draft if exists, NULL otherwise
+     * @codeCoverageIgnore
+     */
+    public function getDraft()
+    {
+        return $this->_draft;
+    }
+
+    /**
+     * Unsets current user draft
+     * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @codeCoverageIgnore
+     */
+    public function releaseDraft()
+    {
+        $this->_draft = null;
+        return $this;
+    }
+
+    /**
+     * Associates an user's draft to this content
+     * @param \BackBuilder\ClassContent\Revision $draft
+     * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @codeCoverageIgnore
+     */
+    public function setDraft(Revision $draft)
+    {
+        $this->_draft = $draft;
+        return $this;
+    }
+
+    /**
+     * Prepares to commit an user's draft data for current content
+     * @return \BackBuilder\ClassContent\AClassContent the current instance
+     * @throws \BackBuilder\ClassContent\Exception\RevisionMissingException Occurs if none draft is defined
+     * @throws \BackBuilder\ClassContent\Exception\RevisionConflictedException Occurs if the revision is conlicted
+     * @throws \BackBuilder\ClassContent\Exception\RevisionUptodateException Occurs if the revision is already up to date
+     */
+    public function prepareCommitDraft()
+    {
+        if (null === $revision = $this->getDraft()) {
+            throw new Exception\RevisionMissingException('Enable to commit: missing draft');
+        }
+
+        switch ($revision->getState()) {
+            case Revision::STATE_ADDED :
+            case Revision::STATE_MODIFIED :
+                $revision->setRevision($revision->getRevision() + 1);
+                $revision->setState(Revision::STATE_COMMITTED);
+
+                $this->releaseDraft();
+
+                $this->_label = $revision->getLabel();
+                $this->_accept = $revision->getAccept();
+                $this->_maxentry = $revision->getMaxEntry();
+                $this->_minentry = $revision->getMinEntry();
+                $this->_parameters = $revision->getParam();
+
+                $this->setRevision($revision->getRevision())
+                        ->setState(AClassContent::STATE_NORMAL)
+                        ->addRevision($revision);
+
+                return $this;
+                break;
+
+            case Revision::STATE_CONFLICTED :
+                throw new Exception\RevisionConflictedException('Content is in conflict, please resolve or revert it');
+                break;
+        }
+
+        throw new Exception\RevisionUptodateException(sprintf('Content can not be commited (state : %s)', $revision->getState()));
+    }
+
+    /**
+     * Returns TRUE if the content is an entity managed by doctrine
+     * @return Boolean
+     * @codeCoverageIgnore
+     */
+    public function isLoaded()
+    {
+        return $this->_isloaded;
+    }
+
+    /**
+     * Initialized datas on postLoad doctrine event
+     * @codeCoverageIgnore
+     */
+    public function postLoad()
+    {
+        $this->_isloaded = true;
+        $this->_initData();
+        parent::postLoad();
+    }
+
+    /**
+     * Alternative recursive clone method, created because of problems related to doctrine clone method
      * @param \BackBuilder\NestedNode\Page $origin_page
      * @return \BackBuilder\ClassContent\ContentSet
      */
     public function createClone(Page $origin_page = null)
     {
-        $class = $this->getRealClass();
+        $class = ClassUtils::getRealClass($this);
         $clone = new $class(null, null);
         $clone->_accept = $this->_accept;
         $clone->_maxentry = $this->_maxentry;
@@ -281,6 +400,480 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
     }
 
     /**
+     * Returns the content revision
+     * @return \BackBuilder\ClassContent\AClassContent
+     * @codeCoverageIgnore
+     */
+    protected function _getContentInstance()
+    {
+        return $this;
+    }
+
+    /**
+     * Sets options at the construction of a new instance
+     * @param array $options Initial options for the content:
+     *                         - label       the label of the content
+     *                         - parameters  a set of parameters for the content
+     *                         - default     array default value for datas
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    protected function _setOptions($options = null)
+    {
+        if (null !== $options) {
+            $options = (array) $options;
+
+            if (true === array_key_exists('label', $options)) {
+                $this->_label = $options['label'];
+            }
+
+            if (true === array_key_exists('parameters', $options)) {
+                foreach ($options['parameters'] as $key => $param) {
+                    $this->_defineParam($key, $param['type'], $param['options']);
+                }
+            }
+
+            if (true === array_key_exists('default', $options)) {
+                $options['default'] = (array) $options['default'];
+                foreach ($options['default'] as $var => $value) {
+                    $this->_data[$var] = array();
+                    $this->_maxentry[$var] = 1;
+                    $this->_minentry[$var] = 0;
+                    $this->__set($var, $value);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets a collection of datas
+     * Has to be overwritten by generalizations
+     * @return void
+     * @codeCoverageIgnore
+     */
+    protected function _initData()
+    {
+        // Has to be overwritten by generalizations
+    }
+
+    /**
+     * Dynamically adds and sets new property to this content
+     * @param string $var the name of the property
+     * @param mixed $value the value of the property
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     */
+    protected function _defineProperty($var, $value)
+    {
+        if (false === array_key_exists($var, $this->_properties)) {
+            $this->_properties[$var] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Dynamically adds and sets new element to this content
+     * @param string $var the name of the element
+     * @param string $type the type
+     * @param array $options Initial options for the content (see this constructor)
+     * @param Boolean $updateAccept dynamically accept or not the type for the new element
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     */
+    protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = true)
+    {
+        if (true === $updateAccept) {
+            $this->_addAcceptedType($type, $var);
+        }
+
+        if (false === array_key_exists($var, $this->_data)) {
+            $this->_data[$var] = array();
+            $this->_maxentry[$var] = (!is_null($options) && isset($options['maxentry'])) ? $options['maxentry'] : 1;
+            $this->_minentry[$var] = (!is_null($options) && isset($options['minentry'])) ? $options['minentry'] : 0;
+
+            $values = array();
+            if (true === is_array($options) && true === array_key_exists('default', $options)) {
+                $values = (array) $options['default'];
+
+                if ('scalar' !== $type) {
+                    foreach ($values as &$value) {
+                        $value = new $type(null, $options);
+                    }
+                    unset($value);
+                }
+            } else {
+                $values[] = ('scalar' == $type) ? '' : new $type(null, $options);
+            }
+
+            return $this->__set($var, $values);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Dynamically add and set new parameter to this content
+     * @param string $var the name of the element
+     * @param string $type the type
+     * @param array $options Initial options for the parameter (see this constructor)
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     */
+    protected function _defineParam($var, $type = 'scalar', $options = null)
+    {
+        if ('accept' === $var) {
+            if (true === is_array($options) && true === array_key_exists('default', $options)) {
+                return $this->_addAcceptedType($options['default']);
+            }
+        } else {
+            $values = array();
+            if (true === is_array($options) && true === array_key_exists('default', $options)) {
+                $values[$type] = $options['default'];
+            } else {
+                $values[$type] = null;
+            }
+
+            if (false === array_key_exists($var, $this->_parameters)) {
+                $this->_parameters[$var] = $values;
+            }
+
+            $this->_defaultparameters[$var] = $values;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Adds a new accepted type to the element
+     * @param string $type the type to accept
+     * @param string $var the element
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     */
+    protected function _addAcceptedType($type, $var = null)
+    {
+        if (null === $var) {
+            return $this;
+        }
+
+        if (false === array_key_exists($var, $this->_accept)) {
+            $this->_accept[$var] = array();
+        }
+
+        $types = (array) $type;
+        foreach ($types as $type) {
+            $type = (NAMESPACE_SEPARATOR === substr($type, 0, 1)) ? substr($type, 1) : $type;
+            if (false === in_array($type, $this->_accept[$var])) {
+                $this->_accept[$var][] = $type;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Adds a subcontent to the collection.
+     * @param \BackBuilder\ClassContent\AClassContent $value
+     * @return string the unique identifier of the add subcontent
+     */
+    protected function _addSubcontent(AClassContent $value)
+    {
+        if (false === $this->_subcontent->indexOf($value)) {
+            $this->_subcontent->add($value);
+        }
+
+        $this->_subcontentmap[$value->getUid()] = $this->_subcontent->indexOf($value);
+
+        return $value->getUid();
+    }
+
+    /**
+     * Removes the association with subcontents of the element $var
+     * @param string $var
+     */
+    protected function _removeSubcontent($var)
+    {
+        if (true === $this->acceptSubcontent($var)) {
+            foreach ($this->_data[$var] as $type => $value) {
+                if (is_array($value)) {
+                    $keys = array_keys($value);
+                    $values = array_values($value);
+
+                    $type = end($keys);
+                    $value = end($values);
+                }
+
+                foreach ($this->_subcontent as $subcontent) {
+                    if ($subcontent->getUid() === $value) {
+                        $this->_subcontent->removeElement($subcontent);
+                        break;
+                    }
+                }
+            }
+
+            $this->_updateSubcontentMap();
+        }
+    }
+
+    /**
+     * Updates the associationing map between subcontent and uid
+     */
+    private function _updateSubcontentMap()
+    {
+        $this->_subcontentmap = array();
+
+        $index = 0;
+        foreach ($this->_subcontent as $subcontent) {
+            $this->_subcontentmap[$subcontent->getUid()] = $index++;
+        }
+    }
+
+    /*     * **************************************************************** */
+    /*                                                                        */
+    /*                   Public methods overload by Revision                  */
+    /*                          if a draft is defined                         */
+    /*                                                                        */
+    /*     * **************************************************************** */
+
+    /**
+     * Magical function to set value to given element
+     * @param string $var The name of the element
+     * @param mixed $value The value to set
+     * @return \BackBuilder\ClassContent\AClassContent The current instance content
+     * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
+     * @codeCoverageIgnore
+     */
+    public function __set($var, $value)
+    {
+        return (null !== $this->getDraft()) ? $this->getDraft()->__set($var, $value) : parent::__set($var, $value);
+    }
+
+    /**
+     * Magical function to check the setting of an element
+     * @param string $var the name of the element
+     * @codeCoverageIgnore
+     */
+    public function __isset($var)
+    {
+        return (null !== $this->getDraft()) ? $this->getDraft()->__isset($var) : parent::__isset($var);
+    }
+
+    /**
+     * Magical function to unset an element
+     * @param string $var The name of the element to unset
+     * @codeCoverageIgnore
+     */
+    public function __unset($var)
+    {
+        return (null !== $this->getDraft()) ? $this->getDraft()->__unset($var) : parent::__unset($var);
+    }
+
+    /**
+     * Return the label of the content
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function getLabel()
+    {
+        return (null !== $this->getDraft()) ? $this->getDraft()->getLabel() : parent::getLabel();
+    }
+
+    /**
+     * Returns the current accepted subcontents
+     * @return array
+     * @codeCoverageIgnore
+     */
+    public function getAccept()
+    {
+        return (null !== $this->getDraft()) ? $this->getDraft()->getAccept() : parent::getAccept();
+    }
+
+    /**
+     * Returns the raw datas array of the content
+     * @return array
+     * @codeCoverageIgnore
+     */
+    public function getDataToObject()
+    {
+        return (null !== $this->getDraft()) ? $this->getDraft()->getDataToObject() : parent::getDataToObject();
+    }
+
+    /**
+     * Get the maxentry of the content
+     * @return array
+     * @codeCoverageIgnore
+     */
+    public function getMaxEntry()
+    {
+        return (NULL !== $this->getDraft()) ? $this->getDraft()->getMaxEntry() : parent::getMaxEntry();
+    }
+
+    /**
+     * Gets the minentry of the content
+     * @return array
+     * @codeCoverageIgnore
+     */
+    public function getMinEntry()
+    {
+        return (NULL !== $this->getDraft()) ? $this->getDraft()->getMinEntry() : parent::getMinEntry();
+    }
+
+    /**
+     * Returns the creation date of the content
+     * @return DateTime
+     * @codeCoverageIgnore
+     */
+    public function getCreated()
+    {
+        return NULL != $this->getDraft() ? $this->getDraft()->getCreated() : parent::getCreated();
+    }
+
+    /**
+     * Returns the last modified date of the content
+     * @return DateTime
+     * @codeCoverageIgnore
+     */
+    public function getModified()
+    {
+        return (NULL !== $this->getDraft()) ? $this->getDraft()->getModified() : parent::getModified();
+    }
+
+    /**
+     * Returns the revision number of the content
+     * @return int
+     * @codeCoverageIgnore
+     */
+    public function getRevision()
+    {
+        return (NULL !== $this->getDraft()) ? $this->getDraft()->getRevision() : parent::getRevision();
+    }
+
+    /**
+     * Returns the state of the content
+     * @return int
+     * @codeCoverageIgnore
+     */
+    public function getState()
+    {
+        return (NULL !== $this->getDraft()) ? $this->getDraft()->getState() : parent::getState();
+    }
+
+    /**
+     * Sets one or all parameters
+     * @param string $var the parameter name to set, if NULL all the parameters array wil be set
+     * @param mixed $values the parameter value or all the parameters if $var is NULL
+     * @param string $type the optionnal casting type of the value
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     * @codeCoverageIgnore
+     */
+    public function setParam($var = null, $values = null, $type = null)
+    {
+        return (NULL !== $this->getDraft()) ? $this->getDraft()->setParam($var, $values, $type) : parent::setParam($var, $values, $type);
+    }
+
+    /**
+     * Checks if the element accept subcontent
+     * @param string $var the element
+     * @return Boolean TRUE if a subcontents are accepted, FALSE otherwise
+     * @codeCoverageIgnore
+     */
+    public function acceptSubcontent($var)
+    {
+        return (null !== $this->getDraft()) ? $this->getDraft()->acceptSubcontent($var) : parent::acceptSubcontent($var);
+    }
+
+    /**
+     * Returns the mode to be used by current content
+     * @return string
+     */
+    public function getMode()
+    {
+        $rendermode = NULL;
+
+        if (is_array($this->getParam('rendermode'))) {
+            $rendermode = @array_pop($this->getParam('rendermode'));
+
+            if (isset($rendermode['rendertype'])) {
+                switch ($rendermode['rendertype']) {
+                    case 'select':
+                        $rendermode = $rendermode['selected'];
+                        break;
+                }
+            }
+        }
+
+        return $rendermode;
+    }
+
+    /*     * **************************************************************** */
+    /*                                                                        */
+    /*                   Implementation of IRenderable                        */
+    /*                                                                        */
+    /*     * **************************************************************** */
+
+    /**
+     * Return the data of this content
+     * @param string $var The element to be return, if NULL, all datas are returned
+     * @param Boolean $forceArray Force the return as array
+     * @return mixed Could be either one or array of scalar, array, AClassContent instance
+     * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
+     * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
+     * @codeCoverageIgnore
+     */
+    public function getData($var = NULL, $forceArray = false)
+    {
+        return (null != $this->getDraft()) ? $this->getDraft()->getData($var, $forceArray) : parent::getData($var, $forceArray);
+    }
+
+    /**
+     * Returns defined parameters
+     * @param string $var The parameter to be return, if NULL, all parameters are returned
+     * @param string $type The casting type of the parameter
+     * @return mixed the parameter value or NULL if unfound
+     * @codeCoverageIgnore
+     */
+    public function getParam($var = null, $type = null)
+    {
+        return (null != $this->getDraft()) ? $this->getDraft()->getParam($var, $type) : parent::getParam($var, $type);
+    }
+
+    /**
+     * Checks for state of the content before rendering it
+     * @return Boolean
+     * @codeCoverageIgnore
+     */
+    public function isRenderable()
+    {
+        return $this->getState() === AClassContent::STATE_NORMAL;
+    }
+
+    /*     * **************************************************************** */
+    /*                                                                        */
+    /*                   Implementation of Serializable                       */
+    /*                                                                        */
+    /*     * **************************************************************** */
+
+    /**
+     * Return the serialized string of the content
+     * @return string
+     */
+    public function serialize()
+    {
+        $serialized = json_decode(parent::serialize());
+
+        $serialized->properties = $this->_arrayToStdClass($this->getProperty());
+        $serialized->isdraft = (null !== $this->getDraft());
+        $serialized->draftuid = $serialized->isdraft ? $this->getDraft()->getUid() : null;
+
+        return json_encode($serialized);
+    }
+
+    /*     * **************************************************************** */
+    /*                                                                        */
+    /*                         Deprecated methods ?                           */
+    /*                                                                        */
+    /*     * **************************************************************** */
+
+    /**
+     * ?????????????????????
      * Return the real classname object in spite of the doctrine's proxy
      * @return string
      */
@@ -296,177 +889,10 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
     }
 
     /**
-     * Magical function to clone this content
-     */
-    public function __clone()
-    {
-        if ($this->_uid) {
-            $this->_uid = md5(uniqid('', TRUE));
-            $this->_created = new \DateTime();
-            $this->_modified = new \DateTime();
-            $this->_isloaded = FALSE;
-            $this->_revision = 0;
-            $this->_state = self::STATE_NEW;
-            $this->_draft = NULL;
-
-            $this->_indexation->clear();
-            $this->_revisions->clear();
-            $this->_parentcontent->clear();
-
-            $subcontents = array();
-            foreach ($this->_data as $values) {
-                foreach ($values as $type => &$value) {
-                    if (is_array($value)) {
-                        $keys = array_keys($value);
-                        $values = array_values($value);
-
-                        $type = end($keys);
-                        $value = end($values);
-                    }
-
-                    if (0 === strpos($type, 'BackBuilder\ClassContent')) {
-//                        $classtoload = class_exists($type);
-                        foreach ($this->_subcontent as $subcontent) {
-                            if ($subcontent->getUid() == $value) {
-                                $newsubcontent = clone $subcontent;
-                                $value = $newsubcontent->getUid();
-                                $subcontents[] = $newsubcontent;
-                                break;
-                            }
-                        }
-                    }
-                }
-                unset($value);
-            }
-
-            $this->_subcontent->clear();
-            foreach ($subcontents as $subcontent) {
-                var_dump('parent_' . $this->_uid, 'child_' . $subcontent->getUid());
-                $this->_subcontent->add($subcontent);
-            }
-        }
-    }
-
-    /**
-     * Magical function to get value for given element
-     * @param string $var the name of the element
-     * @return mixed the value
-     */
-    public function __get($var)
-    {
-        return $this->getData($var);
-    }
-
-    /**
-     * Magical function to check the setting of an element
-     * @param string $var the name of the element
-     */
-    public function __isset($var)
-    {
-        return (NULL === $this->getDraft()) ? array_key_exists($var, $this->_data) && 0 < count($this->_data[$var]) : $this->getDraft()->__isset($var);
-    }
-
-    /**
-     * Magical function to set value to given element
-     * @param string $var the name of the element
-     * @param mixed $value the value to set
-     * @return AClassContent $this
-     * @throws ClassContentException
-     */
-    public function __set($var, $value)
-    {
-        if (NULL !== $this->getDraft())
-            return $this->getDraft()->__set($var, $value);
-
-        $values = is_array($value) ? $value : array($value);
-        if (isset($this->_data[$var])) {
-            $this->__unset($var);
-            $val = array();
-
-            foreach ($values as $value) {
-                if (
-                        (isset($this->_maxentry[$var]) && 0 < $this->_maxentry[$var] && $this->_maxentry[$var] == count($val)) ||
-                        (isset($this->_minentry[$var]) && count($val) < $this->_minentry[$var] && $this->_maxentry[$var] == count($val))
-                ) {
-                    break;
-                }
-                if ($this->_isAccepted($value, $var)) {
-                    $type = $this->_getType($value);
-                    if (is_object($value) && $value instanceof AClassContent) {
-                        if (FALSE === $this->_subcontent->indexOf($value))
-                            $this->_subcontent->add($value);
-                        $this->_subcontentmap[$value->getUid()] = $this->_subcontent->indexOf($value);
-                        $value = $value->getUid();
-                    }
-
-                    $val[] = array($type => $value);
-                }
-            }
-            $this->_data[$var] = $val;
-            $this->_modified = new \DateTime();
-        } else {
-            throw new ClassContentException(sprintf('Unknown property %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Magical function to get a string representation of the content
-     * @return string
-     */
-    public function __toString()
-    {
-        if ($this->isElementContent()) {
-            $string = '';
-            foreach ($this->getData() as $val) {
-                $string .= $val;
-            }
-            return $string;
-        } else {
-            return sprintf('%s(%s)', get_class($this), $this->_uid);
-        }
-    }
-
-    /**
-     * Magical function to unset an element
-     * @param string $var the name of the element
-     */
-    public function __unset($var)
-    {
-        if (NULL !== $this->getDraft())
-            return $this->getDraft()->__unset($var);
-
-        if ($this->__isset($var)) {
-            if (TRUE === $this->_acceptSubcontent($var)) {
-                $this->_updateSubcontentMap();
-
-                foreach ($this->_data[$var] as $type => $value) {
-                    if (is_array($value)) {
-                        $keys = array_keys($value);
-                        $values = array_values($value);
-
-                        $type = end($keys);
-                        $value = end($values);
-                    }
-
-                    foreach ($this->_subcontent as $subcontent) {
-                        if ($subcontent->getUid() == $value) {
-                            $this->_subcontent->removeElement($subcontent);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $this->_data[$var] = array();
-        }
-    }
-
-    /**
-     *
-     * @param AClassContent $subContent
-     * @return type
+     * ?????????????????????
+     * Unsets a subcontent to the current collection
+     * @param \BackBuilder\ClassContent\AClassContent $subContent
+     * @return \BackBuilder\ClassContent\AClassContent
      */
     public function unsetSubContent(AClassContent $subContent)
     {
@@ -491,795 +917,12 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
                 }
             }
         }
-    }
-
-    /**
-     * Check if the element accept subcontent
-     * @param string $var the element
-     * @return Boolean True if a subcontents are accepted False else
-     */
-    private function _acceptSubcontent($var)
-    {
-        if (NULL !== $this->getDraft())
-            return $this->getDraft()->acceptSubcontent($var);
-
-        if (FALSE === array_key_exists($var, $this->_accept))
-            return FALSE;
-
-        foreach ($this->_accept[$var] as $type) {
-            if (0 === strpos($type, 'BackBuilder\ClassContent')) {
-                return TRUE;
-            }
-        }
-
-        return FALSE;
-    }
-
-    /**
-     * Add a new accepted type to the element
-     * @param string $type the type to accept
-     * @param string $var the element
-     * @return AClassContent $this
-     */
-    protected function _addAcceptedType($type, $var = NULL)
-    {
-        if (NULL === $var)
-            return $this;
-
-        if (!isset($this->_accept[$var]))
-            $this->_accept[$var] = array();
-
-        $types = (array) $type;
-        foreach ($types as $type) {
-            $type = (NAMESPACE_SEPARATOR == substr($type, 0, 1)) ? substr($type, 1) : $type;
-            if (!in_array($type, $this->_accept[$var]))
-                $this->_accept[$var][] = $type;
-        }
 
         return $this;
     }
 
     /**
-     * Dynamically add and set new element to this content
-     * @param string $var the name of the element
-     * @param type $value the type
-     * @param array $options Initial options for the content (see this constructor)
-     * @param boolean $updateAccept dynamically accept or not the type for the new element
-     * @return AClassContent $this
-     */
-    protected function _defineData($var, $type = 'scalar', $options = NULL, $updateAccept = TRUE)
-    {
-        if ($updateAccept)
-            $this->_addAcceptedType($type, $var);
-
-        if (!isset($this->_data[$var])) {
-            $this->_data[$var] = array();
-            $this->_maxentry[$var] = (!is_null($options) && isset($options['maxentry'])) ? $options['maxentry'] : 1;
-            $this->_minentry[$var] = (!is_null($options) && isset($options['minentry'])) ? $options['minentry'] : 0;
-
-            $values = array();
-            if (!is_null($options) && isset($options['default'])) {
-                $values = (array) $options['default'];
-
-                if ('scalar' != $type) {
-                    foreach ($values as &$value) {
-                        $value = new $type(NULL, $options);
-                    }
-                    unset($value);
-                }
-            } else {
-                $values[] = ('scalar' == $type) ? '' : new $type(null, $options);
-            }
-
-            return $this->__set($var, $values);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Dynamically add and set new parameter to this content
-     * @param string $var the name of the element
-     * @param type $value the type
-     * @param array $options Initial options for the parameter (see this constructor)
-     * @return AClassContent $this
-     */
-    protected function _defineParam($var, $type = 'scalar', $options = NULL)
-    {
-        if ('accept' == $var) {
-            if (!is_null($options) && isset($options['default']))
-                return $this->_addAcceptedType($options['default']);
-        } else {
-            $values = array();
-            if (!is_null($options) && isset($options['default'])) {
-                $values[$type] = $options['default'];
-            } else {
-                $values[$type] = NULL;
-            }
-
-            if (!isset($this->_parameters[$var])) {
-                $this->_parameters[$var] = $values;
-            }
-
-            $this->_defaultparameters[$var] = $values;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Dynamically add and set new property to this content
-     * @param string $var the name of the property
-     * @param mixed $value the value of the property
-     * @return AClassContent $this
-     */
-    protected function _defineProperty($var, $value)
-    {
-        if (!isset($this->_properties[$var])) {
-            $this->_properties[$var] = $value;
-        }
-        return $this;
-    }
-
-    /**
-     * Update a non pesistent property value for the current instance
-     * @param string $var the name of the property
-     * @param mixed $value the value of the property
-     * @return AClassContent the current instance
-     */
-    public function setProperty($var, $value)
-    {
-        if (false === is_array($this->_properties)) {
-            $this->_properties = array();
-        }
-
-        $this->_properties[$var] = $value;
-        return $this;
-    }
-
-    /**
-     * Return the type of a given value
-     * @param mixed $value
-     * @return string
-     */
-    protected function _getType($value)
-    {
-        if (is_object($value))
-            return get_class($value);
-
-        if (is_array($value))
-            return 'array';
-
-        return 'scalar';
-    }
-
-    /**
-     * Sets a collection of datas
-     * Has to be overwritten by generalizations
-     */
-    protected function _initData()
-    {
-        // Has to be overwritten by generalizations
-    }
-
-    /**
-     * Check for an accepted type
-     * @param string $value the value from which the type will be checked
-     * @param string $var the element to be checks
-     * @return boolean
-     */
-    private function _isAccepted($value, $var = NULL)
-    {
-        if (NULL === $var)
-            return false;
-
-        if (!isset($this->_accept[$var]) || 0 == count($this->_accept[$var]))
-            return true;
-
-        return in_array($this->_getType($value), $this->_accept[$var]);
-    }
-
-    public function getType($var)
-    {
-        $accepts = ($this->getAccept());
-        if (isset($accepts[$var]) && !empty($accepts[$var])) {
-            return reset($accepts[$var]);
-        }
-        else
-            throw new ClassContentException(sprintf('Unknown element %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
-    }
-
-    /**
-     * Set options at the construction of a new instance
-     * @param array $options Initial options for the content:
-     *                         - label       the label of the content
-     *                         - parameters  a set of parameters for the content
-     *                         - default     array default value for datas
-     */
-    protected function _setOptions($options = NULL)
-    {
-        if (!is_null($options)) {
-            $options = (array) $options;
-            if (array_key_exists('label', $options))
-                $this->_label = $options['label'];
-            if (array_key_exists('parameters', $options)) {
-                foreach ($options['parameters'] as $key => $param)
-                    $this->_defineParam($key, $param['type'], $param['options']);
-            }
-            if (array_key_exists('default', $options)) {
-                $options['default'] = (array) $options['default'];
-                foreach ($options['default'] as $var => $value) {
-                    $this->_data[$var] = array();
-                    $this->_maxentry[$var] = 1;
-                    $this->_minentry[$var] = 0;
-                    $this->__set($var, $value);
-                }
-            }
-        }
-    }
-
-    /**
-     * Update the associationing map between subcontent and uid
-     */
-    private function _updateSubcontentMap()
-    {
-        $this->_subcontentmap = array();
-        $index = 0;
-
-        foreach ($this->_subcontent as $subcontent) {
-            $this->_subcontentmap[$subcontent->getUid()] = $index++;
-        }
-    }
-
-    /**
-     * Add a new revision to the collection
-     * @param Revision $revisions
-     * @return AClassContent the current instance
-     */
-    public function addRevision(Revision $revisions)
-    {
-        $this->_revisions[] = $revisions;
-        return $this;
-    }
-
-    /**
-     * Return the current accepted subcontent
-     * @return array
-     */
-    public function getAccept()
-    {
-        return NULL != $this->getDraft() ? $this->getDraft()->getAccept() : $this->_accept;
-    }
-
-    /**
-     * Return the creation date of the content
-     * @return DateTime
-     */
-    public function getCreated()
-    {
-        return NULL != $this->getDraft() ? $this->getDraft()->getCreated() : $this->_created;
-    }
-
-    /**
-     * Return the data of this content
-     * @param $var string the element to be return, if NULL, all datas are returned
-     * @param $forceArray boolean force the return as array
-     * @return mixed could be either one or array of scalar value, AClassContent instance
-     * @throws ClassContentException Occurs when $var does not match an element
-     */
-    public function getData($var = NULL, $forceArray = false)
-    {
-        if (NULL !== $this->getDraft())
-            return $this->getDraft()->getData($var);
-
-        if (NULL === $var) {
-            $datas = array();
-            foreach (array_keys($this->_data) as $key) {
-                $datas[$key] = $this->getData($key);
-            }
-
-            return $datas;
-        }
-
-        if (array_key_exists($var, $this->_data)) {
-            $data = array();
-            foreach ($this->_data[$var] as $type => $value) {
-                if (is_array($value)) {
-                    $keys = array_keys($value);
-                    $values = array_values($value);
-
-                    $type = end($keys);
-                    $value = end($values);
-                }
-
-                if (0 === strpos($type, 'BackBuilder\ClassContent')) {
-                    // Ensure the class type is known
-                    $classtoload = class_exists($type);
-
-                    //if (!$ignoreMap && array_key_exists($value, $this->_subcontentmap)) {
-                    //    $data[] = $this->_subcontent->get($this->_subcontentmap[$value]);
-                    //} else {
-                    $index = 0;
-                    foreach ($this->_subcontent as $subcontent) {
-                        $this->_subcontentmap[$subcontent->getUid()] = $index++;
-                        if ($subcontent->getUid() == $value) {
-                            $data[] = $subcontent;
-                            break;
-                        }
-                    }
-                    //}
-                } else {
-                    $data[] = $value;
-                }
-            }
-
-            if (!$forceArray) {
-                switch (count($data)) {
-                    case 0:
-                        $data = NULL;
-                        break;
-                    case 1:
-                        $data = array_pop($data);
-                        break;
-                }
-            }
-
-            return $data;
-        } else if ($this instanceof ContentSet) {
-            return NULL;
-        } else {
-            throw new ClassContentException(sprintf('Unknown property %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
-        }
-    }
-
-    /**
-     * Returns the raw datas array of the content
-     * @return array
-     */
-    public function getDataToObject()
-    {
-        return (NULL === $this->getDraft()) ? $this->_data : $this->getDraft()->getDataToObject();
-    }
-
-    /**
-     * Returns the parameters as defined in Yaml
-     * @return array
-     */
-    public function getDefaultParameters()
-    {
-        return $this->_defaultparameters;
-    }
-
-    /**
-     * Return the user draft of this content if exists
-     * @return Revision the current draft if exists NULL otherwise
-     */
-    public function getDraft()
-    {
-        return $this->_draft;
-    }
-
-    /**
-     * Return the label of the content
-     * @return string
-     */
-    public function getLabel()
-    {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getLabel() : $this->_label;
-    }
-
-    public function getIndexation() {
-        return $this->_indexation;
-    }
-
-    /**
-     * Return the associated page of the content
-     * @return Page
-     */
-    public function getMainNode()
-    {
-        return $this->_mainnode;
-    }
-
-    /**
-     * Get the maxentry of the content
-     * @return array
-     */
-    public function getMaxEntry()
-    {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getMaxEntry() : $this->_maxentry;
-    }
-
-    /**
-     * Get the minentry of the content
-     * @return array
-     */
-    public function getMinEntry()
-    {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getMinEntry() : $this->_minentry;
-    }
-
-    /**
-     * Return the last modification date of the content
-     * @return DateTime
-     */
-    public function getModified()
-    {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getModified() : $this->_modified;
-    }
-
-    /**
-     * Return defined parameters of the content
-     * @param $var string the parameter to be return, if NULL, all parameters are returned
-     * @param $type string the casting type of the parameter
-     * @return mixed the parameter value or NULL if unfound
-     */
-    public function getParam($var = NULL, $type = NULL)
-    {
-        if (NULL !== $this->getDraft()) {
-            return $this->getDraft()->getParam($var, $type);
-        }
-
-        if (NULL == $var) {
-            return $this->_parameters;
-        }
-
-        if (isset($this->_parameters[$var])) {
-            if (NULL == $type)
-                return $this->_parameters[$var];
-            else if (isset($this->_parameters[$var][$type]))
-                return $this->_parameters[$var][$type];
-            else
-                return NULL;
-        }
-
-        return NULL;
-    }
-
-    /**
-     * Return the current parent content if exists
-     * @return AClassContent The parent content if exists, NULL otherwise
-     */
-    public function getParentContent()
-    {
-        return $this->_parentcontent;
-    }
-
-    /**
-     * Return defined property of the content
-     * @param $var string the property to be return, if NULL, all properties are returned
-     * @return mixed the property value or NULL if unfound
-     */
-    public function getProperty($var = NULL)
-    {
-        if (NULL == $var) {
-            return $this->_properties;
-        }
-
-        if (isset($this->_properties[$var])) {
-            return $this->_properties[$var];
-        }
-
-        return NULL;
-    }
-
-    /**
-     * Return the revision number of the content
-     * @return int
-     */
-    public function getRevision()
-    {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getRevision() : $this->_revision;
-    }
-
-    /**
-     * Return the collection of revisions of the content
-     * @return ArrayCollection
-     */
-    public function getRevisions()
-    {
-        return $this->_revisions;
-    }
-
-    /**
-     * Return the state of the content
-     * @return int
-     */
-    public function getState()
-    {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getState() : $this->_state;
-    }
-
-    /**
-     * Return the unique identifier of the content
-     * @return string
-     */
-    public function getUid()
-    {
-        return $this->_uid;
-    }
-
-    /**
-     * Return TRUE if the content is an entity managed by doctrine
-     * @return boolean
-     */
-    public function isLoaded()
-    {
-        return $this->_isloaded;
-    }
-
-    public function isElementContent()
-    {
-        return false !== strpos(get_class($this), 'BackBuilder\ClassContent\Element\\');
-    }
-
-    /**
-     * Checks for state of the content before rendering it
-     * @return boolean
-     */
-    public function isRenderable()
-    {
-        return $this->getState() == AClassContent::STATE_NORMAL;
-    }
-
-    /**
-     * Initialized datas on postLoad doctrine event
-     */
-    public function postLoad()
-    {
-        $this->_initData();
-        $this->_parameters = Parameter::paramsReplaceRecursive($this->getDefaultParameters(), $this->getParam());
-        $this->_isloaded = true;
-    }
-
-    /**
-     * Prepare to commit an user draft data for current content
-     * @return AClassContent the current instance
-     * @throw ClassContentException Occurs when the provided revision is invalid
-     */
-    public function prepareCommitDraft()
-    {
-        if (NULL === $revision = $this->getDraft()) {
-            throw new ClassContentException('Enable to commit: missing draft', ClassContentException::REVISION_MISSING);
-        }
-        switch ($revision->getState()) {
-            case Revision::STATE_ADDED :
-            case Revision::STATE_MODIFIED :
-                $revision->setRevision($revision->getRevision() + 1);
-                $revision->setState(Revision::STATE_COMMITTED);
-
-                $this->releaseDraft();
-
-                $this->_label = $revision->getLabel();
-                $this->_accept = $revision->getAccept();
-                $this->_maxentry = $revision->getMaxEntry();
-                $this->_minentry = $revision->getMinEntry();
-                $this->_parameters = $revision->getParam();
-
-                $this->setRevision($revision->getRevision())
-                        ->setState(AClassContent::STATE_NORMAL)
-                        ->addRevision($revision);
-
-                return $this;
-                break;
-
-            case Revision::STATE_CONFLICTED :
-                throw new ClassContentException('Content is in conflict, please resolve or revert it', ClassContentException::REVISION_CONFLICTED);
-                break;
-        }
-
-        throw new ClassContentException(sprintf('Content can not be commited (state : %s)', $revision->getState()), ClassContentException::REVISION_UPTODATE);
-    }
-
-    /**
-     * Unset current user draft
-     * @return AClassContent the current instance
-     */
-    public function releaseDraft()
-    {
-        $this->_draft = NULL;
-        return $this;
-    }
-
-    /**
-     * Return the serialized string of the content
-     * @return string
-     */
-    public function serialize()
-    {
-        $serialized = new \stdClass();
-        $serialized->uid = $this->getUid();
-        $serialized->type = get_class($this);
-        $serialized->isdraft = (NULL !== $this->getDraft());
-        $serialized->draftuid = $serialized->isdraft ? $this->getDraft()->getUid() : NULL;
-        $serialized->label = $this->getLabel();
-        $serialized->revision = $this->getRevision();
-        $serialized->state = $this->getState();
-        $serialized->created = $this->getCreated();
-        $serialized->modified = $this->getModified();
-
-        $serialized->properties = new \stdClass();
-        foreach ($this->getProperty() as $key => $value) {
-            $serialized->properties->$key = $value;
-        }
-        $serialized->accept = new \stdClass();
-        foreach ($this->getAccept() as $key => $value) {
-            $serialized->accept->$key = $value;
-        }
-        $serialized->maxentry = new \stdClass();
-        if (true === is_array($this->getMaxEntry())) {
-            foreach ($this->getMaxEntry() as $key => $value) {
-                $serialized->maxentry->$key = $value;
-            }
-        }
-        $serialized->minentry = new \stdClass();
-        if (true === is_array($this->getMinEntry())) {
-            foreach ($this->getMinEntry() as $key => $value) {
-                $serialized->minentry->$key = $value;
-            }
-        }
-        $serialized->data = new \stdClass();
-        foreach ($this->getData() as $key => $value) {
-            if (is_array($value)) {
-                $tmp = array();
-                foreach ($value as $val)
-                    $tmp[] = ($val instanceof AClassContent) ? $val->getUid() : $val;
-                $serialized->data->$key = $tmp;
-            } else {
-                $serialized->data->$key = ($value instanceof AClassContent) ? $value->getUid() : $value;
-            }
-        }
-
-        $serialized->param = new \stdClass();
-        if ($this->getParam())
-            foreach ($this->getParam() as $key => $value)
-                $serialized->param->$key = $value;
-
-        return json_encode($serialized);
-    }
-
-    /**
-     * Associated an user draft to this content
-     * @param Revision $draft
-     * @return AClassContent the current instance
-     */
-    public function setDraft(Revision $draft)
-    {
-        $this->_draft = $draft;
-        return $this;
-    }
-
-    public function setLabel($label)
-    {
-        $this->_label = $label;
-        return $this;
-    }
-
-    /**
-     * Set the main page to this content
-     * @param Page $node
-     * @return AClassContent the current instance
-     */
-    public function setMainNode(Page $node = NULL)
-    {
-        $this->_mainnode = $node;
-        return $this;
-    }
-
-    public function setModified()
-    {
-        $this->_modified = new \DateTime();
-        return $this;
-    }
-    /**
-     * Set parameter of the content
-     * @param string $var the parameter name to set, if NULL all the parameters array wil be set
-     * @param mixed $values the parameter value or all the parameters if $var is null
-     * @param string $type the optionnal casting type of the value
-     * @return AClassContent the current instance
-     */
-    public function setParam($var, $values, $type = NULL)
-    {
-        if (NULL !== $this->getDraft())
-            return $this->getDraft()->setParam($var, $values, $type);
-
-        if (NULL === $var) {
-            $this->_parameters = $values;
-        } else {
-            if (NULL !== $type)
-                $values = array($type => $values);
-            else
-                $values = (array) $values;
-
-            if (is_array($this->_parameters) && array_key_exists($var, $this->_parameters))
-                $this->_parameters[$var] = array_replace_recursive($this->_parameters[$var], $values);
-            else
-                $this->_parameters[$var] = $values;
-        }
-
-        return $this;
-    }
-
-    /**
-     * What this ?
-     */
-    public function setPreviewMode()
-    {
-        foreach (array_keys($this->_data) as $key) {
-            if ((isset($this->_accept[$key])) && (1 === count($this->_accept[$key]))) {
-                $type = $this->_accept[$key][0];
-
-                if ((0 === strpos($type, 'BackBuilder\ClassContent')) && ('BackBuilder\ClassContent\ContentSet' !== $type)) {
-                    if (NULL === $this->getData($key)) {
-                        if (class_exists($type)) {
-                            $value = array();
-                            $value[] = new $type();
-                            $this->__set($key, $value);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Set the revision number of the content
-     * @param int $revision
-     * @return AClassContent the current instance
-     */
-    public function setRevision($revision)
-    {
-        $this->_revision = $revision;
-        return $this;
-    }
-
-    /**
-     * Set the state of the content
-     * @param int $state
-     * @return AClassContent the current instance
-     */
-    public function setState($state)
-    {
-        $this->_state = $state;
-        return $this;
-    }
-
-    /**
-     * Initialized the instance from a serialized string
-     * @param string $serialized
-     * @param boolean $strict If TRUE, all missing or additionnal element will generate an error
-     * @return AClassContent the current instance
-     */
-    public function unserialize($serialized, $strict = FALSE)
-    {
-
-        if (FALSE === is_object($serialized))
-            $serialized = json_decode($serialized);
-
-        foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
-            if (in_array($property, array('_created', '_modified'))) {
-                continue;
-            } else if ($property == "_param" && !is_null($value)) {
-                foreach ($value as $param => $paramvalue) {
-                    $this->setParam($param, $paramvalue);
-                }
-            } else if ($property == "_data" && !is_null($value)) {
-                foreach ($value as $el => $val) {
-                    $this->$el = $val;
-                }
-            } else if ($property == "_value" && !is_null($value)) {
-                $this->value = $value;
-            } else if (TRUE === property_exists($this, $property)) {
-                //$this->$property = $value;
-            } else if (TRUE === $strict)
-                throw new BBException(sprintf('Unknown property `%s` in %s.', $property, get_class($this)));
-        }
-
-        return $this;
-    }
-
-    /**
+     * ??????????????????????????????
      * Update the instance
      * @param Revision $lastCommitted The last committed revision of the content
      * @throws ClassContentException Occurs when a data conflict is detected
@@ -1301,34 +944,61 @@ abstract class AClassContent implements IRenderable, \Serializable, DomainObject
     }
 
     /**
-     * Returns a unique identifier for this domain object
-     * @return string
+     * ??????????????????????????????
      */
-    public function getObjectIdentifier()
+    public function setPreviewMode()
     {
-        return $this->getUid();
+        foreach (array_keys($this->_data) as $key) {
+            if ((isset($this->_accept[$key])) && (1 === count($this->_accept[$key]))) {
+                $type = $this->_accept[$key][0];
+
+                if ((0 === strpos($type, 'BackBuilder\ClassContent')) && ('BackBuilder\ClassContent\ContentSet' !== $type)) {
+                    if (NULL === $this->getData($key)) {
+                        if (class_exists($type)) {
+                            $value = array();
+                            $value[] = new $type();
+                            $this->__set($key, $value);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * Returns the mode use by current content
-     * @return string
+     * ??????????????????????????????
+     * Returns a subcontent instance by its type and value, FALSE if not found
+     * @param string $type The classname of the subcontent
+     * @param string $value The value of the subcontent (uid)
+     * @return \BackBuilder\ClassContent\AClassContent|FALSE
      */
-    public function getMode() {
-        $rendermode = NULL;
-
-        if (is_array($this->getParam('rendermode'))) {
-            $rendermode = @array_pop($this->getParam('rendermode'));
-
-            if (isset($rendermode['rendertype'])) {
-                switch ($rendermode['rendertype']) {
-                    case 'select':
-                        $rendermode = $rendermode['selected'];
-                        break;
+    protected function _getContentByDataValue($type, $value)
+    {
+        if (true === class_exists($type)) {
+            $index = 0;
+            foreach ($this->_subcontent as $subcontent) {
+                $this->_subcontentmap[$subcontent->getUid()] = $index++;
+                if ($subcontent->getUid() === $value) {
+                    return $subcontent;
+                    break;
                 }
             }
         }
 
-        return $rendermode;
+        return false;
+    }
+
+    /**
+     * ??????????????????????????????
+     */
+    public function getAcceptedType($var)
+    {
+        $accepts = ($this->getAccept());
+        if (isset($accepts[$var]) && !empty($accepts[$var])) {
+            return reset($accepts[$var]);
+        }
+        else
+            throw new ClassContentException(sprintf('Unknown element %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
     }
 
 }

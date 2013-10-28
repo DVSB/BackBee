@@ -75,4 +75,23 @@ class PermissionMap extends BasicPermissionMap
         ),
     );
 
+    /**
+     * {@inheritDoc}
+     */
+    public function getMasks($permission, $object)
+    {
+        if (!isset($this->map[$permission])) {
+            return null;
+        }
+
+        return $this->map[$permission];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function contains($permission)
+    {
+        return isset($this->map[$permission]);
+    }
 }

@@ -46,6 +46,13 @@ abstract class ARenderer implements IRenderer {
      */
     protected $_mode;
     
+    /**
+     * Ignore the rendering if specified render mode is not 
+     * available if TRUE, use the default template otherwise
+     * @var Boolean
+     */
+    protected $_ignoreIfRenderModeNotAvailable;
+    
     protected $_node;
     
     /**
@@ -118,6 +125,7 @@ abstract class ARenderer implements IRenderer {
     /**
      * Add new helpre directory in the choosen position.
      *
+     * @codeCoverageIgnore
      * @param string $new_dir location of the new directory
      * @param integer $position position in the array
      */
@@ -130,6 +138,7 @@ abstract class ARenderer implements IRenderer {
     /**
      * Add new layout directory in the choosen position.
      *
+     * @codeCoverageIgnore
      * @param string $new_dir location of the new directory
      * @param integer $position position in the array
      */
@@ -141,6 +150,7 @@ abstract class ARenderer implements IRenderer {
     /**
      * Add new script directory in the choosen position.
      *
+     * @codeCoverageIgnore
      * @param strimg $new_dir location of the new directory
      * @param integer $position position in the array
      */
@@ -237,6 +247,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Magic method to test the setting of an assign var
+     * @codeCoverageIgnore
      * @param string $var the name of the variable
      * @return boolean
      */
@@ -246,6 +257,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Magic method to assign a var
+     * @codeCoverageIgnore
      * @param string $var the name of the variable
      * @param mixed $value the value of the variable
      * @return ARenderer the current renderer
@@ -307,11 +319,19 @@ abstract class ARenderer implements IRenderer {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return \BackBuilder\Renderer\ARenderer
+     */
     private function _resetVars() {
         $this->_vars = array();
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return \BackBuilder\Renderer\ARenderer
+     */
     private function _resetParams() {
         $this->_params = array();
         return $this;
@@ -338,22 +358,35 @@ abstract class ARenderer implements IRenderer {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return \BackBuilder\BBApplication
+     */
     public function getApplication() {
         return $this->_application;
     }
     
     /**
      * Return the assigned variables
+     * @codeCoverageIgnore
      * @return array Array of assigned variables
      */
     public function getAssignedVars() {
         return $this->_vars;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getClassContainer() {
         return $this->__object;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getCurrentElement() {
         return $this->__currentelement;
     }
@@ -398,36 +431,51 @@ abstract class ARenderer implements IRenderer {
         return $url;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getMaxEntry() {
         return $this->_maxentry;
     }
     
     /**
      * Return the current rendering mode
+     * @codeCoverageIgnore
      * @return string
      */
     public function getMode() {
         return $this->_mode;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getNode() {
         return $this->_node;
     }
     
     /**
      * Return the object to be rendered
+     * @codeCoverageIgnore
      * @return IRenderable
      */
     public function getObject() {
         return $this->_object;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getParentUid() {
         return $this->_parentuid;
     }
     
     /**
      * Return the previous object to be rendered
+     * @codeCoverageIgnore
      * @return IRenderable or NULL
      */
     public function getPreviousObject() {
@@ -436,6 +484,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Return the current page to be rendered
+     * @codeCoverageIgnore
      * @return null|BackBuilder\NestedNode\Page
      */
     public function getCurrentPage() {
@@ -460,6 +509,7 @@ abstract class ARenderer implements IRenderer {
 
     /**
      * return the current rendered site
+     * @codeCoverageIgnore
      * @return null|BackBuilder\Site\Site
      */
     public function getCurrentSite() {
@@ -486,9 +536,11 @@ abstract class ARenderer implements IRenderer {
      * @param string $mode The rendering mode
      * @param array $params  A force set of parameters
      * @param string $template A force template script to be rendered
+     * @param Boolean $ignoreIfRenderModeNotAvailable Ignore the rendering if specified render mode is not 
+     *                                                available if TRUE, use the default template otherwise
      * @return string The view script output
      */
-    public function render(IRenderable $content = NULL, $mode = NULL, $params = NULL, $template = NULL) {
+    public function render(IRenderable $content = NULL, $mode = NULL, $params = NULL, $template = NULL, $ignoreIfRenderModeNotAvailable = true) {
         // Nothing to do
     }
     
@@ -521,14 +573,23 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Set the rendering mode
+     * @codeCoverageIgnore
      * @param string $mode
+     * @param Boolean $ignoreIfRenderModeNotAvailable Ignore the rendering if specified render mode is not 
+     *                                                available if TRUE, use the default template otherwise
      * @return ARenderer The current renderer
      */
-    public function setMode($mode = NULL) {
+    public function setMode($mode = NULL, $ignoreIfRenderModeNotAvailable = true) {
         $this->_mode = $mode;
+        $this->_ignoreIfRenderModeNotAvailable = $ignoreIfRenderModeNotAvailable;
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param \BackBuilder\NestedNode\ANestedNode $node
+     * @return \BackBuilder\Renderer\ARenderer
+     */
     public function setNode(ANestedNode $node) {
         $this->_node = $node;
         return $this;
@@ -585,6 +646,11 @@ abstract class ARenderer implements IRenderer {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $render
+     * @return \BackBuilder\Renderer\ARenderer
+     */
     public function setRender($render) {
         $this->__render = $render;
         return $this;
@@ -657,6 +723,7 @@ abstract class ARenderer implements IRenderer {
     
     /**
      * Return the current token
+     * @codeCoverageIgnore
      * @return \Symfony\Component\Security\Core\Authentication\Token\AbstractToken
      */
     public function getToken()
@@ -679,5 +746,15 @@ abstract class ARenderer implements IRenderer {
         unset($template);
         
         return $templates;
+    }
+    
+    /**
+     * Returns the ignore state of rendering if render mode is not available
+     * @return Boolean
+     * @codeCoverageIgnore
+     */
+    public function getIgnoreIfNotAvailable()
+    {
+        return $this->_ignoreIfRenderModeNotAvailable;
     }
 }

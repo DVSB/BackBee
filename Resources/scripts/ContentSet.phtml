@@ -2,7 +2,11 @@
 <div <?php echo $this->datacontent(); ?>>
     <?php foreach ($this->getObject() as $content): ?>
         <?php
-        echo $this->render($content, is_array($this->getParam('rendermode')) ? @array_pop($this->getParam('rendermode')) : $this->getMode(), is_array($contentwidth) && array_key_exists($content->getUid(), $contentwidth) ? array('class' => $contentwidth[$content->getUid()]) : NULL);
+        echo $this->render($content, 
+                           is_array($this->getParam('rendermode')) ? @array_pop($this->getParam('rendermode')) : $this->getMode(), 
+                           is_array($contentwidth) && array_key_exists($content->getUid(), $contentwidth) ? array('class' => $contentwidth[$content->getUid()]) : NULL,
+                           null,
+                           $this->getIgnoreIfNotAvailable());
         ?>
     <?php endforeach; ?>
 </div>

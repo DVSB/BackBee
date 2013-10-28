@@ -4,13 +4,18 @@ namespace BackBuilder\Services\Local;
 
 use BackBuilder\Services\Local\AbstractServiceLocal,
     BackBuilder\Services\Content\Category,
-    BackBuilder\Cache\File\Cache,
     BackBuilder\Services\Content\ContentRender,
     BackBuilder\Services\Exception\ServicesException,
     BackBuilder\Util\String;
-    
 
-
+/**
+ * RPC services for AClassContent management
+ * 
+ * @category    BackBuilder
+ * @package     BackBuilder\Services\Local
+ * @copyright   Lp digital system
+ * @author      c.rouillon <rouillon.charles@gmail.com>
+ */
 class ContentBlocks extends AbstractServiceLocal
 {
 
@@ -253,7 +258,7 @@ class ContentBlocks extends AbstractServiceLocal
                     $currentItemTitle = (null === $item->getLabel()) ? $item->getProperty("name") . " " . $item->getUid() : $item->getLabel();
                     $contentInfos = new \stdClass();
                     $contentInfos->uid = $item->getUid();
-                    $contentInfos->title = String::truncateText($currentItemTitle,50); //truncate
+                    $contentInfos->title = String::truncateText($currentItemTitle, 50); //truncate
                     $contentInfos->ico = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->type = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->classname = $itemClass;
@@ -339,6 +344,8 @@ class ContentBlocks extends AbstractServiceLocal
             $contentNode = new $contentTypeClass($contentUid);
         }
 
+        $this->isGranted('VIEW', $contentNode);
+
         // Find a draft if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken()))
             $contentNode->setDraft($draft);
@@ -349,7 +356,7 @@ class ContentBlocks extends AbstractServiceLocal
         return $contentParams;
     }
 
-   /**
+    /**
      * @exposed(secured=true)
      */
     public function updateContentparameters($params = null, $contentInfos = null)
@@ -364,6 +371,8 @@ class ContentBlocks extends AbstractServiceLocal
             $contentNode = new $contentTypeClass($contentUid);
             $em->persist($contentNode);
         }
+
+        $this->isGranted('EDIT', $contentNode);
 
         // Find a draft if exists
         if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true))
@@ -408,6 +417,8 @@ class ContentBlocks extends AbstractServiceLocal
             $content = new $content_classname($contentUid);
         }
 
+        $this->isGranted('EDIT', $content);
+
         // Find a draft if exists
         if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
             $content->setDraft($draft);
@@ -434,7 +445,7 @@ class ContentBlocks extends AbstractServiceLocal
                 $result->bb5_form->$key->bb5_uid = array();
 
                 if (NULL === $content->$key) {
-                    $newContent = $content->getType($key);
+                    $newContent = $content->getAcceptedType($key);
                     $subcontent = new $newContent();
                 }
 
@@ -491,6 +502,9 @@ class ContentBlocks extends AbstractServiceLocal
             $content = new $content_classname($contentUid);
             $this->em->persist($content);
         }
+
+        $this->isGranted('EDIT', $content);
+
         //json_decode($contentValues);
         $content = $this->_postContent($content, json_decode($contentValues));
 
@@ -537,6 +551,8 @@ class ContentBlocks extends AbstractServiceLocal
             }
         }
 
+        $this->isGranted('EDIT', $content);
+
         // Find a draft, checkout it if not exists
         if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
             $content->setDraft($draft);
@@ -559,7 +575,7 @@ class ContentBlocks extends AbstractServiceLocal
 
                 if (true === property_exists($value, 'form') && true === is_object($value->form)) {
                     if (true === property_exists($value, 'delete') && true === $value->delete) {
-                        $newContent = $content->getType($key);
+                        $newContent = $content->getAcceptedType($key);
                         $subcontent = new $newContent();
                         $this->em->persist($subcontent);
                         $newvalues[] = $subcontent;
@@ -580,7 +596,7 @@ class ContentBlocks extends AbstractServiceLocal
                         } elseif (0 < $index) {
                             $subcontent = null;
                         }
-                      
+
 
                         // Attach the subcontent if not
                         if (null !== $subcontent && false === $this->em->contains($subcontent)) {
@@ -589,7 +605,7 @@ class ContentBlocks extends AbstractServiceLocal
 
                         // Create a new content if null
                         if (null === $subcontent) {
-                            $newContent = $content->getType($key);
+                            $newContent = $content->getAcceptedType($key);
                             $subcontent = new $newContent();
                             $this->em->persist($subcontent);
                         }
@@ -611,7 +627,7 @@ class ContentBlocks extends AbstractServiceLocal
                     }
                 }
 
-                $content->$key = $newvalues;               
+                $content->$key = $newvalues;
             }
         }
         return $content;
@@ -619,6 +635,7 @@ class ContentBlocks extends AbstractServiceLocal
 
     /**
      * @exposed(secured=true)
+     * @codeCoverageIgnore
      */
     public function handleContentChange($contentsArr = array())
     {
@@ -626,9 +643,7 @@ class ContentBlocks extends AbstractServiceLocal
         return $result;
     }
 
-    
-
-     private function _getAvailableMedias()
+    private function _getAvailableMedias()
     {
         if (null === $this->_availableMedias) {
             $this->_availableMedias = array();
@@ -641,8 +656,8 @@ class ContentBlocks extends AbstractServiceLocal
                 }
             }
         }
-        
-        return $this->_availableMedias;        
+
+        return $this->_availableMedias;
     }
 
 }
