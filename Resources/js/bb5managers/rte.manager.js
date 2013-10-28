@@ -57,7 +57,7 @@
         },
         
         handleRteEdit: function(data){
-            if( typeof data !=="object" ) throw "rte.manager.handleRteEdit data must be an object {node:'',newValue:'',oldValue:''}"; 
+            if( typeof data !=="object" ) throw "rte.manager.handleRteEdit data must be an object { node:'', newValue:'', oldValue:''}"; 
             var bbContent = $bb(data.node);
             if(bbContent.isASubContent){
                 bbContent.set("value",data.newValue);
