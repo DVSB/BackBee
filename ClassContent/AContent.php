@@ -396,7 +396,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
-    public function setMinEntry(array $minentry)
+    public function setMinEntry(array $minentry = null)
     {
         $this->_minentry = $minentry;
         return $this->_getContentInstance();
