@@ -48,8 +48,7 @@ define(["jscore"], function(){
                 var data = (typeof data == "object") ? data : {};
                 if(typeof this._callbacks[stage]=="function"){
                     this._callbacks[stage](data);
-                    if(stage=="onReady") this.isLoaded = true;
-                    
+                    if(stage=="onReady") this.isLoaded = true; 
                 }
             },
             
@@ -80,7 +79,7 @@ define(["jscore"], function(){
             enable: function(){
                 this.isEnabled = true 
             },
-        
+            
             disable: function(){
                 this.isDisabled = false;
             },

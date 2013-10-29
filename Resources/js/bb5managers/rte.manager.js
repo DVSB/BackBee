@@ -23,8 +23,8 @@
         init: function(userSettings){
             var userSettings = userSettings || {};
             this._settings = $.extend({},this._settings,userSettings);
-            bb.require(["RteManager"],$.proxy(this.applyRte,this));
             this.rte = null;
+            bb.require(["RteManager"],$.proxy(this.applyRte,this));
             return this;
         },
         
@@ -50,6 +50,7 @@
         handleRte: function(){  
             var self = this;
             $(document).bind("content:ItemClicked",function(e, path, bbContent){
+                if(self.isDisabled()) return;
                 if(!bbContent) throw "rte.manager bbContent can't be found"; 
                 self.rte.applyInlineTo(bbContent.contentEl);
                 return true;
@@ -63,6 +64,16 @@
                 bbContent.set("value",data.newValue);
                 bbContent.parentNode.updateData(); 
             } 
+        },
+        
+        enable: function(){
+            this.callSuper();
+            if(this.rte) this.rte.enable();
+        },
+        
+        disable: function(){
+           this.callSuper();
+           this.rte.disable(); 
         }
         
     });

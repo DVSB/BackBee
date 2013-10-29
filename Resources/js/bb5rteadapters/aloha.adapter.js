@@ -1,14 +1,16 @@
 /*Aloha Settings here*/
-(function(global,jq) {
+(function(global,jq,undefined) {
     
     if (global.Aloha === undefined || global.Aloha === null) {
         var Aloha = global.Aloha = {};
     }
-    Aloha = {};
-    Aloha.settings = {
-        baseUrl : "bower_components/alohaeditor/aloha/lib",
+    
+    global.Aloha.settings = {
+        baseUrl : "js/libs/alohaeditor/aloha/lib",
         toolbar: {
-            floating : false
+            floating : false,
+            pin: false,
+            draggable: false
         },
         bundles: {
             // Path for custom bundle relative from Aloha.settings.baseUrl usually path of aloha.js
@@ -16,7 +18,6 @@
         }
     };
 })(window,$);
-
 /* loadScript */
 function loadScript(url, callback, config){
     var script = document.createElement("script");
@@ -50,6 +51,7 @@ bb.RteManager.registerAdapter("aloha",{
         var self = this;
         this.contentNode = null;
         this.mode = null;
+        this.editables = [];
         this._settings = {
             plugins: "common/ui,common/format,common/table,common/list,common/link," 
         +"common/highlighteditables,common/block,common/undo,common/commands,common/paste,common/abbr,"
@@ -59,14 +61,11 @@ bb.RteManager.registerAdapter("aloha",{
         loadScript("js/libs/alohaeditor/aloha/lib/aloha-full.min.js", function(){
             Aloha.ready(function(){
                 self.trigger("onReady");
+                /*show toolbar*/
+                Aloha.bind("aloha-editable-activated",jQuery.proxy(self.onShowToolbar,self));
+                /* update bbcontent only if content has changed */
+                Aloha.bind("aloha-editable-deactivated",jQuery.proxy(self.handleContentEdition,self));
             });
-            
-            /*show toolbar*/
-            Aloha.bind("aloha-editable-activated",jQuery.proxy(self.onShowToolbar,self));
-            /* update bbcontent only if content has changed */
-            Aloha.bind("aloha-editable-deactivated",jQuery.proxy(self.handleContentEdition,self));
-            /* save content when Aloha is deactivated */
-            //Aloha.bind("aloha-editable-deactivated",jQuery.proxy(self.handleContentChange,self));
         },{
             "data-aloha-plugins" : self._settings.plugins
         });        
@@ -105,8 +104,10 @@ bb.RteManager.registerAdapter("aloha",{
             jQuery.each(params.editables, function(i,configObject){
                 jQuery.each(configObject,function(fieldname,nodeConfig){
                     var node = self.mainNode.find('[data-aloha="' + fieldname + '"]').eq(0); 
-                    if(node){
-                        Aloha.jQuery(node).aloha();
+                    var editableNode = $(node).get(0); 
+                    if(editableNode && !Aloha.isEditable(editableNode)){
+                        Aloha.jQuery(editableNode).aloha();
+                        self.editables.push(editableNode);
                     }
                 });
             });
@@ -121,11 +122,16 @@ bb.RteManager.registerAdapter("aloha",{
     
     /* prendre en compte le mode*/
     onShowToolbar : function(){
+        $("#aloha").css({
+            position:"relative"
+        });
         if(this.mode != "inline") return;
         $(".aloha-ui.aloha-ui-toolbar").css({
-            width: "490px"
+            width: "490px",
+            position: "absolute",
+            top: "0px"
         });
-        $(".aloha-toolbar").appendTo("#bb5-edit-tabs-data"); 
+        $(".aloha-toolbar").appendTo("#aloha"); 
     },
     
     _loadContentParams : function(contentType){
@@ -153,5 +159,20 @@ bb.RteManager.registerAdapter("aloha",{
         },                      
         ];
         return config;
+    },
+    
+    enable: function(){
+        this.callSuper();
+    },
+    
+    disable: function(){
+        this.callSuper();
+        if(!this.editables.length) return;
+        Aloha.jQuery(this.editables).mahalo();
+    /*jQuery.each(this.editables,function(i,node){
+            console.log(Aloha.jQuery(node).attr("id"));
+            console.log(Aloha.getEditableById(Aloha.jQuery(node).attr("id")));
+        });*/
     }
+      
 });

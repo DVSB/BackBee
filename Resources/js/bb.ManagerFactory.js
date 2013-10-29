@@ -45,7 +45,7 @@ define(["jscore"], function(){
             
             initialize: function(){
                 this.initDefaultSettings(); //init default
-                this.isEnabled = true;
+                this.managerIsEnabled = false;
             },
             
             getExposedApi: function(){
@@ -54,9 +54,22 @@ define(["jscore"], function(){
             
             getMedator: function(){},
          
-            enable: function(){},
+          
+            enable: function(){
+                this.managerIsEnabled = true 
+            },
             
-            disable: function(){},
+            disable: function(){
+                this.managerIsEnabled = false;
+            },
+        
+            isEnabled: function(){
+                return (this.managerIsEnabled==true) ? true : false;  
+            },
+            
+            isDisabled: function(){
+                return (this.managerIsEnabled==false) ? true : false;
+            },
             
             saveState: function(){},
             
@@ -75,10 +88,14 @@ define(["jscore"], function(){
                         var Manager = new JS.Class(AbstactManager, cleanedDefinition);
                         /* override getExposed and and the init method the api */
                         Manager.define('getPublicApi', function(){
-                            /*add init function the */
+                            /*add init - enable - disable function to the public api */
                             var init = this.method("init");
+                            var enable = this.method("enable");
+                            var disable = this.method("disable");
                             var api = this.getExposedApi();
                             api.init = init;
+                            api.enable = enable;
+                            api.disable = disable;
                             return api;
                         });
                         _managers[name] = Manager;

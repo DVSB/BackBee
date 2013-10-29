@@ -602,26 +602,19 @@ BB4.ToolsbarManager.register("editiontb",{
             this._contextMenu.enable();
         }
 
-        /*get Rte here */
-        try{
-            var rte = bb.ManagersContainer.getInstance().getManager("RteAdapter"); 
-        }catch(e){
-            console.log(e);
-        }
-      
-       
         //AlohaManager.applyAloha();
         
         /* handle rte manager here use deferred */
+        var self = this;
         bb.require(["ManagerFactory"], function(){
             try{
-                var contentManager = bb.core.getManager("rte");
-                contentManager.init();
+                if(self.contentManager){ self.contentManager.enable(); return;}
+                self.contentManager = bb.core.getManager("rte");
+                self.contentManager.init().enable();
             }catch(e){
                 throw e;
             }
         });
-        
         
         this._context.isEnable = true;   
     },
@@ -1246,9 +1239,11 @@ BB4.ToolsbarManager.register("editiontb",{
 
     disable: function() {
        
-        AlohaManager.stop(); 
-        //$('[data-uid]').die('contentchange');
-         
+       console.log("inside disable ");
+        //AlohaManager.stop(); 
+        if(this.contentManager){
+            this.contentManager.disable();
+        }         
         if (this._context.mediaSelector) {
             $('[data-type^="Media\\\\"]').die('mouseover');            
             $('[data-type^="Media\\\\"]').die('mouseout');                

@@ -161,7 +161,8 @@ $.loadScript = function(url, options) {
         init: function() {
             if (bb.isloaded)
                 return;
-                        
+          $(bb).trigger("bb.loading.start");
+           
             baseurl = $('#bb5-scripts').attr('src');
             if ('undefined' != typeof(baseurl))
                 bb.baseurl = baseurl.replace(bb.resourcesdir+'js/bb.js', '');
@@ -182,14 +183,16 @@ $.loadScript = function(url, options) {
 
             /*Upload*/
             bb.uploadManager.setup(bb.uploadManagerConfig); 
-            
+             $(bb).trigger("bb.loading.end");
             bb.isloaded = true;
         },
         
         loadLibs: function() {
+            
             $.each(bb.libs, function(index, script) {
                 $.loadScript(bb.resourcesdir+script);
             });
+           
         },
         
         loadScripts: function() {
@@ -203,7 +206,6 @@ $.loadScript = function(url, options) {
                 if (!event.altKey || !event.ctrlKey || 66 != event.keyCode)
                     return;
             }
-            
             if (!bb.isloaded) bb.init();
             
             bb.webserviceManager.getInstance('ws_local_user').request('getUser', {
