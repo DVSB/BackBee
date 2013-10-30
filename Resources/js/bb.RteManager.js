@@ -6,7 +6,7 @@ var module = {
     exports: {}
 };
 
-define(["jscore"], function(){
+define(["jscore","webserviceMng"], function(a,webserviceMng){
     
     return (function(global){
         //console.log(JS);
@@ -18,13 +18,16 @@ define(["jscore"], function(){
          **/
             initialize: function(){
                 this._callbacks = {
-                    "onReady" : function(){},
+                    "onReady": function(){},
                     "onEdit": function(){}
                 };
-                this.settings = {};
+                this.settings = {
+                    ws:"ws_local_contentBlock"
+                };
                 this.isEnabled = false;
                 this.isLoaded = false;
                 this.contentConfig = {}; //key - config 
+                this.ws = webserviceMng.getInstance("ws_local_contentBlock"); 
                 this.onCreate();
             },
             
@@ -71,9 +74,32 @@ define(["jscore"], function(){
                 console.log("execute loadPlugins");
             },
             
-            /* load rte save content */
-            loadContentParams : function(contentId,contentType){
-                
+            /* load params and make */
+            loadNodeRteParams : function(contentType){
+                var self = this;
+                var editables = null;
+                if(typeof contentType==!"string") throw "bb.RTEManager.loadNodeRteParams contentType must a string";
+                if(contentType in this.contentConfig){
+                    editables = this.contentConfig[contentType];
+                }
+                else{
+                    try{
+                        this.ws.request("getDataContentType", {
+                            params: {
+                                name:contentType
+                            }, 
+                            async: false, 
+                            success: function(response){
+                                editables = response.result.editables;
+                                self.contentConfig[contentType] = editables;
+                                editables = editables;
+                            }
+                        });   
+                    }catch(e){
+                        console.log("bb.RTEManager.loadNodeRteParams :"+e);
+                    } 
+                }
+                return editables;
             },
 
             enable: function(){

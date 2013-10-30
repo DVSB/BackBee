@@ -15,9 +15,17 @@
         bundles: {
             // Path for custom bundle relative from Aloha.settings.baseUrl usually path of aloha.js
             cmsplugin: '../../../aloha-plugins'
+        },
+        plugins :{
+            "format": {
+                // all elements with no specific configuration get this configuration
+                config : [ 'b', 'i','sub','sup'],
+                editables: {}
+            }
         }
-    };
+    }
 })(window,$);
+
 /* loadScript */
 function loadScript(url, callback, config){
     var script = document.createElement("script");
@@ -58,7 +66,7 @@ bb.RteManager.registerAdapter("aloha",{
         +"common/image,common/contenthandler"
         };
         
-        loadScript("js/libs/alohaeditor/aloha/lib/aloha-full.min.js", function(){
+        loadScript("js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
             Aloha.ready(function(){
                 self.trigger("onReady");
                 /*show toolbar*/
@@ -97,29 +105,34 @@ bb.RteManager.registerAdapter("aloha",{
         /*find all rte enabled contents*/
         var self = this;
         /*load Content params via the mainnode. keep track of the*/
-        var contentParams = this._loadContentParams($(this.mainNode).attr("data-type"));
+        var editables = this.loadNodeRteParams($(this.mainNode).attr("data-type"));//sync call
         /* apply aloha to all the the fields*/
-        var params = contentParams[0];
-        if(jQuery.isArray(params.editables)){
-            jQuery.each(params.editables, function(i,configObject){
+        if(jQuery.isArray(editables)){
+            jQuery.each(editables, function(i,configObject){
                 jQuery.each(configObject,function(fieldname,nodeConfig){
                     var node = self.mainNode.find('[data-aloha="' + fieldname + '"]').eq(0); 
                     var editableNode = $(node).get(0); 
                     if(editableNode && !Aloha.isEditable(editableNode)){
                         Aloha.jQuery(editableNode).aloha();
                         self.editables.push(editableNode);
+                        self._setNodeParams(node,nodeConfig); //save params for node
                     }
                 });
             });
         }
     },
     
+    _setNodeParams: function(node,params){
+        if(node && typeof jQuery.isArray(params)){
+            var id = "#"+$(node).attr("id");
+            Aloha.settings.plugins.format.editables[id] = params;  
+        }
+    },
+    
     applyToTextarea : function(){
         this.mode = "textarea";
     },
-    
-    
-    
+      
     /* prendre en compte le mode*/
     onShowToolbar : function(){
         $("#aloha").css({

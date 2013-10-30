@@ -37545,7 +37545,6 @@ define('aloha/plugin',[
 			var configObj = null,
 				configSpecified = false,
 				that = this;
-
 			if (this.settings.editables) {
 				// check if the editable's selector matches and if so add its configuration to object configuration
 				jQuery.each(this.settings.editables, function (selector, selectorConfig) {
@@ -37587,7 +37586,6 @@ define('aloha/plugin',[
 					configObj = this.settings.config;
 				}
 			}
-
 			return configObj;
 		},
 
@@ -60102,7 +60100,6 @@ define('link/link-plugin', [
 			Aloha.bind('aloha-editable-created', function (event, editable) {
 				var config = that.getEditableConfig(editable.obj),
 				    enabled = (jQuery.inArray('a', config) !== -1);
-
 				isEnabled[editable.getId()] = enabled;
 
 				if (!enabled) {
@@ -67081,7 +67078,6 @@ define('format/format-plugin', [
 	function onSelectionChanged(formatPlugin, rangeObject) {
 		var effectiveMarkup,
 		    foundMultiSplit, i, j, multiSplitItem;
-
 		jQuery.each(formatPlugin.buttons, function (index, button) {
 			var statusWasSet = false;
 			var nodeNames = interchangeableNodeNames[button.markup[0].nodeName] || [button.markup[0].nodeName];
@@ -67231,7 +67227,7 @@ define('format/format-plugin', [
 		applyButtonConfig: function (obj) {
 			var config = this.getEditableConfig(obj),
 			    button, i, len;
-
+				
 			if ( typeof config === 'object' ) {
 				var config_old = [];
 				jQuery.each(config, function(j, button) {

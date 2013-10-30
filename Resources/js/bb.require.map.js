@@ -12,6 +12,7 @@ bb.require({
         "RteManager" : "bb.RteManager",
         "ManagerFactory": "bb.ManagerFactory",
         "jscore" : "libs/jsclass/min/core",
+         "webserviceMng":"bb.webservice",
         "aloha": "libs/alohaeditor/aloha/lib/aloha"
     }
 });

@@ -243,4 +243,7 @@ $.extend(bb.webserviceManager, {
     }
 });
 
-
+/* requireJS module webServiceManager */
+define("webserviceMng",[],function(){
+    return bb.webserviceManager;
+})
