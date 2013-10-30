@@ -18,6 +18,8 @@ use BackBuilder\Renderer\ARenderer,
  */
 class phtml extends ARenderer
 {
+    const HEADER_SCRIPT = 'header';
+    const FOOTER_SCRIPT = 'footer';
 
     /**
      * Default extension to use to construct URI
@@ -36,6 +38,8 @@ class phtml extends ARenderer
      * @var string
      */
     private $_templateFile;
+
+    private $_scripts;
 
     /**
      * Try to locate the corresponding template file for the current object
@@ -276,6 +280,7 @@ class phtml extends ARenderer
             if (is_a($object, '\BackBuilder\NestedNode\Page')) {
                 $renderer->setCurrentPage($object);
                 $renderer->__render = $renderer->_renderPage($template);
+                $this->_insertHeaderAndFooterScript();
                 $this->getApplication()->debug(sprintf('Rendering Page OK'));
             } else {
                 // Rendering a content
@@ -441,4 +446,50 @@ class phtml extends ARenderer
         return array_unique($modes);
     }
 
+    public function addHeaderScript($href)
+    {
+        $this->_addScript(self::HEADER_SCRIPT, $href);
+    }
+
+    public function addFooterScript($href)
+    {
+        $this->_addScript(self::FOOTER_SCRIPT, $href);
+    }
+
+    private function _addScript($type, $href)
+    {
+        if (!isset($this->_scripts)) {
+            $this->_scripts = array(
+                self::HEADER_SCRIPT => array(),
+                self::FOOTER_SCRIPT => array()
+            );
+        }
+
+        if(!in_array($href, $this->_scripts[$type])) {
+            $this->_scripts[$type][] = $href;
+        }
+    }
+
+    private function _insertHeaderAndFooterScript()
+    {
+        if (!isset($this->_scripts)) {
+            return;
+        }
+
+        $this->_scripts[self::FOOTER_SCRIPT] = array_diff($this->_scripts[self::FOOTER_SCRIPT], $this->_scripts[self::HEADER_SCRIPT]);
+        echo htmlspecialchars($this->__render);
+
+        $this->setRender(strstr($this->getRender(), '</head>', true).$this->_generateScriptCode($this->_scripts[self::HEADER_SCRIPT]).strstr($this->getRender(), '</head>'));
+        $this->setRender(strstr($this->getRender(), '</body>', true).$this->_generateScriptCode($this->_scripts[self::FOOTER_SCRIPT]).strstr($this->getRender(), '</body>'));
+    }
+
+    private function _generateScriptCode($scripts)
+    {
+        $result = '';
+        foreach ($scripts as $href) {
+            $result .= '<script type="text/javascript src="'.$href.'"></script>';
+        }
+
+        return $result;
+    }
 }

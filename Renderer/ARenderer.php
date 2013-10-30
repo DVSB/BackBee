@@ -655,6 +655,14 @@ abstract class ARenderer implements IRenderer {
         $this->__render = $render;
         return $this;
     }
+
+    /**
+     * 
+     * @return string 
+     */
+    public function getRender() {
+        return $this->__render;
+    }
     
     /**
      * Updates a file script of a layout
