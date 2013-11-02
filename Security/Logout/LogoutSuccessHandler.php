@@ -36,7 +36,6 @@ class LogoutSuccessHandler implements LogoutSuccessHandlerInterface
      */
     public function onLogoutSuccess(Request $request)
     {
-        setcookie('rememberme', '', 0, '/');
         return $this->httpUtils->createRedirectResponse($request, $this->targetUrl);
     }
 
