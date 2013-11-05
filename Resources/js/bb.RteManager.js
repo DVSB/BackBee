@@ -22,12 +22,12 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                     "onEdit": function(){}
                 };
                 this._settings = {
-                    ws:"ws_local_contentBlock"
+                    ws : "ws_local_classContent"
                 };
                 this.isEnabled = false;
                 this.isLoaded = false;
                 this.contentConfig = {}; //key - config 
-                this.ws = webserviceMng.getInstance("ws_local_contentBlock"); 
+                this.ws = webserviceMng.getInstance("ws_local_classContent"); 
                 this.onCreate();
             },
             
@@ -86,7 +86,7 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                 }
                 else{
                     try{
-                        this.ws.request("getDataContentType", {
+                        this.ws.request("getContentsRteParams", {
                             params: {
                                 name:contentType
                             }, 

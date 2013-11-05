@@ -150,7 +150,6 @@ class phtml extends ARenderer
             $this->assign($this->_object->getData())
                     ->setParam($this->_object->getParam());
         }
-
         if (NULL !== $params) {
             $params = (array) $params;
             foreach ($params as $param => $value)

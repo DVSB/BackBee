@@ -61,7 +61,6 @@ bb.RteManager.registerAdapter("aloha",{
         this.contentNode = null;
         this.mode = null;
         this.editables = [];
-        console.log(this._settings);
         /*handle all settings here*/
         loadScript("js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
             Aloha.ready(function(){
@@ -92,10 +91,6 @@ bb.RteManager.registerAdapter("aloha",{
         this.trigger("onEdit",editedData);
     },
     
-    handleContentChange : function(){
-    //console.log(arguments);
-    },
-    
     applyInlineTo : function(node){
         this.mode = "inline"; 
         this.mainNode = node;
@@ -104,13 +99,13 @@ bb.RteManager.registerAdapter("aloha",{
         /*load Content params via the mainnode. this should not be needed.*/
         var editables = this.loadNodesRteParams($(this.mainNode).attr("data-type"));//sync call
         var fieldPrefix = this._settings.fieldPrefix;
-        if(!fieldPrefix) throw "aloha.adapter field prefix can't be found";
+        if(!fieldPrefix || typeof fieldPrefix!="string") throw "aloha.adapter fieldPrefix must be a string";
         
         /* apply aloha to all the the fields*/
         if(jQuery.isArray(editables)){
             jQuery.each(editables, function(i,configObject){
                 jQuery.each(configObject, function(fieldname,nodeConfig){
-                    var node = self.mainNode.find('["'+fieldPrefix+'"="' + fieldname + '"]').eq(0); 
+                    var node = self.mainNode.find('['+fieldPrefix+'="' + fieldname + '"]').eq(0); 
                     var editableNode = $(node).get(0); 
                     if(editableNode && !Aloha.isEditable(editableNode)){
                         Aloha.jQuery(editableNode).aloha();
@@ -144,6 +139,7 @@ bb.RteManager.registerAdapter("aloha",{
             position: "absolute",
             top: "0px"
         });
+        $(".aloha-multisplit-content").css("zIndex",1000);
         $(".aloha-toolbar").appendTo("#aloha"); 
     },
     

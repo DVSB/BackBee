@@ -15,6 +15,7 @@ use BackBuilder\ClassContent\ContentSet;
  *   * data-minentry:       The minimum subcontents allowed
  *   * data-maxentry:       The maximum subcontents allowed
  *   * data-accept:         The accepted subcontents
+ *   * data-rteconfig       The rte config to be used
  *   * data-element:        The name or index of this content
  *   * data-isloaded:       Is the content is contained by the entity manager
  *   * data-forbidenactions:The editing forbiden actions
@@ -69,11 +70,12 @@ class datacontent extends AHelper
 
         // If a valid BB user is granted to access this content
         if (null !== $this->_content && true === $this->_isGranted()) {
-        $this->_addCommonContentMarkup($params)
-                ->_addContentSetMarkup($params)
-                ->_addClassContainerMarkup($params)
-                ->_addElementFileMarkup($params)
-                ->_addAlohaMarkup($params);
+            $this->_addCommonContentMarkup($params)
+                    ->_addContentSetMarkup($params)
+                    ->_addClassContainerMarkup($params)
+                    ->_addElementFileMarkup($params)
+                    ->_addAlohaMarkup($params);
+            //->_addRteMarkup($params);
         }
 
         return implode(' ', array_map(array($this, '_formatAttributes'), array_keys($this->_attributes), array_values($this->_attributes)));
@@ -196,7 +198,16 @@ class datacontent extends AHelper
                 && null !== $this->_renderer->getCurrentElement()) {
             $this->_addValueToAttribute('data-aloha', $this->_renderer->getCurrentElement());
         }
+        return $this;
+    }
 
+    /**
+     * adds specific rte markup on content
+     * @params aray $params Optional parameters
+     * @return \BackBuilder\Renderer\Helper\datacontent
+     */
+    private function _addRteMarkup($params = array())
+    {
         return $this;
     }
 
