@@ -2,7 +2,10 @@
 
 namespace BackBuilder\Renderer\Adapter;
 
-use BackBuilder\Renderer\ARenderer,
+use Symfony\Component\HttpFoundation\ParameterBag;
+
+use BackBuilder\BBApplication,
+    BackBuilder\Renderer\ARenderer,
     BackBuilder\Renderer\IRenderable,
     BackBuilder\Renderer\Exception\RendererException,
     BackBuilder\Site\Layout,
@@ -18,6 +21,8 @@ use BackBuilder\Renderer\ARenderer,
  */
 class phtml extends ARenderer
 {
+    const HEADER_SCRIPT = 'header';
+    const FOOTER_SCRIPT = 'footer';
 
     /**
      * Default extension to use to construct URI
@@ -36,6 +41,15 @@ class phtml extends ARenderer
      * @var string
      */
     private $_templateFile;
+
+    private $_scripts;
+
+    public function __construct(BBApplication $application = null, $config = null)
+    {
+        parent::__construct($application, $config);
+
+        $this->_scripts = new ParameterBag();
+    }
 
     /**
      * Try to locate the corresponding template file for the current object
@@ -276,6 +290,7 @@ class phtml extends ARenderer
             if (is_a($object, '\BackBuilder\NestedNode\Page')) {
                 $renderer->setCurrentPage($object);
                 $renderer->__render = $renderer->_renderPage($template);
+                $renderer->_insertHeaderAndFooterScript();
                 $this->getApplication()->debug(sprintf('Rendering Page OK'));
             } else {
                 // Rendering a content
@@ -441,4 +456,87 @@ class phtml extends ARenderer
         return array_unique($modes);
     }
 
+    /**
+     * Helper: generate javascript's tag with $href and add it to head tag children
+     * Note: guaranteed that two or more scripts with same href will be included only once
+     * 
+     * @param string $href href of the js file to add
+     * @return BackBuilder\Renderer\Adapter\phtml
+     */
+    public function addHeaderScript($href)
+    {
+        $this->_addScript(self::HEADER_SCRIPT, $href);
+
+        return $this;
+    }
+
+    /**
+     * Helper: generate javascript's tag with $href and add it to body tag children
+     * Note: if header and footer scripts contains same href string, the script will be
+     * only add in the head tag
+     * 
+     * @param string $href 
+     * @return BackBuilder\Renderer\Adapter\phtml
+     */
+    public function addFooterScript($href)
+    {
+        $this->_addScript(self::FOOTER_SCRIPT, $href);
+
+        return $this;
+    }
+
+    /**
+     * @param string $type 
+     * @param string $href 
+     */
+    private function _addScript($type, $href)
+    {
+        $scripts = array();
+        if ($this->_scripts->has($type)) {
+            $scripts = $this->_scripts->get($type);
+        }
+
+        if(!in_array($href, $scripts)) {
+            $scripts[] = $href;
+        }
+
+        $this->_scripts->set($type, $scripts);
+    }
+
+    private function _insertHeaderAndFooterScript()
+    {
+        if (null === $this->_scripts) {
+            return;
+        }
+
+        $footerScripts = $this->_scripts->get(self::FOOTER_SCRIPT, array());
+        $headerScripts = $this->_scripts->get(self::HEADER_SCRIPT, array());
+        $footerScripts = array_diff($footerScripts, $headerScripts);
+        if (0 < count($headerScripts)) {
+            $this->setRender(strstr($this->getRender(), '</head>', true).$this->_generateScriptCode($headerScripts).strstr($this->getRender(), '</head>'));
+        }
+
+        if (0 < count($footerScripts)) {
+            $this->setRender(strstr($this->getRender(), '</body>', true).$this->_generateScriptCode($footerScripts).strstr($this->getRender(), '</body>'));
+        }
+
+        // Reset scripts array
+        $this->_scripts->remove(self::FOOTER_SCRIPT);
+        $this->_scripts->remove(self::HEADER_SCRIPT);
+    }
+
+    /**
+     * 
+     * @param  array $scripts
+     * @return string
+     */
+    private function _generateScriptCode($scripts)
+    {
+        $result = '';
+        foreach ($scripts as $href) {
+            $result .= '<script type="text/javascript" src="'.$href.'"></script>';
+        }
+
+        return $result;
+    }
 }

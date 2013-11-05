@@ -173,9 +173,14 @@ bb.StatusManager = (function($,gExport){
     
     var _enable = function() {
         if (!currentPage) {
+			var layoutId = $('#bb5-toolbar-wrapper').attr('data-layout');
+			while (!layoutId) {
+				layoutId = $('#bb5-toolbar-wrapper').attr('data-layout');
+			}
+			
             pageWebservice.request('getWorkflowStatus', {
                 params:{
-                    uid: _settings.layoutId
+                    uid: layoutId
                 },
                 success:function(response){
                     if (response.result) {

@@ -47,7 +47,18 @@ class NestedNodeRepository extends EntityRepository {
         }
 
         $node->setRightnode($leftnode + 1);
-        $this->_em->flush($node);
+        
+        $this->createQueryBuilder('n')
+                ->update()
+                ->set('n._leftnode', $node->getLeftnode())
+                ->set('n._rightnode', $node->getRightnode())
+                ->set('n._level', $node->getLevel())
+                ->where('n._uid = :uid')
+                ->setParameter('uid', $node->getUid())
+                ->getQuery()
+                ->execute();
+        
+//        $this->_em->flush($node);
 
         return $node;
     }
