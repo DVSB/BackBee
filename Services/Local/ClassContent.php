@@ -435,7 +435,8 @@ class ClassContent extends AbstractServiceLocal
                        $rteStyle = $content->{$key}->getParam('aloha', 'scalar');
                         if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == TRUE && NULL !== $rteStyle)) {
                             $stdClassObj = new \stdClass();
-                            /* if the style exists */
+                            /* if the style doesn't exist */
+                            if(!array_key_exists($rteStyle,$adapterConfig["styles"])) throw new \Exception("rte style '".$rteStyle."' can't be found. Add it to your config.");
                             $stdClassObj->{$key} = $adapterConfig["styles"][$rteStyle];
                             $editable[] = $stdClassObj;
                         }
