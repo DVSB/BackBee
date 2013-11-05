@@ -7,74 +7,85 @@
     /*dire à l'avance les événements qui nous intéressent */
     bb.core.registerManager("rte", {
         
+        
         moduleConfig: {
             alias : "rte",
-            dependencies: ["manager1", "adapter1"] //les dépendances seront chargées et disponibles dans bb.core
+            dependencies: ["manager1", "adapter1"]
         },
         
         initDefaultSettings : function(){     
             this.managerSettings = {
-                rte: "aloha",
-                contentClass: ".mainContent"
+                adapter: "",
+                contentClass: ".mainContent",
+                wsName: "ws_local_config"
             }
         },
         
-        /*pour avoir les params utiliser*/
+        /*avoir l'assurance que les dépendances seront chargées*/
         init: function(userSettings){
             var userSettings = userSettings || {};
             this._settings = $.extend({},this._settings,userSettings);
-            this.rte = null;
-            bb.require(["RteManager"],$.proxy(this.applyRte,this));
-            return this;
-        },
-        
-        applyRte: function(RTEManager){
-            // if(!this.isEnabled) return false;
-            var rteSettings = {
-                mainNodeClass: ".mainContent", 
-                inlineContentClass: ".contentAloha", 
-                editContentClass: "", 
-                fieldPrefix: "data-aloha"
-            };
-            try{
-                this.rte = RTEManager.use(this.managerSettings.rte,rteSettings);
-                this.rte.onReady(this.handleRte,this);
-                this.rte.onEdit(this.handleRteEdit,this); 
-                this.rte.init();
-            }catch(e){
-                console.log(e);
-            }
-           
-        },
-        
-        handleRte: function(){  
+            this.rteAdapter = null;
             var self = this;
-            $(document).bind("content:ItemClicked",function(e, path, bbContent){
-                if(self.isDisabled()) return;
-                if(!bbContent) throw "rte.manager bbContent can't be found"; 
-                self.rte.applyInlineTo(bbContent.contentEl);
-                return true;
-            });                
-        },
+            this.rteConfig = {};
+            bb.webserviceManager.getInstance(this.managerSettings.wsName).request("getRTEConfig",{
+                async: false, 
+                params: {},
+                success: function(response){
+                    var rteConfig = response.result;
+                    var adapter = ("adapter" in rteConfig.config) ? rteConfig.config.adapter : false;
+                    if(!adapter) throw "rte.manager adapter can't be found";
+                    self.managerSettings.adapter = adapter;
+                    var adapterConfig = rteConfig[adapter];
+                    if(adapterConfig == "undefined") throw "rte.manager config can't be found for "+adaper+" adapter";
+                    $.extend(self.rteConfig,rteConfig.config,adapterConfig);
+                }
+            });
+        /* try to load rte config here */
+        bb.require(["RteManager"],$.proxy(this.applyRte,this));
+        return this;
+    },
         
-        handleRteEdit: function(data){
-            if( typeof data !=="object" ) throw "rte.manager.handleRteEdit data must be an object { node:'', newValue:'', oldValue:''}"; 
-            var bbContent = $bb(data.node);
-            if(bbContent.isASubContent){
-                bbContent.set("value",data.newValue);
-                bbContent.parentNode.updateData(); 
-            } 
-        },
+    applyRte: function(RTEManager){
+        try{
+            this.rteAdapter = RTEManager.use(this.managerSettings.adapter);
+            this.rteAdapter.onReady(this.handleRte,this);
+            this.rteAdapter.onEdit(this.handleRteEdit,this); 
+            this.rteAdapter.init(this.rteConfig);
+        }catch(e){
+            console.log(e);
+        }  
+    },
         
-        enable: function(){
-            this.callSuper();
-            if(this.rte) this.rte.enable();
-        },
+    handleRte: function(){  
+        var self = this;
+        $(document).bind("content:ItemClicked",function(e, path, bbContent){
+            if(self.isDisabled()) return;
+            if(!bbContent) throw "rte.manager bbContent can't be found"; 
+            self.rteAdapter.applyInlineTo(bbContent.contentEl);
+            return true;
+        });                
+    },
         
-        disable: function(){
-           this.callSuper();
-           this.rte.disable(); 
-        }
+    handleRteEdit: function(data){
+        if( typeof data !=="object" ) throw "rte.manager.handleRteEdit data must be an object { node:'', newValue:'', oldValue:''}"; 
+        var bbContent = $bb(data.node);
+        if(bbContent.isASubContent){
+            bbContent.set("value",data.newValue);
+            bbContent.parentNode.updateData(); 
+        } 
+    },
+        
+    enable: function(){
+        this.callSuper();
+        //delay call is rte is not ready yet
+        if(this.rteAdapter) this.rteAdapter.enable();
+    },
+        
+    disable: function(){
+        this.callSuper();
+        this.rteAdapter.disable(); 
+    }
         
     });
         

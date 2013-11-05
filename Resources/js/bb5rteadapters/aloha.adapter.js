@@ -53,19 +53,16 @@ function loadScript(url, callback, config){
     document.getElementsByTagName("head")[0].appendChild(script);
 }
 
+/* declaring aloha adapter */
 bb.RteManager.registerAdapter("aloha",{
     
-    onInit : function(){
+    onInit : function(params){
         var self = this;
         this.contentNode = null;
         this.mode = null;
         this.editables = [];
-        this._settings = {
-            plugins: "common/ui,common/format,common/table,common/list,common/link," 
-        +"common/highlighteditables,common/block,common/undo,common/commands,common/paste,common/abbr,"
-        +"common/image,common/contenthandler"
-        };
-        
+        console.log(this._settings);
+        /*handle all settings here*/
         loadScript("js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
             Aloha.ready(function(){
                 self.trigger("onReady");
@@ -104,13 +101,16 @@ bb.RteManager.registerAdapter("aloha",{
         this.mainNode = node;
         /*find all rte enabled contents*/
         var self = this;
-        /*load Content params via the mainnode. keep track of the*/
-        var editables = this.loadNodeRteParams($(this.mainNode).attr("data-type"));//sync call
+        /*load Content params via the mainnode. this should not be needed.*/
+        var editables = this.loadNodesRteParams($(this.mainNode).attr("data-type"));//sync call
+        var fieldPrefix = this._settings.fieldPrefix;
+        if(!fieldPrefix) throw "aloha.adapter field prefix can't be found";
+        
         /* apply aloha to all the the fields*/
         if(jQuery.isArray(editables)){
             jQuery.each(editables, function(i,configObject){
-                jQuery.each(configObject,function(fieldname,nodeConfig){
-                    var node = self.mainNode.find('[data-aloha="' + fieldname + '"]').eq(0); 
+                jQuery.each(configObject, function(fieldname,nodeConfig){
+                    var node = self.mainNode.find('["'+fieldPrefix+'"="' + fieldname + '"]').eq(0); 
                     var editableNode = $(node).get(0); 
                     if(editableNode && !Aloha.isEditable(editableNode)){
                         Aloha.jQuery(editableNode).aloha();
@@ -147,33 +147,6 @@ bb.RteManager.registerAdapter("aloha",{
         $(".aloha-toolbar").appendTo("#aloha"); 
     },
     
-    _loadContentParams : function(contentType){
-        if(!contentType) throw "_loadContentparams:rteAdapter";
-        var config = [{
-            "name":"text",
-            uid:"",
-            editables:[
-            {
-                title:["b","i"]
-            },
-
-            {
-                content:["b","i"]
-            },
-
-            {
-                headline:["b","i"]
-            },
-
-            {
-                footer:["b","i"]
-            }
-            ]
-        },                      
-        ];
-        return config;
-    },
-    
     enable: function(){
         this.callSuper();
     },
@@ -182,10 +155,6 @@ bb.RteManager.registerAdapter("aloha",{
         this.callSuper();
         if(!this.editables.length) return;
         Aloha.jQuery(this.editables).mahalo();
-    /*jQuery.each(this.editables,function(i,node){
-            console.log(Aloha.jQuery(node).attr("id"));
-            console.log(Aloha.getEditableById(Aloha.jQuery(node).attr("id")));
-        });*/
     }
       
 });

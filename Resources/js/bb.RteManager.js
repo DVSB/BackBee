@@ -21,7 +21,7 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                     "onReady": function(){},
                     "onEdit": function(){}
                 };
-                this.settings = {
+                this._settings = {
                     ws:"ws_local_contentBlock"
                 };
                 this.isEnabled = false;
@@ -40,11 +40,13 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                 console.log("OnInit must be overrided");
             },
         
-            /*called when the toolbar is shown */
+            /* called when the toolbar should be shown */
             onShowToolbar : function(){},
         
-            init : function(){
-                this.onInit();  
+            init : function(userParams){
+                var userParams = userParams || {};
+                this._settings = jQuery.extend(true,this._settings,userParams);
+                this.onInit(this._settings);  
             },
         
             trigger : function(stage,data){
@@ -75,7 +77,7 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
             },
             
             /* load params and make */
-            loadNodeRteParams : function(contentType){
+            loadNodesRteParams : function(contentType){
                 var self = this;
                 var editables = null;
                 if(typeof contentType==!"string") throw "bb.RTEManager.loadNodeRteParams contentType must a string";
@@ -158,15 +160,15 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
             var PublicApi = function(){
                     
                 this.use = function(adapterName){
+                    var params =(typeof params =="object") ? params : {};
                     var self = this;
                     if(adapterName in _adapters){
                         try{
-                            var adapter = new _adapters[adapterName];
+                            var adapter = new _adapters[adapterName]();
                             return adapter;  
                         }catch(e){
                             throw e;
                         }
-                   
                     }else{
                         /* load adapter */
                         $.ajax({
@@ -184,7 +186,6 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                     _adapters[key] = _createAdapter(definition); //create a constructor
                 }
             }
-                
             return this.init();
         })(global);             
         return global.RteManager;   

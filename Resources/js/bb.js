@@ -146,7 +146,14 @@ $.loadScript = function(url, options) {
                 name: "ws_local_keyword",
                 namespace:"BackBuilder_Services_Local_Keyword"
             },
-            
+             {
+                name: "ws_local_keyword",
+                namespace:"BackBuilder_Services_Local_Keyword"
+            },
+            {
+                name: "ws_local_config",
+                namespace:"BackBuilder_Services_Local_Config"
+            }
             ]
         },
                 
