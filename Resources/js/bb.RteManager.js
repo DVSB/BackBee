@@ -173,9 +173,11 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                         /* load adapter */
                         $.ajax({
                             url: _settings.adapterPath+adapterName+".adapter.js", 
-                            async : false
-                        })
-                        .fail(function(e){
+                            async : false,
+                            error : function(xhr,textStatus,errorMsg){
+                             throw "textStatus :"+errorMsg;  
+                            }
+                        }).fail(function(){
                             throw "NotFounRTEAdapter ["+adapterName+"]";
                         });
                         return self.use(adapterName);

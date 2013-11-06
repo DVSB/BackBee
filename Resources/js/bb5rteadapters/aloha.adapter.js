@@ -56,7 +56,7 @@ function loadScript(url, callback, config){
 /* declaring aloha adapter */
 bb.RteManager.registerAdapter("aloha",{
     
-    onInit : function(params){
+    onInit : function(){
         var self = this;
         this.contentNode = null;
         this.mode = null;
