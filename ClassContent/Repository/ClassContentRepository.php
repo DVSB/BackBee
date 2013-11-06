@@ -646,7 +646,6 @@ class ClassContentRepository extends EntityRepository
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
     {
-
         /** enable form to edit more than one parameter */
         if (true === (property_exists($value, "parameters"))) {
             $parameters = (is_object($value->parameters)) ? array($value->parameters) : $value->parameters;
@@ -654,7 +653,7 @@ class ClassContentRepository extends EntityRepository
                 foreach ($parameters as $param) {
                     if (is_object($param)) {
                         if (true === property_exists($param, 'name') && true === property_exists($param, 'value')) {
-                            $content->setParam($param->name, $param->value);
+                            $content->setParam($param->name, $param->value, 'scalar');
                         }
                     }
                 }

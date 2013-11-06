@@ -274,9 +274,13 @@ class ClassContentListener
         if (false === class_exists($classname))
             return;
 
-        $modes = array(0 => 'default');
         $renderer = $application->getRenderer();
-        $result['rendermode']['array']['options'] = array_merge($modes, $renderer->getAvailableRenderMode(new $classname()));
+        $modes = array('default' => 'default');
+        foreach($renderer->getAvailableRenderMode(new $classname()) as $mode) {
+            $modes[$mode] = $mode;
+        }
+        
+        $result['rendermode']['array']['options'] = $modes;
 
         $event->setArgument('result', $result);
     }

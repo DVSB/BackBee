@@ -86,21 +86,22 @@ class SecurityContext extends sfSecurityContext {
             $voters[] = new AuthenticatedVoter($trustResolver);    
             
             if (null !== $this->_aclprovider) {
-                $voters[] = new \Symfony\Component\Security\Acl\Voter\AclVoter(
+                $voters[] = new Authorization\Voter\BBAclVoter(
                                     $this->_aclprovider,
                                     new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
-                                    new \Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
+                                    new \BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
                                             new RoleHierarchy( array() ),
                                             $trustResolver
                                     ),
-                                    new \Symfony\Component\Security\Acl\Permission\BasicPermissionMap(),
+                                    new Acl\Permission\PermissionMap(),
                                     $this->getApplication()->getLogging(),
-                                    false
+                                    false,
+                                    $this->getApplication()
                                 );
-                $voters[] = new RoleVoter();
+//                $voters[] = new RoleVoter();
             }
 
-            $accessDecisionManager = new DecisionManager($voters);
+            $accessDecisionManager = new DecisionManager($voters, 'affirmative', false, true);
         }
         
         parent::__construct($this->_authmanager, $accessDecisionManager);
@@ -151,6 +152,11 @@ class SecurityContext extends sfSecurityContext {
             $this->_authmanager->addProvider($this->_authproviders['bb_auth']);
             $listener = new BBAuthenticationListener($this, $this->_authmanager, $this->_logger);
             $listeners[] = $listener;
+            
+            $logout_listener = new LogoutListener($this, $httpUtils = new HttpUtils(), new Logout\BBLogoutSuccessHandler($httpUtils));
+            $logout_listener->addHandler(new Logout\BBLogoutHandler($this->_authproviders['bb_auth']));
+            
+            $this->_dispatcher->addListener('frontcontroller.request.logout', array($logout_listener, 'handle'));
         }
         
         if (array_key_exists('form_login', $config)) {
@@ -185,6 +191,10 @@ class SecurityContext extends sfSecurityContext {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getACLProvider()
     {
         return $this->_aclprovider;
@@ -248,27 +258,52 @@ class SecurityContext extends sfSecurityContext {
         return $this;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param string $name
+     * @param \Symfony\Component\Security\Core\User\UserProviderInterface $provider
+     */
     public function addUserProvider($name, UserProviderInterface $provider) {
         $this->_userproviders[$name] = $provider;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $requestMatcher
+     * @param type $listeners
+     */
     public function addFirewall($requestMatcher, $listeners) {
         $this->_firewallmap->add($requestMatcher, $listeners, NULL);
     }
     
+    /**
+     * @codeCoverageIgnore
+     */
     private function _registerFirewall() {
         $this->_firewall = new Firewall($this->_firewallmap, $this->_dispatcher);
         $this->_dispatcher->addListener('frontcontroller.request', array($this->_firewall, 'onKernelRequest'));
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return BBApplication
+     */
     public function getApplication() {
         return $this->_application;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getUserProviders() {
         return $this->_userproviders;
     }
     
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
     public function getAuthenticationManager()
     {
         return $this->_authmanager;

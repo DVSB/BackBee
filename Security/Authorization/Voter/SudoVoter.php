@@ -1,8 +1,8 @@
 <?php
+
 namespace BackBuilder\Security\Authorization\Voter;
 
 use BackBuilder\BBApplication;
-
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface,
     Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
@@ -14,9 +14,14 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface,
  */
 class SudoVoter implements VoterInterface
 {
+
     private $_application;
     private $_sudoers;
-    
+
+    /**
+     * @codeCoverageIgnore
+     * @param \BackBuilder\BBApplication $application
+     */
     public function __construct(BBApplication $application)
     {
         $this->_application = $application;
@@ -24,6 +29,7 @@ class SudoVoter implements VoterInterface
     }
 
     /**
+     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function supportsAttribute($attribute)
@@ -32,6 +38,7 @@ class SudoVoter implements VoterInterface
     }
 
     /**
+     * @codeCoverageIgnore
      * {@inheritdoc}
      */
     public function supportsClass($class)
@@ -46,13 +53,19 @@ class SudoVoter implements VoterInterface
     {
         $result = VoterInterface::ACCESS_ABSTAIN;
 
+        if (false === ($token instanceof \BackBuilder\Security\Token\BBUserToken)
+                && null === $token = $this->_application->getBBUserToken()) {
+            return self::ACCESS_DENIED;
+        }
+
         foreach ($attributes as $attribute) {
             if (!$this->supportsAttribute($attribute)) {
                 continue;
-            } 
+            }
+
             if (
-                array_key_exists($token->getUsername(), $this->_sudoers) &&
-                $token->getUser()->getId() === $this->_sudoers[$token->getUsername()]
+                    array_key_exists($token->getUsername(), $this->_sudoers) &&
+                    $token->getUser()->getId() === $this->_sudoers[$token->getUsername()]
             ) {
                 $result = VoterInterface::ACCESS_GRANTED;
             }
@@ -61,4 +74,5 @@ class SudoVoter implements VoterInterface
 
         return $result;
     }
+
 }

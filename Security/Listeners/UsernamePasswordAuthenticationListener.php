@@ -71,10 +71,6 @@ class UsernamePasswordAuthenticationListener implements ListenerInterface {
         }
         
         if (null !== $token && is_a($token, 'BackBuilder\Security\Token\UsernamePasswordToken')) {
-            if (1 == $request->request->get('rememberme')) {
-                setcookie('rememberme', md5($token->getUser()->getUsername()), time()+(30*24*60*60), '/');
-            }
-
             $this->_context->setToken($token);
             
             if ($request->request->get('redirect')) {

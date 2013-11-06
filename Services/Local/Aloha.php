@@ -13,6 +13,10 @@ namespace BackBuilder\Services\Local;
 class Aloha extends AbstractServiceLocal {
     
     
+    /**
+     * @codeCoverageIgnore
+     * @param type $data
+     */
     private function setStdObjectAloha($data)
     {
         $stdClass = new \stdClass();
@@ -20,7 +24,7 @@ class Aloha extends AbstractServiceLocal {
     
     /**
      * @exposed(secured=true)
-     * 
+     * @codeCoverageIgnore
      */
     public function getAlohaPluginsTbale()
     {

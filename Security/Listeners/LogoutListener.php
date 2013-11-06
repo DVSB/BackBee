@@ -2,37 +2,54 @@
 
 namespace BackBuilder\Security\Listeners;
 
-use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\Security\Core\SecurityContextInterface;
-use Symfony\Component\Security\Http\HttpUtils;
-use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
-use Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface;
-use Symfony\Component\Security\Http\Firewall\ListenerInterface;
+use Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\Response,
+    Symfony\Component\HttpKernel\Event\GetResponseEvent,
+    Symfony\Component\Security\Core\SecurityContextInterface,
+    Symfony\Component\Security\Http\HttpUtils,
+    Symfony\Component\Security\Http\Logout\LogoutHandlerInterface,
+    Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface,
+    Symfony\Component\Security\Http\Firewall\ListenerInterface;
 
 /**
- * LogoutListener logout users.
- *
- * @author Fabien Potencier <fabien@symfony.com>
+ * LogoutListener logout users
+ * 
+ * @category    BackBuilder
+ * @package     BackBuilder\Security\Listeners
+ * @copyright   Lp digital system
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  */
 class LogoutListener implements ListenerInterface
 {
 
+    /**
+     * The current security context
+     * @var \Symfony\Component\Security\Core\SecurityContextInterface
+     */
     private $securityContext;
+
+    /**
+     * An array of logout handlers
+     * @var array 
+     */
     private $handlers;
+
+    /**
+     * @var \Symfony\Component\Security\Http\HttpUtils 
+     */
     private $httpUtils;
+
+    /**
+     * On success handler
+     * @var \Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface 
+     */
     private $successHandler;
 
     /**
-     * Constructor
-     *
-     * @param SecurityContextInterface      $securityContext
-     * @param HttpUtils                     $httpUtils       An HttpUtilsInterface instance
-     * @param LogoutSuccessHandlerInterface $successHandler  A LogoutSuccessHandlerInterface instance
-     * @param array                         $options         An array of options to process a logout attempt
-     * @param CsrfProviderInterface         $csrfProvider    A CsrfProviderInterface instance
+     * Class constructor
+     * @param \Symfony\Component\Security\Core\SecurityContextInterface $securityContext
+     * @param \Symfony\Component\Security\Http\HttpUtils $httpUtils An HttpUtilsInterface instance
+     * @param \Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface $successHandler A LogoutSuccessHandlerInterface instance
      */
     public function __construct(SecurityContextInterface $securityContext, HttpUtils $httpUtils, LogoutSuccessHandlerInterface $successHandler)
     {
@@ -44,8 +61,8 @@ class LogoutListener implements ListenerInterface
 
     /**
      * Adds a logout handler
-     *
-     * @param LogoutHandlerInterface $handler
+     * @param \Symfony\Component\Security\Http\Logout\LogoutHandlerInterface $handler
+     * @codeCoverageIgnore
      */
     public function addHandler(LogoutHandlerInterface $handler)
     {
@@ -54,12 +71,7 @@ class LogoutListener implements ListenerInterface
 
     /**
      * Performs the logout if requested
-     *
-     * If a CsrfProviderInterface instance is available, it will be used to
-     * validate the request.
-     *
-     * @param GetResponseEvent $event A GetResponseEvent instance
-     * @throws InvalidCsrfTokenException if the CSRF token is invalid
+     * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event A GetResponseEvent instance
      * @throws RuntimeException if the LogoutSuccessHandlerInterface instance does not return a response
      */
     public function handle(GetResponseEvent $event)
@@ -72,7 +84,7 @@ class LogoutListener implements ListenerInterface
         }
 
         // handle multiple logout attempts gracefully
-        if ($token = $this->securityContext->getToken()) {
+        if (null !== $token = $this->securityContext->getToken()) {
             foreach ($this->handlers as $handler) {
                 $handler->logout($request, $response, $token);
             }
@@ -84,18 +96,13 @@ class LogoutListener implements ListenerInterface
 
     /**
      * Whether this request is asking for logout.
-     *
-     * The default implementation only processed requests to a specific path,
-     * but a subclass could change this to logout requests where
-     * certain parameters is present.
-     *
-     * @param Request $request
-     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
      * @return Boolean
+     * @codeCoverageIgnore
      */
     protected function requiresLogout(Request $request)
     {
-        //return $this->httpUtils->checkRequestPath($request, $this->options['logout_path']);
+        return true;
     }
 
 }

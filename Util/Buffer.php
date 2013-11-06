@@ -1,4 +1,5 @@
 <?php
+
 namespace BackBuilder\Util;
 
 /**
@@ -9,6 +10,7 @@ namespace BackBuilder\Util;
  */
 class Buffer
 {
+
     public static function flush()
     {
         if (!ob_get_contents()) {
@@ -19,9 +21,15 @@ class Buffer
         ob_start();
     }
 
+    /**
+     * pring the string value directly
+     * @param string $string
+     * @codeCoverageIgnore
+     */
     public static function dump($string)
     {
         print $string;
         static::flush();
     }
+
 }

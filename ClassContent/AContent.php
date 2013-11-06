@@ -366,7 +366,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
 
                 // A surveiller cette partie pour les revisions
                 if (true === is_array($this->_parameters)
-                        && true === array_key_exists($var, $this->_parameters)) {
+                        && true === array_key_exists($var, $this->_parameters)
+                        && true === is_array($this->_parameters[$var])) {
                     $values = array_replace_recursive($this->_parameters[$var], $values);
                 }
             }
@@ -395,7 +396,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
-    public function setMinEntry(array $minentry)
+    public function setMinEntry(array $minentry = null)
     {
         $this->_minentry = $minentry;
         return $this->_getContentInstance();
@@ -483,7 +484,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      */
     public function postLoad()
     {
-        $this->_parameters = Parameter::paramsReplaceRecursive($this->_getContentInstance()->getDefaultParameters(), $this->getParam());
+        if (null !== $this->_getContentInstance()) {
+            $this->_parameters = Parameter::paramsReplaceRecursive($this->_getContentInstance()->getDefaultParameters(), $this->getParam());
+        }
     }
 
     /**

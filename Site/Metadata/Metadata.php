@@ -13,73 +13,121 @@ namespace BackBuilder\Site\Metadata;
  * @Table(name="metadata")
  * @fixtures(qty=20)
  */
-class Metadata {
-    
+class Metadata
+{
+
     /**
      * The unique identifier
      * @Id
      * @Column(type="string")
      * @fixture(type="md5")
      */
-    protected $uid;
-    
+    private $uid;
+
     /**
      * @Column(type="string")
      * @fixture(type="word")
      */
-    protected $attribute;
-    
+    private $attribute;
+
     /**
      * @Column(type="string", name="attr_value")
      * @fixture(type="word")
      */
-    protected $attrValue;
-    
+    private $attrValue;
+
     /**
      * @Column(type="string")
      * @fixture(type="sentence", value=6)
      */
-    protected $content;
-    
-    
-    function __construct($uid = NULL, $attribute = NULL, $attrValue = NULL, $content = NULL) {
-        $this->uid          = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
-        $this->attribute    = $attribute;
-        $this->attrValue    = $attrValue;
-        $this->content      = $content;
+    private $content;
+
+    function __construct($uid = NULL, $attribute = NULL, $attrValue = NULL, $content = NULL)
+    {
+        $this->uid = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
+        $this->attribute = $attribute;
+        $this->attrValue = $attrValue;
+        $this->content = $content;
     }
 
-    
-    public function getUid() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getUid()
+    {
         return $this->uid;
     }
 
-    public function setUid($uid) {
+    /**
+     * @codeCoverageIgnore
+     * @param type $uid
+     * @return \BackBuilder\Site\Metadata\Metadata
+     */
+    public function setUid($uid)
+    {
         $this->uid = $uid;
+        return $this;
     }
 
-    public function getAttribute() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getAttribute()
+    {
         return $this->attribute;
     }
 
-    public function setAttribute($attribute) {
+    /**
+     * @codeCoverageIgnore
+     * @param type $attribute
+     * @return \BackBuilder\Site\Metadata\Metadata
+     */
+    public function setAttribute($attribute)
+    {
         $this->attribute = $attribute;
+        return $this;
     }
 
-    public function getAttrValue() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getAttrValue()
+    {
         return $this->attrValue;
     }
 
-    public function setAttrValue($attrValue) {
+    /**
+     * @codeCoverageIgnore
+     * @param type $attrValue
+     * @return \BackBuilder\Site\Metadata\Metadata
+     */
+    public function setAttrValue($attrValue)
+    {
         $this->attrValue = $attrValue;
+        return $this;
     }
 
-    public function getContent() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getContent()
+    {
         return $this->content;
     }
 
-    public function setContent($content) {
+    /**
+     * @codeCoverageIgnore
+     * @param string $content
+     * @return \BackBuilder\Site\Metadata\Metadata
+     */
+    public function setContent($content)
+    {
         $this->content = $content;
+        return $this;
     }
 
 }

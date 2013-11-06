@@ -95,7 +95,8 @@ $.loadScript = function(url, options) {
             mediaFileSize:{
                 pdf: 15,
                 image: 10,
-                flash: 15
+                flash: 15,
+                zip: 15
             }
         },
         

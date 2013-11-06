@@ -14,7 +14,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface,
  * @category    BackBuilder
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
- * @author      c.rouillon
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  */
 class BBAuthenticationProvider implements AuthenticationProviderInterface
 {
@@ -104,13 +104,15 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         $validToken = new BBUserToken($user->getRoles());
-        $validToken->setUser($user);
+        $validToken->setUser($user)
+                ->setNonce($token->getNonce());
 
         return $validToken;
     }
 
     /**
      * Checks whether this provider supports the given token.
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return boolean
      */

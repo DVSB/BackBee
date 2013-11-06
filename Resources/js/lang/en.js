@@ -249,8 +249,9 @@
     },
     authmanager: {
         authentication_required: 'Authentification required',
-        connect: 'connect',
-        abort: 'abort',
+        connect: 'Connect',
+        abort: 'Abort',
+        close: 'Close',
         try_remaining: '(%1 try remaining)',
         tries_remaining: '(%1 tries remaining)',
         username: 'Username:',
@@ -263,8 +264,9 @@
             '9004': 'Invalid key',
             '9005': 'Expired authentication',
             '9006': 'Expired token',
-            '9007': 'Unauthorized user'
-        }
+            '9007': 'Permission denied'
+        },
+        forbidden_access: 'Forbidden access'
     },
     contenttypebrowser: {
         title: 'Content selector'

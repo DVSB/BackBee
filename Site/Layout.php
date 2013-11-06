@@ -151,6 +151,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the unique identifier.
+     * @codeCoverageIgnore
      * @return string
      */
     public function getUid()
@@ -160,6 +161,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the label
+     * @codeCoverageIgnore
      * @return string
      */
     public function getLabel()
@@ -169,6 +171,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the file name of the layout.
+     * @codeCoverageIgnore
      * @return string
      */
     public function getPath()
@@ -178,6 +181,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the serialized data of the layout.
+     * @codeCoverageIgnore
      * @return string
      */
     public function getData()
@@ -187,6 +191,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the unserialzed object for the layout.
+     * @codeCoverageIgnore
      * @return \StdClass
      */
     public function getDataObject()
@@ -196,6 +201,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the path to the layout icon if defined, NULL otherwise
+     * @codeCoverageIgnore
      * @return string|NULL
      */
     public function getPicPath()
@@ -205,6 +211,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the owner site if defined, NULL otherwise
+     * @codeCoverageIgnore
      * @return \BackBuilder\Site\Site|NULL
      */
     public function getSite()
@@ -362,6 +369,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Sets the label.
+     * @codeCoverageIgnore
      * @param string $label
      * @return \BackBuilder\Site\Layout
      */
@@ -373,6 +381,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Set the filename of the layout
+     * @codeCoverageIgnore
      * @param string $path
      * @return \BackBuilder\Site\Layout
      */
@@ -421,6 +430,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Sets the path to the layout icon.
+     * @codeCoverageIgnore
      * @param string $picpath
      * @return \BackBuilder\Site\Layout
      */
@@ -432,6 +442,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Associates this layout to a website.
+     * @codeCoverageIgnore
      * @param \BackBuilder\Site\Site $site
      * @return \BackBuilder\Site\Layout
      */

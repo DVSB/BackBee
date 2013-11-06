@@ -34,6 +34,7 @@ class UserPreferencesRepository extends EntityRepository {
     /**
      * Calculate the unique user preferences key.
      *
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return String
      */

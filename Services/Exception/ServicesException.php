@@ -10,5 +10,5 @@ class ServicesException extends BBException {
     const UNAUTHORIZED_USER      = 7003;
     const CONTENT_OUTOFDATE      = 7100;
     
-    private $_code = self::UNKNOWN_ERROR;
+    protected $_code = self::UNKNOWN_ERROR;
 }

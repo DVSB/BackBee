@@ -5,7 +5,8 @@ namespace BackBuilder\Services\Content;
 use Symfony\Component\Yaml\Yaml as parserYaml;
 use BackBuilder\ClassContent\AClassContent;
 
-class ContentRender {
+class ContentRender
+{
 
     private $category;
     private $name;
@@ -17,7 +18,8 @@ class ContentRender {
     private $content;
     private $label;
 
-    private function globRecursive($pattern, $flags = 0) {
+    private function globRecursive($pattern, $flags = 0)
+    {
         $files = glob($pattern, $flags);
         $dirs = glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT);
         if (is_array($dirs) && count($dirs)) {
@@ -29,7 +31,8 @@ class ContentRender {
         return $files;
     }
 
-    private function initCategory() {
+    private function initCategory()
+    {
         $str = str_replace('\\', '/', $this->name);
 
         $file = $this->globRecursive($this->bbapp->getRepository() . '/ClassContent/' . $str . '.yml', 0);
@@ -42,7 +45,8 @@ class ContentRender {
         }
     }
 
-    public function initContentObject() {
+    public function initContentObject()
+    {
         if (NULL === $this->content) {
             $classname = "BackBuilder\ClassContent\\" . $this->name;
             if (NULL !== $this->uid)
@@ -64,14 +68,15 @@ class ContentRender {
         }
     }
 
-    private function initFields() {
+    private function initFields()
+    {
         $fields = array();
         $alohaConf = $this->bbapp->getConfig()->getSection('alohapluginstable');
         $content = $this->content;
         if (!is_a($content, 'BackBuilder\ClassContent\ContentSet')) {
             $elements = $content->getData();
             foreach ($elements as $key => $item) {
-                if (is_a($content->$key,"BackBuilder\ClassContent\AClassContent")) {
+                if (is_a($content->$key, "BackBuilder\ClassContent\AClassContent")) {
                     if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == TRUE && NULL !== ($content->{$key}->getParam('aloha', 'scalar')))) {
                         $stdClassObj = new \stdClass();
                         $stdClassObj->{$key} = $alohaConf[$content->{$key}->getParam('aloha', 'scalar')];
@@ -84,7 +89,8 @@ class ContentRender {
         $this->editables = $fields;
     }
 
-    public function __construct($name, $bbapp, $category = null, $mode = null, $uid = null) {
+    public function __construct($name, $bbapp, $category = null, $mode = null, $uid = null)
+    {
         $this->uid = (NULL === $uid) ? uniqid() : $uid;
         $this->name = $name;
         $this->renderer = $bbapp->getRenderer();
@@ -99,36 +105,73 @@ class ContentRender {
         $this->initFields();
     }
 
-    public function getContentObject() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getContentObject()
+    {
         return $this->content;
     }
 
-    public function getCategory() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getCategory()
+    {
         return $this->category;
     }
 
-    public function getName() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function getLabel() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getLabel()
+    {
         return $this->label;
     }
 
-    public function setLabel($label) {
-        return $this->label = $label;
+    /**
+     * @codeCoverageIgnore
+     * @param string $label
+     * @return \BackBuilder\Services\Content\ContentRender
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+        return $this;
     }
 
-    public function getFields() {
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getFields()
+    {
         return $this->editables;
     }
 
-    public function getRender() {
-        //var_dump($this->mode);
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     */
+    public function getRender()
+    {
         return $this->renderer->render($this->content, $this->mode);
     }
 
-    public function __toStdObject($withRender = true) {
+    public function __toStdObject($withRender = true)
+    {
         $withRender = is_bool($withRender) ? $withRender : true; //send render by default
         $stdClass = new \stdClass();
         $stdClass->name = $this->getname();
