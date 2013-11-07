@@ -6,7 +6,7 @@ bb.require = (function(require){
 
 /* à éditer automatiquement */
 bb.require({
-    baseUrl: "js/",
+    baseUrl: bb.baseurl+bb.resourcesdir+'js/',
     catchError:true,
     paths: {
         "RteManager" : "bb.RteManager",

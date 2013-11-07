@@ -130,7 +130,7 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
             /* adapter hash */
             var _adapters = {};
             var _settings = {
-                adapterPath: "js/bb5rteadapters/"
+                adapterPath: bb.baseurl+bb.resourcesdir+"js/bb5rteadapters/"
             };
      
             /* clean class Definition */
