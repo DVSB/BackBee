@@ -1,15 +1,16 @@
 <?php
+
 namespace BackBuilder\Installer;
 
 use BackBuilder\Util\Dir;
-
 use Doctrine\Common\Annotations\SimpleAnnotationReader,
     Doctrine\ORM\Mapping\Entity;
 
 class EntityFinder
 {
+
     /**
-     * @var array 
+     * @var array
      */
     private $_ignoredFolder = array(
         'Resources',
@@ -17,22 +18,23 @@ class EntityFinder
         'TestUnit',
         'Exception'
     );
+
     /**
-     * @var string 
+     * @var string
      */
     private $_baseDir;
+
     /**
-     * @var SimpleAnnotationReader 
+     * @var SimpleAnnotationReader
      */
     private $_annotationReader;
-
 
     public function __construct($baseDir)
     {
         $this->_baseDir = $baseDir;
     }
 
-        /**
+    /**
      * @param string $path
      * @return array
      */
@@ -41,21 +43,22 @@ class EntityFinder
         $entities = array();
         foreach (Dir::getContent($path) as $content) {
             $subpath = $path . DIRECTORY_SEPARATOR . $content;
-            if (in_array($content, $this->_ignoredFolder)) continue;
+            if (in_array($content, $this->_ignoredFolder))
+                continue;
             if (is_dir($subpath)) {
                 $entities = array_merge($entities, $this->getEntities($subpath));
             } else {
                 if (strpos($subpath, '.php')) {
                     $namespace = $this->getNamespace($subpath);
                     if ($this->_isEntity(new \ReflectionClass($namespace))) {
-                        $entities[] = $namespace; 
+                        $entities[] = $namespace;
                     }
                 }
             }
         }
         return $entities;
     }
-    
+
     /**
      * @param string $file
      * @return string
@@ -63,7 +66,8 @@ class EntityFinder
     public function getNamespace($file)
     {
         $classname = str_replace(array($this->_baseDir, 'bundle', '.php', '/'), array('', 'Bundle', '', '\\'), $file);
-        return (strpos('BackBuilder', $classname) === false) ? $classname : 'BackBuilder' . $classname;
+
+        return (strpos('BackBuilder', $classname) === false) ? 'BackBuilder' . $classname : $classname;
     }
 
     /**
@@ -74,7 +78,7 @@ class EntityFinder
     {
         return !is_null($this->_getEntityAnnotation($reflection));
     }
-    
+
     /**
      * @param \ReflectionClass $class
      * @return Entity
@@ -87,4 +91,5 @@ class EntityFinder
         }
         return $this->_annotationReader->getClassAnnotation($class, new Entity());
     }
+
 }
