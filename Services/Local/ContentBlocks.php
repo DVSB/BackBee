@@ -307,7 +307,7 @@ class ContentBlocks extends AbstractServiceLocal
         $result = $content->__toStdObject();
         return $result;
     }
-
+     
     /**
      * @exposed(secured=true)
      */

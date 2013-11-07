@@ -22,7 +22,8 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
 <?php endforeach; ?>
 
 <?php if (NULL !== $this->getParam('token') && is_a($this->getParam('token'), 'BackBuilder\Security\Token\BBUserToken')): ?>
-    <script src="<?php echo $this->getUri('ressources/js/aloha/lib/aloha.js'); ?>" data-aloha-plugins="common/format, common/link, common/highlighteditables, common/paste, common/block, common/commands, extra/bbselector <?php echo (('' != $this->getParam('aloha_extraplugins')) ? (', ' . $this->getParam('aloha_extraplugins')) : ''); ?>" type="text/javascript"></script>
+   <!-- not used <script src="<?php echo $this->getUri('ressources/js/aloha/lib/aloha.js'); ?>" data-aloha-plugins="common/format, common/link, common/highlighteditables, common/paste, common/block, common/commands, extra/bbselector <?php echo (('' != $this->getParam('aloha_extraplugins')) ? (', ' . $this->getParam('aloha_extraplugins')) : ''); ?>" type="text/javascript"></script>-->
+    <link rel="stylesheet" href="<?php echo $this->getUri('ressources/js/libs/alohaeditor/aloha/css/aloha.css'); ?>">
 
     <?php // BB5 interface ?>
     <link rel="stylesheet" href="<?php echo $this->getUri('ressources/css/jquery-ui-select.css'); ?>">

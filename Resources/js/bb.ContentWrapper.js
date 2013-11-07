@@ -489,8 +489,9 @@ bb.ContentWrapper = (function($,global){
                         if(!$.trim(render).length){
                              self.updateData();
                              return;
-                        }; //handle empty content
-                        self.contentEl.html($(render)); 
+                        }//handle empty content
+                        self.contentEl.replaceWith($(result.render)); //$(render)
+                        //old self.contentEl.html(//$(render));
                         self.updateData();
                         var contentManager = bb.ManagersContainer.getInstance().getManager("ContentManager"); 
                         contentManager.initDroppableImage(self.contentEl); 
