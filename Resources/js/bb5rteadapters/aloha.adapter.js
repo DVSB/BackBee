@@ -105,12 +105,13 @@ bb.RteManager.registerAdapter("aloha",{
         if(jQuery.isArray(editables)){
             jQuery.each(editables, function(i,configObject){
                 jQuery.each(configObject, function(fieldname,nodeConfig){
-                    var node = self.mainNode.find('['+fieldPrefix+'="' + fieldname + '"]').eq(0); 
+                    var node = self.mainNode.find('['+fieldPrefix+'="' + fieldname + '"]').eq(0);
                     var editableNode = $(node).get(0); 
                     if(editableNode && !Aloha.isEditable(editableNode)){
                         Aloha.jQuery(editableNode).aloha();
                         self.editables.push(editableNode);
                         self._setNodeParams(node,nodeConfig); //save params for node
+                        
                     }
                 });
             });
@@ -118,8 +119,9 @@ bb.RteManager.registerAdapter("aloha",{
     },
     
     _setNodeParams: function(node,params){
-        if(node && typeof jQuery.isArray(params)){
-            var id = "#"+$(node).attr("id");
+       
+        if(node && jQuery.isArray(params)){
+            var id = "#"+jQuery(node).attr("id");
             Aloha.settings.plugins.format.editables[id] = params;  
         }
     },
@@ -151,6 +153,7 @@ bb.RteManager.registerAdapter("aloha",{
         this.callSuper();
         if(!this.editables.length) return;
         Aloha.jQuery(this.editables).mahalo();
+        this.editables = []; 
     }
       
 });
