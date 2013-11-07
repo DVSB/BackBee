@@ -22,7 +22,7 @@ class Importer
 
     /**
      * Class constructor
-     * 
+     *
      * @param \BackBuilder\BBApplication $application
      * @param \BackBuilder\Importer\IImporterConnector $connector
      * @param \BackBuilder\Config\Config $config
@@ -42,12 +42,12 @@ class Importer
 
     /**
      * @param type $flush_every if you don't need flush put 0
-     * @param boolean $check_for_existing 
+     * @param boolean $check_for_existing
      * @return boolean
      */
     public function run($flush_every = 1000, $check_for_existing = true)
     {
-        $relations = $this->_loadRelataions();
+        $relations = $this->_loadRelations();
         if (0 == count($relations)) return false;
         foreach ($relations as $class => $config) {
             $start_time = microtime(true);
@@ -78,13 +78,14 @@ class Importer
                 $this->save($entities, $check_for_existing);
             }
             unset($entities);
+            $this->getConverter()->onImportationFinish();
             \BackBuilder\Util\Buffer::dump(count($values) . ' ' . $class . ' imported in ' . (microtime(true) - $start_time) . ' s' . "\n");
         }
         return true;
     }
 
     /**
-     * 
+     *
      * @param array $config
      * @return \BackBuilder\Importer\IConverter
      */
@@ -102,14 +103,14 @@ class Importer
         $this->_ids = $this->getExistingIds($id_label, $table_name, $where_clause);
         return $converter;
     }
-    
+
     final protected function getExistingIds($id_label, $table_name, $where_clause)
     {
         $sql= 'SELECT ' . $id_label . ' FROM ' . $table_name . ' WHERE ' . $where_clause;
         $statement = $this->_application->getEntityManager()->getConnection()->executeQuery($sql);
         return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
-    
+
     public function newBBEntity($classname, $uid)
     {
         if (!in_array($uid, $this->_ids)) {
@@ -133,13 +134,13 @@ class Importer
             $entity = new $classname($uid);
             $em->persist($entity);
         }
-        
-        return $entity;        
+
+        return $entity;
     }
-    
+
     /**
      * Save Entities
-     * 
+     *
      * @param array $entities
      */
     public function save(array $entities, $check_for_existing = true)
@@ -148,9 +149,10 @@ class Importer
 
         \BackBuilder\Util\Buffer::dump('Saving...' . "\n");
         foreach ($entities as $entity) {
-            if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
-                $this->_application->getEntityManager()->persist($entity);
-            }
+//            if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
+//                $this->_application->getEntityManager()->persist($entity);
+//            }
+            $this->_application->getEntityManager()->persist($entity);
         }
         $this->_application->getEntityManager()->flush();
         $this->getConverter()->afterEntitiesFlush($this, $entities);
@@ -163,7 +165,7 @@ class Importer
         gc_collect_cycles();
         $this->getConverter()->beforeImport($this, $this->_import_config);
     }
-    
+
     /**
      * @return /BackBuilder/BBApplication
      */
@@ -177,21 +179,21 @@ class Importer
         return $this->_connector->find($string);
     }
 
-    final protected function _loadRelataions()
+    final protected function _loadRelations()
     {
        return $this->getConfig()->getSection('relations');
     }
-    
+
     final protected function getConfig()
     {
         return $this->_config;
     }
-    
+
     final protected function getConverter()
     {
         return $this->_converter;
     }
-    
+
     final protected function setConverter($converter)
     {
         return $this->_converter = $converter;

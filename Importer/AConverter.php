@@ -30,7 +30,7 @@ abstract class AConverter implements IConverter
     public function __construct(Importer $importer = null) {
         $this->_importer = $importer;
     }
-    
+
     /**
      * return the BackBuilder Entity Object
      *
@@ -57,6 +57,8 @@ abstract class AConverter implements IConverter
 
     public function afterEntitiesFlush(Importer $importer, array $entities) {}
 
+    public function onImportationFinish() {}
+
     /**
      * Update Status and revision value
      * @param \BackBuilder\ClassContent\AClassContent $element
@@ -79,7 +81,7 @@ abstract class AConverter implements IConverter
     {
         return  trim(html_entity_decode(html_entity_decode(String::toUTF8($str), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8'));
     }
-    
+
     /**
      * Set the value of an scalar element
      */
