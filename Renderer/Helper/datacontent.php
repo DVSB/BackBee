@@ -67,7 +67,6 @@ class datacontent extends AHelper
 
         // Store initial basic attributes to content
         $this->_basic_attributes = $this->_attributes;
-
         // If a valid BB user is granted to access this content
         if (null !== $this->_content && true === $this->_isGranted()) {
             $this->_addCommonContentMarkup($params)
@@ -313,9 +312,13 @@ class datacontent extends AHelper
     {
         $securityContext = $this->_renderer->getApplication()->getSecurityContext();
 
-        return (true === $securityContext->isGranted('sudo')
-                || null === $securityContext->getACLProvider()
-                || true === $securityContext->isGranted('VIEW', $this->_content));
+        try {
+            return (true === $securityContext->isGranted('sudo')
+                    || null === $securityContext->getACLProvider()
+                    || true === $securityContext->isGranted('VIEW', $this->_content));
+        } catch (\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException $e) {
+            return false;
+        }
     }
 
     /**
