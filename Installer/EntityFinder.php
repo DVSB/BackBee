@@ -66,8 +66,7 @@ class EntityFinder
     public function getNamespace($file)
     {
         $classname = str_replace(array($this->_baseDir, 'bundle', '.php', '/'), array('', 'Bundle', '', '\\'), $file);
-
-        return (strpos('BackBuilder', $classname) === false) ? 'BackBuilder' . $classname : $classname;
+        return (strpos($classname, 'BackBuilder') === false) ? 'BackBuilder' . $classname : $classname;
     }
 
     /**
