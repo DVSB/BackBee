@@ -76,7 +76,8 @@
 							// handle change of href
 							onHrefChange: function( obj, href, item ) {
 								if ( item ) {
-									jQuery(obj).attr('data-name', item.name);
+				
+                                jQuery(obj).attr('data-name', item.name);
 								}
 							}
 					},
