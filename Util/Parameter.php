@@ -22,9 +22,7 @@ class Parameter
         if (!is_array($array2)) {
             return $array1;
         }
-        if (count($array1) == 0) {
-            return $array2;
-        }
+        
         foreach ($array1 as $key => $value) {
             $mutableFields = (is_array($value) && array_key_exists("_mutablefields", $value)) ? (array) $value["_mutablefields"] : $mutableField;
 
