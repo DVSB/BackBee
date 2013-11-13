@@ -45,43 +45,32 @@ class Importer
      * @param boolean $check_for_existing
      * @return boolean
      */
-    public function run($flush_every = 1000, $check_for_existing = true)
+    public function run($class, $config, $flush_every, $check_for_existing)
     {
-        $relations = $this->_loadRelations();
-        if (0 == count($relations)) return false;
-        foreach ($relations as $class => $config) {
-            $start_time = microtime(true);
-            $this->setConverter($this->initConvertion($config));
-            $values = $this->getConverter()->getRows($this);
-            \BackBuilder\Util\Buffer::dump('Importation of ' . count($values) . ' ' . $class . ' was started' . "\n");
-            $i = 0;
-            $entities = array();
-            if (count($values) == 0) continue;
-            foreach ($values as $value) {
-                if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
-                    try {
-                        $entities[] = $this->getConverter()->convert($value);
-                    } catch (\Exception $error) {
-                        \BackBuilder\Util\Buffer::dump($error->getMessage() . "\n");
-                        $this->_application->getContainer()->removeDefinition('em');
-                        $this->_application->getEntityManager();
-                    }
-                }
-                if (++$i === $flush_every) {
-                    $this->save($entities, $check_for_existing);
-                    $i = 0;
-                    unset($entities);
-                    $entities = array();
-                }
+        $start_time = microtime(true);
+        $this->setConverter($this->initConvertion($config));
+        $values = $this->getConverter()->getRows($this);
+        \BackBuilder\Util\Buffer::dump('Importation of ' . count($values) . ' ' . $class . ' was started' . "\n");
+        $i = 0;
+        $entities = array();
+        if (count($values) == 0) return;
+        foreach ($values as $value) {
+            if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
+                $entities[] = $this->getConverter()->convert($value);
             }
-            if ($flush_every != 0) {
+            if (++$i === $flush_every) {
                 $this->save($entities, $check_for_existing);
+                $i = 0;
+                unset($entities);
+                $entities = array();
             }
-            unset($entities);
-            $this->getConverter()->onImportationFinish();
-            \BackBuilder\Util\Buffer::dump(count($values) . ' ' . $class . ' imported in ' . (microtime(true) - $start_time) . ' s' . "\n");
         }
-        return true;
+        if ($flush_every != 0) {
+            $this->save($entities, $check_for_existing);
+        }
+        unset($entities);
+        $this->getConverter()->onImportationFinish();
+        \BackBuilder\Util\Buffer::dump(count($values) . ' ' . $class . ' imported in ' . (microtime(true) - $start_time) . ' s' . "\n");
     }
 
     /**
