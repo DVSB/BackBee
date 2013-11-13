@@ -64,7 +64,7 @@ Aloha.settings = {
                 meta: true,
                 margin: false,
                 crop: false,
-                resizable: true,
+                resizable: true
             },
             editables:{}
         },
@@ -151,6 +151,7 @@ var AlohaManager = {
             /*use bb content uniqId*/
             var bbContentId = self.mainContainer.id;
             $.each(object, function (attr, value) {
+                /* Apply style here */
                 Aloha.settings.plugins.format.editables['[data-bbContentRef="'+bbContentId+'"][data-type="' + self._contentName + '"] [data-aloha="' + attr + '"]'] = value;
             });
         });

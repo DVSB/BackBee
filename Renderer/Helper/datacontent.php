@@ -15,6 +15,7 @@ use BackBuilder\ClassContent\ContentSet;
  *   * data-minentry:       The minimum subcontents allowed
  *   * data-maxentry:       The maximum subcontents allowed
  *   * data-accept:         The accepted subcontents
+ *   * data-rteconfig       The rte config to be used
  *   * data-element:        The name or index of this content
  *   * data-isloaded:       Is the content is contained by the entity manager
  *   * data-forbidenactions:The editing forbiden actions
@@ -66,14 +67,14 @@ class datacontent extends AHelper
 
         // Store initial basic attributes to content
         $this->_basic_attributes = $this->_attributes;
-
         // If a valid BB user is granted to access this content
         if (null !== $this->_content && true === $this->_isGranted()) {
-        $this->_addCommonContentMarkup($params)
-                ->_addContentSetMarkup($params)
-                ->_addClassContainerMarkup($params)
-                ->_addElementFileMarkup($params)
-                ->_addAlohaMarkup($params);
+            $this->_addCommonContentMarkup($params)
+                    ->_addContentSetMarkup($params)
+                    ->_addClassContainerMarkup($params)
+                    ->_addElementFileMarkup($params)
+                    ->_addAlohaMarkup($params);
+            //->_addRteMarkup($params);
         }
 
         return implode(' ', array_map(array($this, '_formatAttributes'), array_keys($this->_attributes), array_values($this->_attributes)));
@@ -196,7 +197,16 @@ class datacontent extends AHelper
                 && null !== $this->_renderer->getCurrentElement()) {
             $this->_addValueToAttribute('data-aloha', $this->_renderer->getCurrentElement());
         }
+        return $this;
+    }
 
+    /**
+     * adds specific rte markup on content
+     * @params aray $params Optional parameters
+     * @return \BackBuilder\Renderer\Helper\datacontent
+     */
+    private function _addRteMarkup($params = array())
+    {
         return $this;
     }
 
@@ -302,9 +312,13 @@ class datacontent extends AHelper
     {
         $securityContext = $this->_renderer->getApplication()->getSecurityContext();
 
-        return (true === $securityContext->isGranted('sudo')
-                || null === $securityContext->getACLProvider()
-                || true === $securityContext->isGranted('VIEW', $this->_content));
+        try {
+            return (true === $securityContext->isGranted('sudo')
+                    || null === $securityContext->getACLProvider()
+                    || true === $securityContext->isGranted('VIEW', $this->_content));
+        } catch (\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException $e) {
+            return false;
+        }
     }
 
     /**

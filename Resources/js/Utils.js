@@ -238,13 +238,30 @@ var ScriptLoader = function(params){
         var source = (params.basename)? params.basename+params.scriptname : this.basename+params.scriptname;
         script.type = "text/javascript";
         script.src = source;
-        script.async = true;
+        script.async = (typeof params.async=="boolean") ? params.async: true;
         var id = $.md5(source);
         /*do nothing if the script is already loaded*/
         if(this._isLoaded(id)){
             return;  
         }
         this.scriptInfos[id] = source;
+        
+        /* handle */
+        if (script.readyState){  //IE
+            script.onreadystatechange = function(){
+                if (script.readyState == "loaded" ||
+                    script.readyState == "complete"){
+                    script.onreadystatechange = null;
+                    if(typeof params.onSuccess=="function"){
+                        params.onSuccess();
+                    }
+                }
+            };
+        } else {  //Others
+            script.onload = function(){
+                params.onSuccess();
+            };
+        }
         $("body").eq(0).append(script);
     } 
     

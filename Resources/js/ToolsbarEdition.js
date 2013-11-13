@@ -113,6 +113,7 @@ BB4.ToolsbarManager.register("editiontb",{
         var bbSelector = $(this._context.linkSelector).data('bbSelector');
         bbSelector.open();
     }, 
+    
     _initEditContentEvent : function(){
         /*moseover on content*/
         /*click on content edit-mode*/
@@ -601,24 +602,20 @@ BB4.ToolsbarManager.register("editiontb",{
             this._contextMenu.enable();
         }
 
-        // context menu
-        // $('body').append($('<div class="bb-edition-context-menu"/>'));
-            
-        // Actions
-        /*var actionContainer = $('<ul></ul>').clone();
-        actionContainer.append($('<li class=""><ins class="edit">&nbsp;</ins><a href="#" rel="edit">Edition</a></li>'));
-        $(actionContainer).find('a').attr('href', 'javascript:;');
-        $('.bb-edition-context-menu').append(actionContainer);
-        $('.bb-edition-context-menu').appendTo($('body'));
-        $('.bb-edition-context-menu').hide();
+        //AlohaManager.applyAloha();
         
-        this._context.contextMenu = $('.bb-edition-context-menu');
-            
-        $('.bb-edition-context-menu a[rel="edit"]').live('click', function(e) {
-            self._editContent(self._context.contextMenu.data('content'));
-        });*/
-         
-        AlohaManager.applyAloha();
+        /* handle rte manager here use deferred */
+        var self = this;
+        bb.require(["ManagerFactory"], function(){
+            try{
+                if(self.contentManager){ self.contentManager.enable(); return;}
+                self.contentManager = bb.core.getManager("rte");
+                self.contentManager.init().enable();
+            }catch(e){
+                throw e;
+            }
+        });
+        
         this._context.isEnable = true;   
     },
     
@@ -626,6 +623,7 @@ BB4.ToolsbarManager.register("editiontb",{
         var bbPrevContent = $bb(prevMedia);
         var prevContentClass = $(bbPrevContent.contentEl).attr("class");
         var newContent = $(newMedia);
+        
         newContent.attr("class",prevContentClass);
         var prevSrc = $(newContent).find("img").eq(0).attr("src");
         var ctime = new Date();
@@ -1241,9 +1239,11 @@ BB4.ToolsbarManager.register("editiontb",{
 
     disable: function() {
        
-        AlohaManager.stop(); 
-        //$('[data-uid]').die('contentchange');
-         
+       console.log("inside disable ");
+        //AlohaManager.stop(); 
+        if(this.contentManager){
+            this.contentManager.disable();
+        }         
         if (this._context.mediaSelector) {
             $('[data-type^="Media\\\\"]').die('mouseover');            
             $('[data-type^="Media\\\\"]').die('mouseout');                
