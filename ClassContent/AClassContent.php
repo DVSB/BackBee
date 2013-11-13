@@ -175,7 +175,17 @@ abstract class AClassContent extends AContent
     {
         return $this->_parentcontent;
     }
-
+    
+    /**
+     * Returns the collection of the subcontent if exists
+     * @return \Doctrine\Common\Collections\ArrayCollection|NULL
+     * @codeCoverageIgnore
+     */
+    public function getSubcontent()
+    {
+        return $this->_subcontent;
+    }
+    
     /**
      * Returns the collection of revisions of the content
      * @return \Doctrine\Common\Collections\ArrayCollection
