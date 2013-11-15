@@ -364,12 +364,19 @@ class FrontController implements HttpKernelInterface
     {
         $this->_validateResourcesAction($filename);
 
-        $includePath = array($this->_application->getStorageDir(),
-            $this->_application->getMediaDir());
-        if (NULL !== $this->_application->getBBUserToken())
+        $includePath = array($this->_application->getStorageDir(), $this->_application->getMediaDir());
+        if (NULL !== $this->_application->getBBUserToken()) {
             $includePath[] = $this->_application->getTemporaryDir();
-
-        $test = File::resolveMediapath($filename, NULL, array('include_path' => $includePath));
+        }
+        
+        $matches = array();
+        if (preg_match('/([a-f0-9]{3})\/([a-f0-9]{29})\/(.*)\.([^\.]+)/', $filename, $matches)) {
+            $filename = $matches[1].'/'.$matches[2].'.'.$matches[4];
+            File::resolveFilepath($filename, NULL, array('include_path' => $includePath));
+        } else {
+            File::resolveMediapath($filename, NULL, array('include_path' => $includePath));
+        }
+        
         $this->_application->info(sprintf('Handling image URL `%s`.', $filename));
         $this->_flushfile($filename);
     }
