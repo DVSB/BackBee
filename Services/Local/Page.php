@@ -110,7 +110,6 @@ class Page extends AbstractServiceLocal
             $opage->url = $this->getApplication()->getRenderer()->getUri($opage->url);
             $opage->redirect = $this->getApplication()->getRenderer()->getUri($opage->redirect);
         }
-
         $defaultmeta = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
         $opage->metadata = (null === $opage->metadata) ? $defaultmeta->toArray() : array_merge($defaultmeta->toArray(), $page->getMetadata()->toArray());
 
@@ -128,6 +127,9 @@ class Page extends AbstractServiceLocal
      */
     public function update($serialized)
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+
         if (null === $object = json_decode($serialized)) {
             throw new InvalidArgumentException('Can not decode serialized data.');
         }
@@ -177,6 +179,7 @@ class Page extends AbstractServiceLocal
         }
 
         $page->unserialize($object);
+        
         $this->getEntityManager()->flush();
 
         return array('url' => $page->getUrl(), 'state' => $page->getState());

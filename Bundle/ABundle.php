@@ -20,7 +20,8 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     private $_config;
     private $_properties;
     private $_routing;
-
+    private $_request;
+    
     public function __call($method, $args)
     {
         if (NULL !== $this->getLogger()) {
@@ -140,7 +141,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     public function getRequest()
     {
         if (NULL === $this->_request)
-            $this->_request = Request::createFromGlobals();
+            $this->_request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
 
         return $this->_request;
     }

@@ -206,7 +206,9 @@ $(function(){
                 };
             } else {
                 var checked = new Array();
-                $.each($(this.form).find('input:checked'), function(i, input) { checked[checked.length] = $(input).val()});
+                $.each($(this.form).find('input:checked'), function(i, input) {
+                    checked[checked.length] = $(input).val()
+                    });
 
                 var result = {
                     'array':{
@@ -228,6 +230,7 @@ $(function(){
             itemTplClass: ".linkItem-tpl",
             itemCls: "bb5-link-item",
             itemContainerClass: ".linksContainer",
+            blockLabelCls: ".block-label",
             highLightCls: "bb5-link-item-highlighted",
             actionContainerClass :".btnContainer",
             fieldErrorCls: "hasError"
@@ -247,6 +250,14 @@ $(function(){
             this.form = $(this._settings.formTplClass).eq(0).clone();
             this._template.itemTpl = this.form.find(this._settings.itemTplClass).eq(0);
             this.linksContainer = $(this.form).find(this._settings.itemContainerClass).eq(0);
+            var fieldLabel = (this._settings.fieldInfos.param.array.label!="undefined") ? this._settings.fieldInfos.param.array.label:"";
+            var maxEntry = this._settings.fieldInfos.param.array.maxentry;
+            var minEntry = this._settings.fieldInfos.param.array.minentry;
+            this.maxEntry = ( maxEntry == "undefined" || isNaN(parseInt(maxEntry)) ) ? 999 : parseInt(maxEntry);
+            this.minEntry = ( maxEntry == "undefined" || isNaN(parseInt(minEntry)) ) ? 0 : parseInt(minEntry);
+            this.minEntry = ( this.maxEntry > this.minEntry ) ? this.minEntry : 0; 
+            
+            $(this.form).find(this._settings.blockLabelCls).eq(0).text(fieldLabel);
             this.linksContainer.empty();
             $(this.form).removeClass(this._settings.formTplClass.replace(".",""));
             var linksInfos = this._settings.fieldInfos.param.array.links;
@@ -263,6 +274,14 @@ $(function(){
                     self._populateLink(linkData);
                 });
             }
+        },
+        /**
+         *return true of it's ok to add a new item
+         **/
+        _checkBondaries : function(){
+            var result = false;
+            var nbItems = $(this.linksContainer).find(".bb5-link-item").length;
+            return !this.maxEntry <= nbItems;
         },
         
         _bindEvents : function(){
@@ -288,7 +307,7 @@ $(function(){
             /*bind delete action*/
             $(this.form).find(".bb5-ico-del").live("click",function(e){
                 var target = e.target;
-               var linknode = $(target).parents("."+self._settings.itemCls).eq(0);
+                var linknode = $(target).parents("."+self._settings.itemCls).eq(0);
                 if(linknode){
                     $(linknode).remove();
                     return;
@@ -318,6 +337,7 @@ $(function(){
         },
         _showLinkSelector : function(){
             var self = this;
+            if(!this._checkBondaries()) return false;
             if(this._context.linkSelector){
                 /*afficher - selectionner noeud*/
                 if(this._context.linkSelector.data("bbSelector")){
@@ -428,6 +448,12 @@ $(function(){
             if(linksWithErrors.length > 0){
                 this._handleError(linksWithErrors);
                 isValid = false;
+            }
+            /* handle minetry */
+            if(this.minEntry){
+                if($(this.linksContainer).find(".bb5-link-item").length < this.minEntry){
+                    isValid = false; 
+                }
             }
             return isValid;
         },
@@ -649,11 +675,11 @@ $(function(){
          
         onClose : function(){
             /*masquer tous les arbes*/
-                if(this._context.contentTypeSelector){
-                    if(this._context.contentTypeSelector.data("bbContentTypeBrowser")){
-                        this._context.contentTypeSelector.data("bbContentTypeBrowser").destroy();  
-                    }
+            if(this._context.contentTypeSelector){
+                if(this._context.contentTypeSelector.data("bbContentTypeBrowser")){
+                    this._context.contentTypeSelector.data("bbContentTypeBrowser").destroy();  
                 }
+            }
             
             if(this._context.pageBrowser){
                 if(this._context.pageBrowser.data("bbPageBrowser")){

@@ -6,7 +6,7 @@
     }
     
     global.Aloha.settings = {
-        baseUrl : "js/libs/alohaeditor/aloha/lib",
+        baseUrl : bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor/aloha/lib",
         toolbar: {
             floating : false,
             pin: false,
@@ -21,7 +21,8 @@
                 // all elements with no specific configuration get this configuration
                 config : [ 'b', 'i','sub','sup'],
                 editables: {}
-            }
+            },
+            "links":{}
         }
     }
 })(window,$);
@@ -62,7 +63,7 @@ bb.RteManager.registerAdapter("aloha",{
         this.mode = null;
         this.editables = [];
         /*handle all settings here*/
-        loadScript("js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
+        loadScript(bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
             Aloha.ready(function(){
                 self.trigger("onReady");
                 /*show toolbar*/

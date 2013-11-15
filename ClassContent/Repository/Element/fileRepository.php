@@ -45,12 +45,12 @@ class fileRepository extends ClassContentRepository
         //if (null === $file->getDraft()) return false;
 
         $filename = $file->path;
-        File::resolveMediapath($filename, NULL, array('base_dir' => $this->_temporarydir));
+        File::resolveFilepath($filename, NULL, array('base_dir' => $this->_temporarydir));
 
         if (file_exists($filename) && false === is_dir($filename)) {
             $extension = pathinfo($filename, PATHINFO_EXTENSION);
-            $currentname = $file->getUid().'.'.$extension;
-            File::resolveMediapath($currentname, NULL, array('base_dir' => ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir));
+            $currentname = \BackBuilder\Util\Media::getPathFromContent($file);
+            File::resolveFilepath($currentname, NULL, array('base_dir' => ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir));
 
             if (FALSE === is_dir(dirname($currentname)))
                 mkdir(dirname($currentname), 0755, TRUE);
@@ -58,7 +58,7 @@ class fileRepository extends ClassContentRepository
             copy($filename, $currentname);
             unlink($filename);
 
-            $file->path = $file->getUid().'.'.$extension;
+            $file->path = \BackBuilder\Util\Media::getPathFromContent($file);
         }
 
         return true;
@@ -87,18 +87,14 @@ class fileRepository extends ClassContentRepository
         $stat = stat($newfilename);
 
         $base_dir = $this->_temporarydir;
-        if (NULL !== $file->getDraft()) {
-            $moveto = $file->getDraft()->getUid() . '.' . $extension;
-        } elseif ($this->isInMediaLibrary($file)) {
-            $moveto = $file->getUid() . '.' . $extension;
-            $base_dir = $this->_mediadir;
-        } else {
-            $moveto = $file->getUid() . '.' . $extension;
-            $base_dir = $this->_storagedir;
+        $file->path = \BackBuilder\Util\Media::getPathFromContent($file);
+        
+        if (null === $file->getDraft()) {
+            $base_dir = ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir;
         }
 
-        $file->path = $moveto;
-        File::resolveMediapath($moveto, null, array('base_dir' => $base_dir));
+        $moveto = $file->path;
+        File::resolveFilepath($moveto, null, array('base_dir' => $base_dir));
 
         if (FALSE === is_dir(dirname($moveto)))
             mkdir(dirname($moveto), 0755, TRUE);

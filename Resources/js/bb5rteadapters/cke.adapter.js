@@ -1,4 +1,10 @@
 /** declaring ck adapter*/
+var compteur = (function(){
+    var compteur = 0;
+    return function(){
+        return "compteur: "+compteur++;
+    }
+})()
 bb.RteManager.registerAdapter("cke",{
                 
     onInit: function(){
@@ -7,26 +13,21 @@ bb.RteManager.registerAdapter("cke",{
         this.mainNodeContainer = null;
         this.mode = null;
         this.editables = [];
-        CKEDITOR_BASEPATH = "js/libs/ckeditor-releases/"; 
-        jQuery.get("/js/libs/ckeditor-releases/ckeditor.js", function(){
+        CKEDITOR_BASEPATH = bb.baseurl+bb.resourcesdir+"js/libs/ckeditor-releases/"; 
+        jQuery.get(CKEDITOR_BASEPATH+"ckeditor.js", function(){
             self.ckeMng = CKEDITOR;
             self.ckeMng.disableAutoInline = true;
             self.ckeMng.dtd.$editable.span = 1;
             self.ckeMng.dtd.$editable.a = 1;
             
-            /*self.ckeMng.on("currentInstance",function(){
+            self.ckeMng.on("currentInstance",function(){
                 var editor = CKEDITOR.currentInstance;
                 if(editor){
-                    setTimeout(function(){
-                        self.onShowToolbar(editor.name); 
-                    },10);                   
+                    self.onShowToolbar({
+                        editor:editor
+                    })
                 }
             });
-            $(window).bind("scroll",function(){
-                setTimeout(function(){
-                    self.onShowToolbar(editor.name); 
-                },0);  
-            });*/
             self.trigger("onReady");  
         });                    
     },
@@ -54,7 +55,7 @@ bb.RteManager.registerAdapter("cke",{
                     /* if node ha an editor */
                     /* handle config here */
                     var element = CKEDITOR.dom.element.get( $(node).get(0) );
-                    if(element.getEditor()) return;
+                    if(!element || element.getEditor()) return;
                     var editableNode = $(node).get(0); 
                     self._applyCkToNode(editableNode,nodeConfig);
                 });
@@ -83,10 +84,19 @@ bb.RteManager.registerAdapter("cke",{
                 border: "none"
             }).appendTo("#aloha");
             $("#cke_"+name).css("visibility","visible"); 
-        },100);       
+        },150);       
+    },
+    
+    _hideEditor: function(editor){
+        var editorName = editor.name;
+        if(editorName){
+            $("#cke_"+editorName).hide();
+        }
     },
     
     handleContentEdition : function(event){
+        this._hideEditor(event.editor);
+        /* hide editor */
         var editor = event.editor;
         if(!editor || !editor.checkDirty()) return false;
         var editedContent = editor.getData();

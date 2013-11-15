@@ -180,7 +180,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * @param \BackBuilder\ClassContent\AClassContent $content
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
      */
-    public function setContent(AClassContent $content)
+    public function setContent(AClassContent $content = null)
     {
         $this->_content = $content;
 

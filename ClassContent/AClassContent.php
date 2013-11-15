@@ -54,7 +54,7 @@ abstract class AClassContent extends AContent
     /**
      * The many to many association between this content and its subcontent
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_parentcontent", cascade={"persist", "detach", "merge", "refresh"})
+     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_parentcontent", cascade={"persist", "detach", "merge", "refresh", "remove"})
      * @JoinTable(name="content_has_subcontent",
      *   joinColumns={@JoinColumn(name="parent_uid", referencedColumnName="uid")},
      *   inverseJoinColumns={@JoinColumn(name="content_uid", referencedColumnName="uid")}
@@ -175,7 +175,17 @@ abstract class AClassContent extends AContent
     {
         return $this->_parentcontent;
     }
-
+    
+    /**
+     * Returns the collection of the subcontent if exists
+     * @return \Doctrine\Common\Collections\ArrayCollection|NULL
+     * @codeCoverageIgnore
+     */
+    public function getSubcontent()
+    {
+        return $this->_subcontent;
+    }
+    
     /**
      * Returns the collection of revisions of the content
      * @return \Doctrine\Common\Collections\ArrayCollection

@@ -192,7 +192,7 @@ $.extend(bb.webservice, {
                 } else if ('403' == jqXHR.status && 'undefined' != jqXHR.getResponseHeader('X-BB-AUTH')) {
                     $(bb.authmanager).trigger('bb-auth-forbidden', [jqXHR.getResponseHeader('X-BB-AUTH'), this]);
                 } else {
-                    _that._requestError.call(_that, json, options.error);
+                    _that._requestError.call(_that, jqXHR, options.error);
                 }
             },
             

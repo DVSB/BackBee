@@ -14,7 +14,7 @@ define(["jscore"], function(){
          * put in a global config
     /**/
         var _settings = {
-            managerPath: "js/bb5managers/"
+            managerPath: bb.baseurl+bb.resourcesdir+"js/bb5managers/"
         };
         
         var _handleModuleConfig = function(){
