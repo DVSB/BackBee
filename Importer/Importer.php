@@ -32,12 +32,6 @@ class Importer
         $this->_application = $application;
         $this->_connector = $connector;
         $this->_config = $config;
-//        if (array_key_exists('php_config', $config)) {
-//            $maxExecutionTime = (array_key_exists('max_execution_time', $config['php_config'])) ? (int)$config['php_config']['max_execution_time'] : (int)ini_get('max_execution_time');
-//            $memoryLimit = (array_key_exists('max_execution_time', $config['php_config'])) ? $config['php_config']['max_execution_time'] : ini_get('max_execution_time');
-            ini_set('max_execution_time', 0);
-            ini_set('memory_limit', '2048M');
-//        }
     }
 
     /**
@@ -53,7 +47,7 @@ class Importer
         \BackBuilder\Util\Buffer::dump('Importation of ' . count($values) . ' ' . $class . ' was started' . "\n");
         $i = 0;
         $entities = array();
-        if (count($values) == 0) return;
+        if (count($values) == 0) {return;}
         foreach ($values as $value) {
             if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
                 $entities[] = $this->getConverter()->convert($value);

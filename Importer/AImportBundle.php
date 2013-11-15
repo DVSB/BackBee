@@ -2,7 +2,8 @@
 namespace BackBuilder\Importer;
 
 use BackBuilder\BBApplication,
-    BackBuilder\Config\Config;
+    BackBuilder\Config\Config,
+    BackBuilder\Importer\Exception\SkippedImportException;
 
 /**
  * @category    BackBuilder
@@ -14,27 +15,33 @@ abstract class AImportBundle
 {
     protected $_dir;
     /**
-     * @var BBApplication
+     * @var Config
      */
     protected $_config;
     /**
-     * @var Config
+     * @var array
      */
     protected $_relations;
     /**
-     * @var type
+     * @var BBApplication
      */
     protected $_application;
 
     public function __construct(BBApplication $application)
     {
-        $this->_dir = __DIR__;
         $this->_application = $application;
         $this->_config = new Config($this->_dir);
         $this->_relations = $this->_config->getSection('relations');
-        if (0 == count($this->_relations)) return false;
+
+        if (0 == count($this->_relations)) {return false;}
+
+        $this->setPhpConf($this->_config->getSection('php_ini'));
         foreach ($this->_relations as $class => $config) {
-            $this->{'import' . ucfirst($class)}($config);
+            try {
+                $this->{'import' . ucfirst($class)}($config);
+            } catch (SkippedImportException $exc) {
+                echo $exc->getMessage() . "\n";
+            }
         }
         return true;
     }
@@ -52,5 +59,24 @@ abstract class AImportBundle
             $checkForExisting = array_key_exists('check_exists', $config) ? (boolean)$config['check_exists'] : true;
             $importer->run($key, $config, $flushEvery, $checkForExisting);
         }
+    }
+
+    protected function markAsSkipped($name)
+    {
+        throw new SkippedImportException(ucfirst($name) . ' importation has been skipped.');
+    }
+
+    protected function setPhpConf($config)
+    {
+        if (is_array($config)) {
+            $maxExecTime = (array_key_exists('max_execution_time', $config)) ? $config['max_execution_time'] : 0;
+            $memLimit = (array_key_exists('memory_limit', $config)) ? $config['memory_limit'] : '2048M';
+        } else {
+            $memLimit = '2048M';
+            $maxExecTime = 0;
+        }
+
+        ini_set('max_execution_time', $maxExecTime);
+        ini_set('memory_limit', $memLimit);
     }
 }

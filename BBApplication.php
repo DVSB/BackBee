@@ -82,7 +82,7 @@ class BBApplication {
     {
         if (NULL !== $bundles = $this->getConfig()->getSection('importbundles')) {
             foreach($bundles as $classname) {
-                $class = new $classname($this);
+                new $classname($this);
             }
         }
     }
