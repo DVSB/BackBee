@@ -138,33 +138,29 @@ class Media extends AbstractServiceLocal {
                 } else if ($subcontent instanceof elementFile) {
                     $content_image_obj = json_decode($value);
                     if (isset($content_image_obj->filename)) {
+
+                        $subcontent->originalname = $content_image_obj->originalname;
+                        $subcontent->path = \BackBuilder\Util\Media::getPathFromContent($subcontent);
+                        
                         $filename = $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $content_image_obj->filename;
-                        $basename = basename($filename);
-                        $extension = pathinfo($filename, PATHINFO_EXTENSION);
-                        $stat = stat($filename);
-                        $sha1 = sha1_file($filename);
-                        if ($subcontent instanceof elementImage) {
-                            $size = getimagesize($filename);
-                            list($width, $height, $type, $attr) = $size;
-                        }
-                       
-                        $moveto = $subcontent->getUid() . '.' . $extension;
-                        File::resolveMediapath($moveto, NULL, array('base_dir' => $this->bbapp->getMediaDir()));
+                        $moveto = $subcontent->path;
+                        File::resolveFilepath($moveto, NULL, array('base_dir' => $this->bbapp->getMediaDir()));
                         if (FALSE === is_dir(dirname($moveto)))
                             mkdir(dirname($moveto), 0755, TRUE);
 
                         copy($filename, $moveto);
                         unlink($filename);
-
-                        $subcontent->path = $subcontent->getUid() . '.' . $extension;
-                        $subcontent->originalname = $content_image_obj->originalname;
-
+                        
+                        $stat = stat($moveto);
+                        $subcontent->setParam('stat', $stat, 'array');
+                        
                         if ($subcontent instanceof elementImage) {
+                            $size = getimagesize($moveto);
+                            list($width, $height, $type, $attr) = $size;
                             $subcontent->setParam('width', $width, 'scalar');
                             $subcontent->setParam('height', $height, 'scalar');
                         }
-
-                        $subcontent->setParam('stat', $stat, 'array');
+                        
                     }
 
                     $media_content->$element = $subcontent;
