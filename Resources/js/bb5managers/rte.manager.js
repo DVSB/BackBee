@@ -7,9 +7,10 @@
     /*dire à l'avance les événements qui nous intéressent */
     bb.core.registerManager("rte", {
         
+        /* not implemented yet*/
         moduleConfig: {
             alias : "rte",
-            dependencies: ["manager1", "adapter1"]
+            dependencies: ["manager1", "adapter1"] //dependencies are other modules
         },
         
         initDefaultSettings : function(){     
@@ -80,13 +81,13 @@
         },
         
         enable: function(){
-            //this.callSuper();
+            this.callSuper();
             //delay call if rte is not ready yet
             if(this.rteAdapter) this.rteAdapter.enable();
         },
         
         disable: function(){
-            //this.callSuper();
+            this.callSuper();
             if(this.rteAdapter) this.rteAdapter.disable(); 
         }
         
