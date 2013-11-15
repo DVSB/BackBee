@@ -29,6 +29,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
      */
     public function __construct(array $definitions = null, Page $page = null)
     {
+        $this->_metadatas = array();
         $this->update($definitions, $page);
     }
 
