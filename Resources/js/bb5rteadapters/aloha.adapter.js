@@ -21,7 +21,8 @@
                 // all elements with no specific configuration get this configuration
                 config : [ 'b', 'i','sub','sup'],
                 editables: {}
-            }
+            },
+            "links":{}
         }
     }
 })(window,$);

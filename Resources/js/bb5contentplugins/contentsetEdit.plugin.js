@@ -178,7 +178,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
              
     exposeActions : function(){
         this.createAction({
-            label:"add a new item to this container", 
+            label:"Add a new item to this container", 
             icoCls : "bb5-ico-add", 
             command : this.cmdAdd
         });
