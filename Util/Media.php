@@ -27,7 +27,7 @@ class Media
         }
 
         $folder = '';
-        $filename = $content->getUid();
+        $filename = (null !== $content->getDraft()) ? $content->getDraft()->getUid() : $content->getUid();
 
         if (0 < $folder_size && strlen($content->getUid()) > $folder_size) {
             $folder = substr($content->getUid(), 0, $folder_size) . '/';
