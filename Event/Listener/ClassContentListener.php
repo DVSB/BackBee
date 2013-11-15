@@ -221,7 +221,7 @@ class ClassContentListener
                 $includePath[] = $application->getTemporaryDir();
 
             $filename = $content->path;
-            File::resolveMediapath($filename, NULL, array('include_path' => $includePath));
+            File::resolveFilepath($filename, NULL, array('include_path' => $includePath));
 
             @unlink($filename);
         } catch (\Exception $e) {
