@@ -19,7 +19,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
      * The array of metadata
      * @var array
      */
-    private $_metadatas;
+    private $_metadatas = array();
 
     /**
      * Class constructor
