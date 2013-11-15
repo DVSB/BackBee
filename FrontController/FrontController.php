@@ -372,10 +372,9 @@ class FrontController implements HttpKernelInterface
         $matches = array();
         if (preg_match('/([a-f0-9]{3})\/([a-f0-9]{29})\/(.*)\.([^\.]+)/', $filename, $matches)) {
             $filename = $matches[1].'/'.$matches[2].'.'.$matches[4];
-            File::resolveFilepath($filename, NULL, array('include_path' => $includePath));
-        } else {
-            File::resolveMediapath($filename, NULL, array('include_path' => $includePath));
         }
+        
+        File::resolveFilepath($filename, NULL, array('include_path' => $includePath));
         
         $this->_application->info(sprintf('Handling image URL `%s`.', $filename));
         $this->_flushfile($filename);
