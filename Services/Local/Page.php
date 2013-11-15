@@ -128,6 +128,9 @@ class Page extends AbstractServiceLocal
      */
     public function update($serialized)
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+
         if (null === $object = json_decode($serialized)) {
             throw new InvalidArgumentException('Can not decode serialized data.');
         }
