@@ -15,11 +15,11 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Rewriting\UrlGenerator,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
-    
+
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager;
-    
+
 use Symfony\Component\DependencyInjection\ContainerBuilder,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\Translation\MessageSelector,
@@ -28,7 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder,
 
 class BBApplication {
     const VERSION = '1.0.1';
-    
+
     private $_container;
     private $_context;
     private $_debug;
@@ -46,20 +46,20 @@ class BBApplication {
     private $_bundles;
     private $_classcontentdir;
     private $_theme;
-    
+
     public function __call($method, $args) {
         if ($this->getContainer()->has('logging')) {
             call_user_func_array(array($this->getContainer()->get('logging'), $method), $args);
         }
     }
-    
+
     public function __construct($context = NULL, $debug = FALSE) {
         $this->_starttime = time();
         $this->_context = (NULL === $context) ? 'default' : $context;
         $this->_debug = (Boolean) $debug;
         $this->_isinitialized = FALSE;
         $this->_isstarted = FALSE;
-  
+
         $this->_initAutoloader()
              ->_initLogging()
              ->_initContentWrapper()
@@ -74,7 +74,7 @@ class BBApplication {
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, TRUE)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
-        
+
         $this->_isinitialized = TRUE;
     }
 
@@ -91,7 +91,7 @@ class BBApplication {
         if ($this->_isstarted)
             $this->info('BackBuilder application ended');
     }
-    
+
     /**
      * @return \BackBuilder\BBApplication
      */
@@ -105,7 +105,7 @@ class BBApplication {
              ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')))
              ->setEventDispatcher($this->getEventDispatcher())
              ->setLogger($this->getLogging());
-        
+
         return $this;
     }
 
@@ -116,7 +116,7 @@ class BBApplication {
 //        $translator->addLoader('yml', new \Symfony\Component\Translation\Loader\YamlFileLoader());
 //        $translator->addResource('yml', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'BackBuilder', 'Resources', 'translation', 'fr_FR', 'general.yml')), 'fr_FR');
         $this->getContainer()->set('translator', $translator);
-        
+
         return $this;
     }
 
@@ -130,7 +130,7 @@ class BBApplication {
         }
         return $this->_theme;
     }
-    
+
     /**
      * @return \Swift_Mailer
      */
@@ -140,18 +140,18 @@ class BBApplication {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
                 $smtp = (is_array($mailer_config['smtp'])) ? reset($mailer_config['smtp']) : $mailer_config['smtp'];
                 $port = (is_array($mailer_config['port'])) ? reset($mailer_config['port']) : $mailer_config['port'];
-                    
+
                 $transport = \Swift_SmtpTransport::newInstance($smtp, $port);
                 if (array_key_exists('username', $mailer_config) && array_key_exists('password', $mailer_config)) {
                     $username = (is_array($mailer_config['username'])) ? reset($mailer_config['username']) : $mailer_config['username'];
                     $password = (is_array($mailer_config['password'])) ? reset($mailer_config['password']) : $mailer_config['password'];
-                    
+
                     $transport->setUsername($username)->setPassword($password);
                 }
                 $this->getContainer()->set('mailer', \Swift_Mailer::newInstance($transport));
             }
         }
-        
+
         return $this->getContainer()->get('mailer');
     }
 
@@ -184,16 +184,16 @@ class BBApplication {
     private function _initContentWrapper() {
         if (NULL === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig())
             throw new BBException('None class content wrapper found');
-        
+
         $namespace = isset($contentwrapperConfig['namespace']) ? $contentwrapperConfig['namespace'] : '';
         $protocol = isset($contentwrapperConfig['protocol']) ? $contentwrapperConfig['protocol'] : '';
         $adapter = isset($contentwrapperConfig['adapter']) ? $contentwrapperConfig['adapter'] : '';
 
         $this->getAutoloader()->registerStreamWrapper($namespace, $protocol, $adapter);
-        
+
         return $this;
     }
-    
+
     /**
      * @return \BackBuilder\BBApplication
      * @throws BBException
@@ -212,16 +212,16 @@ class BBApplication {
         $config->setProxyNamespace('Proxies');
 
         $config->setSQLLogger($this->getLogging());
-        
+
         // Init ORM event
         $evm = new EventManager();
         $r = new \ReflectionClass( 'Doctrine\ORM\Events' );
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
-        
+
         // Create EntityManager
         $connectionOptions = isset($doctrineConfig['dbal']) ? $doctrineConfig['dbal'] : array();
         $this->getContainer()->set('em', EntityManager::create($connectionOptions, $config, $evm));
-        
+
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
             try {
                 $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_client = "'.addslashes($doctrineConfig['dbal']['charset']).'";');
@@ -231,7 +231,7 @@ class BBApplication {
                 throw new BBException(sprintf('Invalid database character set `%s`', $doctrineConfig['dbal']['charset']), BBException::INVALID_ARGUMENT, $e);
             }
         }
-        
+
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['collation'])) {
             try {
                 $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION collation_connection = "'.addslashes($doctrineConfig['dbal']['collation']).'";');
@@ -239,9 +239,9 @@ class BBApplication {
                 throw new BBException(sprintf('Invalid database collation `%s`', $doctrineConfig['dbal']['collation']), BBException::INVALID_ARGUMENT, $e);
             }
         }
-        
+
         $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
-        
+
         return $this;
     }
 
@@ -252,7 +252,7 @@ class BBApplication {
         $this->getContainer()->set('logging', new Logger($this));
         return $this;
     }
-    
+
     /**
      * @return \BackBuilder\BBApplication
      * @throws BBException
@@ -265,26 +265,26 @@ class BBApplication {
             throw new BBException('None renderer adapter found');
 
         $this->getContainer()->set('renderer', new $rendererConfig['adapter']($this));
-        
+
         $this->debug(sprintf('%s(): Renderer initialized with adapter `%s`', __METHOD__, $rendererConfig['adapter']));
-        
+
         return $this;
     }
-	
+
     /**
      * @return \BackBuilder\BBApplication
      */
     private function _initSecurityContext() {
         if (FALSE === $this->getContainer()->has('security.context'))
             $this->getContainer()->set('security.context', new SecurityContext($this));
-        
+
         return $this;
     }
 
     private function _initBundles() {
         if (null === $this->_bundles)
             $this->_bundles = array();
-        
+
         if (NULL !== $bundles = $this->getConfig()->getBundlesConfig()) {
             foreach($bundles as $name => $classname) {
                 $bundle = new $classname($this);
@@ -295,7 +295,7 @@ class BBApplication {
             }
         }
     }
-    
+
     /**
      * @param type $name
      * @return Bundle\ABundle
@@ -304,10 +304,10 @@ class BBApplication {
         if ($this->getContainer()->has('bundle.'.$name)) {
             return $this->getContainer()->get('bundle.'.$name);
         }
-        
+
         return NULL;
     }
-    
+
     public function getBundles() {
         return $this->_bundles;
     }
@@ -318,7 +318,7 @@ class BBApplication {
     public function debugMode() {
         return $this->_debug;
     }
-    
+
     /**
      * @param \BackBuilder\Site\Site $site
      */
@@ -326,21 +326,21 @@ class BBApplication {
         if (NULL === $site) {
             $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array());
         }
-        
+
         if (NULL !== $site) {
             $this->getContainer()->set('site', $site);
         }
-        
+
         $this->_isstarted = TRUE;
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (NULL !== $site) ? $site->getUid() : 'none'));
-        
+
         if (null !== $this->_bundles) {
             foreach($this->_bundles as $bundle)
                 $bundle->start();
         }
 
         $this->getTheme()->init();
-        
+
         $this->getController()->handle();
     }
 
@@ -351,10 +351,10 @@ class BBApplication {
         if (false === $this->getContainer()->has('controller')) {
             $this->getContainer()->set('controller', new FrontController($this));
         }
-        
+
         return $this->getContainer()->get('controller');
     }
-    
+
     /**
      * @return AutoLoader
      */
@@ -374,34 +374,34 @@ class BBApplication {
             $r = new \ReflectionObject($this);
             $this->_basedir = dirname($r->getFileName()) . DIRECTORY_SEPARATOR . '..';
         }
-        
+
         return $this->_basedir;
     }
-    
-    
+
+
     public function getContext()
     {
         return $this->_context;
     }
-    
+
     /**
      * @return BackBuilder\Security\Token\BBUserToken|null
      */
     public function getBBUserToken() {
         $token = NULL;
-        
+
         if ($this->getContainer()->has('bb_session')) {
             if (NULL !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
                 $token = unserialize($token);
-                
+
                 if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken'))
                     $token = NULL;
             }
         }
-        
+
         return $token;
     }
-    
+
     /**
      * @return \BackBuilder\Cache\DAO\Cache
      */
@@ -409,12 +409,12 @@ class BBApplication {
         if (!$this->getContainer()->has('cache-control')) {
             $this->getContainer()->set('cache-control', new \BackBuilder\Cache\DAO\Cache($this));
         }
-        
+
         return $this->getContainer()->get('cache-control');
     }
 
     /**
-     * 
+     *
      * @return \BackBuilder\Cache\ACache
      */
     public function getBootstrapCache()
@@ -423,9 +423,9 @@ class BBApplication {
             $this->getContainer()->set('cache.bootstrap', new Cache\File\Cache($this));
         }
 
-        return $this->getContainer()->get('cache.bootstrap');        
+        return $this->getContainer()->get('cache.bootstrap');
     }
-    
+
     public function getCacheDir()
     {
         if (NULL === $this->_cachedir) {
@@ -433,7 +433,7 @@ class BBApplication {
         }
         return $this->_cachedir;
     }
-    
+
     /**
      * @return ContainerBuilder
      */
@@ -474,20 +474,20 @@ class BBApplication {
         if (!$this->getContainer()->has('ed')) {
             $this->getContainer()->set('ed', new Dispatcher($this));
         }
-        
+
         return $this->getContainer()->get('ed');
     }
-    
+
     /**
      * @return Logger
      */
     public function getLogging() {
         if (FALSE === $this->getContainer()->has('logging'))
             $this->_initLogging();
-        
+
         return $this->getContainer()->get('logging');
     }
-    
+
     public function getMediaDir() {
         if (NULL === $this->_mediadir) {
             $this->_mediadir = implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Data', 'Media'));
@@ -495,7 +495,7 @@ class BBApplication {
 
         return $this->_mediadir;
     }
-    
+
     /**
      * @return Renderer\ARenderer
      */
@@ -523,20 +523,20 @@ class BBApplication {
     {
         if (NULL === $this->_classcontentdir) {
             $this->_classcontentdir = array();
-            
+
             array_unshift($this->_classcontentdir, $this->getBaseDir().'/BackBuilder/ClassContent');
             array_unshift($this->_classcontentdir, $this->getBaseDir().'/repository/ClassContent');
 
             if (NULL !== $this->_context && 'default' != $this->_context) {
                 array_unshift($this->_classcontentdir, $this->getRepository().'/ClassContent');
             }
-            
+
             array_walk( $this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
         }
-        
+
         return $this->_classcontentdir;
     }
-    
+
     /**
      * Push one directory at the end of classcontent dirs
      * @param string $dir
@@ -545,15 +545,15 @@ class BBApplication {
     public function pushClassContentDir($dir)
     {
         File::resolveFilepath($dir);
-        
+
         $classcontentdir = $this->getClassContentDir();
         array_push($classcontentdir, $dir);
-        
+
         $this->_classcontentdir = $classcontentdir;
-        
+
         return $this;
     }
-    
+
     /**
      * Prepend one directory at the beginning of classcontent dirs
      * @param type $dir
@@ -562,15 +562,15 @@ class BBApplication {
     public function unshiftClassContentDir($dir)
     {
         File::resolveFilepath($dir);
-        
+
         $classcontentdir = $this->getClassContentDir();
         array_unshift($classcontentdir, $dir);
-        
+
         $this->_classcontentdir = $classcontentdir;
-        
+
         return $this;
     }
-    
+
     /**
      * Return the resource directories, if undefined, initialized with common resources
      * @return array The resource directories
@@ -579,20 +579,20 @@ class BBApplication {
     {
         if (NULL === $this->_resourcedir) {
             $this->_resourcedir = array();
-            
+
             $this->addResourceDir( $this->getBaseDir().'/BackBuilder/Resources' )
                  ->addResourceDir( $this->getBaseDir().'/repository/Ressources' );
-            
+
             if (NULL !== $this->_context && 'default' != $this->_context) {
                  $this->addResourceDir( $this->getRepository().'/Ressources' );
             }
-            
+
             array_walk( $this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
         }
-        
+
         return $this->_resourcedir;
     }
-    
+
     /**
      * Push one directory at the end of resources dirs
      * @param string $dir
@@ -601,15 +601,15 @@ class BBApplication {
     public function pushResourceDir($dir)
     {
         File::resolveFilepath($dir);
-        
+
         $resourcedir = $this->getResourceDir();
         array_push($resourcedir, $dir);
-        
+
         $this->_resourcedir = $resourcedir;
-        
+
         return $this;
     }
-    
+
     /**
      * Prepend one directory at the begining of resources dirs
      * @param type $dir
@@ -618,15 +618,15 @@ class BBApplication {
     public function unshiftResourceDir($dir)
     {
         File::resolveFilepath($dir);
-        
+
         $resourcedir = $this->getResourceDir();
         array_unshift($resourcedir, $dir);
-        
+
         $this->_resourcedir = $resourcedir;
-        
+
         return $this;
     }
-    
+
     /**
      * Prepend one directory of resources
      * @param String $dir The new resource directory to add
@@ -638,7 +638,7 @@ class BBApplication {
         if (NULL === $this->_resourcedir) {
             $this->_resourcedir = array();
         }
-        
+
         if (false === is_array($this->_resourcedir)) {
             throw new BBException('Misconfiguration of the BBApplication : resource dir has to be an array', BBException::INVALID_ARGUMENT);
         }
@@ -646,12 +646,12 @@ class BBApplication {
         if (false === file_exists( $dir ) || false === is_dir( $dir )) {
             throw new BBException(sprintf('The resource folder `%s` does not exist or is not a directory', $dir), BBException::INVALID_ARGUMENT);
         }
-        
+
         array_unshift($this->_resourcedir, $dir);
-        
+
         return $this;
     }
-    
+
     /**
      * Return the current resource dir (ie the first one in those defined)
      * @return string the file path of the current resource dir
@@ -660,11 +660,11 @@ class BBApplication {
     public function getCurrentResourceDir()
     {
         $dir = $this->getResourceDir();
-        
+
         if (0 == count($dir)) {
             throw new BBException('Misconfiguration of the BBApplication : none resource dir defined', BBException::INVALID_ARGUMENT);
         }
-        
+
         return array_shift( $dir );
     }
 
@@ -675,7 +675,7 @@ class BBApplication {
     public function getRequest() {
         if (FALSE === $this->isStarted())
             throw new BBException('The BackBuilder application has to be started before to access request');
-        
+
         return $this->getController()->getRequest();
     }
 
@@ -708,10 +708,10 @@ class BBApplication {
         if (!$this->getContainer()->has('rewriting.urlgenerator')) {
             $this->getContainer()->set('rewriting.urlgenerator', new UrlGenerator($this));
         }
-        
+
         return $this->getContainer()->get('rewriting.urlgenerator');
     }
-    
+
     /**
      * @return \Symfony\Component\HttpFoundation\Session\SessionInterface|null The session
      */
@@ -723,7 +723,7 @@ class BBApplication {
         }
         return $this->getRequest()->getSession();
     }
-    
+
     /**
      * @return SecurityContext
      */
@@ -744,7 +744,7 @@ class BBApplication {
         }
         return NULL;
     }
-    
+
     /**
      * @return string
      */
@@ -755,7 +755,7 @@ class BBApplication {
 
         return $this->_storagedir;
     }
-    
+
     /**
      * @return string
      */
@@ -766,14 +766,14 @@ class BBApplication {
 
         return $this->_tmpdir;
     }
-    
+
     /**
      * @return boolean
      */
     public function isReady() {
         return ($this->_isinitialized && NULL !== $this->_container);
     }
-    
+
     /**
      * @return boolean
      */
