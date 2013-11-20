@@ -84,6 +84,7 @@ class Importer
         $id_label = array_key_exists('id_label', $config) ? $config['id_label'] : 'uid';
         $this->_object_identifier = array_key_exists('object_identifier', $config) ? $config['object_identifier'] : 'id';
         $this->_ids = $this->getExistingIds($id_label, $table_name, $where_clause);
+
         return $converter;
     }
 
