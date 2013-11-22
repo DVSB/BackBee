@@ -49,11 +49,11 @@ abstract class AImportBundle
     public function __call($name, $arguments)
     {
         $config = $arguments[0];
-        $key = (strpos('import', $name) === 0) ? strtolower(str_replace('import', '', $name)) : '';
+        $key = (strpos($name, 'import') === 0) ? strtolower(str_replace('import', '', $name)) : '';
         if ($key !== '') {
-            $connectorName = $config['connector'];
+            $connectorName = '\BackBuilder\Importer\Connector\\' . $config['connector'];
 
-            $connector = new $connectorName($this->_application, $config['config']);
+            $connector = new $connectorName($this->_application, $this->_config->getSection($config['config']));
             $importer = new Importer($this->_application, $connector, $this->_config);
             $flushEvery = array_key_exists('flush_every', $config) ? (int)$config['flush_every'] : 1000;
             $checkForExisting = array_key_exists('check_exists', $config) ? (boolean)$config['check_exists'] : true;
