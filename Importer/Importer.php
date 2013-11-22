@@ -49,9 +49,9 @@ class Importer
         $entities = array();
         if (count($values) == 0) {return;}
         foreach ($values as $value) {
-            if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
+            //if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
                 $entities[] = $this->getConverter()->convert($value);
-            }
+            //}
             if (++$i === $flush_every) {
                 $this->save($entities, $check_for_existing);
                 $i = 0;
@@ -79,6 +79,7 @@ class Importer
         $converter->setBBEntity($config['entity_class']);
         $converter->beforeImport($this, $config);
         $em = $this->_application->getEntityManager();
+        
         $table_name = $em->getClassMetadata($config['entity_class'])->getTableName();
         $where_clause = array_key_exists('where_clause', $config) ? $config['where_clause'] : 1;
         $id_label = array_key_exists('id_label', $config) ? $config['id_label'] : 'uid';
@@ -131,7 +132,7 @@ class Importer
     {
         $id_label = 'get' . ucfirst(array_key_exists('id_label', $this->_import_config) ? $this->_import_config['id_label'] : 'uid');
 
-        \BackBuilder\Util\Buffer::dump('Saving...' . "\n");
+        \BackBuilder\Util\Buffer::dump('Saving...' . "\n");$i= 0;
         foreach ($entities as $entity) {
 //            if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
 //                $this->_application->getEntityManager()->persist($entity);

@@ -39,4 +39,17 @@ interface IConverter
      * @param array $entities
      */
     public function afterEntitiesFlush(Importer $importer, array $entities);
+
+    /**
+     * Returns an existing or new object of BB Entity according to $identifier
+     * @param  string $identifier 
+     * @return BackBuilder\ClassContent\AClassContent $entity
+     */
+    public function getBBEntity($identifier);
+
+    /**
+     * Returns in an array list of every existing uid
+     * @return array 
+     */
+    public function getAvailableKeys();
 }

@@ -24,6 +24,10 @@ abstract class AConverter implements IConverter
     protected $_importer;
 
     /**
+     * Every keys
+     */
+    protected $_availableKeys = null;
+    /**
      * Class constructor
      * @param \BackBuilder\Importer\Importer $importer
      */
@@ -36,9 +40,9 @@ abstract class AConverter implements IConverter
      *
      * @return Object
      */
-    public function getBBEntity()
+    public function getBBEntity($identifier)
     {
-        return $this->_bb_entity;
+        return new $this->_bb_entity($identifier);
     }
 
     /**
@@ -58,6 +62,15 @@ abstract class AConverter implements IConverter
     public function afterEntitiesFlush(Importer $importer, array $entities) {}
 
     public function onImportationFinish() {}
+
+    public function getAvailableKeys() 
+    {
+        if (null === $this->_availableKeys) {
+            $this->_availableKeys = array();
+        }
+
+        return $this->_availableKeys;
+    }
 
     /**
      * Update Status and revision value
