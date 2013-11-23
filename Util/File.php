@@ -99,7 +99,7 @@ class File
     public static function getExtension($filename, $withDot = true)
     {
         $filename = basename($filename);
-        if (false === strpos($filename, '.'))
+        if (false === strrpos($filename, '.'))
             return '';
 
         return substr($filename, strrpos($filename, '.') - strlen($filename) + ($withDot ? 0 : 1));

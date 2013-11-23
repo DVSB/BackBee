@@ -83,10 +83,8 @@ class fileRepository extends ClassContentRepository
         File::resolveFilepath($newfilename, null, array('base_dir' => $this->_temporarydir));
         if (false === file_exists($newfilename)) return false;
 
-        $extension = pathinfo($newfilename, PATHINFO_EXTENSION);
-        $stat = stat($newfilename);
-
         $base_dir = $this->_temporarydir;
+        $file->originalname = $originalname;
         $file->path = \BackBuilder\Util\Media::getPathFromContent($file);
         
         if (null === $file->getDraft()) {
@@ -102,7 +100,7 @@ class fileRepository extends ClassContentRepository
         copy($newfilename, $moveto);
         unlink($newfilename);
 
-        $file->originalname = $originalname;
+        $stat = stat($moveto);
         $file->setParam('stat', $stat, 'array');
 
         return $moveto;
