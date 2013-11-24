@@ -40,7 +40,7 @@ class Logger implements LoggerInterface, SQLLogger
             throw new LoggingException(sprintf('Unkown priority `%s`.', $priorityname));
 
         if (0 == count($args))
-            throw new LoggingException('None log message provied.');
+            throw new LoggingException('None log message provided.');
 
         $this->log($priority, $args[0], 0 < count($args) ? $args[1] : array());
     }
@@ -72,7 +72,7 @@ class Logger implements LoggerInterface, SQLLogger
                         $this->addAppender(new $appender($loggingConfig));
                     }
                 }
-                
+
                 if (array_key_exists('mailto', $loggingConfig)) {
                     $this->_mailto = $loggingConfig['mailto'];
                 }
@@ -111,6 +111,11 @@ class Logger implements LoggerInterface, SQLLogger
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param \BackBuilder\Logging\Appender\IAppender $appender
+     * @return \BackBuilder\Logging\Logger
+     */
     public function addAppender(IAppender $appender)
     {
         $this->_appenders[] = $appender;
@@ -203,8 +208,8 @@ class Logger implements LoggerInterface, SQLLogger
                 $content .= $error_trace;
             }
 
-            $this->_sendErrorMail($title,  '<h1>' . $httpCode . ': ' . $title . '<h1><h2>' . $message . '<h2>'.$error_trace);
-            
+            $this->_sendErrorMail($title, '<h1>' . $httpCode . ': ' . $title . '<h1><h2>' . $message . '</h2><p>Referer : ' . $this->_application->getRequest()->server->get('HTTP_REFERER') . '</p>' . $error_trace);
+
             $response = new Response($content, $httpCode);
             $response->send();
             die();
@@ -273,11 +278,21 @@ class Logger implements LoggerInterface, SQLLogger
         $this->log(self::DEBUG, $buffer . ' in ' . (microtime(true) - $this->_start) . 'ms');
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function emergency($message, array $context = array())
     {
         $this->log(self::ERROR, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function alert($message, array $context = array())
     {
         $this->log(self::WARNING, $message, $context);
@@ -288,52 +303,79 @@ class Logger implements LoggerInterface, SQLLogger
         $this->log(self::ERROR, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function error($message, array $context = array())
     {
         $this->log(self::ERROR, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function warning($message, array $context = array())
     {
         $this->log(self::WARNING, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function notice($message, array $context = array())
     {
         $this->log(self::NOTICE, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function info($message, array $context = array())
     {
         $this->log(self::INFO, $message, $context);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param type $message
+     * @param array $context
+     */
     function debug($message, array $context = array())
     {
         $this->log(self::DEBUG, $message, $context);
     }
 
-    private function _sendErrorMail($subject, $message) 
+    private function _sendErrorMail($subject, $message)
     {
         $application = $this->_application;
-        
+
         if (false === is_array($this->_mailto) || 0 === count($this->_mailto)) {
             return;
         }
-        
+
         try {
             $mailer = $application->getMailer();
             $mailerconfig = $application->getConfig()->getMailerConfig();
             $from = isset($mailerconfig['from']) ? $mailerconfig['from'] : 'no-reply@anonymous.com';
             $from_name = isset($mailerconfig['from_name']) ? $mailerconfig['from_name'] : null;
-            
-            if (is_array($from)) $from = reset($from);
-            if (is_array($from_name)) $from_name = reset($from_name);
+
+            if (is_array($from))
+                $from = reset($from);
+            if (is_array($from_name))
+                $from_name = reset($from_name);
 
             $mail = \Swift_Message::newInstance($subject, $message, 'text/html', 'utf-8');
             $mail->addFrom($from, $from_name);
-            
-            foreach($this->_mailto as $to) {
+
+            foreach ($this->_mailto as $to) {
                 $mail->addTo($to);
             }
 
@@ -342,4 +384,5 @@ class Logger implements LoggerInterface, SQLLogger
             return false;
         }
     }
+
 }
