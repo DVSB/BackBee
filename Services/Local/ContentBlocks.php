@@ -217,7 +217,11 @@ class ContentBlocks extends AbstractServiceLocal
      * @exposed(secured=true)
      */
     public function searchContent($params = array(), $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0)
-    {
+	{
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+
+	
         $catName = (isset($params['typeField'])) ? $params['typeField'] : $params['catName'];
         $result = array("numResults" => 0, "rows" => array());
         if (!$catName)
@@ -307,7 +311,7 @@ class ContentBlocks extends AbstractServiceLocal
         $result = $content->__toStdObject();
         return $result;
     }
-     
+
     /**
      * @exposed(secured=true)
      */

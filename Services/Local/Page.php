@@ -110,6 +110,7 @@ class Page extends AbstractServiceLocal
             $opage->url = $this->getApplication()->getRenderer()->getUri($opage->url);
             $opage->redirect = $this->getApplication()->getRenderer()->getUri($opage->redirect);
         }
+
         $defaultmeta = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
         $opage->metadata = (null === $opage->metadata) ? $defaultmeta->toArray() : array_merge($defaultmeta->toArray(), $page->getMetadata()->toArray());
 
@@ -179,7 +180,6 @@ class Page extends AbstractServiceLocal
         }
 
         $page->unserialize($object);
-        
         $this->getEntityManager()->flush();
 
         return array('url' => $page->getUrl(), 'state' => $page->getState());
@@ -417,6 +417,9 @@ class Page extends AbstractServiceLocal
      */
     public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid)
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+
         if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', strval($layout_uid))) {
             throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
         }
