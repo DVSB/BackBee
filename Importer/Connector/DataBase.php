@@ -1,12 +1,12 @@
 <?php
+
 namespace BackBuilder\Importer\Connector;
 
 use BackBuilder\BBApplication,
+    BackBuilder\Exception\BBException,
     BackBuilder\Importer\IImporterConnector;
-
 use Doctrine\ORM\EntityManager,
-    Doctrine\ORM\Configuration,
-    Doctrine\ORM\Query;
+    Doctrine\ORM\Configuration;
 
 /**
  * @category    BackBuilder
@@ -16,11 +16,14 @@ use Doctrine\ORM\EntityManager,
  */
 class DataBase implements IImporterConnector
 {
+
     private $_config;
+
     /**
      * @var Doctrine\ORM\EntityManager
      */
     private $_connector;
+
     /**
      * @var BackBuilder\BBApplication
      */
@@ -69,25 +72,26 @@ class DataBase implements IImporterConnector
 
         // Create EntityManager
         $em = EntityManager::create($this->_config, $config);
-        
+
         if (isset($this->_config['charset'])) {
             try {
-                $em->getConnection()->executeQuery('SET SESSION character_set_client = "'.addslashes($this->_config['charset']).'";');
-                $em->getConnection()->executeQuery('SET SESSION character_set_connection = "'.addslashes($this->_config['charset']).'";');
-                $em->getConnection()->executeQuery('SET SESSION character_set_results = "'.addslashes($this->_config['charset']).'";');
-            } catch(\Exception $e) {
+                $em->getConnection()->executeQuery('SET SESSION character_set_client = "' . addslashes($this->_config['charset']) . '";');
+                $em->getConnection()->executeQuery('SET SESSION character_set_connection = "' . addslashes($this->_config['charset']) . '";');
+                $em->getConnection()->executeQuery('SET SESSION character_set_results = "' . addslashes($this->_config['charset']) . '";');
+            } catch (\Exception $e) {
                 throw new BBException(sprintf('Invalid database character set `%s`', $this->_config['charset']), BBException::INVALID_ARGUMENT, $e);
             }
         }
-        
+
         if (isset($this->_config['collation'])) {
             try {
-                $em->getConnection()->executeQuery('SET SESSION collation_connection = "'.addslashes($this->_config['collation']).'";');
-            } catch(\Exception $e) {
+                $em->getConnection()->executeQuery('SET SESSION collation_connection = "' . addslashes($this->_config['collation']) . '";');
+            } catch (\Exception $e) {
                 throw new BBException(sprintf('Invalid database collation `%s`', $this->_config['collation']), BBException::INVALID_ARGUMENT, $e);
             }
         }
-        
+
         return $em;
     }
+
 }
