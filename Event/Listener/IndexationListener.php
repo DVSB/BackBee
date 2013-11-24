@@ -44,9 +44,12 @@ class IndexationListener
 
         if ($uow->isScheduledForInsert($content) || $uow->isScheduledForUpdate($content)) {
             if (null !== $site = $application->getSite()) {
-                $em->getRepository('BackBuilder\ClassContent\Indexation')
-                        ->updateIdxSiteContent($site, $content);
+                if (null !== $content->getMainNode()) {
+                    $em->getRepository('BackBuilder\ClassContent\Indexation')
+                            ->updateIdxSiteContent($site, $content);
+                }
             }
+
 
             if (is_array($content->getProperty()) && array_key_exists('indexation', $content->getProperty())) {
                 foreach ($content->getProperty('indexation') as $indexedElement) {
