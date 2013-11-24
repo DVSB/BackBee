@@ -279,7 +279,9 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         $this->clear();
         foreach ($newContentsetArr as $key => $content) {
-            $this->push($content);
+            if ($content instanceof AClassContent) {
+                $this->push($content);
+            }
         }
         return true;
     }
