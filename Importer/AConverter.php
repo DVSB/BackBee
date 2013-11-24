@@ -1,4 +1,24 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Importer;
 
 use BackBuilder\ClassContent\AClassContent,
@@ -6,12 +26,13 @@ use BackBuilder\ClassContent\AClassContent,
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\BddExport
- * @copyright   Lp system
+ * @package     BackBuilder\Importer
+ * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 abstract class AConverter implements IConverter
 {
+
     /**
      * @var Object
      */
@@ -27,7 +48,8 @@ abstract class AConverter implements IConverter
      * Class constructor
      * @param \BackBuilder\Importer\Importer $importer
      */
-    public function __construct(Importer $importer = null) {
+    public function __construct(Importer $importer = null)
+    {
         $this->_importer = $importer;
     }
 
@@ -53,11 +75,20 @@ abstract class AConverter implements IConverter
         return $this;
     }
 
-    public function beforeImport(Importer $importer, array $config) {}
+    public function beforeImport(Importer $importer, array $config)
+    {
+        
+    }
 
-    public function afterEntitiesFlush(Importer $importer, array $entities) {}
+    public function afterEntitiesFlush(Importer $importer, array $entities)
+    {
+        
+    }
 
-    public function onImportationFinish() {}
+    public function onImportationFinish()
+    {
+        
+    }
 
     /**
      * Update Status and revision value
@@ -79,7 +110,7 @@ abstract class AConverter implements IConverter
      */
     protected function _cleanText($str)
     {
-        return  trim(html_entity_decode(html_entity_decode(String::toUTF8($str), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8'));
+        return trim(html_entity_decode(html_entity_decode(String::toUTF8($str), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8'));
     }
 
     /**
@@ -126,4 +157,5 @@ abstract class AConverter implements IConverter
 
         return $this->_setElementText($element, '');
     }
+
 }

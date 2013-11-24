@@ -1,4 +1,24 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Importer;
 
 use BackBuilder\BBApplication,
@@ -7,21 +27,25 @@ use BackBuilder\BBApplication,
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\Import
- * @copyright   Lp system
+ * @package     BackBuilder\Importer
+ * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 abstract class AImportBundle
 {
+
     protected $_dir;
+
     /**
      * @var Config
      */
     protected $_config;
+
     /**
      * @var array
      */
     protected $_relations;
+
     /**
      * @var BBApplication
      */
@@ -33,7 +57,9 @@ abstract class AImportBundle
         $this->_config = new Config($this->_dir);
         $this->_relations = $this->_config->getSection('relations');
 
-        if (0 == count($this->_relations)) {return false;}
+        if (0 == count($this->_relations)) {
+            return false;
+        }
 
         $this->setPhpConf($this->_config->getSection('php_ini'));
         foreach ($this->_relations as $class => $config) {
@@ -55,8 +81,8 @@ abstract class AImportBundle
 
             $connector = new $connectorName($this->_application, $this->_config->getSection($config['config']));
             $importer = new Importer($this->_application, $connector, $this->_config);
-            $flushEvery = array_key_exists('flush_every', $config) ? (int)$config['flush_every'] : 1000;
-            $checkForExisting = array_key_exists('check_exists', $config) ? (boolean)$config['check_exists'] : true;
+            $flushEvery = array_key_exists('flush_every', $config) ? (int) $config['flush_every'] : 1000;
+            $checkForExisting = array_key_exists('check_exists', $config) ? (boolean) $config['check_exists'] : true;
             $importer->run($key, $config, $flushEvery, $checkForExisting);
         }
     }
@@ -79,4 +105,5 @@ abstract class AImportBundle
         ini_set('max_execution_time', $maxExecTime);
         ini_set('memory_limit', $memLimit);
     }
+
 }

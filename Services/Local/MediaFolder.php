@@ -1,23 +1,46 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\Services\Auth\Auth,
-    BackBuilder\Services\Local\AbstractServiceLocal,
+use BackBuilder\Services\Local\AbstractServiceLocal,
     BackBuilder\Util\String;
 use BackBuilder\Services\Exception\ServicesException;
 
 /**
  * Description of Media folder
  *
- * @copyright   Lp system
- * @author      m.baptista
+ * @category    BackBuilder
+ * @package     BackBuilder\Services
+ * @subpackage  Local
+ * @copyright   Lp digital system
+ * @author      m.baptista <michel.baptista@lp-digital.fr>
  */
-class MediaFolder extends AbstractServiceLocal {
+class MediaFolder extends AbstractServiceLocal
+{
 
     const MEDIAFOLDER_TITLE = "Médiathèque";
 
-    private function createRoot() {
+    private function createRoot()
+    {
         try {
             $mediaFolderRoot = $this->em->getRepository("\BackBuilder\NestedNode\MediaFolder")->getRoot();
             if (is_null($mediaFolderRoot)) {
@@ -38,7 +61,8 @@ class MediaFolder extends AbstractServiceLocal {
     /**
      * @exposed(secured=true)
      */
-    public function getBBBrowserTree($root_uid) {
+    public function getBBBrowserTree($root_uid)
+    {
         $em = $this->bbapp->getEntityManager();
 
         $tree = array();
@@ -90,7 +114,8 @@ class MediaFolder extends AbstractServiceLocal {
         return $tree;
     }
 
-    private function isContentTypeMediaFolder($mediaFolder) {
+    private function isContentTypeMediaFolder($mediaFolder)
+    {
         $pattern = "/ClassContent/i";
         $result = array();
         $match = preg_match($pattern, $mediaFolder->getTitle(), $result);
@@ -100,7 +125,8 @@ class MediaFolder extends AbstractServiceLocal {
     /**
      * @exposed(secured=true)
      */
-    public function insertBBBrowserTree($title, $root_uid) {
+    public function insertBBBrowserTree($title, $root_uid)
+    {
         $em = $this->bbapp->getEntityManager();
 
         $root = $em->find('\BackBuilder\NestedNode\MediaFolder', $root_uid);
@@ -133,7 +159,8 @@ class MediaFolder extends AbstractServiceLocal {
     /**
      * @exposed(secured=true)
      */
-    public function renameBBBrowserTree($title, $mediafolder_uid) {
+    public function renameBBBrowserTree($title, $mediafolder_uid)
+    {
         $em = $this->bbapp->getEntityManager();
 
         $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid);
@@ -154,7 +181,8 @@ class MediaFolder extends AbstractServiceLocal {
     /**
      * @exposed(secured=true)
      */
-    public function moveBBBrowserTree($mediafolder_uid, $root_uid, $next_uid) {
+    public function moveBBBrowserTree($mediafolder_uid, $root_uid, $next_uid)
+    {
         $em = $this->bbapp->getEntityManager();
         $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid);
         $root = $em->find('\BackBuilder\NestedNode\MediaFolder', $root_uid);
@@ -184,7 +212,8 @@ class MediaFolder extends AbstractServiceLocal {
     /**
      * @exposed(secured=true)
      */
-    public function deleteBBBrowserTree($mediafolder_uid) {
+    public function deleteBBBrowserTree($mediafolder_uid)
+    {
         $em = $this->bbapp->getEntityManager();
         $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid);
         if ($mediafolder) {
@@ -192,7 +221,7 @@ class MediaFolder extends AbstractServiceLocal {
         }
         return false;
     }
-    
+
     /**
      * @exposed(secured=true)
      */
@@ -200,20 +229,21 @@ class MediaFolder extends AbstractServiceLocal {
     {
         if (null === $folder = $this->em->find('\BackBuilder\NestedNode\MediaFolder', $uid))
             throw new ServicesException(sprintf('Unable to delete media folder for `%s` uid', $uid));
-        
+
         if (true === $folder->isRoot())
             throw new ServicesException('mediaselector.error.is_root');
-            
+
         if (0 < $this->em->getRepository("\BackBuilder\NestedNode\Media")->countMedias($folder))
             throw new ServicesException('mediaselector.error.is_not_empty');
-        
+
         return $this->em->getRepository('\BackBuilder\NestedNode\MediaFolder')->delete($folder);
     }
-    
+
     /**
      * @exposed(secured=true)
      */
-    public function getBBSelectorView($params = array(), $mediafolder_uid, $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0) {
+    public function getBBSelectorView($params = array(), $mediafolder_uid, $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0)
+    {
         $em = $this->bbapp->getEntityManager();
         $renderer = $this->bbapp->getRenderer();
 
