@@ -150,7 +150,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Metadatas associated to the page
      * @var \BackBuilder\MetaData\MetaDataBag
-     * @Column(type="array", name="metadata", nullable=true)
+     * @Column(type="object", name="metadata", nullable=true)
      */
     protected $_metadata;
 
