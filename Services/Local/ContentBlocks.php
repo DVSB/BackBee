@@ -1,5 +1,24 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Services\Local;
 
 use BackBuilder\Services\Local\AbstractServiceLocal,
@@ -12,9 +31,10 @@ use BackBuilder\Services\Local\AbstractServiceLocal,
  * RPC services for AClassContent management
  * 
  * @category    BackBuilder
- * @package     BackBuilder\Services\Local
+ * @package     BackBuilder\Services
+ * @subpackage  Local
  * @copyright   Lp digital system
- * @author      c.rouillon <rouillon.charles@gmail.com>
+ * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  */
 class ContentBlocks extends AbstractServiceLocal
 {
@@ -217,11 +237,11 @@ class ContentBlocks extends AbstractServiceLocal
      * @exposed(secured=true)
      */
     public function searchContent($params = array(), $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0)
-	{
+    {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
-	
+
         $catName = (isset($params['typeField'])) ? $params['typeField'] : $params['catName'];
         $result = array("numResults" => 0, "rows" => array());
         if (!$catName)

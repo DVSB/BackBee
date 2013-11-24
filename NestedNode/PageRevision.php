@@ -1,8 +1,25 @@
 <?php
 
-namespace BackBuilder\NestedNode;
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-use Doctrine\Common\Collections\ArrayCollection;
+namespace BackBuilder\NestedNode;
 
 /**
  * PageRevison object in BackBuilder 4
@@ -11,12 +28,13 @@ use Doctrine\Common\Collections\ArrayCollection;
  * 
  * @category    BackBuilder
  * @package     BackBuilder\NestedNode
- * @copyright   Lp system
- * @author      m.baptista
+ * @copyright   Lp digital system
+ * @author      m.baptista <michel.baptista@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRevisionRepository")
  * @Table(name="page_revision")
  */
-class PageRevision {
+class PageRevision
+{
     /**
      * Versions
      */
@@ -64,61 +82,73 @@ class PageRevision {
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
-    
+
     /**
      * Class constructor
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->_date = new \DateTime();
         $this->_version = PageRevision::VERSION_DRAFT;
     }
 
-    public function setUser(\BackBuilder\Security\User $user) {
+    public function setUser(\BackBuilder\Security\User $user)
+    {
         $this->_user = $user;
         return $this;
     }
 
-    public function setPage(\BackBuilder\NestedNode\Page $page) {
+    public function setPage(\BackBuilder\NestedNode\Page $page)
+    {
         $this->_page = $page;
         return $this;
     }
 
-    public function setContent($content) {
+    public function setContent($content)
+    {
         $this->_content = $content;
         return $this;
     }
-    
-    public function setDate($date) {
+
+    public function setDate($date)
+    {
         $this->_date = $date;
         return $this;
     }
 
-    public function setVersion($version) {
+    public function setVersion($version)
+    {
         $this->_version = $version;
         return $this;
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->_id;
     }
-    
-    public function getUser() {
+
+    public function getUser()
+    {
         return $this->_user;
     }
 
-    public function getPage() {
+    public function getPage()
+    {
         return $this->_page;
     }
 
-    public function getContent() {
+    public function getContent()
+    {
         return $this->_content;
     }
-    
-    public function getDate() {
+
+    public function getDate()
+    {
         return $this->_date;
     }
 
-    public function getVersion() {
+    public function getVersion()
+    {
         return $this->_version;
     }
 

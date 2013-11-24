@@ -1,14 +1,42 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\NestedNode\Repository;
 
-use BackBuilder\NestedNode\KeyWord;
-use BackBuilder\NestedNode\ANestedNode;
 use BackBuilder\NestedNode\Page;
 
-class KeyWordRepository extends NestedNodeRepository {
+/**
+ * Keyword repository
+ * 
+ * @category    BackBuilder
+ * @package     BackBuilder/NestedNode
+ * @subpackage  Repository
+ * @copyright   Lp digital system
+ * @author      n.bremont <nicolas.bremont@lp-digital.fr>
+ */
+class KeyWordRepository extends NestedNodeRepository
+{
 
-    public function getLikeKeyWords($cond) {
+    public function getLikeKeyWords($cond)
+    {
         try {
             $q = $this->createQueryBuilder('k')->andWhere('k._keyWord like :key')->orderBy('k._keyWord', 'ASC')->setMaxResults(10)
                     ->setParameters(array('key' => $cond . '%'))
@@ -21,7 +49,8 @@ class KeyWordRepository extends NestedNodeRepository {
         }
     }
 
-    public function getRoot() {
+    public function getRoot()
+    {
         try {
             $q = $this->createQueryBuilder('k')
                     ->andWhere('k._parent is NULL')
@@ -34,7 +63,8 @@ class KeyWordRepository extends NestedNodeRepository {
         }
     }
 
-    public function getKeywordTreeAsArray($node = null) {
+    public function getKeywordTreeAsArray($node = null)
+    {
         $node = (is_null($node)) ? $this->getRoot() : $node;
         $nodeInfos = new \stdClass();
         $nodeInfos->uid = $node->getUid();
@@ -50,7 +80,8 @@ class KeyWordRepository extends NestedNodeRepository {
         return $nodeInfos;
     }
 
-    public function getContentsIdByKeyWords($keywords, $limitToOnline = true) {
+    public function getContentsIdByKeyWords($keywords, $limitToOnline = true)
+    {
         try {
             if (isset($keywords) && !empty($keywords)) {
 

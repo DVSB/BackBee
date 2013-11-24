@@ -1,4 +1,24 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Theme;
 
 use BackBuilder\Theme\ThemeEntity,
@@ -8,10 +28,11 @@ use BackBuilder\Theme\ThemeEntity,
  * @category    BackBuilder
  * @package     BackBuilder\Theme
  * @copyright   Lp digital system
- * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
+ * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class PersonalThemesManager extends AThemesManager
 {
+
     /**
      * create personal theme folder architecture.
      *
@@ -20,12 +41,12 @@ class PersonalThemesManager extends AThemesManager
      */
     public function create(ThemeEntity $theme)
     {
-        if (!file_exists($this->_path.$theme->getFolder())) {
-            mkdir($this->_path.$theme->getFolder(), 0755, true);
+        if (!file_exists($this->_path . $theme->getFolder())) {
+            mkdir($this->_path . $theme->getFolder(), 0755, true);
             $this->updateConfig($theme);
             $architecture = $this->_cleanArchitecture($theme->getArchitecture());
             foreach ($architecture as $folder) {
-                mkdir($this->_path.$theme->getFolder().DIRECTORY_SEPARATOR.$folder);
+                mkdir($this->_path . $theme->getFolder() . DIRECTORY_SEPARATOR . $folder);
             }
         } else {
             throw new ThemeException('Theme already exist', ThemeException::THEME_ALREADY_EXISTANT);
@@ -45,11 +66,10 @@ class PersonalThemesManager extends AThemesManager
             $clean_architecture['img_dir'] = $architecture['img_dir'];
         }
         if (array_key_exists('less_dir', $architecture)) {
-             $clean_architecture['less_dir'] = $architecture['less_dir'];
+            $clean_architecture['less_dir'] = $architecture['less_dir'];
         }
         return $clean_architecture;
     }
-
 
     /**
      * Generate a theme object
@@ -68,4 +88,5 @@ class PersonalThemesManager extends AThemesManager
             throw new ThemeException('Theme config is incompleted', ThemeException::THEME_CONFIG_INCORRECT);
         }
     }
+
 }
