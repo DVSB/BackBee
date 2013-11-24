@@ -54,7 +54,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder,
 class BBApplication
 {
 
-    const VERSION = '0.8';
+    const VERSION = '0.8.0';
 
     private $_container;
     private $_context;
