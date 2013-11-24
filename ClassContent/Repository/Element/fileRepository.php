@@ -1,4 +1,5 @@
 <?php
+
 namespace BackBuilder\ClassContent\Repository\Element;
 
 use BackBuilder\ClassContent\Repository\ClassContentRepository,
@@ -6,6 +7,7 @@ use BackBuilder\ClassContent\Repository\ClassContentRepository,
     BackBuilder\ClassContent\AClassContent,
     BackBuilder\ClassContent\Element\file as elementFile,
     BackBuilder\Util\File,
+    BackBuilder\Util\Media,
     BackBuilder\BBApplication;
 
 /**
@@ -13,10 +15,11 @@ use BackBuilder\ClassContent\Repository\ClassContentRepository,
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent\Repository\Element
  * @copyright   Lp digital system
- * @author      c.rouillon
+ * @author      c.rouillon <rouillon.charles@gmail.com>
  */
 class fileRepository extends ClassContentRepository
 {
+
     /**
      * The temporary directory
      * @var string
@@ -36,30 +39,25 @@ class fileRepository extends ClassContentRepository
     protected $_mediadir;
 
     /**
-     * Move an uploaded file to either media library or storage directory
+     * Move an temporary uploaded file to either media library or storage directory
      * @param \BackBuilder\ClassContent\Element\file $file
      * @return boolean
      */
     public function commitFile(elementFile $file)
     {
-        //if (null === $file->getDraft()) return false;
-
         $filename = $file->path;
-        File::resolveFilepath($filename, NULL, array('base_dir' => $this->_temporarydir));
+        File::resolveFilepath($filename, null, array('base_dir' => $this->_temporarydir));
 
-        if (file_exists($filename) && false === is_dir($filename)) {
-            $extension = pathinfo($filename, PATHINFO_EXTENSION);
-            $currentname = \BackBuilder\Util\Media::getPathFromContent($file);
-            File::resolveFilepath($currentname, NULL, array('base_dir' => ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir));
+        $currentname = Media::getPathFromContent($file);
+        File::resolveFilepath($currentname, null, array('base_dir' => ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir));
 
-            if (FALSE === is_dir(dirname($currentname)))
-                mkdir(dirname($currentname), 0755, TRUE);
-
-            copy($filename, $currentname);
-            unlink($filename);
-
-            $file->path = \BackBuilder\Util\Media::getPathFromContent($file);
+        try {
+            File::move($filename, $currentname);
+        } catch (\BackBuilder\Exception\BBException $e) {
+            return false;
         }
+
+        $file->path = Media::getPathFromContent($file);
 
         return true;
     }
@@ -70,7 +68,7 @@ class fileRepository extends ClassContentRepository
      * @param string $newfilename
      * @param string $originalname
      * @return boolean|string
-     * @throws ClassContentException Occures on invalid content type provided
+     * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
     public function updateFile(AClassContent $file, $newfilename, $originalname = null)
     {
@@ -78,27 +76,27 @@ class fileRepository extends ClassContentRepository
             throw new ClassContentException('Invalid content type');
         }
 
-        if (NULL === $originalname) $originalname = $file->originalname;
-
-        File::resolveFilepath($newfilename, null, array('base_dir' => $this->_temporarydir));
-        if (false === file_exists($newfilename)) return false;
-
+        if (null === $originalname) {
+            $originalname = $file->originalname;
+        }
+        
         $base_dir = $this->_temporarydir;
         $file->originalname = $originalname;
         $file->path = \BackBuilder\Util\Media::getPathFromContent($file);
-        
+
         if (null === $file->getDraft()) {
             $base_dir = ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir;
         }
 
         $moveto = $file->path;
         File::resolveFilepath($moveto, null, array('base_dir' => $base_dir));
-
-        if (FALSE === is_dir(dirname($moveto)))
-            mkdir(dirname($moveto), 0755, TRUE);
-
-        copy($newfilename, $moveto);
-        unlink($newfilename);
+        File::resolveFilepath($newfilename, null, array('base_dir' => $this->_temporarydir));
+        
+        try {
+            File::move($newfilename, $moveto);
+        } catch (\BackBuilder\Exception\BBException $e) {
+            return false;
+        }
 
         $stat = stat($moveto);
         $file->setParam('stat', $stat, 'array');
@@ -114,13 +112,14 @@ class fileRepository extends ClassContentRepository
     public function isInMediaLibrary(elementFile $file)
     {
         $parent_ids = $this->getParentContentUid($file);
-        if (0 === count($parent_ids)) return false;
+        if (0 === count($parent_ids))
+            return false;
 
         $q = $this->_em->getConnection()
-                       ->createQueryBuilder()
-                       ->select('m.id')
-                       ->from('media', 'm')
-                       ->andWhere('m.content_uid IN ("'.implode('","', $parent_ids).'")');
+                ->createQueryBuilder()
+                ->select('m.id')
+                ->from('media', 'm')
+                ->andWhere('m.content_uid IN ("' . implode('","', $parent_ids) . '")');
 
         $medias = $q->execute()->fetchAll(\PDO::FETCH_COLUMN);
 
@@ -133,7 +132,7 @@ class fileRepository extends ClassContentRepository
      * @param stdClass $value
      * @param \BackBuilder\ClassContent\AClassContent $parent
      * @return \BackBuilder\ClassContent\Element\file
-     * @throws ClassContentException Occures on invalid content type provided
+     * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
     {
@@ -162,8 +161,8 @@ class fileRepository extends ClassContentRepository
     {
         if (null !== $application) {
             $this->setTemporaryDir($application->getTemporaryDir())
-                 ->setStorageDir($application->getStorageDir())
-                 ->setMediaDir($application->getMediaDir());
+                    ->setStorageDir($application->getStorageDir())
+                    ->setMediaDir($application->getMediaDir());
         }
 
         return $this;
@@ -201,4 +200,5 @@ class fileRepository extends ClassContentRepository
         $this->_mediadir = $media_dir;
         return $this;
     }
+
 }

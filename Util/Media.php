@@ -2,6 +2,9 @@
 
 namespace BackBuilder\Util;
 
+use BackBuilder\ClassContent\Element\file as elementFile,
+    BackBuilder\Exception\InvalidArgumentException;
+
 /**
  * Set of utility methods to deal with media files
  * 
@@ -20,18 +23,22 @@ class Media
      * @return string
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the provided element file is empty
      */
-    public static function getPathFromContent(\BackBuilder\ClassContent\Element\file $content, $folder_size = 3)
+    public static function getPathFromContent(elementFile $content, $folder_size = 3)
     {
-        if (null === $content->getUid() || null === $content->originalname) {
-            throw new \BackBuilder\Exception\InvalidArgumentException('Ènable to compute path, the provided element file is not yet initialized');
+        if (null === $content->getUid() 
+                || null === $content->originalname) {
+            throw new InvalidArgumentException('Enable to compute path, the provided element file is not yet initialized');
         }
 
         $folder = '';
-        $filename = (null !== $content->getDraft()) ? $content->getDraft()->getUid() : $content->getUid();
+        $filename = $content->getUid();
+        if (null !== $draft = $content->getDraft()) {
+            $filename = $draft->getUid();
+        }
 
-        if (0 < $folder_size && strlen($content->getUid()) > $folder_size) {
-            $folder = substr($content->getUid(), 0, $folder_size) . '/';
-            $filename = substr($content->getUid(), $folder_size);
+        if (0 < $folder_size && strlen($filename) > $folder_size) {
+            $folder = substr($filename, 0, $folder_size) . '/';
+            $filename = substr($filename, $folder_size);
         }
 
         $extension = File::getExtension($content->originalname, true);
