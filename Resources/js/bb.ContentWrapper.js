@@ -706,6 +706,14 @@ bb.ContentWrapper = (function($,global){
                             contentManager.handleNewContent(itemRender);//show media path
                             $(document).trigger("content:newContentAdded",[self,$(itemRender),null]);
                         //if(cp == nbItem) bb.Utils.scrollToContent($(itemRender)); //scroll to last
+                        
+                            var scripts = $(item.render,"script").slice(1);
+                            if (0 < $(item.render,"script").slice(1).length) {
+                                $.each(scripts, function(i, script) {
+                                    eval($(script).get(0).innerHTML);                                
+                                });
+                            }
+
                         });
                         self.updateData();
                         self.hideEmptyZone();

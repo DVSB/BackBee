@@ -1,24 +1,45 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Security\Authorization\Voter;
 
 use BackBuilder\BBApplication;
-
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface,
     Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Security
- * @copyright   Lp system
+ * @subpackage  Authorization\Voter
+ * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class AccessVoter implements VoterInterface
 {
+
     private $_application;
     private $_adaptator;
     private $_prefix;
     private $_class;
-    
+
     /**
      * Constructor.
      *
@@ -68,8 +89,8 @@ class AccessVoter implements VoterInterface
                 continue;
             }
             if (
-                array_key_exists($token->getUsername(), $this->_sudoers) &&
-                $token->getUser()->getId() === $this->_sudoers[$token->getUsername()]
+                    array_key_exists($token->getUsername(), $this->_sudoers) &&
+                    $token->getUser()->getId() === $this->_sudoers[$token->getUsername()]
             ) {
                 $result = VoterInterface::ACCESS_GRANTED;
             }
@@ -82,7 +103,6 @@ class AccessVoter implements VoterInterface
     private function voteForAccess(TokenInterface $token, array $attributes)
     {
         $result = VoterInterface::ACCESS_ABSTAIN;
-        
     }
 
     private function voteForSomething(TokenInterface $token, $object, array $attributes)
@@ -98,15 +118,15 @@ class AccessVoter implements VoterInterface
     {
         return $this->_adaptator->extractRoles($token);
     }
-    
+
     private function getAccessRole()
     {
         $classPath = explode('\\', $this->_class);
         $config = $this->_application->getConfig()->getSecurityConfig();
-        
+
         foreach ($array as $value) {
             
         }
-        
     }
+
 }
