@@ -27,6 +27,7 @@ namespace BackBuilder\Services\Rpc\Annotation;
  * @subpackage  Rpc\Annotation
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
+ * @Annotation
  */
 class Exposed
 {
