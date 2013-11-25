@@ -626,6 +626,18 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Sets the date of the page
+     * @codeCoverageIgnore
+     * @param \DateTime $date
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setDate(\DateTime $date)
+    {
+        $this->_date = $date;
+        return $this;
+    }
+
+    /**
      * Sets the layout for the page.
      * Adds as much ContentSet to the page main ContentSet than defined zones in layout
      * @param \BackBuilder\Site\Layout $layout
