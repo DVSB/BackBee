@@ -156,11 +156,11 @@ class Importer
             //if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
             //  $this->_application->getEntityManager()->persist($entity);
             //}
-            if (null !== $entity) {
+            if (null !== $entity && false === $this->_application->getEntityManager()->contains($entity)) {
                 $this->_application->getEntityManager()->persist($entity);
             }
         }
-        
+
         $this->_application->getEntityManager()->flush();
         $this->getConverter()->afterEntitiesFlush($this, $entities);
         $this->flushMemory();
