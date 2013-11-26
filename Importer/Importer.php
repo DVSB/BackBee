@@ -153,11 +153,14 @@ class Importer
 
         \BackBuilder\Util\Buffer::dump('Saving...' . "\n");$i= 0;
         foreach ($entities as $entity) {
-//            if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
-//                $this->_application->getEntityManager()->persist($entity);
-//            }
-            $this->_application->getEntityManager()->persist($entity);
+            //if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
+            //  $this->_application->getEntityManager()->persist($entity);
+            //}
+            if (null !== $entity) {
+                $this->_application->getEntityManager()->persist($entity);
+            }
         }
+        
         $this->_application->getEntityManager()->flush();
         $this->getConverter()->afterEntitiesFlush($this, $entities);
         $this->flushMemory();
