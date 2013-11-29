@@ -56,10 +56,10 @@ abstract class AClassContentHelper extends AHelper
      * @param object $object
      * @return AClassContentHelper
      */
-    public function __invoke($instanceOf, $object)
-    {
-        return $this->invoke($instanceOf, $object);
-    }
+    // public function __invoke($instanceOf, $object)
+    // {
+    //     return $this->invoke($instanceOf, $object);
+    // }
 
     protected function getObjectParameters($key)
     {
