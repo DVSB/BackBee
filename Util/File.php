@@ -1,7 +1,37 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Util;
 
+use BackBuilder\Exception\BBException,
+    BackBuilder\Exception\InvalidArgumentException;
+
+/**
+ * Set of utility methods to deal with files
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\Util
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ */
 class File
 {
 
@@ -96,13 +126,97 @@ class File
         self::resolveFilepath($filename, $key, $options);
     }
 
+    /**
+     * Returns the extension file base on its name
+     * @param string $filename
+     * @param Boolean $withDot
+     * @return string
+     */
     public static function getExtension($filename, $withDot = true)
     {
         $filename = basename($filename);
-        if (false === strpos($filename, '.'))
+        if (false === strrpos($filename, '.')) {
             return '';
+        }
 
         return substr($filename, strrpos($filename, '.') - strlen($filename) + ($withDot ? 0 : 1));
+    }
+
+    /**
+     * Makes directory
+     * @param string $path The directory path
+     * @return boolean Returns TRUE on success
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if directory already 
+     *                                                         exists or cannot be made
+     */
+    public static function mkdir($path)
+    {
+        if (true === is_dir($path)) {
+            throw new InvalidArgumentException(sprintf('Directory `%s` already exists.', $path));
+        }
+
+        if (false === @mkdir($path, 0755, true)) {
+            throw new InvalidArgumentException(sprintf('Enable to make directory `%s`.', $path));
+        }
+
+        return true;
+    }
+
+    /**
+     * Copies file
+     * @param string $from The source file path
+     * @param string $to The target file path
+     * @return boolean Returns TRUE on success
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if either $from or $to is invalid
+     * @throws \BackBuilder\Exception\BBException Occurs if the copy can not be done
+     */
+    public static function copy($from, $to)
+    {
+        if (false === $frompath = realpath($from)) {
+            throw new InvalidArgumentException(sprintf('The file `%s` cannot be accessed', $from));
+        }
+
+        if (false === is_readable($frompath) || true === is_dir($frompath)) {
+            throw new InvalidArgumentException(sprintf('The file `%s` doesn\'t exist or cannot be read', $from));
+        }
+
+        $topath = self::normalizePath($to);
+        if (false === is_writable(dirname($topath))) {
+            self::mkdir(dirname($topath));
+        }
+
+        if (false === @copy($frompath, $topath)) {
+            throw new BBException(sprintf('Enable to copy file `%s` to `%s`.', $from, $to));
+        }
+
+        return true;
+    }
+
+    /**
+     * Moves file
+     * @param string $from The source file path
+     * @param string $to The target file path
+     * @return boolean Returns TRUE on success
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if either $from or $to is invalid
+     * @throws \BackBuilder\Exception\BBException Occurs if $from can not be deleted
+     */
+    public static function move($from, $to)
+    {
+        if (false === $frompath = realpath($from)) {
+            throw new InvalidArgumentException(sprintf('The file `%s` cannot be accessed', $from));
+        }
+
+        if (false === is_writable($frompath) || true === is_dir($frompath)) {
+            throw new InvalidArgumentException(sprintf('The file `%s` doesn\'t exist or cannot be write', $from));
+        }
+
+        self::copy($from, $to);
+
+        if (false === @unlink($frompath)) {
+            throw new BBException(sprintf('Enable to delete file `%s`.', $from));
+        }
+
+        return true;
     }
 
 }

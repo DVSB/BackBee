@@ -1,9 +1,27 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Event\Listener;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Event\Event;
-
+use BackBuilder\BBApplication;
 use Doctrine\ORM\Events;
 
 /**
@@ -32,27 +50,31 @@ use Doctrine\ORM\Events;
  *              to entities have been removed from the unit of work.
  *
  * @category    BackBuilder
- * @package     BackBuilder\Event\Listener
- * @copyright   Lp system
- * @author      c.rouillon
+ * @package     BackBuilder\Event
+ * @subpackage  Listener
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @see         http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/events.html
  */
-class DoctrineListener {
+class DoctrineListener
+{
+
     /**
      * Current BackBuilder application
      * @var BackBuilder\BBApplication
      */
     private $_application;
-    
+
     /**
      * Class constructor
      * @access public
      * @param BBApplication $application The current instance of BB application
      */
-    public function __construct(BBApplication $application = null) {
+    public function __construct(BBApplication $application = null)
+    {
         $this->_application = $application;
     }
-    
+
     /**
      * Trigger a BackBuilder\Event\Event depending on the entity and event name
      * @access protected
@@ -60,33 +82,43 @@ class DoctrineListener {
      * @param Object    $entity    The entity instance
      * @param EventArgs $eventArgs The doctrine event arguments
      */
-    protected function _triggerEvent($eventName, $entity, $eventArgs) {
-        if (NULL === $this->_application) return;
-        
+    protected function _triggerEvent($eventName, $entity, $eventArgs)
+    {
+        if (NULL === $this->_application)
+            return;
+
         $dispatcher = $this->_application->getEventDispatcher();
-        if (NULL != $dispatcher) $dispatcher->triggerEvent($eventName, $entity, $eventArgs);
+        if (NULL != $dispatcher)
+            $dispatcher->triggerEvent($eventName, $entity, $eventArgs);
     }
-    
+
     /**
      * Occur after the mapping metadata for a class has been loaded from a mapping source
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function loadClassMetadata($eventArgs) { }
-    
+    public function loadClassMetadata($eventArgs)
+    {
+        
+    }
+
     /**
      * Occur when the EntityManager#clear() operation is invoked
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function onClear($eventArgs) { }
-    
+    public function onClear($eventArgs)
+    {
+        
+    }
+
     /**
      * Occur on preFlush events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function preFlush($eventArgs) {
+    public function preFlush($eventArgs)
+    {
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
 
@@ -102,13 +134,14 @@ class DoctrineListener {
             $this->_triggerEvent(Events::preFlush, $entity, $eventArgs);
         }
     }
-    
+
     /**
      * Occur on onFlush events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function onFlush($eventArgs) {
+    public function onFlush($eventArgs)
+    {
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
 
@@ -124,13 +157,14 @@ class DoctrineListener {
             $this->_triggerEvent(Events::onFlush, $entity, $eventArgs);
         }
     }
-    
+
     /**
      * Occur on postFlush events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postFlush($eventArgs) {
+    public function postFlush($eventArgs)
+    {
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
 
@@ -146,78 +180,86 @@ class DoctrineListener {
             $this->_triggerEvent(Events::postFlush, $entity, $eventArgs);
         }
     }
-    
+
     /**
      * Occur on postLoad events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postLoad($eventArgs) {
+    public function postLoad($eventArgs)
+    {
         if (method_exists($eventArgs, 'getEntity'))
             $this->_triggerEvent(Events::postLoad, $eventArgs->getEntity(), $eventArgs);
-        
+
         if (is_a($eventArgs->getEntity(), 'BackBuilder\ClassContent\AClassContent')) {
             $eventArgs->getEntity()->postLoad();
         }
     }
-    
+
     /**
      * Occur on postPersist events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postPersist($eventArgs) {
+    public function postPersist($eventArgs)
+    {
         if (method_exists($eventArgs, 'getEntity'))
             $this->_triggerEvent(Events::postPersist, $eventArgs->getEntity(), $eventArgs);
     }
-    
+
     /**
      * Occur on preRemove events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function preRemove($eventArgs) {
+    public function preRemove($eventArgs)
+    {
         if (method_exists($eventArgs, 'getEntity'))
             $this->_triggerEvent(Events::preRemove, $eventArgs->getEntity(), $eventArgs);
     }
-    
+
     /**
      * Occur on postRemove events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postRemove($eventArgs) {
+    public function postRemove($eventArgs)
+    {
         if (method_exists($eventArgs, 'getEntity'))
             $this->_triggerEvent(Events::postRemove, $eventArgs->getEntity(), $eventArgs);
     }
-    
+
     /**
      * Occur on postUpdate events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postUpdate($eventArgs) {
+    public function postUpdate($eventArgs)
+    {
         if (method_exists($eventArgs, 'getEntity'))
             $this->_triggerEvent(Events::postUpdate, $eventArgs->getEntity(), $eventArgs);
     }
-    
+
     /**
      * Occur on prePersist events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function prePersist($eventArgs) {
+    public function prePersist($eventArgs)
+    {
         if (method_exists($eventArgs, 'getEntity'))
             $this->_triggerEvent(Events::prePersist, $eventArgs->getEntity(), $eventArgs);
     }
-    
+
     /**
      * Occur on preUpdate events
      * @access public
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function preUpdate($eventArgs) {
+    public function preUpdate($eventArgs)
+    {
         if (method_exists($eventArgs, 'getEntity'))
             $this->_triggerEvent(Events::preUpdate, $eventArgs->getEntity(), $eventArgs);
     }
+
 }

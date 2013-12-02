@@ -1,4 +1,24 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Renderer;
 
 use BackBuilder\BBApplication,
@@ -13,10 +33,12 @@ use BackBuilder\BBApplication,
  *
  * @category    BackBuilder
  * @package     BackBuilder\Renderer
- * @copyright   Lp system
- * @author      c.rouillon
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class ARenderer implements IRenderer {
+abstract class ARenderer implements IRenderer
+{
+
     /**
      * Current BackBuilder application
      * @var BackBuilder\BBApplication
@@ -52,7 +74,6 @@ abstract class ARenderer implements IRenderer {
      * @var Boolean
      */
     protected $_ignoreIfRenderModeNotAvailable;
-
     protected $_node;
 
     /**
@@ -60,7 +81,6 @@ abstract class ARenderer implements IRenderer {
      * @var array
      */
     protected $_params = array();
-
     protected $_parentuid;
 
     /**
@@ -80,7 +100,6 @@ abstract class ARenderer implements IRenderer {
      * @var array
      */
     protected $_vars = array();
-
     private $__currentelement;
     private $__object = null;
     private $__vars = array();
@@ -88,9 +107,10 @@ abstract class ARenderer implements IRenderer {
     private $__overloaded = 0;
     protected $__render;
 
-    public function __call($method, $argv) {
+    public function __call($method, $argv)
+    {
         if (!array_key_exists($method, $this->_helpers)) {
-            $classhelper = '\BackBuilder\Renderer\Helper\\'.$method;
+            $classhelper = '\BackBuilder\Renderer\Helper\\' . $method;
             if (class_exists($classhelper)) {
                 $this->_helpers[$method] = new $classhelper($this, $argv);
             }
@@ -103,21 +123,24 @@ abstract class ARenderer implements IRenderer {
         return $this->_helpers[$method];
     }
 
-    public function __($string) {
+    public function __($string)
+    {
         return $this->translate($string);
     }
 
-    public function __clone() {
+    public function __clone()
+    {
         $this->_cache()
-             ->reset();
+                ->reset();
 
-        foreach($this->_helpers as $method => $helper) {
-            $this->_helpers[$method] = clone  $this->_helpers[$method];
+        foreach ($this->_helpers as $method => $helper) {
+            $this->_helpers[$method] = clone $this->_helpers[$method];
             $this->_helpers[$method]->setRenderer($this);
         }
     }
 
-    public function overload($new_dir) {
+    public function overload($new_dir)
+    {
         array_unshift($this->_scriptdir, $new_dir);
         $this->__overloaded = $this->__overloaded + 1;
     }
@@ -129,7 +152,8 @@ abstract class ARenderer implements IRenderer {
      * @param string $new_dir location of the new directory
      * @param integer $position position in the array
      */
-    public function addHelperDir($new_dir, $position = 0) {
+    public function addHelperDir($new_dir, $position = 0)
+    {
         $this->getApplication()->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $new_dir);
         return $this;
         //$this->insertInArrayOnPostion($this->_helpers, $new_dir, $position);
@@ -142,7 +166,8 @@ abstract class ARenderer implements IRenderer {
      * @param string $new_dir location of the new directory
      * @param integer $position position in the array
      */
-    public function addLayoutDir($new_dir, $position = 0) {
+    public function addLayoutDir($new_dir, $position = 0)
+    {
         $this->insertInArrayOnPostion($this->_layoutdir, $new_dir, $position);
         return $this;
     }
@@ -154,7 +179,8 @@ abstract class ARenderer implements IRenderer {
      * @param strimg $new_dir location of the new directory
      * @param integer $position position in the array
      */
-    public function addScriptDir($new_dir, $position = 0) {
+    public function addScriptDir($new_dir, $position = 0)
+    {
         $this->insertInArrayOnPostion($this->_scriptdir, $new_dir, $position);
         return $this;
     }
@@ -166,7 +192,8 @@ abstract class ARenderer implements IRenderer {
      * @param string $new_value location of the new directory
      * @param integer $position position in the array
      */
-    protected function insertInArrayOnPostion(array &$array, $new_value, $position) {
+    protected function insertInArrayOnPostion(array &$array, $new_value, $position)
+    {
         if (in_array($new_value, $array)) {
             foreach ($array as $key => $value) {
                 if ($value == $new_value) {
@@ -184,7 +211,7 @@ abstract class ARenderer implements IRenderer {
         } elseif ($position >= count($array)) {
             $array[count($array) - 1] = $new_value;
         } else {
-            for ($i = (count($array) -1); $i >= $position; $i--) {
+            for ($i = (count($array) - 1); $i >= $position; $i--) {
                 $array[$i + 1] = $array[$i];
             }
             $array[$position] = $new_value;
@@ -192,7 +219,8 @@ abstract class ARenderer implements IRenderer {
         ksort($array);
     }
 
-    public function release() {
+    public function release()
+    {
         for ($i = 0; $i < $this->__overloaded; $i++) {
             unset($this->_scriptdir[$i]);
         }
@@ -205,7 +233,8 @@ abstract class ARenderer implements IRenderer {
      * @param BBAplication $application The current BBapplication
      * @param array $config Optional configurations overriding
      */
-    public function __construct(BBApplication $application = NULL, $config = NULL) {
+    public function __construct(BBApplication $application = NULL, $config = NULL)
+    {
         $repdir = '';
 
         if (NULL !== $application) {
@@ -220,7 +249,7 @@ abstract class ARenderer implements IRenderer {
 
         if (is_array($config)) {
             foreach ($config as $dir => $path) {
-                $dir = '_'.strtolower($dir);
+                $dir = '_' . strtolower($dir);
                 if (FALSE !== strpos($dir, 'dir') && property_exists($this, $dir)) {
                     $path = (array) $path;
                     array_walk($path, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $repdir));
@@ -241,7 +270,8 @@ abstract class ARenderer implements IRenderer {
      * @param string $var the name of the variable
      * @return mixed the value
      */
-    public function __get($var) {
+    public function __get($var)
+    {
         return isset($this->_vars[$var]) ? $this->_vars[$var] : NULL;
     }
 
@@ -251,7 +281,8 @@ abstract class ARenderer implements IRenderer {
      * @param string $var the name of the variable
      * @return boolean
      */
-    public function __isset($var) {
+    public function __isset($var)
+    {
         return isset($this->_vars[$var]);
     }
 
@@ -262,7 +293,8 @@ abstract class ARenderer implements IRenderer {
      * @param mixed $value the value of the variable
      * @return ARenderer the current renderer
      */
-    public function __set($var, $value = NULL) {
+    public function __set($var, $value = NULL)
+    {
         $this->_vars[$var] = $value;
         return $this;
     }
@@ -271,7 +303,8 @@ abstract class ARenderer implements IRenderer {
      * Magic method to unset an assign var
      * @param string $var the name of the variable
      */
-    public function __unset($var) {
+    public function __unset($var)
+    {
         if (isset($this->_vars[$var]))
             unset($this->_vars[$var]);
     }
@@ -282,7 +315,8 @@ abstract class ARenderer implements IRenderer {
      * @return string the file path
      * @throws RendererException
      */
-    protected function _getLayoutFile(Layout $layout) {
+    protected function _getLayoutFile(Layout $layout)
+    {
         $layoutfile = $layout->getPath();
         if (NULL === $layoutfile) {
             $layoutfile = String::toPath($layout->getLabel(), array('extension' => $this->_includeExtensions[0]));
@@ -292,14 +326,18 @@ abstract class ARenderer implements IRenderer {
         return $layoutfile;
     }
 
-    protected function _triggerEvent($name = 'render', $object = NULL, $render = null) {
-        if (NULL === $this->_application) return;
+    protected function _triggerEvent($name = 'render', $object = NULL, $render = null)
+    {
+        if (NULL === $this->_application)
+            return;
 
         $dispatcher = $this->_application->getEventDispatcher();
-        if (NULL != $dispatcher) $dispatcher->triggerEvent($name, NULL != $object ? $object : $this->getObject(), NULL === $render ? $this : array($this, $render));
+        if (NULL != $dispatcher)
+            $dispatcher->triggerEvent($name, NULL != $object ? $object : $this->getObject(), NULL === $render ? $this : array($this, $render));
     }
 
-    protected function _cache() {
+    protected function _cache()
+    {
         if (NULL !== $this->_object) {
             $this->_parentuid = $this->_object->getUid();
             $this->__object = $this->_application->getEntityManager()->find(get_class($this->_object), $this->_object->getUid());
@@ -311,10 +349,11 @@ abstract class ARenderer implements IRenderer {
         return $this;
     }
 
-    protected function _restore() {
+    protected function _restore()
+    {
         $this->_object = $this->__object;
-		$this->_vars = array_pop($this->__vars);
-		$this->_params = array_pop($this->__params);
+        $this->_vars = array_pop($this->__vars);
+        $this->_params = array_pop($this->__params);
 
         return $this;
     }
@@ -323,7 +362,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return \BackBuilder\Renderer\ARenderer
      */
-    private function _resetVars() {
+    private function _resetVars()
+    {
         $this->_vars = array();
         return $this;
     }
@@ -332,7 +372,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return \BackBuilder\Renderer\ARenderer
      */
-    private function _resetParams() {
+    private function _resetParams()
+    {
         $this->_params = array();
         return $this;
     }
@@ -343,14 +384,15 @@ abstract class ARenderer implements IRenderer {
      * @param mixed $value The variable value to set
      * @return ARenderer The current renderer
      */
-    public function assign($var, $value = NULL) {
+    public function assign($var, $value = NULL)
+    {
         if (is_string($var)) {
             $this->_vars[$var] = $value;
             return $this;
         }
 
         if (is_array($var)) {
-            foreach($var as $key => $value) {
+            foreach ($var as $key => $value) {
                 $this->_vars[$key] = $value;
             }
         }
@@ -362,7 +404,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return \BackBuilder\BBApplication
      */
-    public function getApplication() {
+    public function getApplication()
+    {
         return $this->_application;
     }
 
@@ -371,7 +414,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return array Array of assigned variables
      */
-    public function getAssignedVars() {
+    public function getAssignedVars()
+    {
         return $this->_vars;
     }
 
@@ -379,7 +423,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return type
      */
-    public function getClassContainer() {
+    public function getClassContainer()
+    {
         return $this->__object;
     }
 
@@ -387,17 +432,19 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return type
      */
-    public function getCurrentElement() {
+    public function getCurrentElement()
+    {
         return $this->__currentelement;
     }
 
-    public function getUri($pathinfo = null) {
+    public function getUri($pathinfo = null)
+    {
         if (NULL !== $pathinfo && preg_match('/^http[s]?:\/\//', $pathinfo)) {
             return $pathinfo;
         }
 
         if ('/' !== substr($pathinfo, 0, 1)) {
-            $pathinfo = '/'.$pathinfo;
+            $pathinfo = '/' . $pathinfo;
         }
 
         if ($this->_application->isStarted() && NULL !== $this->_application->getRequest()) {
@@ -408,7 +455,7 @@ abstract class ARenderer implements IRenderer {
             }
 
             if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
-                return $request->getSchemeAndHttpHost().substr($request->getBaseUrl(), 0, -1*(1+strlen(basename($request->getBaseUrl())))).$pathinfo;
+                return $request->getSchemeAndHttpHost() . substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl())))) . $pathinfo;
             } else {
                 return $request->getUriForPath($pathinfo);
             }
@@ -417,12 +464,13 @@ abstract class ARenderer implements IRenderer {
         return $pathinfo;
     }
 
-    public function getRelativeUrl($uri) {
+    public function getRelativeUrl($uri)
+    {
         $url = $uri;
 
         if ($this->_application->isStarted() && NULL !== $this->_application->getRequest()) {
             $request = $this->_application->getRequest();
-            $baseurl = str_replace('\\', '/', $request->getSchemeAndHttpHost().dirname($request->getBaseUrl()));
+            $baseurl = str_replace('\\', '/', $request->getSchemeAndHttpHost() . dirname($request->getBaseUrl()));
             $url = str_replace($baseurl, '', $uri);
 
             if (FALSE !== $ext = strrpos($url, '.')) {
@@ -430,7 +478,7 @@ abstract class ARenderer implements IRenderer {
             }
 
             if ('/' != substr($url, 0, 1)) {
-                $url = '/'.$url;
+                $url = '/' . $url;
             }
         }
 
@@ -441,7 +489,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return type
      */
-    public function getMaxEntry() {
+    public function getMaxEntry()
+    {
         return $this->_maxentry;
     }
 
@@ -450,7 +499,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return string
      */
-    public function getMode() {
+    public function getMode()
+    {
         return $this->_mode;
     }
 
@@ -458,7 +508,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return type
      */
-    public function getNode() {
+    public function getNode()
+    {
         return $this->_node;
     }
 
@@ -467,7 +518,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return IRenderable
      */
-    public function getObject() {
+    public function getObject()
+    {
         return $this->_object;
     }
 
@@ -475,7 +527,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return type
      */
-    public function getParentUid() {
+    public function getParentUid()
+    {
         return $this->_parentuid;
     }
 
@@ -484,7 +537,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return IRenderable or NULL
      */
-    public function getPreviousObject() {
+    public function getPreviousObject()
+    {
         return $this->__object;
     }
 
@@ -493,7 +547,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return null|BackBuilder\NestedNode\Page
      */
-    public function getCurrentPage() {
+    public function getCurrentPage()
+    {
         return $this->_currentpage;
     }
 
@@ -501,15 +556,16 @@ abstract class ARenderer implements IRenderer {
      * Return the current root of the page to be rendered
      * @return null|BackBuilder\NestedNode\Page
      */
-    public function getCurrentRoot() {
+    public function getCurrentRoot()
+    {
         if (NULL !== $this->getCurrentPage()) {
             return $this->getCurrentPage()->getRoot();
         } else if (NULL === $this->getCurrentSite()) {
             return NULL;
         } else {
             return $this->_application->getEntityManager()
-                                      ->getRepository('BackBuilder\NestedNode\Page')
-                                      ->getRoot($this->getCurrentSite());
+                            ->getRepository('BackBuilder\NestedNode\Page')
+                            ->getRoot($this->getCurrentSite());
         }
     }
 
@@ -518,7 +574,8 @@ abstract class ARenderer implements IRenderer {
      * @codeCoverageIgnore
      * @return null|BackBuilder\Site\Site
      */
-    public function getCurrentSite() {
+    public function getCurrentSite()
+    {
         return $this->_application->getSite();
     }
 
@@ -527,7 +584,8 @@ abstract class ARenderer implements IRenderer {
      * @param string $param The parameter to return
      * @return mixed The parameter value asked or array of the parameters
      */
-    public function getParam($param = NULL) {
+    public function getParam($param = NULL)
+    {
         if (NULL === $param)
             return $this->_params;
 
@@ -546,11 +604,13 @@ abstract class ARenderer implements IRenderer {
      *                                                available if TRUE, use the default template otherwise
      * @return string The view script output
      */
-    public function render(IRenderable $content = NULL, $mode = NULL, $params = NULL, $template = NULL, $ignoreIfRenderModeNotAvailable = true) {
+    public function render(IRenderable $content = NULL, $mode = NULL, $params = NULL, $template = NULL, $ignoreIfRenderModeNotAvailable = true)
+    {
         // Nothing to do
     }
 
-    public function partial($template = NULL, $params = NULL) {
+    public function partial($template = NULL, $params = NULL)
+    {
         // Nothing to do
     }
 
@@ -568,9 +628,10 @@ abstract class ARenderer implements IRenderer {
         return false;
     }
 
-    public function reset() {
+    public function reset()
+    {
         $this->_resetVars()
-             ->_resetParams();
+                ->_resetParams();
 
         $this->__render = null;
 
@@ -585,7 +646,8 @@ abstract class ARenderer implements IRenderer {
      *                                                available if TRUE, use the default template otherwise
      * @return ARenderer The current renderer
      */
-    public function setMode($mode = NULL, $ignoreIfRenderModeNotAvailable = true) {
+    public function setMode($mode = NULL, $ignoreIfRenderModeNotAvailable = true)
+    {
         $this->_mode = $mode;
         $this->_ignoreIfRenderModeNotAvailable = $ignoreIfRenderModeNotAvailable;
         return $this;
@@ -596,7 +658,8 @@ abstract class ARenderer implements IRenderer {
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @return \BackBuilder\Renderer\ARenderer
      */
-    public function setNode(ANestedNode $node) {
+    public function setNode(ANestedNode $node)
+    {
         $this->_node = $node;
         return $this;
     }
@@ -606,11 +669,12 @@ abstract class ARenderer implements IRenderer {
      * @param IRenderable $object
      * @return ARenderer The current renderer
      */
-    public function setObject(IRenderable $object = NULL) {
+    public function setObject(IRenderable $object = NULL)
+    {
         $this->_object = $object;
 
         if (is_array($this->__vars)) {
-            foreach($this->__vars[count($this->__vars)-1] as $key => $var) {
+            foreach ($this->__vars[count($this->__vars) - 1] as $key => $var) {
                 if ($var === $object) {
                     $this->__currentelement = $key;
                 }
@@ -625,7 +689,8 @@ abstract class ARenderer implements IRenderer {
      * @param BackBuilder\NestedNode\Page $page
      * @return ARenderer The current renderer
      */
-    public function setCurrentPage(\BackBuilder\NestedNode\Page $page = NULL) {
+    public function setCurrentPage(\BackBuilder\NestedNode\Page $page = NULL)
+    {
         $this->_currentpage = $page;
 
         return $this;
@@ -637,14 +702,15 @@ abstract class ARenderer implements IRenderer {
      * @param mixed $value The parameter value to set
      * @return ARenderer The current renderer
      */
-    public function setParam($param, $value = NULL) {
+    public function setParam($param, $value = NULL)
+    {
         if (is_string($param)) {
             $this->_params[$param] = $value;
             return $this;
         }
 
         if (is_array($param)) {
-            foreach($param as $key => $value) {
+            foreach ($param as $key => $value) {
                 $this->_params[$key] = $value;
             }
         }
@@ -657,7 +723,8 @@ abstract class ARenderer implements IRenderer {
      * @param type $render
      * @return \BackBuilder\Renderer\ARenderer
      */
-    public function setRender($render) {
+    public function setRender($render)
+    {
         $this->__render = $render;
         return $this;
     }
@@ -666,7 +733,8 @@ abstract class ARenderer implements IRenderer {
      *
      * @return string
      */
-    public function getRender() {
+    public function getRender()
+    {
         return $this->__render;
     }
 
@@ -675,7 +743,8 @@ abstract class ARenderer implements IRenderer {
      * @param Layout $layout The layout to update
      * @return string The filename of the updated script
      */
-    public function updateLayout(Layout $layout) {
+    public function updateLayout(Layout $layout)
+    {
         if (NULL === $layout->getSite())
             return FALSE;
 
@@ -697,7 +766,8 @@ abstract class ARenderer implements IRenderer {
      * Unlink a file script of a layout
      * @param Layout $layout The layout to update
      */
-    public function removeLayout(Layout $layout) {
+    public function removeLayout(Layout $layout)
+    {
         if (NULL === $layout->getSite())
             return FALSE;
 
@@ -712,9 +782,7 @@ abstract class ARenderer implements IRenderer {
      */
     protected function _getTemplatePath(IRenderable $object)
     {
-        return str_replace(array('BackBuilder'.NAMESPACE_SEPARATOR.'ClassContent'.NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR),
-                           array('', DIRECTORY_SEPARATOR),
-                           get_class($object));
+        return str_replace(array('BackBuilder' . NAMESPACE_SEPARATOR . 'ClassContent' . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array('', DIRECTORY_SEPARATOR), get_class($object));
     }
 
     /**
@@ -727,9 +795,9 @@ abstract class ARenderer implements IRenderer {
         File::resolveFilepath($pattern);
 
         $templates = array();
-        foreach($this->_scriptdir as $dir) {
-			if (true === is_array(glob($dir . DIRECTORY_SEPARATOR . $pattern )))
-				$templates = array_merge($templates, glob($dir . DIRECTORY_SEPARATOR . $pattern ));
+        foreach ($this->_scriptdir as $dir) {
+            if (true === is_array(glob($dir . DIRECTORY_SEPARATOR . $pattern)))
+                $templates = array_merge($templates, glob($dir . DIRECTORY_SEPARATOR . $pattern));
         }
 
         return $templates;
@@ -753,9 +821,9 @@ abstract class ARenderer implements IRenderer {
     public function getAvailableRenderMode(IRenderable $object)
     {
         $templatePath = $this->_getTemplatePath($object);
-        $templates = $this->getTemplatesByPattern($templatePath.'.*');
-        foreach($templates as &$template) {
-            $template = basename(str_replace($templatePath.'.', '', $template));
+        $templates = $this->getTemplatesByPattern($templatePath . '.*');
+        foreach ($templates as &$template) {
+            $template = basename(str_replace($templatePath . '.', '', $template));
         }
         unset($template);
 
@@ -771,4 +839,5 @@ abstract class ARenderer implements IRenderer {
     {
         return $this->_ignoreIfRenderModeNotAvailable;
     }
+
 }

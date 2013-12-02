@@ -1,15 +1,35 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Form;
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\Importer
- * @copyright   Lp system
+ * @package     BackBuilder\Form
+ * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class ExecutionContext implements \Symfony\Component\Validator\ExecutionContextInterface
 {
+
     /**
      * @var array
      */
@@ -33,7 +53,10 @@ class ExecutionContext implements \Symfony\Component\Validator\ExecutionContextI
     /**
      * Creates a new execution context.
      */
-    public function __construct(){}
+    public function __construct()
+    {
+        
+    }
 
     /**
      * {@inheritdoc}
@@ -74,15 +97,59 @@ class ExecutionContext implements \Symfony\Component\Validator\ExecutionContextI
         return $this->globalContext;
     }
 
-    public function addViolationAt($subPath, $message, array $params = array(), $invalidValue = null, $pluralization = null, $code = null){}
-    public function getRoot(){}
-    public function getPropertyPath($subPath = ''){}
-    public function getClassName(){}
-    public function getPropertyName(){}
-    public function getValue(){}
-    public function getGroup(){}
-    public function getMetadata(){}
-    public function validate($value, $subPath = '', $groups = null, $traverse = false, $deep = false){}
-    public function validateValue($value, $constraints, $subPath = '', $groups = null){}
-    public function getMetadataFactory(){}
+    public function addViolationAt($subPath, $message, array $params = array(), $invalidValue = null, $pluralization = null, $code = null)
+    {
+        
+    }
+
+    public function getRoot()
+    {
+        
+    }
+
+    public function getPropertyPath($subPath = '')
+    {
+        
+    }
+
+    public function getClassName()
+    {
+        
+    }
+
+    public function getPropertyName()
+    {
+        
+    }
+
+    public function getValue()
+    {
+        
+    }
+
+    public function getGroup()
+    {
+        
+    }
+
+    public function getMetadata()
+    {
+        
+    }
+
+    public function validate($value, $subPath = '', $groups = null, $traverse = false, $deep = false)
+    {
+        
+    }
+
+    public function validateValue($value, $constraints, $subPath = '', $groups = null)
+    {
+        
+    }
+
+    public function getMetadataFactory()
+    {
+        
+    }
+
 }
