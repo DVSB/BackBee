@@ -403,11 +403,23 @@ class BBApplication {
     }
 
     /**
+     * Get cache provider from config
+     * @return string Cache provider config name or \BackBuilder\Cache\DAO\Cache if not found
+     */
+    public function getCacheProvider() {
+        $conf = $this->getConfig()->getCacheConfig();
+        $defaultClass = '\BackBuilder\Cache\DAO\Cache';
+        $parentClass = '\BackBuilder\Cache\AExtendedCache';
+        return (isset($conf['provider']) && is_subclass_of($conf['provider'], $parentClass) ? $conf['provider'] : $defaultClass);
+    }
+
+    /**
      * @return \BackBuilder\Cache\DAO\Cache
      */
     public function getCacheControl() {
         if (!$this->getContainer()->has('cache-control')) {
-            $this->getContainer()->set('cache-control', new \BackBuilder\Cache\DAO\Cache($this));
+            $provider = $this->getCacheProvider();
+            $this->getContainer()->set('cache-control', new $provider($this));
         }
 
         return $this->getContainer()->get('cache-control');
