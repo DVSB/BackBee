@@ -1,5 +1,24 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\FrontController;
 
 use BackBuilder\BBApplication,
@@ -10,7 +29,6 @@ use BackBuilder\BBApplication,
     BackBuilder\Routing\Matcher\UrlMatcher,
     BackBuilder\Util\File,
     BackBuilder\Services\Content\Category,
-    BackBuilder\Cache\File\Cache,
     BackBuilder\Util\MimeType;
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response,
@@ -26,7 +44,7 @@ use Symfony\Component\HttpFoundation\Request,
  * @category    BackBuilder
  * @package     BackBuilder\FrontController
  * @copyright   Lp system
- * @author      c.rouillon
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class FrontController implements HttpKernelInterface
 {
@@ -162,7 +180,7 @@ class FrontController implements HttpKernelInterface
     private function _flushfile($filename)
     {
         if (FALSE === file_exists($filename) || FALSE === is_readable($filename) || true === is_dir($filename))
-            throw new FrontControllerException(sprintf('The file `%s` can not be found (referer: %s).', $this->_request->getHost().'/'.$this->_request->getPathInfo(), $this->_request->server->get('HTTP_REFERER')), FrontControllerException::NOT_FOUND);
+            throw new FrontControllerException(sprintf('The file `%s` can not be found (referer: %s).', $this->_request->getHost() . '/' . $this->_request->getPathInfo(), $this->_request->server->get('HTTP_REFERER')), FrontControllerException::NOT_FOUND);
 
         try {
             $filestats = stat($filename);
@@ -253,11 +271,11 @@ class FrontController implements HttpKernelInterface
 
         if (FALSE === $this->_application->getContainer()->has('site'))
             throw new FrontControllerException('A BackBuilder\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
-        
+
         $site = $this->_application->getContainer()->get('site');
         $uri = preg_replace('/(.*)\.[hx]?[t]?m[l]?$/i', '$1', $uri);
         $redirect_page = $this->_application->getRequest()->get('bb5-redirect') ? ('false' !== $this->_application->getRequest()->get('bb5-redirect')) : TRUE;
-        
+
         if ('_root_' == $uri) {
             $page = $this->_application->getEntityManager()
                     ->getRepository('BackBuilder\NestedNode\Page')
@@ -268,19 +286,18 @@ class FrontController implements HttpKernelInterface
                     ->findOneBy(array('_site' => $site,
                 '_url' => '/' . $uri,
                 '_state' => Page::getUndeletedStates()));
-                
         }
 
         if (NULL !== $page && !$page->isOnline())
             $page = (NULL === $this->_application->getBBUserToken()) ? NULL : $page;
 
         if (NULL === $page)
-            throw new FrontControllerException(sprintf('The URL `%s` can not be found.', $this->_request->getHost().'/'.$uri), FrontControllerException::NOT_FOUND);
-        
+            throw new FrontControllerException(sprintf('The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND);
+
         if (NULL !== $redirect = $page->getRedirect()) {
             if ((NULL === $this->_application->getBBUserToken()) || ((NULL !== $this->_application->getBBUserToken()) && (TRUE === $redirect_page))) {
                 $redirect = $this->_application->getRenderer()->getUri($redirect);
-                
+
                 header('Cache-Control: no-store, no-cache, must-revalidate');
                 header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
                 header('Status: 301 Moved Permanently', false, 301);
@@ -299,7 +316,7 @@ class FrontController implements HttpKernelInterface
             }
 
             // logout Event dispatch
-            if (null !== $this->getRequest()->get('logout') 
+            if (null !== $this->getRequest()->get('logout')
                     && TRUE == $this->getRequest()->get('logout')
                     && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
                 $this->_dispatch('frontcontroller.request.logout');
@@ -311,7 +328,7 @@ class FrontController implements HttpKernelInterface
             else
                 return $response;
         } catch (\Exception $e) {
-            throw new FrontControllerException(sprintf('An error occured while rendering URL `%s`.', $this->_request->getHost().'/'.$uri), FrontControllerException::INTERNAL_ERROR, $e);
+            throw new FrontControllerException(sprintf('An error occured while rendering URL `%s`.', $this->_request->getHost() . '/' . $uri), FrontControllerException::INTERNAL_ERROR, $e);
         }
     }
 
@@ -368,19 +385,19 @@ class FrontController implements HttpKernelInterface
         if (NULL !== $this->_application->getBBUserToken()) {
             $includePath[] = $this->_application->getTemporaryDir();
         }
-        
+
         $matches = array();
         if (preg_match('/([a-f0-9]{3})\/([a-f0-9]{29})\/(.*)\.([^\.]+)/', $filename, $matches)) {
-            $filename = $matches[1].'/'.$matches[2].'.'.$matches[4];
+            $filename = $matches[1] . '/' . $matches[2] . '.' . $matches[4];
         } elseif (preg_match('/([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})\/.*\.([^\.]+)/', $filename, $matches)) {
-            $filename = $matches[1].$matches[2].$matches[3].$matches[4].$matches[5].$matches[6].$matches[7].$matches[8].'.'.$matches[9];
+            $filename = $matches[1] . $matches[2] . $matches[3] . $matches[4] . $matches[5] . $matches[6] . $matches[7] . $matches[8] . '.' . $matches[9];
             File::resolveMediapath($filename, NULL, array('include_path' => $includePath));
         } else {
-            File::resolveMediapath($filename, NULL, array('include_path' => $includePath));            
+            File::resolveMediapath($filename, NULL, array('include_path' => $includePath));
         }
-        
+
         File::resolveFilepath($filename, NULL, array('include_path' => $includePath));
-        
+
         $this->_application->info(sprintf('Handling image URL `%s`.', $filename));
         $this->_flushfile($filename);
     }
@@ -418,7 +435,8 @@ class FrontController implements HttpKernelInterface
     /**
      * Handle static file request for bundle
      */
-    public function serveBundleRessourcesAction($bundleName, $type, $filename) {
+    public function serveBundleRessourcesAction($bundleName, $type, $filename)
+    {
         $pathInfos = array(
             "css" => "Ressources/Templates/css",
             "js" => "Ressources/Templates/javascript",
@@ -521,7 +539,7 @@ class FrontController implements HttpKernelInterface
                 $this->_invokeAction($matches);
             }
 
-            throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getHost().'/'.$this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);
+            throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getHost() . '/' . $this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);
         } catch (\Exception $e) {
             $exception = ($e instanceof FrontControllerException ) ? $e : new FrontControllerException(sprintf('An error occured while processing URL `%s`.', $this->getRequest()->getPathInfo()), FrontControllerException::INTERNAL_ERROR, $e);
             $exception->setRequest($this->getRequest());

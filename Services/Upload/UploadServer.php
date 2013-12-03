@@ -1,17 +1,44 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Services\Upload;
 
 use BackBuilder\Services\Upload\Exception\UploadException,
     BackBuilder\Services\Utils\Error;
-
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request;
-
 use BackBuilder\Services\Rpc\JsonRPCServer;
 
-class UploadServer extends JsonRPCServer {
+/**
+ * @category    BackBuilder
+ * @package     BackBuilder\Services
+ * @subpackage  Upload
+ * @copyright   Lp digital system
+ * @author      m.baptista <michel.baptista@lp-digital.fr>
+ */
+class UploadServer extends JsonRPCServer
+{
 
-    public function getResponse($request, $request_payload = array()) {
+    public function getResponse($request, $request_payload = array())
+    {
         $response = new Response();
         $response->headers->set('content-type', 'application/json');
         try {
@@ -26,13 +53,13 @@ class UploadServer extends JsonRPCServer {
                 $method = $requestArray[1];
 
                 $reflectionMethod = $this->_validateMethodService($namespaceClass, $method);
-                
+
                 $this->_registerAnnotations($reflectionMethod);
             }
 
             if (false === $this->isExposed())
                 throw new UploadException("Method:" . $method . " not exposed");
-            
+
             if (NULL !== $this->_application)
                 $this->_application->info(sprintf('Handling Upload RPC request `%s::%s`.', $namespaceClass, $method));
             $object = new $namespaceClass();
@@ -53,7 +80,7 @@ class UploadServer extends JsonRPCServer {
 
         return $response;
     }
-    
+
     /**
      * 
      * @inherited
@@ -75,11 +102,12 @@ class UploadServer extends JsonRPCServer {
         } catch (\ReflectionException $e) {
             throw new RpcException(sprintf('UploadServer: unknown method `%s` for `%s` service', $method, $classname));
         }
-        
+
         return $reflectionMethod;
     }
-    
-    public function handle(Request $request = NULL, $request_payload = NULL) {
+
+    public function handle(Request $request = NULL, $request_payload = NULL)
+    {
         if (NULL === $request && NULL === $this->_application) {
             return;
         }
@@ -93,4 +121,5 @@ class UploadServer extends JsonRPCServer {
 
         return $this->getResponse($request, $request_payload);
     }
+
 }
