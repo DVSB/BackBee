@@ -239,12 +239,36 @@ class Logger implements LoggerInterface, SQLLogger
             $response->send();
             die();
         } else {
-            echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')';
+            echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')' . PHP_EOL;
+            if (NULL !== $this->_application && $this->_application->debugMode()) {
+                foreach ($exception->getTrace() as $trace) {
+                    echo 'Trace: line ' .
+                    (array_key_exists('line', $trace) ? $trace['line'] : '-') . ': ' .
+                    (array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ', ' .
+                    (array_key_exists('class', $trace) ? $trace['class'] : '') .
+                    (array_key_exists('type', $trace) ? $trace['type'] : '') .
+                    (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()' . PHP_EOL;
+                }
+
+                $previous = $exception->getPrevious();
+                while (NULL !== $previous) {
+                    echo PHP_EOL . 'Caused by: ' . $previous->getMessage() . ' (errNo: ' . $previous->getCode() . ')' . PHP_EOL;
+                    foreach ($previous->getTrace() as $trace) {
+                        echo 'Trace: line ' .
+                        (array_key_exists('line', $trace) ? $trace['line'] : '-') . ': ' .
+                        (array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ', ' .
+                        (array_key_exists('class', $trace) ? $trace['class'] : '') .
+                        (array_key_exists('type', $trace) ? $trace['type'] : '') .
+                        (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()' . PHP_EOL;
+                    }
+                    $previous = $previous->getPrevious();
+                }
+            }
         }
 
-        if (NULL !== $this->_exceptionHandlers) {
-            return call_user_func($this->_exceptionHandlers, $exception);
-        }
+//        if (NULL !== $this->_exceptionHandlers) {
+//            return call_user_func($this->_exceptionHandlers, $exception);
+//        }
 
         die();
     }

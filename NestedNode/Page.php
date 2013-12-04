@@ -53,6 +53,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
  * @Table(name="page")
  * @HasLifecycleCallbacks
+ * @fixtures(qty=1)
  */
 class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 {
@@ -103,6 +104,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Unique identifier of the page
      * @var string
      * @Id @Column(type="string", name="uid")
+     * @fixture(type="md5")
      */
     protected $_uid;
 
@@ -142,6 +144,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The title of this page
      * @var string
      * @Column(type="string", name="title", nullable=false)
+     * @fixture(type="sentence", value=6)
      */
     protected $_title;
 
@@ -185,6 +188,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The publication datetime
      * @var \DateTime
      * @Column(type="datetime", name="date", nullable=true)
+     * @fixture(type="dateTime")
      */
     protected $_date;
 
@@ -192,6 +196,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The state of the page
      * @var int
      * @Column(type="smallint", name="state", nullable=false)
+     * @fixture(type="boolean")
      */
     protected $_state;
 

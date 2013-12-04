@@ -19,28 +19,23 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Site\Repository;
-
-use Doctrine\ORM\EntityRepository;
+namespace BackBuilder\Exception;
 
 /**
+ * Exception thrown if an invalid argument is provided
+ *
  * @category    BackBuilder
- * @package     BackBuilder\Site
- * @subpackage  Repository
+ * @package     BackBuilder\Exception
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class SiteRepository extends EntityRepository
+class InvalidArgumentsException extends BBException
 {
 
-    public function findByServerName($server_name)
-    {
-        $q = $this->createQueryBuilder('s')
-                ->andWhere('s._server_name = :server_name')
-                ->setParameters(array('server_name' => $server_name));
-        $theme = $q->getQuery()->getOneOrNullResult();
-
-        return $theme;
-    }
+    /**
+     * The default error code
+     * @var int
+     */
+    protected $_code = self::INVALID_ARGUMENT;
 
 }

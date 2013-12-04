@@ -22,7 +22,8 @@
 namespace BackBuilder\Site;
 
 use Symfony\Component\Security\Core\User\UserInterface,
-    Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+    Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
+    Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
  * UserPreferences object in BackBuilder 5
@@ -72,8 +73,9 @@ class UserPreferences
     {
         $this->_uid = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
 
-        if ($token instanceof TokenInterface)
+        if ($token instanceof TokenInterface) {
             $this->_owner = UserSecurityIdentity::fromToken($token);
+        }
     }
 
     /**

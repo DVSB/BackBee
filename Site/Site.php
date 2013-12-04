@@ -39,7 +39,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Site\Repository\SiteRepository")
- * @Table(name="site")
+ * @Table(name="site", indexes={@Index(name="url", columns={"server_name"})})
+ * @fixtures(qty=1)
  */
 class Site extends AObjectIdentifiable implements IJson
 {
@@ -48,6 +49,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The unique identifier of this website.
      * @var string
      * @Id @Column(type="string", name="uid")
+     * @fixture(type="md5")
      */
     protected $_uid;
 
@@ -55,6 +57,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The label of this website.
      * @var string
      * @Column(type="string", name="label", nullable=false)
+     * @fixture(type="domainWord")
      */
     protected $_label;
 
@@ -62,6 +65,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The creation datetime.
      * @var \DateTime
      * @Column(type="datetime", name="created", nullable=false)
+     * @fixture(type="dateTime")
      */
     protected $_created;
 
@@ -69,6 +73,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The last modification datetime.
      * @var \DateTime
      * @Column(type="datetime", name="modified", nullable=false)
+     * @fixture(type="dateTime")
      */
     protected $_modified;
 
@@ -76,6 +81,7 @@ class Site extends AObjectIdentifiable implements IJson
      * The optional server name.
      * @var string
      * @Column(type="string", name="server_name", nullable=true)
+     * @fixture(type="domainWord")
      */
     protected $_server_name;
 
@@ -117,8 +123,10 @@ class Site extends AObjectIdentifiable implements IJson
         $this->_layouts = new ArrayCollection();
         $this->_metadata = new ArrayCollection();
 
-        if (true === is_array($options)
-                && true === array_key_exists('label', $options)) {
+        if (
+            true === is_array($options) && 
+            true === array_key_exists('label', $options)
+        ) {
             $this->setLabel($options['label']);
         }
     }
@@ -165,6 +173,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the collection of layouts available for this website.
+     * @codeCoverageIgnore
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getLayouts()

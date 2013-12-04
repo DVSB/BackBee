@@ -62,7 +62,7 @@ class BBApplication
     private $_isinitialized;
     private $_isstarted;
     private $_autoloader;
-    private $_basedir;
+    private $_bbdir;
     private $_cachedir;
     private $_mediadir;
     private $_repository;
@@ -258,6 +258,12 @@ class BBApplication
         $connectionOptions = isset($doctrineConfig['dbal']) ? $doctrineConfig['dbal'] : array();
         $this->getContainer()->set('em', EntityManager::create($connectionOptions, $config, $evm));
 
+        try {
+            $this->getContainer()->get('em')->getConnection()->connect();
+        } catch (\Exception $e) {
+            throw new Exception\DatabaseConnectionException('Enable to connect to the database.', 0, $e);            
+        }
+        
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
             try {
                 $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_client = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
@@ -411,18 +417,23 @@ class BBApplication
 
         return $this->_autoloader;
     }
+    
+    public function getBBDir()
+    {
+        if (NULL === $this->_bbdir) {
+            $r = new \ReflectionObject($this);
+            $this->_bbdir = dirname($r->getFileName());
+        }
+
+        return $this->_bbdir;
+    }
 
     /**
      * @return string
      */
     public function getBaseDir()
     {
-        if (NULL === $this->_basedir) {
-            $r = new \ReflectionObject($this);
-            $this->_basedir = dirname($r->getFileName()) . DIRECTORY_SEPARATOR . '..';
-        }
-
-        return $this->_basedir;
+        return dirname($this->getBBDir());
     }
 
     public function getContext()
@@ -480,7 +491,7 @@ class BBApplication
     public function getBootstrapCache()
     {
         if (!$this->getContainer()->has('cache.bootstrap')) {
-            $this->getContainer()->set('cache.bootstrap', new Cache\File\Cache($this));
+            $this->getContainer()->set('cache.bootstrap', new Cache\File\Cache(array('cachedir' => $this->getCacheDir())));
         }
 
         return $this->getContainer()->get('cache.bootstrap');
