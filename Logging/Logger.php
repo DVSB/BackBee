@@ -252,7 +252,7 @@ class Logger implements LoggerInterface, SQLLogger
 
                 $previous = $exception->getPrevious();
                 while (NULL !== $previous) {
-                    echo PHP_EOL . 'Caused by: ' . $previous->getMessage() . PHP_EOL;
+                    echo PHP_EOL . 'Caused by: ' . $previous->getMessage() . ' (errNo: ' . $previous->getCode() . ')' . PHP_EOL;
                     foreach ($previous->getTrace() as $trace) {
                         echo 'Trace: line ' .
                         (array_key_exists('line', $trace) ? $trace['line'] : '-') . ': ' .

@@ -258,6 +258,12 @@ class BBApplication
         $connectionOptions = isset($doctrineConfig['dbal']) ? $doctrineConfig['dbal'] : array();
         $this->getContainer()->set('em', EntityManager::create($connectionOptions, $config, $evm));
 
+        try {
+            $this->getContainer()->get('em')->getConnection()->connect();
+        } catch (\Exception $e) {
+            throw new Exception\DatabaseConnectionException('Enable to connect to the database.', 0, $e);            
+        }
+        
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
             try {
                 $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_client = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
