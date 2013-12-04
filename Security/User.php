@@ -98,6 +98,20 @@ class User implements UserInterface
     protected $_groups;
 
     /**
+     * The creation datetime
+     * @var \DateTime
+     * @Column(type="datetime", name="created")
+     */
+    protected $_created;
+
+    /**
+     * The last modification datetime
+     * @var \DateTime
+     * @Column(type="datetime", name="modified")
+     */
+    protected $_modified;
+
+    /**
      * Class constructor
      *
      * @param string $login
