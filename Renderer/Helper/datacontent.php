@@ -26,7 +26,8 @@ use BackBuilder\ClassContent\ContentSet;
 /**
  * Helper providing HTML attributes to online-edited content
  * 
- * If a valid BB5 user is rendering the content following attributes would be sets :
+ * If a valid BB5 user is rendering the content and parameter bb5.editable not 
+ * set to false following attributes would be sets :
  *   * data-uid:            The unique identifier of the content
  *   * data-parent:         The unique identifier of the content owner
  *   * data-draftuid:       The unique identifier of the revision
@@ -87,8 +88,11 @@ class datacontent extends AHelper
 
         // Store initial basic attributes to content
         $this->_basic_attributes = $this->_attributes;
+
         // If a valid BB user is granted to access this content
-        if (null !== $this->_content && true === $this->_isGranted()) {
+        if (null !== $this->_content
+                && true === $this->_isGranted()
+                && false !== $this->_renderer->getParam('bb5.editable')) {
             $this->_addCommonContentMarkup($params)
                     ->_addContentSetMarkup($params)
                     ->_addClassContainerMarkup($params)
