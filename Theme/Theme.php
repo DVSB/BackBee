@@ -104,7 +104,7 @@ class Theme extends ThemeConst
         $this->_application = $bbapp;
         $this->_site_uid = (null !== $bbapp->getSite()) ? $bbapp->getSite()->getUid() : null;
         $this->_themes_dir = $this->_application->getConfig()->getSection('themes_dir');
-
+        
         $manager = new ThemesManager($this->getThemeDir(self::DEFAULT_NAME));
         $this->_default_theme = $manager->hydrateTheme($this->_application->getConfig()->getSection('theme'));
         $this->parseDirectory($this->_default_theme->getArchitecture(), $this->getDefaultDirectory());
@@ -154,8 +154,8 @@ class Theme extends ThemeConst
     public function getThemeDir($type)
     {
         if (array_key_exists($type, $this->_themes_dir)) {
-            $theme_dir = $this->_application->getBaseDir() . $this->_themes_dir[$type];
-//            File::resolveFilepath($theme_dir, NULL, array('base_dir' => $this->_application->getBaseDir()));
+            $theme_dir = $this->_themes_dir[$type];
+            File::resolveFilepath($theme_dir, NULL, array('base_dir' => $this->_application->getBaseDir()));
             return $theme_dir . DIRECTORY_SEPARATOR;
         }
         return false;
@@ -287,10 +287,14 @@ class Theme extends ThemeConst
      */
     private function _initConfig($configdir = null)
     {
+        if (null === $this->_application) {
+            throw new \BackBuilder\Exception\MissingApplicationException('Missing BackBuilder application for theme');
+        }
+        
         if (is_null($configdir))
             $configdir = $this->getDirectory();
 
-        $this->_config = new Config($configdir, $this->_bbapp->getBootstrapCache());
+        $this->_config = new Config($configdir, $this->_application->getBootstrapCache());
 
         return $this;
     }
