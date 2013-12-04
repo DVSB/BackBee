@@ -24,70 +24,76 @@ $.loadScript = function(url, options) {
         },
         
         libs: [
-            'js/libs/jquery.event.mousestop.js', //fix mouseenter/mouseleave when moving fast
-            'js/libs/jquery-ui-1.8.24.custom.min.js',//to fix sortable jitter and flaky effects and fucking datepicker
-            'js/libs/jquery.loadmask.min.js',
-            'js/libs/jquery.jstree.js',
-            'js/libs/jquery.jscrollpane.min.js',
-            'js/libs/jquery-ui-timepicker-addon.js',
-            'js/libs/json2.js',
-            'js/libs/jquery.jsonrpc.js',
-            'js/libs/jquery.filedrop.js',
-            'js/libs/jquery.templates.js',
-            'js/libs/jquery.layout-latest.min.js',
-            'js/libs/jquery.fileDownload.js',
-            'js/colorpicker.js',
-            'js/bb.i18n.js',
-            'js/less-1.3.0.min.js',
-            'js/jquery.ui.selectgroup.js',
-            'js/libs/jquery.paging.js',
-            'js/libs/bootstrap.min.js',
-            'js/jquery.bxSlider.mod.min.js',
-            'js/jquery.ui.selectgroup.js',
-            'js/script.js',
-            'js/Utils.js',
-            'js/dbmanager.js',
-            'js/min/bb.StateManager.js',
-            'js/bb.upload.js',
-            'js/bb.authmanager.js',
-            'js/bb.webservice.js',
-            'js/bb.jstree.rpc_data.js',
-            'js/bb.jquery-ui.js',
-            'js/bb.ui-bbUtilsPager.js',
-            'js/bb.ui.bbSearchEngine.js',
-            'js/bb.ui.bbPageSelector.js',
-            'js/bb.ui.bbLinkSelector.js',
-            'js/bb.ui.bbMediaSelector.js',
-            'js/bb.ui.bbSelector.js',
-            'js/bb.ui.bbPageBrowser.js',
-            'js/bb.ui.bbKeywordBrowser.js',
-            'js/bb.ui.bbContentSelector.js',
-            'js/bb.ui.bbMediaImageUpload.js',
-            'js/bb.ui.bbContentTypeBrowser.js',
-            'js/bb.contentPluginManager.js',
-            'js/bb.ContentWrapper.js',
-            'js/min/bb.UserPreferences.js',
-            'js/lpTab.js',
-            'js/lpContextMenu.js',
-            'js/bb.ManagersContainer.js',
-            'js/AlohaManager.js',
-            'js/FilterManager.js',
-            'js/LayoutManager.js',
-            'js/StatusManager.js',
-            'js/ToolsbarManager.js',
-            'js/ToolsbarTheme.js',
-            'js/ToolsbarEdition.js',
-            'js/ToolsbarContent.js',
-            'js/ContentManager.js',
-            'js/ContentEditionManager.js',
-            'js/ToolsbarLayout.js',
-            'js/ToolsbarStatus.js',
-            'js/ToolsbarBundle.js',
-            'js/PopupManager.js',
-            'js/bb.FormBuilder.plugins.js',
-            'js/FrontApplication.js', 
-            'js/i18n/fr.js',
-            'js/min/bb.Notify.js'
+        'js/libs/requirejs/require.js',
+        'js/bb.require.map.js',//js module config
+        
+        'js/libs/jquery.event.mousestop.js', //fix mouseenter/mouseleave when moving fast
+        'js/libs/jquery-ui-1.8.24.custom.min.js',//to fix sortable jitter and flaky effects and fucking datepicker
+        'js/libs/jquery.loadmask.min.js',
+        'js/libs/jquery.jstree.js',
+        'js/libs/jquery.jscrollpane.min.js',
+        'js/libs/jquery-ui-timepicker-addon.js',
+        'js/libs/json2.js',
+        'js/libs/jquery.jsonrpc.js',
+        'js/libs/jquery.filedrop.js',
+        'js/libs/jquery.templates.js',
+        'js/libs/jquery.layout-latest.min.js',
+        'js/libs/jquery.fileDownload.js',
+            
+        'js/colorpicker.js',
+        'js/bb.i18n.js',
+        'js/less-1.3.0.min.js',
+        'js/jquery.ui.selectgroup.js',
+        'js/libs/jquery.paging.js',
+        'js/libs/bootstrap.min.js',
+        'js/jquery.bxSlider.mod.min.js',
+        'js/jquery.ui.selectgroup.js',
+        'js/script.js',
+        'js/Utils.js',
+            
+        'js/dbmanager.js',
+        'js/min/bb.StateManager.js',
+        'js/bb.upload.js',
+        'js/bb.authmanager.js',
+        'js/bb.webservice.js',
+        'js/bb.jstree.rpc_data.js',
+        'js/bb.jquery-ui.js',
+        'js/bb.ui-bbUtilsPager.js',
+        'js/bb.ui.bbSearchEngine.js',
+        'js/bb.ui.bbPageSelector.js',
+        'js/bb.ui.bbLinkSelector.js',
+        'js/bb.ui.bbMediaSelector.js',
+        'js/bb.ui.bbSelector.js',
+        'js/bb.ui.bbPageBrowser.js',
+        'js/bb.ui.bbKeywordBrowser.js',
+        'js/bb.ui.bbContentSelector.js',
+        'js/bb.ui.bbMediaImageUpload.js',
+        'js/bb.ui.bbContentTypeBrowser.js',
+        'js/bb.contentPluginManager.js',
+        'js/bb.ContentWrapper.js',
+        'js/min/bb.UserPreferences.js',
+        'js/lpTab.js',
+        'js/lpContextMenu.js',
+        'js/bb.ManagersContainer.js',
+            
+        'js/AlohaManager.js',
+        'js/FilterManager.js',
+        'js/LayoutManager.js',
+        'js/StatusManager.js',
+        'js/ToolsbarManager.js',
+        'js/ToolsbarTheme.js',
+        'js/ToolsbarEdition.js',
+        'js/ToolsbarContent.js',
+        'js/ContentManager.js',
+        'js/ContentEditionManager.js',
+        'js/ToolsbarLayout.js',
+        'js/ToolsbarStatus.js',
+        'js/ToolsbarBundle.js',
+        'js/PopupManager.js',
+        'js/bb.FormBuilder.plugins.js',
+        'js/FrontApplication.js', 
+        'js/i18n/fr.js',
+        'js/min/bb.Notify.js'
         ],
         
         config: {
@@ -140,7 +146,14 @@ $.loadScript = function(url, options) {
                 name: "ws_local_keyword",
                 namespace:"BackBuilder_Services_Local_Keyword"
             },
-            
+             {
+                name: "ws_local_keyword",
+                namespace:"BackBuilder_Services_Local_Keyword"
+            },
+            {
+                name: "ws_local_config",
+                namespace:"BackBuilder_Services_Local_Config"
+            }
             ]
         },
                 
@@ -155,7 +168,8 @@ $.loadScript = function(url, options) {
         init: function() {
             if (bb.isloaded)
                 return;
-                        
+          $(bb).trigger("bb.loading.start");
+           
             baseurl = $('#bb5-scripts').attr('src');
             if ('undefined' != typeof(baseurl))
                 bb.baseurl = baseurl.replace(bb.resourcesdir+'js/bb.js', '');
@@ -176,14 +190,16 @@ $.loadScript = function(url, options) {
 
             /*Upload*/
             bb.uploadManager.setup(bb.uploadManagerConfig); 
-            
+             $(bb).trigger("bb.loading.end");
             bb.isloaded = true;
         },
         
         loadLibs: function() {
+            
             $.each(bb.libs, function(index, script) {
                 $.loadScript(bb.resourcesdir+script);
             });
+           
         },
         
         loadScripts: function() {
@@ -197,7 +213,6 @@ $.loadScript = function(url, options) {
                 if (!event.altKey || !event.ctrlKey || 66 != event.keyCode)
                     return;
             }
-            
             if (!bb.isloaded) bb.init();
             
             bb.webserviceManager.getInstance('ws_local_user').request('getUser', {
@@ -230,10 +245,10 @@ $.loadScript = function(url, options) {
         },
         
         onKeyup: function(event) {
-            //console.log(event);
+        //console.log(event);
         }
     };
-    
+  bb.core = bb.core || {};  
 })(jQuery);
 
 $(document).bind('keyup', bb.start);

@@ -1,13 +1,40 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\NestedNode\Repository;
 
+/**
+ * Media folder repository
+ * 
+ * @category    BackBuilder
+ * @package     BackBuilder/NestedNode
+ * @subpackage  Repository
+ * @copyright   Lp digital system
+ * @author      m.baptista <michel.baptista@lp-digital.fr>
+ */
+class MediaFolderRepository extends NestedNodeRepository
+{
 
-use BackBuilder\NestedNode\ANestedNode;
-
-class MediaFolderRepository extends NestedNodeRepository {
-
-    public function getRoot() {
+    public function getRoot()
+    {
         try {
             $q = $this->createQueryBuilder('mf')
                     ->andWhere('mf._parent is null')
@@ -20,15 +47,17 @@ class MediaFolderRepository extends NestedNodeRepository {
             return null;
         }
     }
-    
-    private function preloadMediaType(\BackBuilder\BBApplication $bbApp) {
+
+    private function preloadMediaType(\BackBuilder\BBApplication $bbApp)
+    {
         $classnames = $bbApp->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*');
         foreach ($classnames as $classname) {
             class_exists($classname);
         }
     }
 
-    private function deleteMediaContent(\BackBuilder\BBApplication $bbapp, $media) {
+    private function deleteMediaContent(\BackBuilder\BBApplication $bbapp, $media)
+    {
         $em = $this->_em;
         if ($media) {
             $token = $bbapp->getBBUserToken();

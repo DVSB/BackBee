@@ -489,8 +489,9 @@ bb.ContentWrapper = (function($,global){
                         if(!$.trim(render).length){
                              self.updateData();
                              return;
-                        }; //handle empty content
-                        self.contentEl.html($(render)); 
+                        }//handle empty content
+                        self.contentEl.replaceWith($(result.render)); //$(render)
+                        //old self.contentEl.html(//$(render));
                         self.updateData();
                         var contentManager = bb.ManagersContainer.getInstance().getManager("ContentManager"); 
                         contentManager.initDroppableImage(self.contentEl); 
@@ -705,6 +706,14 @@ bb.ContentWrapper = (function($,global){
                             contentManager.handleNewContent(itemRender);//show media path
                             $(document).trigger("content:newContentAdded",[self,$(itemRender),null]);
                         //if(cp == nbItem) bb.Utils.scrollToContent($(itemRender)); //scroll to last
+                        
+                            var scripts = $(item.render,"script").slice(1);
+                            if (0 < $(item.render,"script").slice(1).length) {
+                                $.each(scripts, function(i, script) {
+                                    eval($(script).get(0).innerHTML);                                
+                                });
+                            }
+
                         });
                         self.updateData();
                         self.hideEmptyZone();

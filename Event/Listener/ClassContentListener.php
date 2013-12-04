@@ -1,5 +1,24 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Event\Listener;
 
 use BackBuilder\Util\File;
@@ -18,9 +37,10 @@ use BackBuilder\Event\Event,
  *    - classcontent.include: occurs when autoloader include a classcontent definition
  *
  * @category    BackBuilder
- * @package     BackBuilder\Event\Listener
- * @copyright   Lp system
- * @author      c.rouillon
+ * @package     BackBuilder\Event
+ * @subpackage  Listener
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class ClassContentListener
 {
@@ -221,7 +241,7 @@ class ClassContentListener
                 $includePath[] = $application->getTemporaryDir();
 
             $filename = $content->path;
-            File::resolveMediapath($filename, NULL, array('include_path' => $includePath));
+            File::resolveFilepath($filename, NULL, array('include_path' => $includePath));
 
             @unlink($filename);
         } catch (\Exception $e) {
@@ -276,10 +296,10 @@ class ClassContentListener
 
         $renderer = $application->getRenderer();
         $modes = array('default' => 'default');
-        foreach($renderer->getAvailableRenderMode(new $classname()) as $mode) {
+        foreach ($renderer->getAvailableRenderMode(new $classname()) as $mode) {
             $modes[$mode] = $mode;
         }
-        
+
         $result['rendermode']['array']['options'] = $modes;
 
         $event->setArgument('result', $result);

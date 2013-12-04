@@ -1,9 +1,27 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Renderer\Adapter;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
-
 use BackBuilder\BBApplication,
     BackBuilder\Renderer\ARenderer,
     BackBuilder\Renderer\IRenderable,
@@ -15,12 +33,14 @@ use BackBuilder\BBApplication,
  * Rendering adapter for phtml templating files
  *
  * @category    BackBuilder
- * @package     BackBuilder\Renderer\Adapter
- * @copyright   Lp system
- * @author      c.rouillon
+ * @package     BackBuilder\Renderer
+ * @subpackage  Adapter
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class phtml extends ARenderer
 {
+
     const HEADER_SCRIPT = 'header';
     const FOOTER_SCRIPT = 'footer';
 
@@ -41,7 +61,6 @@ class phtml extends ARenderer
      * @var string
      */
     private $_templateFile;
-
     private $_scripts;
 
     public function __construct(BBApplication $application = null, $config = null)
@@ -150,7 +169,6 @@ class phtml extends ARenderer
             $this->assign($this->_object->getData())
                     ->setParam($this->_object->getParam());
         }
-
         if (NULL !== $params) {
             $params = (array) $params;
             foreach ($params as $param => $value)
@@ -496,7 +514,7 @@ class phtml extends ARenderer
             $scripts = $this->_scripts->get($type);
         }
 
-        if(!in_array($href, $scripts)) {
+        if (!in_array($href, $scripts)) {
             $scripts[] = $href;
         }
 
@@ -513,11 +531,11 @@ class phtml extends ARenderer
         $headerScripts = $this->_scripts->get(self::HEADER_SCRIPT, array());
         $footerScripts = array_diff($footerScripts, $headerScripts);
         if (0 < count($headerScripts)) {
-            $this->setRender(strstr($this->getRender(), '</head>', true).$this->_generateScriptCode($headerScripts).strstr($this->getRender(), '</head>'));
+            $this->setRender(strstr($this->getRender(), '</head>', true) . $this->_generateScriptCode($headerScripts) . strstr($this->getRender(), '</head>'));
         }
 
         if (0 < count($footerScripts)) {
-            $this->setRender(strstr($this->getRender(), '</body>', true).$this->_generateScriptCode($footerScripts).strstr($this->getRender(), '</body>'));
+            $this->setRender(strstr($this->getRender(), '</body>', true) . $this->_generateScriptCode($footerScripts) . strstr($this->getRender(), '</body>'));
         }
 
         // Reset scripts array
@@ -534,9 +552,10 @@ class phtml extends ARenderer
     {
         $result = '';
         foreach ($scripts as $href) {
-            $result .= '<script type="text/javascript" src="'.$href.'"></script>';
+            $result .= '<script type="text/javascript" src="' . $href . '"></script>';
         }
 
         return $result;
     }
+
 }

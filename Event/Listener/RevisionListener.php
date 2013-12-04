@@ -1,4 +1,24 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Event\Listener;
 
 use BackBuilder\ClassContent\AClassContent,
@@ -11,46 +31,57 @@ use BackBuilder\ClassContent\AClassContent,
  *    - classcontent.onflush: occurs when a classcontent entity is mentioned for current flush
  *
  * @category    BackBuilder
- * @package     BackBuilder\Event\Listener
- * @copyright   Lp system
- * @author      c.rouillon
+ * @package     BackBuilder\Event
+ * @subpackage  Listener
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class RevisionListener {
+class RevisionListener
+{
 
     public static function onRemoveContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent)) return;
+        if (!($content instanceof AClassContent))
+            return;
 
         $dispatcher = $event->getDispatcher();
-        if (null === $dispatcher) return;
+        if (null === $dispatcher)
+            return;
 
         $application = $dispatcher->getApplication();
-        if (null === $application) return;
+        if (null === $application)
+            return;
 
         $em = $application->getEntityManager();
 
         $revisions = $em->getRepository('BackBuilder\ClassContent\Revision')->getRevisions($content);
-        foreach($revisions as $revision) {
+        foreach ($revisions as $revision) {
             $revision->setContent(NULL);
             $revision->setState(Revision::STATE_DELETED);
         }
     }
 
-    public static function onFlushContent(Event $event) {
+    public static function onFlushContent(Event $event)
+    {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent)) return;
+        if (!($content instanceof AClassContent))
+            return;
 
         $dispatcher = $event->getDispatcher();
-        if (null === $dispatcher) return;
+        if (null === $dispatcher)
+            return;
 
         $application = $dispatcher->getApplication();
-        if (null === $application) return;
+        if (null === $application)
+            return;
 
         $token = $application->getSecurityContext()->getToken();
-        if (null === $token) return;
-        if ('BackBuilder\Security\Token\BBUserToken' != get_class($token)) return;
-            
+        if (null === $token)
+            return;
+        if ('BackBuilder\Security\Token\BBUserToken' != get_class($token))
+            return;
+
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
 
@@ -60,7 +91,7 @@ class RevisionListener {
             $uow->computeChangeSet($em->getClassMetadata('BackBuilder\ClassContent\Revision'), $revision);
         } elseif ($uow->isScheduledForDelete($content)) {
             $revisions = $em->getRepository('BackBuilder\ClassContent\Revision')->getRevisions($content);
-            foreach($revisions as $revision) {
+            foreach ($revisions as $revision) {
                 $revision->setContent(NULL);
                 $revision->setState(Revision::STATE_DELETED);
                 $uow->computeChangeSet($em->getClassMetadata('BackBuilder\ClassContent\Revision'), $revision);
@@ -68,7 +99,8 @@ class RevisionListener {
         }
     }
 
-    public static function onPostLoad(Event $event) {
+    public static function onPostLoad(Event $event)
+    {
         $revision = $event->getTarget();
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
@@ -78,15 +110,14 @@ class RevisionListener {
             $em = $application->getEntityManager();
 
             $db = $em->getConnection();
-            $stmt  = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?",
-                                        array($revision->getUid()),
-                                        array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY,1,1));
+            $stmt = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?", array($revision->getUid()), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1));
 
             $items = $stmt->fetchAll();
-            if($items){
-                foreach($items as $item){
-                    $content = $em->find($item["classname"],$item["content_uid"]); //@fixme ->use ResultSetMapping
-                    if($content) $revision->setContent($content);
+            if ($items) {
+                foreach ($items as $item) {
+                    $content = $em->find($item["classname"], $item["content_uid"]); //@fixme ->use ResultSetMapping
+                    if ($content)
+                        $revision->setContent($content);
                 }
             }
         }
@@ -94,16 +125,21 @@ class RevisionListener {
         $revision->postLoad();
     }
 
-    public static function onPrerenderContent(Event $event) {
+    public static function onPrerenderContent(Event $event)
+    {
         $dispatcher = $event->getDispatcher();
-        if (NULL === $application = $dispatcher->getApplication()) return;
-        if (NULL === $token = $application->getBBUserToken()) return;
+        if (NULL === $application = $dispatcher->getApplication())
+            return;
+        if (NULL === $token = $application->getBBUserToken())
+            return;
 
         $renderer = $event->getEventArgs();
-        if (!is_a($renderer, 'BackBuilder\Renderer\ARenderer')) return;
+        if (!is_a($renderer, 'BackBuilder\Renderer\ARenderer'))
+            return;
 
         $content = $renderer->getObject();
-        if (!is_a($content, 'BackBuilder\ClassContent\AClassContent')) return;
+        if (!is_a($content, 'BackBuilder\ClassContent\AClassContent'))
+            return;
 
         $em = $application->getEntityManager();
         if (NULL !== $revision = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token)) {
@@ -126,4 +162,5 @@ class RevisionListener {
             }
         }
     }
+
 }

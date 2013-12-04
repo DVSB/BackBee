@@ -8,8 +8,8 @@
  **/
 
 bb.contentPluginsManager.registerPlugins("contentsetEdit",{
-    settings:{
-        title: "Edit this content block",
+    settings: {
+        title: "Edit this content block", //i18n
         dialogWidth: "50px",
         dialogHeight: "50px"
     },
@@ -21,7 +21,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
             +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">Type de contenu <label></span><span class="span8"><select class="contentType" name="mode"></select></span></p>'
             +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">Nombre d\'élements <label></span><span class="span8"><select class="maxentry" name="mode"></select></span></p>'
             +'</form>').clone();   
-    /* si maxentry atteint grisé le bouton */
+    /* disable maxentry on button */
     /* handle change on content too like change on content*/
     //this.bindEvents();
     },
@@ -178,7 +178,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
              
     exposeActions : function(){
         this.createAction({
-            label:"add a new item to this container", 
+            label:"Add a new item to this container", 
             icoCls : "bb5-ico-add", 
             command : this.cmdAdd
         });

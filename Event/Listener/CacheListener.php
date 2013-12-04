@@ -1,10 +1,38 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Event\Listener;
 
 use BackBuilder\ClassContent\AClassContent,
     BackBuilder\Event\Event;
 
+/**
+ * Listener to Cache events
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\Event
+ * @subpackage  Listener
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ */
 class CacheListener
 {
 
@@ -19,14 +47,18 @@ class CacheListener
         $content = $event->getTarget();
         if (!is_a($content, 'BackBuilder\ClassContent\AClassContent'))
             return;
-        if ($content->isElementContent())
-            return;
+//        if ($content->isElementContent())
+//            return;
 
         if (0 !== $application->getController()->getRequest()->request->count())
             return;
 
-        if (NULL === $lifetime = $content->getProperty('cache-lifetime'))
+        if (NULL === $lifetime = $content->getProperty('cache-lifetime')) {
             $lifetime = 0;
+        }
+
+        $application->debug('Cache lifetime defined : ' . $lifetime);
+
         if (0 > $lifetime)
             return;
 
@@ -47,7 +79,6 @@ class CacheListener
         }
 
         $cache_uid = md5($unencrypted_uid);
-//        $cache_uid = md5($content->getUid().'-'.$renderer->getMode());
         if (false !== $data = $application->getCacheControl()->load($cache_uid)) {
             $application->debug(sprintf('Found cache for rendering `%s(%s)` with mode `%s`.', get_class($content), $content->getUid(), $renderer->getMode()));
             $renderer->setRender($data);
@@ -67,8 +98,8 @@ class CacheListener
         $content = $event->getTarget();
         if (!is_a($content, 'BackBuilder\ClassContent\AClassContent'))
             return;
-        if ($content->isElementContent())
-            return;
+//        if ($content->isElementContent())
+//            return;
 
         if (0 !== $application->getController()->getRequest()->request->count())
             return;
@@ -78,8 +109,12 @@ class CacheListener
         if (!is_a($renderer, 'BackBuilder\Renderer\ARenderer'))
             return;
 
-        if (NULL === $lifetime = $content->getProperty('cache-lifetime'))
+        if (NULL === $lifetime = $content->getProperty('cache-lifetime')) {
             $lifetime = 0;
+        }
+
+        $application->debug('Cache lifetime defined : ' . $lifetime);
+
         if (0 > $lifetime)
             return;
 
@@ -100,8 +135,6 @@ class CacheListener
             }
         }
         $render = array_shift($args);
-        //$cache_uid = md5($content->getUid().'-'.$renderer->getMode());
-
         $unencrypted_uid = $content->getUid() . '-' . $renderer->getMode();
         if (NULL !== $param = $content->getProperty('cache-param')) {
             if (array_key_exists('query', $param)) {
@@ -127,8 +160,8 @@ class CacheListener
         $content = $event->getTarget();
         if (!is_a($content, 'BackBuilder\ClassContent\AClassContent'))
             return;
-        if ($content->isElementContent())
-            return;
+//        if ($content->isElementContent())
+//            return;
 
         if (false === is_a($application->getCacheControl(), 'BackBuilder\Cache\AExtendedCache')) {
             return;
@@ -136,9 +169,8 @@ class CacheListener
 
         $application->getCacheControl()->removeByTag(array($content->getUid()));
 
-        if ($parentUids = $application->getEntityManager()->getrepository(get_class($content))->getParentContentUid($content)) {
-            $application->getCacheControl()->removeByTag($parentUids);
-        }
+        $parentUids = $application->getEntityManager()->getrepository(get_class($content))->getParentContentUid($content);
+        $application->getCacheControl()->removeByTag($parentUids);
     }
 
 }

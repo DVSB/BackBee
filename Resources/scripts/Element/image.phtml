@@ -1,1 +1,1 @@
-<img <?php echo $this->datacontent(); ?> src="<?php echo $this->getUri('/images/'.$this->path); ?>"  alt="<?php echo $this->getParam('title'); ?>">
+<img <?php echo $this->datacontent(); ?> src="<?php echo $this->getUri('/images/'.substr($this->path, 0, strrpos($this->path, '.')).'/'.$this->originalname); ?>"  alt="<?php echo $this->getParam('title'); ?>">

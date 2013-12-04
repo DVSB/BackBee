@@ -3,7 +3,7 @@ bb.contentPluginsManager = (function(){
     var pluginsContainer = {}; 
     var pluginsInstanceContainer = {}; 
     var _settings = {
-        pluginPath: "/js/bb5contentplugins/",
+        pluginPath: bb.baseurl+bb.resourcesdir+"js/bb5contentplugins/",
         actionContainerClass: ".bb5-content-actions",
         pluginActionCls: "plugin-action"
 

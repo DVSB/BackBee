@@ -1,13 +1,41 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Site\Repository;
 
 use BackBuilder\BBApplication,
     BackBuilder\Site\Layout,
     BackBuilder\Util\File;
-
 use Doctrine\ORM\EntityRepository;
 
-class LayoutRepository extends EntityRepository {
+/**
+ * @category    BackBuilder
+ * @package     BackBuilder\Site
+ * @subpackage  Repository
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ */
+class LayoutRepository extends EntityRepository
+{
+
     /**
      * Draw a filled rect on image
      *
@@ -18,15 +46,11 @@ class LayoutRepository extends EntityRepository {
      * @param boolean $nowpadding If true don't insert a right padding
      * @param boolean $nohpadding If true don't insert a bottom padding
      */
-    private function _drawRect(&$image, $clip, $background, $nowpadding = true, $nohpadding = true) {
-        imagefilledrectangle($image,
-                             $clip[0],
-                             $clip[1],
-                             $clip[0] + $clip[2] - (!$nowpadding*1),
-                             $clip[1] + $clip[3] - (!$nohpadding*1),
-                             $background);
+    private function _drawRect(&$image, $clip, $background, $nowpadding = true, $nohpadding = true)
+    {
+        imagefilledrectangle($image, $clip[0], $clip[1], $clip[0] + $clip[2] - (!$nowpadding * 1), $clip[1] + $clip[3] - (!$nohpadding * 1), $background);
     }
-    
+
     /**
      * Draw a final layout zone on its thumbnail
      *
@@ -39,39 +63,40 @@ class LayoutRepository extends EntityRepository {
      * @param boolean $lastChild   True if the current node is the last child of its parent node
      * @return int The new X axis position;
      */
-    private function _drawThumbnailZone(&$thumbnail, $node, $clip, $background, $gridcolumn, $lastChild = false) {
+    private function _drawThumbnailZone(&$thumbnail, $node, $clip, $background, $gridcolumn, $lastChild = false)
+    {
         $x = $clip[0];
         $y = $clip[1];
         $width = $clip[2];
         $height = $clip[3];
-        
+
         if (NULL !== $spansize = preg_replace('/[^0-9]+/', '', $node->getAttribute('class')))
             $width = floor($width * $spansize / $gridcolumn);
-        
+
         if (FALSE !== strpos($node->getAttribute('class'), 'Child'))
             $height = floor($height / 2);
-        
+
         if (!$node->hasChildNodes()) {
             $this->_drawRect($thumbnail, array($x, $y, $width, $height), $background, ($width == $clip[2] || strpos($node->getAttribute('class'), 'hChild')), $lastChild);
-            return $width+2;
+            return $width + 2;
         }
-        
-        foreach($node->childNodes as $child) {
+
+        foreach ($node->childNodes as $child) {
             if (is_a($child, 'DOMText'))
                 continue;
-            
+
             if ('clear' == $child->getAttribute('class')) {
                 $x = $clip[0];
                 $y = $clip[1] + floor($height / 2) + 2;
                 continue;
             }
-            
+
             $x += $this->_drawThumbnailZone($thumbnail, $child, array($x, $y, $clip[2], $height), $background, $gridcolumn, $node->isSameNode($node->parentNode->lastChild));
         }
-        
+
         return $x + $width - 2;
     }
-    
+
     /**
      * Generate a layout thumbnail according to the configuration
      *
@@ -80,91 +105,107 @@ class LayoutRepository extends EntityRepository {
      * @param BBApplication $app The current instance of BBApplication
      * @return mixed FALSE if something wrong, the ressource path of the thumbnail elsewhere
      */
-    public function generateThumbnail(Layout $layout, BBApplication $app) {
+    public function generateThumbnail(Layout $layout, BBApplication $app)
+    {
         // Is the layout valid ?
-        if (!$layout->isValid()) return FALSE;
-        
+        if (!$layout->isValid())
+            return FALSE;
+
         // Is some layout configuration existing ?
-        if (NULL === $app->getConfig()->getSection('layout')) return FALSE;
+        if (NULL === $app->getConfig()->getSection('layout'))
+            return FALSE;
         $layoutconfig = $app->getConfig()->getSection('layout');
-        
+
         // Is some thumbnail configuration existing ?
-        if (!isset($layoutconfig['thumbnail'])) return FALSE;
+        if (!isset($layoutconfig['thumbnail']))
+            return FALSE;
         $thumbnailconfig = $layoutconfig['thumbnail'];
-        
+
         // Is gd available ?
-        if (!function_exists('gd_info')) return FALSE;
+        if (!function_exists('gd_info'))
+            return FALSE;
         $gd_info = gd_info();
-        
+
         // Is the selected format supported by gd ?
-        if (!isset($thumbnailconfig['format'])) return FALSE;
-        if (TRUE !== $gd_info[strtoupper($thumbnailconfig['format']).' Support']) return FALSE;
-        
+        if (!isset($thumbnailconfig['format']))
+            return FALSE;
+        if (TRUE !== $gd_info[strtoupper($thumbnailconfig['format']) . ' Support'])
+            return FALSE;
+
         // Is the template file existing ?
-        if (!isset($thumbnailconfig['template'])) return FALSE;
+        if (!isset($thumbnailconfig['template']))
+            return FALSE;
         $templatefile = $thumbnailconfig['template'];
         $thumbnaildir = dirname($templatefile);
         File::resolveFilepath($templatefile, NULL, array('include_path' => $app->getResourceDir()));
-        if (FALSE === file_exists($templatefile) || false === is_readable($templatefile)) return FALSE;
-        
+        if (FALSE === file_exists($templatefile) || false === is_readable($templatefile))
+            return FALSE;
+
         try {
-            $gd_function = 'imagecreatefrom'.strtolower($thumbnailconfig['format']);
+            $gd_function = 'imagecreatefrom' . strtolower($thumbnailconfig['format']);
             $thumbnail = $gd_function($templatefile);
-            $thumbnailfile = $thumbnaildir.'/'.$layout->getUid().'.'.strtolower($thumbnailconfig['format']);
-            
+            $thumbnailfile = $thumbnaildir . '/' . $layout->getUid() . '.' . strtolower($thumbnailconfig['format']);
+
             // Is a background color existing ?
-            if (!isset($thumbnailconfig['background']) || !is_array($thumbnailconfig['background']) || 3 != count($thumbnailconfig['background'])) return FALSE;
-            $background = imagecolorallocate($thumbnail, $thumbnailconfig['background'][0],  $thumbnailconfig['background'][1],  $thumbnailconfig['background'][2]);
-            
+            if (!isset($thumbnailconfig['background']) || !is_array($thumbnailconfig['background']) || 3 != count($thumbnailconfig['background']))
+                return FALSE;
+            $background = imagecolorallocate($thumbnail, $thumbnailconfig['background'][0], $thumbnailconfig['background'][1], $thumbnailconfig['background'][2]);
+
             // Is a clipping zone existing ?
-            if (!isset($thumbnailconfig['clip']) || !is_array($thumbnailconfig['clip']) || 4 != count($thumbnailconfig['clip'])) return FALSE;
-            
+            if (!isset($thumbnailconfig['clip']) || !is_array($thumbnailconfig['clip']) || 4 != count($thumbnailconfig['clip']))
+                return FALSE;
+
             $gridcolumn = 12;
             if (NULL !== $lessconfig = $app->getConfig()->getSection('less')) {
-                if (isset($lessconfig['gridcolumn'])) $gridcolumn = $lessconfig['gridcolumn'];
+                if (isset($lessconfig['gridcolumn']))
+                    $gridcolumn = $lessconfig['gridcolumn'];
             }
-            
+
             $domlayout = $layout->getDomDocument();
             if (!$domlayout->hasChildNodes() || !$domlayout->firstChild->hasChildNodes())
                 $this->_drawRect($thumbnail, $thumbnailconfig['clip'], $background);
             else
                 $this->_drawThumbnailZone($thumbnail, $domlayout->firstChild, $thumbnailconfig['clip'], $background, $gridcolumn);
-            
+
             imagesavealpha($thumbnail, TRUE);
-            
-            $thumbnaildir = dirname(File::normalizePath($app->getCurrentResourceDir().'/'.$thumbnailfile));
-            if (false === is_dir($thumbnaildir)) mkdir($thumbnaildir, 0755, true);
-            
-            imagepng($thumbnail, File::normalizePath($app->getCurrentResourceDir().'/'.$thumbnailfile));
-        } catch (\Exception $e) { return FALSE; }
-        
+
+            $thumbnaildir = dirname(File::normalizePath($app->getCurrentResourceDir() . '/' . $thumbnailfile));
+            if (false === is_dir($thumbnaildir))
+                mkdir($thumbnaildir, 0755, true);
+
+            imagepng($thumbnail, File::normalizePath($app->getCurrentResourceDir() . '/' . $thumbnailfile));
+        } catch (\Exception $e) {
+            return FALSE;
+        }
+
         $layout->setPicPath($thumbnailfile);
-        
+
         return $layout->getPicPath();
     }
-    
+
     public function removeThumbnail(Layout $layout, BBApplication $app)
     {
         $thumbnailfile = $layout->getPicPath();
         File::resolveFilepath($thumbnailfile, NULL, array('include_path' => $app->getResourceDir()));
-        
+
         while (TRUE === file_exists($thumbnailfile) && TRUE === is_writable($thumbnailfile)) {
             @unlink($thumbnailfile);
-            
+
             $thumbnailfile = $layout->getPicPath();
             File::resolveFilepath($thumbnailfile, NULL, array('include_path' => $app->getResourceDir()));
         }
-        
+
         return TRUE;
     }
-    
+
     /**
      * Returns layout models
      *
      * @access public
      * @return array Array of Layout
      */
-    public function getModels() {
+    public function getModels()
+    {
         try {
             $q = $this->createQueryBuilder('l')
                     ->where('l._site IS NULL')
@@ -177,4 +218,5 @@ class LayoutRepository extends EntityRepository {
             return null;
         }
     }
+
 }

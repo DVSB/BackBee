@@ -1,4 +1,24 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Importer\Connector;
 
 use BackBuilder\BBApplication,
@@ -7,23 +27,25 @@ use BackBuilder\BBApplication,
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\Importer\Connector
+ * @package     BackBuilder\Importer
+ * @subpackage  Connector
  * @copyright   Lp digital system
- * @author      c.rouillon
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class FileSystem implements IImporterConnector
 {
+
     /**
      * @var BackBuilder\BBApplication
      */
     private $_application;
-    
+
     /**
      * The base directory where to look for files
      * @var string
      */
     private $_basedir;
-    
+
     /**
      * Class constructor
      * @param \BackBuilder\BBApplication $application
@@ -33,7 +55,7 @@ class FileSystem implements IImporterConnector
     {
         $this->_application = $application;
         $this->_config = $config;
-        
+
         if (true === array_key_exists('basedir', $config)) {
             $this->_basedir = $config['basedir'];
             File::resolveFilepath($this->_basedir, NULL, array('include_path' => $this->_application->getRepository()));
@@ -52,7 +74,8 @@ class FileSystem implements IImporterConnector
     {
         $values = glob($this->_basedir . DIRECTORY_SEPARATOR . $pattern);
         sort($values);
-        
+
         return $values;
     }
+
 }

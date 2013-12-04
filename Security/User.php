@@ -1,19 +1,36 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Security;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * User object in BackBuilder 4
- *
- * A user is...
+ * User object in BackBuilder5
  *
  * @category    BackBuilder
  * @package     BackBuilder\Security
- * @copyright   Lp system
- * @author      m.baptista
+ * @copyright   Lp digital system
+ * @author      m.baptista <michel.baptista@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Security\Repository\UserRepository")
  * @Table(name="user")
  * @fixtures(qty=20)
@@ -265,7 +282,7 @@ class User implements UserInterface
         $this->_groups = $groups;
         return $this;
     }
-    
+
     /**
      * @param Group $group
      * @return User
@@ -276,8 +293,6 @@ class User implements UserInterface
         $this->_groups->add($group);
         return $this;
     }
-    
-    
 
     /**
      * @return array()
