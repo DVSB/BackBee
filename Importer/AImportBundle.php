@@ -48,8 +48,8 @@ abstract class AImportBundle
 
     public function __call($name, $arguments)
     {
-        $config = $arguments[0];
-        $key = (strpos($name, 'import') === 0) ? strtolower(str_replace('import', '', $name)) : '';
+        $config = reset($arguments);
+        $key = (0 === strpos($name, 'import')) ? strtolower(str_replace('import', '', $name)) : '';
         if ($key !== '') {
             $connectorName = '\BackBuilder\Importer\Connector\\' . $config['connector'];
 

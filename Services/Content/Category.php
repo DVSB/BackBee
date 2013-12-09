@@ -1,20 +1,36 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Services\Content;
 
 use Symfony\Component\Yaml\Yaml as parserYaml,
     BackBuilder\Services\Content\ContentRender,
     BackBuilder\Util\File;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of Category
- *
- * @author Nicolas BREMONT<nicolas.bremont@group-lp.com>
+ * @category    BackBuilder
+ * @package     BackBuilder\Services
+ * @subpackage  Content
+ * @copyright   Lp digital system
+ * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  */
 class Category
 {
@@ -192,7 +208,7 @@ class Category
         $categories = array("tous" => new Category("Tous", $application, true));
         foreach ($application->getClassContentDir() as $classcontentdir) {
             //$files = self::globRecursive($classcontentdir . DIRECTORY_SEPARATOR . '*.yml');
-            $files = glob($classcontentdir. DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]', GLOB_BRACE);
+            $files = glob($classcontentdir . DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]', GLOB_BRACE);
             if (is_array($files)) {
                 $categories = array_merge($categories, self::getFilesCategory($files));
             }

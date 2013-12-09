@@ -1,5 +1,24 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\NestedNode;
 
 use BackBuilder\Exception\BBException,
@@ -30,10 +49,11 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @category    BackBuilder
  * @package     BackBuilder\NestedNode
  * @copyright   Lp digital system
- * @author      c.rouillon <rouillon.charles@gmail.com>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
  * @Table(name="page")
  * @HasLifecycleCallbacks
+ * @fixtures(qty=1)
  */
 class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 {
@@ -84,6 +104,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Unique identifier of the page
      * @var string
      * @Id @Column(type="string", name="uid")
+     * @fixture(type="md5")
      */
     protected $_uid;
 
@@ -123,6 +144,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The title of this page
      * @var string
      * @Column(type="string", name="title", nullable=false)
+     * @fixture(type="sentence", value=6)
      */
     protected $_title;
 
@@ -150,7 +172,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Metadatas associated to the page
      * @var \BackBuilder\MetaData\MetaDataBag
-     * @Column(type="array", name="metadata", nullable=true)
+     * @Column(type="object", name="metadata", nullable=true)
      */
     protected $_metadata;
 
@@ -166,6 +188,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The publication datetime
      * @var \DateTime
      * @Column(type="datetime", name="date", nullable=true)
+     * @fixture(type="dateTime")
      */
     protected $_date;
 
@@ -173,6 +196,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The state of the page
      * @var int
      * @Column(type="smallint", name="state", nullable=false)
+     * @fixture(type="boolean")
      */
     protected $_state;
 
@@ -554,14 +578,14 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function isOnline($ignoreSchedule = false)
     {
         if (true === $ignoreSchedule) {
-        return (($this->getState() & self::STATE_ONLINE)
+            return (($this->getState() & self::STATE_ONLINE)
                     && !($this->getState() & self::STATE_DELETED));
         } else {
             return (($this->getState() & self::STATE_ONLINE)
-                && !($this->getState() & self::STATE_DELETED)
-                && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
-                && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert));
-    }
+                    && !($this->getState() & self::STATE_DELETED)
+                    && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
+                    && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert));
+        }
     }
 
     /**
@@ -603,6 +627,18 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function setContentset(ContentSet $contentset)
     {
         $this->_contentset = $contentset;
+        return $this;
+    }
+
+    /**
+     * Sets the date of the page
+     * @codeCoverageIgnore
+     * @param \DateTime $date
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setDate(\DateTime $date)
+    {
+        $this->_date = $date;
         return $this;
     }
 

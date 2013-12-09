@@ -1,5 +1,24 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Renderer\Helper;
 
 use BackBuilder\ClassContent\ContentSet;
@@ -7,7 +26,8 @@ use BackBuilder\ClassContent\ContentSet;
 /**
  * Helper providing HTML attributes to online-edited content
  * 
- * If a valid BB5 user is rendering the content following attributes would be sets :
+ * If a valid BB5 user is rendering the content and parameter bb5.editable not 
+ * set to false following attributes would be sets :
  *   * data-uid:            The unique identifier of the content
  *   * data-parent:         The unique identifier of the content owner
  *   * data-draftuid:       The unique identifier of the revision
@@ -22,9 +42,10 @@ use BackBuilder\ClassContent\ContentSet;
  *   * data-contentplugins: The edting plugins to load
  * 
  * @category    BackBuilder
- * @package     BackBuilder\Renderer\Helper
+ * @package     BackBuilder\Renderer
+ * @subpackage  Helper
  * @copyright   Lp digital system
- * @author      c.rouillon <rouillon.charles@gmail.com>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class datacontent extends AHelper
 {
@@ -67,8 +88,11 @@ class datacontent extends AHelper
 
         // Store initial basic attributes to content
         $this->_basic_attributes = $this->_attributes;
+
         // If a valid BB user is granted to access this content
-        if (null !== $this->_content && true === $this->_isGranted()) {
+        if (null !== $this->_content
+                && true === $this->_isGranted()
+                && false !== $this->_renderer->getParam('bb5.editable')) {
             $this->_addCommonContentMarkup($params)
                     ->_addContentSetMarkup($params)
                     ->_addClassContainerMarkup($params)

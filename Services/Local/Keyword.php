@@ -1,18 +1,44 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\Services\Auth\Auth,
-    BackBuilder\Services\Local\AbstractServiceLocal,
-    BackBuilder\Util\String;
+use BackBuilder\Services\Local\AbstractServiceLocal;
 
-class Keyword extends AbstractServiceLocal {
+/**
+ * @category    BackBuilder
+ * @package     BackBuilder\Services
+ * @subpackage  Local
+ * @copyright   Lp digital system
+ * @author      n.bremont <nicolas.bremont@lp-digital.fr>
+ */
+class Keyword extends AbstractServiceLocal
+{
 
     /**
      * @exposed(secured=true)
      * 
      */
-    public function getKeywordTree($root_uid) {
+    public function getKeywordTree($root_uid)
+    {
         $em = $this->bbapp->getEntityManager();
         $tree = array();
         if ($root_uid && $root_uid !== null) {
@@ -59,7 +85,8 @@ class Keyword extends AbstractServiceLocal {
      * @exposed : true
      * @secured : true
      */
-    public function postKeywordForm($keywordInfos) {
+    public function postKeywordForm($keywordInfos)
+    {
         $keywordInfos = (object) $keywordInfos;
         $mode = $keywordInfos->mode;
         $em = $this->bbapp->getEntityManager();
@@ -95,7 +122,8 @@ class Keyword extends AbstractServiceLocal {
      * @exposed : true
      * @secured : true
      */
-    public function deleteKeyword($keywordId) {
+    public function deleteKeyword($keywordId)
+    {
         if (!isset($keywordId))
             throw new ServicesException(sprintf("Keyword can't be null"));
         $result = false;
@@ -113,7 +141,8 @@ class Keyword extends AbstractServiceLocal {
      * @exposed : true
      * @secured : true
      */
-    public function getKeywordsList() {
+    public function getKeywordsList()
+    {
         $em = $this->bbapp->getEntityManager();
         $root = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->getRoot();
         $keywordList = $em->getRepository("\BackBuilder\NestedNode\KeyWord")->getDescendants($root);
@@ -130,7 +159,8 @@ class Keyword extends AbstractServiceLocal {
         return $keywordContainer;
     }
 
-    public function getKeywordByIds() {
+    public function getKeywordByIds()
+    {
         $em = $this->bbapp->getEntityManager();
     }
 

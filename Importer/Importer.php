@@ -1,4 +1,23 @@
 <?php
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Importer;
 
 use BackBuilder\BBApplication,
@@ -7,7 +26,7 @@ use BackBuilder\BBApplication,
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Importer
- * @copyright   Lp system
+ * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class Importer
@@ -49,9 +68,9 @@ class Importer
         $entities = array();
         if (count($values) == 0) {return;}
         foreach ($values as $value) {
-            if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
+            //if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
                 $entities[] = $this->getConverter()->convert($value);
-            }
+            //}
             if (++$i === $flush_every) {
                 $this->save($entities, $check_for_existing);
                 $i = 0;
@@ -79,6 +98,7 @@ class Importer
         $converter->setBBEntity($config['entity_class']);
         $converter->beforeImport($this, $config);
         $em = $this->_application->getEntityManager();
+        
         $table_name = $em->getClassMetadata($config['entity_class'])->getTableName();
         $where_clause = array_key_exists('where_clause', $config) ? $config['where_clause'] : 1;
         $id_label = array_key_exists('id_label', $config) ? $config['id_label'] : 'uid';
@@ -131,13 +151,16 @@ class Importer
     {
         $id_label = 'get' . ucfirst(array_key_exists('id_label', $this->_import_config) ? $this->_import_config['id_label'] : 'uid');
 
-        \BackBuilder\Util\Buffer::dump('Saving...' . "\n");
+        \BackBuilder\Util\Buffer::dump('Saving...' . "\n");$i= 0;
         foreach ($entities as $entity) {
-//            if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
-//                $this->_application->getEntityManager()->persist($entity);
-//            }
-            $this->_application->getEntityManager()->persist($entity);
+            //if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
+            //  $this->_application->getEntityManager()->persist($entity);
+            //}
+            if (null !== $entity && false === $this->_application->getEntityManager()->contains($entity)) {
+                $this->_application->getEntityManager()->persist($entity);
+            }
         }
+
         $this->_application->getEntityManager()->flush();
         $this->getConverter()->afterEntitiesFlush($this, $entities);
         $this->flushMemory();

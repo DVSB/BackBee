@@ -1,51 +1,77 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Theme;
 
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Theme
- * @copyright   Lp system
- * @author      n.dufreche
+ * @copyright   Lp digital system
+ * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 abstract class AThemeEntity implements IThemeEntity
 {
+
     /**
      * Unique identifier of the object
      * @var string
      */
     protected $_uid;
+
     /**
      * Site identifier
      * @var string
      */
     protected $_site_uid;
+
     /**
      * Name of the theme
      * @var string
      */
     protected $_name;
+
     /**
      * Name of the theme
      * @var string
      */
     protected $_description;
+
     /**
      * Graphic representation of the theme
      * @var string
      */
     protected $_screenshot;
+
     /**
      * Name of the folder theme
      * @var string
      */
     protected $_folder_name;
+
     /**
      * Architecture of the folder theme
      * @var string
      * @column(type="string", name="architecture")
      */
     protected $_architecture;
- 
 
     /**
      * Return the Unique identifier of the current theme
@@ -204,7 +230,7 @@ abstract class AThemeEntity implements IThemeEntity
         return $this;
     }
 
-     /**
+    /**
      * Return the theme architecture
      *
      * @return array
@@ -212,7 +238,7 @@ abstract class AThemeEntity implements IThemeEntity
      */
     public function getArchitecture()
     {
-        return (array)json_decode($this->_architecture);
+        return (array) json_decode($this->_architecture);
     }
 
     /**
@@ -227,4 +253,5 @@ abstract class AThemeEntity implements IThemeEntity
         $this->_architecture = json_encode($folder_architecture);
         return $this;
     }
+
 }

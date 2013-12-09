@@ -1,10 +1,28 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Site\Repository;
 
 use BackBuilder\Site\UserPreferences;
-
 use Doctrine\ORM\EntityRepository;
-
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
@@ -13,26 +31,24 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
  * User preferences persistence
  *
  * @category    BackBuilder
- * @package     BackBuilder\Site\
- * @copyright   Lp system
- * @author      n.dufreche
+ * @package     BackBuilder\Site
+ * @subpackage  Repository
+ * @copyright   Lp digital system
+ * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class UserPreferencesRepository extends EntityRepository {
+class UserPreferencesRepository extends EntityRepository
+{
 
     /**
      * Retrieve the user prefernces by security token.
      *
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return UserPreferences object
      */
-    public function loadPreferences($token)
+    public function loadPreferences(TokenInterface $token)
     {
-        if ($token instanceof TokenInterface) {
-            $uid = $this->retrieveUserPreferencesUid($token);
-        } else {
-            $uid = $token;
-        }
-        return $this->retrieveByUid($uid, $token->getUser());
+        return $this->retrieveByUid($this->retrieveUserPreferencesUid($token), $token->getUser());
     }
 
     /**
@@ -44,12 +60,13 @@ class UserPreferencesRepository extends EntityRepository {
      */
     public function retrieveUserPreferencesUid(TokenInterface $token)
     {
-        return md5((string)$token->getUser());
+        return md5((string) $token->getUser());
     }
 
     /**
      * Set the user preferences.
      *
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param string $preferences
      */
@@ -57,7 +74,6 @@ class UserPreferencesRepository extends EntityRepository {
     {
         $user_preferences = $this->loadPreferences($token);
         return $user_preferences->setPreferences($preferences);
-
     }
 
     /**
@@ -73,7 +89,7 @@ class UserPreferencesRepository extends EntityRepository {
             $q = $this->createQueryBuilder('up')
                     ->andWhere('up._uid = :uid')
                     ->setParameters(array(
-                        'uid' => $uid
+                'uid' => $uid
                     ));
             return $q->getQuery()->getSingleResult();
         } catch (\Exception $e) {
@@ -86,4 +102,5 @@ class UserPreferencesRepository extends EntityRepository {
             return $user_preference;
         }
     }
+
 }

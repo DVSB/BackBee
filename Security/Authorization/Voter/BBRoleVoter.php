@@ -1,30 +1,42 @@
 <?php
 
 /*
- * This file is part of the Symfony package.
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
  *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Security\Authorization\Voter;
 
 use BackBuilder\Security\Authorization\Adaptator\IRoleReaderAdaptator;
-
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
     Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Security
- * @copyright   Lp system
+ * @subpackage  Authorization\Voter
+ * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class BBRoleVoter implements VoterInterface
 {
+
     private $_prefix;
+
     /**
      * @var \BackBuilder\Security\Authentication\Adaptator\IRoleReaderAdaptator 
      */
@@ -39,7 +51,6 @@ class BBRoleVoter implements VoterInterface
     {
         $this->_prefix = $prefix;
         $this->_adaptator = $adaptator;
-        
     }
 
     /**
@@ -86,4 +97,5 @@ class BBRoleVoter implements VoterInterface
     {
         return $this->_adaptator->extractRoles($token);
     }
+
 }

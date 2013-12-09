@@ -1,21 +1,37 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Renderer\Helper;
 
-use BackBuilder\Renderer\ARenderer;
 use BackBuilder\Renderer\Exception\RendererException;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of date
- *
- * @author nicolas
+ * @category    BackBuilder
+ * @package     BackBuilder\Renderer
+ * @subpackage  Helper
+ * @copyright   Lp digital system
+ * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  */
-class dateHelper extends AHelper {
+class dateHelper extends AHelper
+{
 
     private static $DATE_ERROR = 0;
     private static $DATE_TIMESTAMP = 1;
@@ -29,7 +45,8 @@ class dateHelper extends AHelper {
     private $date;
     private $culture;
 
-    private function initFormat($format = NULL) {
+    private function initFormat($format = NULL)
+    {
         if (NULL === $format) {
             $configDate = $this->_renderer->getApplication()->getConfig()->getDateConfig();
 
@@ -42,7 +59,8 @@ class dateHelper extends AHelper {
             $this->format = $format;
     }
 
-    private function initCulture($culture = NULL) {
+    private function initCulture($culture = NULL)
+    {
         if (NULL !== $culture) {
             $configCulture = $this->_renderer->getApplication()->getConfig()->getCultureConfig();
             if (array_key_exists('default', $configCulture))
@@ -54,7 +72,8 @@ class dateHelper extends AHelper {
             $this->culture = $culture;
     }
 
-    private function initTimezone($timezone = NULL) {
+    private function initTimezone($timezone = NULL)
+    {
         if (NULL === $timezone) {
             $config = $this->_renderer->getApplication()->getConfig()->getDateConfig();
             if (array_key_exists('timezone', $config))
@@ -66,7 +85,8 @@ class dateHelper extends AHelper {
             $this->timezone = $timezone;
     }
 
-    private function getType($date) {
+    private function getType($date)
+    {
         if (is_a($date, "DateTime"))
             return self::$DATE_OBJECT;
         if (preg_match('/^[\d]{4}-[\d]{2}-[\d]{2}$/', $date))
@@ -78,7 +98,8 @@ class dateHelper extends AHelper {
         return self::$DATE_ERROR;
     }
 
-    private function setDateTime($date = "") {
+    private function setDateTime($date = "")
+    {
         $type = $this->getType($date);
 
         switch ($type) {
@@ -109,7 +130,8 @@ class dateHelper extends AHelper {
         }
     }
 
-    private function initDateTimezone($date, $format = NULL, $timezone = NULL, $culture = NULL) {
+    private function initDateTimezone($date, $format = NULL, $timezone = NULL, $culture = NULL)
+    {
         $this->setDateTime($date);
         $this->initFormat($format);
         $this->initTimezone($timezone);
@@ -123,7 +145,8 @@ class dateHelper extends AHelper {
      * @param string $timezone
      * @return string 
      */
-    public function __invoke($date = NULL, $format = NULL, $timezone = NULL, $culture = NULL) {
+    public function __invoke($date = NULL, $format = NULL, $timezone = NULL, $culture = NULL)
+    {
         if (NULL === $date)
             return '';
 
@@ -131,7 +154,8 @@ class dateHelper extends AHelper {
         return $this->getDate($format, $timezone, $culture);
     }
 
-    public function getDate($format = NULL, $timezone = NULL, $culture = NULL) {
+    public function getDate($format = NULL, $timezone = NULL, $culture = NULL)
+    {
         if (NULL === $this->date)
             return '';
         if (NULL !== $this->timezone)
