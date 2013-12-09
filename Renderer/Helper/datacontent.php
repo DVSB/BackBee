@@ -164,6 +164,7 @@ class datacontent extends AHelper
                 // @todo Add test on resizable (new forbiddenaction ?)
                 //$this->_addValueToAttribute('class', $this->_getClassMarkup('
                 //'));
+               $this->_addValueToAttribute('class', $this->_getClassMarkup('resizableclass'));
             }
         }
 
