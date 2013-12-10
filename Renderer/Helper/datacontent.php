@@ -183,12 +183,12 @@ class datacontent extends AHelper
             if ($class_container instanceof ContentSet) {
                 if (false === ($this->_content instanceof \BackBuilder\ClassContent\Bloc\autobloc)) {
                     $this->_addValueToAttribute('class', $this->_getClassMarkup('draggableclass'));
+                    $this->_addValueToAttribute('class', $this->_getClassMarkup('resizableclass'));
                 }
 
                 // @todo Add test on resizable (new forbiddenaction ?)
                 //$this->_addValueToAttribute('class', $this->_getClassMarkup('
                 //'));
-               $this->_addValueToAttribute('class', $this->_getClassMarkup('resizableclass'));
             }
         }
 

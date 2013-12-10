@@ -928,6 +928,10 @@ var ResizableItem = function(userSettings){
             this.resizableId = bb.Utils.generateId("resizableContent");
             $(this._element).attr("resizableId",this.resizableId);
             this._itemSize = this._readSize(this._element);
+            if(!this._itemSize){
+                this._itemSize = $(this._element).outerWidth(true)/settings.gridStep;
+            }
+            
             this._bindResizableEvent(); 
         } 
     }
