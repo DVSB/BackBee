@@ -103,6 +103,57 @@ class Arrays
         return str_replace('&', '&amp;', self::convertChild($array));
     }
 
+    /**
+     * [array_diff_assoc_recursive description]
+     * 
+     * @param  array $array1 
+     * @param  array $array2 
+     * @return array         
+     */
+    public static function array_diff_assoc_recursive(array $array1, array $array2) 
+    {
+        $diff = array();
+        foreach ($array1 as $key => $value) {
+            if (true === is_array($value)) {
+                if(false === isset($array2[$key]) || false === is_array($array2[$key])) {
+                    $diff[$key] = $value;
+                } else {
+                    $newDiff = self::array_diff_assoc_recursive($value, $array2[$key]);
+                    if(false === empty($newDiff)) {
+                        $diff[$key] = $newDiff;
+                    }
+                }
+            } elseif (false === array_key_exists($key,$array2) || $array2[$key] !== $value) {
+                $diff[$key] = $value;
+            }
+        }
+
+        return $diff;
+    }
+
+    /**
+     * [array_merge_assoc_recursive description]
+     * 
+     * @param  array $array1 
+     * @param  array $array2 
+     * @return array         
+     */
+    public static function array_merge_assoc_recursive($array1, $array2) 
+    {
+        foreach ($array2 as $key => $value) {
+            if (false === array_key_exists($key, $array1)) {
+                $array1[$key] = $value;
+            } elseif (true === is_array($value)) {
+                $array1[$key] = self::array_merge_assoc_recursive($array1[$key], $array2[$key]);
+            } else {
+                $array1[$key] = $value;
+            }
+
+        }
+
+        return $array1;
+    }
+
     private static function convertChild(array $array)
     {
         $return = '';
@@ -161,5 +212,4 @@ class Arrays
         }
         return $return;
     }
-
 }

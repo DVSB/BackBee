@@ -25,8 +25,11 @@ use BackBuilder\BBApplication,
     BackBuilder\Config\Config,
     BackBuilder\Routing\RouteCollection as Routing,
     BackBuilder\Logging\Logger,
-    BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
-use Symfony\Component\Security\Core\Util\ClassUtils;
+    BackBuilder\Security\Acl\Domain\IObjectIdentifiable,
+    BackBuilder\Util\Arrays;
+
+use Symfony\Component\Security\Core\Util\ClassUtils,
+    Symfony\Component\Yaml\Yaml;
 
 /**
  * Abstract class for bundle in BackBuilder5 application
@@ -38,7 +41,6 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  */
 abstract class ABundle implements IObjectIdentifiable, \Serializable
 {
-
     private $_id;
     private $_application;
     private $_em;
@@ -48,6 +50,17 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     private $_properties;
     private $_routing;
     private $_request;
+
+    /**
+     * @var array
+     */
+    private $configDefaultSections;
+
+    /**
+     * @var boolean
+     */
+    private $isConfigFullyInit = false;
+
 
     public function __call($method, $args)
     {
@@ -78,12 +91,34 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
     private function _initConfig($configdir = null)
     {
-        if (is_null($configdir))
+        if (is_null($configdir)) {
             $configdir = $this->getResourcesDir();
+        }
 
         $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
+        $this->configDefaultSections = $this->_config->getAllSections();
 
         return $this;
+    }
+
+    private function completeConfigInit()
+    {
+        $overrideSection = $this->_config->getSection('override_site');
+        if (null !== $overrideSection) {
+            $site = $this->getApplication()->getSite();
+            if (null !== $site && true === isset($overrideSection[$site->getUid()])) {
+                $siteConfig = $overrideSection[$site->getUid()];
+                foreach ($siteConfig as $section => $datas) {
+                    $this->_config->setSection($section, Arrays::array_merge_assoc_recursive(
+                        $this->_config->getSection($section),
+                        $siteConfig[$section]
+                    ), true);
+
+                }
+            }
+        }
+
+        $this->isConfigFullyInit = true;
     }
 
     private function _initRouting()
@@ -175,10 +210,34 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
     public function getConfig()
     {
-        if (NULL === $this->_config)
+        if (null === $this->_config) {
             $this->_initConfig();
+        }
+
+        if (false === $this->isConfigFullyInit && null !== $this->getApplication()->getSite()) {
+            $this->completeConfigInit();
+        }
 
         return $this->_config;
+    }
+
+    public function saveConfig()
+    {
+        $wipConfig = $this->_config->getAllSections();
+        $updatedSections = Arrays::array_diff_assoc_recursive($wipConfig, $this->configDefaultSections);
+
+        $overrideSection = array();
+        if (true === isset($this->configDefaultSections['override_site'])) {
+            $overrideSection = $this->configDefaultSections['override_site'];
+        }
+
+        $overrideSection[$this->getApplication()->getSite()->getUid()] = $updatedSections;
+        $this->configDefaultSections['override_site'] = $overrideSection;
+        
+        file_put_contents(
+            $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml', 
+            Yaml::dump($this->configDefaultSections)
+        );
     }
 
     public function getProperty($key = null)
@@ -277,5 +336,4 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         return ($this->getType() === $identity->getType()
                 && $this->getIdentifier() === $identity->getIdentifier());
     }
-
 }
