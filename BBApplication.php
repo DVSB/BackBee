@@ -153,12 +153,13 @@ class BBApplication
     }
 
     /**
-     *
-     * @return BackBuilder\Theme\Theme
+     * Returns the associated theme
+     * @param boolean $force_reload Force to reload the theme if TRUE
+     * @return \BackBuilder\Theme\Theme
      */
-    public function getTheme()
+    public function getTheme($force_reload = false)
     {
-        if (!is_object($this->_theme)) {
+        if (false === is_object($this->_theme) || true === $force_reload) {
             $this->_theme = new Theme($this);
         }
         return $this->_theme;
@@ -261,9 +262,9 @@ class BBApplication
         try {
             $this->getContainer()->get('em')->getConnection()->connect();
         } catch (\Exception $e) {
-            throw new Exception\DatabaseConnectionException('Enable to connect to the database.', 0, $e);            
+            throw new Exception\DatabaseConnectionException('Enable to connect to the database.', 0, $e);
         }
-        
+
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
             try {
                 $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_client = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
@@ -417,7 +418,7 @@ class BBApplication
 
         return $this->_autoloader;
     }
-    
+
     public function getBBDir()
     {
         if (NULL === $this->_bbdir) {
@@ -464,7 +465,8 @@ class BBApplication
      * Get cache provider from config
      * @return string Cache provider config name or \BackBuilder\Cache\DAO\Cache if not found
      */
-    public function getCacheProvider() {
+    public function getCacheProvider()
+    {
         $conf = $this->getConfig()->getCacheConfig();
         $defaultClass = '\BackBuilder\Cache\DAO\Cache';
         $parentClass = '\BackBuilder\Cache\AExtendedCache';
