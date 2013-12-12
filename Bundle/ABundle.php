@@ -59,6 +59,11 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     /**
      * @var boolean
      */
+    private $manageMultisiteConfig = true;
+
+    /**
+     * @var boolean
+     */
     private $isConfigFullyInit = false;
 
 
@@ -96,7 +101,16 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         }
 
         $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
-        $this->configDefaultSections = $this->_config->getAllSections();
+        $allSections = $this->_config->getAllSections();
+        $this->configDefaultSections = $allSections;
+        if (
+            true === array_key_exists('bundle', $allSections) && 
+            true === array_key_exists('manage_multisite', $allSections['bundle']) &&
+            false === $allSections['bundle']['manage_multisite']
+        ) {
+            $this->manageMultisiteConfig = false;
+        }
+
 
         return $this;
     }
@@ -214,7 +228,11 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
             $this->_initConfig();
         }
 
-        if (false === $this->isConfigFullyInit && null !== $this->getApplication()->getSite()) {
+        if (
+            true === $this->manageMultisiteConfig && 
+            false === $this->isConfigFullyInit && 
+            null !== $this->getApplication()->getSite()
+        ) {
             $this->completeConfigInit();
         }
 
@@ -223,20 +241,32 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
     public function saveConfig()
     {
+        if (false === $this->manageMultisiteConfig) {
+            $this->doSaveConfig($this->_config->getAllSections());
+            return;
+        }
+
         $wipConfig = $this->_config->getAllSections();
         $updatedSections = Arrays::array_diff_assoc_recursive($wipConfig, $this->configDefaultSections);
 
-        $overrideSection = array();
-        if (true === isset($this->configDefaultSections['override_site'])) {
-            $overrideSection = $this->configDefaultSections['override_site'];
-        }
+        if (0 < count($updatedSections)) {
+            $overrideSection = array();
+            if (true === isset($this->configDefaultSections['override_site'])) {
+                $overrideSection = $this->configDefaultSections['override_site'];
+            }
 
-        $overrideSection[$this->getApplication()->getSite()->getUid()] = $updatedSections;
-        $this->configDefaultSections['override_site'] = $overrideSection;
-        
+            $overrideSection[$this->getApplication()->getSite()->getUid()] = $updatedSections;
+            $this->configDefaultSections['override_site'] = $overrideSection;
+            
+            $this->doSaveConfig($this->configDefaultSections);
+        }
+    }
+
+    private function doSaveConfig(array $config)
+    {
         file_put_contents(
             $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml', 
-            Yaml::dump($this->configDefaultSections)
+            Yaml::dump($config)
         );
     }
 

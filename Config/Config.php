@@ -257,6 +257,11 @@ class Config
         return $this;
     }
 
+    /**
+     * Returns every sections
+     * 
+     * @return array
+     */
     public function getAllSections()
     {
         return $this->_parameters;
