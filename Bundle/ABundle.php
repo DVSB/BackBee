@@ -118,6 +118,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     private function completeConfigInit()
     {
         $overrideSection = $this->_config->getSection('override_site');
+
         if (null !== $overrideSection) {
             $site = $this->getApplication()->getSite();
             if (null !== $site && true === isset($overrideSection[$site->getUid()])) {
@@ -127,7 +128,6 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
                         $this->_config->getSection($section),
                         $siteConfig[$section]
                     ), true);
-
                 }
             }
         }
