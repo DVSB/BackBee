@@ -267,7 +267,6 @@ bb.PopupManager = (function($,gExport){
             buttons = [];
         }
         buttons.push(data);
-         console.log(buttons);
         $(this.dialog).dialog("option","buttons",buttons);
     }
     
