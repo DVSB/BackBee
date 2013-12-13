@@ -52,8 +52,14 @@ class Cache extends ACache
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache directory doesn't exist, can not
      *                                                     be created or is not writable.
      */
-    public function __construct(array $options = array(), LoggerInterface $logger = null)
+    public function __construct($options = array(), LoggerInterface $logger = null)
     {
+        if (false === is_array($options)) {
+            $options = array(
+                'cachedir' => $options
+            );
+        }
+
         parent::__construct($options, $logger);
         $this->_setOptions($options);
 
