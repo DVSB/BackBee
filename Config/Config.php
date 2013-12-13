@@ -258,6 +258,16 @@ class Config
     }
 
     /**
+     * Returns every sections
+     * 
+     * @return array
+     */
+    public function getAllSections()
+    {
+        return $this->_parameters;
+    }
+
+    /**
      * Extends the current instance with a new base directory
      * @param string $basedir Optional base directory
      */
@@ -274,5 +284,4 @@ class Config
             $this->_saveToCache($basedir);
         }
     }
-
 }

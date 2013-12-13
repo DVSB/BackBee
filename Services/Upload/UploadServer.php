@@ -37,7 +37,7 @@ use BackBuilder\Services\Rpc\JsonRPCServer;
 class UploadServer extends JsonRPCServer
 {
 
-    public function getResponse($request, $request_payload = array())
+    public function getResponse(Request $request, $request_payload)
     {
         $response = new Response();
         $response->headers->set('content-type', 'application/json');
