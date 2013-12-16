@@ -197,7 +197,7 @@ class JsonRPCServer
                 $return = array('jsonrpc' => '2.0', 'result' => NULL, 'error' => $error);
                 $response = new Response();
                 $response->headers->set('content-type', 'application/json');
-                $response->setContent($return);
+                $response->setContent(json_encode($return));
                 exit();
             } catch (BBException $e) {
                 
