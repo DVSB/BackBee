@@ -923,7 +923,6 @@ var ResizableItem = function(userSettings){
             resizableconfig.helper = settings.helper;
             resizableconfig.grid = settings.gridStep;
             resizableconfig.maxWidth = $(this._element).parent().width();
-            
             $(this._element).resizable(resizableconfig);
             this.resizableId = bb.Utils.generateId("resizableContent");
             $(this._element).attr("resizableId",this.resizableId);

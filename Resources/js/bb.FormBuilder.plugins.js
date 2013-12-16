@@ -1,49 +1,16 @@
 $(function(){
-    
-    /*scalar type*/
-    FormBuilder.registerRenderTypePlugin("date",{
-        name:"date",
-        _init : function(){
-            this.id = this._settings.formId+'-'+this.id;
-            this.fieldWrapper = $("<p></p>");
-            this.template = $("<label class='fieldLabel'></label><input class='bb5-plugin-form-field fieldDate' type='text' value=''></input>").clone();
-            this.fiedId = this.id+"-"+this._settings.fieldInfos.fieldLabel; 
-        },
-
-        render : function(){
-            $(this.fieldWrapper).append(this.template);
-            $(this.fieldWrapper).find(".fieldLabel").html((typeof this._settings.fieldInfos.param.array.label=="string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel);
-            var value = this._settings.fieldInfos.param.array.value;
-            $(this.fieldWrapper).find(".fieldDate").attr("id",this.fieldId).datepicker({
-                dateFormat: 'dd/mm/yy'
-            });
-            if (value)
-                $(this.fieldWrapper).find(".fieldDate").datepicker('setDate', new Date(value*1000));
-            return this.fieldWrapper;
-        },
-
-        parse : function(){
-            var value = $(this.fieldWrapper).find(".fieldDate").datepicker('getDate');
-            
-            var result = {
-                'array':{
-                    'value': (value) ? value.getTime() / 1000 : ''
-                }
-            };
-            return result;            
-        }
-
-    });
+   
   
     /*scalar type*/
     FormBuilder.registerRenderTypePlugin("scalar",{
+       
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
             this.fieldWrapper = $("<p></p>");
             this.template = $("<label class='fieldLabel'>test</label><input class='bb5-plugin-form-field fieldText' type='text' value=''></input>").clone();
-            this.fiedId = this.id+"-"+this._settings.fieldInfos.fieldLabel; 
+            this.fiedId = this.id+"-"+this._settings.fieldInfos.fieldLabel;
         },
-
+        
         render : function(){
             $(this.fieldWrapper).append(this.template);
             $(this.fieldWrapper).find(".fieldLabel").html(this._settings.fieldInfos.fieldLabel);
@@ -51,14 +18,13 @@ $(function(){
             $(this.fieldWrapper).find(".fieldText").attr("id",this.fieldId).val(value);
             return this.fieldWrapper;
         },
-
+       
         parse : function(){
             var result = {
                 scalar: $(this.fieldWrapper).find(".fieldText").val()
             };
-            return result;            
+            return result;           
         }
-
     });
 
     /*scalar type*/
@@ -66,11 +32,11 @@ $(function(){
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
             this.fieldWrapper = $("<p></p>");
-            
+           
             var pattern = (this._settings.fieldInfos.param.array.pattern) ? " pattern='"+this._settings.fieldInfos.param.array.pattern+"'" : '';
-            
+           
             this.template = $("<label class='fieldLabel'>test</label><input class='bb5-plugin-form-field fieldText' type='text' value=''"+pattern+"></input>").clone();
-            this.fiedId = this.id+"-"+this._settings.fieldInfos.fieldLabel; 
+            this.fiedId = this.id+"-"+this._settings.fieldInfos.fieldLabel;
         },
 
         render : function(){
@@ -86,145 +52,218 @@ $(function(){
                     'value': $(this.fieldWrapper).find(".fieldText").val()
                 }
             };
-            return result;            
+            return result;           
         }
 
     });
 
-    /*Radio type*/
-    FormBuilder.registerRenderTypePlugin('radio', {
+    /*Checkbox type*/
+    FormBuilder.registerRenderTypePlugin('checkbox', {
         _init: function(){
-            this.id = this._settings.formId+'-'+this.id; 
-            var template = $("<p><label>Provide a label for this field</label></p>").clone();
-            $(template).attr("id",this.id).addClass('bb5-param-'+this._settings.fieldInfos.fieldLabel);
-            var form = this._populateForm();
-            var fieldLabel = (typeof this._settings.fieldInfos.param.array.label=="string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel;
-            $(template).find("label").text(fieldLabel);
-            $(template).append(form);
-            if ('undefined' != typeof(this._settings.fieldInfos.param.array.onchange))
-                $(template).find("input").attr('onchange', this._settings.fieldInfos.param.array.onchange);
-            this.form = template;
+            this.id = this._settings.formId + '-' + this.id;
+            this.fieldWrapper = $('<p></p>');
+            this.template = $('<label class="fieldLabel">test</label><input class="bb5-plugin-form-field fieldCheck" type="checkbox" value="1">').clone();
+            this.fiedId = this.id + '-' + this._settings.fieldInfos.fieldLabel;
         },
-        
-        _populateForm : function(){
-            var self = this;
-            var options = this._settings.fieldInfos.param.array.options;
-            var selection = this._settings.fieldInfos.param.array.checked;
-            var dFragment = document.createDocumentFragment();
 
-            $.each(options,function(value,option){
-                var optionTpl = $('<label class="bb5-form-label-chkbx"><input type="radio" name="radio'+self.id+'" /><span></span></label>').clone();
-                $(optionTpl).find("input").attr("value",value);
-                $(optionTpl).find("span").html(option);
-                if(selection+''==value+'') $(optionTpl).find("input").attr("checked","checked");
-                dFragment.appendChild($(optionTpl).get(0));
-            });
-            return dFragment;
+        render: function(){
+            $(this.fieldWrapper).append(this.template);
+            $(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
+            if (this._settings.fieldInfos.param.array.checked == true) {
+                $(this.fieldWrapper).find('.fieldCheck').attr('checked', 'checked');
+            }
+            var value = this._settings.fieldInfos.param.scalar;
+            $(this.fieldWrapper).find('.fieldCheck').attr('id',this.fieldId).val(value);
+            return this.fieldWrapper;
         },
-        
-        render : function(){
-            if ('undefined' != typeof(this._settings.fieldInfos.param.array.onrender))
-                eval(this._settings.fieldInfos.param.array.onrender);
-            
-            return this.form;
-        },
-        
+
         parse: function(){
             var result = {
                 'array':{
-                    'checked': $(this.form).find('input:checked').val()
+                    'checked': $(this.fieldWrapper).find('.fieldCheck').is(':checked')
                 }
             };
             return result;
         }
     });
-    
-    /*Checkbox type*/
-    FormBuilder.registerRenderTypePlugin('checkbox', {
+   
+   
+    /********************** media-list ************
+     *my_medias:
+     *  label: "Choisissez un Media",
+     *  maxentry: 1
+     *  minentry: 0,
+     *  accept: [bbMedianame],
+     *  medias: ""
+     ******/
+    /**************Media selection render type **************/
+    FormBuilder.registerRenderTypePlugin("media-list",{
+           
+        _settings : { 
+            removeBtnClass: ".bb5-ico-del"
+        },
+            
+        _context: {
+            mediaSelector : null
+        },
+            
+        _template: {
+            
+            mediaWrapper : '<div>'
+            +'<p><label class="fieldLabel">Trace sonore...</label></p>'
+            +'<div class="bb5-listContainer">'
+            +'<ul class="bb5-list-media bb5-list-media-is-list clearfix"></ul>'
+            +'</div>'
+            +'<p class="bb5-edit-article-toolbar">\n\
+                                    <span class="bb5-edit-article-toolbar-label">Ajouter un média</span> \n\
+                                    <a class="bb5-button bb5-ico-lib bb5-button-link add_media_btn bb5-button-thick bb5-button-outline" href="#">Médiathèque</a> \n\
+                                </p>'
+            +'</div>',
+        
+            mediaItem : '<li class="bb5-selector-item">'
+        +'<p><a href="javascript:;"><img class="media-pic" src="" alt=""></a></p>'
+        +'<p><a class="media-title" href="javascript:;">${mediaTitle}</a></p>'
+        +'<p style="visibility : hidden"><span data-i18n="mediaselector.width">L :</span> 200px, <span data-i18n="mediaselector.height">H :</span> 142px, 11.81 kB</p>'
+        +'<p>'
+        +'<button class="bb5-button bb5-ico-del" data-i18n="popupmanager.button.delete">Supprimer</button>'
+        +'</p>'
+        +'</li>'
+        },
+            
         _init: function(){
-            this.id = this._settings.formId + '-' + this.id;
-            this.fiedId = this.id + '-' + this._settings.fieldInfos.fieldLabel;
-            
-            if ('undefined' == typeof(this._settings.fieldInfos.param.array.options)) {
-                var template = $('<p><label class="fieldLabel">test</label><input class="bb5-plugin-form-field fieldCheck" type="checkbox" value="1"></p>').clone();
-                $(template).attr("id",this.id).addClass('bb5-param-'+this._settings.fieldInfos.fieldLabel);
-                $(template).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
-                if (this._settings.fieldInfos.param.array.checked == true) {
-                    $(template).find('.fieldCheck').attr('checked', 'checked');
-                }
-                var value = this._settings.fieldInfos.param.scalar;
-                $(template).find('.fieldCheck').attr('id',this.fieldId).val(value);
-            } else {
-                var template = $("<p><label>Provide a label for this field</label></p>").clone();
-                $(template).attr("id",this.id).addClass('bb5-param-'+this._settings.fieldInfos.fieldLabel);
-                var form = this._populateForm();
-                var fieldLabel = (typeof this._settings.fieldInfos.param.array.label=="string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel;
-                $(template).find("label").text(fieldLabel);
-                $(template).append(form);
-                this.initvalues = this._settings.fieldInfos.param.array.checked;
-                for(var i=0; i<this.initvalues.length; i++) this.initvalues[i] = null;
-                if ('undefined' != typeof(this._settings.fieldInfos.param.array.onchange))
-                    $(template).find("input").attr('onchange', this._settings.fieldInfos.param.array.onchange);
+            this.form = $(this._template.mediaWrapper).clone();
+            this._addBtn = this.form.find(".add_media_btn").eq(0);
+            this._mediaContainer = $(this.form).find(".bb5-list-media").eq(0);
+            var label = this._settings.fieldInfos.param.array.label;
+            $(this.form).find(".fieldLabel").html(label); //i18nkey
+            /* use for populate */
+             var mediaInfos = this._settings.fieldInfos.param.array.medias;
+            this._mediaList =  new bb.SmartList({
+                idKey : "uid",
+                maxEntry: 1,
+                onChange: $.proxy(this._handleListChange,this),
+                onDelete: $.proxy(this._removeMedia,this)
+            });
+            if(mediaInfos && mediaInfos.length){
+                var mediaData = JSON.parse(mediaInfos);
+                this._mediaList.setData(mediaData);
             }
-            
-            this.form = template;                
+            this._bindEvents();
+        },
+
+        _handleListChange : function(collection,name,mediaData){
+            var render = $(this._template.mediaItem).clone();
+            $(render).addClass("media-"+mediaData.uid);
+            $(render).find(".media-title").eq(0).html(mediaData.title);
+            $(render).find(".media-pic").eq(0).attr("src",mediaData.value).attr("alt",mediaData.title);
+            mediaData.render = $(mediaData.render).get(0);
+            $(render).find(this._settings.removeBtnClass).data("mediaUid",mediaData.uid);
+            this._mediaContainer.append(render);
         },
         
-        _populateForm : function(){
-            var self = this;
-            var options = this._settings.fieldInfos.param.array.options;
-            var selection = this._settings.fieldInfos.param.array.checked;
-            var dFragment = document.createDocumentFragment();
-
-            $.each(options,function(value,option){
-                var optionTpl = $('<label class="bb5-form-label-chkbx"><input type="checkbox" name="radio'+self.id+'" /><span></span></label>').clone();
-                $(optionTpl).find("input").attr("value",value);
-                $(optionTpl).find("span").html(option);
-                for(var i=0; i < selection.length; i++) {
-                    if(selection[i]+''==value+'') {
-                        $(optionTpl).find("input").attr("checked","checked");
-                        break;
-                    }
-                }
-                dFragment.appendChild($(optionTpl).get(0));
-            });
-            return dFragment;
+        _bindEvents : function(){
+            this._addBtn.bind("click", $.proxy(this._showMediaBrowser,this));
+            this.form.delegate(this._settings.removeBtnClass,"click",$.proxy(this._deleteMedia,this));
         },
-
+        
+        /* remove media */
+        _removeMedia : function(container,name,id){
+            $(this._mediaContainer).find(".media-"+id).remove();
+        },
+        
+        _typeIsValid : function(media){
+          var valid = false;
+          if(media.data.content.classname.indexOf("Media\\image") != -1){
+              valid = true; 
+          }
+          if(!valid){
+              alert("Media of type " +media.data.content.classname+" is not allowed!");
+          }
+          
+          return valid;  
+        },
+        
+        /* add media */
+        _addMedia : function(params){
+            if(!this._typeIsValid(params)) return;
+            if("uid" in params){
+                this._mediaList.set(params.uid,params);
+            }
+        },
+        
+        _deleteMedia : function(e){
+            var mediaUid = $(e.currentTarget).data("mediaUid"); 
+            if(mediaUid){
+                this._mediaList.deleteItemById(mediaUid);
+            }
+        },
+            
+        _showMediaBrowser : function(){
+            var self = this;
+            if(this._context.mediaSelector){
+                /*afficher - selectionner noeud*/
+                if(this._context.mediaSelector.data("bbSelector")){
+                    this._context.mediaSelector.data("bbSelector").open();
+                    return false;
+                }
+            }
+     
+            if (!this._context.mediaSelector) {
+                var selectorMedia = bb.i18n.__('toolbar.editing.mediaselectorLabel');
+                var mediaSelectorContainer = $("<div id='bb5-param-mediasselector' class='bb5-selector-wrapper'></div>").clone();
+                this._context.mediaSelector = $(mediaSelectorContainer).bbSelector({
+                    popup: true,
+                    pageSelector: false,
+                    linkSelector: false,
+                    mediaSelector: true,
+                    contentSelector : false,
+                    resizable: false,
+                    selectorTitle : selectorMedia,
+                    callback: function(item) {
+                        $('#bbb5-param-mediasselector').bbSelector('close');
+                    },
+                  
+                    beforeWidgetInit:function(){
+                        var bbSelector = $(this.element).data('bbSelector');
+                        bbSelector.onWidgetInit(bbSelector._panel.MEDIA_LINK, function () {
+                            var bbMediaSelector = $(this).data('bbMediaSelector') || false;
+                            if(bbMediaSelector){
+                                bbMediaSelector.setCallback(function(params) {
+                                    self._addMedia(params);
+                                    bbSelector.close();
+                                });
+                            }
+                        }); 
+                    }
+                });
+            }
+            this._context.mediaSelector.data("bbSelector").open();
+        },
+           
+           
+        validate: function(){
+               
+        },
+           
         render : function(){
-            if ('undefined' != typeof(this._settings.fieldInfos.param.array.onrender))
-                eval(this._settings.fieldInfos.param.array.onrender);
             return this.form;
         },
-
-        parse: function(){
-            if ('undefined' == typeof(this._settings.fieldInfos.param.array.options)) {
-                var result = {
-                    'array':{
-                        'checked': $(this.form).find('.fieldCheck').is(':checked')
-                    }
-                };
-            } else {
-                var checked = new Array();
-                $.each($(this.form).find('input:checked'), function(i, input) {
-                    checked[checked.length] = $(input).val()
-                    });
-
-                var result = {
-                    'array':{
-                        'checked': $.extend(this.initvalues, checked)
-                    }
-                };
-            }
-            
-            return result;
+           
+        parse : function(){
+            var mediaContent = this._mediaList.toArray(true); 
+            var result = {
+                'array':{
+                    medias: JSON.stringify(mediaContent)
+                }
+            }; 
+            return result; 
         }
     });
-    
-    
+   
+   
     /*----------------link-list------------------------*/
     FormBuilder.registerRenderTypePlugin("link-list",{
-       
+      
         _settings: {
             formTplClass: ".link-list-from-tpl",
             itemTplClass: ".linkItem-tpl",
@@ -235,18 +274,18 @@ $(function(){
             actionContainerClass :".btnContainer",
             fieldErrorCls: "hasError"
         },
-       
+      
         _context:{
-            linkSelector : null, 
+            linkSelector : null,
             parsedData : [],
             selected: null
         },
         _template:{
             itemTpl : null
         },
-       
+      
         _init : function(){
-            this.id = this._settings.formId+'-'+this.id; 
+            this.id = this._settings.formId+'-'+this.id;
             this.form = $(this._settings.formTplClass).eq(0).clone();
             this._template.itemTpl = this.form.find(this._settings.itemTplClass).eq(0);
             this.linksContainer = $(this.form).find(this._settings.itemContainerClass).eq(0);
@@ -261,12 +300,12 @@ $(function(){
             this.linksContainer.empty();
             $(this.form).removeClass(this._settings.formTplClass.replace(".",""));
             var linksInfos = this._settings.fieldInfos.param.array.links;
-            if(linksInfos.length){
+            if(linksInfos && linksInfos.length){
                 this._populate(JSON.parse(linksInfos));
             }
             this._bindEvents();
         },
-       
+      
         _populate : function(linksInfos){
             var self = this;
             if($.isArray(linksInfos)){
@@ -283,27 +322,27 @@ $(function(){
             var nbItems = $(this.linksContainer).find(".bb5-link-item").length;
             return !this.maxEntry <= nbItems;
         },
-        
+       
         _bindEvents : function(){
             var self = this;
-           
-            $(this.form).find(".addLinkBtn").die().unbind().bind("click",function(e){ 
+          
+            $(this.form).find(".addLinkBtn").die().unbind().bind("click",function(e){
                 self._showLinkSelector();
-            }); 
-            
+            });
+           
             $(this.form).find("."+this._settings.itemCls).live("mouseenter",function(e){
                 var currentLink = e.currentTarget;
                 $("."+self._settings.itemCls).removeClass(self._settings.highLightCls);
                 self._highlight(currentLink);
                 return;
             });
-            
+           
             $(this.form).find("."+this._settings.itemCls).live("mouseleave",function(e){
                 $("."+self._settings.itemCls).removeClass(self._settings.highLightCls);
                 $("."+self._settings.itemCls).find(self._settings.actionContainerClass).hide();
                 return;
             });
-            
+           
             /*bind delete action*/
             $(this.form).find(".bb5-ico-del").live("click",function(e){
                 var target = e.target;
@@ -313,7 +352,7 @@ $(function(){
                     return;
                 }
             });
-            
+           
         },
         _handleError : function(fieldsWithErrors){
             var self = this;
@@ -326,14 +365,14 @@ $(function(){
                 });
             }
         },
-        
+       
         _highlight: function(node){
             if(!node) return;
             /*clean all*/
             $("."+this._settings.itemCls).removeClass(this._settings.highLightCls);
             $(node).addClass(this._settings.highLightCls);
             $(node).find(this._settings.actionContainerClass).show();
-             
+            
         },
         _showLinkSelector : function(){
             var self = this;
@@ -345,7 +384,7 @@ $(function(){
                     return false;
                 }
             }
-      
+     
             if (!this._context.linkSelector) {
                 var selectorLink = bb.i18n.__('toolbar.editing.linkselectorLabel');
                 var linkSelectorContainer = $("<div id='bb5-param-linksselector' class='bb5-selector-wrapper'></div>").clone();
@@ -357,23 +396,22 @@ $(function(){
                     contentSelector : false,
                     resizable: false,
                     selectorTitle : selectorLink,
-                    //site: bb.frontApplication.getSiteUid(),
                     callback: function(item) {
                         $('#bb5-param-linksselector').bbSelector('close');
                     },
-                   
+                  
                     beforeWidgetInit:function(){
                         var bbSelector = $(this.element).data('bbSelector');
-                        bbSelector.onWidgetInit(bbSelector._panel.INTERNAL_LINK, function () { 
+                        bbSelector.onWidgetInit(bbSelector._panel.INTERNAL_LINK, function () {
                             var bbPageSelector = $(this).data('bbPageSelector') || false;
                             if(bbPageSelector){
                                 bbPageSelector.setCallback(function(params) {
                                     self._populateLink(params);
                                     bbSelector.close();
-                                }); 
+                                });
                             }
                         });
-                        
+                       
                         /*for External link*/
                         bbSelector.onWidgetInit(bbSelector._panel.EXTERNAL_LINK, function () {
                             var bbLinkSelector = $(this).data('bbLinkSelector');
@@ -384,7 +422,7 @@ $(function(){
                             });
                         });
                     }
-                
+               
                 //open: $.proxy(self.bbSelectorHandlers.openHandler,self,"bbLinkInternalContainer"),
                 //resizeStart: $.proxy(this.bbSelectorHandlers.resizeStartHandler,this,"bbLinkInternalContainer"),
                 //resize : $.proxy(this.bbSelectorHandlers.resizeHandler,this,"bbLinkInternalContainer")
@@ -392,7 +430,7 @@ $(function(){
             }
             this._context.linkSelector.data("bbSelector").open();
         },
-        
+       
         /*afficher le lien {url, title, target, pageuid}*/
         _populateLink: function(data){
             var itemTpl = $(this._template.itemTpl).clone().removeClass("linkItem-tpl").addClass(this._settings.itemCls);
@@ -413,7 +451,7 @@ $(function(){
             },800);
             this._parseLinks();
         },
-        
+       
         _parseLinks: function(){
             var self = this;
             self._context.parsedData = [];
@@ -422,18 +460,18 @@ $(function(){
                 linksInfos.uid = $(link).data("uid")||false;
                 linksInfos.target = $(link).find('.target:checked').val();
                 linksInfos.title = $(link).find(".title").val();
-                linksInfos.value = $(link).find(".link").val(); 
+                linksInfos.value = $(link).find(".link").val();
                 self._context.parsedData.push(linksInfos);
             });
         },
-       
+      
         render : function(){
             return this.form;
         },
-        
-        
+       
+       
         onOpen : function(e,data){},
-        
+       
         /*validate form: This function is called before submit*/
         validate : function(){
             var isValid = true;
@@ -457,7 +495,7 @@ $(function(){
             }
             return isValid;
         },
-        
+       
         parse : function(){
             this._parseLinks();
             var result = {
@@ -465,15 +503,15 @@ $(function(){
                     links : JSON.stringify(this._context.parsedData)
                 }
             };
-            return result;  
-        } 
+            return result; 
+        }
     });
-    
-    
-    
+   
+   
+   
     /*----------------node-selector------------------------*/
     FormBuilder.registerRenderTypePlugin("node-selector",{
-        
+       
         _settings : {
             addNodeBtnCls:".addParentNodeBtn",
             formTplClass : ".node-selector-form-tpl",
@@ -481,12 +519,12 @@ $(function(){
             fieldWrapperClass:".fieldWrapper",
             treeBtnClass :".bb5-ico-tree"
         },
-        
+       
         i18n : {
             pageBrowserTitle:"Selectionner une page"
         },
         _init : function(){
-            this.id = this._settings.formId+'-'+this.id; 
+            this.id = this._settings.formId+'-'+this.id;
             this.form = $(this._settings.formTplClass).clone();
             $(this.form).removeClass(this._settings.formTplClass.replace(".",""));
             $(this.form).attr("id",this.id);
@@ -498,7 +536,7 @@ $(function(){
             parsedData:{},
             pageBrowser:""
         },
-            
+           
         callbacks : {
             clickOnFieldHandler : function(e){
                 var currentTarget = e.currentTarget;
@@ -511,7 +549,7 @@ $(function(){
                 }
             }
         },
-        
+       
         _populateForm : function(){
             var self = this;
             var parentnodeTitle = this._settings.fieldInfos.param.array["parentnodeTitle"]||"";
@@ -520,7 +558,7 @@ $(function(){
                 if($.inArray(key,self._settings.disabledFields) != -1){
                     $(field).parents(self._settings.fieldWrapperClass).hide();
                     return true;
-                } 
+                }
                 var fieldValue = (key=="limit") ? parseInt(self._settings.fieldInfos.param.array[key]) : self._settings.fieldInfos.param.array[key][0];
                 $(field).val(fieldValue);
                 if(key=="parentnode"){
@@ -532,12 +570,12 @@ $(function(){
                 return true;
             });
             if(this.kwRenderer){
-                $(this.form).append(this.kwRenderer.render());   
+                $(this.form).append(this.kwRenderer.render());  
             }
-           
+          
         },
         /**
-         * Keyword has it's own renderer, so we must use it.
+         * Keyword has its own renderer that we gonna use.
          * Instance is created by calling bb.FormBuilder.createSubformRenderer
          * this function return a renderer
          **/
@@ -546,10 +584,10 @@ $(function(){
             if(typeof this._settings.fieldInfos.param.array.keywordsselector !="undefined"){
                 var keywordSelector = this._settings.fieldInfos.param.array.keywordsselector;
                 keywordsRender = bb.FormBuilder.createSubformRenderer("keywordsselector",keywordSelector,this._settings.formId);
-            } 
+            }
             return keywordsRender;
         },
-        
+       
         showPageTree : function(formField){
             var pageBrowser = $("<div id='bb5-form-pagebrowser'><div id='browser' class='filetree'></div></div>").clone();
             var self = this;
@@ -559,7 +597,7 @@ $(function(){
                     this._context.pageBrowser.data("bbPageBrowser").open();
                     return false;
                 }
-                
+               
             }else{
                 this._context.pageBrowser = $(pageBrowser).bbPageBrowser({
                     title : this.i18n.pageBrowserTitle,
@@ -571,7 +609,7 @@ $(function(){
                     editMode: false,
                     site: bb.frontApplication.getSiteUid(),
                     breadcrumb:bb.frontApplication.getBreadcrumbIds(),
-                    
+                   
                     select: function(e, data){
                         $(formField).attr("data-fieldValue",data.node_id);
                         $(formField).val($("#node_"+data.node_id).find("a").get(0).textContent);
@@ -591,7 +629,7 @@ $(function(){
                     this._context.contentTypeSelector.data("bbContentTypeBrowser").open();
                     return false;
                 }
-                
+               
             }
             this._context.contentTypeSelector = $(contentTypeSelector).bbContentTypeBrowser({
                 popup: {
@@ -614,7 +652,7 @@ $(function(){
                     if (selectedContentType.indexOf('BackBuilder\\ClassContent\\') === -1) {
                         fieldValue = 'BackBuilder\\ClassContent\\' + fieldValue;
                     }
-                   
+                  
                     $(formField).attr("data-fieldValue", fieldValue);
                     $(formField).trigger("change");
                     $(formField).val(selectedContentType);
@@ -624,17 +662,17 @@ $(function(){
             });
             this._context.contentTypeSelector.data("bbContentTypeBrowser").open();
         },
-        
-        
+       
+       
         bindEvents : function(){
             $(this.form).delegate(this._settings.treeBtnClass,"click",$.proxy(this.callbacks["clickOnFieldHandler"],this));
             this.initFormAutoBind();
         },
-        
+       
         initFormAutoBind : function(){
             $(this.form).delegate(this._settings.formfielClass,"change",$.proxy(this.handleFieldsChange,this));
         },
-        
+       
         handleFieldsChange :function(e){
             var nodeType = $(e.currentTarget).attr("data-key") || "none";
             var nodeValue = $(e.currentTarget).attr("data-fieldValue") || $(e.currentTarget).val();
@@ -645,16 +683,16 @@ $(function(){
                     this._context.parsedData[nodeType] = [$.trim(nodeValue)];
                 }
                 if(nodeType=="parentnode"){
-                    this._context.parsedData["parentnodeTitle"] = $(e.currentTarget).val();    
+                    this._context.parsedData["parentnodeTitle"] = $(e.currentTarget).val();   
                 }
             }
-            
+           
         },
-        
+       
         render : function(){
             return this.form;
         },
-        
+       
         parse : function(){
             if (this.kwRenderer) {
                 var keywordsData = this.kwRenderer.parse();
@@ -663,45 +701,46 @@ $(function(){
                     var selectedKeywords = keywordsData.array.selected;
                     this._context.parsedData["keywordsselector"] ={
                         selected : selectedKeywords
-                    } 
+                    }
                 }
             }
-            
+           
             var result = {
                 "array": this._context.parsedData
             };
-            return result;  
+            return result; 
         },
-         
+        
         onClose : function(){
             /*masquer tous les arbes*/
             if(this._context.contentTypeSelector){
-                if(this._context.contentTypeSelector.data("bbContentTypeBrowser")){
-                    this._context.contentTypeSelector.data("bbContentTypeBrowser").destroy();  
+                if(this._context.contentTypeSelector){
+                    if(this._context.contentTypeSelector.data("bbContentTypeBrowser")){
+                        this._context.contentTypeSelector.data("bbContentTypeBrowser").destroy(); 
+                    }
                 }
             }
-            
             if(this._context.pageBrowser){
                 if(this._context.pageBrowser.data("bbPageBrowser")){
-                    this._context.pageBrowser.data("bbPageBrowser").destroy();  
+                    this._context.pageBrowser.data("bbPageBrowser").destroy(); 
                 }
-                
+               
             }
         }
-        
+       
 
     });
-    
-  
-    /*--------------select renderType-------------------------*/  
+   
+ 
+    /*--------------select renderType-------------------------*/ 
     FormBuilder.registerRenderTypePlugin("select",{
-      
+     
         _settings : {
             emptyLabel: "Provide a label for this field"
         },
-      
+     
         _init : function(){
-            this.id = this._settings.formId+'-'+this.id; 
+            this.id = this._settings.formId+'-'+this.id;
             var template = $("<p><label>Provide a label for this field</label><select></select></p>").clone();
             $(template).attr("id",this.id);
             var form = this._populateForm();
@@ -711,15 +750,15 @@ $(function(){
             if ('undefined' != typeof(this._settings.fieldInfos.param.array.onchange))
                 $(template).find("select").attr('onchange', this._settings.fieldInfos.param.array.onchange);
             this.form = template;
-           
+          
         },
-        
+       
         _populateForm : function(){
-        
+       
             var options = this._settings.fieldInfos.param.array.options;
             var selection = this._settings.fieldInfos.param.array.selected;
             var dFragment = document.createDocumentFragment();
-        
+       
             $.each(options,function(value,option){
                 var optionTpl = $("<option></option>").clone();
                 $(optionTpl).attr("value",value);
@@ -729,35 +768,35 @@ $(function(){
             });
             return dFragment;
         },
-      
+     
         render : function(){
             if ('undefined' != typeof(this._settings.fieldInfos.param.array.onrender))
                 eval(this._settings.fieldInfos.param.array.onrender);
-            
+           
             return this.form;
         },
-      
+     
         parse :function(){
             var result = {
                 "array":{
                     selected: $(this.form).find("select").eq(0).val()
                 }
             };
-            return result; 
+            return result;
         }
-     
-    });  
-    /*--------------select-multiple renderType-------------------------*/  
+    
+    }); 
+    /*--------------select-multiple renderType-------------------------*/ 
     FormBuilder.registerRenderTypePlugin("select-multiple",{
-      
+     
         _settings : {
             emptyLabel: "Provide a label for this field"
         },
-      
+     
         _init : function(){
             var self = this;
-            
-            this.id = this._settings.formId+'-'+this.id; 
+           
+            this.id = this._settings.formId+'-'+this.id;
             var template = $('<p><label>Provide a label for this field</label><select class="available" style="width:150px;"><option>'+bb.i18n.__('parameters.add_multiple')+'</option></select><br/><select class="selected" size="4" style="width:150px;height:65px;float:left;"></select><button style="display:block;" class="bb5-button bb5-ico-arrow_n bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-del bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-arrow_s bb5-button-square"></button></p>').clone();
             $(template).attr("id",this.id).addClass('bb5-param-'+this._settings.fieldInfos.fieldLabel);
             var available = this._populateAvailable();
@@ -768,11 +807,11 @@ $(function(){
             $(template).find("select.selected").append(form);
             if ('undefined' != typeof(this._settings.fieldInfos.param.array.onchange))
                 $(template).find("select").attr('onchange', this._settings.fieldInfos.param.array.onchange);
-            
+           
             this.form = template;
             this.initvalues = this._settings.fieldInfos.param.array.selected;
             for(var i=0; i<this.initvalues.length; i++) this.initvalues[i] = null;
-            
+           
             $(self.form).find("select.available").bind('change', function() {
                 $(self.form).find("select.selected").append($(this).find(':selected').remove());
             });
@@ -786,9 +825,9 @@ $(function(){
                 $(self.form).find('select.selected option:selected').before($(self.form).find('select.selected option:selected').next().remove());
             });
         },
-        
+       
         _populateForm : function(){
-        
+       
             var options = this._settings.fieldInfos.param.array.options;
             var selection = this._settings.fieldInfos.param.array.selected;
             var dFragment = document.createDocumentFragment();
@@ -798,15 +837,15 @@ $(function(){
                     var optionTpl = $("<option></option>").clone();
                     $(optionTpl).attr("value",value);
                     $(optionTpl).html(options[value]);
-                    dFragment.appendChild($(optionTpl).get(0));        
+                    dFragment.appendChild($(optionTpl).get(0));       
                 }
             });
 
             return dFragment;
         },
-        
+       
         _populateAvailable : function(){
-        
+       
             var options = this._settings.fieldInfos.param.array.options;
             var selection = this._settings.fieldInfos.param.array.selected;
             var dFragment = document.createDocumentFragment();
@@ -821,33 +860,33 @@ $(function(){
             });
             return dFragment;
         },
-      
+     
         render : function(){
             if ('undefined' != typeof(this._settings.fieldInfos.param.array.onrender))
                 eval(this._settings.fieldInfos.param.array.onrender);
-            
+           
             return this.form;
         },
-      
+     
         parse :function(){
             var values = [];
             $(this.form).find('select.selected option').each(function() {
                 values[values.length] = $(this).val();
             })
-            
+           
             var result = {
                 "array":{
                     selected: $.extend(this.initvalues, values)
                 }
             };
-            return result; 
+            return result;
         }
-     
-    });  
     
+    }); 
+   
     /*--------------keyword-selector-autocomplete renderType-------------------------*/
     FormBuilder.registerRenderTypePlugin("keyword-selector-autocomplete",{
-        
+       
         _settings : {
             selectedCtnClass : ".selectedContainer",
             keywordContainerClass:".selectedKeywords"
@@ -877,13 +916,13 @@ $(function(){
         },
         /* Check mandatory params*/
         _checkParams : function(){
-            
+           
         },
         _hasManyEntries : function(){
-            
+           
         },
-        
-        _findKeywordByIds : function(keywordIds){ 
+       
+        _findKeywordByIds : function(keywordIds){
             var keywords = [];
             var self = this;
             var nbItem = keywordIds.length;
@@ -892,34 +931,34 @@ $(function(){
                 if($.inArray(keyword.value, keywordIds)!=-1){
                     keywords.push(keyword.label);
                     self.selectedItems[ keyword.label] = keyword.value;
-                    nbItem -=1; 
-                } 
+                    nbItem -=1;
+                }
             });
             return keywords;
         },
-        
+       
         _cleanSelection: function(selected){
             var selected = ($.isPlainObject(selected)) ? selected : {};
-            var keywordIds = []; 
+            var keywordIds = [];
             $.each(selected, function(key,label){
                 keywordIds.push(key);
             });
             return keywordIds;
-        }, 
-        
+        },
+       
         /*handle multiple selections*/
         _handleKeywordSelection : function(terms,selectedKeyword){
             var self = this;
-            var selectedItems = [];  
+            var selectedItems = []; 
             if(this.maxEntry > 0){
                 var termArr = [];
                 var cmpt;
                 for( cmpt = 0 ; cmpt <= this.maxEntry; cmpt++ ){
-                    termArr.push(terms.pop());   
+                    termArr.push(terms.pop());  
                 }
                 terms = termArr.reverse();
             }
-            
+           
             $.each(terms,function(i,keyword){
                 var kwId = self.selectedItems[keyword];
                 if(typeof kwId=="string"){
@@ -929,11 +968,11 @@ $(function(){
             this.keywordField.val(terms.join(", "));
             this.selected = selectedItems;
         },
-        
+       
         _split : function(val){
             return val.split(/,\s*/);
         },
-        
+       
         _populateKeywords : function(){
             if(!this.selected.length) return false;
             var keywordsString = "";
@@ -945,12 +984,12 @@ $(function(){
             $(this.keywordField).val(keywordsString);
             this._updateFieldSpace();
         },
-        
+       
         _updateFieldSpace: function(){
         /*$(this.keywordField).animate({
                 height : "16px"
             },"fast");*/
-            
+           
         },
         _getKeywordList : function(){
             var self = this;
@@ -963,13 +1002,13 @@ $(function(){
                     list = response.result;
                 }
             });
-            return list;           
-        }, 
-        
+            return list;          
+        },
+       
         _getLast : function(term){
             return this._split(term).pop();
         },
-        
+       
         _initAutoComplete : function(){
             var self = this;
             $(this.keywordField).autocomplete({
@@ -980,7 +1019,7 @@ $(function(){
                 focus : function(){
                     return false;
                 },
-                // fix empty list etc
+                /*@fix empty list etc*/
                 select : function(event, ui){
                     var terms = self._split(this.value);
                     terms.pop();//last
@@ -991,18 +1030,18 @@ $(function(){
                     return false;
                 }
             });
-        },  
+        }, 
         parse : function(){
             var result = {
                 "array" :{
                     selected: this.selected
-                } 
+                }
             };
             return result;
         }
-        
+       
     });
+   
 
-     
+    
 });
-  

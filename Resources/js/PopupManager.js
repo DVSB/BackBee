@@ -262,7 +262,7 @@ bb.PopupManager = (function($,gExport){
     
     DialogItem.fn.addButton = function(data){
         var data = data || false;
-        var buttons =  $(this.dialog).dialog("option","buttons");
+        var buttons =  $(this.dialog).dialog("option","buttons")
         if(typeof buttons.length == "undefined"){
             buttons = [];
         }
