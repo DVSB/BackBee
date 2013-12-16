@@ -35,11 +35,10 @@ use Doctrine\Common\EventManager,
 
 use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\ContainerBuilder,
+    Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
     Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
     Symfony\Component\DependencyInjection\Loader\XMLFileLoader,
-    Symfony\Component\HttpFoundation\Session\Session,
-    Symfony\Component\Translation\MessageSelector,
-    Symfony\Component\Translation\IdentityTranslator;
+    Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * The main BackBuilder5 application
@@ -92,7 +91,6 @@ class BBApplication
         $this->_initContainer()
             ->_initAutoloader()
             ->_initContentWrapper()
-            ->_initTranslator()
             ->_initBundles();
 
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
@@ -139,17 +137,24 @@ class BBApplication
 
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
-        // Set every bbapp parameters
-        $this->_container->setParameter('bbapp.cache.dir', $this->getCacheDir());
-        $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
-        $this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
-        // Need to create really early SecurityContext
+        
+        $this->_initBBAppParamsIntoContainer();
+
+        // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();        
         $this->_initRenderer();
 
         $this->_initExternalBundleServices();
 
         return $this;
+    }
+
+    private function _initBBAppParamsIntoContainer()
+    {
+        // Set every bbapp parameters
+        $this->_container->setParameter('bbapp.cache.dir', $this->getCacheDir());
+        $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
+        $this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
     }
 
     private function _initExternalBundleServices()
@@ -159,6 +164,17 @@ class BBApplication
         if (null !== $externalServices && 0 < count($externalServices)) {
             foreach ($externalServices as $key => $datas) {
                 $bundle = new $datas['class']();
+                if (false === ($bundle instanceof ExtensionInterface)) {
+                    $errorMsg = sprintf(
+                        'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', 
+                        $datas['class'],
+                        'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
+                    );
+                    $this->debug($errorMsg);
+
+                    throw new BBException($errorMsg);
+                }
+
                 $config = true === isset($datas['config']) ? array($key => $datas['config']) : array();
                 $bundle->load($config, $this->_container);
             }
@@ -194,18 +210,6 @@ class BBApplication
                 ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')))
                 ->setEventDispatcher($this->getEventDispatcher())
                 ->setLogger($this->getLogging());
-
-        return $this;
-    }
-
-    private function _initTranslator()
-    {
-        $message_selector = new MessageSelector();
-        $translator = new IdentityTranslator($message_selector);
-        $translator->setLocale('fr_FR');
-//        $translator->addLoader('yml', new \Symfony\Component\Translation\Loader\YamlFileLoader());
-//        $translator->addResource('yml', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'BackBuilder', 'Resources', 'translation', 'fr_FR', 'general.yml')), 'fr_FR');
-        $this->getContainer()->set('translator', $translator);
 
         return $this;
     }

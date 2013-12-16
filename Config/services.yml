@@ -2,6 +2,7 @@ parameters:
     # bbapp parameters, somes will be set at init of container by BBApplication
     bbapp.cache.dir: ''
     bbapp.config.dir: ''
+    bbapp.locale: 'fr_FR'
     # bbapp classes
     bbapp.cachebootstrap.class: BackBuilder\Cache\File\Cache
     bbapp.cachecontrol.class: ''
@@ -14,6 +15,8 @@ parameters:
     bbapp.rpcserver.class: BackBuilder\Services\Rpc\JsonRPCServer
     bbapp.uploadserver.class: BackBuilder\Services\Upload\UploadServer
     bbapp.urlgenerator.class: BackBuilder\Rewriting\UrlGenerator
+    bbapp.translator.selector.class: Symfony\Component\Translation\MessageSelector
+    bbapp.translator.class: Symfony\Component\Translation\IdentityTranslator
 
 services:
     cache.bootstrap:
@@ -49,3 +52,12 @@ services:
     rewriting.urlgenerator:
         class:      %bbapp.urlgenerator.class%
         arguments:  ["@bbapp"]
+    translator.selector:
+        class:      %bbapp.translator.selector.class%
+        public:     false
+    translator:
+        class:      %bbapp.translator.class%
+        arguments:  ["@translator.selector"]
+        calls:
+            - [setLocale, ["%bbapp.locale%"]]
+
