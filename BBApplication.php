@@ -116,8 +116,9 @@ class BBApplication
 
     public function __destruct()
     {
-        if ($this->_isstarted)
+        if ($this->_isstarted) {
             $this->info('BackBuilder application ended');
+        }
     }
 
     private function _initContainer()
@@ -126,11 +127,9 @@ class BBApplication
         $this->_container = new ContainerBuilder();
         
         // Define where to looking for services.yml
-        $servicesDir = array(
-            $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config',
-            $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'services'
-        );
-        $loader = new YamlFileLoader($this->_container, new FileLocator($servicesDir));
+        $loader = new YamlFileLoader($this->_container, new FileLocator(array(
+            $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config')
+        ));
 
         // Load every services definitions into our container
         $loader->load('services.yml');
