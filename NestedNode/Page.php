@@ -294,7 +294,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
         $this->_contentset = new ContentSet();
         $this->_revisions = new ArrayCollection();
-        $this->_state = self::STATE_OFFLINE;
+        $this->_state = self::STATE_HIDDEN;
         $this->_type = self::TYPE_DYNAMIC;
         $this->_target = self::DEFAULT_TARGET;
     }
