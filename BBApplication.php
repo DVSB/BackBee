@@ -349,9 +349,9 @@ class BBApplication
             throw new BBException('None renderer adapter found');            
         }
 
-        $this->getContainer()->setParameter('bbapp.renderer.class', $rendererConfig['adapter']);
+        $this->getContainer()->setParameter('bbapp.renderer.class', $rendererConfig['adapter'][0]);
 
-        $this->debug(sprintf('%s(): Renderer initialized with adapter `%s`', __METHOD__, $rendererConfig['adapter']));
+        $this->debug(sprintf('%s(): Renderer initialized with adapter `%s`', __METHOD__, $rendererConfig['adapter'][0]));
 
         return $this;
     }
@@ -404,6 +404,9 @@ class BBApplication
      */
     public function start(Site $site = null)
     {
+        /*$renderer = new \BackBuilder\Renderer\Renderer($this);
+        var_dump($renderer); die;*/
+
         if (null === $site) {
             $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array());
         }

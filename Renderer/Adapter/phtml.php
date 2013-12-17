@@ -21,11 +21,15 @@
 
 namespace BackBuilder\Renderer\Adapter;
 
+use Exception;
+
 use Symfony\Component\HttpFoundation\ParameterBag;
+
 use BackBuilder\BBApplication,
     BackBuilder\Renderer\ARenderer,
     BackBuilder\Renderer\IRenderable,
     BackBuilder\Renderer\Exception\RendererException,
+    BackBuilder\Renderer\IRendererAdapter,
     BackBuilder\Site\Layout,
     BackBuilder\Util\File;
 
@@ -38,7 +42,7 @@ use BackBuilder\BBApplication,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class phtml extends ARenderer
+class phtml extends ARenderer implements IRendererAdapter
 {
 
     const HEADER_SCRIPT = 'header';
@@ -73,6 +77,44 @@ class phtml extends ARenderer
         parent::__construct($application, $config);
 
         $this->_scripts = new ParameterBag();
+    }
+
+    /**
+     * @see BackBuilder\Renderer\IRendererAdapter::getManagedFileExtensions()
+     */
+    public function getManagedFileExtensions()
+    {
+        return $this->_includeExtensions;
+    }
+
+    public function isValidTemplateFile($filename, array $templateDir)
+    {
+        if (0 === count($templateDir)) {
+            return false;
+        }
+
+        File::resolveFilepath($filename, null, array('include_path' => $templateDir));
+
+        return is_readable($filename);
+    }
+
+    public function renderTemplate($filename, array $templateDir, array $params = array())
+    {
+        foreach ($params as $key => $v) {
+            $this->setParam($key, $v);
+        }
+
+         try {
+            File::resolveFilepath($filename, null, array('include_path' => $templateDir));
+            ob_start();
+            include $filename;
+            return ob_get_clean();
+        } catch (Exception $e) {
+            ob_end_clean();
+            throw new RendererException(
+                $e->getMessage() . ' in ' . $this->_templateFile, RendererException::RENDERING_ERROR, $e
+            );
+        }
     }
 
     /**
@@ -231,7 +273,6 @@ class phtml extends ARenderer
         }
 
         File::resolveFilepath($this->_templateFile, null, array('include_path' => $this->_layoutdir));
-
         if (false === is_readable($this->_templateFile)) {
             throw new RendererException(sprintf('Unable to read layout %s.', $layoutfile), RendererException::LAYOUT_ERROR);
         }
@@ -334,23 +375,6 @@ class phtml extends ARenderer
         }
 
         return $renderer->__render;
-    }
-
-    public function getUri($pathinfo = '/')
-    {
-        $pathinfo = parent::getUri($pathinfo);
-
-        if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
-            if (null === $this->_default_ext) {
-                if (null !== $this->getApplication())
-                    if ($this->getApplication()->getContainer()->has('site'))
-                        $this->_default_ext = $this->getApplication()->getContainer()->get('site')->getDefaultExtension();
-            }
-
-            $pathinfo .= $this->_default_ext;
-        }
-
-        return $pathinfo;
     }
 
     /**

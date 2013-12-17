@@ -24,6 +24,7 @@ namespace BackBuilder\Renderer;
 use BackBuilder\BBApplication,
     BackBuilder\NestedNode\ANestedNode,
     BackBuilder\Renderer\Exception\RendererException,
+    BackBuilder\Renderer\Helper\HelperManager,
     BackBuilder\Site\Layout,
     BackBuilder\Util\File,
     BackBuilder\Util\String;
@@ -45,11 +46,8 @@ abstract class ARenderer implements IRenderer
      */
     protected $_application;
 
-    /**
-     * The loaded helpers
-     * @var array
-     */
-    protected $_helpers = array();
+
+    protected $helperManager;
 
     /**
      * The current object to be render
@@ -115,18 +113,16 @@ abstract class ARenderer implements IRenderer
 
     public function __call($method, $argv)
     {
-        if (!array_key_exists($method, $this->_helpers)) {
-            $classhelper = '\BackBuilder\Renderer\Helper\\' . $method;
-            if (class_exists($classhelper)) {
-                $this->_helpers[$method] = new $classhelper($this, $argv);
-            }
+        $helper = $this->helperManager->get($method);
+        if (null === $helper) {
+            $helper = $this->helperManager->create($method, $argv);
         }
 
-        if (is_callable($this->_helpers[$method])) {
-            return call_user_func_array($this->_helpers[$method], $argv);
+        if (is_callable($helper)) {
+            return call_user_func_array($helper, $argv);
         }
 
-        return $this->_helpers[$method];
+        return $helper;
     }
 
     public function __($string)
@@ -137,12 +133,10 @@ abstract class ARenderer implements IRenderer
     public function __clone()
     {
         $this->_cache()
-                ->reset();
+            ->reset();
 
-        foreach ($this->_helpers as $method => $helper) {
-            $this->_helpers[$method] = clone $this->_helpers[$method];
-            $this->_helpers[$method]->setRenderer($this);
-        }
+        $this->helperManager = clone $this->helperManager;
+        $this->helperManager->updateRenderer($this);
     }
 
     public function overload($new_dir)
@@ -152,17 +146,17 @@ abstract class ARenderer implements IRenderer
     }
 
     /**
-     * Add new helpre directory in the choosen position.
+     * Add new helper directory in the choosen position.
      *
      * @codeCoverageIgnore
      * @param string $new_dir location of the new directory
      * @param integer $position position in the array
      */
-    public function addHelperDir($new_dir, $position = 0)
+    public function addHelperDir($dir)
     {
-        $this->getApplication()->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $new_dir);
+        $this->helperManager->addHelperDir($dir);
+
         return $this;
-        //$this->insertInArrayOnPostion($this->_helpers, $new_dir, $position);
     }
 
     /**
@@ -269,6 +263,8 @@ abstract class ARenderer implements IRenderer
             File::resolveFilepath($bb5script);
             $this->_scriptdir[] = $bb5script;
         }
+
+        $this->helperManager = new HelperManager($this);
     }
 
     /**
@@ -468,6 +464,16 @@ abstract class ARenderer implements IRenderer
             } else {
                 return $request->getUriForPath($pathinfo);
             }
+        }
+
+        if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
+            if (null === $this->_default_ext) {
+                if (null !== $this->getApplication())
+                    if ($this->getApplication()->getContainer()->has('site'))
+                        $this->_default_ext = $this->getApplication()->getContainer()->get('site')->getDefaultExtension();
+            }
+
+            $pathinfo .= $this->_default_ext;
         }
 
         return $pathinfo;
