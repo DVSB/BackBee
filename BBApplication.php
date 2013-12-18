@@ -140,8 +140,7 @@ class BBApplication
         $this->_initBBAppParamsIntoContainer();
 
         // Force container to create SecurityContext object to activate listener
-        $this->getSecurityContext();        
-        $this->_initRenderer();
+        $this->getSecurityContext();
 
         $this->_initExternalBundleServices();
 
@@ -335,27 +334,6 @@ class BBApplication
         return $this;
     }
 
-    /**
-     * @return \BackBuilder\BBApplication
-     * @throws BBException
-     */
-    private function _initRenderer()
-    {
-        if (null === $rendererConfig = $this->getConfig()->getRendererConfig()) {
-            throw new BBException('None renderer configuration found');            
-        }
-
-        if (false === isset($rendererConfig['adapter'])) {
-            throw new BBException('None renderer adapter found');            
-        }
-
-        $this->getContainer()->setParameter('bbapp.renderer.class', $rendererConfig['adapter'][0]);
-
-        $this->debug(sprintf('%s(): Renderer initialized with adapter `%s`', __METHOD__, $rendererConfig['adapter'][0]));
-
-        return $this;
-    }
-
     private function _initBundles()
     {
         if (null === $this->_bundles)
@@ -404,9 +382,6 @@ class BBApplication
      */
     public function start(Site $site = null)
     {
-        /*$renderer = new \BackBuilder\Renderer\Renderer($this);
-        var_dump($renderer); die;*/
-
         if (null === $site) {
             $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array());
         }

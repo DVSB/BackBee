@@ -2,8 +2,16 @@
 
 namespace BackBuilder\Renderer;
 
+use BackBuilder\Renderer\IRendererAdapter;
+
 interface IRendererAdapter
 {
+	/**
+	 * [__construct description]
+	 * @param ARenderer $renderer [description]
+	 */
+	public function __construct(ARenderer $renderer);
+
 	/**
 	 * Returns array that contains every single file's extension managed
 	 * by this adapter

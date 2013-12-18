@@ -8,7 +8,7 @@ use Exception,
 use Twig_Loader_Filesystem,
 	Twig_Environment;
 
-use BackBuilder\BBApplication,
+use BackBuilder\Renderer\ARenderer,
     BackBuilder\Renderer\Exception\RendererException,
 	BackBuilder\Renderer\IRenderable,
     BackBuilder\Renderer\ARendererAdapter,
@@ -33,24 +33,19 @@ class Twig extends ARendererAdapter
 	protected $includeExtensions = array('.twig');
 
 	/**
-	 * The file name of the twig template
-	 * @var string
-	 */
-	private $templateFile;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param BackBuilder\BBApplication|null $bbapp  
 	 * @param array|null 					 $config
 	 */
-	public function __construct(BBApplication $bbapp)
+	public function __construct(ARenderer $renderer)
 	{
-        parent::__construct($bbapp);
+        parent::__construct($renderer);
 
+        $bbapp = $this->renderer->getApplication();
 		$this->loader = new \Twig_Loader_Filesystem(array());
 		$this->twig = new \Twig_Environment($this->loader, array(
-			'debug' => null !== $bbapp ? $bbapp->isDebugMode() : false
+			'debug' => null !== $bbapp  ? $bbapp->isDebugMode() : false
 		));
 	}
 
@@ -83,12 +78,13 @@ class Twig extends ARendererAdapter
         }
     }
 
-    public function renderTemplate($filename, array $templateDir, array $params = array())
+    public function renderTemplate($filename, array $templateDir, array $params = array(), array $vars = array())
     {
         $this->addDirPathIntoLoaderIfNotExists($templateDir);
         $render = '';
         try {
             $params['this'] = $this;
+            $params = array_merge($params, $vars);
             $render = $this->twig->render($filename, $params);
         } catch (Exception $e) {
             throw new RendererException(
@@ -97,24 +93,5 @@ class Twig extends ARendererAdapter
         }
 
         return $render;
-    }
-
-    /**
-     * @see  BackBuilder\Renderer\ARenderer::partial()
-     */
-	public function partial($template = null, $params = null)
-	{
-		$this->templateFile = $template;
-		
-		if (null !== $params) {
-			$params = (array) $params;
-			foreach ($params as $param => $value) {
-				$this->setParam($param, $value);
-			}
-		}
-
-		return $this->renderTemplate(true);
-	}
-
-	
+    }	
 }

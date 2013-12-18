@@ -3,6 +3,7 @@
 namespace BackBuilder\Renderer;
 
 use BackBuilder\BBApplication,
+	BackBuilder\NestedNode\Page,
 	BackBuilder\Renderer\ARenderer,
 	BackBuilder\Renderer\Exception\RendererException,
 	BackBuilder\Renderer\IRenderable,
@@ -53,17 +54,23 @@ class Renderer extends ARenderer
 			$rendererConfig = $this->getApplication()->getConfig()->getRendererConfig();
 			$adapters = (array) $rendererConfig['adapter'];
 			foreach ($adapters as $a) {
-				$this->addRendererAdapter(new $a());
+				$this->addRendererAdapter(new $a($this));
 			}
 		}
+	}
 
-		/*$this->_scriptdir = array(
-			'c:\Work'
-		);
-		$this->setParam('te_name', 'phtml');
-		$this->templateFile = 'a/test.phtml';
-		var_dump($this->renderTemplate()); die;*/
-		//var_dump($this->isValidTemplateFile()); die;
+	public function __clone()
+	{
+		parent::__clone();
+
+		$this->updateRendererAdapters();
+	}
+
+	private function updateRendererAdapters()
+	{
+		foreach ($this->rendererAdapters->all() as $ra) {
+			$ra->setRenderer($this);
+		}
 	}
 
 	/**
@@ -76,9 +83,6 @@ class Renderer extends ARenderer
 		if (false === $this->rendererAdapters->has($key)) {
 			$this->rendererAdapters->set($key, $rendererAdapter);
 			$this->addManagedExtensions($rendererAdapter);
-			if ($rendererAdapter instanceof \BackBuilder\Renderer\ARendererAdapter) {
-				$rendererAdapter->setHelperManager($this->helperManager);
-			}
 		}
 	}
 
@@ -196,7 +200,7 @@ class Renderer extends ARenderer
     		if (true === is_a($obj, '\BackBuilder\NestedNode\Page')) {
     			$renderer->setCurrentPage($obj);
     			$renderer->__render = $renderer->renderPage($template);
-    			// phtml need to do something here (to insert header and footer script)
+    			$renderer->insertHeaderAndFooterScript();
     			$bbapp->debug('Rendering Page OK');
     		} else {
     			// Rendering a content
@@ -206,7 +210,60 @@ class Renderer extends ARenderer
     		$renderer->_triggerEvent('postrender', null, $renderer->__render);
     	}
 
-    	return $renderer->__render;
+    	$this->updateHelpers();
+    	$this->updateRendererAdapters();
+    	$render = $renderer->__render;
+    	unset($renderer);
+    	
+    	return $render;
+	}
+
+	public function partial($template = null, $params = null)
+	{
+		$this->templateFile = $template;
+
+		// Assign parameters
+        if (null !== $params) {
+            $params = (array) $params;
+            foreach ($params as $param => $value) {
+                $this->setParam($param, $value);            	
+            }
+        }
+
+        return $this->renderTemplate(true);
+	}
+
+	public function error($errorCode, $title = null, $message = null, $trace = null)
+	{
+		$found = false;
+		foreach ($this->manageableExt->keys() as $ext) {
+			$this->templateFile = 'error' . DIRECTORY_SEPARATOR . $errorCode . $ext;
+			if (true === $this->isValidTemplateFile()) {
+				$found = true;
+				break;
+			}
+		}
+
+		if (false === $found) {
+			foreach ($this->manageableExt->keys() as $ext) {
+				$this->templateFile = 'error' . DIRECTORY_SEPARATOR . 'default' . $ext;
+				if (true === $this->isValidTemplateFile()) {
+					$found = true;
+					break;
+				}
+			}
+		}
+
+		if (false === $found) {
+			return false;
+		}
+
+		$this->assign('error_code', $errorCode);
+		$this->assign('error_title', $title);
+		$this->assign('error_message', $message);
+		$this->assign('error_trace', $trace);
+
+		return $this->renderTemplate();
 	}
 
 	/**
@@ -223,11 +280,9 @@ class Renderer extends ARenderer
 		$bbapp = $this->getApplication();
 		// Rendering subcontent
 		if (null !== $contentSet = $this->getObject()->getContentSet()) {
-			$revision = $bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft(
-    			$contentSet, 
-    			$bbapp->getBBUserToken()
-    		);
-    		if (null !== $bbapp->getBBUserToken() && null !== $revision) {
+			$bbUserToken = $bbapp->getBBUserToken();
+			$revisionRepo = $bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision');
+			if (null !== $bbUserToken && null !== $revision = $revisionRepo->getDraft($contentSet, $bbUserToken)) {
     			$contentSet->setDraft($revision);
     		}
 
@@ -254,8 +309,8 @@ class Renderer extends ARenderer
 			$this->templateFile = $this->_getLayoutFile($this->layout());
 		}
 
-		if (false === $this->isValidTemplateFile()) {
-			throw new RendererException(sprintf('Unable to read layout %s.', $layoutFile), RendererException::LAYOUT_ERROR);
+		if (false === $this->isValidTemplateFile(true)) {
+			throw new RendererException(sprintf('Unable to read layout %s.', $this->templateFile), RendererException::LAYOUT_ERROR);
 		}
 
 		$bbapp->info(sprintf('Rendering page `%s`.', $this->getObject()->getNormalizeUri()));
@@ -336,7 +391,7 @@ class Renderer extends ARenderer
 				$classname = get_class($this->_object);
 				$uid = $this->_object->getUid();
 
-				$em->detatch($this->_object);
+				$em->detach($this->_object);
 				$object = $em->find($classname, $uid);
 				if (null !== $object) {
 					$this->_object = $object;
@@ -358,7 +413,7 @@ class Renderer extends ARenderer
 		}
 
 		if (null !== $bbapp) {
-			$this->bbapp->debug(sprintf(
+			$bbapp->debug(sprintf(
 				'Rendering content `%s(%s)`.', 
 				get_class($this->_object), 
 				$this->_object->getUid()
@@ -428,17 +483,47 @@ class Renderer extends ARenderer
 		$dirs = true === $isLayout ? $this->_layoutdir : $this->_scriptdir;
 		if (null === $adapter) {
 			throw new RendererException(sprintf(
-				'Unable to find file \'%s\' in path (%s)', 
-				$this->_templateFile, 
+				'Unable to manage file \'%s\' in path (%s)', 
+				$this->templateFile, 
 				implode(', ', $dirs)
 			), RendererException::SCRIPTFILE_ERROR);
 		}
 
-		$this->getApplication()->debug(sprintf('Rendering file `%s`.', $this->_templateFile));
+		$this->getApplication()->debug(sprintf('Rendering file `%s`.', $this->templateFile));
 		if (false === $isPartial) {
 			$this->_triggerEvent();
 		}
 
-		return $adapter->renderTemplate($this->templateFile, $dirs, $this->getParam());
+		return $adapter->renderTemplate($this->templateFile, $dirs, $this->getParam(), $this->getAssignedVars());
 	}
+
+	/**
+     * Returns an array of template files according the provided pattern
+     * @param string $pattern
+     * @return array
+     */
+    public function getTemplatesByPattern($pattern)
+    {
+    	$templates = array();
+        foreach ($this->manageableExt->keys() as $ext) {
+            $templates = array_merge($templates, parent::getTemplatesByPattern($pattern . $ext));
+        }
+
+        return $templates;
+    }
+
+    /**
+     * Returns the list of available render mode for the provided object
+     * @param \BackBuilder\Renderer\IRenderable $object
+     * @return array
+     */
+    public function getAvailableRenderMode(IRenderable $object)
+    {
+        $modes = parent::getAvailableRenderMode($object);
+        foreach ($modes as &$mode) {
+            $mode = str_replace($this->manageableExt->keys(), '', $mode);
+        }
+
+        return array_unique($modes);
+    }
 }

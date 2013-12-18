@@ -64,17 +64,8 @@ class HelperManager
 		if (true === class_exists($helperClass)) {
 			$this->helpers->set($method, new $helperClass($this->renderer, $argv));
 		}
-
+		
 		return $this->helpers->get($method);
-	}
-
-	/**
-	 * [addHelperDir description]
-	 * @param [type] $dir [description]
-	 */
-	public function addHelperDir($dir)
-	{
-		$this->bbapp->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $dir);
 	}
 
 	/**

@@ -2,34 +2,26 @@
 
 namespace BackBuilder\Renderer;
 
-use BackBuilder\BBApplication,
-	BackBuilder\Renderer\IRendererAdapter,
-	BackBuilder\Renderer\Helper\HelperManager;
+use	BackBuilder\NestedNode\Page,
+	BackBuilder\Renderer\ARenderer,
+	BackBuilder\Renderer\Helper\HelperManager,
+	BackBuilder\Renderer\IRenderable,
+	BackBuilder\Renderer\IRendererAdapter;
 
 abstract class ARendererAdapter implements IRendererAdapter
 {
 	/**
-	 * @var BBApplication
+	 * @var BackBuilder\Renderer\ARenderer
 	 */
-	protected $bbapp;
-
-	/**
-	 * @var BackBuilder\Renderer\Helper\HelperManager
-	 */
-	protected $helperManager;
-
-	/**
-	 * @var string
-	 */
-	private $defaultExt;
+	protected $renderer;
 
 	/**
 	 * [__construct description]
 	 * @param BBApplication $bbapp [description]
 	 */
-	public function __construct(BBApplication $bbapp)
+	public function __construct(ARenderer $renderer)
 	{
-		$this->bbapp = $bbapp;
+		$this->renderer = $renderer;
 	}
 
 	/**
@@ -39,65 +31,16 @@ abstract class ARendererAdapter implements IRendererAdapter
 	 * @return [type]         [description]
 	 */
 	public function __call($method, $argv)
-	{
-		$helper = $this->helperManager->get($method);
-		if (null === $helper) {
-			$helper = $this->helperManager->create($method, $argv);
-		}
-
-        if (is_callable($helper)) {
-            return call_user_func_array($helper, $argv);
-        }
-
-        return $helper;
+	{        
+		return call_user_func_array(array($this->renderer, $method), $argv);
 	}
 
 	/**
 	 * [setHelperManager description]
 	 * @param HelperManager $helperManager [description]
 	 */
-	public function setHelperManager(HelperManager $helperManager)
+	public function setRenderer(ARenderer $renderer)
 	{
-		$this->helperManager = $helperManager;
+		$this->renderer = $renderer;
 	}
-
-	/**
-	 * [getUri description]
-	 * @param  [type] $pathinfo [description]
-	 * @return [type]           [description]
-	 */
-	public function getUri($pathinfo = null)
-    {
-        if (null !== $pathinfo && preg_match('/^http[s]?:\/\//', $pathinfo)) {
-            return $pathinfo;
-        }
-
-        if ('/' !== substr($pathinfo, 0, 1)) {
-            $pathinfo = '/' . $pathinfo;
-        }
-
-        if (true === $this->bbapp->isStarted() && null !== $this->bbapp->getRequest()) {
-            $request = $this->bbapp->getRequest();
-
-            if (null === $pathinfo) {
-                $pathinfo = $request->getBaseUrl();
-            }
-
-            if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
-                return $request->getSchemeAndHttpHost() . substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl())))) . $pathinfo;
-            } else {
-                return $request->getUriForPath($pathinfo);
-            }
-        }
-
-        if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
-            if (null === $this->defaultExt && true === $this->bbapp->getContainer()->has('site')) {
-            	$this->defaultExt = $this->bbapp->getContainer()->get('site')->getDefaultExtension();
-            }
-
-            $pathinfo .= $this->defaultExt;
-        }
-
-        return $pathinfo;
-    }
 }
