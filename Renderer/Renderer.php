@@ -209,7 +209,7 @@ class Renderer extends ARenderer
 	/**
 	 * @see BackBuilder\Renderer\IRenderer::render()
 	 */
-	public function render(IRenderable $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = true)
+	public function render(IRenderable $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = false)
 	{
 		if (null === $obj) {
 			return null;
