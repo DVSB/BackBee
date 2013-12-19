@@ -15,8 +15,10 @@ class EntityFinder
     private $_ignoredFolder = array(
         'Resources',
         'Ressources',
+        'Test',
         'TestUnit',
-        'Exception'
+        'Exception',
+        'Commands'
     );
 
     /**
@@ -48,7 +50,7 @@ class EntityFinder
             if (is_dir($subpath)) {
                 $entities = array_merge($entities, $this->getEntities($subpath));
             } else {
-                if (strpos($subpath, '.php')) {
+                if (1 === preg_match('/.*(.php)$/', $subpath)) {
                     $namespace = $this->getNamespace($subpath);
                     if ($this->_isEntity(new \ReflectionClass($namespace))) {
                         $entities[] = $namespace;
