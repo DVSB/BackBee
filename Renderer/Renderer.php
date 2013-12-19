@@ -7,10 +7,19 @@ use BackBuilder\BBApplication,
 	BackBuilder\Renderer\ARenderer,
 	BackBuilder\Renderer\Exception\RendererException,
 	BackBuilder\Renderer\IRenderable,
-	BackBuilder\Renderer\IRendererAdapter;
+	BackBuilder\Renderer\IRendererAdapter,
+	BackBuilder\Site\Layout;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 
+/**
+ * Renderer engine class; able to manage multiple template engine
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\Renderer
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
+ */
 class Renderer extends ARenderer
 {
 	/**
@@ -40,9 +49,9 @@ class Renderer extends ARenderer
     /**
      * Constructor
      * 
-     * @param [type]  $bbapp                   [description]
-     * @param [type]  $config                  [description]
-     * @param boolean $autoloadRendererApdater [description]
+     * @param BBApplication  $bbapp                   
+     * @param array|null  	 $config                  
+     * @param boolean 		 $autoloadRendererApdater 
      */
 	public function __construct(BBApplication $bbapp = null, $config = null, $autoloadRendererApdater = true)
 	{
@@ -66,6 +75,20 @@ class Renderer extends ARenderer
 		$this->updateRendererAdapters();
 	}
 
+	protected function _restore()
+	{
+		parent::_restore();
+
+		$this->updateRendererAdapters();
+
+		return $this;
+	}
+
+	/**
+	 * Update every registered renderer adapters of the current renderer instance
+	 * by updating their ARenderer; its method is used at clone and unset of
+	 * ARenderer
+	 */
 	private function updateRendererAdapters()
 	{
 		foreach ($this->rendererAdapters->all() as $ra) {
@@ -74,8 +97,9 @@ class Renderer extends ARenderer
 	}
 
 	/**
-	 * [addRendererAdapter description]
-	 * @param IRendererAdapter $rendererAdapter [description]
+	 * Register a renderer adapter ($rendererAdapter)
+	 * 
+	 * @param IRendererAdapter $rendererAdapter 
 	 */
 	public function addRendererAdapter(IRendererAdapter $rendererAdapter)
 	{
@@ -87,9 +111,10 @@ class Renderer extends ARenderer
 	}
 
 	/**
-	 * [getRendererAdapterKey description]
-	 * @param  IRendererAdapter $rendererAdapter [description]
-	 * @return [type]                            [description]
+	 * Compute a key for renderer adapter ($rendererAdapter)
+	 * 
+	 * @param  IRendererAdapter $rendererAdapter 
+	 * @return string
 	 */
 	private function getRendererAdapterKey(IRendererAdapter $rendererAdapter)
 	{
@@ -99,8 +124,9 @@ class Renderer extends ARenderer
 	}
 
 	/**
-	 * [addManagedExtensions description]
-	 * @param IRendererAdapter $rendererAdapter [description]
+	 * Extract managed extensions from rendererAdapter and store it
+	 * 
+	 * @param IRendererAdapter $rendererAdapter 
 	 */
 	private function addManagedExtensions(IRendererAdapter $rendererAdapter)
 	{
@@ -117,9 +143,11 @@ class Renderer extends ARenderer
 	}
 
 	/**
-	 * [getRightAdapter description]
-	 * @param  array  $adapters [description]
-	 * @return [type]           [description]
+	 * Returns an adapter containing in $adapeters; it will returns in prior
+	 * the defaultAdpater if it is in $adapters or the first adapter found
+	 * 
+	 * @param  array  $adapters contains object of type IRendererAdapter
+	 * @return IRendererAdapter
 	 */
 	private function getRightAdapter(array $adapters)
 	{
@@ -127,23 +155,24 @@ class Renderer extends ARenderer
 		if (1 < count($adapters) && true === in_array($this->defaultAdapter, $adapters)) {
 			$adapter = $this->defaultAdapter;
 		} else {
-			$adapter = $adapters[0];
+			$adapter = reset($adapters);
 		}
 
 		return $adapter;
 	}
 
 	/**
-	 * [determineWhichAdapterToUse description]
-	 * @return [type] [description]
+	 * Returns the right adapter to use according to the filename extension
+	 * 
+	 * @return IRendererAdapter
 	 */
-	private function determineWhichAdapterToUse()
+	private function determineWhichAdapterToUse($filename = null)
 	{
-		if (null === $this->templateFile || false === is_string($this->templateFile)) {
+		if (null === $filename || false === is_string($filename)) {
 			return null;
 		}
 
-		$pieces = explode('.', $this->templateFile);
+		$pieces = explode('.', $filename);
 		if (1 > count($pieces)) {
 			return null;
 		}
@@ -160,6 +189,9 @@ class Renderer extends ARenderer
 	}
 
 	/**
+	 * Set the adapter referenced by $adapterKey as defaultAdapter to use in conflict
+	 * case; the default adapter is also considered by self::getRightAdapter()
+	 * 
 	 * @param  string $adapterKey 
 	 * @return boolean
 	 */
@@ -174,6 +206,9 @@ class Renderer extends ARenderer
 		return $exists;
 	}
 
+	/**
+	 * @see BackBuilder\Renderer\IRenderer::render()
+	 */
 	public function render(IRenderable $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = true)
 	{
 		if (null === $obj) {
@@ -210,14 +245,16 @@ class Renderer extends ARenderer
     		$renderer->_triggerEvent('postrender', null, $renderer->__render);
     	}
 
-    	$this->updateHelpers();
-    	$this->updateRendererAdapters();
     	$render = $renderer->__render;
+    	$this->_restore();
     	unset($renderer);
     	
     	return $render;
 	}
 
+	/**
+	 * @see BackBuilder\Renderer\IRenderer::partial()
+	 */
 	public function partial($template = null, $params = null)
 	{
 		$this->templateFile = $template;
@@ -233,12 +270,15 @@ class Renderer extends ARenderer
         return $this->renderTemplate(true);
 	}
 
+	/**
+	 * @see BackBuilder\Renderer\IRenderer::error()
+	 */
 	public function error($errorCode, $title = null, $message = null, $trace = null)
 	{
 		$found = false;
 		foreach ($this->manageableExt->keys() as $ext) {
 			$this->templateFile = 'error' . DIRECTORY_SEPARATOR . $errorCode . $ext;
-			if (true === $this->isValidTemplateFile()) {
+			if (true === $this->isValidTemplateFile($this->templateFile)) {
 				$found = true;
 				break;
 			}
@@ -247,7 +287,7 @@ class Renderer extends ARenderer
 		if (false === $found) {
 			foreach ($this->manageableExt->keys() as $ext) {
 				$this->templateFile = 'error' . DIRECTORY_SEPARATOR . 'default' . $ext;
-				if (true === $this->isValidTemplateFile()) {
+				if (true === $this->isValidTemplateFile($this->templateFile)) {
 					$found = true;
 					break;
 				}
@@ -309,7 +349,7 @@ class Renderer extends ARenderer
 			$this->templateFile = $this->_getLayoutFile($this->layout());
 		}
 
-		if (false === $this->isValidTemplateFile(true)) {
+		if (false === $this->isValidTemplateFile($this->templateFile, true)) {
 			throw new RendererException(sprintf('Unable to read layout %s.', $this->templateFile), RendererException::LAYOUT_ERROR);
 		}
 
@@ -341,7 +381,7 @@ class Renderer extends ARenderer
 				}
 			}
 
-			if (false === $this->isValidTemplateFile) {
+			if (false === $this->isValidTemplateFile($this->templateFile)) {
 				throw new RendererException(sprintf(
 					'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
 				), RendererException::SCRIPTFILE_ERROR);
@@ -356,8 +396,7 @@ class Renderer extends ARenderer
 
 					foreach ($subcontents as $sc) {
 						if (true === is_a($sc, 'BackBuilder\Renderer\IRenderable')) {
-							$renderer = clone $this;
-							$scRender = $renderer->render(
+							$scRender = $this->render(
 								$sc, 
 								$this->getMode(), 
 								$params, 
@@ -367,8 +406,6 @@ class Renderer extends ARenderer
 							if (false === $scRender) {
 								throw $e;
 							}
-
-							$this->_restore();
 
 							$render .= $scRender;
 						}
@@ -424,10 +461,13 @@ class Renderer extends ARenderer
 	}
 
 	/**
-	 * [getTemplateFile description]
-	 * @param  IRenderable $object [description]
-	 * @param  [type]      $mode   [description]
-	 * @return [type]              [description]
+	 * Try to compute and guess a valid filename for $object:
+	 * 		- on success return string which is the right filename with its extension
+	 * 		- on fail return false
+	 * 		
+	 * @param  IRenderable $object 
+	 * @param  [type]      $mode   
+	 * @return string|boolean string if successfully found a valid file name, else false
 	 */
 	private function getTemplateFile(IRenderable $object, $mode = null)
 	{
@@ -435,7 +475,7 @@ class Renderer extends ARenderer
 		$template = $this->_getTemplatePath($object);
 		foreach ($this->manageableExt->keys() as $ext) {
 			$this->templateFile = $template . (null !== $mode ? '.' . $mode : '') . $ext;
-			if (true === $this->isValidTemplateFile()) {
+			if (true === $this->isValidTemplateFile($this->templateFile)) {
 				$filename = $this->templateFile;
 				$this->templateFile = $tmpStorage;
 
@@ -454,33 +494,36 @@ class Renderer extends ARenderer
 	}
 
 	/**
-	 * [isValidTemplateFile description]
-	 * @param  boolean $isLayout [description]
-	 * @return boolean           [description]
+	 * Use the right adapter depending on $filename extension to define if
+	 * $filename is a valid template filename or not
+	 * 
+	 * @param  string  $filename 
+	 * @param  boolean $isLayout if you want to check $filename in layout dir, default: false
+	 * @return boolean           
 	 */
-	private function isValidTemplateFile($isLayout = false)
+	private function isValidTemplateFile($filename, $isLayout = false)
 	{
-		$adapter = $this->determineWhichAdapterToUse();
+		$adapter = $this->determineWhichAdapterToUse($filename);
 		if (null === $adapter) {
 			return false;
 		}
 		
 		return $adapter->isValidTemplateFile(
-			$this->templateFile,
+			$filename,
 			true === $isLayout ? $this->_layoutdir : $this->_scriptdir
 		);
 	}
 
 	/**
-	 * [renderTemplate description]
-	 * @param  boolean $isPartial [description]
-	 * @param  boolean $isLayout  [description]
-	 * @return [type]             [description]
+	 * @param  boolean $isPartial 
+	 * @param  boolean $isLayout  
+	 * @return string
 	 */
 	private function renderTemplate($isPartial = false, $isLayout = false)
 	{
-		$adapter = $this->determineWhichAdapterToUse();
+		$adapter = $this->determineWhichAdapterToUse($this->templateFile);
 		$dirs = true === $isLayout ? $this->_layoutdir : $this->_scriptdir;
+
 		if (null === $adapter) {
 			throw new RendererException(sprintf(
 				'Unable to manage file \'%s\' in path (%s)', 
@@ -499,6 +542,7 @@ class Renderer extends ARenderer
 
 	/**
      * Returns an array of template files according the provided pattern
+     * 
      * @param string $pattern
      * @return array
      */
@@ -514,6 +558,7 @@ class Renderer extends ARenderer
 
     /**
      * Returns the list of available render mode for the provided object
+     * 
      * @param \BackBuilder\Renderer\IRenderable $object
      * @return array
      */
@@ -525,5 +570,55 @@ class Renderer extends ARenderer
         }
 
         return array_unique($modes);
+    }
+
+    /**
+     * @see BackBuilder\Renderer\IRenderer::updateLayout()
+     */
+    public function updateLayout(Layout $layout)
+    {
+    	$layoutFile = parent::updateLayout($layout);
+    	$adapter = $this->determineWhichAdapterToUse($layoutFile);
+    	if (null === $adapter) {
+    		throw new RendererException(sprintf(
+				'Unable to manage file \'%s\' in path (%s)', 
+				$layoutFile, 
+				$this->_layoutdir[0]
+			), RendererException::SCRIPTFILE_ERROR);
+    	}
+
+    	return $adapter->updateLayout($layout, $layoutFile);
+    }
+
+    /**
+     * Return the file path to current layout, try to create it if not exists
+     * 
+     * @param Layout $layout
+     * @return string the file path
+     * @throws RendererException
+     */
+    protected function _getLayoutFile(Layout $layout)
+    {
+        $layoutfile = $layout->getPath();
+        if (null === $layoutfile && 0 < $this->manageableExt->count()) {
+        	$adapter = null;
+            if (null !== $this->defaultAdapter && null !== $adapter = $this->rendererAdapters->get($this->defaultAdapter)) {
+            	$extensions = $adapter->getManagedFileExtensions();
+            } else {
+            	$extensions = $this->manageableExt->all();
+            }
+            
+            if (0 === count($extensions)) {
+        		throw new RendererException(
+        			'Declared adapter(s) (count:' . $this->rendererAdapters->count() . ') is/are not able to manage ' .
+        			'any file extensions at moment.'
+        		);
+        	}
+
+			$layoutfile = String::toPath($layout->getLabel(), array('extension' => reset($extensions)));
+            $layout->setPath($layoutfile);
+        }
+
+        return $layoutfile;
     }
 }

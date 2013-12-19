@@ -27,9 +27,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 use BackBuilder\Renderer\ARenderer,
     BackBuilder\Renderer\ARendererAdapter,
-    BackBuilder\Renderer\IRenderable,
     BackBuilder\Renderer\Exception\RendererException,
-    BackBuilder\Renderer\IRendererAdapter,
     BackBuilder\Site\Layout,
     BackBuilder\Util\File;
 
@@ -41,8 +39,9 @@ use BackBuilder\Renderer\ARenderer,
  * @subpackage  Adapter
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ *              e.chau <eric.chau@lp-digital.fr>
  */
-class phtml extends ARendererAdapter implements IRendererAdapter
+class phtml extends ARendererAdapter
 {
     /**
      * Extensions to include searching file
@@ -214,12 +213,13 @@ class phtml extends ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\ARenderer::updateLayout()
+     * @see BackBuilder\Renderer\IRendererAdapter::updateLayout()
      */
-    public function updateLayout(Layout $layout)
+    public function updateLayout(Layout $layout, $layoutFile)
     {
-        if (false === ($layoutfile = parent::updateLayout($layout)))
-            return false;
+        if (false === $layoutFile) {
+            return false;            
+        }
 
         $mainLayoutRow = $layout->getDomDocument();
         if (!$layout->isValid() || null === $mainLayoutRow)
@@ -239,8 +239,8 @@ class phtml extends ARendererAdapter implements IRendererAdapter
         libxml_use_internal_errors(true);
 
         $domlayout = new \DOMDocument();
-        //$domlayout->loadHTMLFile($layoutfile);
-        $layoutcontent = str_replace(array('<?php', '?>'), array('&lt;?php', '?&gt;'), file_get_contents($layoutfile));
+        //$domlayout->loadHTMLFile($layoutFile);
+        $layoutcontent = str_replace(array('<?php', '?>'), array('&lt;?php', '?&gt;'), file_get_contents($layoutFile));
         @$domlayout->loadHTML($layoutcontent);
         $domlayout->formatOutput = true;
 
@@ -260,11 +260,11 @@ class phtml extends ARendererAdapter implements IRendererAdapter
             $domlayout->appendChild($layoutNode);
         }
 
-        if (!file_put_contents($layoutfile, preg_replace_callback('/(&lt;|<)\?php(.+)\?(&gt;|>)/iu', create_function('$matches', 'return "<?php".html_entity_decode(urldecode($matches[2]))."?".">";'), $domlayout->saveHTML())))
-            throw new RendererException(sprintf('Unable to save layout %s.', $layoutfile), RendererException::LAYOUT_ERROR);
+        if (!file_put_contents($layoutFile, preg_replace_callback('/(&lt;|<)\?php(.+)\?(&gt;|>)/iu', create_function('$matches', 'return "<?php".html_entity_decode(urldecode($matches[2]))."?".">";'), $domlayout->saveHTML())))
+            throw new RendererException(sprintf('Unable to save layout %s.', $layoutFile), RendererException::LAYOUT_ERROR);
 
         libxml_clear_errors();
 
-        return $layoutfile;
+        return $layoutFile;
     }
 }

@@ -1,23 +1,29 @@
 <?php
+
 namespace BackBuilder\Renderer\Adapter;
 
 use Exception,
-	ReflectionClass,
 	Twig_Error_Loader;
 
-use Twig_Loader_Filesystem,
-	Twig_Environment;
+use Twig_Environment;
 
-use BackBuilder\Renderer\ARenderer,
+use BackBuilder\Renderer\Adapter\TwigLoaderFilesystem,
+    BackBuilder\Renderer\ARenderer,
     BackBuilder\Renderer\Exception\RendererException,
-	BackBuilder\Renderer\IRenderable,
-    BackBuilder\Renderer\ARendererAdapter,
-	BackBuilder\Util\File;
+    BackBuilder\Renderer\ARendererAdapter;
 
+/**
+ * twig renderer adapter for BackBuilder\Renderer\Renderer
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\Renderer
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
+ */
 class Twig extends ARendererAdapter
 {
 	/**
-	 * @var Twig_Loader_Filesystem
+	 * @var BackBuilder\Renderer\Adapter\TwigLoaderFilesystem
 	 */
 	private $loader;
 
@@ -43,8 +49,8 @@ class Twig extends ARendererAdapter
         parent::__construct($renderer);
 
         $bbapp = $this->renderer->getApplication();
-		$this->loader = new \Twig_Loader_Filesystem(array());
-		$this->twig = new \Twig_Environment($this->loader, array(
+		$this->loader = new TwigLoaderFilesystem(array());
+		$this->twig = new Twig_Environment($this->loader, array(
 			'debug' => null !== $bbapp  ? $bbapp->isDebugMode() : false
 		));
 	}
@@ -57,6 +63,13 @@ class Twig extends ARendererAdapter
         return $this->includeExtensions;
     }
 
+    /**
+     * Check if $filename exists in directories provided by $templateDir
+     * 
+     * @param  [type]  $filename    
+     * @param  array   $templateDir 
+     * @return boolean true if the file was found and is readable
+     */
     public function isValidTemplateFile($filename, array $templateDir)
     {
         if (0 === count($templateDir)) {
@@ -68,6 +81,11 @@ class Twig extends ARendererAdapter
         return $this->loader->exists($filename);
     }
 
+    /**
+     * Add dir path into loader only if it not already exists
+     * 
+     * @param array $templateDir 
+     */
     private function addDirPathIntoLoaderIfNotExists(array $templateDir)
     {
         $paths = $this->loader->getPaths();
@@ -78,6 +96,15 @@ class Twig extends ARendererAdapter
         }
     }
 
+    /**
+     * Generate the render of $filename template with $params and $vars
+     * 
+     * @param  string $filename    
+     * @param  array  $templateDir 
+     * @param  array  $params      
+     * @param  array  $vars        
+     * @return string              
+     */
     public function renderTemplate($filename, array $templateDir, array $params = array(), array $vars = array())
     {
         $this->addDirPathIntoLoaderIfNotExists($templateDir);

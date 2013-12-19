@@ -38,6 +38,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  * @package     BackBuilder\Renderer
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ *              e.chau <eric.chau@lp-digital.fr>
  */
 abstract class ARenderer implements IRenderer
 {
@@ -50,8 +51,16 @@ abstract class ARenderer implements IRenderer
      */
     protected $_application;
 
+    /**
+     * Contains evey helpers
+     * @var ParameterBag
+     */
     protected $helpers;
 
+    /**
+     * Contains every header and footer scripts
+     * @var ParameterBag
+     */
     protected $scripts;
 
     /**
@@ -370,9 +379,11 @@ abstract class ARenderer implements IRenderer
 
     protected function _restore()
     {
-        $this->_object = $this->__object;
-        $this->_vars = array_pop($this->__vars);
-        $this->_params = array_pop($this->__params);
+        // $this->_object = $this->__object;
+        // $this->_vars = array_pop($this->__vars);
+        // $this->_params = array_pop($this->__params);
+
+        $this->updateHelpers();
 
         return $this;
     }
@@ -774,8 +785,9 @@ abstract class ARenderer implements IRenderer
      */
     public function updateLayout(Layout $layout)
     {
-        if (null === $layout->getSite())
-            return false;
+        if (null === $layout->getSite()) {
+            return false;            
+        }
 
         $layoutfile = $this->_getLayoutFile($layout);
         File::resolveFilepath($layoutfile, null, array('base_dir' => $this->_layoutdir[0]));
@@ -871,7 +883,7 @@ abstract class ARenderer implements IRenderer
         return $this->_ignoreIfRenderModeNotAvailable;
     }
 
-        /**
+    /**
      * Helper: generate javascript's tag with $href and add it to head tag children
      * Note: guaranteed that two or more scripts with same href will be included only once
      * 
@@ -881,8 +893,6 @@ abstract class ARenderer implements IRenderer
     public function addHeaderScript($href)
     {
         $this->addScript(self::HEADER_SCRIPT, $href);
-
-        return $this;
     }
 
     /**
@@ -896,11 +906,10 @@ abstract class ARenderer implements IRenderer
     public function addFooterScript($href)
     {
         $this->addScript(self::FOOTER_SCRIPT, $href);
-
-        return $this;
     }
 
     /**
+     * Generic add script used by self::addHeaderScript() and self::addFooterScript()
      * @param string $type 
      * @param string $href 
      */
@@ -918,6 +927,10 @@ abstract class ARenderer implements IRenderer
         $this->scripts->set($type, $scripts);
     }
 
+    /**
+     * Insert header and footer scripts with HTML tag on the render of the current
+     * ARenderer; it inserts header and footer scripts at the right location of the DOM
+     */
     public function insertHeaderAndFooterScript()
     {
         if (null === $this->scripts) {
@@ -941,11 +954,11 @@ abstract class ARenderer implements IRenderer
     }
 
     /**
-     * 
+     * Generate HTML script tag from given array $scripts
      * @param  array $scripts
      * @return string
      */
-    private function _generateScriptCode($scripts)
+    private function _generateScriptCode(array $scripts)
     {
         $result = '';
         foreach ($scripts as $href) {
@@ -955,10 +968,10 @@ abstract class ARenderer implements IRenderer
         return $result;
     }
 
-        /**
-     * [get description]
-     * @param  [type] $method [description]
-     * @return [type]         [description]
+    /**
+     * Returns helper if it exists or null
+     * @param  [type] $method 
+     * @return AHelper|null
      */
     public function getHelper($method)
     {
@@ -971,18 +984,21 @@ abstract class ARenderer implements IRenderer
     }
 
     /**
-     * [create description]
-     * @param  [type] $method [description]
-     * @param  [type] $argv   [description]
-     * @return [type]         [description]
+     * Create a new helper if class exists
+     * 
+     * @param  string $method 
+     * @param  array  $argv   
+     * @return AHelper|null
      */
     public function createHelper($method, $argv)
     {
+        $helper = null;
         $helperClass = '\BackBuilder\Renderer\Helper\\' . $method;
         if (true === class_exists($helperClass)) {
             $this->helpers->set($method, new $helperClass($this, $argv));
+            $helper = $this->helpers->get($method);
         }
         
-        return $this->helpers->get($method);
+        return $helper;
     }
 }
