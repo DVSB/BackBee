@@ -21,6 +21,8 @@
 
 namespace BackBuilder;
 
+use Exception;
+
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
@@ -346,6 +348,26 @@ class BBApplication
                     $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
                     $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
                 }
+            }
+        }
+
+        $this->initBundlesServices();
+    }
+
+    /**
+     * Load every service definition defined in bundle
+     */
+    private function initBundlesServices()
+    {
+        foreach ($this->_bundles as $b) {
+            $xml = $b->getResourcesDir() . DIRECTORY_SEPARATOR . 'services.xml';
+            if (true === is_file($xml)) {
+                $loader = new XMLFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
+                try {
+                    $loader->load('services.xml');
+                } catch (Exception $e) { /* nothing to do, just ignore it */ }
+
+                unset($loader);
             }
         }
     }
