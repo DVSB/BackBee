@@ -27,6 +27,7 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
+    BackBuilder\Exception\DatabaseConnectionException,    
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
@@ -310,7 +311,7 @@ class BBApplication
         try {
             $this->getContainer()->get('em')->getConnection()->connect();
         } catch (\Exception $e) {
-            throw new Exception\DatabaseConnectionException('Enable to connect to the database.', 0, $e);
+            throw new DatabaseConnectionException('Enable to connect to the database.', 0, $e);
         }
 
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {

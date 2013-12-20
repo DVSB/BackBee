@@ -8,7 +8,8 @@ use BackBuilder\BBApplication,
 	BackBuilder\Renderer\Exception\RendererException,
 	BackBuilder\Renderer\IRenderable,
 	BackBuilder\Renderer\IRendererAdapter,
-	BackBuilder\Site\Layout;
+	BackBuilder\Site\Layout,
+	BackBuilder\Util\String;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 
@@ -605,7 +606,7 @@ class Renderer extends ARenderer
             if (null !== $this->defaultAdapter && null !== $adapter = $this->rendererAdapters->get($this->defaultAdapter)) {
             	$extensions = $adapter->getManagedFileExtensions();
             } else {
-            	$extensions = $this->manageableExt->all();
+            	$extensions = $this->manageableExt->keys();
             }
             
             if (0 === count($extensions)) {
