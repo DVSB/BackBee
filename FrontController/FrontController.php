@@ -339,7 +339,7 @@ class FrontController implements HttpKernelInterface {
         try {
             $this->_application->info(sprintf('Handling URL request `rss%s`.', $uri));
 
-            $response = new Response($this->_application->getRenderer()->render($page, 'rss', null, 'rss.phtml'));
+            $response = new Response($this->_application->getRenderer()->render($page, 'rss', null, 'rss.phtml', true));
             $response->headers->set('Content-Type', 'text/xml');
             $response->setClientTtl(15);
             $response->setTtl(15);

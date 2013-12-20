@@ -37,7 +37,7 @@ class layout extends AHelper
 
     public function getLayout()
     {
-        if (NULL === $this->_layout) {
+        if (null === $this->_layout) {
             $object = $this->_renderer->getObject();
             if (is_object($object) && method_exists($object, 'getLayout')) {
                 $layout = $object->getLayout();
@@ -45,7 +45,7 @@ class layout extends AHelper
                     $this->_layout = $layout;
             }
 
-            if (NULL === $this->_layout)
+            if (null === $this->_layout)
                 $this->_layout = new EmptyLayout();
         }
 

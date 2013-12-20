@@ -170,8 +170,7 @@ var SmartList = function(config){
     SmartList.prototype.deleteItemById = function(id){
         delete(this.dataContainer[id]);
         this.itemCount = this.itemCount - 1;
-        this.onDelete.call(this,this.dataContainer,this.name);
-       
+        this.onDelete.call(this,this.dataContainer,this.name,id);   
     }     
       
     SmartList.prototype.setData = function(data,keyId){

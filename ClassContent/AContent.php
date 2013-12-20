@@ -48,7 +48,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     /**
      * The label of this content
      * @var string
-     * @Column(type="string", name="label")
+     * @Column(type="string", name="label", nullable=true)
      */
     protected $_label;
 

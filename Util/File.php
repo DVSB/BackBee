@@ -22,7 +22,7 @@
 namespace BackBuilder\Util;
 
 use BackBuilder\Exception\BBException,
-    BackBuilder\Exception\InvalidArgumentException;
+    BackBuilder\Exception\InvalidArgumentsException;
 
 /**
  * Set of utility methods to deal with files
@@ -146,17 +146,17 @@ class File
      * Makes directory
      * @param string $path The directory path
      * @return boolean Returns TRUE on success
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if directory already 
+     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if directory already 
      *                                                         exists or cannot be made
      */
     public static function mkdir($path)
     {
         if (true === is_dir($path)) {
-            throw new InvalidArgumentException(sprintf('Directory `%s` already exists.', $path));
+            throw new InvalidArgumentsException(sprintf('Directory `%s` already exists.', $path));
         }
 
         if (false === @mkdir($path, 0755, true)) {
-            throw new InvalidArgumentException(sprintf('Enable to make directory `%s`.', $path));
+            throw new InvalidArgumentsException(sprintf('Enable to make directory `%s`.', $path));
         }
 
         return true;
@@ -167,17 +167,17 @@ class File
      * @param string $from The source file path
      * @param string $to The target file path
      * @return boolean Returns TRUE on success
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if either $from or $to is invalid
+     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if either $from or $to is invalid
      * @throws \BackBuilder\Exception\BBException Occurs if the copy can not be done
      */
     public static function copy($from, $to)
     {
         if (false === $frompath = realpath($from)) {
-            throw new InvalidArgumentException(sprintf('The file `%s` cannot be accessed', $from));
+            throw new InvalidArgumentsException(sprintf('The file `%s` cannot be accessed', $from));
         }
 
         if (false === is_readable($frompath) || true === is_dir($frompath)) {
-            throw new InvalidArgumentException(sprintf('The file `%s` doesn\'t exist or cannot be read', $from));
+            throw new InvalidArgumentsException(sprintf('The file `%s` doesn\'t exist or cannot be read', $from));
         }
 
         $topath = self::normalizePath($to);
@@ -197,19 +197,17 @@ class File
      * @param string $from The source file path
      * @param string $to The target file path
      * @return boolean Returns TRUE on success
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if either $from or $to is invalid
+     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if either $from or $to is invalid
      * @throws \BackBuilder\Exception\BBException Occurs if $from can not be deleted
      */
     public static function move($from, $to)
     {
         if (false === $frompath = realpath($from)) {
-            //throw new InvalidArgumentException(sprintf('The file `%s` cannot be accessed', $from));
-            return false;
+            throw new InvalidArgumentsException(sprintf('The file `%s` cannot be accessed', $from));
         }
 
         if (false === is_writable($frompath) || true === is_dir($frompath)) {
-            //throw new InvalidArgumentException(sprintf('The file `%s` doesn\'t exist or cannot be write', $from));
-            return false;
+            throw new InvalidArgumentsException(sprintf('The file `%s` doesn\'t exist or cannot be write', $from));
         }
 
         self::copy($from, $to);

@@ -1191,7 +1191,7 @@ var FormBuilder = function(settings){
     }
     
     // fixme how to process values
-    this.valuesProcessor = {
+    /*this.valuesProcessor = {
         "array" : function(value){
             return JSON.stringify(value);
         },
@@ -1204,7 +1204,7 @@ var FormBuilder = function(settings){
         process :function(keyType, value){
             return this[keyType].call(this,value);
         }        
-    };
+    };*/
  
     this.fieldsBuilder = {
         getWrapper : function(){
@@ -1383,7 +1383,8 @@ FormBuilder.registerRenderTypePlugin = function(rendererName,rendererConfig){
     for (prop in rendererConfig){
         if(typeof rendererConfig[prop]=="function") protoFunc[prop] = rendererConfig[prop];
     }
-    RendererConstructor.prototype = $.extend(true,AbstractPluginPrototype,protoFunc);
+    var PluginPrototype = $.extend({},AbstractPluginPrototype);
+    RendererConstructor.prototype = $.extend(true,PluginPrototype,protoFunc);
     FormBuilder.rendererPlugins[rendererName] = RendererConstructor;
 }
 

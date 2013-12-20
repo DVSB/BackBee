@@ -51,6 +51,12 @@ class BBException extends \Exception
     const MISSING_APPLICATION = 1002;
 
     /**
+     * Invalid database connection
+     * @var int
+     */
+    const INVALID_DB_CONNECTION = 1003;
+
+    /**
      * The default error code
      * @var int
      */

@@ -82,7 +82,7 @@ class Dir
             $files = array_diff(scandir($path), array('.', '..'));
             return $files;
         } else {
-            throw new \Exception('Incorect path name in ' . __FILE__ . ' at line ' . __LINE__);
+            throw new \Exception('Incorect path "' . $path . '" name in ' . __FILE__ . ' at line ' . __LINE__);
         }
     }
 

@@ -35,15 +35,15 @@ use BackBuilder\Renderer\IRenderable,
 interface IRenderer
 {
 
-    public function assign($var, $value = NULL);
+    public function assign($var, $value = null);
 
     public function getAssignedVars();
 
-    public function render(IRenderable $content = NULL, $mode = NULL, $params = NULL, $template = NULL);
+    public function render(IRenderable $content = null, $mode = null, $params = null, $template = null);
 
-    public function partial($template = NULL, $params = NULL);
+    public function partial($template = null, $params = null);
 
-    public function error($error_code, $title = NULL, $message = NULL, $trace = NULL);
+    public function error($error_code, $title = null, $message = null, $trace = null);
 
     public function updateLayout(Layout $layout);
 
