@@ -62,7 +62,7 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
             <?php // BB5 MAINTABS ?>
             <div id="bb5-maintabs">
                 <ul class='bb5-tabs'>
-                    <li<?php if (false === $this->getApplication()->getSecurityContext()->isGranted('sudo')
+                    <li<?php if (false !== $this->getApplication()->getSecurityContext()->isGranted('sudo')
                 && false === $this->getApplication()->getSecurityContext()->isGranted('EDIT', new \BackBuilder\Site\Layout('*')))
             echo ' style="display:none;"';
         ?>>

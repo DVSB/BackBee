@@ -203,11 +203,13 @@ class File
     public static function move($from, $to)
     {
         if (false === $frompath = realpath($from)) {
-            throw new InvalidArgumentException(sprintf('The file `%s` cannot be accessed', $from));
+            //throw new InvalidArgumentException(sprintf('The file `%s` cannot be accessed', $from));
+            return false;
         }
 
         if (false === is_writable($frompath) || true === is_dir($frompath)) {
-            throw new InvalidArgumentException(sprintf('The file `%s` doesn\'t exist or cannot be write', $from));
+            //throw new InvalidArgumentException(sprintf('The file `%s` doesn\'t exist or cannot be write', $from));
+            return false;
         }
 
         self::copy($from, $to);
