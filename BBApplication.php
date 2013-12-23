@@ -21,10 +21,13 @@
 
 namespace BackBuilder;
 
+use Exception;
+
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
+    BackBuilder\Exception\DatabaseConnectionException,    
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
@@ -93,6 +96,9 @@ class BBApplication
             ->_initContentWrapper()
             ->_initBundles();
 
+        // Force container to create SecurityContext object to activate listener
+        $this->getSecurityContext();
+
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
                 setLocale(LC_ALL, $encoding['locale']);
@@ -138,10 +144,6 @@ class BBApplication
         $this->_container->set('bbapp', $this);
         
         $this->_initBBAppParamsIntoContainer();
-
-        // Force container to create SecurityContext object to activate listener
-        $this->getSecurityContext();        
-        $this->_initRenderer();
 
         $this->_initExternalBundleServices();
 
@@ -309,7 +311,7 @@ class BBApplication
         try {
             $this->getContainer()->get('em')->getConnection()->connect();
         } catch (\Exception $e) {
-            throw new Exception\DatabaseConnectionException('Enable to connect to the database.', 0, $e);
+            throw new DatabaseConnectionException('Enable to connect to the database.', 0, $e);
         }
 
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
@@ -335,27 +337,6 @@ class BBApplication
         return $this;
     }
 
-    /**
-     * @return \BackBuilder\BBApplication
-     * @throws BBException
-     */
-    private function _initRenderer()
-    {
-        if (null === $rendererConfig = $this->getConfig()->getRendererConfig()) {
-            throw new BBException('None renderer configuration found');            
-        }
-
-        if (false === isset($rendererConfig['adapter'])) {
-            throw new BBException('None renderer adapter found');            
-        }
-
-        $this->getContainer()->setParameter('bbapp.renderer.class', $rendererConfig['adapter']);
-
-        $this->debug(sprintf('%s(): Renderer initialized with adapter `%s`', __METHOD__, $rendererConfig['adapter']));
-
-        return $this;
-    }
-
     private function _initBundles()
     {
         if (null === $this->_bundles)
@@ -368,6 +349,26 @@ class BBApplication
                     $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
                     $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
                 }
+            }
+        }
+
+        $this->initBundlesServices();
+    }
+
+    /**
+     * Load every service definition defined in bundle
+     */
+    private function initBundlesServices()
+    {
+        foreach ($this->_bundles as $b) {
+            $xml = $b->getResourcesDir() . DIRECTORY_SEPARATOR . 'services.xml';
+            if (true === is_file($xml)) {
+                $loader = new XMLFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
+                try {
+                    $loader->load('services.xml');
+                } catch (Exception $e) { /* nothing to do, just ignore it */ }
+
+                unset($loader);
             }
         }
     }

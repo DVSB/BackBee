@@ -10,7 +10,7 @@ parameters:
     bbapp.logger.class: BackBuilder\Logging\Logger
     bbapp.securitycontext.class: BackBuilder\Security\SecurityContext
     bbapp.controller.class: BackBuilder\FrontController\FrontController
-    bbapp.renderer.class: ''
+    bbapp.renderer.class: BackBuilder\Renderer\Renderer
     bbapp.ed.class: BackBuilder\Event\Dispatcher
     bbapp.rpcserver.class: BackBuilder\Services\Rpc\JsonRPCServer
     bbapp.uploadserver.class: BackBuilder\Services\Upload\UploadServer

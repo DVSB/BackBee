@@ -58,4 +58,9 @@ abstract class AHelper
         return $this;
     }
 
+    public function getRenderer()
+    {
+        return $this->_renderer;
+    }
+
 }

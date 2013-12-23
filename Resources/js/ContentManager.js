@@ -424,7 +424,7 @@ bb.ContentManager =(function($,gExport){
                         var itemDatas = $(ui.item).data();
                         var itemType = ("contentTypeInfos" in itemDatas) ? itemDatas.contentTypeInfos.name : itemDatas.type;
                         //console.log("itemType",itemType);
-                        var canAccept = receiver.checkAcceptMaxEntry(itemType); 
+                        var canAccept = receiver.checkAcceptMaxEntry(itemType);
                         if(!canAccept) $(ui.placeholder).addClass(_settings.invalidPlaceHolderCls);
                         if(canAccept) $(ui.placeholder).removeClass(_settings.invalidPlaceHolderCls); 
                         $(document).trigger("content:overItem");
