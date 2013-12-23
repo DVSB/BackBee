@@ -96,6 +96,9 @@ class BBApplication
             ->_initContentWrapper()
             ->_initBundles();
 
+        // Force container to create SecurityContext object to activate listener
+        $this->getSecurityContext();
+
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
                 setLocale(LC_ALL, $encoding['locale']);
@@ -141,9 +144,6 @@ class BBApplication
         $this->_container->set('bbapp', $this);
         
         $this->_initBBAppParamsIntoContainer();
-
-        // Force container to create SecurityContext object to activate listener
-        $this->getSecurityContext();
 
         $this->_initExternalBundleServices();
 
