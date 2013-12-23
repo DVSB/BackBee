@@ -1,0 +1,63 @@
+parameters:
+    # bbapp parameters, somes will be set at init of container by BBApplication
+    bbapp.cache.dir: ''
+    bbapp.config.dir: ''
+    bbapp.locale: 'fr_FR'
+    # bbapp classes
+    bbapp.cachebootstrap.class: BackBuilder\Cache\File\Cache
+    bbapp.cachecontrol.class: ''
+    bbapp.config.class: BackBuilder\Config\Config
+    bbapp.logger.class: BackBuilder\Logging\Logger
+    bbapp.securitycontext.class: BackBuilder\Security\SecurityContext
+    bbapp.controller.class: BackBuilder\FrontController\FrontController
+    bbapp.renderer.class: ''
+    bbapp.ed.class: BackBuilder\Event\Dispatcher
+    bbapp.rpcserver.class: BackBuilder\Services\Rpc\JsonRPCServer
+    bbapp.uploadserver.class: BackBuilder\Services\Upload\UploadServer
+    bbapp.urlgenerator.class: BackBuilder\Rewriting\UrlGenerator
+    bbapp.translator.selector.class: Symfony\Component\Translation\MessageSelector
+    bbapp.translator.class: Symfony\Component\Translation\IdentityTranslator
+
+services:
+    cache.bootstrap:
+        class:      %bbapp.cachebootstrap.class%
+        arguments:  ["%bbapp.cache.dir%"]
+    cache-control:
+        class:      %bbapp.cachecontrol.class%
+        arguments:  ["@bbapp"]
+    config:
+        class:      %bbapp.config.class%
+        arguments:  ["%bbapp.config.dir%", "@cache.bootstrap"]
+    ed:
+        class:      %bbapp.ed.class%
+        arguments:  ["@bbapp"]
+    logging:
+        class:      %bbapp.logger.class%
+        arguments:  ["@bbapp"]
+    security.context:
+        class:      %bbapp.securitycontext.class%
+        arguments:  ["@bbapp"]
+    controller:
+        class:      %bbapp.controller.class%
+        arguments:  ["@bbapp"]
+    renderer:       
+        class:      %bbapp.renderer.class%
+        arguments:  ["@bbapp"]
+    rpcserver:
+        class:      %bbapp.rpcserver.class%
+        arguments:  ["@bbapp"]
+    uploadserver:
+        class:      %bbapp.uploadserver.class%
+        arguments:  ["@bbapp"]
+    rewriting.urlgenerator:
+        class:      %bbapp.urlgenerator.class%
+        arguments:  ["@bbapp"]
+    translator.selector:
+        class:      %bbapp.translator.selector.class%
+        public:     false
+    translator:
+        class:      %bbapp.translator.class%
+        arguments:  ["@translator.selector"]
+        calls:
+            - [setLocale, ["%bbapp.locale%"]]
+

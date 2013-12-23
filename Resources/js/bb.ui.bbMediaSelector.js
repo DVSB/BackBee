@@ -200,7 +200,7 @@
             $(this.element).delegate(".bb5-selector-item","click",function(e){
                 e.preventDefault();
                 var itemData = $(e.currentTarget).data("media");
-                myself._selectItem(itemData);
+                myself._selectItem(itemData,e.currentTarget);
             });
 
             /*handle click on search engine*/
@@ -245,7 +245,7 @@
             return data;
         },
 
-        _selectItem : function(data){
+        _selectItem : function(data,htmlData){
             var context = this.getContext();
             if (context.callback) {
                 context.callback({
@@ -253,6 +253,7 @@
                     uid: data.content.uid,
                     title: data.title,
                     value: data.content.url,
+                    render: jQuery(htmlData).clone(),
                     target: '_self',
                     data: data
                 });

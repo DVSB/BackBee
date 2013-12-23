@@ -42,17 +42,13 @@ class UserPreferencesRepository extends EntityRepository
     /**
      * Retrieve the user prefernces by security token.
      *
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return UserPreferences object
      */
-    public function loadPreferences($token)
+    public function loadPreferences(TokenInterface $token)
     {
-        if ($token instanceof TokenInterface) {
-            $uid = $this->retrieveUserPreferencesUid($token);
-        } else {
-            $uid = $token;
-        }
-        return $this->retrieveByUid($uid, $token->getUser());
+        return $this->retrieveByUid($this->retrieveUserPreferencesUid($token), $token->getUser());
     }
 
     /**
@@ -70,6 +66,7 @@ class UserPreferencesRepository extends EntityRepository
     /**
      * Set the user preferences.
      *
+     * @codeCoverageIgnore
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param string $preferences
      */

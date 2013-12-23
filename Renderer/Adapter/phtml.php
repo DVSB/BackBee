@@ -61,6 +61,11 @@ class phtml extends ARenderer
      * @var string
      */
     private $_templateFile;
+
+    /**
+     * Array that contains every declared js script (header and footer)
+     * @var array
+     */
     private $_scripts;
 
     public function __construct(BBApplication $application = null, $config = null)
@@ -77,21 +82,22 @@ class phtml extends ARenderer
      * @param string $mode The rendering mode
      * @return string The file path to the template file
      */
-    private function _getTemplateFile(IRenderable $object, $mode = NULL)
+    private function _getTemplateFile(IRenderable $object, $mode = null)
     {
         $template = $this->_getTemplatePath($object);
 
         foreach ($this->_includeExtensions as $ext) {
             $filename = $template . ($mode ? '.' . $mode : '') . $ext;
-            File::resolveFilepath($filename, NULL, array('include_path' => $this->_scriptdir));
-            if (is_file($filename) && is_readable($filename))
+            File::resolveFilepath($filename, null, array('include_path' => $this->_scriptdir));
+            if (is_file($filename) && is_readable($filename)) {
                 return $filename;
+            }
         }
 
         if ($parentClassname = get_parent_class($object)) {
             $parent = new \ReflectionClass($parentClassname);
             if (!$parent->isAbstract()) {
-                return $this->_getTemplateFile(new $parentClassname(), $mode, NULL);
+                return $this->_getTemplateFile(new $parentClassname(), $mode, null);
             }
         }
 
@@ -105,38 +111,42 @@ class phtml extends ARenderer
      * @return string The rendered output
      * @throws RendererException
      */
-    private function _renderContent($params = NULL, $template = NULL)
+    private function _renderContent($params = null, $template = null)
     {
         try {
             $mode = (null !== $this->getMode()) ? $this->getMode() : $this->_object->getMode();
             $this->_templateFile = $template;
-            if (NULL === $this->_templateFile && NULL !== $this->_object) {
+            if (null === $this->_templateFile && null !== $this->_object) {
                 $this->_templateFile = $this->_getTemplateFile($this->_object, $mode);
-                if (FALSE === $this->_templateFile) {
+                if (false === $this->_templateFile) {
                     $this->_templateFile = $this->_getTemplateFile($this->_object, $this->getMode());
                 }
                 if (false === $this->_templateFile && false === $this->_ignoreIfRenderModeNotAvailable) {
                     $this->_templateFile = $this->_getTemplateFile($this->_object);
                 }
             }
-            File::resolveFilepath($this->_templateFile, NULL, array('include_path' => $this->_scriptdir));
+
+            File::resolveFilepath($this->_templateFile, null, array('include_path' => $this->_scriptdir));
 
             // Unfound template file for this object
-            if (!is_file($this->_templateFile) || !is_readable($this->_templateFile))
+            if (!is_file($this->_templateFile) || !is_readable($this->_templateFile)) {
                 throw new RendererException(sprintf('Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)), RendererException::SCRIPTFILE_ERROR);
+            }
         } catch (RendererException $e) {
             $render = '';
 
             // Unknown template, try to render subcontent
-            if (NULL !== $this->_object && is_array($this->_object->getData())) {
+            if (null !== $this->_object && is_array($this->_object->getData())) {
                 foreach ($this->_object->getData() as $subcontents) {
                     $subcontents = is_array($subcontents) ? $subcontents : array($subcontents);
 
                     foreach ($subcontents as $subcontent) {
                         if (is_a($subcontent, 'BackBuilder\Renderer\IRenderable')) {
                             $renderer = clone $this;
-                            if (FALSE === $subcontentrender = $renderer->render($subcontent, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable))
+                            if (false === $subcontentrender = $renderer->render($subcontent, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable)) {
                                 throw $e;
+                            }
+
                             $this->_restore();
 
                             $render .= $subcontentrender;
@@ -149,7 +159,7 @@ class phtml extends ARenderer
         }
 
         // Assign vars and parameters
-        if (NULL !== $this->_object) {
+        if (null !== $this->_object) {
             $draft = $this->_object->getDraft();
             if (is_a($this->_object, 'BackBuilder\ClassContent\AClassContent') && !$this->_object->isLoaded()) {
                 // trying to refresh unloaded content
@@ -159,9 +169,9 @@ class phtml extends ARenderer
                 $uid = $this->_object->getUid();
 
                 $em->detach($this->_object);
-                if (NULL !== $object = $em->find($classname, $uid)) {
+                if (null !== $object = $em->find($classname, $uid)) {
                     $this->_object = $object;
-                    if (NULL !== $draft)
+                    if (null !== $draft)
                         $this->_object->setDraft($draft);
                 }
             }
@@ -169,13 +179,13 @@ class phtml extends ARenderer
             $this->assign($this->_object->getData())
                     ->setParam($this->_object->getParam());
         }
-        if (NULL !== $params) {
+        if (null !== $params) {
             $params = (array) $params;
             foreach ($params as $param => $value)
                 $this->setParam($param, $value);
         }
 
-        if (NULL !== $this->_application)
+        if (null !== $this->_application)
             $this->_application->debug(sprintf('Rendering content `%s(%s)`.', get_class($this->_object), $this->_object->getUid()));
 
         return $this->_renderTemplate();
@@ -187,14 +197,15 @@ class phtml extends ARenderer
      * @return string The rendered output
      * @throws RendererException
      */
-    private function _renderPage($layoutfile = NULL)
+    private function _renderPage($layoutfile = null)
     {
         $this->setNode($this->getObject());
 
         // Rendering subcontent
-        if (NULL !== $contentset = $this->getObject()->getContentSet()) {
-            if (NULL !== $this->getApplication()->getBBUserToken() && NULL !== $revision = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentset, $this->getApplication()->getBBUserToken()))
+        if (null !== $contentset = $this->getObject()->getContentSet()) {
+            if (null !== $this->getApplication()->getBBUserToken() && null !== $revision = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentset, $this->getApplication()->getBBUserToken())) {
                 $contentset->setDraft($revision);
+            }
 
             $layout = $this->getObject()->getLayout();
             $zones = $layout->getZones();
@@ -204,26 +215,30 @@ class phtml extends ARenderer
                 if (array_key_exists($indexZone, $zones)) {
                     $zone = $zones[$indexZone];
                     $this->container()->add($this->render($content, $this->getMode(), array(
-                                'class' => 'rootContentSet',
-                                'isRoot' => true,
-                                'indexZone' => $indexZone++,
-                                'isMainZone' => NULL !== $zone && property_exists($zone, 'mainZone') && TRUE === $zone->mainZone
-                                    ), null, $this->_ignoreIfRenderModeNotAvailable));
+                        'class' => 'rootContentSet',
+                        'isRoot' => true,
+                        'indexZone' => $indexZone++,
+                        'isMainZone' => null !== $zone && property_exists($zone, 'mainZone') && true === $zone->mainZone
+                    ), null, $this->_ignoreIfRenderModeNotAvailable));
                 }
             }
         }
+
         // Check for a valid layout file
         $this->_templateFile = $layoutfile;
-        if (NULL === $this->_templateFile)
+        if (null === $this->_templateFile) {
             $this->_templateFile = $this->_getLayoutFile($this->layout());
+        }
 
-        File::resolveFilepath($this->_templateFile, NULL, array('include_path' => $this->_layoutdir));
+        File::resolveFilepath($this->_templateFile, null, array('include_path' => $this->_layoutdir));
 
-        if (false === is_readable($this->_templateFile))
+        if (false === is_readable($this->_templateFile)) {
             throw new RendererException(sprintf('Unable to read layout %s.', $layoutfile), RendererException::LAYOUT_ERROR);
+        }
 
-        if (NULL !== $this->_application)
+        if (null !== $this->_application) {
             $this->_application->info(sprintf('Rendering page `%s`.', $this->getObject()->getNormalizeUri()));
+        }
 
         return $this->_renderTemplate();
     }
@@ -238,7 +253,7 @@ class phtml extends ARenderer
         if (!is_file($this->_templateFile) && !is_readable($this->_templateFile))
             throw new RendererException(sprintf('Unable to find file \'%s\' in path (%s)', $this->_templateFile, implode(', ', $this->_scriptdir)), RendererException::SCRIPTFILE_ERROR);
 
-        if (NULL !== $this->_application)
+        if (null !== $this->_application)
             $this->_application->debug(sprintf('Rendering file `%s`.', $this->_templateFile));
 
         try {
@@ -265,7 +280,7 @@ class phtml extends ARenderer
      */
     private function _resolvefilePath($filename)
     {
-        $basedir = (NULL !== $this->_application) ? $this->_application->getRepository() : '';
+        $basedir = (null !== $this->_application) ? $this->_application->getRepository() : '';
 
         if (!is_file($filename)) {
             foreach ($this->_scriptdir as $scriptdir) {
@@ -279,7 +294,7 @@ class phtml extends ARenderer
             }
         }
 
-        if (!is_file($filename) || FALSE === $realfilename = realpath($filename))
+        if (!is_file($filename) || false === $realfilename = realpath($filename))
             throw new RendererException(sprintf('Unable to find file \'%s\' in path (%s)', $filename, implode(', ', $this->_scriptdir)), RendererException::SCRIPTFILE_ERROR);
 
         return $realfilename;
@@ -288,12 +303,12 @@ class phtml extends ARenderer
     /**
      * @see BackBuilder\Renderer\ARenderer::render()
      */
-    public function render(IRenderable $object = NULL, $mode = NULL, $params = NULL, $template = NULL, $ignoreIfRenderModeNotAvailable = true)
+    public function render(IRenderable $object = null, $mode = null, $params = null, $template = null, $ignoreIfRenderModeNotAvailable = true)
     {
-        if (NULL === $object)
+        if (null === $object)
             return;
 
-        if (false === $object->isRenderable() && NULL === $this->getApplication()->getBBUserToken())
+        if (false === $object->isRenderable() && null === $this->getApplication()->getBBUserToken())
             return;
 
         $this->getApplication()->debug(sprintf('Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($object), $object->getUid(), $mode, $ignoreIfRenderModeNotAvailable));
@@ -303,7 +318,7 @@ class phtml extends ARenderer
                 ->setMode($mode, $ignoreIfRenderModeNotAvailable)
                 ->_triggerEvent('prerender');
 
-        if (NULL === $renderer->__render) {
+        if (null === $renderer->__render) {
             // Rendering a page with layout
             if (is_a($object, '\BackBuilder\NestedNode\Page')) {
                 $renderer->setCurrentPage($object);
@@ -325,9 +340,9 @@ class phtml extends ARenderer
     {
         $pathinfo = parent::getUri($pathinfo);
 
-        if (FALSE === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
-            if (NULL === $this->_default_ext) {
-                if (NULL !== $this->getApplication())
+        if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
+            if (null === $this->_default_ext) {
+                if (null !== $this->getApplication())
                     if ($this->getApplication()->getContainer()->has('site'))
                         $this->_default_ext = $this->getApplication()->getContainer()->get('site')->getDefaultExtension();
             }
@@ -341,13 +356,13 @@ class phtml extends ARenderer
     /**
      * @see BackBuilder\Renderer.ARenderer::partial()
      */
-    public function partial($template = NULL, $params = NULL)
+    public function partial($template = null, $params = null)
     {
         $this->_templateFile = $template;
-        File::resolveFilepath($this->_templateFile, NULL, array('include_path' => $this->_scriptdir));
+        File::resolveFilepath($this->_templateFile, null, array('include_path' => $this->_scriptdir));
 
         // Assign parameters
-        if (NULL !== $params) {
+        if (null !== $params) {
             $params = (array) $params;
             foreach ($params as $param => $value)
                 $this->setParam($param, $value);
@@ -362,17 +377,17 @@ class phtml extends ARenderer
     /**
      * @see BackBuilder\Renderer.ARenderer::erro()
      */
-    public function error($error_code, $title = NULL, $message = NULL, $trace = NULL)
+    public function error($error_code, $title = null, $message = null, $trace = null)
     {
         foreach ($this->_includeExtensions as $ext) {
             $this->_templateFile = 'error' . DIRECTORY_SEPARATOR . $error_code . $ext;
-            File::resolveFilepath($this->_templateFile, NULL, array('include_path' => $this->_layoutdir));
+            File::resolveFilepath($this->_templateFile, null, array('include_path' => $this->_layoutdir));
             if (false !== file_exists($this->_templateFile) || false === is_readable($this->_templateFile))
                 break;
         }
         if (false === file_exists($this->_templateFile) || false === is_readable($this->_templateFile)) {
             $this->_templateFile = 'error' . DIRECTORY_SEPARATOR . 'default.phtml';
-            File::resolveFilepath($this->_templateFile, NULL, array('include_path' => $this->_layoutdir));
+            File::resolveFilepath($this->_templateFile, null, array('include_path' => $this->_layoutdir));
         }
         if (false === file_exists($this->_templateFile) || false === is_readable($this->_templateFile))
             return false;
@@ -393,11 +408,11 @@ class phtml extends ARenderer
      */
     public function updateLayout(Layout $layout)
     {
-        if (FALSE === ($layoutfile = parent::updateLayout($layout)))
-            return FALSE;
+        if (false === ($layoutfile = parent::updateLayout($layout)))
+            return false;
 
         $mainLayoutRow = $layout->getDomDocument();
-        if (!$layout->isValid() || NULL === $mainLayoutRow)
+        if (!$layout->isValid() || null === $mainLayoutRow)
             throw new RendererException('Malformed data for the layout layout.');
 
         // Add an php instruction to each final droppable zone found
@@ -419,7 +434,7 @@ class phtml extends ARenderer
         @$domlayout->loadHTML($layoutcontent);
         $domlayout->formatOutput = true;
 
-        $layoutNode = $domlayout->importNode($mainLayoutRow->firstChild, TRUE);
+        $layoutNode = $domlayout->importNode($mainLayoutRow->firstChild, true);
         $layoutid = $layoutNode->getAttribute('id');
 
         $xPath = new \DOMXPath($domlayout);
@@ -557,5 +572,4 @@ class phtml extends ARenderer
 
         return $result;
     }
-
 }

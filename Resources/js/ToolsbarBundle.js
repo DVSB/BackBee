@@ -53,7 +53,6 @@ BB4.ToolsbarManager.register("bundletb",{
         $(window).resize(function(e){
             if(this._delay != false) clearTimeout(this._delay);
             var onResize = function(){
-              
                 if(self.bundleAdminDialog && self.bundleAdminDialog.invoke("isOpen")){
                     self.bundleAdminDialog.setOption("width",$(window).innerWidth() - 100);
                     self.bundleAdminDialog.setOption("height",$(window).innerHeight() - 100);
@@ -156,7 +155,6 @@ BB4.ToolsbarManager.register("bundletb",{
 	
     bundleAdmin : function() {
         var self = this;
-		
         if (this.selectedBundle && this.selectedBundle.service) {
             bb.webserviceManager.setup({
                 endPoint: 'index.php',
@@ -166,7 +164,6 @@ BB4.ToolsbarManager.register("bundletb",{
                 }]
             });
             this.selectedBundle.webservice = bb.webserviceManager.getInstance('ws_local_bundle_'+this.selectedBundle.id);
-			
             $(this.bundleAdminDialog).dialog('option', 'title', "Administration : "+(this.selectedBundle.name||$this.selectedBundle.id));	
             this.bundleAdminDialog.show();
         }

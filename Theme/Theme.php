@@ -52,7 +52,7 @@ class Theme extends ThemeConst
      * Renderer object
      * @var BBApplication
      */
-    private $_bbapp;
+    private $_application;
 
     /**
      * The template folder is valid (exist ? and is readable ?)
@@ -101,11 +101,12 @@ class Theme extends ThemeConst
         if ($bbapp == null) {
             throw new ThemeException('Bad contruct implementation', ThemeException::THEME_BAD_CONSTRUCT);
         }
-        $this->_bbapp = $bbapp;
+        $this->_application = $bbapp;
         $this->_site_uid = (null !== $bbapp->getSite()) ? $bbapp->getSite()->getUid() : null;
-        $this->_themes_dir = $this->_bbapp->getConfig()->getSection('themes_dir');
+        $this->_themes_dir = $this->_application->getConfig()->getSection('themes_dir');
+        
         $manager = new ThemesManager($this->getThemeDir(self::DEFAULT_NAME));
-        $this->_default_theme = $manager->hydrateTheme($this->_bbapp->getConfig()->getSection('theme'));
+        $this->_default_theme = $manager->hydrateTheme($this->_application->getConfig()->getSection('theme'));
         $this->parseDirectory($this->_default_theme->getArchitecture(), $this->getDefaultDirectory());
     }
 
@@ -114,7 +115,7 @@ class Theme extends ThemeConst
      */
     public function init()
     {
-        $theme_repository = $this->_bbapp->getEntityManager()->getRepository('BackBuilder\Theme\PersonalThemeEntity');
+        $theme_repository = $this->_application->getEntityManager()->getRepository('BackBuilder\Theme\PersonalThemeEntity');
         $this->_personal_theme = $theme_repository->retrieveBySiteUid($this->_site_uid);
 
         if (is_object($this->_personal_theme) && $this->_personal_theme->getDependency() != self::DEFAULT_NAME) {
@@ -125,7 +126,7 @@ class Theme extends ThemeConst
                 $this->_is_valid = $this->validateDirectory();
             }
 
-            $this->_bbapp->getConfig()->extend($this->getDirectory());
+            $this->_application->getConfig()->extend($this->getDirectory());
         }
 
         $this->build();
@@ -154,7 +155,7 @@ class Theme extends ThemeConst
     {
         if (array_key_exists($type, $this->_themes_dir)) {
             $theme_dir = $this->_themes_dir[$type];
-            File::resolveFilepath($theme_dir, NULL, array('base_dir' => $this->_bbapp->getBaseDir()));
+            File::resolveFilepath($theme_dir, NULL, array('base_dir' => $this->_application->getBaseDir()));
             return $theme_dir . DIRECTORY_SEPARATOR;
         }
         return false;
@@ -168,8 +169,8 @@ class Theme extends ThemeConst
     public function getDirectory()
     {
         if ($this->_is_valid) {
-            $dir = $this->_theme->getFolder();
-            File::resolveFilepath($dir, NULL, array('base_dir' => $this->getThemeDir(static::THEME_NAME)));
+            $dir = $this->getThemeDir(static::THEME_NAME) . $this->_theme->getFolder();
+//            File::resolveFilepath($dir, NULL, array('base_dir' => $this->getThemeDir(static::THEME_NAME)));
             return $dir;
         }
         return $this->getDefaultDirectory();
@@ -183,8 +184,8 @@ class Theme extends ThemeConst
     public function getDefaultDirectory()
     {
         if (
-                is_dir($this->getThemeDir(static::DEFAULT_NAME) . $this->_default_theme->getFolder()) &&
-                is_readable($this->getThemeDir(static::DEFAULT_NAME) . $this->_default_theme->getFolder())
+            is_dir($this->getThemeDir(static::DEFAULT_NAME) . $this->_default_theme->getFolder()) &&
+            is_readable($this->getThemeDir(static::DEFAULT_NAME) . $this->_default_theme->getFolder())
         ) {
             return $this->getThemeDir(static::DEFAULT_NAME) . $this->_default_theme->getFolder();
         }
@@ -246,13 +247,13 @@ class Theme extends ThemeConst
     private function dispatchDirectory($architecture, $path, $target)
     {
         if ($target === static::SCRIPT_DIR) {
-            $this->_bbapp->getRenderer()->addScriptDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            $this->_application->getRenderer()->addScriptDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
         } elseif ($target === static::HELPER_DIR) {
-            $this->_bbapp->getRenderer()->addHelperDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            $this->_application->getRenderer()->addHelperDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
         } elseif ($target === static::LAYOUT_DIR) {
-            $this->_bbapp->getRenderer()->addLayoutDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            $this->_application->getRenderer()->addLayoutDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
         } elseif ($target === static::LISTENER_DIR) {
-            $this->_bbapp->getAutoloader()->registerListenerNamespace($path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            $this->_application->getAutoloader()->registerListenerNamespace($path . DIRECTORY_SEPARATOR . $architecture[$target]);
         } elseif (in_array($target, array(static::CSS_DIR, static::LESS_DIR, static::JS_DIR, static::IMG_DIR))) {
             if (!array_key_exists($target, $this->_dir)) {
                 $this->_dir[$target] = array();
@@ -286,10 +287,14 @@ class Theme extends ThemeConst
      */
     private function _initConfig($configdir = null)
     {
+        if (null === $this->_application) {
+            throw new \BackBuilder\Exception\MissingApplicationException('Missing BackBuilder application for theme');
+        }
+        
         if (is_null($configdir))
             $configdir = $this->getDirectory();
 
-        $this->_config = new Config($configdir, $this->_bbapp->getBootstrapCache());
+        $this->_config = new Config($configdir, $this->_application->getBootstrapCache());
 
         return $this;
     }

@@ -22,20 +22,20 @@
 namespace BackBuilder\Exception;
 
 /**
- * Exception thrown if an invalid argument is provided
+ * Exception thrown if the connection to the database is not available
  *
  * @category    BackBuilder
  * @package     BackBuilder\Exception
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class InvalidArgumentException extends BBException
+class DatabaseConnectionException extends BBException
 {
 
     /**
      * The default error code
      * @var int
      */
-    protected $_code = self::INVALID_ARGUMENT;
+    protected $_code = self::INVALID_DB_CONNECTION;
 
 }

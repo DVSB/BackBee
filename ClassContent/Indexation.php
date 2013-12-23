@@ -90,50 +90,91 @@ class Indexation
                 ->setCallback($callback);
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @return string
+     */
     public function getField()
     {
         return $this->_field;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @return function
+     */
     public function getCallback()
     {
         return $this->_callback;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @return string
+     */
     public function getValue()
     {
         return $this->_value;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @return string
+     */
     public function getContent()
     {
         return $this->_content;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param string $content
+     * @return \BackBuilder\ClassContent\Indexation
+     */
     public function setContent($content)
     {
         $this->_content = $content;
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param string $field
+     * @return \BackBuilder\ClassContent\Indexation
+     */
     public function setField($field)
     {
         $this->_field = $field;
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $owner
+     * @return \BackBuilder\ClassContent\Indexation
+     */
     public function setOwner($owner)
     {
         $this->_owner = $owner;
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param string $value
+     * @return \BackBuilder\ClassContent\Indexation
+     */
     public function setValue($value)
     {
         $this->_value = $value;
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param function $callback
+     * @return \BackBuilder\ClassContent\Indexation
+     */
     public function setCallback($callback)
     {
         $this->_callback = $callback;

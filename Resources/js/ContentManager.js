@@ -230,8 +230,8 @@ bb.ContentManager =(function($,gExport){
         $(_settings.mainContensetContainerClass).live("mouseleave",_outsideDropZone);
         $(_settings.mainContensetContainerClass).bind("mousestop",_handleMousestop);
         $(document).bind("bbcontent:contentSelected",function(e,data){
-         $(".bb5-droppable-place").show();
-         _insideDropZone();
+            $(".bb5-droppable-place").show();
+            _insideDropZone();
         });
     };
     
@@ -245,7 +245,7 @@ bb.ContentManager =(function($,gExport){
     var _outsideDropZone = function(e){
         _inAllowedZone = false;
         _outOfDroppableZone = true;
-          $(".bb5-droppable-place").hide();
+        $(".bb5-droppable-place").hide();
         return true;
     }
     
@@ -923,11 +923,14 @@ var ResizableItem = function(userSettings){
             resizableconfig.helper = settings.helper;
             resizableconfig.grid = settings.gridStep;
             resizableconfig.maxWidth = $(this._element).parent().width();
-            
             $(this._element).resizable(resizableconfig);
             this.resizableId = bb.Utils.generateId("resizableContent");
             $(this._element).attr("resizableId",this.resizableId);
             this._itemSize = this._readSize(this._element);
+            if(!this._itemSize){
+                this._itemSize = $(this._element).outerWidth(true)/settings.gridStep;
+            }
+            
             this._bindResizableEvent(); 
         } 
     }
@@ -991,18 +994,20 @@ var ResizableItem = function(userSettings){
             this.decrementItemSize(step);
         }
         
-        /*vers la droite : augmentation de la taille*/
-        if(this._resizeDirection=="right" && step < 0 ){
-            /*decrement current*/
-            this.incrementItemSize(Math.abs(step));
-        }
-        
-        
         /*vers la droite : diminution de la taille*/
         if(this._resizeDirection=="right" && step >0){
             /*decrement current*/
             this.decrementItemSize(Math.abs(step));
         }
+        
+        
+        /*vers la droite : augmentation de la taille*/
+        if(this._resizeDirection=="right" && step < 0 ){
+            /*decrement current*/
+
+            this.incrementItemSize(Math.abs(step));
+        }
+        
         
       
         /*vers la gauche : augmentation de la taille*/
@@ -1052,12 +1057,11 @@ var ResizableItem = function(userSettings){
             if(this._itemSize){
                 $(this._element).removeClass(this._settings.sizePrefix+parseInt(this._itemSize));
             }
-            /*add new*/
-            $(this._element).addClass(this._settings.sizePrefix+parseInt(itemSize));
-            this._itemSize = itemSize;
             
-            if (this._bbContent.parentNode){}
-               
+            /*add new*/
+            $(this._element).addClass(this._settings.sizePrefix+Math.abs(parseInt(itemSize)));
+            this._itemSize = itemSize;  
+            if (this._bbContent.parentNode){}   
         }  
     }
 
