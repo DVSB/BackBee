@@ -46,8 +46,7 @@ use Symfony\Component\HttpFoundation\Request,
  * @copyright   Lp system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class FrontController implements HttpKernelInterface
-{
+class FrontController implements HttpKernelInterface {
 
     /**
      * Iternal services map for Backbuilder
@@ -88,8 +87,7 @@ class FrontController implements HttpKernelInterface
      * @access public
      * @param \BackBuilder\BBApplication $application The current BBapplication
      */
-    public function __construct(BBApplication $application = null)
-    {
+    public function __construct(BBApplication $application = null) {
         $this->_application = $application;
     }
 
@@ -102,8 +100,7 @@ class FrontController implements HttpKernelInterface
      *                          (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
      * @param  boolean $stopWithResponse Send response if TRUE and response exists
      */
-    private function _dispatch($eventName, $type = self::MASTER_REQUEST, $stopWithResponse = TRUE)
-    {
+    private function _dispatch($eventName, $type = self::MASTER_REQUEST, $stopWithResponse = TRUE) {
         if (NULL === $this->_application)
             return;
 
@@ -124,8 +121,7 @@ class FrontController implements HttpKernelInterface
      * @param  integer $type    The type of the request
      *                          (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
      */
-    private function _send(Response $response, $type = self::MASTER_REQUEST)
-    {
+    private function _send(Response $response, $type = self::MASTER_REQUEST) {
         if (NULL !== $this->_application && NULL !== $this->_application->getEventDispatcher()) {
             $event = new FilterResponseEvent($this, $this->getRequest(), $type, $response);
             $this->_application->getEventDispatcher()->dispatch('frontcontroller.response', $event);
@@ -143,8 +139,7 @@ class FrontController implements HttpKernelInterface
      * @param array $matches An array of parameters provided by the URL matcher
      * @throws FrontControllerException
      */
-    private function _invokeAction($matches)
-    {
+    private function _invokeAction($matches) {
         if (FALSE === array_key_exists('_action', $matches))
             return;
         $args = array();
@@ -177,8 +172,7 @@ class FrontController implements HttpKernelInterface
      * @param string $filename The filename to flush
      * @throws FrontControllerException
      */
-    private function _flushfile($filename)
-    {
+    private function _flushfile($filename) {
         if (FALSE === file_exists($filename) || FALSE === is_readable($filename) || true === is_dir($filename))
             throw new FrontControllerException(sprintf('The file `%s` can not be found (referer: %s).', $this->_request->getHost() . '/' . $this->_request->getPathInfo(), $this->_request->server->get('HTTP_REFERER')), FrontControllerException::NOT_FOUND);
 
@@ -207,8 +201,7 @@ class FrontController implements HttpKernelInterface
      * @access public
      * @return BBApplication
      */
-    public function getApplication()
-    {
+    public function getApplication() {
         return $this->_application;
     }
 
@@ -218,8 +211,7 @@ class FrontController implements HttpKernelInterface
      * @access public
      * @return Request
      */
-    public function getRequest()
-    {
+    public function getRequest() {
         if (NULL === $this->_request)
             $this->_request = Request::createFromGlobals();
 
@@ -232,8 +224,7 @@ class FrontController implements HttpKernelInterface
      * @access protected
      * @return RequestContext
      */
-    protected function getRequestContext()
-    {
+    protected function getRequestContext() {
         if (NULL === $this->_requestContext) {
             $this->_requestContext = new RequestContext();
             $this->_requestContext->fromRequest($this->getRequest());
@@ -248,8 +239,7 @@ class FrontController implements HttpKernelInterface
      * @access public
      * @return RouteCollection
      */
-    public function getRouteCollection()
-    {
+    public function getRouteCollection() {
         if (NULL === $this->_routeCollection) {
             $this->_routeCollection = new RouteCollection($this->_application);
         }
@@ -264,8 +254,7 @@ class FrontController implements HttpKernelInterface
      * @param string $uri The URI to handle
      * @throws FrontControllerException
      */
-    public function defaultAction($uri = NULL, $sendResponse = true)
-    {
+    public function defaultAction($uri = NULL, $sendResponse = true) {
         if (NULL === $this->_application)
             throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
 
@@ -315,14 +304,6 @@ class FrontController implements HttpKernelInterface
                 $response = new Response($this->_application->getRenderer()->render($page));
             }
 
-            // logout Event dispatch
-            if (null !== $this->getRequest()->get('logout')
-                    && TRUE == $this->getRequest()->get('logout')
-                    && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
-                $this->_dispatch('frontcontroller.request.logout');
-                //$this->defaultAction($this->getRequest()->getPathInfo(), $sendResponse);
-            }
-
             if ($sendResponse)
                 $this->_send($response);
             else
@@ -332,8 +313,7 @@ class FrontController implements HttpKernelInterface
         }
     }
 
-    public function rssAction($uri = NULL)
-    {
+    public function rssAction($uri = NULL) {
         if (NULL === $this->_application)
             throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
 
@@ -377,8 +357,7 @@ class FrontController implements HttpKernelInterface
      * @param string $filename The media file to provide
      * @throws FrontControllerException
      */
-    public function mediaAction($type, $filename = NULL)
-    {
+    public function mediaAction($type, $filename = NULL) {
         $this->_validateResourcesAction($filename);
 
         $includePath = array($this->_application->getStorageDir(), $this->_application->getMediaDir());
@@ -409,8 +388,7 @@ class FrontController implements HttpKernelInterface
      * @param string $filename The media file to provide
      * @throws FrontControllerException
      */
-    public function themesResourcesAction($type, $filename = NULL)
-    {
+    public function themesResourcesAction($type, $filename = NULL) {
         $this->staticResourcesAction($type, $filename);
     }
 
@@ -421,8 +399,7 @@ class FrontController implements HttpKernelInterface
      * @param string $filename The media file to provide
      * @throws FrontControllerException
      */
-    public function staticResourcesAction($type, $filename = NULL)
-    {
+    public function staticResourcesAction($type, $filename = NULL) {
         $this->_validateResourcesAction($filename);
 
         $keyword = constant('BackBuilder\Theme\Theme::' . strtoupper($type) . '_DIR');
@@ -435,8 +412,7 @@ class FrontController implements HttpKernelInterface
     /**
      * Handle static file request for bundle
      */
-    public function serveBundleRessourcesAction($bundleName, $type, $filename)
-    {
+    public function serveBundleRessourcesAction($bundleName, $type, $filename) {
         $pathInfos = array(
             "css" => "Ressources/Templates/css",
             "js" => "Ressources/Templates/javascript",
@@ -466,8 +442,7 @@ class FrontController implements HttpKernelInterface
      * @param string $filename The resource file to provide
      * @throws FrontControllerException
      */
-    public function resourcesAction($filename = NULL, $base_dir = null)
-    {
+    public function resourcesAction($filename = NULL, $base_dir = null) {
         $this->_validateResourcesAction($filename);
 
         if (NULL === $base_dir)
@@ -485,8 +460,7 @@ class FrontController implements HttpKernelInterface
      * @access public
      * @throws FrontControllerException
      */
-    public function rpcAction()
-    {
+    public function rpcAction() {
         if (NULL === $this->_application)
             throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
 
@@ -505,8 +479,7 @@ class FrontController implements HttpKernelInterface
      * @access public
      * @throws FrontControllerException
      */
-    public function uploadAction()
-    {
+    public function uploadAction() {
         if (NULL === $this->_application)
             throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
 
@@ -529,13 +502,18 @@ class FrontController implements HttpKernelInterface
      * @param  Boolean $catch   Whether to catch exceptions or not
      * @throws FrontControllerException
      */
-    public function handle(Request $request = NULL, $type = self::MASTER_REQUEST, $catch = true)
-    {
+    public function handle(Request $request = NULL, $type = self::MASTER_REQUEST, $catch = true) {
         try {
             $this->_request = $request;
             $this->_dispatch('frontcontroller.request');
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
             if ($matches = $urlMatcher->match($this->getRequest()->getPathInfo())) {
+                // logout Event dispatch
+                if (null !== $this->getRequest()->get('logout') && TRUE == $this->getRequest()->get('logout') && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
+                    $this->_dispatch('frontcontroller.request.logout');
+                    //$this->defaultAction($this->getRequest()->getPathInfo(), $sendResponse);
+                }
+
                 $this->_invokeAction($matches);
             }
 
@@ -547,13 +525,11 @@ class FrontController implements HttpKernelInterface
         }
     }
 
-    public function addAction($handler, $action)
-    {
+    public function addAction($handler, $action) {
         $this->_actions[$action] = $handler;
     }
 
-    private function _validateResourcesAction($value)
-    {
+    private function _validateResourcesAction($value) {
         if (NULL === $value)
             throw new FrontControllerException('A filename is required', FrontControllerException::BAD_REQUEST);
 
@@ -568,8 +544,7 @@ class FrontController implements HttpKernelInterface
      * @access public
      * services call must return a Symfony\Component\HttpFoundation\Response
      */
-    public function handleInternalServicesAction($servicename = null)
-    {
+    public function handleInternalServicesAction($servicename = null) {
         try {
             if (isset($servicename) && array_key_exists($servicename, $this->_internalServicesMap)) {
                 $serviceCallback = $this->_internalServicesMap[$servicename];
@@ -595,8 +570,7 @@ class FrontController implements HttpKernelInterface
      * Allow the classContents list to be served faster by caching them
      * @access public
      */
-    private function generateClassContentCache()
-    {
+    private function generateClassContentCache() {
         $contents = array();
         $result = false;
         $categoryList = Category::getCategories($this->_application);
@@ -622,8 +596,7 @@ class FrontController implements HttpKernelInterface
      * @param string $route_path
      * @return string
      */
-    public function getUrlByRoutePath($route_path)
-    {
+    public function getUrlByRoutePath($route_path) {
         if (null === $url = $this->getRouteCollection()->getRoutePath($route_path)) {
             $url = '/';
         }
