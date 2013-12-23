@@ -316,7 +316,11 @@ class Cache extends AExtendedCache
     public function loadHashmap()
     {
         try {
-            return ($this->_hashmap = \apc_fetch($this->_hashmapId) ? $this->_hashmap : array());
+            if ($this->_hashmap = \apc_fetch($this->_hashmapId)) {
+                return $this->_hashmap;
+            } else {
+                return array();
+            }
         } catch (\Exception $e) {
             $this->_app->warning(\sprintf('Unable to load hashmap %s : %s', $this->_hashmapId, $e->getMessage()));
             return false;

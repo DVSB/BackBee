@@ -40,7 +40,7 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
     Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
-    Symfony\Component\DependencyInjection\Loader\XMLFileLoader,
+    Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -363,7 +363,7 @@ class BBApplication
         foreach ($this->_bundles as $b) {
             $xml = $b->getResourcesDir() . DIRECTORY_SEPARATOR . 'services.xml';
             if (true === is_file($xml)) {
-                $loader = new XMLFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
+                $loader = new XmlFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
                 try {
                     $loader->load('services.xml');
                 } catch (Exception $e) { /* nothing to do, just ignore it */ }
