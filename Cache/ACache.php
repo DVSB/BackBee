@@ -21,7 +21,8 @@
 
 namespace BackBuilder\Cache;
 
-use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\Cache\Exception\CacheException,
+    BackBuilder\Exception\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -36,10 +37,16 @@ abstract class ACache
 {
 
     /**
-     * A logger
-     * @var Psr\Log\LoggerInterface
+     * Cache adapter options
+     * @var array
      */
-    protected $_logger;
+    protected $_instance_options = array();
+
+    /**
+     * A logger
+     * @var \Psr\Log\LoggerInterface
+     */
+    protected $_logger = null;
 
     /**
      * Class constructor
@@ -50,9 +57,8 @@ abstract class ACache
      */
     public function __construct(array $options = array(), LoggerInterface $logger = null)
     {
-        if (null !== $logger) {
-            $this->setLogger($logger);
-        }
+        $this->setLogger($logger)
+                ->setInstanceOptions($options);
     }
 
     /**
@@ -101,9 +107,28 @@ abstract class ACache
      * @return \BackBuilder\Cache\ACache
      * @codeCoverageIgnore
      */
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger = null)
     {
         $this->_logger = $logger;
+        return $this;
+    }
+
+    /**
+     * Sets the cache adapter instance options
+     * @param array $options
+     * @return \BackBuilder\Cache\ACache
+     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
+     */
+    protected function setInstanceOptions(array $options = array())
+    {
+        foreach ($options as $key => $value) {
+            if (true === array_key_exists($key, $this->_instance_options)) {
+                $this->_instance_options[$key] = $value;
+            } else {
+                throw new CacheException(sprintf('Unknown option %s for cache adapter %s.', $key, get_class($this)));
+            }
+        }
+
         return $this;
     }
 

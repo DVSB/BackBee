@@ -45,6 +45,14 @@ class Cache extends ACache
     private $_cachedir;
 
     /**
+     * Memcached adapter options
+     * @var array
+     */
+    protected $_instance_options = array(
+        'cachedir' => __DIR__
+    );
+
+    /**
      * Class constructor
      * @param array $options Initial options for the cache adapter:
      *                         - cachedir string The cache directory
