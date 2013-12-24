@@ -153,6 +153,7 @@ class BBApplication
     private function _initBBAppParamsIntoContainer()
     {
         // Set every bbapp parameters
+        $this->_container->setParameter('bbapp.context', $this->getContext());
         $this->_container->setParameter('bbapp.cache.dir', $this->getCacheDir());
         $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
         $this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());

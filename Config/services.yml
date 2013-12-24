@@ -1,5 +1,6 @@
 parameters:
     # bbapp parameters, somes will be set at init of container by BBApplication
+    bbapp.context: 'default'
     bbapp.cache.dir: ''
     bbapp.config.dir: ''
     bbapp.locale: 'fr_FR'
@@ -21,7 +22,7 @@ parameters:
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
-        arguments:  ["%bbapp.cache.dir%"]
+        arguments:  [{cachedir: "%bbapp.cache.dir%"}, "%bbapp.context%"]
     cache-control:
         class:      %bbapp.cachecontrol.class%
         arguments:  ["@bbapp"]

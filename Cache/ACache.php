@@ -21,8 +21,7 @@
 
 namespace BackBuilder\Cache;
 
-use BackBuilder\Cache\Exception\CacheException,
-    BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\Cache\Exception\CacheException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -49,15 +48,23 @@ abstract class ACache
     protected $_logger = null;
 
     /**
+     * A cache context
+     * @var string
+     */
+    protected $_context = null;
+
+    /**
      * Class constructor
      * @param array $options An array of options allowing to construct the cache adapter
+     * @param string $context An optional cache context
      * @param \Psr\Log\LoggerInterface $logger An optional logger
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache adapter cannot be construct
      * @codeCoverageIgnore
      */
-    public function __construct(array $options = array(), LoggerInterface $logger = null)
+    public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
-        $this->setLogger($logger)
+        $this->setContext($context)
+                ->setLogger($logger)
                 ->setInstanceOptions($options);
     }
 
@@ -73,7 +80,7 @@ abstract class ACache
     /**
      * Tests if a cache is available or not (for the given id)
      * @param string $id Cache id
-     * @return int|FALSE the last modified timestamp of the available cache record
+     * @return int|FALSE the last modified timestamp of the available cache record (0 infinite expiration date)
      */
     abstract public function test($id);
 
@@ -114,6 +121,28 @@ abstract class ACache
     }
 
     /**
+     * Returns the cache context
+     * @return string|NULL
+     * @codeCoverageIgnore
+     */
+    public function getContext()
+    {
+        return $this->_context;
+    }
+
+    /**
+     * Sets the cache coontext
+     * @param string $context
+     * @return \BackBuilder\Cache\ACache
+     * @codeCoverageIgnore
+     */
+    protected function setContext($context = null)
+    {
+        $this->_context = $context;
+        return $this;
+    }
+
+    /**
      * Sets the cache adapter instance options
      * @param array $options
      * @return \BackBuilder\Cache\ACache
@@ -137,16 +166,11 @@ abstract class ACache
      * @param string $method The log level
      * @param string $message The message to log
      * @param array $context The logging context
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the defined logger does not implement \Psr\Log\LoggerInterface
      * @codeCoverageIgnore
      */
-    protected function log($level, $message, array $context = array())
+    protected function log($level, $message, array $context = array('cache'))
     {
         if (null !== $this->_logger) {
-            if (false === ($this->_logger instanceof LoggerInterface)) {
-                throw new InvalidArgumentException('Logger must implements \Psr\Log\LoggerInterface');
-            }
-
             $this->_logger->log($level, $message, $context);
         }
     }
