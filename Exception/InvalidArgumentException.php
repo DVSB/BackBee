@@ -29,7 +29,7 @@ namespace BackBuilder\Exception;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class InvalidArgumentsException extends BBException
+class InvalidArgumentException extends BBException
 {
 
     /**
