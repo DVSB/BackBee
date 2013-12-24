@@ -168,9 +168,9 @@ class EntityManagerCreator
         if (true === array_key_exists('charset', $options)) {
             try {
                 if ('pdo_mysql' === $connection->getDriver()->getName()) {
-                $connection->executeQuery('SET SESSION character_set_client = "' . addslashes($options['charset']) . '";');
-                $connection->executeQuery('SET SESSION character_set_connection = "' . addslashes($options['charset']) . '";');
-                $connection->executeQuery('SET SESSION character_set_results = "' . addslashes($options['charset']) . '";');
+                    $connection->executeQuery('SET SESSION character_set_client = "' . addslashes($options['charset']) . '";');
+                    $connection->executeQuery('SET SESSION character_set_connection = "' . addslashes($options['charset']) . '";');
+                    $connection->executeQuery('SET SESSION character_set_results = "' . addslashes($options['charset']) . '";');
                 }
             } catch (\Exception $e) {
                 throw new InvalidArgumentException(sprintf('Invalid database character set `%s`', $options['charset']), InvalidArgumentException::INVALID_ARGUMENT, $e);
@@ -188,9 +188,9 @@ class EntityManagerCreator
     {
         if (true === array_key_exists('collation', $options)) {
             try {
-                                if ('pdo_mysql' === $connection->getDriver()->getName()) {
-                $connection->executeQuery('SET SESSION collation_connection = "' . addslashes($options['collation']) . '";');
-                                }
+                if ('pdo_mysql' === $connection->getDriver()->getName()) {
+                    $connection->executeQuery('SET SESSION collation_connection = "' . addslashes($options['collation']) . '";');
+                }
             } catch (\Exception $e) {
                 throw new InvalidArgumentException(sprintf('Invalid database collation `%s`', $options['collation']), InvalidArgumentException::INVALID_ARGUMENT, $e);
             }
