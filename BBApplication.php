@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -27,7 +27,7 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
-    BackBuilder\Exception\DatabaseConnectionException,    
+    BackBuilder\Exception\DatabaseConnectionException,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
@@ -45,7 +45,7 @@ use Symfony\Component\Config\FileLocator,
 
 /**
  * The main BackBuilder5 application
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder
  * @copyright   Lp digital system
@@ -68,6 +68,7 @@ class BBApplication
     private $_cachedir;
     private $_mediadir;
     private $_repository;
+    private $_base_repository;
     private $_resourcedir;
     private $_starttime;
     private $_storagedir;
@@ -75,6 +76,7 @@ class BBApplication
     private $_bundles;
     private $_classcontentdir;
     private $_theme;
+    private $_overwrite_config;
 
     public function __call($method, $args)
     {
@@ -83,15 +85,22 @@ class BBApplication
         }
     }
 
-    public function __construct($context = null, $debug = false)
+    /**
+     * @param string $context
+     * @param true $debug
+     * @param true $overwrite_config set true if you need overide base config with the context config
+     */
+    public function __construct($context = null, $debug = false, $overwrite_config = false)
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
         $this->_debug = (Boolean) $debug;
         $this->_isinitialized = false;
         $this->_isstarted = false;
+        $this->_overwrite_config = $overwrite_config;
 
         $this->_initContainer()
+            ->_initContextConfig()
             ->_initAutoloader()
             ->_initContentWrapper()
             ->_initBundles();
@@ -131,7 +140,7 @@ class BBApplication
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
-        
+
         // Define where to looking for services.yml
         $loader = new YamlFileLoader($this->_container, new FileLocator(array(
             $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config')
@@ -142,7 +151,7 @@ class BBApplication
 
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
-        
+
         $this->_initBBAppParamsIntoContainer();
 
         $this->_initExternalBundleServices();
@@ -167,7 +176,7 @@ class BBApplication
                 $bundle = new $datas['class']();
                 if (false === ($bundle instanceof ExtensionInterface)) {
                     $errorMsg = sprintf(
-                        'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', 
+                        'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`',
                         $datas['class'],
                         'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
                     );
@@ -259,6 +268,18 @@ class BBApplication
     public function isDebugMode()
     {
         return (bool) $this->_debug;
+    }
+
+    /**
+     * @param string $configdir
+     * @return \BackBuilder\BBApplication
+     */
+    private function _initContextConfig()
+    {
+        if (NULL !== $this->_context && 'default' != $this->_context) {
+           $this->getContainer()->get('config')->extend($this->getRepository(), $this->_overwrite_config);
+        }
+        return $this;
     }
 
     /**
@@ -481,7 +502,7 @@ class BBApplication
                 $token = unserialize($token);
 
                 if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken')) {
-                    $token = null;                    
+                    $token = null;
                 }
             }
         }
@@ -544,7 +565,7 @@ class BBApplication
 
     public function getConfigDir()
     {
-        return $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
+        return $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
     }
 
     /**
@@ -595,13 +616,21 @@ class BBApplication
     public function getRepository()
     {
         if (null === $this->_repository) {
-            $this->_repository = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'repository';
+            $this->_repository = $this->getBaseRepository();
             if (null !== $this->_context && 'default' != $this->_context) {
-                $this->_repository .= DIRECTORY_SEPARATOR . $this->_context;                
+                $this->_repository .= DIRECTORY_SEPARATOR . $this->_context;
             }
         }
 
         return $this->_repository;
+    }
+    
+    public function getBaseRepository()
+    {
+        if (NULL === $this->_base_repository) {
+            $this->_base_repository = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'repository';
+        }
+        return $this->_base_repository;
     }
 
     /**
