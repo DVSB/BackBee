@@ -21,9 +21,9 @@
 
 namespace BackBuilder\Cache\DAO;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Cache\AExtendedCache,
+use BackBuilder\Cache\AExtendedCache,
     BackBuilder\Cache\Exception\CacheException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Database cache adapter
@@ -40,10 +40,16 @@ class Cache extends AExtendedCache
 {
 
     /**
-     * The current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * The cache entity class name
+     * @var string
      */
-    private $_application;
+    const ENTITY_CLASSNAME = 'BackBuilder\Cache\DAO\Entity';
+
+    /**
+     * The Doctrine entity manager to use
+     * @var \Doctrine\ORM\EntityManager
+     */
+    private $_em;
 
     /**
      * The entity repository
@@ -58,20 +64,72 @@ class Cache extends AExtendedCache
     private $_entity;
 
     /**
-     * Class constructor
-     * @param \BackBuilder\BBApplication $application BackBuilder application
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the entity repository can not be loaded
+     * The prefix key for cache items
+     * @var type 
      */
-    public function __construct(BBApplication $application)
+    private $_prefix_key = '';
+
+    /**
+     * Cache adapter options
+     * @var array
+     */
+    protected $_instance_options = array(
+        'em' => null,
+        'dbal' => array()
+    );
+
+    /**
+     * Class constructor
+     * @param array $options Initial options for the cache adapter:
+     *          - em \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
+     *          - dbal array Optional, an array of Doctrine connection options among:
+     *               - connection  \Doctrine\DBAL\Connection  Optional, an already initialized database connection
+     *               - proxy_dir   string                     The proxy directory
+     *               - proxy_ns    string                     The namespace for Doctrine proxy
+     *               - charset     string                     Optional, the charset to use
+     *               - collation   string                     Optional, the collation to use
+     *               - ...         mixed                      All the required parameter to open a new connection
+     * @param string $context An optional cache context
+     * @param \Psr\Log\LoggerInterface $logger An optional logger
+     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
+     */
+    public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
-        $this->_application = $application;
+        parent::__construct($options, $context, $logger);
 
         try {
-            $this->_repository = $application->getEntityManager()
-                    ->getRepository('BackBuilder\Cache\DAO\Entity');
+            $this->_repository = $this->_em->getRepository(self::ENTITY_CLASSNAME);
         } catch (\Exception $e) {
             throw new CacheException('Enable to load the cache entity repository', null, $e);
         }
+    }
+
+    /**
+     * Sets the memcache adapter instance options
+     * @param array $options
+     * @return \BackBuilder\Cache\DAO\Cache
+     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter
+     *                                                     or if enable to create a database conneciton.
+     */
+    protected function setInstanceOptions(array $options = array())
+    {
+        parent::setInstanceOptions($options);
+
+        if ($this->_instance_options['em'] instanceof \Doctrine\ORM\EntityManager) {
+            $this->_em = $this->_instance_options['em'];
+        } else {
+            try {
+                $this->_em = BackBuilder\Util\Doctrine\EntityManagerCreator::create($this->_instance_options['dbal'], $this->getLogger());
+            } catch (\BackBuilder\Exception\InvalidArgumentException $e) {
+                throw new CacheException('DAO cache: enable to create a database conneciton');
+            }
+        }
+
+        if (null !== $this->getContext()) {
+            $this->_prefix_key = md5($this->getContext());
+        }
+
+        return $this;
     }
 
     /**
@@ -83,10 +141,6 @@ class Cache extends AExtendedCache
      */
     public function load($id, $bypassCheck = false, \DateTime $expire = null)
     {
-        if ($this->_application->debugMode()) {
-            return false;
-        }
-
         if (null === $this->_getCacheEntity($id)) {
             return false;
         }
@@ -152,22 +206,18 @@ class Cache extends AExtendedCache
             );
 
             if (null === $this->_getCacheEntity($id)) {
-                $this->_application
-                        ->getEntityManager()
-                        ->getConnection()
+                $this->_em->getConnection()
                         ->insert('cache', $params, $types);
             } else {
                 $identifier = array('uid' => array_shift($params));
                 $type = array_shift($types);
                 $types[] = $type;
 
-                $this->_application
-                        ->getEntityManager()
-                        ->getConnection()
+                $this->_em->getConnection()
                         ->update('cache', $params, $identifier, $types);
             }
         } catch (\Exception $e) {
-            $this->_application->warning(sprintf('Enable to load cache for id %s : %s', $id, $e->getMessage()));
+            $this->log('warning', sprintf('Enable to load cache for id %s : %s', $id, $e->getMessage()));
             return false;
         }
 
@@ -190,7 +240,7 @@ class Cache extends AExtendedCache
                     ->getQuery()
                     ->execute();
         } catch (\Exception $e) {
-            $this->_application->warning(sprintf('Enable to remove cache for id %s : %s', $id, $e->getMessage()));
+            $this->log('warning', sprintf('Enable to remove cache for id %s : %s', $id, $e->getMessage()));
             return false;
         }
 
@@ -219,7 +269,7 @@ class Cache extends AExtendedCache
                     ->getQuery()
                     ->execute();
         } catch (\Exception $e) {
-            $this->_application->warning(sprintf('Enable to remove cache for tags (%s) : %s', implode(',', $tags), $e->getMessage()));
+            $this->log('warning', sprintf('Enable to remove cache for tags (%s) : %s', implode(',', $tags), $e->getMessage()));
             return false;
         }
 
@@ -256,7 +306,7 @@ class Cache extends AExtendedCache
                     ->getQuery()
                     ->execute();
         } catch (\Exception $e) {
-            $this->_application->warning(sprintf('Enable to update cache for tags (%s) : %s', implode(',', $tags), $e->getMessage()));
+            $this->log('warning', sprintf('Enable to update cache for tags (%s) : %s', implode(',', $tags), $e->getMessage()));
             return false;
         }
 
@@ -277,7 +327,7 @@ class Cache extends AExtendedCache
                     ->getQuery()
                     ->execute();
         } catch (\Exception $e) {
-            $this->_application->warning(sprintf('Enable to clear cache : %s', $e->getMessage()));
+            $this->log('warning', sprintf('Enable to clear cache : %s', $e->getMessage()));
             return false;
         }
 

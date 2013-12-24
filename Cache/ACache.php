@@ -51,7 +51,7 @@ abstract class ACache
      * A cache context
      * @var string
      */
-    protected $_context = null;
+    private $_context = null;
 
     /**
      * Class constructor
@@ -118,6 +118,16 @@ abstract class ACache
     {
         $this->_logger = $logger;
         return $this;
+    }
+
+    /**
+     * Gets the cache logger
+     * @return \Psr\Log\LoggerInterface $logger
+     * @codeCoverageIgnore
+     */
+    public function getLogger()
+    {
+        return $this->_logger;
     }
 
     /**

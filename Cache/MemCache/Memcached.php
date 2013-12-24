@@ -23,6 +23,7 @@ namespace BackBuilder\Cache\MemCache;
 
 use BackBuilder\Cache\AExtendedCache,
     BackBuilder\Cache\Exception\CacheException;
+use Psr\Log\LoggerInterface;
 
 /**
  * MemCached cache adapter
@@ -108,7 +109,7 @@ class Memcached extends AExtendedCache
      * @param \Psr\Log\LoggerInterface $logger An optional logger
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if Memcached extension is not available.
      */
-    public function __construct(array $options = array(), $context = null, \Psr\Log\LoggerInterface $logger = null)
+    public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
         if (false === extension_loaded('memcached')) {
             throw new CacheException('Memcached extension is not available');

@@ -24,6 +24,7 @@ namespace BackBuilder\Cache\File;
 use BackBuilder\Cache\ACache,
     BackBuilder\Cache\Exception\CacheException,
     BackBuilder\Util\String;
+use Psr\Log\LoggerInterface;
 
 /**
  * Filesystem cache adapter
