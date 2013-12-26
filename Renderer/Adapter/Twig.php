@@ -57,7 +57,7 @@ class Twig extends ARendererAdapter
 		));
 
         if (true === $isDebugMode) {
-            $twig->addExtension(new Twig_Extension_Debug());
+            $this->twig->addExtension(new Twig_Extension_Debug());
         }
 	}
 
