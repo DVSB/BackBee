@@ -22,7 +22,6 @@
 namespace BackBuilder;
 
 use Exception;
-
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
@@ -31,11 +30,9 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
-
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager;
-
 use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
@@ -53,6 +50,7 @@ use Symfony\Component\Config\FileLocator,
  */
 class BBApplication
 {
+
     const VERSION = '0.8.0';
 
     /**
@@ -100,10 +98,10 @@ class BBApplication
         $this->_overwrite_config = $overwrite_config;
 
         $this->_initContainer()
-            ->_initContextConfig()
-            ->_initAutoloader()
-            ->_initContentWrapper()
-            ->_initBundles();
+                ->_initContextConfig()
+                ->_initAutoloader()
+                ->_initContentWrapper()
+                ->_initBundles();
 
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
@@ -141,13 +139,19 @@ class BBApplication
         // Construct service container
         $this->_container = new ContainerBuilder();
 
-        // Define where to looking for services.yml
-        $loader = new YamlFileLoader($this->_container, new FileLocator(array(
-            $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config')
-        ));
+        $dir_to_looking_for = array();
+        $dir_to_looking_for[] = $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
+        $dir_to_looking_for[] = $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
+        $dir_to_looking_for[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
 
-        // Load every services definitions into our container
-        $loader->load('services.yml');
+        foreach ($dir_to_looking_for as $dir) {
+            if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
+                // Define where to looking for services.yml
+                $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
+                // Load every services definitions into our container
+                $loader->load('services.yml');
+            }
+        }
 
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
@@ -177,9 +181,7 @@ class BBApplication
                 $bundle = new $datas['class']();
                 if (false === ($bundle instanceof ExtensionInterface)) {
                     $errorMsg = sprintf(
-                        'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`',
-                        $datas['class'],
-                        'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
+                            'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', $datas['class'], 'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
                     );
                     $this->debug($errorMsg);
 
@@ -278,7 +280,7 @@ class BBApplication
     private function _initContextConfig()
     {
         if (NULL !== $this->_context && 'default' != $this->_context) {
-           $this->getContainer()->get('config')->extend($this->getRepository(), $this->_overwrite_config);
+            $this->getContainer()->get('config')->extend($this->getRepository(), $this->_overwrite_config);
         }
         return $this;
     }
@@ -388,7 +390,8 @@ class BBApplication
                 $loader = new XmlFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
                 try {
                     $loader->load('services.xml');
-                } catch (Exception $e) { /* nothing to do, just ignore it */ }
+                } catch (Exception $e) { /* nothing to do, just ignore it */
+                }
 
                 unset($loader);
             }
@@ -625,7 +628,7 @@ class BBApplication
 
         return $this->_repository;
     }
-    
+
     public function getBaseRepository()
     {
         if (NULL === $this->_base_repository) {
@@ -700,7 +703,7 @@ class BBApplication
             $this->_resourcedir = array();
 
             $this->addResourceDir($this->getBaseDir() . '/BackBuilder/Resources')
-                ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
+                    ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
 
             if (null !== $this->_context && 'default' != $this->_context) {
                 $this->addResourceDir($this->getRepository() . '/Ressources');
@@ -896,4 +899,5 @@ class BBApplication
     {
         return (true === $this->_isstarted);
     }
+
 }

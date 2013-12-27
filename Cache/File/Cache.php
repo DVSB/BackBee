@@ -51,7 +51,7 @@ class Cache extends ACache
      * @var array
      */
     protected $_instance_options = array(
-        'cachedir' => __DIR__
+        'cachedir' => null
     );
 
     /**

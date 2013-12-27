@@ -112,7 +112,7 @@ class Memcached extends AExtendedCache
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
         if (false === extension_loaded('memcached')) {
-            throw new CacheException('Memcached extension is not available');
+            throw new CacheException('Memcached extension is not loaded');
         }
 
         if (true === array_key_exists('persistent_id', $options)) {
@@ -126,6 +126,7 @@ class Memcached extends AExtendedCache
 
     /**
      * Closes all the memcached server connections if not persistent
+     * @codeCoverageIgnore
      */
     public function __destruct()
     {
