@@ -64,7 +64,7 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
                 <ul class='bb5-tabs'>
                     <li<?php if (false !== $this->getApplication()->getSecurityContext()->isGranted('sudo')
                 && false === $this->getApplication()->getSecurityContext()->isGranted('EDIT', new \BackBuilder\Site\Layout('*')))
-            echo ' style="display:none;"';
+            //echo ' style="display:none;"';
         ?>>
                         <a href='#bb5-grid' data-i18n="toolbar.templates.label">Gabarits</a>
                     </li>

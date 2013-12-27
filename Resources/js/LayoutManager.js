@@ -303,9 +303,10 @@ BB4.LayoutManager = (function(){
                     else{
                         id = id || _generateId();
                         $(layoutNode).attr("id",id);
-                        var sizePattern = /span.*/gi;
+                        var sizePattern = /col-md-.*/gi;
+                        console.log(sizePattern);
                         var classes = $(layoutNode).attr("class");
-                        var currentSize = parseInt(sizePattern.exec(classes)[0].replace("span",""));
+                        var currentSize = parseInt(sizePattern.exec(classes)[0].replace("col-md-",""));
                         
                         var layoutNodeInfo = {};
                         layoutNodeInfo.id = id;
@@ -536,8 +537,8 @@ BB4.LayoutManager = (function(){
         }
         
         /*header and footer*/
-        $(_settings.tplHeaderId).addClass("span"+_settings.gridSize);
-        $(_settings.tplFooterId).addClass("span"+_settings.gridSize);
+        $(_settings.tplHeaderId).addClass("col-md-"+_settings.gridSize);
+        $(_settings.tplFooterId).addClass("col-md-"+_settings.gridSize);
 		
         if (0 == _layoutsContainer.length) {
             var playGroundLayoutL = new BB4.LayoutItem({
@@ -841,7 +842,7 @@ LayoutItem = function(userConfig){
         useGridSize : true,
         gridSize : null,
         gridStep :80,
-        gridClassPrefix : "span",
+        gridClassPrefix : "col-md-",
         selectedClass : null
     };
     
