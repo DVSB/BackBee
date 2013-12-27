@@ -4,6 +4,7 @@ namespace BackBuilder\Cache\APC;
 
 use BackBuilder\Cache\AExtendedCache,
     BackBuilder\Cache\Exception\CacheException;
+use Psr\Log\LoggerInterface;
 
 /**
  * APC cache adapter
