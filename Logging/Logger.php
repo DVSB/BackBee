@@ -285,7 +285,7 @@ class Logger implements LoggerInterface, SQLLogger
             throw new LoggingException('None appenders defined.');
 
         if (!array_key_exists($level, $this->_priorities))
-            throw new LoggingException(sprintf('Unkown priority level `%d`.'), $level);
+            throw new LoggingException(sprintf('Unkown priority level `%d`.', $level));
 
         if ($level > $this->_level)
             return;
