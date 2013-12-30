@@ -82,8 +82,16 @@ class datacontent extends AHelper
      */
     public function __invoke($datacontent = array(), $params = array())
     {
-        $this->_content = $this->_renderer->getObject();
-        $this->_attributes = $this->_toRegularBag($datacontent);
+        if ($datacontent instanceof BackBuilder\Renderer\IRenderable) {
+            $this->_content = $datacontent;
+        } else {
+            $this->_content = $this->_renderer->getObject();            
+        }
+
+if (true === is_array($datacontent)) {
+        $this->_attributes = $this->_toRegularBag($datacontent);    
+}
+
         $this->_addValueToAttribute('class', $this->_renderer->getParam('class'));
 
         // Store initial basic attributes to content
