@@ -2,9 +2,9 @@
 
 namespace BackBuilder\Cache\APC;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Cache\AExtendedCache,
+use BackBuilder\Cache\AExtendedCache,
     BackBuilder\Cache\Exception\CacheException;
+use Psr\Log\LoggerInterface;
 
 /**
  * APC cache adapter
@@ -16,12 +16,16 @@ use BackBuilder\BBApplication,
  */
 class Cache extends AExtendedCache
 {
+    /**
+     * Hashmap id prefix
+     */
+
+    const HASHMAP_PREFIX = 'HaShMaP';
 
     /**
-     * The current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * Hashmap ttl (default infinite)
      */
-    private $_app;
+    const HASHMAP_TTL = 0;
 
     /**
      * The hashmap id for current site
@@ -34,16 +38,6 @@ class Cache extends AExtendedCache
      * @var mixed
      */
     private $_hashmap = array();
-
-    /**
-     * Hashmap id prefix
-     */
-    const HASHMAP_PREFIX = 'HaShMaP';
-
-    /**
-     * Hashmap ttl (default infinite)
-     */
-    const HASHMAP_TTL = 0;
 
     /**
      * hashmapId getter
@@ -65,21 +59,32 @@ class Cache extends AExtendedCache
 
     /**
      * Class constructor
-     * @param \BackBuilder\BBApplication $app BackBuilder application
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if APC extension is not loaded
+     * @param array $options Initial options for the cache adapter: none to be defined
+     * @param string $context An optional cache context
+     * @param \Psr\Log\LoggerInterface $logger An optional logger
+     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
      */
-    public function __construct(BBApplication $app)
+    public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
-        try {
-            if (!extension_loaded('apc')) {
-                throw new CacheException('APC extension not loaded');
-            }
-            $this->_app = $app;
-            $this->_hashmapId = self::HASHMAP_PREFIX . '_' . \md5($app->getSite()->getUid());
-            $this->_hashmap = $this->loadHashmap();
-        } catch (Exception $e) {
-            throw new CacheException('Error while creating cache handler', null, $e);
+        if (false === extension_loaded('apc')) {
+            throw new CacheException('APC extension not loaded');
         }
+
+        parent::__construct($options, $context, $logger);
+    }
+
+    /**
+     * Sets the memcache adapter instance options
+     * @param array $options
+     * @return \BackBuilder\Cache\APC\Cache
+     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
+     */
+    protected function setInstanceOptions(array $options = array())
+    {
+        parent::setInstanceOptions($options);
+
+        $this->_hashmapId = self::HASHMAP_PREFIX . '_' . md5($this->getContext());
+        $this->_hashmap = $this->loadHashmap();
     }
 
     /**
@@ -92,11 +97,9 @@ class Cache extends AExtendedCache
     public function load($id, $bypassCheck = false, \DateTime $expire = null)
     {
         try {
-            if (!$this->_app->debugMode()) {
-                return \apc_fetch($id);
-            }
+            return \apc_fetch($id);
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to load cache for id %s : %s', $id, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to load cache for id %s : %s', $id, $e->getMessage()));
             return false;
         }
         return false;
@@ -121,7 +124,7 @@ class Cache extends AExtendedCache
                 }
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to test cache for id %s : %s', $id, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to test cache for id %s : %s', $id, $e->getMessage()));
             return false;
         }
         return false;
@@ -145,7 +148,7 @@ class Cache extends AExtendedCache
                 return false;
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to save cache for id %s : %s', $id, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to save cache for id %s : %s', $id, $e->getMessage()));
             return false;
         }
         return true;
@@ -164,7 +167,7 @@ class Cache extends AExtendedCache
                 return true;
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to delete cache for id %s : %s', $id, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to delete cache for id %s : %s', $id, $e->getMessage()));
             return false;
         }
     }
@@ -182,7 +185,7 @@ class Cache extends AExtendedCache
                 $this->removeTag($tag);
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to delete cache for tag(s) %s : %s', \implode(',', $tags), $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to delete cache for tag(s) %s : %s', \implode(',', $tags), $e->getMessage()));
             return false;
         }
         return true;
@@ -202,7 +205,7 @@ class Cache extends AExtendedCache
                 $this->updateExpireTag($tag, $lifetime);
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to delete cache for tag(s) %s : %s', \implode(',', $tags), $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to delete cache for tag(s) %s : %s', \implode(',', $tags), $e->getMessage()));
             return false;
         }
         return true;
@@ -220,7 +223,7 @@ class Cache extends AExtendedCache
                 return $this->saveHashmap();
             }
         } catch (\Exception $e) {
-            $this->_application->warning(sprintf('Unable to clear cache : %s', $e->getMessage()));
+            $this->log('warning', sprintf('Unable to clear cache : %s', $e->getMessage()));
         }
         return false;
     }
@@ -242,7 +245,7 @@ class Cache extends AExtendedCache
                 return $this->saveHashmap();
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to delete cache for tag %s : %s', $tag, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to delete cache for tag %s : %s', $tag, $e->getMessage()));
             return false;
         }
         return true;
@@ -267,7 +270,7 @@ class Cache extends AExtendedCache
                 return true;
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to update cache ttl for tag %s : %s', $tag, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to update cache ttl for tag %s : %s', $tag, $e->getMessage()));
             return false;
         }
         return false;
@@ -289,7 +292,7 @@ class Cache extends AExtendedCache
                 }
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to remove id from hashmap %s : %s', $id, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to remove id from hashmap %s : %s', $id, $e->getMessage()));
             return false;
         }
         return false;
@@ -304,7 +307,7 @@ class Cache extends AExtendedCache
         try {
             return \apc_store($this->_hashmapId, $this->_hashmap, self::HASHMAP_TTL);
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to store hashmap %s : %s', $this->_hashmapId, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to store hashmap %s : %s', $this->_hashmapId, $e->getMessage()));
             return false;
         }
     }
@@ -322,7 +325,7 @@ class Cache extends AExtendedCache
                 return array();
             }
         } catch (\Exception $e) {
-            $this->_app->warning(\sprintf('Unable to load hashmap %s : %s', $this->_hashmapId, $e->getMessage()));
+            $this->log('warning', \sprintf('Unable to load hashmap %s : %s', $this->_hashmapId, $e->getMessage()));
             return false;
         }
     }

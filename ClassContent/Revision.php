@@ -114,7 +114,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * The comment associated to this revision
      * @var string
-     * @Column(type="string", name="comment")
+     * @Column(type="string", name="comment", nullable=true)
      */
     private $_comment;
 

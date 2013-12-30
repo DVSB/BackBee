@@ -222,8 +222,9 @@ class phtml extends ARendererAdapter
         }
 
         $mainLayoutRow = $layout->getDomDocument();
-        if (!$layout->isValid() || null === $mainLayoutRow)
-            throw new RendererException('Malformed data for the layout layout.');
+        if (false === $layout->isValid() || null === $mainLayoutRow) {
+            throw new RendererException('Malformed data for the layout layout.');            
+        }
 
         // Add an php instruction to each final droppable zone found
         $xpath = new \DOMXPath($mainLayoutRow);
