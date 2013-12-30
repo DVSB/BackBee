@@ -279,7 +279,7 @@ class Renderer extends ARenderer
 		$found = false;
 		foreach ($this->manageableExt->keys() as $ext) {
 			$this->templateFile = 'error' . DIRECTORY_SEPARATOR . $errorCode . $ext;
-			if (true === $this->isValidTemplateFile($this->templateFile)) {
+			if (true === $this->isValidTemplateFile($this->templateFile, true)) {
 				$found = true;
 				break;
 			}
@@ -304,7 +304,7 @@ class Renderer extends ARenderer
 		$this->assign('error_message', $message);
 		$this->assign('error_trace', $trace);
 
-		return $this->renderTemplate();
+		return $this->renderTemplate(false, true);
 	}
 
 	/**

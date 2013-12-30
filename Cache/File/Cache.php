@@ -22,7 +22,9 @@
 namespace BackBuilder\Cache\File;
 
 use BackBuilder\Cache\ACache,
-    BackBuilder\Cache\Exception\CacheException;
+    BackBuilder\Cache\Exception\CacheException,
+    BackBuilder\Util\String;
+use Psr\Log\LoggerInterface;
 
 /**
  * Filesystem cache adapter
@@ -45,25 +47,55 @@ class Cache extends ACache
     private $_cachedir;
 
     /**
+     * Memcached adapter options
+     * @var array
+     */
+    protected $_instance_options = array(
+        'cachedir' => null
+    );
+
+    /**
      * Class constructor
      * @param array $options Initial options for the cache adapter:
      *                         - cachedir string The cache directory
+     * @param string $context An optional cache context
      * @param \Psr\Log\LoggerInterface $logger An optional logger
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache directory doesn't exist, can not
      *                                                     be created or is not writable.
      */
-    public function __construct($options = array(), LoggerInterface $logger = null)
+    public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
-        if (false === is_array($options)) {
-            $options = array(
-                'cachedir' => $options
-            );
+        parent::__construct($options, $context, $logger);
+        $this->log('info', sprintf('File cache system initialized with directory set to `%s`.', $this->_cachedir));
+    }
+
+    /**
+     * Sets the memcache adapter instance options
+     * @param array $options
+     * @return \BackBuilder\Cache\File\Cache
+     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache directory doesn't exist and it cannot
+     *                                                     be created or if it is not writable.
+     */
+    protected function setInstanceOptions(array $options = array())
+    {
+        parent::setInstanceOptions($options);
+
+        $this->_cachedir = $this->_instance_options['cachedir'];
+
+        if (null !== $this->getContext()) {
+            $this->_cachedir .= DIRECTORY_SEPARATOR . String::toPath($this->getContext());
         }
 
-        parent::__construct($options, $logger);
-        $this->_setOptions($options);
+        if (false === is_dir($this->_cachedir)
+                && false === @mkdir($this->_cachedir, 0700, true)) {
+            throw new CacheException(sprintf('Unable to create the cache directory `%s`.', $this->_cachedir));
+        }
 
-        $this->log('info', sprintf('File cache system initialized with directory set to `%s`.', $this->_cachedir), array('cache'));
+        if (false === is_writable($this->_cachedir)) {
+            throw new CacheException(sprintf('Unable to write in the cache directory `%s`.', $this->_cachedir));
+        }
+
+        return $this;
     }
 
     /**
@@ -81,17 +113,17 @@ class Cache extends ACache
 
         $last_timestamp = $this->test($id);
         if (true === $bypassCheck
-                || false === $last_timestamp
+                || 0 === $last_timestamp
                 || $expire->getTimestamp() <= $last_timestamp) {
 
             if (false !== $data = @file_get_contents($this->_getCacheFile($id))) {
-                $this->log('debug', sprintf('Reading file cache data for id `%s`.', $id), array('cache'));
+                $this->log('debug', sprintf('Reading file cache data for id `%s`.', $id));
                 return $data;
             }
 
-            $this->log('warning', sprintf('Enable to read data in file cache for id `%s`.', $id), array('cache'));
+            $this->log('warning', sprintf('Enable to read data in file cache for id `%s`.', $id));
         } else {
-            $this->log('debug', sprintf('None available file cache found for id `%s` newer than %s.', $id, $expire->format('d/m/Y H:i')), array('cache'));
+            $this->log('debug', sprintf('None available file cache found for id `%s` newer than %s.', $id, $expire->format('d/m/Y H:i')));
         }
 
         return false;
@@ -123,13 +155,13 @@ class Cache extends ACache
     public function save($id, $data, $lifetime = null, $tag = null)
     {
         if (null !== $lifetime || null !== $tag) {
-            $this->log('warning', sprintf('Lifetime and tag features are not available for cache adapter `%s`.', get_class($this)), array('cache'));
+            $this->log('warning', sprintf('Lifetime and tag features are not available for cache adapter `%s`.', get_class($this)));
         }
 
         if (true === $result = @file_put_contents($this->_getCacheFile($id), $data)) {
-            $this->log('debug', sprintf('Storing data in cache for id `%s`.', $id), array('cache'));
+            $this->log('debug', sprintf('Storing data in cache for id `%s`.', $id));
         } else {
-            $this->log('warning', sprintf('Unable to save data to file cache for id `%s` in directory `%s`.', $id, $this->_cachedir), array('cache'));
+            $this->log('warning', sprintf('Unable to save data to file cache for id `%s` in directory `%s`.', $id, $this->_cachedir));
         }
 
         return (false !== $result);
@@ -143,7 +175,7 @@ class Cache extends ACache
     public function remove($id)
     {
         if (true === $result = @unlink($this->_getCacheFile($id))) {
-            $this->log('debug', sprintf('Cache data removed for id `%s`.', $id), array('cache'));
+            $this->log('debug', sprintf('Cache data removed for id `%s`.', $id));
         }
 
         return $result;
@@ -161,7 +193,7 @@ class Cache extends ACache
             foreach ($files as $file) {
                 if (false === is_dir($file)) {
                     if (false === $remove = @unlink($file)) {
-                        $this->log('warning', sprintf('Enable to remove cache file `%s`.', $file), array('cache'));
+                        $this->log('warning', sprintf('Enable to remove cache file `%s`.', $file));
                         $result = false;
                     }
                 }
@@ -169,34 +201,10 @@ class Cache extends ACache
         }
 
         if (true === $result) {
-            $this->log('debug', sprintf('File system cache cleared in `%s`.', $this->_cachedir), array('cache'));
+            $this->log('debug', sprintf('File system cache cleared in `%s`.', $this->_cachedir));
         }
 
         return $result;
-    }
-
-    /**
-     * Sets the initialization options for this adapter
-     * @param array $options
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache directory doesn't exist and it cannot
-     *                                                     be created or if it is not writable.
-     */
-    private function _setOptions(array $options = array())
-    {
-        if (false === array_key_exists('cachedir', $options)) {
-            throw new CacheException('None cache directory set.');
-        }
-
-        $this->_cachedir = $options['cachedir'];
-
-        if (false === is_dir($this->_cachedir)
-                && false === @mkdir($this->_cachedir, 0700, true)) {
-            throw new CacheException(sprintf('Unable to create the cache directory `%s`.', $this->_cachedir));
-        }
-
-        if (false === is_writable($this->_cachedir)) {
-            throw new CacheException(sprintf('Unable to write in the cache directory `%s`.', $this->_cachedir));
-        }
     }
 
     /**

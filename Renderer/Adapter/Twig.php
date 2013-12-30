@@ -5,7 +5,8 @@ namespace BackBuilder\Renderer\Adapter;
 use Exception,
 	Twig_Error_Loader;
 
-use Twig_Environment;
+use Twig_Environment,
+    Twig_Extension_Debug;
 
 use BackBuilder\Renderer\Adapter\TwigLoaderFilesystem,
     BackBuilder\Renderer\ARenderer,
@@ -50,9 +51,14 @@ class Twig extends ARendererAdapter
 
         $bbapp = $this->renderer->getApplication();
 		$this->loader = new TwigLoaderFilesystem(array());
+        $isDebugMode = null !== $bbapp ? $bbapp->isDebugMode() : false;
 		$this->twig = new Twig_Environment($this->loader, array(
-			'debug' => null !== $bbapp  ? $bbapp->isDebugMode() : false
+			'debug' => $isDebugMode
 		));
+
+        if (true === $isDebugMode) {
+            $this->twig->addExtension(new Twig_Extension_Debug());
+        }
 	}
 
     /**
