@@ -624,7 +624,7 @@ class BBApplication
 
         return $this->_repository;
     }
-    
+
     public function getBaseRepository()
     {
         if (NULL === $this->_base_repository) {
