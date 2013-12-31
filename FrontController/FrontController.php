@@ -147,6 +147,8 @@ class FrontController implements HttpKernelInterface {
             if ('_' != substr($key, 0, 1))
                 $args[$key] = $value;
 
+        $this->getRequest()->attributes = new \Symfony\Component\HttpFoundation\ParameterBag($args);
+        $this->_dispatch('frontcontroller.request');
         if (FALSE === method_exists($this, $matches['_action'])) {
             if (array_key_exists($matches['_action'], $this->_actions) && is_callable($this->_actions[$matches['_action']])) {
                 return call_user_func_array($this->_actions[$matches['_action']], $args);
@@ -505,7 +507,6 @@ class FrontController implements HttpKernelInterface {
     public function handle(Request $request = NULL, $type = self::MASTER_REQUEST, $catch = true) {
         try {
             $this->_request = $request;
-            $this->_dispatch('frontcontroller.request');
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
             if ($matches = $urlMatcher->match($this->getRequest()->getPathInfo())) {
                 // logout Event dispatch
