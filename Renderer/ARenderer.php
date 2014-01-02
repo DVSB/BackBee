@@ -28,7 +28,6 @@ use BackBuilder\BBApplication,
     BackBuilder\Site\Layout,
     BackBuilder\Util\File,
     BackBuilder\Util\String;
-
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -42,6 +41,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  */
 abstract class ARenderer implements IRenderer
 {
+
     const HEADER_SCRIPT = 'header';
     const FOOTER_SCRIPT = 'footer';
 
@@ -149,7 +149,7 @@ abstract class ARenderer implements IRenderer
     public function __clone()
     {
         $this->_cache()
-            ->reset();
+                ->reset();
 
         $this->updateHelpers();
     }
@@ -423,6 +423,12 @@ abstract class ARenderer implements IRenderer
 
         if (is_array($var)) {
             foreach ($var as $key => $value) {
+                if ($value instanceof \BackBuilder\ClassContent\AClassContent) {
+                    $value = $this->getApplication()
+                            ->getEntityManager()
+                            ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($value))
+                            ->load($value, $this->getApplication()->getBBUserToken());
+                }
                 $this->_vars[$key] = $value;
             }
         }
@@ -476,7 +482,6 @@ abstract class ARenderer implements IRenderer
         if ('/' !== substr($pathinfo, 0, 1)) {
             $pathinfo = '/' . $pathinfo;
         }
-
         if ($this->_application->isStarted() && null !== $this->_application->getRequest()) {
             $request = $this->_application->getRequest();
 
@@ -671,7 +676,7 @@ abstract class ARenderer implements IRenderer
     public function reset()
     {
         $this->_resetVars()
-             ->_resetParams();
+                ->_resetParams();
 
         $this->__render = null;
 
@@ -786,7 +791,7 @@ abstract class ARenderer implements IRenderer
     public function updateLayout(Layout $layout)
     {
         if (null === $layout->getSite()) {
-            return false;            
+            return false;
         }
 
         $layoutfile = $this->_getLayoutFile($layout);
@@ -810,7 +815,7 @@ abstract class ARenderer implements IRenderer
     public function removeLayout(Layout $layout)
     {
         if (null === $layout->getSite()) {
-            return false;            
+            return false;
         }
 
         $layoutfile = $this->_getLayoutFile($layout);
@@ -839,7 +844,7 @@ abstract class ARenderer implements IRenderer
         $templates = array();
         foreach ($this->_scriptdir as $dir) {
             if (true === is_array(glob($dir . DIRECTORY_SEPARATOR . $pattern))) {
-                $templates = array_merge($templates, glob($dir . DIRECTORY_SEPARATOR . $pattern));                
+                $templates = array_merge($templates, glob($dir . DIRECTORY_SEPARATOR . $pattern));
             }
         }
 
@@ -978,7 +983,7 @@ abstract class ARenderer implements IRenderer
         $helper = null;
         if (true === $this->helpers->has($method)) {
             $helper = $this->helpers->get($method);
-        } 
+        }
 
         return $helper;
     }
@@ -998,7 +1003,8 @@ abstract class ARenderer implements IRenderer
             $this->helpers->set($method, new $helperClass($this, $argv));
             $helper = $this->helpers->get($method);
         }
-        
+
         return $helper;
     }
+
 }
