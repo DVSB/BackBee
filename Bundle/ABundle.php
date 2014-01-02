@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -33,7 +33,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils,
 
 /**
  * Abstract class for bundle in BackBuilder5 application
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Bundle
  * @copyright   Lp digital system
@@ -104,7 +104,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $allSections = $this->_config->getAllSections();
         $this->configDefaultSections = $allSections;
         if (
-            true === array_key_exists('bundle', $allSections) && 
+            true === array_key_exists('bundle', $allSections) &&
             true === array_key_exists('manage_multisite', $allSections['bundle']) &&
             false === $allSections['bundle']['manage_multisite']
         ) {
@@ -229,8 +229,8 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         }
 
         if (
-            true === $this->manageMultisiteConfig && 
-            false === $this->isConfigFullyInit && 
+            true === $this->manageMultisiteConfig &&
+            false === $this->isConfigFullyInit &&
             null !== $this->getApplication()->getSite()
         ) {
             $this->completeConfigInit();
@@ -257,7 +257,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
             $overrideSection[$this->getApplication()->getSite()->getUid()] = $updatedSections;
             $this->configDefaultSections['override_site'] = $overrideSection;
-            
+
             $this->doSaveConfig($this->configDefaultSections);
         }
     }
@@ -265,7 +265,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     private function doSaveConfig(array $config)
     {
         file_put_contents(
-            $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml', 
+            $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml',
             Yaml::dump($config)
         );
     }
@@ -306,7 +306,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
     public function unserialize($serialized)
     {
-        
+
     }
 
     abstract function init();
@@ -333,7 +333,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     }
 
     /**
-     * Returns the unique identifier for this object. 
+     * Returns the unique identifier for this object.
      * @return string
      * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
      * @codeCoverageIgnore
