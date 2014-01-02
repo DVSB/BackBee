@@ -174,7 +174,7 @@ class bb5content extends AHelper
 
         $this->_addValueToAttribute('data-uid', $this->_content->getUid())
                 ->_addValueToAttribute('data-type', $this->_getDataType())
-                ->_addValueToAttribute('data-parent', $this->_parent->getUid())
+                ->_addValueToAttribute('data-parent', $this->_parent ? $this->_parent->getUid() : null)
                 ->_addValueToAttribute('data-element', $this->_element_name)
                 ->_addValueToAttribute('data-isloaded', $this->_content->isLoaded() ? 'true' : 'false')
                 ->_addValueToAttribute('data-rendermode', (null !== $this->_content->getMode()) ? $this->_content->getMode() : (string) $this->_renderer->getMode())
