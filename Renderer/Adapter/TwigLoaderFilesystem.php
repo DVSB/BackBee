@@ -22,6 +22,7 @@ class TwigLoaderFilesystem extends Twig_Loader_Filesystem
      */
     public function exists($name)
     {
+        $name = preg_replace('#/{2,}#', '/', strtr($name, '\\', '/'));
     	$exists = parent::exists($name);
     	$readable = false;
     	if (true === $exists) {
