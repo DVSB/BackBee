@@ -21,8 +21,8 @@
 
 namespace BackBuilder\Event\Listener;
 
-use BackBuilder\Util\File;
-use BackBuilder\Event\Event,
+use BackBuilder\Util\File,
+    BackBuilder\Event\Event,
     BackBuilder\Exception\BBException,
     BackBuilder\ClassContent\ContentSet,
     BackBuilder\ClassContent\Revision,
@@ -30,6 +30,7 @@ use BackBuilder\Event\Event,
     BackBuilder\ClassContent\Element\file as elementFile,
     BackBuilder\ClassContent\Exception\ClassContentException,
     BackBuilder\Security\Exception\SecurityException;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Listener to ClassContent events :
@@ -164,21 +165,23 @@ class ClassContentListener
     public static function onCommit(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent))
+        if (false === ($content instanceof AClassContent)) {
             throw new BBException('Enable to commit object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBuilder\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
-
+        }
+        
         $dispatcher = $event->getDispatcher();
-        if (NULL === $application = $dispatcher->getApplication())
+        if (null === $application = $dispatcher->getApplication()) {
             throw new BBException('Enable to commit object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBuilder application has to be initialized'));
-
-        if (NULL === $token = $application->getBBUserToken())
+        }
+        
+        if (null === $token = $application->getBBUserToken()) {
             throw new SecurityException('Enable to commit : unauthorized user', SecurityException::UNAUTHORIZED_USER);
-
+        }
+        
         $em = $dispatcher->getApplication()->getEntityManager();
-        if (NULL === $revision = $content->getDraft()) {
-            if (NULL === $revision = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token))
-                throw new ClassContentException('Enable to get draft', ClassContentException::REVISION_MISSING);
-            $content->setDraft($revision);
+        $content = $em->getRepository(ClassUtils::getRealClass($content))->load($content, $token);
+        if (null === $revision = $content->getDraft()) {
+            throw new ClassContentException('Enable to get draft', ClassContentException::REVISION_MISSING);            
         }
 
         $content->prepareCommitDraft();
@@ -186,10 +189,11 @@ class ClassContentListener
         if ($content instanceof ContentSet) {
             $content->clear();
             while ($subcontent = $revision->next()) {
-                if ($subcontent instanceof AClassContent && !$em->contains($subcontent)) {
-                    $subcontent = $em->find(get_class($subcontent), $subcontent->getUid());
-                    if (NULL !== $subcontent)
+                if ($subcontent instanceof AClassContent) {
+                    $subcontent = $em->getRepository(ClassUtils::getRealClass($subcontent))->load($subcontent);
+                    if (null !== $subcontent) {
                         $content->push($subcontent);
+                    }
                 }
             }
         } else {
@@ -197,7 +201,7 @@ class ClassContentListener
                 $values = is_array($values) ? $values : array($values);
                 foreach ($values as &$subcontent) {
                     if ($subcontent instanceof AClassContent) {
-                        $subcontent = $em->find(get_class($subcontent), $subcontent->getUid());
+                        $subcontent = $em->getRepository(ClassUtils::getRealClass($subcontent))->load($subcontent);
                     }
                 }
                 unset($subcontent);
