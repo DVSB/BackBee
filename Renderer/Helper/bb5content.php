@@ -96,6 +96,7 @@ class bb5content extends AHelper
 
             $this->_element_name = null;
             $this->_parent = $this->_renderer->getObject();
+
             if (null !== $this->_parent) {
                 $this->_setElementName($this->_parent, $element);
             }
@@ -134,11 +135,14 @@ class bb5content extends AHelper
             foreach ($values as $value) {
                 if ($value instanceof AClassContent) {
                     if (false === $value->isLoaded()) {
-                        $value = $this->getRenderer()
+                        // try to load subcontent
+                        if (null !== $subcontent = $this->getRenderer()
                                 ->getApplication()
                                 ->getEntityManager()
                                 ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($value))
-                                ->load($value, $this->getRenderer()->getApplication()->getBBUserToken());
+                                ->load($value, $this->getRenderer()->getApplication()->getBBUserToken())) {
+                            $value = $subcontent;
+                        }
                     }
                     if (true === $element->equals($value)) {
                         $this->_element_name = $key;

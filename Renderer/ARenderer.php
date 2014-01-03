@@ -424,11 +424,16 @@ abstract class ARenderer implements IRenderer
         if (is_array($var)) {
             foreach ($var as $key => $value) {
                 if ($value instanceof \BackBuilder\ClassContent\AClassContent) {
-                    $value = $this->getApplication()
+                    // trying to load subcontent
+                    $subcontent = $this->getApplication()
                             ->getEntityManager()
                             ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($value))
                             ->load($value, $this->getApplication()->getBBUserToken());
+                    if (null !== $subcontent) {
+                        $value = $subcontent;
+                    }
                 }
+
                 $this->_vars[$key] = $value;
             }
         }
@@ -718,7 +723,7 @@ abstract class ARenderer implements IRenderer
     {
         $this->_object = $object;
 
-        if (is_array($this->__vars)) {
+        if (is_array($this->__vars) && 0 < count($this->__vars)) {
             foreach ($this->__vars[count($this->__vars) - 1] as $key => $var) {
                 if ($var === $object) {
                     $this->__currentelement = $key;
