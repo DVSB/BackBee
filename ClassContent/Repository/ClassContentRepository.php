@@ -793,7 +793,9 @@ class ClassContentRepository extends EntityRepository
 
         if (false === $content->isLoaded()) {
             $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content);
-            $content = $this->_em->find($classname, $content->getUid());
+            if (null !== $refresh = $this->_em->find($classname, $content->getUid())) {
+                $content = $refresh;
+            }
         }
 
         if (null !== $content) {
