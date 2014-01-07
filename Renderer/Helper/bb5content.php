@@ -400,9 +400,10 @@ class bb5content extends AHelper
         $securityContext = $this->_renderer->getApplication()->getSecurityContext();
 
         try {
-            return (true === $securityContext->isGranted('sudo')
+            return (null !== $this->getRenderer()->getApplication()->getBBUserToken()
+                    && (true === $securityContext->isGranted('sudo')
                     || null === $securityContext->getACLProvider()
-                    || true === $securityContext->isGranted('VIEW', $this->_content));
+                    || true === $securityContext->isGranted('VIEW', $this->_content)));
         } catch (\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException $e) {
             return false;
         }
