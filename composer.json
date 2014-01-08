@@ -7,7 +7,7 @@
             "BackBuilder\\": ""
         }
     },
-    "extra": {
-        "class": "BackBuilder\\Composer\\BackBuilderInstaller"
+    "config": {
+        "vendor-dir": ""
     }
 }
