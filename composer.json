@@ -9,7 +9,7 @@
     },
     "require": {
         "composer/installers": "~1.0"
-    }
+    },
     "extra": {
         "installer-paths": {
             "BackBuilder": ["vendor/package"]
