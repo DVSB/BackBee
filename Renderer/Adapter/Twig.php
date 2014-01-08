@@ -60,8 +60,8 @@ class Twig extends ARendererAdapter
             $this->twig->addExtension(new Twig_Extension_Debug());
         }
 
-        foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $ext) {
-            $this->twig->addExtension($ext);
+        foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $id => $datas) {
+            $this->twig->addExtension($bbapp->getContainer()->get($name));
         }
 	}
 
