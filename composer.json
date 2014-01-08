@@ -1,17 +1,13 @@
 {
     "name": "next/backbuilder",
     "description": "BackBuilder",
-    "type": "composer-installer",
-    "require": {
-        "composer-plugin-api": "1.0.0"
-    },
+    "type": "package",
     "autoload": {
         "psr-0": {
             "BackBuilder\\": "",
-            "BackBuilder\\Composer": "Composer"
         }
     },
-    "extra": {
-        "class": "BackBuilder\\Composer\\BackBuilderInstaller"
-    }
+    "config": {
+        "vendor-dir": "plugins"
+    },
 }
