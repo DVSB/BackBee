@@ -2,12 +2,7 @@
     "name": "next/backbuilder",
     "description": "BackBuilder",
     "type": "composer-installer",
-    "autoload": {
-        "psr-0": {
-            "BackBuilder\\": ""
-        }
-    },
     "extra": {
-        "class": "Composer\\BackBuilderInstaller"
+        "class": "BackBuilder\\Composer\\BackBuilderInstaller"
     }
 }
