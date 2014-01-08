@@ -1,7 +1,7 @@
 {
     "name": "next/backbuilder",
     "description": "BackBuilder",
-    "type": "symfony1",
+    "type": "elgg",
     "autoload": {
         "psr-0": {
             "BackBuilder\\": ""
@@ -9,7 +9,7 @@
     },
     "extra": {
         "installer-paths": {
-            "toto/{$name}/": ["type:backbuilder", "next/backbuilder"]
+            "toto/{$name}/": ["type:elgg", "next/backbuilder"]
         }
     },
     "require": {
