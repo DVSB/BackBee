@@ -8,9 +8,7 @@
         }
     },
     "extra": {
-        "installer-paths": {
-            "BackBuilder/": ["type:backbuilder", "next/backbuilder"]
-        }
+        "installer-name": "BackBuilder"
     },
     "require": {
         "composer/installers": "~1.0"
