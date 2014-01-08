@@ -3,9 +3,9 @@
     "description": "BackBuilder",
     "type": "composer-installer",
     "autoload": {
-        "classmap": [
-            "."
-        ]
+        "psr-0": {
+            "BackBuilder\\": ""
+        }
     },
     "extra": {
         "class": "BackBuilder\\Composer\\BackBuilderInstaller"
