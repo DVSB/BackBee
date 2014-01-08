@@ -6,12 +6,12 @@
         "composer-plugin-api": "1.0.0"
     },
     "autoload": {
-        "psr-0": {"BackBuilder\\Composer\\": "Composer/"}
+        "psr-0": {
+            "BackBuilder\\": "",
+            "BackBuilder\\Composer\\": ""
+        }
     },
     "extra": {
         "class": "BackBuilder\\Composer\\BackBuilderInstaller"
-    },
-    "config": {
-        "vendor-dir": ""
     }
 }
