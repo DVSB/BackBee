@@ -8,7 +8,7 @@
     "autoload": {
         "psr-0": {
             "BackBuilder\\": "",
-            "BackBuilder\\Composer\\": ""
+            "BackBuilder\\Composer\\": "Composer"
         }
     },
     "extra": {
