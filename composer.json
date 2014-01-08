@@ -7,7 +7,7 @@
             "BackBuilder\\": ""
         }
     },
-    "config": {
-        "vendor-dir": "plugins"
+    "require": {
+        "composer/installers": "~1.0"
     }
 }
