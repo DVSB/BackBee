@@ -4,7 +4,7 @@
     "type": "composer-installer",
     "autoload": {
         "psr-0": {
-            "BackBuilder\\Composer": ""
+            "BackBuilder\\": ""
         }
     },
     "extra": {
