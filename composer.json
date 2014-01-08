@@ -9,9 +9,8 @@
     },
     "extra": {
         "installer-paths": {
-            "toto/{$name}/": ["type:backbuilder", "next/backbuilder"]
+            "BackBuilder/": ["type:backbuilder", "next/backbuilder"]
         },
-        "installer-name": "TITI"
     },
     "require": {
         "composer/installers": "~1.0"
