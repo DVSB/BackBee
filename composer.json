@@ -7,6 +7,11 @@
             "BackBuilder\\": ""
         }
     },
+    "extra": {
+        "installer-paths": {
+            "toto/{$name}/": ["type:backbuilder", "next/backbuilder"]
+        }
+    },
     "require": {
         "composer/installers": "~1.0"
     }
