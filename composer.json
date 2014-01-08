@@ -10,7 +10,7 @@
     "extra": {
         "installer-paths": {
             "BackBuilder/": ["type:backbuilder", "next/backbuilder"]
-        },
+        }
     },
     "require": {
         "composer/installers": "~1.0"
