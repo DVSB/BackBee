@@ -8,6 +8,6 @@
         }
     },
     "extra": {
-        "class": "BackBuilder\\Composer\\BackBuilderInstaller"
+        "class": "Composer\\BackBuilderInstaller"
     }
 }
