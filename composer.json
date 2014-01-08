@@ -2,11 +2,6 @@
     "name": "next/backbuilder",
     "description": "BackBuilder",
     "type": "backbuilder-package",
-    "autoload": {
-        "psr-0": {
-            "BackBuilder\\": ""
-        }
-    },
     "extra": {
         "installer-name": "BackBuilder"
     },
