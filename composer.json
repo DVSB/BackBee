@@ -7,17 +7,8 @@
             "."
         ]
     },
-    "require": {
-        "composer/installers": "~1.0"
-    },
     "config": {
 		"vendor-dir": "BackBuilder"
-	},
-    "extra": {
-		"installer-name": "BackBuilder",
-        "installer-paths": {
-            "toto/{$name}/": ["symfony-bundle"]
-        }
-    }
+	}
 }
 
