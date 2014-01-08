@@ -1,7 +1,7 @@
 {
     "name": "next/backbuilder",
     "description": "BackBuilder",
-    "type": "elgg",
+    "type": "backbuilder-package",
     "autoload": {
         "psr-0": {
             "BackBuilder\\": ""
@@ -9,7 +9,7 @@
     },
     "extra": {
         "installer-paths": {
-            "toto/{$name}/": ["type:elgg", "next/backbuilder"]
+            "toto/{$name}/": ["type:backbuilder", "next/backbuilder"]
         },
         "installer-name": "TITI"
     },
