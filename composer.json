@@ -1,7 +1,7 @@
 {
     "name": "next/backbuilder",
     "description": "BackBuilder",
-    "type": "project",
+    "type": "composer-installer",
     "autoload": {
         "classmap": [
             "."
