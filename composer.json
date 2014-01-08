@@ -1,7 +1,7 @@
 {
     "name": "next/backbuilder",
     "description": "BackBuilder",
-    "type": "backbuilder",
+    "type": "symfony1",
     "autoload": {
         "psr-0": {
             "BackBuilder\\": ""
