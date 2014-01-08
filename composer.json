@@ -1,7 +1,7 @@
 {
     "name": "next/backbuilder",
     "description": "BackBuilder",
-    "type": "library",
+    "type": "project",
     "autoload": {
         "classmap": [
             "."
