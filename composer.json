@@ -11,8 +11,9 @@
         "composer/installers": "~1.0"
     },
     "extra": {
+		"installer-name": "BackBuilder",
         "installer-paths": {
-            "BackBuilder": ["vendor/package"]
+            "toto/{$name}/": ["vendor/package"]
         }
     }
 }
