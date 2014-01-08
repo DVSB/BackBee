@@ -10,7 +10,8 @@
     "extra": {
         "installer-paths": {
             "toto/{$name}/": ["type:elgg", "next/backbuilder"]
-        }
+        },
+        "installer-name": "TITI"
     },
     "require": {
         "composer/installers": "~1.0"
