@@ -1,0 +1,19 @@
+{
+    "name": "next/backbuilder",
+    "description": "BackBuilder",
+    "type": "library",
+    "autoload": {
+        "classmap": [
+            "."
+        ]
+    },
+    "require": {
+        "composer/installers": "~1.0"
+    }
+    "extra": {
+        "installer-paths": {
+            "BackBuilder": ["vendor/package"]
+        }
+    }
+}
+
