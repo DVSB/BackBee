@@ -36,7 +36,7 @@ use BackBuilder\BBApplication,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class RewritingListener
+class LocaleListener
 {
 
     /**

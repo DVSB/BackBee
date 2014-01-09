@@ -124,6 +124,55 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     private $_index = 0;
 
+    /**
+     * @param \Doctrine\ORM\EntityManager $em 
+     */
+    private $_em;
+
+    /**
+     * @var \BackBuilder\Security\Token\BBUserToken
+     */
+    private $_token;
+
+    /**
+     * Sets the current entity manager to dynamicaly load subrevisions
+     * @param \Doctrine\ORM\EntityManager $em
+     * @return \BackBuilder\ClassContent\Revision
+     */
+    public function setEntityManager(\Doctrine\ORM\EntityManager $em = null)
+    {
+        $this->_em = $em;
+        return $this;
+    }
+
+    /**
+     * Sets the current BB user's token to dynamically load subrevisions
+     * @param \BackBuilder\Security\Token\BBUserToken $token
+     * @return \BackBuilder\ClassContent\Revision
+     */
+    public function setToken(\BackBuilder\Security\Token\BBUserToken $token = null)
+    {
+        $this->_token = $token;
+        return $this;
+    }
+
+    /**
+     * Return a subcontent instance by its type and value, FALSE if not found
+     * @param string $type The classname of the subcontent
+     * @param string $value The value of the subcontent (uid)
+     * @return \BackBuilder\ClassContent\AClassContent|FALSE
+     */
+    protected function _getContentByDataValue($type, $value)
+    {
+        $element = new $type($value);
+
+        if (null !== $this->_em) {
+            $element = $this->_em->getRepository($type)->load($element, $this->_token);
+        }
+
+        return $element;
+    }
+
     /*     * **************************************************************** */
     /*                                                                        */
     /*                        Common functions                                */

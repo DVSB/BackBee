@@ -369,14 +369,18 @@ class BBApplication
         if (null !== $bundles = $this->getConfig()->getBundlesConfig()) {
             foreach ($bundles as $name => $classname) {
                 $bundle = new $classname($this);
-                if ($bundle->init()) {
-                    $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
-                    $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
-                }
+                $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
             }
         }
 
         $this->initBundlesServices();
+
+        if (0 < count($this->_bundles)) {
+            foreach ($this->_bundles as $bundle) {
+                $bundle->init();
+                $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
+            }
+        }
     }
 
     /**

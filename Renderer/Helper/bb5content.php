@@ -21,7 +21,8 @@
 
 namespace BackBuilder\Renderer\Helper;
 
-use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\ClassContent\AClassContent,
+    BackBuilder\ClassContent\ContentSet;
 
 /**
  * Helper providing HTML attributes to online-edited content
@@ -47,7 +48,7 @@ use BackBuilder\ClassContent\ContentSet;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class datacontent extends AHelper
+class bb5content extends AHelper
 {
 
     /**
@@ -73,6 +74,9 @@ class datacontent extends AHelper
      * @var array
      */
     private $_classmarkup;
+    private $_element_name;
+    private $_parent_uid;
+    private $_parent;
 
     /**
      * Returns the HTML formated attributes for content
@@ -80,19 +84,28 @@ class datacontent extends AHelper
      * @param array $params Optional parameters
      * @return string The HTML formated attributes for content
      */
-    public function __invoke($datacontent = array(), $params = array())
+    public function __invoke(AClassContent $element = null, $datacontent = array(), $params = array())
     {
-        if ($datacontent instanceof BackBuilder\Renderer\IRenderable) {
-            $this->_content = $datacontent;
-        } else {
+        if (null === $element) {
+            $this->_element_name = $this->_renderer->getCurrentElement();
             $this->_content = $this->_renderer->getObject();
+            $this->_parent = $this->getRenderer()->getClassContainer();
+            $this->_parent_uid = $this->_renderer->getParentUid();
+        } else {
+            $this->_content = $element;
+
+            $this->_element_name = null;
+            $this->_parent = $this->_renderer->getObject();
+
+            if (null !== $this->_parent) {
+                $this->_setElementName($this->_parent, $element);
+            }
+
+            $this->_parent_uid = $this->_renderer->getObject()->getUid();
         }
 
-        if (true === is_array($datacontent)) {
-            $this->_attributes = $this->_toRegularBag($datacontent);
-        }
-
-        $this->_addValueToAttribute('class', $this->_renderer->getParam('class'));
+        $this->_attributes = $this->_toRegularBag($datacontent);
+        $this->_addValueToAttribute('class', $this->_content->getParam('class'));
 
         // Store initial basic attributes to content
         $this->_basic_attributes = $this->_attributes;
@@ -100,7 +113,7 @@ class datacontent extends AHelper
         // If a valid BB user is granted to access this content
         if (null !== $this->_content
                 && true === $this->_isGranted()
-                && false !== $this->_renderer->getParam('bb5.editable')) {
+                && false !== $this->_content->getParam('bb5.editable')) {
             $this->_addCommonContentMarkup($params)
                     ->_addContentSetMarkup($params)
                     ->_addClassContainerMarkup($params)
@@ -110,6 +123,44 @@ class datacontent extends AHelper
         }
 
         return implode(' ', array_map(array($this, '_formatAttributes'), array_keys($this->_attributes), array_values($this->_attributes)));
+    }
+
+    private function _setElementName(AClassContent $parent, AClassContent $element)
+    {
+        foreach ($parent->getData() as $key => $values) {
+            if (false === is_array($values)) {
+                $values = array($values);
+            }
+
+            foreach ($values as $value) {
+                if ($value instanceof AClassContent) {
+                    if (false === $value->isLoaded()) {
+                        // try to load subcontent
+                        if (null !== $subcontent = $this->getRenderer()
+                                ->getApplication()
+                                ->getEntityManager()
+                                ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($value))
+                                ->load($value, $this->getRenderer()->getApplication()->getBBUserToken())) {
+                            $value = $subcontent;
+                        }
+                    }
+                    if (true === $element->equals($value)) {
+                        $this->_element_name = $key;
+                        $this->_parent = $parent;
+                    } else {
+                        $this->_setElementName($value, $element);
+                    }
+                }
+
+                if (null !== $this->_element_name) {
+                    break;
+                }
+            }
+
+            if (null !== $this->_element_name) {
+                break;
+            }
+        }
     }
 
     /**
@@ -127,8 +178,8 @@ class datacontent extends AHelper
 
         $this->_addValueToAttribute('data-uid', $this->_content->getUid())
                 ->_addValueToAttribute('data-type', $this->_getDataType())
-                ->_addValueToAttribute('data-parent', $this->_renderer->getParentUid())
-                ->_addValueToAttribute('data-element', $this->_renderer->getCurrentElement())
+                ->_addValueToAttribute('data-parent', $this->_parent ? $this->_parent->getUid() : null)
+                ->_addValueToAttribute('data-element', $this->_element_name)
                 ->_addValueToAttribute('data-isloaded', $this->_content->isLoaded() ? 'true' : 'false')
                 ->_addValueToAttribute('data-rendermode', (null !== $this->_content->getMode()) ? $this->_content->getMode() : (string) $this->_renderer->getMode())
                 ->_addValueToAttribute('data-forbidenactions', implode(',', (array) $this->_content->getProperty('forbiden-actions')))
@@ -187,7 +238,7 @@ class datacontent extends AHelper
      */
     private function _addClassContainerMarkup($params = array())
     {
-        if (null !== $class_container = $this->_renderer->getClassContainer()) {
+        if (null !== $class_container = $this->_parent) {
             if ($class_container instanceof ContentSet) {
                 if (false === ($class_container instanceof \BackBuilder\ClassContent\Bloc\autobloc)) {
                     $this->_addValueToAttribute('class', $this->_getClassMarkup('draggableclass'));
@@ -230,8 +281,8 @@ class datacontent extends AHelper
         $this->_addValueToAttribute('class', 'contentAloha');
 
         if (false === ($this->_content instanceof ContentSet)
-                && null !== $this->_renderer->getCurrentElement()) {
-            $this->_addValueToAttribute('data-aloha', $this->_renderer->getCurrentElement());
+                && null !== $this->_element_name) {
+            $this->_addValueToAttribute('data-aloha', $this->_element_name);
         }
         return $this;
     }
@@ -353,7 +404,7 @@ class datacontent extends AHelper
                     && (true === $securityContext->isGranted('sudo')
                     || null === $securityContext->getACLProvider()
                     || true === $securityContext->isGranted('VIEW', $this->_content)));
-         } catch (\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException $e) {
+        } catch (\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException $e) {
             return false;
         }
     }

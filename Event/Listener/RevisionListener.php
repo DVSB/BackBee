@@ -106,22 +106,26 @@ class RevisionListener
         $application = $dispatcher->getApplication();
 
         $classname = $revision->getClassname();
-        if (NULL !== $application && NULL == $revision->getContent()) {
-            $em = $application->getEntityManager();
+        if (NULL !== $application) {
+        $em = $application->getEntityManager();
+            $revision->setEntityManager($em)
+                    ->setToken($application->getBBUserToken());
+            
+            if (NULL == $revision->getContent()) {
+                $db = $em->getConnection();
+                $stmt = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?", array($revision->getUid()), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1));
 
-            $db = $em->getConnection();
-            $stmt = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?", array($revision->getUid()), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1));
-
-            $items = $stmt->fetchAll();
-            if ($items) {
-                foreach ($items as $item) {
-                    $content = $em->find($item["classname"], $item["content_uid"]); //@fixme ->use ResultSetMapping
-                    if ($content)
-                        $revision->setContent($content);
+                $items = $stmt->fetchAll();
+                if ($items) {
+                    foreach ($items as $item) {
+                        $content = $em->find($item["classname"], $item["content_uid"]); //@fixme ->use ResultSetMapping
+                        if ($content)
+                            $revision->setContent($content);
+                    }
                 }
             }
         }
-
+        
         $revision->postLoad();
     }
 

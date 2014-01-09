@@ -777,4 +777,32 @@ class ClassContentRepository extends EntityRepository
         return $this;
     }
 
+    /**
+     * Load content if need, the user's revision is also set
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param \BackBuilder\Security\Token\BBUserToken $token
+     * @param boolean $checkoutOnMissing If true, checks out a new revision if none was found
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    public function load(AClassContent $content, \BackBuilder\Security\Token\BBUserToken $token = null, $checkoutOnMissing = false)
+    {
+        $revision = null;
+        if (null !== $token) {
+            $revision = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, $checkoutOnMissing);
+        }
+
+        if (false === $content->isLoaded()) {
+            $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content);
+            if (null !== $refresh = $this->_em->find($classname, $content->getUid())) {
+                $content = $refresh;
+            }
+        }
+
+        if (null !== $content) {
+            $content->setDraft($revision);
+        }
+
+        return $content;
+    }
+
 }

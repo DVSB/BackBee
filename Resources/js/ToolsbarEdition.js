@@ -490,21 +490,15 @@ BB4.ToolsbarManager.register("editiontb",{
             }
             
         }
-        
+        this._handleContentEdition();
         // Contextmenu
         //var contentSelector = this._settings.contentClass;
         this.isActivated = true; 	
         return self;
     },
 	
-    /*all resizeHandler*/     
-        
-    enable: function() {
+    _handleContentEdition : function(){
         var self = this;
-        this.toggleEditionMode($('.bb5-onlyShowBlocksBtn').attr('checked'));
-        
-        self.activate();
-		
         $('[data-uid]').die("contentchange.content").live('contentchange.content', function(e) { 
             var content = $(this);
             
@@ -543,8 +537,14 @@ BB4.ToolsbarManager.register("editiontb",{
             self._hideContextMenu();
             return true;            
         });
+    },
+    /*all resizeHandler*/       
+    enable: function() {
+        var self = this;
+        this.toggleEditionMode($('.bb5-onlyShowBlocksBtn').attr('checked'));
         
-                                
+        self.activate();
+                       
         // Upload drag'n'drop
         $('[data-type^="Media\\\\"]').live('mouseover', function() {
             $(this).addClass('aloha-editable-active');
