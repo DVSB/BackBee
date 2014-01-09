@@ -2,7 +2,9 @@ var bb = (bb) ? bb : {};
 
 bb.upload = {};
 
-$.extend(bb.upload, {
+(function($) {
+
+bb.jquery.extend(bb.upload, {
     token: null,
     endPoint: null,
     namespace: null,
@@ -19,13 +21,13 @@ $.extend(bb.upload, {
     },
     
     upload: function(method, config) {
-        var dropbox = $('<div/>');
-        $('body').prepend(dropbox);
+        var dropbox = bb.jquery('<div/>');
+        bb.jquery('body').prepend(dropbox);
         
-        dropbox.filedrop($.extend(config, {
+        dropbox.filedrop(bb.jquery.extend(config, {
             url: this.endPoint,
             
-            data: $.extend(config.data, {
+            data: bb.jquery.extend(config.data, {
                 method: this.namespace + '.' + method
             }),
             
@@ -37,19 +39,19 @@ $.extend(bb.upload, {
             }
         }));
         
-        $('#' + config.fallback_id).trigger('change');
+        bb.jquery('#' + config.fallback_id).trigger('change');
         
         dropbox.filedrop('destroy');
         dropbox.remove();
     },
     
     filedrop: function(method, config, dropbox_el) {
-        var dropbox = $(dropbox_el) ? $(dropbox_el) : $('body').prepend($('<div>'));
+        var dropbox = bb.jquery(dropbox_el) ? bb.jquery(dropbox_el) : bb.jquery('body').prepend(bb.jquery('<div>'));
         
-        return dropbox.filedrop($.extend(config, {
+        return dropbox.filedrop(bb.jquery.extend(config, {
             url: this.endPoint,
             
-            data: $.extend(config.data, {
+            data: bb.jquery.extend(config.data, {
                 method: this.namespace + '.' + method
             }),
             
@@ -65,15 +67,15 @@ $.extend(bb.upload, {
 
 bb.uploadManager = {};
 
-$.extend(bb.uploadManager, {
+bb.jquery.extend(bb.uploadManager, {
     uploads: {},
     
     setup: function(config) {
         var myself = this;
         
-        $.each(config.uploads, function(index, upload) {
+        bb.jquery.each(config.uploads, function(index, upload) {
             myself.uploads[upload.name] = {};
-            myself.uploads[upload.name] = $.extend({}, {}, bb.upload);
+            myself.uploads[upload.name] = bb.jquery.extend({}, {}, bb.upload);
 
             myself.uploads[upload.name] = myself.uploads[upload.name].setup({
                 token: config.token,
@@ -84,7 +86,7 @@ $.extend(bb.uploadManager, {
     },
     
     setToken: function(token) {
-        $.each(this.uploads, function(index, upload) {
+        bb.jquery.each(this.uploads, function(index, upload) {
             upload.setToken(token);
         });
     },
@@ -93,3 +95,5 @@ $.extend(bb.uploadManager, {
         return this.uploads[name];
     }
 });
+
+}) (bb.jquery);

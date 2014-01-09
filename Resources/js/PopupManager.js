@@ -31,7 +31,7 @@ bb.PopupManager = (function($,gExport){
     
     var _init = function(userConfigs){
         var userConfigs = (typeof userConfigs=="object") ? userConfigs : {};
-        _settings = $.extend(true,_settings,userConfigs);
+        _settings = bb.jquery.extend(true,_settings,userConfigs);
         return publicApi;
     };
   
@@ -68,35 +68,35 @@ bb.PopupManager = (function($,gExport){
         /*create dialog*/
         var dialogEl = dialogSettings.dialogEl || false;
         var self = this;
-        if(!$(dialogEl)) throw "DialogEl can't be null";
+        if(!bb.jquery(dialogEl)) throw "DialogEl can't be null";
         
         this.settings = dialogSettings.dialogConfig || {}; 
         if ('undefined' != typeof(this.settings.i18n))
-            dialogEl = $.template(dialogEl).apply(this.settings.i18n);
+            dialogEl = bb.jquery.template(dialogEl).apply(this.settings.i18n);
 
         if(this.dialog == false) throw new Error("Dialog can't be null");        
-        // var userOnCreate = (typeof dialogSettings.create =="function" ) ?  dialogSettings.create :$.noop;
+        // var userOnCreate = (typeof dialogSettings.create =="function" ) ?  dialogSettings.create :bb.jquery.noop;
         
         /*handle content here*/
-        if(("content" in this.settings) && $(this.settings.content).length!=0){
-            $(dialogEl).append($(this.settings.content));
+        if(("content" in this.settings) && bb.jquery(this.settings.content).length!=0){
+            bb.jquery(dialogEl).append(bb.jquery(this.settings.content));
         }
         
-        this.dialog = $(dialogEl).dialog(this.settings);
+        this.dialog = bb.jquery(dialogEl).dialog(this.settings);
         if(!this.dialog) throw "Dialog can't be null";
-        this.dialogUi = $(this.dialog).parent(_settings.dialogSettings.dialogClass).eq(0);
+        this.dialogUi = bb.jquery(this.dialog).parent(_settings.dialogSettings.dialogClass).eq(0);
         
         
         /*onOpen*/
         this.on("open.core",function(){
-            $(self.dialog).dialog("moveToTop");
+            bb.jquery(self.dialog).dialog("moveToTop");
         });
         
                 
         /*fixresize*/
         this.on("resizestop.core",function(event,ui){
-            var position = [(Math.floor(ui.position.left) - $(window).scrollLeft()),(Math.floor(ui.position.top) - $(window).scrollTop())];
-            $(event.target).parent().css('position', 'fixed');
+            var position = [(Math.floor(ui.position.left) - bb.jquery(window).scrollLeft()),(Math.floor(ui.position.top) - bb.jquery(window).scrollTop())];
+            bb.jquery(event.target).parent().css('position', 'fixed');
             self.setOption('position',position);
             return true;
         });
@@ -104,21 +104,21 @@ bb.PopupManager = (function($,gExport){
         /*Adding keypress listner enter key to valid*/
         this.on("open.core",function(){
             if(self._dialogStates.isFixed) return true;
-            $(self.dialog).keypress(function(e) {
-                if ($(self.dialog).dialog('isOpen') && e.keyCode === $.ui.keyCode.ENTER && self.settings.bindEnterKeyToValid) {
-                    $(self.dialog).parent().find("button[data-default='true']:eq(0)").trigger("click");
+            bb.jquery(self.dialog).keypress(function(e) {
+                if (bb.jquery(self.dialog).dialog('isOpen') && e.keyCode === bb.jquery.ui.keyCode.ENTER && self.settings.bindEnterKeyToValid) {
+                    bb.jquery(self.dialog).parent().find("button[data-default='true']:eq(0)").trigger("click");
                 }
             });
-        /*var closeBtn =  $(self.dialogUi).find(".ui-dialog-titlebar-close");
-              $(closeBtn).replaceWith("<button class=\"bb5-button bb5-ico-close bb5-button-square bb5-invert\"></button>");
-              $(self.dialogUi).find(".bb5-ico-close").bind("click",$.proxy(self.close,self));
+        /*var closeBtn =  bb.jquery(self.dialogUi).find(".ui-dialog-titlebar-close");
+              bb.jquery(closeBtn).replaceWith("<button class=\"bb5-button bb5-ico-close bb5-button-square bb5-invert\"></button>");
+              bb.jquery(self.dialogUi).find(".bb5-ico-close").bind("click",bb.jquery.proxy(self.close,self));
               self._dialogStates.isFixed = true;*/ 
         });
        
         /* hack to keep the dialog in the viewport after a drag */
         this.on("dragstop.core",function(e,ui){
-            var dialog = $(self.dialog).parent(_settings.dialogSettings.dialogClass).eq(0);
-            var top = parseInt($(dialog).css("top"));
+            var dialog = bb.jquery(self.dialog).parent(_settings.dialogSettings.dialogClass).eq(0);
+            var top = parseInt(bb.jquery(dialog).css("top"));
             /* up */
             if(top < 0){
                 top = Math.abs(top);
@@ -129,24 +129,24 @@ bb.PopupManager = (function($,gExport){
             }
             
             /* down */
-            var dialogHeight = parseInt($(dialog).css("height"));
+            var dialogHeight = parseInt(bb.jquery(dialog).css("height"));
             var offsetTop = ui.offset.top; 
-            var winHeight = $(window).height();
+            var winHeight = bb.jquery(window).height();
             var dialogCurrentTop = ui.position.top;
             /*as dialog is fixed*/
             var adjustPosition = ((dialogCurrentTop+dialogHeight) > winHeight) ? true : false;
             if(adjustPosition){
                 var adjustSize =  dialogCurrentTop+dialogHeight -  winHeight; 
                 var newTop = (dialogCurrentTop - adjustSize) - 15; // margin de 2px
-                $(dialog).animate({
+                bb.jquery(dialog).animate({
                     top:newTop+"px"
                 });
             }        
         });
         /* hack to keep the dialog in the viewport after a drag */
         this.on("open.core",function(e,ui){
-            var dialog = $(self.dialog).parent(_settings.dialogSettings.dialogClass).eq(0);
-            var top = parseInt($(dialog).css("top"));
+            var dialog = bb.jquery(self.dialog).parent(_settings.dialogSettings.dialogClass).eq(0);
+            var top = parseInt(bb.jquery(dialog).css("top"));
             if( top < 0 ){
                 top = Math.abs(top);
                 var position = self.getOption("position");
@@ -159,19 +159,19 @@ bb.PopupManager = (function($,gExport){
     DialogItem.fn = DialogItem.prototype;
     
     DialogItem.fn.show = function(){
-        var btnContainer = $(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
-        $(btnContainer).find("button").addClass("bb5-button bb5-button-square");
-        $(this.dialog).dialog("open");
+        var btnContainer = bb.jquery(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
+        bb.jquery(btnContainer).find("button").addClass("bb5-button bb5-button-square");
+        bb.jquery(this.dialog).dialog("open");
     };
     
     DialogItem.fn.btnDisable = function() {
-        var btnContainer = $(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
-        $(btnContainer).find("button").attr('disabled', 'disabled');
+        var btnContainer = bb.jquery(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
+        bb.jquery(btnContainer).find("button").attr('disabled', 'disabled');
     };
     
     DialogItem.fn.btnEnable = function() {
-        var btnContainer = $(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
-        $(btnContainer).find("button").removeAttr('disabled');
+        var btnContainer = bb.jquery(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
+        bb.jquery(btnContainer).find("button").removeAttr('disabled');
     };
     
     /*alias*/
@@ -181,18 +181,18 @@ bb.PopupManager = (function($,gExport){
     
     DialogItem.fn.close = function(){
         /*cleanExtra*/
-        $(this.dialogUi).data("bb-dialog-extra",null);
-        $(this.dialog).dialog("close");
+        bb.jquery(this.dialogUi).data("bb-dialog-extra",null);
+        bb.jquery(this.dialog).dialog("close");
     };
     
     DialogItem.fn.destroy = function(){
-        $(this.dialog).dialog("destroy");
-        $(this.dialog).remove();
+        bb.jquery(this.dialog).dialog("destroy");
+        bb.jquery(this.dialog).remove();
     };
     
     DialogItem.fn.getParam = function(paramKey){
         var paramKey = paramKey || "none";
-        return $(this.dialog).dialog("option",paramKey);
+        return bb.jquery(this.dialog).dialog("option",paramKey);
     };
     
     DialogItem.fn.getOption = function(paramKey){
@@ -200,21 +200,21 @@ bb.PopupManager = (function($,gExport){
     };
      
     DialogItem.fn.setOption = function(key,value){
-        $(this.dialog).dialog("option",key,value);
+        bb.jquery(this.dialog).dialog("option",key,value);
         if(key == "buttons"){
             /* fix buttons style */
-            var btnContainer = $(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
-            $(btnContainer).find("button").addClass("bb5-button bb5-button-square"); 
+            var btnContainer = bb.jquery(this.dialog).parents(".bb5-dialog-wrapper").eq(0).find(".ui-dialog-buttonset");
+            bb.jquery(btnContainer).find("button").addClass("bb5-button bb5-button-square"); 
         }
     };
     
     DialogItem.fn.isOpen = function(){
-        return $(this.dialog).dialog("isOpen");
+        return bb.jquery(this.dialog).dialog("isOpen");
     }
      
     DialogItem.fn.invoke = function(methodName){
         if(typeof methodName=="string"){
-            return $(this.dialog).dialog(methodName);
+            return bb.jquery(this.dialog).dialog(methodName);
         }
     }
     
@@ -222,11 +222,11 @@ bb.PopupManager = (function($,gExport){
     DialogItem.fn.on = function(event,callback,context){
         var context = context || this;
         var event = event || "none";
-        var callback = (typeof callback==="function") ? $.proxy(callback,context) : function(){
+        var callback = (typeof callback==="function") ? bb.jquery.proxy(callback,context) : function(){
             console.log("callback has to be a function")
         };
         this.callbacks[event] = callback; //useful for custom event
-        $(this.dialog).bind("dialog"+event,callback);
+        bb.jquery(this.dialog).bind("dialog"+event,callback);
     };
  
     DialogItem.fn.unbind = function(event){
@@ -241,7 +241,7 @@ bb.PopupManager = (function($,gExport){
     DialogItem.fn.setContent = function(content){
         var content = content || null;
         if(content){
-            $(this.dialog).html($(content));  
+            bb.jquery(this.dialog).html(bb.jquery(content));  
         }
     };
     
@@ -249,30 +249,30 @@ bb.PopupManager = (function($,gExport){
         var data = data || null;
        
         if(data && !value){
-            $(this.dialogUi).data("bb-dialog-extra",data);
+            bb.jquery(this.dialogUi).data("bb-dialog-extra",data);
         }else{
-            $(this.dialogUi).data(data,value);
+            bb.jquery(this.dialogUi).data(data,value);
         }
     };
         
     DialogItem.fn.getExtra = function(key){
         var key = key || "bb-dialog-extra";
-        return  $(this.dialogUi).data(key);
+        return  bb.jquery(this.dialogUi).data(key);
     }
     
     DialogItem.fn.addButton = function(data){
         var data = data || false;
-        var buttons =  $(this.dialog).dialog("option","buttons")
+        var buttons =  bb.jquery(this.dialog).dialog("option","buttons")
         if(typeof buttons.length == "undefined"){
             buttons = [];
         }
         buttons.push(data);
-        $(this.dialog).dialog("option","buttons",buttons);
+        bb.jquery(this.dialog).dialog("option","buttons",buttons);
     }
     
     var _buildDialog = function(dialogParams){
-        var dialogTemplate = $("<div></div>").clone();
-        $(dialogTemplate).addClass(dialogParams.contentCls);
+        var dialogTemplate = bb.jquery("<div></div>").clone();
+        bb.jquery(dialogTemplate).addClass(dialogParams.contentCls);
         _dialogTypes[dialogParams.type] = dialogTemplate;  
         return dialogTemplate;
     };
@@ -282,7 +282,7 @@ bb.PopupManager = (function($,gExport){
         create : function (type, dialogConfig) {
             var dialogConfig = dialogConfig || {}; 
             if(!(type) || (typeof type !="string")) throw new Error("Type can't be null or undefined"); 
-            var dialogSettings = $.extend(true,{}, _settings.dialogSettings,dialogConfig);
+            var dialogSettings = bb.jquery.extend(true,{}, _settings.dialogSettings,dialogConfig);
             
             dialogSettings.contentCls = type;
             //var oldDialog = dialogsContainer[type];
@@ -300,7 +300,7 @@ bb.PopupManager = (function($,gExport){
             
             var supDialogCls = (typeof dialogConfig.dialogType == "string") ? dialogSettings.dialogType :""; 
             dialogSettings.dialogClass = _settings.dialogSettings.dialogCls.trim() +' '+supDialogCls.trim();           
-            // var dialog = $(dialogEl).dialog(dialogSettings);
+            // var dialog = bb.jquery(dialogEl).dialog(dialogSettings);
           
             
             var dialogItem = new DialogItem({
@@ -327,4 +327,4 @@ bb.PopupManager = (function($,gExport){
         dialogType: _availableDialogType
     };
     
-})(jQuery,window);
+})(bb.jquery,window);

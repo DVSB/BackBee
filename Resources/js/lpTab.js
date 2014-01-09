@@ -1,4 +1,8 @@
-var LpTabs = function(userConfig){
+var LpTabs = null;
+
+(function($) {
+
+LpTabs = function(userConfig){
     
     this.tab = null;
     this.prefix = null;
@@ -25,9 +29,9 @@ var LpTabs = function(userConfig){
     if(typeof this._init !=="function" ){
         LpTabs.prototype._init = function(userConfig){
             var userConfig = userConfig || {};
-            this._settings = $.extend(true,this._settings,userConfig);
-            // $(this._settings.mainContainer).mask(bb.i18n.loading); //add loader here
-            this.tab = $(this._settings.mainContainer) || null;
+            this._settings = bb.jquery.extend(true,this._settings,userConfig);
+            // bb.jquery(this._settings.mainContainer).mask(bb.i18n.loading); //add loader here
+            this.tab = bb.jquery(this._settings.mainContainer) || null;
             
             if(!this.tab.length) throw "mainContainer can't be null";
             this.prefix = bb.Utils.generateId("tab");
@@ -35,12 +39,12 @@ var LpTabs = function(userConfig){
             /*clone container */
             if(this._settings.cloneContainer){
                 this.mainContainer = "#"+this.prefix;
-                this.tab = $(this.tab).clone();
+                this.tab = bb.jquery(this.tab).clone();
                 this.tab.attr("id",this.mainContainer);
             }
             
-            this.tabLinksContainer = $(this.tab).find(" > "+this._settings.tabLinksContainerClass);
-            this.tabLinks = $(this.tabLinksContainer).find(this._settings.tabLinksEl);
+            this.tabLinksContainer = bb.jquery(this.tab).find(" > "+this._settings.tabLinksContainerClass);
+            this.tabLinks = bb.jquery(this.tabLinksContainer).find(this._settings.tabLinksEl);
             if(!this.tabLinks.length) throw "tablinks can't be found";
             
             if(typeof this._settings.onSelect=="function"){
@@ -64,29 +68,29 @@ var LpTabs = function(userConfig){
     LpTabs.prototype._createTabs = function(){
         var self = this;
        
-        $.each(this.tabLinks,function(i,tab){
-            $(tab).attr("data-tabno",i);
+        bb.jquery.each(this.tabLinks,function(i,tab){
+            bb.jquery(tab).attr("data-tabno",i);
             /*disable tabs here*/
-            if($.isArray(self._settings.disabled)){
-                if($.inArray(i,self._settings.disabled)!=-1){
-                    $(tab).addClass("disabled");
-                    $(tab).hide();
+            if(bb.jquery.isArray(self._settings.disabled)){
+                if(bb.jquery.inArray(i,self._settings.disabled)!=-1){
+                    bb.jquery(tab).addClass("disabled");
+                    bb.jquery(tab).hide();
                 } 
             }
             
-            var content = $(self.tab).find($(tab).attr(CONTENT_KEY));
-            if(!content.length) throw "content for tab "+$(tab).attr(CONTENT_KEY).replace("#","")+" can't be found";
-            if((($.isArray(self._settings.disabled)) && ($.inArray(i,self._settings.disabled)!=-1)) || self._settings.selected!=i){ 
-                $(content).hide();
+            var content = bb.jquery(self.tab).find(bb.jquery(tab).attr(CONTENT_KEY));
+            if(!content.length) throw "content for tab "+bb.jquery(tab).attr(CONTENT_KEY).replace("#","")+" can't be found";
+            if(((bb.jquery.isArray(self._settings.disabled)) && (bb.jquery.inArray(i,self._settings.disabled)!=-1)) || self._settings.selected!=i){ 
+                bb.jquery(content).hide();
             }
             else{
-                if($.inArray(self._settings.selected,self._settings.disabled)==-1){
+                if(bb.jquery.inArray(self._settings.selected,self._settings.disabled)==-1){
                     if(self._settings.selected == i){
-                        self.selectedTab = $(tab);
-                        $(tab).addClass(self._settings.activeTabCls);
-                        $(content).show();
+                        self.selectedTab = bb.jquery(tab);
+                        bb.jquery(tab).addClass(self._settings.activeTabCls);
+                        bb.jquery(content).show();
                         var ui = {
-                            panel : $(content)
+                            panel : bb.jquery(content)
                         }; 
                         self.onShow.call(self,{
                             type:"tabShow"
@@ -95,20 +99,20 @@ var LpTabs = function(userConfig){
                 }
             } 
         });
-        var availableTabs = $(this.tabLinksContainer).find(this._settings.tabLinksEl).not(".disabled");
+        var availableTabs = bb.jquery(this.tabLinksContainer).find(this._settings.tabLinksEl).not(".disabled");
         /*select the first tabs*/
         if(!this.selectedTab){
             /*first available tab*/
             if(availableTabs.length){
                 this.selectedTab = availableTabs[0];
-                $(this.selectedTab).addClass(this._settings.activeTabCls);
-                var content = $(this.tab).find($(this.selectedTab).attr(CONTENT_KEY));
-                if(!content.length) throw "content for tab "+$(this.selectedTab).attr(CONTENT_KEY).replace("#","")+" can't be found";
-                $(content).show();
+                bb.jquery(this.selectedTab).addClass(this._settings.activeTabCls);
+                var content = bb.jquery(this.tab).find(bb.jquery(this.selectedTab).attr(CONTENT_KEY));
+                if(!content.length) throw "content for tab "+bb.jquery(this.selectedTab).attr(CONTENT_KEY).replace("#","")+" can't be found";
+                bb.jquery(content).show();
                 var ui = {
-                    panel : $(content)
+                    panel : bb.jquery(content)
                 }; 
-                var text = $(this.selectedTab).get(0).text;
+                var text = bb.jquery(this.selectedTab).get(0).text;
                 self.onShow.call(this,{
                     type:"tabShow",
                     tabLabel:text
@@ -118,26 +122,26 @@ var LpTabs = function(userConfig){
         /* hide header if asked*/
         if(typeof this._settings.hideHeaderIfonlyOne=="boolean" && this._settings.hideHeaderIfonlyOne && availableTabs.length==1){
             var selected = this.getSelectedTab(); 
-            $(selected.el).hide();
+            bb.jquery(selected.el).hide();
         }
     }
     
     LpTabs.prototype._beforeCreate = function(){
       
         var self = this;
-        $(this.tabLinks).each(function(i,tabItem){
+        bb.jquery(this.tabLinks).each(function(i,tabItem){
             if(self._settings.cloneContainer){
-                var tabContentId = $(tabItem).attr("href");
-                var content = $(self.tab).find(tabContentId);
-                var newContentId = "#"+self.prefix+'-'+$(tabItem).attr("href").replace("#","");
-                if(!content.length) throw "content for tab "+$(self).attr("href").replace("#","")+" can't be found";
-                $(tabItem).attr("href",newContentId);
-                $(content).attr("id",newContentId.replace("#",""));
+                var tabContentId = bb.jquery(tabItem).attr("href");
+                var content = bb.jquery(self.tab).find(tabContentId);
+                var newContentId = "#"+self.prefix+'-'+bb.jquery(tabItem).attr("href").replace("#","");
+                if(!content.length) throw "content for tab "+bb.jquery(self).attr("href").replace("#","")+" can't be found";
+                bb.jquery(tabItem).attr("href",newContentId);
+                bb.jquery(content).attr("id",newContentId.replace("#",""));
             }
          
             if(!self._settings.keepAnchor){
-                $(tabItem).attr(CONTENT_KEY,$(tabItem).attr("href"));
-                $(tabItem).attr("href","javascript:;");
+                bb.jquery(tabItem).attr(CONTENT_KEY,bb.jquery(tabItem).attr("href"));
+                bb.jquery(tabItem).attr("href","javascript:;");
             }    
         });
         
@@ -150,8 +154,8 @@ var LpTabs = function(userConfig){
     
     LpTabs.prototype._bindEvents = function(){
         var self = this;
-        $(this.tabLinks).bind("click",function(e){
-            var currentTab = $(this).attr("data-tabno") || null;
+        bb.jquery(this.tabLinks).bind("click",function(e){
+            var currentTab = bb.jquery(this).attr("data-tabno") || null;
             if(currentTab){
                 self.selectTab(currentTab);
             }      
@@ -159,34 +163,34 @@ var LpTabs = function(userConfig){
     }
    
     LpTabs.prototype.destroy = function(){
-        $(this.tabLinks).unbind();
+        bb.jquery(this.tabLinks).unbind();
         this.tab = null;      
       
     }
     
     LpTabs.prototype.selectTab = function(tabToselect){
-        var previous = $(this.selectedTab).attr("data-tabno");
+        var previous = bb.jquery(this.selectedTab).attr("data-tabno");
         if(tabToselect==previous) return false;
        
         /*hideCurrent*/
         var currentTab = tabToselect;
-        $(this.selectedTab).removeClass(this._settings.activeTabCls);
-        var content =  $(this.tab).find($(this.selectedTab).attr(CONTENT_KEY)) || null;
+        bb.jquery(this.selectedTab).removeClass(this._settings.activeTabCls);
+        var content =  bb.jquery(this.tab).find(bb.jquery(this.selectedTab).attr(CONTENT_KEY)) || null;
         if(content){
-            $(content).hide();
+            bb.jquery(content).hide();
         }
         /*show new*/
-        var tabToSelect = $(this.tab).find("[data-tabno='"+tabToselect+"']") || null;
+        var tabToSelect = bb.jquery(this.tab).find("[data-tabno='"+tabToselect+"']") || null;
         if(!tabToSelect.length) throw " can't find tab no "+tabToSelect;
         tabToSelect = tabToSelect[0];
         this.selectedTab = tabToSelect;
         this._settings.selected = previous;
        
        
-        $(this.selectedTab).addClass(this._settings.activeTabCls);
-        var content = $(this.tab).find($(this.selectedTab).attr(CONTENT_KEY)) || null;
+        bb.jquery(this.selectedTab).addClass(this._settings.activeTabCls);
+        var content = bb.jquery(this.tab).find(bb.jquery(this.selectedTab).attr(CONTENT_KEY)) || null;
         if(content){
-            $(content).show();
+            bb.jquery(content).show();
         }
        
         /*callback:selected*/
@@ -204,9 +208,9 @@ var LpTabs = function(userConfig){
     
     LpTabs.prototype.getSelectedTab = function(){
         return {
-            el:$(this.selectedTab), 
+            el:bb.jquery(this.selectedTab), 
             tabNo :  this._settings.selected,
-            tabPanel : $($(this.selectedTab).attr(CONTENT_KEY)) 
+            tabPanel : bb.jquery(bb.jquery(this.selectedTab).attr(CONTENT_KEY)) 
         }; 
     }
     LpTabs.prototype.getTab = function(){
@@ -220,3 +224,5 @@ var LpTabs = function(userConfig){
 }
 
 bb.LpTabs = LpTabs;
+
+}) (bb.jquery);

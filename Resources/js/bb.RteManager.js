@@ -1,6 +1,10 @@
 var bb = bb || {};  
 
-var module = {
+var module = null;
+
+(function($) {
+
+module = {
     dependencies: ["jscore","aintnolove"],
     moduleName: "RteManager",
     exports: {}
@@ -45,7 +49,7 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
         
             init : function(userParams){
                 var userParams = userParams || {};
-                this._settings = jQuery.extend(true,this._settings,userParams);
+                this._settings = bb.jquery.extend(true,this._settings,userParams);
                 this.onInit(this._settings);  
             },
         
@@ -62,14 +66,14 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                 if(typeof callback!="function"){
                     throw new Error("bb.RteAbstractAdapter onReady must be a function");
                 }
-                this._callbacks["onReady"] = (typeof context=="object") ? jQuery.proxy(callback,context) : jQuery.proxy(callback,this);
+                this._callbacks["onReady"] = (typeof context=="object") ? bb.jquery.proxy(callback,context) : bb.jquery.proxy(callback,this);
             },
             
             onEdit: function(callback,context){
                 if(typeof callback!="function"){
                     throw new Error("bb.RteAbstractAdapter onReady must be a function");
                 }
-                this._callbacks["onEdit"] = (typeof context=="object") ? jQuery.proxy(callback,context) : jQuery.proxy(callback,this);
+                this._callbacks["onEdit"] = (typeof context=="object") ? bb.jquery.proxy(callback,context) : bb.jquery.proxy(callback,this);
             },
         
             loadPlugins: function(config){
@@ -166,12 +170,14 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                         try{
                             var adapter = new _adapters[adapterName]();
                             return adapter;  
+
                         }catch(e){
+
                             throw e;
                         }
                     }else{
                         /* load adapter */
-                        $.ajax({
+                        bb.jquery.ajax({
                             url: _settings.adapterPath+adapterName+".adapter.js", 
                             async : false,
                             error : function(xhr,textStatus,errorMsg){
@@ -194,3 +200,4 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
     })(bb); 
 });
 
+}) (bb.jquery);

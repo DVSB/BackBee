@@ -1,5 +1,5 @@
 (function($){
-    $.widget('ui.bbPageSelector', {
+    bb.jquery.widget('ui.bbPageSelector', {
         options: {
             callback: null,
             pagerContainerClass : ".bb5-windowpane-main-toobar-container",//.bb5-windowpane-main-toolbar-screener",
@@ -50,7 +50,7 @@
             +'<td>${modified}</td>'
             +'<td><button value="${uid}" class="bb5-button bb5-ico-basket bb5-button-square"></button></td>'
             +'</tr>';
-            this._templates.viewRow = $.template(pageRowTpl);
+            this._templates.viewRow = bb.jquery.template(pageRowTpl);
         },
         
         _create: function() {
@@ -67,11 +67,11 @@
             });
             
             //panel
-            var template = $(this._templates.panel).clone();
+            var template = bb.jquery(this._templates.panel).clone();
             var contentId = bb.Utils.generateId("pageSelector");
-            $(template).attr("id",contentId); 
+            bb.jquery(template).attr("id",contentId); 
             this._templates.panel = template;
-            this.element.html($(this._templates.panel).show());
+            this.element.html(bb.jquery(this._templates.panel).show());
             //site droopdown
             this._mask();
             
@@ -82,18 +82,18 @@
                 async : false, 
                 success: function(result) {
                     context = myself.getContext();
-                    select = $(myself.element).find('.bb5-available-sites').eq(0);
+                    select = bb.jquery(myself.element).find('.bb5-available-sites').eq(0);
                     
                     //select change event
                     select.bind('change', function() {
-                        myself._initTree($(this).val());
+                        myself._initTree(bb.jquery(this).val());
                     });
                     
                     //select sites populating
                     select.empty();
-                    $.each(result.result, function(index, site) {
-                        var option = $("<option></option>").clone();
-                        $(option).attr("value",index).text(site);
+                    bb.jquery.each(result.result, function(index, site) {
+                        var option = bb.jquery("<option></option>").clone();
+                        bb.jquery(option).attr("value",index).text(site);
                         select.append(option);         
                     });
                     
@@ -109,9 +109,9 @@
                 }
             });
             
-            $(this.element).find('.bb5-windowpane-main table.bb5-table-data0x thead tr th:first').addClass('headerSortUp');
-            $(this.element).find('.bb5-windowpane-main table.bb5-table-data0x thead tr th:last').removeClass('header');
-            $(this.element).find(this.options.searchEngineContainerClass).hide();
+            bb.jquery(this.element).find('.bb5-windowpane-main table.bb5-table-data0x thead tr th:first').addClass('headerSortUp');
+            bb.jquery(this.element).find('.bb5-windowpane-main table.bb5-table-data0x thead tr th:last').removeClass('header');
+            bb.jquery(this.element).find(this.options.searchEngineContainerClass).hide();
             
         /*init layouts*/
         },
@@ -123,8 +123,8 @@
             context.callback = this.options.callback;
             this.selectModeView(this.options.viewMode);
             context.view = this._templates.viewRow;
-            $(this.element).find('.bb5-windowpane-main table.bb5-table-data0x tbody tr td button').live('click', function() {
-                var viewrow = $(this).parents('tr:first');
+            bb.jquery(this.element).find('.bb5-windowpane-main table.bb5-table-data0x tbody tr td button').live('click', function() {
+                var viewrow = bb.jquery(this).parents('tr:first');
                 var context = myself.getContext();
                 
                 if (context.callback) {
@@ -141,15 +141,15 @@
             
             //this._trigger('selectedPage', null , )
             
-            $(this.element).find('.header').bind('click', function() {
-                if ($(this).hasClass('headerSortUp') || $(this).hasClass('headerSortDown')) {
-                    if ($(this).hasClass('headerSortUp'))
-                        $(this).removeClass('headerSortUp').addClass('headerSortDown');
+            bb.jquery(this.element).find('.header').bind('click', function() {
+                if (bb.jquery(this).hasClass('headerSortUp') || bb.jquery(this).hasClass('headerSortDown')) {
+                    if (bb.jquery(this).hasClass('headerSortUp'))
+                        bb.jquery(this).removeClass('headerSortUp').addClass('headerSortDown');
                     else
-                        $(this).removeClass('headerSortDown').addClass('headerSortUp');
+                        bb.jquery(this).removeClass('headerSortDown').addClass('headerSortUp');
                 } else {
-                    $(this).parents('tr:first').find('th.header').removeClass('headerSortUp').removeClass('headerSortDown');
-                    $(this).addClass('headerSortUp'); 
+                    bb.jquery(this).parents('tr:first').find('th.header').removeClass('headerSortUp').removeClass('headerSortDown');
+                    bb.jquery(this).addClass('headerSortUp'); 
                 }
                 myself._initView({
                     site_uid: context.site, 
@@ -157,15 +157,15 @@
                 });
             });
             
-            this.listContainer = $(this.element).find(this.options.listContainerClass).eq(0);
+            this.listContainer = bb.jquery(this.element).find(this.options.listContainerClass).eq(0);
             this._initSearchEngine();
-            this.treeWrappers = $(this.element).find(this.options.treewrapperClass); 
-            $(this.element).find(this.options.searchToggleBtnClass).bind("click",$.proxy(this.toggleSearchEngine,this));
-            $(this.element).find(this.options.btnClass).bind("click",$.proxy(this.btnHandler,this));
+            this.treeWrappers = bb.jquery(this.element).find(this.options.treewrapperClass); 
+            bb.jquery(this.element).find(this.options.searchToggleBtnClass).bind("click",bb.jquery.proxy(this.toggleSearchEngine,this));
+            bb.jquery(this.element).find(this.options.btnClass).bind("click",bb.jquery.proxy(this.btnHandler,this));
             
             /*parent is bbSelector*/
             this.getParent().on("open",function(){
-                $(myself.element).find(".bb5-windowpane-wrapper").layout({ 
+                bb.jquery(myself.element).find(".bb5-windowpane-wrapper").layout({ 
                     applyDemoStyles: true,
                     defaults: {
                         closable : false
@@ -182,12 +182,12 @@
         btnHandler:function(e){
             var btn = e.target;
             var self = this;
-            if($(btn).hasClass(this.viewInfos.list.replace(".",""))){
+            if(bb.jquery(btn).hasClass(this.viewInfos.list.replace(".",""))){
                 this.selectModeView("list");
                 if(!self.data==null) this._populateView(this.data);
                 return false;
             }
-            if($(btn).hasClass(this.viewInfos.grid.replace(".",""))){
+            if(bb.jquery(btn).hasClass(this.viewInfos.grid.replace(".",""))){
                 this.selectModeView("grid");
                 if(!self.data==null) this._populateView(this.data);
                 return false;
@@ -195,26 +195,26 @@
         },
         
         toggleSearchEngine : function(e){
-            var target = $(e.currentTarget);
-            var mainContainer = $(this.element).find(".bb5-windowpane-wrapper").get(0);
-            $(target).toggleClass('opened');
-            $(this.element).find(this.options.searchEngineContainerClass).toggle();
-            var delta = ($(target).hasClass("opened")) ? -45 : 45; //toggle filter's size
-            //$(mainContainer).height($(mainContainer).height() + delta);
-            $(this.listContainer).height( $(this.listContainer).height() + delta);   
+            var target = bb.jquery(e.currentTarget);
+            var mainContainer = bb.jquery(this.element).find(".bb5-windowpane-wrapper").get(0);
+            bb.jquery(target).toggleClass('opened');
+            bb.jquery(this.element).find(this.options.searchEngineContainerClass).toggle();
+            var delta = (bb.jquery(target).hasClass("opened")) ? -45 : 45; //toggle filter's size
+            //bb.jquery(mainContainer).height(bb.jquery(mainContainer).height() + delta);
+            bb.jquery(this.listContainer).height( bb.jquery(this.listContainer).height() + delta);   
         },
         
         selectModeView :function(viewMode){
             var viewMode = viewMode || "none";
             var availableMode = ["list","grid"];
-            if($.inArray(viewMode,availableMode)==-1){
+            if(bb.jquery.inArray(viewMode,availableMode)==-1){
                 this.options.viewMode = "list"; 
             }else{
                 this.options.viewMode = viewMode;
             }
-            $(this.element).find(this.viewInfos.btnClass).removeClass("bb5-button-selected");
-            var btnToSelect = $(this.element).find(this.viewInfos[this.options.viewMode]);
-            $(btnToSelect).addClass("bb5-button-selected");
+            bb.jquery(this.element).find(this.viewInfos.btnClass).removeClass("bb5-button-selected");
+            var btnToSelect = bb.jquery(this.element).find(this.viewInfos[this.options.viewMode]);
+            bb.jquery(btnToSelect).addClass("bb5-button-selected");
         },
         
         
@@ -222,7 +222,7 @@
             var context = this.getContext();
             if(context.sizeIsFixed!="undefined" && context.sizeIsFixed) return false;
             var SEARCH_ENGINE = 45;
-            $(this.listContainer).height($(this.listContainer).height() + SEARCH_ENGINE);
+            bb.jquery(this.listContainer).height(bb.jquery(this.listContainer).height() + SEARCH_ENGINE);
             context.sizeIsFixed = true;
             this.setContext(context);
         },
@@ -231,20 +231,20 @@
             var delta = (typeof delta=="number") ? delta : 0;
             
             /*tree wrappers*/
-            $.each(this.treeWrappers,function(i,treeWrapper){
-                var oldHeight = $(treeWrapper).height();
-                $(treeWrapper).height(oldHeight+delta);
+            bb.jquery.each(this.treeWrappers,function(i,treeWrapper){
+                var oldHeight = bb.jquery(treeWrapper).height();
+                bb.jquery(treeWrapper).height(oldHeight+delta);
             });
              
             /*update list's height*/
-            var prevListHeight = $(this.listContainer).height(); 
+            var prevListHeight = bb.jquery(this.listContainer).height(); 
             var listHeight = prevListHeight + delta;
-            $(this.listContainer).height(listHeight);
+            bb.jquery(this.listContainer).height(listHeight);
             
             /*update mainPanel's height*/
-            var prevMainPaneHeight = $(this.element).height();
+            var prevMainPaneHeight = bb.jquery(this.element).height();
             var mainPanelHeight = prevMainPaneHeight + delta;
-            $(this.element).height(mainPanelHeight);
+            bb.jquery(this.element).height(mainPanelHeight);
             return;
         },
         _getFiltersFromServiceResult: function (result) {
@@ -253,7 +253,7 @@
                 value:"all",
                 label : myself.i18n.all
             }];
-            $.each(result.result, function(index, type_statu) {
+            bb.jquery.each(result.result, function(index, type_statu) {
                 var filterObject = {};
                 filterObject["value"] = type_statu;
                 filterObject["label"] = index;
@@ -272,7 +272,7 @@
                 cacheTags: ["userSession"],
                 success: function(result) {
                     tf = myself._getFiltersFromServiceResult(result);
-                    var searchEngine = $(myself.element).find(myself.options.searchEngineContainerClass).eq(0).bbSearchEngine({
+                    var searchEngine = bb.jquery(myself.element).find(myself.options.searchEngineContainerClass).eq(0).bbSearchEngine({
                         defaultFilterTypes : tf,
                         onSearch:function(e,criteria){
                             //var criteria = self.searchEngine.getSearchCriteria();
@@ -297,7 +297,7 @@
             if ((site_uid) && (site_uid.length > 0)) {
                 
                 context.site = site_uid;
-                context.treeview = $(this.element).find('.bb5-windowpane-treewrapper-inner').jstree({   
+                context.treeview = bb.jquery(this.element).find('.bb5-windowpane-treewrapper-inner').jstree({   
                     plugins : [ 
                     'themes', 'rpc_data', 'ui', 'crrm' ,'types', 'html_data'
                     ],
@@ -345,8 +345,8 @@
                         }
                     }
                 }).bind('click.jstree', function (e) {
-                    if (($(e.target).parents('a:first').hasClass('jstree-clicked')) || ($(e.target).hasClass('jstree-clicked'))) {
-                        context.selected = $(context.treeview.jstree('get_selected')).attr('id').replace('node_','');
+                    if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
+                        context.selected = bb.jquery(context.treeview.jstree('get_selected')).attr('id').replace('node_','');
                         myself._initView({
                             site_uid: context.site, 
                             page_uid: context.selected
@@ -374,7 +374,7 @@
             
             if (context.treeview) {
                 context.treeview.jstree('destroy');
-                $(this.element).find(".bb5-windowpane-treewrapper-inner").empty();
+                bb.jquery(this.element).find(".bb5-windowpane-treewrapper-inner").empty();
                 this.setContext(context);
             }
         },
@@ -383,7 +383,7 @@
             var myself = this,
             context = this.getContext();
             if (input_params.site_uid) {
-                var order = $(this.element).find('.bb5-windowpane-main th[class*="headerSort"]');
+                var order = bb.jquery(this.element).find('.bb5-windowpane-main th[class*="headerSort"]');
                
                 var order_sort = '_title';
                 var order_dir = 'asc';
@@ -413,7 +413,7 @@
                     }
                 };
                 
-                var successCallback = $.proxy(this._populateView,this); //this,page_uid,site_uid
+                var successCallback = bb.jquery.proxy(this._populateView,this); //this,page_uid,site_uid
                 myself._initPager(pagerParams,successCallback);
                 this.setContext(context);
                 return;
@@ -428,18 +428,18 @@
             var context = this.getContext();
             if(context.pagePager){
                 /*update pager info*/
-                $(context.pagePager).bbUtilsPager("updatePostParams",pagerParams);
+                bb.jquery(context.pagePager).bbUtilsPager("updatePostParams",pagerParams);
             }
             else{
                 var pagerService = bb.webserviceManager.getInstance('ws_local_page');
-                var pagerCtn = $(this.element).find(this.options.pagerContainerClass).get(0);
+                var pagerCtn = bb.jquery(this.element).find(this.options.pagerContainerClass).get(0);
                 
                 //console.log('toto', pagerCtn);
-                context.pagePager = $(pagerCtn).bbUtilsPager({
+                context.pagePager = bb.jquery(pagerCtn).bbUtilsPager({
                     maxPerPageSelector : 5,
                     postParams: pagerParams,
                     onSelect:  function(){
-                        $(myself.element).find(".bb5-windowpane-main").mask(bb.i18n.loading);
+                        bb.jquery(myself.element).find(".bb5-windowpane-main").mask(bb.i18n.loading);
                         return;
                     },
                     dataWebserviceParams :{
@@ -455,28 +455,28 @@
         
         _populateView : function(response, mainobject){ 
             /*vider caption --> vider results*/
-            $(this.element).find('bb5-windowpane-main-toolbar-caption').html('&nbsp');
-            $(this.listContainer).find("tbody").empty();
+            bb.jquery(this.element).find('bb5-windowpane-main-toolbar-caption').html('&nbsp');
+            bb.jquery(this.listContainer).find("tbody").empty();
             var context = this.getContext();
             var site_uid = context.site_uid || null;
             var page_uid = context.page_uid || null;
             var myself = this;
             if (!page_uid){
-                var selectedSite = $(myself.element).find('.bb5-available-sites option:selected');
+                var selectedSite = bb.jquery(myself.element).find('.bb5-available-sites option:selected');
                 var text = selectedSite.get(0).innerHTML;
-                $(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(text);
+                bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(text);
             }
             else{
                 var selectedNode = context.treeview.jstree('get_text', context.treeview.jstree('get_selected'));
-                $(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(context.treeview.jstree('get_text', context.treeview.jstree('get_selected'))); 
+                bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(context.treeview.jstree('get_text', context.treeview.jstree('get_selected'))); 
             }
-            var prevCaption = $(myself.element).find('.bb5-windowpane-main-toolbar-caption').get(0).innerHTML;
-            $(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(prevCaption+' - ' + response.result.numResults + ' ' + myself.i18n.pages);      
-            $.each(response.result.views, function(index, page) {
+            var prevCaption = bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').get(0).innerHTML;
+            bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(prevCaption+' - ' + response.result.numResults + ' ' + myself.i18n.pages);      
+            bb.jquery.each(response.result.views, function(index, page) {
                 myself.listContainer.find("tbody").eq(0).append(context.view.apply(page));
                            
                 //formating
-                var viewrow = $(myself.element).find('.bb5-windowpane-main table.bb5-table-data0x tbody tr:last');
+                var viewrow = bb.jquery(myself.element).find('.bb5-windowpane-main table.bb5-table-data0x tbody tr:last');
                 if (viewrow) {
                     viewrow.find('a').attr('href', page.url);
                     viewrow.data('page', page); 
@@ -488,15 +488,15 @@
         },
        
         _destroyView: function() {
-            $(this.element).find('.bb5-windowpane-main').empty();
+            bb.jquery(this.element).find('.bb5-windowpane-main').empty();
         },
         
         _mask: function() {
-            $(this.element).mask(bb.i18n.loading);
+            bb.jquery(this.element).mask(bb.i18n.loading);
         },
         
         _unmask: function() {
-            $(this.element).unmask();
+            bb.jquery(this.element).unmask();
         },
         
         setCallback: function(callback) {
@@ -509,28 +509,28 @@
         },
                 
         setContext: function(context) {
-            return $(this.element).data('context', $.extend($(this.element).data('context'), context));
+            return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
         
         getContext: function() {
-            return ( (typeof $(this.element).data('context') != 'undefined') ? $(this.element).data('context') : {} );
+            return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         },
         
         destroy: function(){
             var context = this.getContext();
             
-            $(this.element).find('.bb5-windowpane-tree').resizable('destroy');
+            bb.jquery(this.element).find('.bb5-windowpane-tree').resizable('destroy');
             
             this._destroyTree();
             this._destroyView();
-            $(this.element).empty();
+            bb.jquery(this.element).empty();
             
             context.site = null;
             context.selected = null;
             context.view = null;
-            $.Widget.prototype.destroy.apply(this, arguments);
+            bb.jquery.Widget.prototype.destroy.apply(this, arguments);
             
             this.setContext(context);
         }
     })
-})(jQuery);
+})(bb.jquery);

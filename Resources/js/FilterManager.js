@@ -1,3 +1,5 @@
+(function($) {
+
 var FilterManager = function(data,onCompleteCallback){
                 
     this._queriesInfos = {
@@ -12,13 +14,13 @@ var FilterManager = function(data,onCompleteCallback){
     /*permet de construire une fonction qui sera ensuite exécutée*/
     this._buildCriterion = function(field, operator, value, link){
         var availableLinks = ["and","or","none"];
-        var link = ($.inArray(link,availableLinks)) ? link : "and";
+        var link = (bb.jquery.inArray(link,availableLinks)) ? link : "and";
                      
         var operator = (operator=="=") ? "==" : operator;
                              
         /* special filter IN and [Regexp [contains, endWith, beginWith]] */
         var specialOperators = ["IN","contains","beginsWith","endsWith"];
-        var operatorIsSpecial = ($.inArray(operator,specialOperators)!=-1)? true : false;
+        var operatorIsSpecial = (bb.jquery.inArray(operator,specialOperators)!=-1)? true : false;
         if(!operatorIsSpecial){
             var searchMethod = new Function("item","return item['"+field+"']"+operator+" '"+value+"';");
         }else{
@@ -26,13 +28,13 @@ var FilterManager = function(data,onCompleteCallback){
             if(operator.toUpperCase()==="IN"){
                 var value = (Utils.isArray(value)) ? value: [value]; 
                 var searchMethod = function(item){
-                    return ($.inArray(item[field],value)!= -1);
+                    return (bb.jquery.inArray(item[field],value)!= -1);
                 }  
             }
                         
             /*regex operators*/
             var regexpOperator = ["CONTAINS","BEGINSWITH","ENDSWITH"];
-            if($.inArray(operator.toUpperCase(),regexpOperator)!=-1){
+            if(bb.jquery.inArray(operator.toUpperCase(),regexpOperator)!=-1){
                 /*beginsWith*/
                 var regexp = "";
                 if(operator.toUpperCase()=="CONTAINS"){
@@ -82,7 +84,7 @@ var FilterManager = function(data,onCompleteCallback){
         var orderCriterion = {};
         orderCriterion.field = field || "";
         var availableOrders = ["ASC","DESC"];
-        orderCriterion.order = ($.inArray(order.toUpperCase(),availableOrders)) ? order.toUpperCase() : "ASC";
+        orderCriterion.order = (bb.jquery.inArray(order.toUpperCase(),availableOrders)) ? order.toUpperCase() : "ASC";
                  
         /*order fonction*/
         orderCriterion.filter = function(a,b){       
@@ -114,7 +116,7 @@ var FilterManager = function(data,onCompleteCallback){
         var self = this;
         var searchData = this._data; 
         /*criteria*/
-        $.each(this._queriesInfos.criteria,function(i,criterion){
+        bb.jquery.each(this._queriesInfos.criteria,function(i,criterion){
                         
             var linkType = criterion.link;
                         
@@ -124,7 +126,7 @@ var FilterManager = function(data,onCompleteCallback){
                     tempResult = [];  
                 }
             }
-            $.each(searchData,function(i,item){
+            bb.jquery.each(searchData,function(i,item){
                 var checker = criterion.searchMethod;
                 if(checker(item)) tempResult.push(item); 
             }); 
@@ -140,3 +142,5 @@ var FilterManager = function(data,onCompleteCallback){
                 
                 
 } 
+
+}) (bb.jquery);

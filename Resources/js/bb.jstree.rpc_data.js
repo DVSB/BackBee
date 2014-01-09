@@ -1,5 +1,5 @@
 (function ($) {
-    $.jstree.plugin("rpc_data", {
+    bb.jquery.jstree.plugin("rpc_data", {
         __init : function() {
             var s = this._get_settings().rpc_data;
             if(s.progressive_unload) {
@@ -36,13 +36,13 @@
             _is_loaded: function (obj) {
                 var s = this._get_settings().rpc_data;
                 obj = this._get_node(obj);
-                return obj == -1 || !obj || (!s.ajax && !s.progressive_render && !$.isFunction(s.data)) || obj.is(".jstree-open, .jstree-leaf") || obj.children("ul").children("li").length > 0;
+                return obj == -1 || !obj || (!s.ajax && !s.progressive_render && !bb.jquery.isFunction(s.data)) || obj.is(".jstree-open, .jstree-leaf") || obj.children("ul").children("li").length > 0;
             },
 
             refresh: function (obj) {
                 obj = this._get_node(obj);
                 var s = this._get_settings().rpc_data;
-                if(obj && obj !== -1 && s.progressive_unload && ($.isFunction(s.data) || !!s.ajax)) {
+                if(obj && obj !== -1 && s.progressive_unload && (bb.jquery.isFunction(s.data) || !!s.ajax)) {
                     obj.removeData("jstree_children");
                 }
                 return this.__call_old();
@@ -89,8 +89,8 @@
                     case (!s.data && !s.ajax):
                         throw "Neither data nor ajax settings supplied.";
                     // function option added here for easier model integration (also supporting async - see callback)
-                    case ($.isFunction(s.data)):
-                        s.data.call(this, obj, $.proxy(function (d) {
+                    case (bb.jquery.isFunction(s.data)):
+                        s.data.call(this, obj, bb.jquery.proxy(function (d) {
                             d = this._parse_json(d, obj);
                             if (!d) {
                                 if (obj === -1 || !obj) {
@@ -163,7 +163,7 @@
                             if (sf) {
                                 d = sf.call(myself,d,t,x) || d;
                             }
-                            if (d === "" || (d && d.toString && d.toString().replace(/^[\s\n]+$/,"") === "") || (!$.isArray(d) && !$.isPlainObject(d))) {
+                            if (d === "" || (d && d.toString && d.toString().replace(/^[\s\n]+$/,"") === "") || (!bb.jquery.isArray(d) && !bb.jquery.isPlainObject(d))) {
                                 return error_func.call(myself, x, t, "");
                             }
                             d = myself._parse_json(d.result, obj);
@@ -200,7 +200,7 @@
                         };
                         s.ajax.error = error_func;
                         s.ajax.success = success_func;
-                        if ($.isFunction(s.ajax.data)) {
+                        if (bb.jquery.isFunction(s.ajax.data)) {
                             s.ajax.data = s.ajax.data.call(this, obj);
                         }
 
@@ -231,8 +231,8 @@
                 if (s.progressive_unload && obj && obj !== -1) {
                     obj.data("jstree_children", d);
                 }
-                if ($.isArray(js)) {
-                    d = $();
+                if (bb.jquery.isArray(js)) {
+                    d = bb.jquery();
                     if (!js.length) {
                         return false;
                     }
@@ -249,7 +249,7 @@
                     if (!js.data && js.data !== "") {
                         return d;
                     }
-                    d = $("<li />");
+                    d = bb.jquery("<li />");
                     if (js.attr) {
                         d.attr(js.attr);
                     }
@@ -259,14 +259,14 @@
                     if (js.state) {
                         d.addClass("jstree-" + js.state);
                     }
-                    if (!$.isArray(js.data)) {
+                    if (!bb.jquery.isArray(js.data)) {
                         tmp = js.data;
                         js.data = [];
                         js.data.push(tmp);
                     }
-                    $.each(js.data, function (i, m) {
-                        tmp = $("<a />");
-                        if ($.isFunction(m)) {
+                    bb.jquery.each(js.data, function (i, m) {
+                        tmp = bb.jquery("<a />");
+                        if (bb.jquery.isFunction(m)) {
                             m = m.call(this, js);
                         }
                         if (typeof m == "string") {
@@ -306,10 +306,10 @@
                                 if (s.progressive_unload) {
                                     d.data("jstree_children", js.children);
                                 }
-                                if ($.isArray(js.children) && js.children.length) {
+                                if (bb.jquery.isArray(js.children) && js.children.length) {
                                     tmp = this._parse_json(js.children, obj, true);
                                     if (tmp.length) {
-                                            ul2 = $("<ul />");
+                                            ul2 = bb.jquery("<ul />");
                                             ul2.append(tmp);
                                             d.append(ul2);
                                     }
@@ -318,7 +318,7 @@
                     }
                 }
                 if (!is_callback) {
-                    ul1 = $("<ul />");
+                    ul1 = bb.jquery("<ul />");
                     ul1.append(d);
                     d = ul1;
                 }
@@ -334,17 +334,17 @@
                 if (!obj || obj === -1) {
                     obj = this.get_container().find("> ul > li");
                 }
-                li_attr = $.isArray(li_attr) ? li_attr : [ "id", "class" ];
+                li_attr = bb.jquery.isArray(li_attr) ? li_attr : [ "id", "class" ];
                 if (!is_callback && this.data.types) {
                     li_attr.push(s.types.type_attr);
                 }
-                a_attr = $.isArray(a_attr) ? a_attr : [ ];
+                a_attr = bb.jquery.isArray(a_attr) ? a_attr : [ ];
 
                 obj.each(function () {
-                    li = $(this);
+                    li = bb.jquery(this);
                     tmp1 = { data : [] };
                     if (li_attr.length) { tmp1.attr = { }; }
-                    $.each(li_attr, function (i, v) {
+                    bb.jquery.each(li_attr, function (i, v) {
                         tmp2 = li.attr(v);
                         if (tmp2 && tmp2.length && tmp2.replace(/jstree[^ ]*/ig,'').length) {
                             tmp1.attr[v] = (" " + tmp2).replace(/ jstree[^ ]*/ig,'').replace(/\s+$/ig," ").replace(/^ /,"").replace(/ $/,"");
@@ -355,16 +355,16 @@
                     if (li.data()) { tmp1.metadata = li.data(); }
                     a = li.children("a");
                     a.each(function () {
-                        t = $(this);
+                        t = bb.jquery(this);
                         if (
                             a_attr.length ||
-                            $.inArray("languages", s.plugins) !== -1 ||
+                            bb.jquery.inArray("languages", s.plugins) !== -1 ||
                             t.children("ins").get(0).style.backgroundImage.length ||
                             (t.children("ins").get(0).className && t.children("ins").get(0).className.replace(/jstree[^ ]*|$/ig,'').length)
                         ) {
                             lang = false;
-                            if($.inArray("languages", s.plugins) !== -1 && $.isArray(s.languages) && s.languages.length) {
-                                $.each(s.languages, function (l, lv) {
+                            if(bb.jquery.inArray("languages", s.plugins) !== -1 && bb.jquery.isArray(s.languages) && s.languages.length) {
+                                bb.jquery.each(s.languages, function (l, lv) {
                                     if(t.hasClass(lv)) {
                                         lang = lv;
                                         return false;
@@ -372,11 +372,11 @@
                                 });
                             }
                             tmp2 = {attr: { }, title: _this.get_text(t, lang)};
-                            $.each(a_attr, function (k, z) {
+                            bb.jquery.each(a_attr, function (k, z) {
                                 tmp2.attr[z] = (" " + (t.attr(z) || "")).replace(/ jstree[^ ]*/ig,'').replace(/\s+$/ig," ").replace(/^ /,"").replace(/ $/,"");
                             });
-                            if ($.inArray("languages", s.plugins) !== -1 && $.isArray(s.languages) && s.languages.length) {
-                                $.each(s.languages, function (k, z) {
+                            if (bb.jquery.inArray("languages", s.plugins) !== -1 && bb.jquery.isArray(s.languages) && s.languages.length) {
+                                bb.jquery.each(s.languages, function (k, z) {
                                     if(t.hasClass(z)) { tmp2.language = z; return true; }
                                 });
                             }
@@ -405,5 +405,5 @@
             }
         }
     });
-})(jQuery);
+})(bb.jquery);
 //*/
