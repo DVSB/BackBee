@@ -34,7 +34,7 @@ bb.ContentManager =(function($,gExport){
         CONTENT_RENDER_TYPE : "data-rendermode",
         CONTENT_MAXENTRY_KEY :"data-maxentry",
         ITEM_UID_KEY : "data-uid",
-        emptyFileDropImg: "/ressources/img/filedrop.png"
+        emptyFileDropImg: "ressources/img/filedrop.png"
     };
     
     var _enableContentSelection = false;
