@@ -64,10 +64,10 @@ class IndexationListener
 
         if ($uow->isScheduledForInsert($content) || $uow->isScheduledForUpdate($content)) {
             if (null !== $site = $application->getSite()) {
-                if (null !== $content->getMainNode()) {
+ //               if (null !== $content->getMainNode()) {
                     $em->getRepository('BackBuilder\ClassContent\Indexation')
                             ->updateIdxSiteContent($site, $content);
-                }
+ //               }
             }
 
 

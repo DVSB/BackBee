@@ -7,6 +7,8 @@
  */
 var BB4 = (BB4) ? BB4 : {};
 
+(function($) {
+
 BB4.LayoutManager = (function(){
     var _layoutsContainer = [];
     var _currentLayout = false;
@@ -32,7 +34,7 @@ BB4.LayoutManager = (function(){
     
     var _init = function(userSettings){
         _context.enableGrid = (DbManager.init("BB4").get("enableLayoutGrid"))?DbManager.init("BB4").get("enableLayoutGrid"):false;  
-        $.extend(true,_settings,userSettings);
+        bb.jquery.extend(true,_settings,userSettings);
         _initDialogs();
         _bindEvents();
         _load();
@@ -55,7 +57,7 @@ BB4.LayoutManager = (function(){
                 modal: true
             }
         });
-        popupDialog.registerDialogType("propertiesLayout", $("#bb5-zonelayout-properties").html());
+        popupDialog.registerDialogType("propertiesLayout", bb.jquery("#bb5-zonelayout-properties").html());
         _propDialog = popupDialog.create("propertiesLayout",{
             title: bb.i18n.__('layoutmanager.properties'),
             buttons:{
@@ -70,13 +72,13 @@ BB4.LayoutManager = (function(){
                                 _defaultClassContent: _currentLayout._defaultClassContent
                             };
 
-                            _currentLayout._mainZone = (0 < $(this).find('#bb5-zonelayout-property-ismainzone:checked').length);
+                            _currentLayout._mainZone = (0 < bb.jquery(this).find('#bb5-zonelayout-property-ismainzone:checked').length);
                             _currentLayout._accept = [];
-                            $.each($(this).find('#bb5-zonelayout-property-accept option:selected'), function(index, option) {
+                            bb.jquery.each(bb.jquery(this).find('#bb5-zonelayout-property-accept option:selected'), function(index, option) {
                                 _currentLayout._accept.push(option.value);
                             });
-                            _currentLayout._maxentry = $(this).find('#bb5-zonelayout-property-maxentry').val();
-                            _currentLayout._defaultClassContent = $(this).find('#bb5-zonelayout-property-defaultcontent').val() || null;
+                            _currentLayout._maxentry = bb.jquery(this).find('#bb5-zonelayout-property-maxentry').val();
+                            _currentLayout._defaultClassContent = bb.jquery(this).find('#bb5-zonelayout-property-defaultcontent').val() || null;
 
                             if (currentParams._mainZone != _currentLayout._mainZone
                                 || currentParams._accept != _currentLayout._accept.join('|')
@@ -86,14 +88,14 @@ BB4.LayoutManager = (function(){
                             }
                         }
 
-                        $(this).dialog("close");
+                        bb.jquery(this).dialog("close");
                         return;
                     }
                 },
                 "Cancel": {
                     text: bb.i18n.__('popupmanager.button.cancel'),
                     click: function(a){
-                        $(this).dialog("close");
+                        bb.jquery(this).dialog("close");
                         return false;
                     }
                 }
@@ -101,30 +103,30 @@ BB4.LayoutManager = (function(){
         });
 		
         _propDialog.on('open', function() {
-            if (!_currentLayout) $(this.dialog).dialog('close');
+            if (!_currentLayout) bb.jquery(this.dialog).dialog('close');
 			
-            $(this.dialog).find('#bb5-zonelayout-property-ismainzone').removeAttr('checked');
-            $(this.dialog).find('#bb5-zonelayout-property-accept option').removeAttr('selected');
-            $(this.dialog).find('#bb5-zonelayout-property-maxentry').val('');
-            $(this.dialog).find('#bb5-zonelayout-property-defaultcontent option').removeAttr('selected');
+            bb.jquery(this.dialog).find('#bb5-zonelayout-property-ismainzone').removeAttr('checked');
+            bb.jquery(this.dialog).find('#bb5-zonelayout-property-accept option').removeAttr('selected');
+            bb.jquery(this.dialog).find('#bb5-zonelayout-property-maxentry').val('');
+            bb.jquery(this.dialog).find('#bb5-zonelayout-property-defaultcontent option').removeAttr('selected');
 			
             if (_currentLayout._mainZone)
-                $(this.dialog).find('#bb5-zonelayout-property-ismainzone').attr('checked', 'checked');
+                bb.jquery(this.dialog).find('#bb5-zonelayout-property-ismainzone').attr('checked', 'checked');
 			
             if (0 == _currentLayout._accept.length) {
-                $(this.dialog).find('#bb5-zonelayout-property-accept option').first().attr('selected', 'selected');
+                bb.jquery(this.dialog).find('#bb5-zonelayout-property-accept option').first().attr('selected', 'selected');
             } else {
                 for(var i=0; i<_currentLayout._accept.length; i++) {
-                    $(this.dialog).find('#bb5-zonelayout-property-accept option[value="'+_currentLayout._accept[i].replace('\\', '\\\\')+'"]').attr('selected', 'selected');
+                    bb.jquery(this.dialog).find('#bb5-zonelayout-property-accept option[value="'+_currentLayout._accept[i].replace('\\', '\\\\')+'"]').attr('selected', 'selected');
                 }
             }
 			
-            $(this.dialog).find('#bb5-zonelayout-property-maxentry').val(_currentLayout._maxentry);
+            bb.jquery(this.dialog).find('#bb5-zonelayout-property-maxentry').val(_currentLayout._maxentry);
 			
             if( null == _currentLayout._defaultClassContent)
-                $(this.dialog).find('#bb5-zonelayout-property-defaultcontent option').first().attr('selected', 'selected');
+                bb.jquery(this.dialog).find('#bb5-zonelayout-property-defaultcontent option').first().attr('selected', 'selected');
             else {
-                $(this.dialog).find('#bb5-zonelayout-property-defaultcontent option[value="'+_currentLayout._defaultClassContent.replace('\\', '\\\\')+'"]').attr('selected', 'selected');
+                bb.jquery(this.dialog).find('#bb5-zonelayout-property-defaultcontent option[value="'+_currentLayout._defaultClassContent.replace('\\', '\\\\')+'"]').attr('selected', 'selected');
             }
         });
     };
@@ -168,29 +170,29 @@ BB4.LayoutManager = (function(){
     };
     
     var _bindEvents = function(){
-        $(document).bind("layout:sizeChanged",$.proxy(_initLayoutResizable));
-        $(document).bind("layout:ItemDeleted",$.proxy(_initLayoutResizable));
+        bb.jquery(document).bind("layout:sizeChanged",bb.jquery.proxy(_initLayoutResizable));
+        bb.jquery(document).bind("layout:ItemDeleted",bb.jquery.proxy(_initLayoutResizable));
         
         /*click on Layout Item*/
-        $(_settings.layoutClass).die().live("click",function(e){
+        bb.jquery(_settings.layoutClass).die().live("click",function(e){
             if(!_enable) return false;
-            var selectedLayout = _findLayoutById($(e.currentTarget).attr("id"));
+            var selectedLayout = _findLayoutById(bb.jquery(e.currentTarget).attr("id"));
             return _selectLayout(selectedLayout);
         });
         
         /*Click elsewhere*/
-        $(document).bind("click",function(e){
-            if(!$(e.currentTarget).hasClass("bb5-resizableLayout")){
-                var keepSelected = (0 < $(e.target).parents().filter('#bbWrapper, .bb5-dialog-wrapper').length);
-                $.each(_settings.actionsBtnClass,function(i,className){
-                    if($(e.target).hasClass(className)){
+        bb.jquery(document).bind("click",function(e){
+            if(!bb.jquery(e.currentTarget).hasClass("bb5-resizableLayout")){
+                var keepSelected = (0 < bb.jquery(e.target).parents().filter('#bbWrapper, .bb5-dialog-wrapper').length);
+                bb.jquery.each(_settings.actionsBtnClass,function(i,className){
+                    if(bb.jquery(e.target).hasClass(className)){
                         keepSelected = true;
                         return;
                     }
                 });                 
                 if(!keepSelected && _currentLayout){
                     _currentLayout.unSelect();
-                    $("."+_settings.layoutActionCls).remove();
+                    bb.jquery("."+_settings.layoutActionCls).remove();
                 } 
             }  
         });
@@ -201,24 +203,24 @@ BB4.LayoutManager = (function(){
     var _showZoneActions = function(selectZone){
     
         /*remove previous action*/
-        $(".bb5-layoutActionContainer").remove();
-        var actionCtn = $('<div class="bb5-ui bb5-content-actions bb5-layoutActionContainer">'
+        bb.jquery(".bb5-layoutActionContainer").remove();
+        var actionCtn = bb.jquery('<div class="bb5-ui bb5-content-actions bb5-layoutActionContainer">'
             +'<button class="bb5-button bb5-ico-parameter bb5-button-square bb5-invert" title="'+bb.i18n.__('layoutmanager.properties')+'"></button>'
             +'<button class="bb5-button bb5-ico-del bb5-button-square bb5-invert" title="'+bb.i18n.__('popupmanager.button.remove')+'"></button>'
             +'</div>').clone();
     
         /*bind event here*/
-        $(actionCtn).find(".bb5-ico-parameter").unbind().bind("click",function(e){
+        bb.jquery(actionCtn).find(".bb5-ico-parameter").unbind().bind("click",function(e){
             selectZone.layoutManager.editZoneProperties();
             return;
         });
     
-        $(actionCtn).find(".bb5-ico-del").unbind().bind("click",function(e){
+        bb.jquery(actionCtn).find(".bb5-ico-del").unbind().bind("click",function(e){
             selectZone.layoutManager.removeLayout();
             return;
         });
         /*add to zone*/
-        $(actionCtn).appendTo($(selectZone._layout));
+        bb.jquery(actionCtn).appendTo(bb.jquery(selectZone._layout));
     }
 
 
@@ -244,7 +246,7 @@ BB4.LayoutManager = (function(){
     };
    
     var _saveLayoutStructure = function(){
-        var savedLayout = _walkThrough($(_settings.defaultContainer));
+        var savedLayout = _walkThrough(bb.jquery(_settings.defaultContainer));
         _currentTemplate.templateLayouts = savedLayout;
         _currentTemplate.gridSize = _settings.gridSize;
         _currentTemplate.isModified = false;
@@ -256,15 +258,15 @@ BB4.LayoutManager = (function(){
      */
     var _walkThroughTree = function(node,data,isRoot){
         var data = data || [];
-        var nodeList = $(node).children(_settings.layoutClass);
+        var nodeList = bb.jquery(node).children(_settings.layoutClass);
     
-        $.each(nodeList,function(i,layout){
+        bb.jquery.each(nodeList,function(i,layout){
             var nodeInfo = {};
-            nodeInfo.id = $(layout).attr("id");
+            nodeInfo.id = bb.jquery(layout).attr("id");
             if(isRoot==true){
                 nodeInfo.type = "rootChild";  
             }else{
-                nodeInfo.type = ($(layout).hasClass("vChild"))?"vChild":"hChild"; 
+                nodeInfo.type = (bb.jquery(layout).hasClass("vChild"))?"vChild":"hChild"; 
             }
             nodeInfo.layoutSettings = _findLayoutById(nodeInfo.id).serialize(); 
             nodeInfo.children = _walkThrough(layout,[]);
@@ -273,7 +275,7 @@ BB4.LayoutManager = (function(){
  
         if(isRoot==true){
             var rootNode = {};
-            rootNode.id = $(node).attr("id");
+            rootNode.id = bb.jquery(node).attr("id");
             rootNode.type = "root";
             rootNode.children = data;
             return rootNode;
@@ -286,15 +288,15 @@ BB4.LayoutManager = (function(){
         var data = []; 
         var buildFromDom = buildFromDom || false;
         var _walkThroughRec = function(rootNode){
-            var nodeList = $(rootNode).children(_settings.layoutClass);
+            var nodeList = bb.jquery(rootNode).children(_settings.layoutClass);
             if(nodeList.length>0){
                 
-                var parentId = $(rootNode).attr("id");
+                var parentId = bb.jquery(rootNode).attr("id");
                 parentId = parentId || _generateId();
-                $(rootNode).attr("id",parentId);
+                bb.jquery(rootNode).attr("id",parentId);
 
-                $.each(nodeList,function(i,layoutNode){
-                    var id = $(layoutNode).attr("id");
+                bb.jquery.each(nodeList,function(i,layoutNode){
+                    var id = bb.jquery(layoutNode).attr("id");
                     var cpt = i+1;
                     if(!buildFromDom){
                         var serializedLayout = _findLayoutById(id).serialize();
@@ -302,19 +304,20 @@ BB4.LayoutManager = (function(){
                     }
                     else{
                         id = id || _generateId();
-                        $(layoutNode).attr("id",id);
-                        var sizePattern = /span.*/gi;
-                        var classes = $(layoutNode).attr("class");
-                        var currentSize = parseInt(sizePattern.exec(classes)[0].replace("span",""));
+                        bb.jquery(layoutNode).attr("id",id);
+                        var sizePattern = /col-md-.*/gi;
+                        console.log(sizePattern);
+                        var classes = bb.jquery(layoutNode).attr("class");
+                        var currentSize = parseInt(sizePattern.exec(classes)[0].replace("col-md-",""));
                         
                         var layoutNodeInfo = {};
                         layoutNodeInfo.id = id;
-                        layoutNodeInfo.title = ( $(layoutNode).attr("title") && $(layoutNode).attr("title").length > 0)? $(layoutNode).attr("title") :_generateId("zone"); 
+                        layoutNodeInfo.title = ( bb.jquery(layoutNode).attr("title") && bb.jquery(layoutNode).attr("title").length > 0)? bb.jquery(layoutNode).attr("title") :_generateId("zone"); 
                         layoutNodeInfo.position = "none";
                         layoutNodeInfo.gridSize = currentSize;
                         layoutNodeInfo.target = "#"+parentId;
-                        layoutNodeInfo.alphaClass = ($(layoutNode).hasClass("alpha")) ? "alpha" : "";
-                        layoutNodeInfo.omegaClass = ($(layoutNode).hasClass("omega")) ? "omega" : "";
+                        layoutNodeInfo.alphaClass = (bb.jquery(layoutNode).hasClass("alpha")) ? "alpha" : "";
+                        layoutNodeInfo.omegaClass = (bb.jquery(layoutNode).hasClass("omega")) ? "omega" : "";
 						
                         layoutNodeInfo.mainZone = layoutNode._mainZone;
                         layoutNodeInfo.accept = layoutNode._accept;
@@ -322,22 +325,22 @@ BB4.LayoutManager = (function(){
                         layoutNodeInfo.dafault = layoutNode._defaultClassContent;
                       
                         /*------------------------------Hchild------------------------------*/
-                        if($(layoutNode).hasClass("hChild")){
-                            var hSibling = $(rootNode).children(".hChild").not(layoutNode);
+                        if(bb.jquery(layoutNode).hasClass("hChild")){
+                            var hSibling = bb.jquery(rootNode).children(".hChild").not(layoutNode);
                             layoutNodeInfo.typeClass = "hChild";
                             layoutNodeInfo.clearAfter = 1;
                             layoutNodeInfo.resizable = false;
                             layoutNodeInfo.height = "computed";// enfant horizontal half-parent size
                             if(hSibling){
-                                var siblingId = $(hSibling).attr("id") || _generateId();
-                                $(hSibling).attr(id,"id");
+                                var siblingId = bb.jquery(hSibling).attr("id") || _generateId();
+                                bb.jquery(hSibling).attr(id,"id");
                                 layoutNodeInfo.hSibling = siblingId;
                             }
                         }
                         
                         /*------------------------------VChild------------------------------*/
-                        if($(layoutNode).hasClass("vChild")){
-                            if($(layoutNode).hasClass("omega")){
+                        if(bb.jquery(layoutNode).hasClass("vChild")){
+                            if(bb.jquery(layoutNode).hasClass("omega")){
                                 layoutNodeInfo.clearAfter = 1;
                                 layoutNodeInfo.typeClass = "vChild";
                             } 
@@ -347,7 +350,7 @@ BB4.LayoutManager = (function(){
                     }
                 });
                 
-                $.each(nodeList,function(i,layoutNode){
+                bb.jquery.each(nodeList,function(i,layoutNode){
                     _walkThroughRec(layoutNode);
                 });
             }
@@ -363,7 +366,7 @@ BB4.LayoutManager = (function(){
         if(path.length==0) return layoutsOnPath;
         for(i; i>=0;i--){
             var node = path[i];
-            var layoutItem = _findLayoutById($(node).attr("id"));
+            var layoutItem = _findLayoutById(bb.jquery(node).attr("id"));
             layoutsOnPath.push(layoutItem);
         }
         return layoutsOnPath;
@@ -373,12 +376,12 @@ BB4.LayoutManager = (function(){
     var _notify = function(eventName, eventData){
         var eventKey = "layout:"+eventName;
         var eventData = eventData || false;
-        $(document).trigger(eventKey,[eventData]);
+        bb.jquery(document).trigger(eventKey,[eventData]);
     };
     
     var _getLayoutInfos = function(){
         var container = [];
-        $.each(_layoutsContainer,function(i,layoutItem){
+        bb.jquery.each(_layoutsContainer,function(i,layoutItem){
             if(!layoutItem._isDeleted){
                 container.push(layoutItem.toJson());
             } 
@@ -410,7 +413,7 @@ BB4.LayoutManager = (function(){
     
     var _drawAll = function(){
         /*use layoutItems*/
-        $.each(_layoutsContainer, function(i,layout){
+        bb.jquery.each(_layoutsContainer, function(i,layout){
             layout.create();
         });          
         _initLayoutResizable();
@@ -424,8 +427,8 @@ BB4.LayoutManager = (function(){
         if(!layoutStructure) return false;
         /*reset container*/
         _layoutsContainer = [];
-        $(_settings.defaultContainer).html("");
-        $.each(layoutStructure,function(i,nodeConfig){
+        bb.jquery(_settings.defaultContainer).html("");
+        bb.jquery.each(layoutStructure,function(i,nodeConfig){
             _createLayout(nodeConfig);
         });
         _drawAll();
@@ -433,11 +436,11 @@ BB4.LayoutManager = (function(){
     
     /*initResizable*/
     var _initLayoutResizable = function(){
-        $.each(_layoutsContainer,function(i,layout){
+        bb.jquery.each(_layoutsContainer,function(i,layout){
             var handles = [];
             
             if(layout.getChildType() == "vChild"){
-                $(layout._layout).removeClass("alpha omega");
+                bb.jquery(layout._layout).removeClass("alpha omega");
                 var isAvChild = true;
             }
             
@@ -454,19 +457,19 @@ BB4.LayoutManager = (function(){
             if(isAvChild){
                  
                 if(!hasSiblings.hasRightSibling){
-                    $(layout._layout).addClass("omega");//last one
+                    bb.jquery(layout._layout).addClass("omega");//last one
                     delete(layout._settings.alphaClass);
-                    if(!$(layout._layout).next().hasClass("clear")){
-                        $(layout._layout).after("<div class='clear'></div>");
+                    if(!bb.jquery(layout._layout).next().hasClass("clear")){
+                        bb.jquery(layout._layout).after("<div class='clear'></div>");
                     }
                 }
                 if(!hasSiblings.hasLeftSibling){
-                    $(layout._layout).addClass("alpha");
+                    bb.jquery(layout._layout).addClass("alpha");
                     delete(layout._settings.omegaClass);
                 } 
             }
             
-            var layoutHasTarget =(layout.getTarget().length > 0)? $(layout.getTarget()).attr("id"):false;
+            var layoutHasTarget =(layout.getTarget().length > 0)? bb.jquery(layout.getTarget()).attr("id"):false;
             if(!layoutHasTarget){
                 if(layout.getParent()){
 
@@ -486,7 +489,7 @@ BB4.LayoutManager = (function(){
         
         /*met à jour les infos des layouts avec des nouvelles*/
         var layoutInfos = _getLayoutInfos();
-        $(document).trigger("LayoutManager:layoutsDraw",[layoutInfos]);
+        bb.jquery(document).trigger("LayoutManager:layoutsDraw",[layoutInfos]);
     };
     
     var _addLayout = function(layout){
@@ -496,7 +499,7 @@ BB4.LayoutManager = (function(){
     
     var _findLayoutById = function(IdToFind){
         var result = false;
-        $.each(_layoutsContainer,function(i,layout){
+        bb.jquery.each(_layoutsContainer,function(i,layout){
             if(layout.getId() == IdToFind){
                 result =layout;
                 return false;
@@ -526,18 +529,18 @@ BB4.LayoutManager = (function(){
     };
   
     var _enableMng = function(){
-        //$(_settings.contentId).find('object').remove();
-        _cache = $(_settings.contentId).get(0).innerHTML; //fix a strange jQuery html() bug
-        $(_settings.contentId).empty().html('<div class="container"><div id="bb5-templateHeader" class="bb5-lockedLayout"></div><div class="row bb5-layout" id="bb5-mainLayoutRow" style="height:800px;"></div><div id="bb5-templateFooter" class="bb5-lockedLayout"></div></div>');
+        //bb.jquery(_settings.contentId).find('object').remove();
+        _cache = bb.jquery(_settings.contentId).get(0).innerHTML; //fix a strange jQuery html() bug
+        bb.jquery(_settings.contentId).empty().html('<div class="container"><div id="bb5-templateHeader" class="bb5-lockedLayout"></div><div class="row bb5-layout" id="bb5-mainLayoutRow" style="height:800px;"></div><div id="bb5-templateFooter" class="bb5-lockedLayout"></div></div>');
         if(_context.enableGrid){
-            $(_settings.contentId+' > div.container').css('background-image', 'url('+bb.baseurl+bb.resourcesdir+'img/grid.png)');
-            $(_settings.contentId+' > div.container').css('background-size', '100% 100%');
+            bb.jquery(_settings.contentId+' > div.container').css('background-image', 'url('+bb.baseurl+bb.resourcesdir+'img/grid.png)');
+            bb.jquery(_settings.contentId+' > div.container').css('background-size', '100% 100%');
             bb.ToolsbarManager.getTbInstance("layouttb").selectGridBtn();
         }
         
         /*header and footer*/
-        $(_settings.tplHeaderId).addClass("span"+_settings.gridSize);
-        $(_settings.tplFooterId).addClass("span"+_settings.gridSize);
+        bb.jquery(_settings.tplHeaderId).addClass("col-md-"+_settings.gridSize);
+        bb.jquery(_settings.tplFooterId).addClass("col-md-"+_settings.gridSize);
 		
         if (0 == _layoutsContainer.length) {
             var playGroundLayoutL = new BB4.LayoutItem({
@@ -560,12 +563,12 @@ BB4.LayoutManager = (function(){
     var _disableMng = function(){
         _reset(); 
         
-        $(_settings.contentId).get(0).innerHTML = _cache;
-        //$(_settings.contentId).css('background', '');
+        bb.jquery(_settings.contentId).get(0).innerHTML = _cache;
+        //bb.jquery(_settings.contentId).css('background', '');
         
-        $.each($(_settings.layoutClass),function(i,layout){
-            $(layout).removeClass(_settings.selectedLayoutClass);
-            $(layout).resizable("destroy");
+        bb.jquery.each(bb.jquery(_settings.layoutClass),function(i,layout){
+            bb.jquery(layout).removeClass(_settings.selectedLayoutClass);
+            bb.jquery(layout).resizable("destroy");
         });
         
         /*disable click on layout*/
@@ -586,7 +589,7 @@ BB4.LayoutManager = (function(){
                         text: bb.i18n.__('popupmanager.button.save'),
                         click : function(){
                             _notify('saveTemplate');
-                            $(this).dialog("close");
+                            bb.jquery(this).dialog("close");
                             return callback(arg);
                         }
                     },
@@ -597,13 +600,13 @@ BB4.LayoutManager = (function(){
                                 /* remove unsaved added template from carousel */
                                 _notify('removeTempTemplate');
                             }
-                            $(this).dialog("close");						
+                            bb.jquery(this).dialog("close");						
                             return callback(arg);
                         }
                     }
                 }
             });
-            $(popupDialog.dialog).html(bb.i18n.__('layoutmanager.dialog.save_modification'));
+            bb.jquery(popupDialog.dialog).html(bb.i18n.__('layoutmanager.dialog.save_modification'));
             popupDialog.show();
         } else {
             callback(arg);
@@ -624,7 +627,7 @@ BB4.LayoutManager = (function(){
             site : _settings.site
         };
 		
-        $.each(template.templateLayouts, function(index, layoutItem) {
+        bb.jquery.each(template.templateLayouts, function(index, layoutItem) {
             var _newLayoutItem = {};
             for(var i in layoutItem) {
                 _newLayoutItem[i] = layoutItem[i];
@@ -669,8 +672,8 @@ BB4.LayoutManager = (function(){
         editZoneProperties : _editZoneProperties,
         addLayout : _addLayout,
         unSelectAll : function(){
-            $(_settings.layoutClass).removeClass(_settings.selectedLayoutClass);
-            $('.bbLayoutButtons').hide();
+            bb.jquery(_settings.layoutClass).removeClass(_settings.selectedLayoutClass);
+            bb.jquery('.bbLayoutButtons').hide();
             _currentLayout = null;
             _notify("noneItemSelected");
         },
@@ -697,7 +700,7 @@ BB4.LayoutManager = (function(){
             var itemSize = layout._gridSize;
             var self = this;
             var layoutItems = [];
-            $.each(nbItems, function(){
+            bb.jquery.each(nbItems, function(){
                 var newLayoutId = _generateId();
                 var newlayouItemConfig = {
                     id:newLayoutId,
@@ -709,7 +712,7 @@ BB4.LayoutManager = (function(){
                     title : "",
                     clearAfter:1,
                     resizable : false,
-                    height :  $(layout._layout).height()/2 //half its parent's width  
+                    height :  bb.jquery(layout._layout).height()/2 //half its parent's width  
                 };
                 /*layoutChildrenInfos.childrenIDs.push("#"+newLayoutId);
                 layout._layoutChildrenInfos = layoutChildrenInfos;*/
@@ -740,14 +743,14 @@ BB4.LayoutManager = (function(){
                 gridSizes.push(Math.ceil(itemSize));
             }
             var self = this;
-            $.each(gridSizes, function(i,layoutSize){
+            bb.jquery.each(gridSizes, function(i,layoutSize){
                 var newLayoutId = _generateId();
                 var newlayouItemConfig = {
                     id:newLayoutId,
                     target:"#"+layout.getId(),
                     gridSize:layoutSize,
                     position : "after",
-                    height :  $(layout._layout).height()
+                    height :  bb.jquery(layout._layout).height()
                 };
                 var layoutParent = layout.getParent();
                 if(layoutParent){ /*si l'item a un parent --> fix addVertical by group*/
@@ -773,12 +776,12 @@ BB4.LayoutManager = (function(){
         getLayoutById : _findLayoutById,
         
         toggleGridbackground : function(btn){
-            if ($(btn).is(":checked")) {
-                $(_settings.contentId+' > div.container').css('background-image', 'url('+bb.baseurl+bb.resourcesdir+'img/grid.png)');
-                $(_settings.contentId+' > div.container').css('background-size', '100% 100%');
-                $(_settings.contentId+' > div.container').css('background-color', '#fff');
+            if (bb.jquery(btn).is(":checked")) {
+                bb.jquery(_settings.contentId+' > div.container').css('background-image', 'url('+bb.baseurl+bb.resourcesdir+'img/grid.png)');
+                bb.jquery(_settings.contentId+' > div.container').css('background-size', '100% 100%');
+                bb.jquery(_settings.contentId+' > div.container').css('background-color', '#fff');
             } else {
-                $(_settings.contentId+' > div.container').css('background', '');
+                bb.jquery(_settings.contentId+' > div.container').css('background', '');
             }
         }
         
@@ -841,7 +844,7 @@ LayoutItem = function(userConfig){
         useGridSize : true,
         gridSize : null,
         gridStep :80,
-        gridClassPrefix : "span",
+        gridClassPrefix : "col-md-",
         selectedClass : null
     };
     
@@ -853,8 +856,8 @@ LayoutItem = function(userConfig){
     
     if(typeof this._init!=="function"){
         this._init = function(userConfig){
-            this._settings = $.extend(true,this._settings,userConfig);
-            this._layout = _buildItem.call(this,$(_layoutTpl).clone());
+            this._settings = bb.jquery.extend(true,this._settings,userConfig);
+            this._layout = _buildItem.call(this,bb.jquery(_layoutTpl).clone());
             this._updateGrideSize();
 			
             this.layoutManager = this._settings.layoutManager;
@@ -889,18 +892,18 @@ LayoutItem = function(userConfig){
             var config = {
                 helper : "bb4-ui-resizable-helper",
                 grid :  this._settings.gridStep,
-                start: $.proxy(_onStart,this),
-                resize: $.proxy(_onResize,this),
-                stop : $.proxy(_onStop,this),
+                start: bb.jquery.proxy(_onStart,this),
+                resize: bb.jquery.proxy(_onResize,this),
+                stop : bb.jquery.proxy(_onStop,this),
                 minWidth : this._settings.gridSizeInfos.colWidth//taille d'une colonne,
             };
             
             if(this._settings.resizeContainment!="undefined"){
                 config.containment = this._settings.resizeContainment;
             }
-            $(this._layout).resizable("destroy");
-            config = $.extend(true, config,userConfig);             
-            $(this._layout).resizable(config);      
+            bb.jquery(this._layout).resizable("destroy");
+            config = bb.jquery.extend(true, config,userConfig);             
+            bb.jquery(this._layout).resizable(config);      
         }
     } 
     
@@ -922,7 +925,7 @@ LayoutItem = function(userConfig){
     /*onStop*/
     var _onStop = function(event,ui){
         _resizeDirection = (event.clientX < _currentmousePosition ) ? "left" : "right";
-        var width = $(event.target).width();
+        var width = bb.jquery(event.target).width();
         var delta = ui.originalSize.width - width; //ne pas dépasser la taille d'une colonne
         var step = delta /this._settings.gridStep;
         
@@ -975,23 +978,23 @@ LayoutItem = function(userConfig){
         /*reset*/
         _resizeDirection = null;
         _currentmousePosition = null;
-        $(ui.element).css({
+        bb.jquery(ui.element).css({
             width:"",
             left:""
         });
         
         /*update::notify change || update maxWidth*/
-        $(document).trigger("layout:sizeChanged");
+        bb.jquery(document).trigger("layout:sizeChanged");
     };
     
     
     var _buildItem = function(layoutTpl){  
-        $(layoutTpl).addClass(this._settings.layoutClass);
-        $(layoutTpl).addClass(this._settings.alphaClass);
-        $(layoutTpl).addClass(this._settings.omegaClass);
-        $(layoutTpl).addClass(this._settings.typeClass);
-        $(layoutTpl).attr("id",this._settings.id);        
-        $(layoutTpl).css({
+        bb.jquery(layoutTpl).addClass(this._settings.layoutClass);
+        bb.jquery(layoutTpl).addClass(this._settings.alphaClass);
+        bb.jquery(layoutTpl).addClass(this._settings.omegaClass);
+        bb.jquery(layoutTpl).addClass(this._settings.typeClass);
+        bb.jquery(layoutTpl).attr("id",this._settings.id);        
+        bb.jquery(layoutTpl).css({
             //minHeight: "200px",
             height : this._settings.height
         
@@ -1011,21 +1014,21 @@ LayoutItem = function(userConfig){
    
     /*Public API*/
     LayoutItem.prototype.isRemovable = function() {
-        return (false != this.getParent() || 0 < $(this._layout).siblings().length);
+        return (false != this.getParent() || 0 < bb.jquery(this._layout).siblings().length);
     };
 	
     LayoutItem.prototype.getId = function(){
-        return $(this._layout).attr("id");
+        return bb.jquery(this._layout).attr("id");
     };
 	
     LayoutItem.prototype.setGridSize = function(gridSize){
         if(gridSize){
             /*remove previous class*/
             if(this._gridSize){
-                $(this._layout).removeClass(this._settings.gridClassPrefix+parseInt(this._gridSize));
+                bb.jquery(this._layout).removeClass(this._settings.gridClassPrefix+parseInt(this._gridSize));
             }
             /*add new*/
-            $(this._layout).addClass(this._settings.gridClassPrefix+parseInt(gridSize));
+            bb.jquery(this._layout).addClass(this._settings.gridClassPrefix+parseInt(gridSize));
             this._gridSize = gridSize;
         }  
     };
@@ -1038,7 +1041,7 @@ LayoutItem = function(userConfig){
         var layoutHasParent = this.getParent() || false;
         var hChildren = this.getChildrenByType("hChild");
         var vChildren = this.getChildrenByType("vChild");
-        var allChildren = $.merge(hChildren,vChildren);
+        var allChildren = bb.jquery.merge(hChildren,vChildren);
         
         
         /*cas layout de premier niveau*/
@@ -1059,7 +1062,7 @@ LayoutItem = function(userConfig){
                 var newGridSize = layoutParent._gridSize;
                 this.setGridSize(newGridSize);
                 if(allChildren){
-                    $.each(allChildren,function(i,child){
+                    bb.jquery.each(allChildren,function(i,child){
                         child.decrementGridSize(step,true);
                     });
                 }
@@ -1068,13 +1071,13 @@ LayoutItem = function(userConfig){
              * fix limit
              **/
             if(childType=="vChild"){
-                if($(this._layout).hasClass("omega")){
+                if(bb.jquery(this._layout).hasClass("omega")){
                     var newGridSize = this._gridSize - step;
                     this.setGridSize(newGridSize);
                     /*Décrément limit si après resize l'item omega a une taille < à une colonne*/
                     /*ne traiter que les enfants*/
                     if(allChildren){
-                        $.each(allChildren,function(i,child){
+                        bb.jquery.each(allChildren,function(i,child){
                             child.decrementGridSize(step,true);
                         });
                     }
@@ -1084,10 +1087,10 @@ LayoutItem = function(userConfig){
         
         /* var hChildren = this.getChildrenByType("hChild");
         var vChildren = this.getChildrenByType("vChild");
-        var allChildren = $.merge(hChildren,vChildren);*/
+        var allChildren = bb.jquery.merge(hChildren,vChildren);*/
         
         if(allChildren && onlyChild==false){
-            $.each(allChildren,function(i,child){
+            bb.jquery.each(allChildren,function(i,child){
                 child.decrementGridSize(step,true);
             });
         }
@@ -1105,7 +1108,7 @@ LayoutItem = function(userConfig){
         /*current Item immediate children*/
         var hChildren = this.getChildrenByType("hChild");
         var vChildren = this.getChildrenByType("vChild");
-        var allChildren = $.merge(hChildren,vChildren);
+        var allChildren = bb.jquery.merge(hChildren,vChildren);
         
         if(!onlyChild){
             var newGridSize = this._gridSize + step;
@@ -1121,7 +1124,7 @@ LayoutItem = function(userConfig){
                 var newGridSize = layoutParent._gridSize;
                 this.setGridSize(newGridSize);
                 if(allChildren){
-                    $.each(allChildren,function(i,child){
+                    bb.jquery.each(allChildren,function(i,child){
                         child.incrementGridSize(step,true);
                     });
                 }
@@ -1132,12 +1135,12 @@ LayoutItem = function(userConfig){
              * fix limit
              **/
             if(childType=="vChild"){
-                if($(this._layout).hasClass("omega")){
+                if(bb.jquery(this._layout).hasClass("omega")){
                     var newGridSize = this._gridSize + step;
                     this.setGridSize(newGridSize);
                     /*ne traiter que les enfants*/
                     if(allChildren){
-                        $.each(allChildren,function(i,child){
+                        bb.jquery.each(allChildren,function(i,child){
                             child.incrementGridSize(step,true);
                         });
                     }
@@ -1146,7 +1149,7 @@ LayoutItem = function(userConfig){
         }
         
         if(allChildren && onlyChild==false){
-            $.each(allChildren,function(i,child){
+            bb.jquery.each(allChildren,function(i,child){
                 child.incrementGridSize(step,true);
             });
         }
@@ -1155,10 +1158,10 @@ LayoutItem = function(userConfig){
     LayoutItem.prototype.getChildType = function(){
         /*available type : root->sansParent hChild vChild */
         var childType = "root";
-        if($(this._layout).hasClass("hChild")){
+        if(bb.jquery(this._layout).hasClass("hChild")){
             childType = "hChild";  
         }
-        if($(this._layout).hasClass("vChild")){
+        if(bb.jquery(this._layout).hasClass("vChild")){
             childType = "vChild";
         }
         return childType;   
@@ -1177,7 +1180,7 @@ LayoutItem = function(userConfig){
             this._title = myTitle;
             
             this._settings.title = this._title;
-            if(this._settings.showTitle) $(this._layout).find(".layoutTitle").eq(0).text(myTitle);
+            if(this._settings.showTitle) bb.jquery(this._layout).find(".layoutTitle").eq(0).text(myTitle);
         }
     };
     
@@ -1191,8 +1194,8 @@ LayoutItem = function(userConfig){
     };
     
     LayoutItem.prototype.serialize = function(){
-        var settings = $.extend(true, {}, this._settings);    
-        settings = $.extend(true, settings, {
+        var settings = bb.jquery.extend(true, {}, this._settings);    
+        settings = bb.jquery.extend(true, settings, {
             mainZone: this._mainZone,
             accept: this._accept,
             maxentry: this._maxentry,
@@ -1208,12 +1211,12 @@ LayoutItem = function(userConfig){
         
         if(this.getChildType()=="vChild"){
             
-            if($(this._layout).hasClass("omega")){
+            if(bb.jquery(this._layout).hasClass("omega")){
                 settings.clearAfter = 1;
                 settings.omegaClass = "omega";
             }
             
-            if($(this._layout).hasClass("alpha")){
+            if(bb.jquery(this._layout).hasClass("alpha")){
                 settings.alphaClass = "alpha"; 
             }      
         }
@@ -1234,7 +1237,7 @@ LayoutItem = function(userConfig){
         /*si hChild*/
         var hChildren = this.getChildrenByType("hChild");
         if(hChildren.length > 0){
-            $.each(hChildren,function(i, hChild){
+            bb.jquery.each(hChildren,function(i, hChild){
                 hChild.setHeight(childrenSize);
             }); 
         }
@@ -1249,12 +1252,12 @@ LayoutItem = function(userConfig){
     
     LayoutItem.prototype.getHeight = function(computedSize){
         var computedSize = computedSize || false;
-        var layoutHeight = (computedSize) ? $(this._layout).outerHeight() : $(this._layout).height(); 
+        var layoutHeight = (computedSize) ? bb.jquery(this._layout).outerHeight() : bb.jquery(this._layout).height(); 
         return layoutHeight;
     }
     
     LayoutItem.prototype.getWidth = function(computedSize){
-        var layoutWidth = (computedSize) ? $(this._layout).outerWidth() : $(this._layout).width(); 
+        var layoutWidth = (computedSize) ? bb.jquery(this._layout).outerWidth() : bb.jquery(this._layout).width(); 
         return layoutWidth;   
     }
    
@@ -1266,7 +1269,7 @@ LayoutItem = function(userConfig){
     
     LayoutItem.prototype.update = function(){
         /*update size*/
-        $(this._layout).css({
+        bb.jquery(this._layout).css({
             height : this._settings.layoutSize.height+"px",
             width : this._settings.layoutSize.width+"px"
         });
@@ -1274,7 +1277,7 @@ LayoutItem = function(userConfig){
     
     LayoutItem.prototype.getTarget = function(){
         var layoutTarget = this._settings.target || null;
-        layoutTarget = $(layoutTarget) || false;
+        layoutTarget = bb.jquery(layoutTarget) || false;
         return layoutTarget;
     }
     
@@ -1283,8 +1286,8 @@ LayoutItem = function(userConfig){
     }
     
     LayoutItem.prototype.select = function(){
-        $(this._layout).addClass(this._settings.selectedClass);
-        $(this._layout).children('.bbLayoutButtons').show();
+        bb.jquery(this._layout).addClass(this._settings.selectedClass);
+        bb.jquery(this._layout).children('.bbLayoutButtons').show();
     }
     
     LayoutItem.prototype.unSelect = function(){
@@ -1293,7 +1296,7 @@ LayoutItem = function(userConfig){
    
     LayoutItem.prototype.destroy = function(){
         this._isDeleted = true;
-        $(this._layout).remove();
+        bb.jquery(this._layout).remove();
     }
     
     LayoutItem.prototype.create = function(){
@@ -1301,19 +1304,19 @@ LayoutItem = function(userConfig){
         if(this._isRendered || this._isDeleted) return;
         var target = this.getTarget();
         if(this._settings.position=="after"){
-            $(this._layout).insertAfter($(target));
+            bb.jquery(this._layout).insertAfter(bb.jquery(target));
         }else{
-            $(target).append(this._layout);
+            bb.jquery(target).append(this._layout);
         }
         if(this._settings.clearAfter){
-            $(this._layout).after('<div class="clear"></div>');
+            bb.jquery(this._layout).after('<div class="clear"></div>');
         }
         
         /*update height -> main parent is root*/
         var itemType = this.getChildType();
         if(itemType=="root"){
             var parentHeight = target.height();
-            $(this._layout).css({
+            bb.jquery(this._layout).css({
                 height:parentHeight
             });
         }
@@ -1321,9 +1324,9 @@ LayoutItem = function(userConfig){
         /*update height -> hChild*/
         if(this._settings.height=="computed"){
             if(this._settings.typeClass=="hChild"){
-                var parentHeight = $(this._settings.target).height()/2;
+                var parentHeight = bb.jquery(this._settings.target).height()/2;
                 this._settings.height = parentHeight;  
-                $(this._layout).css({
+                bb.jquery(this._layout).css({
                     height:parentHeight
                 });
             }
@@ -1338,7 +1341,7 @@ LayoutItem = function(userConfig){
         /*Taille max si enfant*/
         var maxWidth = this.getWidth(); 
        
-        if($.isArray(handlesRegion)){
+        if(bb.jquery.isArray(handlesRegion)){
      
             if(handlesRegion[0]=="e"){
                 var nextLayout = this.getSibling("next");
@@ -1387,8 +1390,8 @@ LayoutItem = function(userConfig){
                 /*Enfants verticaux omega*/
                 var allOmegaChildren = [];
                 var smallestChild = 0;
-                $.each(hasChildren,function(i,child){
-                    if($(child._layout).hasClass("omega")){
+                bb.jquery.each(hasChildren,function(i,child){
+                    if(bb.jquery(child._layout).hasClass("omega")){
                         allOmegaChildren.push(child);
                     }
                 });
@@ -1396,7 +1399,7 @@ LayoutItem = function(userConfig){
                 /*Si enfants verticaux*/
                 if(allOmegaChildren){
                     var smallestChildWidth = allOmegaChildren[0].getWidth();
-                    $.each(allOmegaChildren,function(i,child){
+                    bb.jquery.each(allOmegaChildren,function(i,child){
                         smallestChildWidth = Math.min(smallestChildWidth,child.getWidth());
                     });
                     
@@ -1409,7 +1412,7 @@ LayoutItem = function(userConfig){
             /*fix classes for Vertical margin here*/
             var handlesRegion = handlesRegion.join(", ");
             //var minWidth = this.getMaxHChildWidth();
-            $(this._layout).resizable("destroy"); 
+            bb.jquery(this._layout).resizable("destroy"); 
             _initResizable.call(this,{
                 handles:handlesRegion,
                 maxWidth : maxWidth,
@@ -1426,8 +1429,8 @@ LayoutItem = function(userConfig){
             /*Enfants verticaux omega*/
             var allOmegaChildren = [];
             var smallestChild = 0;
-            $.each(hasChildren,function(i,child){
-                if($(child._layout).hasClass("omega")){
+            bb.jquery.each(hasChildren,function(i,child){
+                if(bb.jquery(child._layout).hasClass("omega")){
                     allOmegaChildren.push(child);
                 }
             });
@@ -1435,7 +1438,7 @@ LayoutItem = function(userConfig){
             /*Si enfants verticaux*/
             if(allOmegaChildren){
                 var smallestChildWidth = allOmegaChildren[0].getWidth();
-                $.each(allOmegaChildren,function(i,child){
+                bb.jquery.each(allOmegaChildren,function(i,child){
                     smallestChildWidth = Math.min(smallestChildWidth,child.getWidth());
                 });
             }
@@ -1454,15 +1457,15 @@ LayoutItem = function(userConfig){
     
     /*Récupérer le voisin immédiat dans le sens du déplacement*/
     LayoutItem.prototype.getSibling = function(direction){
-        var sibling = (direction=="next") ? $(this._layout).next("."+this._settings.layoutClass) : $(this._layout).prev("."+this._settings.layoutClass); 
+        var sibling = (direction=="next") ? bb.jquery(this._layout).next("."+this._settings.layoutClass) : bb.jquery(this._layout).prev("."+this._settings.layoutClass); 
         sibling = BB4.LayoutManager.getLayoutById(sibling.attr("id"));
         return sibling;
     }
     
     LayoutItem.prototype.hasSiblings = function(){
         var siblings = {};
-        var leftSibling = ($(this._layout).prev().hasClass(this._settings.layoutClass))? 1 : 0;
-        var rightSibling = ($(this._layout).next().hasClass(this._settings.layoutClass))? 1 : 0;
+        var leftSibling = (bb.jquery(this._layout).prev().hasClass(this._settings.layoutClass))? 1 : 0;
+        var rightSibling = (bb.jquery(this._layout).next().hasClass(this._settings.layoutClass))? 1 : 0;
         
         /*test*/ 
         siblings.hasLeftSibling = leftSibling;
@@ -1471,7 +1474,7 @@ LayoutItem = function(userConfig){
     }
     
     LayoutItem.prototype.getParent = function(){
-        var parentId = $(this._layout).parent("."+this._settings.layoutClass).attr("id");
+        var parentId = bb.jquery(this._layout).parent("."+this._settings.layoutClass).attr("id");
         var parent = BB4.LayoutManager.getLayoutById(parentId);
         return parent;
     }
@@ -1481,8 +1484,8 @@ LayoutItem = function(userConfig){
         var result = false;
         var childWidthMax = 0;
         if(this._layoutChildrenInfos && this._layoutChildrenInfos.childrenIDs){
-            $.each(this._layoutChildrenInfos.childrenIDs,function(i,id){
-                childWidthMax = Math.max(childWidthMax, $(id).width());
+            bb.jquery.each(this._layoutChildrenInfos.childrenIDs,function(i,id){
+                childWidthMax = Math.max(childWidthMax, bb.jquery(id).width());
             });
             result = childWidthMax;
         }
@@ -1493,7 +1496,7 @@ LayoutItem = function(userConfig){
         var children = [];
         var hChildren = this.getChildrenByType("hChild");
         var vChildren = this.getChildrenByType("vChild");
-        children = $.merge(hChildren,vChildren);
+        children = bb.jquery.merge(hChildren,vChildren);
         return children;
     } 
     
@@ -1508,16 +1511,16 @@ LayoutItem = function(userConfig){
         var selectorType = (!allChildren) ? " > " : " ";
         if(type=="vChild"){
             var selector = "#"+this.getId() + selectorType + ".vChild"; // fixme ne prendre que le dernier
-            children = $(selector); 
+            children = bb.jquery(selector); 
         }
         
         if(type=="hChild"){
             var selector = "#"+this.getId()+selectorType+".hChild"; // fixme ne prendre que le dernier
-            children = $(selector); 
+            children = bb.jquery(selector); 
         } 
        
-        $.each(children,function(i,layoutNode){
-            var child = BB4.LayoutManager.getLayoutById($(layoutNode).attr("id"));
+        bb.jquery.each(children,function(i,layoutNode){
+            var child = BB4.LayoutManager.getLayoutById(bb.jquery(layoutNode).attr("id"));
             if(child){
                 layoutChildren.push(child); 
             }
@@ -1527,10 +1530,10 @@ LayoutItem = function(userConfig){
     
     LayoutItem.prototype.highlight = function(delay){
         var delay = parseInt(delay) || 5;
-        $(this._layout).html("selected");
+        bb.jquery(this._layout).html("selected");
         var self = this;
         setTimeout(function(){
-            $(self._layout).html("");
+            bb.jquery(self._layout).html("");
         },delay*1000); 
     }
 
@@ -1560,7 +1563,7 @@ LayoutItem = function(userConfig){
         var sibling = (this._handlesRegion[0]=="w") ? this.getSibling("prev") : this.getSibling("next");
         
         if(currentLayoutType=="root"){
-            $(this._layout).remove(); //effacer du Dom
+            bb.jquery(this._layout).remove(); //effacer du Dom
             sibling.incrementGridSize(this._gridSize);
         }
         
@@ -1568,7 +1571,7 @@ LayoutItem = function(userConfig){
         if(layoutHasParent){
             /*vChild*/
             if(currentLayoutType=="vChild"){
-                $(this._layout).remove();
+                bb.jquery(this._layout).remove();
                 var hasSiblings = sibling.hasSiblings();
                 if(hasSiblings.hasLeftSibling==0 && hasSiblings.hasRightSibling==0){
                     /*last vertical child-->change to hChild*/
@@ -1580,7 +1583,7 @@ LayoutItem = function(userConfig){
             
             /*hChild*/
             if(currentLayoutType=="hChild"){
-                $(this._layout).remove(); 
+                bb.jquery(this._layout).remove(); 
                 var parentHeight = layoutHasParent.getHeight(); 
                 var currentHSibling = this.getHSibling();
                 if(currentHSibling.exists()){
@@ -1603,13 +1606,13 @@ LayoutItem = function(userConfig){
                 }
             }
         } 
-        $(document).trigger("layout:ItemDeleted");
+        bb.jquery(document).trigger("layout:ItemDeleted");
     }
     
     
     /*Chemin jusqu'au container*/  
     LayoutItem.prototype.getPath = function(){
-        var path = $(this._layout).parentsUntil(this._settings.defaultContainer);
+        var path = bb.jquery(this._layout).parentsUntil(this._settings.defaultContainer);
         return path;
     }
     
@@ -1617,15 +1620,15 @@ LayoutItem = function(userConfig){
         var childType = childType || "hChild";
         var content = null;
         if(childType=="vChild"){
-            if ($.isArray(layoutItem)){
+            if (bb.jquery.isArray(layoutItem)){
                 content = document.createDocumentFragment();
                 var self = this;
                 
-                $.each(layoutItem,function(i,layout){
+                bb.jquery.each(layoutItem,function(i,layout){
                     layout.setHeight(self.getHeight());
-                    var cloneLayout = $(layout._layout).clone();
+                    var cloneLayout = bb.jquery(layout._layout).clone();
                     layout._layout = cloneLayout;
-                    content.appendChild($(cloneLayout).get(0));
+                    content.appendChild(bb.jquery(cloneLayout).get(0));
                 });
             }
         }
@@ -1635,19 +1638,19 @@ LayoutItem = function(userConfig){
             content = layoutItem._layout.removeClass("omega").removeClass("alpha");
             /*changer hChild en vChild*/
             if(this.getParent()){
-                $(content).removeClass("hChild");
+                bb.jquery(content).removeClass("hChild");
                 layoutItem._settings.typeClass = "vChild";
-                $(content).addClass("vChild");
+                bb.jquery(content).addClass("vChild");
                 
-                if($(this._layout).hasClass("omega")){
-                    $(content).addClass("omega"); 
+                if(bb.jquery(this._layout).hasClass("omega")){
+                    bb.jquery(content).addClass("omega"); 
                 }
-                if($(this._layout).hasClass("alpha")){
-                    $(content).addClass("alpha");   
+                if(bb.jquery(this._layout).hasClass("alpha")){
+                    bb.jquery(content).addClass("alpha");   
                 }
             }else{
-                $(content).removeClass("hChild");  
-                $(content).removeClass("alpha").removeClass("omega");
+                bb.jquery(content).removeClass("hChild");  
+                bb.jquery(content).removeClass("alpha").removeClass("omega");
             }
             
             layoutItem._settings.resizable = true;
@@ -1657,7 +1660,7 @@ LayoutItem = function(userConfig){
         /*transformer le parent
          *En fonction du type de layoutItem
          **/
-        $(this._layout).replaceWith($(content));
+        bb.jquery(this._layout).replaceWith(bb.jquery(content));
         this.destroy();
     }
     
@@ -1676,7 +1679,7 @@ LayoutItem = function(userConfig){
             sibling = hChildType[0];
             sibling._hSibling = this;
         }
-        $(this._layout).removeClass("vChild").addClass("hChild").removeClass("alpha").removeClass("omega").addClass("alpha omega");
+        bb.jquery(this._layout).removeClass("vChild").addClass("hChild").removeClass("alpha").removeClass("omega").addClass("alpha omega");
         this._settings.typeClass = "hChild";
         this._settings.resizable = false;
         this._hSibling = sibling;
@@ -1688,17 +1691,19 @@ LayoutItem = function(userConfig){
     
     /*still in the DOM*/
     LayoutItem.prototype.exists = function(){
-        var exist = ( $("#"+this.getId()).length ==0 ) ? false : true;
+        var exist = ( bb.jquery("#"+this.getId()).length ==0 ) ? false : true;
         return exist;
     };
     
     /**/
     LayoutItem.prototype.disableResize = function(){
-        $(this._layout).resizable("destroy"); 
+        bb.jquery(this._layout).resizable("destroy"); 
     };
 	
     this._init(userConfig);    
 }
+
+}) (bb.jquery);
 
 BB4.LayoutItem = LayoutItem;
 

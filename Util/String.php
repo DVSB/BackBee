@@ -150,7 +150,7 @@ class String
                     'lengthlimit' => 250
                 ));
 
-        $str = str_replace(array('%', '€', '“', '”', '…'), array('percent', 'euro', '"', '"', '...'), $str);
+        $str = str_replace(array('®', '%', '€', '“', '”', '…'), array('', 'percent', 'euro', '"', '"', '...'), $str);
         $str = preg_replace($options['separators'], ' ', $str);
         return strtolower(preg_replace('/[-]+/', '-', self::toPath($str, $options, $charset)));
     }

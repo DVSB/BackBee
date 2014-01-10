@@ -51,31 +51,31 @@ bb.frontApplication = (function($,gExport){
     var _toggleEditMode = function(editMode){
         _removeEditMode();
         var key = editMode+"Cls"||false;
-        if(key) $(_settings.siteWrapperId).addClass(_settings.editModeInfos[key]);
+        if(key) bb.jquery(_settings.siteWrapperId).addClass(_settings.editModeInfos[key]);
     }
                     
     var _removeEditMode = function(){
-        $(_settings.siteWrapperId).removeClass(_settings.editModeInfos.contentCls).removeClass(_settings.editModeInfos.blockCls);
+        bb.jquery(_settings.siteWrapperId).removeClass(_settings.editModeInfos.contentCls).removeClass(_settings.editModeInfos.blockCls);
     }
                     
     
     var _init = function(userConfig){
         
         /*give a chance to other to change lauching settings before app init*/
-        $(document).trigger("application:init",{
+        bb.jquery(document).trigger("application:init",{
             settings : userConfig
         });        
-        $.extend(true,_settings,userConfig);	
+        bb.jquery.extend(true,_settings,userConfig);	
         
         return new function(){
             this._init = function(){
-                _settings.siteId = $(_settings.toolbarId).attr('data-site');
-                _settings.layoutId = $(_settings.toolbarId).attr('data-layout');
-                _settings.pageId = $(_settings.toolbarId).attr('data-page');
+                _settings.siteId = bb.jquery(_settings.toolbarId).attr('data-site');
+                _settings.layoutId = bb.jquery(_settings.toolbarId).attr('data-layout');
+                _settings.pageId = bb.jquery(_settings.toolbarId).attr('data-page');
                 _settings.dbName = (typeof _settings.dbName=="string") ? _settings.dbName : "BB4";
-                _settings.breadcrumbIds = $(_settings.toolbarId).attr('data-breadcrumb').split('-');
+                _settings.breadcrumbIds = bb.jquery(_settings.toolbarId).attr('data-breadcrumb').split('-');
                 var availableTabs = [_settings.TAB_PROFILE,_settings.TAB_STRUCTURE,_settings.TAB_ZONING,_settings.TAB_USER,_settings.TAB_EDITION,_settings.TAB_EDITION_BLOCKS,_settings.TAB_EDITION_DATA,_settings.TAB_EDITION_PAGE,_settings.TAB_STATUS,_settings.TAB_BUNDLE];
-                if($.inArray(_settings.selectedTab,availableTabs)==-1){
+                if(bb.jquery.inArray(_settings.selectedTab,availableTabs)==-1){
                     _settings.selectedTab = _settings.TAB_EDITION_BLOCKS;
                 }
                 /*keep previous selected tab*/
@@ -91,7 +91,7 @@ bb.frontApplication = (function($,gExport){
                 this.contentManager = null;
                 this.layoutWebservice = null;
                 this.lessWebService = null;
-                if (document.location.hash && $.inArray(document.location.hash.replace('#', ''), availableTabs)) {
+                if (document.location.hash && bb.jquery.inArray(document.location.hash.replace('#', ''), availableTabs)) {
                     _settings.selectedTab = document.location.hash.replace('#', '');
                     document.location.hash = '';
                 }
@@ -100,7 +100,7 @@ bb.frontApplication = (function($,gExport){
                 bb.ManagersContainer.getInstance().register("GlobalParamsManager",this.publicApi);
                 this.tabManager = BB4.ToolsbarManager.init({
                     selectedTab:_settings.selectedTab, 
-                    onInit: $.proxy(this.onTabManagerInit,this)
+                    onInit: bb.jquery.proxy(this.onTabManagerInit,this)
                 });
                
                 /*dialogs*/
@@ -116,29 +116,29 @@ bb.frontApplication = (function($,gExport){
                         "OK": {
                             text: bb.i18n.__('popupmanager.button.ok'),
                             click: function(){
-                                $(this).dialog("close");
+                                bb.jquery(this).dialog("close");
                                 return;
                             }
                         }
                     }
                 });
-                bb.storedsitepadding = 1*$(_settings.siteWrapperId).css('padding-top').replace('px', '');
-                $(_settings.toolbarId).show();
-                $(_settings.siteWrapperId).css('padding-top', (3 + bb.storedsitepadding + 1*$(_settings.toolbarId).css('height').replace('px', '')) + 'px');
+                bb.storedsitepadding = 1*bb.jquery(_settings.siteWrapperId).css('padding-top').replace('px', '');
+                bb.jquery(_settings.toolbarId).show();
+                bb.jquery(_settings.siteWrapperId).css('padding-top', (3 + bb.storedsitepadding + 1*bb.jquery(_settings.toolbarId).css('height').replace('px', '')) + 'px');
 				
-                $.each($('*'), function(index, element) {
-                    if ('fixed' == $(element).css('position')) {
-                        var top = $(element).css('top');
+                bb.jquery.each(bb.jquery('*'), function(index, element) {
+                    if ('fixed' == bb.jquery(element).css('position')) {
+                        var top = bb.jquery(element).css('top');
                         if ('auto' != top && element.id != 'bb5-toolbar-wrapper') {
                             bb.fixedelements[bb.fixedelements.length] = element;
-                            $(element).css('top', (1*top.replace('px', '') + 3 + 1*$(_settings.toolbarId).css('height').replace('px', '')) + 'px');
+                            bb.jquery(element).css('top', (1*top.replace('px', '') + 3 + 1*bb.jquery(_settings.toolbarId).css('height').replace('px', '')) + 'px');
                         }
                     }
                 });
                 
-                $(_settings.userInfo).prepend(_settings.commonname ? _settings.commonname : _settings.username);
+                bb.jquery(_settings.userInfo).prepend(_settings.commonname ? _settings.commonname : _settings.username);
                 /*fix toolbars*/
-                $("#bb5-toolbar-wrapper").css("top","0px");
+                bb.jquery("#bb5-toolbar-wrapper").css("top","0px");
                 window.scrollTo(0,212);
                 bb.frontApplication = this.publicApi;
             };
@@ -179,9 +179,9 @@ bb.frontApplication = (function($,gExport){
                         });
                         
                         self.contentManager.disable();	
-                        $.each(response.result.contentList, function(index, classcontent) {
-                            $('#bb5-zonelayout-property-accept').append('<option value="'+classcontent.name+'">'+classcontent.label+'</option>');
-                            $('#bb5-zonelayout-property-defaultcontent').append('<option value="'+classcontent.name+'">'+classcontent.label+'</option>');
+                        bb.jquery.each(response.result.contentList, function(index, classcontent) {
+                            bb.jquery('#bb5-zonelayout-property-accept').append('<option value="'+classcontent.name+'">'+classcontent.label+'</option>');
+                            bb.jquery('#bb5-zonelayout-property-defaultcontent').append('<option value="'+classcontent.name+'">'+classcontent.label+'</option>');
                         });
                     },
                     error : function(response){
@@ -232,7 +232,7 @@ bb.frontApplication = (function($,gExport){
                         self.layoutToolsbar.setGridSize(gridInfos);
                     },
                     error :function(response){
-                        $(document).trigger("application:error", {
+                        bb.jquery(document).trigger("application:error", {
                             title: "An error occured", 
                             message: "Unable to load grid constants", 
                             error: response.error
@@ -272,8 +272,8 @@ bb.frontApplication = (function($,gExport){
                     gridSize : _settings.MAX_GRID_SIZE
                 }); */
                 /*header and footer*/
-                $(_settings.tplHeaderId).addClass("span"+_settings.MAX_GRID_SIZE);
-                $(_settings.tplFooterId).addClass("span"+_settings.MAX_GRID_SIZE);
+                bb.jquery(_settings.tplHeaderId).addClass("span"+_settings.MAX_GRID_SIZE);
+                bb.jquery(_settings.tplFooterId).addClass("span"+_settings.MAX_GRID_SIZE);
                 
             /*this.layoutManager.addLayout(playGroundLayoutL);
                 this.layoutManager.drawAll();*/
@@ -297,7 +297,7 @@ bb.frontApplication = (function($,gExport){
                     },
                     
                     error: function(response){
-                        $(document).trigger("application:error", {
+                        bb.jquery(document).trigger("application:error", {
                             title: "An error occured", 
                             message: "Unable to load layouts from website", 
                             error: response.error
@@ -314,7 +314,7 @@ bb.frontApplication = (function($,gExport){
                         self.layoutToolsbar.setTemplateModels(response.result); 
                     },
                     error : function(response){
-                        $(document).trigger("application:error", {
+                        bb.jquery(document).trigger("application:error", {
                             title: "An error occured", 
                             message: "Unable to load layout models", 
                             error: response.error
@@ -342,14 +342,14 @@ bb.frontApplication = (function($,gExport){
                 this._bindLayoutTbEvents(this.layoutToolsbar);
                 this._bindDialogsEvents();
                 this._bindContentTbEvents(this.contentsBlockTb);
-                $(document).bind("application:error", function(event, data) {
+                bb.jquery(document).bind("application:error", function(event, data) {
                     switch (typeof(data)) {
                         case 'string':
-                            $(self.alertDialog.dialog).html(data);
+                            bb.jquery(self.alertDialog.dialog).html(data);
                             break;
                         case 'object':
-                            if (data.title) $(self.alertDialog.dialog).dialog('option', 'title', data.title);
-                            if (data.message) $(self.alertDialog.dialog).html(data.message);
+                            if (data.title) bb.jquery(self.alertDialog.dialog).dialog('option', 'title', data.title);
+                            if (data.message) bb.jquery(self.alertDialog.dialog).html(data.message);
                             if ('object' == typeof(data.error)) {
                                 var detail = '<p class="error-detail"><strong>Error detail:</strong>';
                                 detail += '<br/><span>Type:</span>';
@@ -358,7 +358,7 @@ bb.frontApplication = (function($,gExport){
                                 detail += (data.error.code) ? data.error.code : 'undefined';
                                 detail += '<br/><span>Message:</span>';
                                 detail += (data.error.message) ? data.error.message : 'undefined';
-                                if (data.message) $(self.alertDialog.dialog).append(detail);
+                                if (data.message) bb.jquery(self.alertDialog.dialog).append(detail);
                             }
                             break;
                     }
@@ -366,67 +366,67 @@ bb.frontApplication = (function($,gExport){
                 });
 				
                 /*global Events*/
-                $(document).bind("layout:currentTemplateChange", function(event){
+                bb.jquery(document).bind("layout:currentTemplateChange", function(event){
                     self.layoutManager.getCurrentTemplate().isModified = true;
                 });
-                $(document).bind("layout:itemSelected",function(event,data){
+                bb.jquery(document).bind("layout:itemSelected",function(event,data){
                     self.layoutToolsbar.enableZoneProperties(data);
                 });
-                $(document).bind("layout:sizeChanged",function(event,data){
+                bb.jquery(document).bind("layout:sizeChanged",function(event,data){
                     self.layoutManager.trigger("currentTemplateChange");
                 });
-                $(document).bind("layout:noneItemSelected",function(event){
+                bb.jquery(document).bind("layout:noneItemSelected",function(event){
                     self.layoutToolsbar.disableZoneProperties();
                 });
-                $(document).bind("layout:itemDeleted",function(){
+                bb.jquery(document).bind("layout:itemDeleted",function(){
                     self.layoutManager.trigger("currentTemplateChange");
                 });
-                $(document).bind("layout:saveTemplate",function() {
+                bb.jquery(document).bind("layout:saveTemplate",function() {
                     self.layoutToolsbar.trigger('saveLayout');
                 });
-                $(document).bind("layout:removeTempTemplate",function() {
+                bb.jquery(document).bind("layout:removeTempTemplate",function() {
                     self.layoutToolsbar.removeTempTemplate();
                 });
 				
-               $(document).bind("content:ItemClicked",function(event,data){
+               bb.jquery(document).bind("content:ItemClicked",function(event,data){
                     self.tabManager.updateContentPath(data);
                 });
             
-                $(document).bind("content:toggleEditionMode", function(event, data){
+                bb.jquery(document).bind("content:toggleEditionMode", function(event, data){
                     self.contentEditionManager.toggleEditionMode(data);
                     self.contentManager.toggleEditionMode(data);
                 });
 				
                 /*content drag events*/
-                $(document).bind("content:startDrag",function(event,data){
+                bb.jquery(document).bind("content:startDrag",function(event,data){
                     self.contentEditionManager.disable();
                 });
         
-                $(document).bind("content:stopDrag",function(event,data){
+                bb.jquery(document).bind("content:stopDrag",function(event,data){
                     self.contentEditionManager.enable();
                 });
-                $(document).bind("content:overItem",function(event,data){
+                bb.jquery(document).bind("content:overItem",function(event,data){
                 
                     });
                 /*item deleted*/
-                $(document).bind("content:ItemDeleted",function(event,data){
+                bb.jquery(document).bind("content:ItemDeleted",function(event,data){
                     self.tabManager.hidePath();
                 });
             
                 /* clean emptyContent placeHolder*/
-                $(document).bind("content:newContentAdded",function(event,reciever,newContent,sender){
+                bb.jquery(document).bind("content:newContentAdded",function(event,reciever,newContent,sender){
                     self.contentEditionManager.cleanEmptyPlaceHolder(reciever,newContent,sender);
                     return;
                 });
 				
-                $(document).bind("tabItem:click",function(e,selectedTab,previousTab){                    
+                bb.jquery(document).bind("tabItem:click",function(e,selectedTab,previousTab){                    
                     /*save currentTab in localStorage*/
                     self.db.set("selectedTab", selectedTab);
                     
                     /*leaving Editing zone[content | blocks]*/
                     if((previousTab==_settings.TAB_EDITION_BLOCKS) || (previousTab==_settings.TAB_EDITION_DATA) ||  (previousTab==_settings.TAB_EDITION_PAGE)){
                         var subContents = [_settings.TAB_EDITION_BLOCKS,_settings.TAB_EDITION_DATA,_settings.TAB_EDITION_PAGE];
-                        if($.inArray(selectedTab,subContents)==-1){
+                        if(bb.jquery.inArray(selectedTab,subContents)==-1){
                             _removeEditMode();
                             bb.ContentWrapper.persist();
                         }
@@ -557,7 +557,7 @@ bb.frontApplication = (function($,gExport){
                             var tbManager = bb.ManagersContainer.getInstance().getManager("ToolsbarManager");
                             if (tbManager){
                                 selectedEditTab = tbManager.getSelectedEditTab();
-                                selectedEditTab = $(selectedEditTab.tabPanel).attr("id");
+                                selectedEditTab = bb.jquery(selectedEditTab.tabPanel).attr("id");
                             }
                             
                             if (self.editionTb) {
@@ -621,15 +621,15 @@ bb.frontApplication = (function($,gExport){
                 var self = this;
                 /*layoutEditorDialog:Save*/
                 this.layoutEditorDialog.on("save",function(){
-                    var templateName = $(this.dialog).find(".content").val().trim();
+                    var templateName = bb.jquery(this.dialog).find(".content").val().trim();
                     if(templateName.length==0){
-                        $(this).find(".content").css({
+                        bb.jquery(this).find(".content").css({
                             border: "1px solid red"
                         });
                         return false;
                     }
                     
-                    $(this.dialog).find(".content").val("");
+                    bb.jquery(this.dialog).find(".content").val("");
                     this.close();
                     self.layoutToolsbar.updateCurrentTemplateTitle(templateName);
                     self.layoutManager.setCurrentTemplateTitle(templateName);
@@ -637,26 +637,26 @@ bb.frontApplication = (function($,gExport){
                 
                 /*open*/
                 this.layoutEditorDialog.on("open",function(){
-                    $(this.dialog).find(".content").val(self.layoutManager.getCurrentTemplateTitle());
+                    bb.jquery(this.dialog).find(".content").val(self.layoutManager.getCurrentTemplateTitle());
                     return;
                 });
                 
                 /*zoneEditorDialog*/
                 this.zoneEditorDialog.on("open",function(){
-                    $(this.dialog).find(".content").css({
+                    bb.jquery(this.dialog).find(".content").css({
                         border:""
                     });
                     var currentLayout = self.layoutManager.getSelectedLayout() || false;
                     if(!currentLayout) return false;
-                    $(this.dialog).find(".content").val(currentLayout.getTitle());
+                    bb.jquery(this.dialog).find(".content").val(currentLayout.getTitle());
                 });
                 
                 this.zoneEditorDialog.on("save",function(){
-                    var zoneName = $(this.dialog).find(".content").val().trim(); 
+                    var zoneName = bb.jquery(this.dialog).find(".content").val().trim(); 
                     var currentLayout = self.layoutManager.getSelectedLayout() || false;
                     if(!currentLayout) return false;
                     if(zoneName.length==0) {
-                        $(this.dialog).find(".content").css({
+                        bb.jquery(this.dialog).find(".content").css({
                             border:"1px solid red"
                         });
                         return false;
@@ -703,7 +703,7 @@ bb.frontApplication = (function($,gExport){
                             self.layoutToolsbar.updateCurrentTemplateTitle(currentTemplateTitle);*/
                         },
                         error: function(response){
-                            $(document).trigger("application:error", {
+                            bb.jquery(document).trigger("application:error", {
                                 title: "An error occured", 
                                 message: "One or more pages use this layout, you have to previously remove them"
                             } );
@@ -716,7 +716,7 @@ bb.frontApplication = (function($,gExport){
                 });
                 
                 layoutToolsbar.on("editZoneName",function(){
-                    if ($('.bbBtn_smallSquare.editZoneName').hasClass('bbBtnDisabled')) return false;
+                    if (bb.jquery('.bbBtn_smallSquare.editZoneName').hasClass('bbBtnDisabled')) return false;
                     self.zoneEditorDialog.show();
                 });
                 
@@ -770,7 +770,7 @@ bb.frontApplication = (function($,gExport){
                 }); 
                 
                 layoutToolsbar.on("selectPath",function(e){
-                    var layoutPath = $(e.target);
+                    var layoutPath = bb.jquery(e.target);
                     var layoutId = layoutPath.attr("id").replace("path_","");
                     if(!layoutPath.hasClass("bbPath_kindActive")){
                         var layoutItem = self.layoutManager.getLayoutById(layoutId);
@@ -779,7 +779,7 @@ bb.frontApplication = (function($,gExport){
                 });
                 
                 layoutToolsbar.on("showGrid",function(e){
-                    var isSelected = ($(e.currentTarget).is(":checked"))?true:false;
+                    var isSelected = (bb.jquery(e.currentTarget).is(":checked"))?true:false;
                     self.db.set("enableLayoutGrid",isSelected);
                     self.layoutManager.toggleGridbackground(e.currentTarget);
                 });
@@ -798,7 +798,7 @@ bb.frontApplication = (function($,gExport){
                             less.refresh(true);
                             less.refresh(true);
                             var dateNow = new Date();
-                            $("#supraWrapper").css('background-image', 'url("/ressources/img/grid.png?d='+ dateNow.toString() +'")');
+                            bb.jquery("#supraWrapper").css('background-image', 'url("/ressources/img/grid.png?d='+ dateNow.toString() +'")');
                             
                         },
 
@@ -834,7 +834,7 @@ bb.frontApplication = (function($,gExport){
     return {
         init : _init
     };      
-})(jQuery,window);
+})(bb.jquery,window);
 
 
 

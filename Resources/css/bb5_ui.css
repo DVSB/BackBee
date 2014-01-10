@@ -714,7 +714,7 @@ body .bb5-dialog-wrapper .ui-dialog-buttonpane .ui-dialog-buttonset button {marg
 	body .bb5-dialog-search {}
 	body .bb5-dialog-search>.ui-widget-header>.ui-dialog-title:before {content:''; display:inline-block; width:15px; height:15px; vertical-align:text-top; margin:0 5px 0 0; background:url(../img/bb5-topmost-tools.png) no-repeat 0px -540px;}
 	/*Dialog -> authentification*/
-	body .bb5-dialog-wrapper .ui-dialog-content.bb5-dialog-authentication {background:transparent url(../img/bb5_logo_ico_m.png) no-repeat scroll 98% 69%; background-size:25% auto; text-align:left;}
+	body .bb5-dialog-wrapper .ui-dialog-content.bb5-dialog-authentication {background:transparent url(../img/bb5_logo_ico_m.png) no-repeat scroll 98% 69%; background-size:25% auto; text-align:left; margin-top: 0;}
 	body .bb5-dialog-wrapper .ui-dialog-content.bb5-dialog-authentication label {width:210px; line-height:18px;}
 	body .bb5-dialog-wrapper .ui-dialog-content.bb5-dialog-authentication input {float:right;}
 	body .bb5-dialog-authentication .bb5-alert {font-weight:bold; color:#E32611;} /*alert is red*/

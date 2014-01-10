@@ -1,6 +1,9 @@
 <script type="text/javascript" src="<?php echo $this->getUri('ressources/js/libs/jquery-1.7.2.min.js'); ?>"></script>
+<script type="text/javascript">
+    jq172 = jQuery.noConflict(true);
+    jQuery = $ = jq172;
+</script>
 <script type="text/javascript" src="<?php echo $this->getUri('ressources/js/bb.js'); ?>" id="bb5-scripts"></script>
-
 <!--handle custom script-->
 <?php
 $layoutScripts = $this->getParam("scripts");
@@ -62,9 +65,9 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
             <?php // BB5 MAINTABS ?>
             <div id="bb5-maintabs">
                 <ul class='bb5-tabs'>
-                    <li<?php if (false === $this->getApplication()->getSecurityContext()->isGranted('sudo')
+                    <li<?php if (false !== $this->getApplication()->getSecurityContext()->isGranted('sudo')
                 && false === $this->getApplication()->getSecurityContext()->isGranted('EDIT', new \BackBuilder\Site\Layout('*')))
-            echo ' style="display:none;"';
+            //echo ' style="display:none;"';
         ?>>
                         <a href='#bb5-grid' data-i18n="toolbar.templates.label">Gabarits</a>
                     </li>

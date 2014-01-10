@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-var ContentEditionManager = (function(){
+var ContentEditionManager = (function($){
     
     var _settings = {
         contentClass : ".bb5-content",
@@ -128,7 +128,7 @@ var ContentEditionManager = (function(){
          
             // var nodeData = _collectReceiverDatas(selectedNodeInfo.infos.contentEl);
             //console.log(nodeData);
-            //nodeData = $.extend(nodeData,selectedNodeInfo.infos);
+            //nodeData = bb.jquery.extend(nodeData,selectedNodeInfo.infos);
           
             var contentSelector = null;
             if(_context.contentSelector)
@@ -159,7 +159,7 @@ var ContentEditionManager = (function(){
                         content.contentPic = bb.baseurl+'ressources/img/contents/'+params.classname.replace('\\', '/')+'.png';
                         content.created = new Date(content.created.date+' '+content.created.timezone+' '+(content.created.timezone_type > 0 ? '+' : '')+content.created.timezone_type);
                         content.modified = new Date(content.modified.date+' '+content.modified.timezone+' '+(content.modified.timezone_type > 0 ? '+' : '')+content.modified.timezone_type);
-                        $(_contentInfosDialog.dialog).html($('<div class="bb5-dialog-info"><p class="bb5-dialog-visualclue-x"><i style="background-image:url('+content.contentPic+')"></i></p><div class="bb5-dialog-info-desc"><p><strong>'+content.properties.name+'</strong></p><p><em>'+bb.i18n.__('contentmanager.description')+'</em> <br>'+content.properties.description+'</p><p><em>'+bb.i18n.__('contentmanager.creation_date')+'</em> <br>'+content.created.format('d/m/Y H:i')+'</p><p><em>'+bb.i18n.__('contentmanager.modification_date')+'</em> <br>'+content.modified.format('d/m/Y H:i')+'</p><p><em>'+bb.i18n.__('contentmanager.revision_number')+'</em> <br>'+content.revision+'</p></div>'));
+                        bb.jquery(_contentInfosDialog.dialog).html(bb.jquery('<div class="bb5-dialog-info"><p class="bb5-dialog-visualclue-x"><i style="background-image:url('+content.contentPic+')"></i></p><div class="bb5-dialog-info-desc"><p><strong>'+content.properties.name+'</strong></p><p><em>'+bb.i18n.__('contentmanager.description')+'</em> <br>'+content.properties.description+'</p><p><em>'+bb.i18n.__('contentmanager.creation_date')+'</em> <br>'+content.created.format('d/m/Y H:i')+'</p><p><em>'+bb.i18n.__('contentmanager.modification_date')+'</em> <br>'+content.modified.format('d/m/Y H:i')+'</p><p><em>'+bb.i18n.__('contentmanager.revision_number')+'</em> <br>'+content.revision+'</p></div>'));
                         _contentInfosDialog.show();
                     }
                 },
@@ -210,7 +210,7 @@ var ContentEditionManager = (function(){
                     }
                 })
             }
-            _zoneLinksDialog.setContent($("<p>"+_messages.MSG_UNLINK_CONFIRM+"</p>"));
+            _zoneLinksDialog.setContent(bb.jquery("<p>"+_messages.MSG_UNLINK_CONFIRM+"</p>"));
             _zoneLinksDialog.setExtra({
                 action:"unlink",
                 callback:unlinkClosure
@@ -220,7 +220,7 @@ var ContentEditionManager = (function(){
         
         
         linkColToParent : function(nodeInfos){
-            _zoneLinksDialog.setContent($("<p>"+_messages.MSG_LINK_CONFIRM+"</p>"));
+            _zoneLinksDialog.setContent(bb.jquery("<p>"+_messages.MSG_LINK_CONFIRM+"</p>"));
         
             var linkClosure = function(){
                 var ws = bb.webserviceManager.getInstance('ws_local_classContent');
@@ -256,25 +256,25 @@ var ContentEditionManager = (function(){
     };
      
     var _handleNewRootContent = function(nodeInfos,response){
-        var scripts = $(response.result.render).find("script");
-        var nwZone = $(response.result.render).get(0);
-        nwZone = $(nwZone).clone();
-        $(nwZone).addClass(_settings.rootContentSetCls);
+        var scripts = bb.jquery(response.result.render).find("script");
+        var nwZone = bb.jquery(response.result.render).get(0);
+        nwZone = bb.jquery(nwZone).clone();
+        bb.jquery(nwZone).addClass(_settings.rootContentSetCls);
         /*clean new content here*/
-        $(nodeInfos.infos.contentEl).replaceWith(nwZone);
+        bb.jquery(nodeInfos.infos.contentEl).replaceWith(nwZone);
         if(scripts.length){
-            $(nwZone).append($(scripts));
+            bb.jquery(nwZone).append(bb.jquery(scripts));
         }
         var contentManager = bb.ManagersContainer.getInstance().getManager("ContentManager");
         /*Make is droppable or sortable etc*/
-        contentManager.handleNewContent($(nwZone)); 
-        _selectContent($(nwZone));
+        contentManager.handleNewContent(bb.jquery(nwZone)); 
+        _selectContent(bb.jquery(nwZone));
         _zoneLinksDialog.close();
     } 
      
     var _init = function(userConfig){
         var userConfig = userConfig || {};
-        $.extend({},_settings,userConfig);
+        bb.jquery.extend({},_settings,userConfig);
         var popupDialog = bb.PopupManager.init({});
         _paramsEditorPopup = popupDialog.create("contentParamsEditor",{
             title: bb.i18n.__('contentmanager.parameters'),
@@ -291,8 +291,8 @@ var ContentEditionManager = (function(){
 
                             /*deep extendDefaultParams*/
                             var result = {};
-                            $.each(content.get("param"),function(key,item){
-                                result[key] = $.extend(true,item,params[key]); 
+                            bb.jquery.each(content.get("param"),function(key,item){
+                                result[key] = bb.jquery.extend(true,item,params[key]); 
                             });
                             content.updateContentRender();
                         }
@@ -317,7 +317,7 @@ var ContentEditionManager = (function(){
             dialogType : popupDialog.dialogType.INFO,
             buttons: {
                 Fermer : function(){
-                    $(this).dialog('close');
+                    bb.jquery(this).dialog('close');
                 }
             }
         });
@@ -419,7 +419,7 @@ var ContentEditionManager = (function(){
      */
     var _getMainRootContainer = function(){
         if(_settings.mainRootContainer) return rootContainer;
-        var rootContainers = $("."+_settings.rootContentSetCls).eq(0);
+        var rootContainers = bb.jquery("."+_settings.rootContentSetCls).eq(0);
         if( rootContainers.length > 0 ){
             var rootContainer = rootContainers.parents(".row,.row-fluid").eq(0);
             _settings.mainRootContainer = rootContainer;
@@ -439,7 +439,7 @@ var ContentEditionManager = (function(){
                     click: function(){
                         var extraParams = _zoneLinksDialog.getExtra();
                         if(extraParams && typeof extraParams.callback=="function"){
-                            $(_zoneLinksDialog.dialogUi).mask(bb.i18n.loading);
+                            bb.jquery(_zoneLinksDialog.dialogUi).mask(bb.i18n.loading);
                             extraParams.callback();  
                         }
                         return;
@@ -456,7 +456,7 @@ var ContentEditionManager = (function(){
         });  
         
         _zoneLinksDialog.on("close",function(){
-            $(_zoneLinksDialog.dialogUi).unmask();
+            bb.jquery(_zoneLinksDialog.dialogUi).unmask();
         });
     }
     
@@ -496,7 +496,7 @@ var ContentEditionManager = (function(){
     //            params :currentContentInfos,
     //            success : function(response){
     //                var form = _buildParamsForm(response.result);
-    //                _paramsEditorPopup.setContent($(form));
+    //                _paramsEditorPopup.setContent(bb.jquery(form));
     //                _paramsEditorPopup.show();
     //            },
     //            error: function(){}
@@ -509,11 +509,11 @@ var ContentEditionManager = (function(){
     var _collectReceiverDatas = function(contentNode){
         var result = {};
         var attributesToCollect = ["data-uid","data-accept","data-type","data-rendermode","data-maxentry"];
-        $.each(attributesToCollect,function(i,attributesToCollect){
+        bb.jquery.each(attributesToCollect,function(i,attributesToCollect){
             var key = attributesToCollect.replace("data-","");
-            result[key] = $(contentNode).attr(attributesToCollect);
+            result[key] = bb.jquery(contentNode).attr(attributesToCollect);
         });
-        result["isAContentSet"] = ($(contentNode).hasClass(_settings.droppableItemClass.replace(".","")))?true:false;
+        result["isAContentSet"] = (bb.jquery(contentNode).hasClass(_settings.droppableItemClass.replace(".","")))?true:false;
         return result;
     }
    
@@ -521,7 +521,7 @@ var ContentEditionManager = (function(){
     var resizeStep = 0;
     
     var _createContentsSelector = function(){
-        _context.contentSelector = $('#bb5-dialog-content-selector').bbSelector({
+        _context.contentSelector = bb.jquery('#bb5-dialog-content-selector').bbSelector({
             popup: true,
             mediaSelector: false,
             modal: false,
@@ -533,24 +533,24 @@ var ContentEditionManager = (function(){
             draggable: false,
             //site: bb.frontApplication.getSiteUid(),
             callback: function(item) {
-                $('#bb5-dialog-content-selector').bbSelector('close');
+                bb.jquery('#bb5-dialog-content-selector').bbSelector('close');
             },
             
             close : function(){
-                var widget = $(_context.contentSelector).bbSelector("getWidget","bbContentsSelectorContainer");
-                $(widget).data()["bbContentSelector"].reset();
+                var widget = bb.jquery(_context.contentSelector).bbSelector("getWidget","bbContentsSelectorContainer");
+                bb.jquery(widget).data()["bbContentSelector"].reset();
             }
           
         }).bbSelector("getWidgetApi"); 
         
         
-        var widget = $(_context.contentSelector).bbSelector("getWidget","bbContentsSelectorContainer");
+        var widget = bb.jquery(_context.contentSelector).bbSelector("getWidget","bbContentsSelectorContainer");
         _context.contentSelectorWidget = widget;
-        $(_context.contentSelector).bind("bbcontentselectorselectcontent",function(event,data){
+        bb.jquery(_context.contentSelector).bind("bbcontentselectorselectcontent",function(event,data){
             var contents = [];
             /*clean contents here*/
-            $.each(data.selectedContent,function(key,contentNode){
-                contents.push($(contentNode).data("content"));
+            bb.jquery.each(data.selectedContent,function(key,contentNode){
+                contents.push(bb.jquery(contentNode).data("content"));
             });
             
             data.receiver.append({
@@ -568,7 +568,7 @@ var ContentEditionManager = (function(){
         _isEnable = true;
         _contextMenu.enable();
         
-        $("body").bind("click.blockEdit",function(){
+        bb.jquery("body").bind("click.blockEdit",function(){
             if(!_isEnable) return;
             _hideContextMenu();
             return true;            
@@ -577,12 +577,12 @@ var ContentEditionManager = (function(){
     
     
     var _disable = function(){      
-        $(_selectedContent).removeClass(_settings.selectedContentClass);
-        $(_settings.actionCtnClass).remove();
+        bb.jquery(_selectedContent).removeClass(_settings.selectedContentClass);
+        bb.jquery(_settings.actionCtnClass).remove();
         _contextMenu.disable();
         _selectedContent = false;
         _isEnable = false; 
-        $("body").unbind("click.blockEdit");
+        bb.jquery("body").unbind("click.blockEdit");
     }
     
     
@@ -590,11 +590,11 @@ var ContentEditionManager = (function(){
     /*setSelected content*/
     var _updateSelectedContent = function(content){
         if(_selectedContent){
-            $(_selectedContent).removeClass(_settings.selectedContentClass);
+            bb.jquery(_selectedContent).removeClass(_settings.selectedContentClass);
         }
         _selectedContent = (content) || false;
         if(_selectedContent){
-            $(_selectedContent).addClass(_settings.selectedContentClass);  
+            bb.jquery(_selectedContent).addClass(_settings.selectedContentClass);  
         }
         
     }
@@ -622,8 +622,8 @@ var ContentEditionManager = (function(){
    
     /*userfor*/
     var _getInfosFromNode = function(node){
-        var contentUid = $(node).attr("data-uid")||null;
-        var contentType = $(node).attr("data-type")||null;    
+        var contentUid = bb.jquery(node).attr("data-uid")||null;
+        var contentType = bb.jquery(node).attr("data-type")||null;    
         var _selectedNodeInfo = {};
             
         _selectedNodeInfo.infos = {
@@ -652,25 +652,25 @@ var ContentEditionManager = (function(){
     
     var _buildContentActions = function(filters){
         var filters = filters || [];
-        var btnsContainer = $("<div></div>").clone();
+        var btnsContainer = bb.jquery("<div></div>").clone();
         btnsContainer.addClass(_settings.actionCtnCls);
         
-        $.each(_availableBtns,function(key,btnConfig){
-            if($.inArray(key,filters) ==-1){
-                var btn = $("<button></button>").clone();
-                $(btn).addClass(btnConfig.btnClass).attr("title",btnConfig.btnTitle);
-                $(btn).attr("data-type",key);
-                $(btnsContainer).append($(btn));
+        bb.jquery.each(_availableBtns,function(key,btnConfig){
+            if(bb.jquery.inArray(key,filters) ==-1){
+                var btn = bb.jquery("<button></button>").clone();
+                bb.jquery(btn).addClass(btnConfig.btnClass).attr("title",btnConfig.btnTitle);
+                bb.jquery(btn).attr("data-type",key);
+                bb.jquery(btnsContainer).append(bb.jquery(btn));
             }
         });
         /*show plugins action here*/
-        $.each(_availablePluginsBtns,function(key,btnConfig){
-            if($.inArray(key,filters) ==-1){
-                var btn = $("<button/>").clone();
-                $(btn).addClass(btnConfig.btnClass).attr("title",btnConfig.btnTitle);
-                $(btn).attr("data-type",key);
-                $(btn).bind("click",btnConfig.btnCallback);
-                $(btnsContainer).prepend($(btn));
+        bb.jquery.each(_availablePluginsBtns,function(key,btnConfig){
+            if(bb.jquery.inArray(key,filters) ==-1){
+                var btn = bb.jquery("<button/>").clone();
+                bb.jquery(btn).addClass(btnConfig.btnClass).attr("title",btnConfig.btnTitle);
+                bb.jquery(btn).attr("data-type",key);
+                bb.jquery(btn).bind("click",btnConfig.btnCallback);
+                bb.jquery(btnsContainer).prepend(bb.jquery(btn));
             }
         });
         
@@ -680,10 +680,10 @@ var ContentEditionManager = (function(){
     /*put in a class */
     var _handleContentPluginActions = function(pluginActions){
       
-        var pluginActions = $.isArray(pluginActions) ? pluginActions : []; 
+        var pluginActions = bb.jquery.isArray(pluginActions) ? pluginActions : []; 
         var actionsContainer = {}; 
         
-        $.each(pluginActions,function(i,actionInfos){
+        bb.jquery.each(pluginActions,function(i,actionInfos){
             var btnClass = "bb5-button #cls# bb5-button-square bb5-invert";
             btnClass = btnClass.replace("#cls#",actionInfos.icoCls);
             var action = {
@@ -706,37 +706,37 @@ var ContentEditionManager = (function(){
     var _bindEvents = function(){
         var contentSelector = _settings.contentClass+',.'+_settings.rootContentSetCls;
         
-        $(contentSelector).live("mouseenter",function(e,userData){
+        bb.jquery(contentSelector).live("mouseenter",function(e,userData){
             if(!_isEnable) return true;
             e.stopImmediatePropagation();
             var currentTarget = e.currentTarget;
             /*removeallhoverclass*/
-            $(_settings.contentHoverClass).removeClass(_settings.contentHoverClass.replace(".",""));
+            bb.jquery(_settings.contentHoverClass).removeClass(_settings.contentHoverClass.replace(".",""));
             
             /*addHover for current*/
-            $(document).trigger("bbcontent:contentSelected",{
+            bb.jquery(document).trigger("bbcontent:contentSelected",{
                 selected : currentTarget
             });
-            $(currentTarget).addClass(_settings.contentHoverClass.replace(".",""));
-        /*if( $(".bb5-droppable-place").length){
-                $(".bb5-droppable-place").show();
+            bb.jquery(currentTarget).addClass(_settings.contentHoverClass.replace(".",""));
+        /*if( bb.jquery(".bb5-droppable-place").length){
+                bb.jquery(".bb5-droppable-place").show();
             }*/
         });
      
-        $(contentSelector).live("mouseleave",function(e){
+        bb.jquery(contentSelector).live("mouseleave",function(e){
             if(!_isEnable) return true;
-            var currentTarget = $(e.currentTarget);
-            var parentToSelect = $(currentTarget).parent(_settings.contentClass);
-            $(currentTarget).removeClass(_settings.contentHoverClass.replace(".",""));
+            var currentTarget = bb.jquery(e.currentTarget);
+            var parentToSelect = bb.jquery(currentTarget).parent(_settings.contentClass);
+            bb.jquery(currentTarget).removeClass(_settings.contentHoverClass.replace(".",""));
             if((parentToSelect) && parentToSelect.length!=0){
-                $(parentToSelect).trigger("mouseenter",{
+                bb.jquery(parentToSelect).trigger("mouseenter",{
                     userTrigger :true
                 });
             }
           
         });
            
-        $(contentSelector).live("click",function(e){
+        bb.jquery(contentSelector).live("click",function(e){
             if(!_isEnable) return true;
             e.stopPropagation();
             _hideContextMenu();
@@ -744,7 +744,7 @@ var ContentEditionManager = (function(){
             var bbContent = $bb(e.currentTarget);
             var currentContent = e.currentTarget;
             _selectContent(currentContent);
-          /*  $(document).trigger("bbcontent:clicked",{
+          /*  bb.jquery(document).trigger("bbcontent:clicked",{
                 content : bbContent
             });*/
             //_selectNodeContent(currentContent);
@@ -756,16 +756,16 @@ var ContentEditionManager = (function(){
         _bindContextActionEvents();
         
         /*content resize event*/
-        $(document).bind("ContentResized:onResizeStart",function(e,data){
+        bb.jquery(document).bind("ContentResized:onResizeStart",function(e,data){
             /*masques le content action s'il était visible*/
             _updateSelectedContent(data.contentEl);
             if(_selectedContent){
-                $(_settings.actionCtnClass).remove();
+                bb.jquery(_settings.actionCtnClass).remove();
                 return;
             }
         });
         
-        $(document).bind("ContentResized:onResizeStop",function(e,data){
+        bb.jquery(document).bind("ContentResized:onResizeStop",function(e,data){
             _updateSelectedContent(data.contentEl);
             if(_selectedContent){
                 _showActionsForContent(_selectedContent);
@@ -780,17 +780,17 @@ var ContentEditionManager = (function(){
     
     
     var _buildNodeInfos = function(nodeInfos){
-        var template = $("<div></div>").clone();
-        $(template).addClass("contentInfos");
+        var template = bb.jquery("<div></div>").clone();
+        bb.jquery(template).addClass("contentInfos");
         
-        $.each(nodeInfos,function(key,value){
-            var template = $("<p class='confKey'></p>").clone();
+        bb.jquery.each(nodeInfos,function(key,value){
+            var template = bb.jquery("<p class='confKey'></p>").clone();
         });   
     }
     
     
     var _hideContextMenu = function(){
-        $(_settings.contextMenuClass).hide();
+        bb.jquery(_settings.contextMenuClass).hide();
     }
     
     var _selectNodeContent = function(currentContent){
@@ -804,7 +804,7 @@ var ContentEditionManager = (function(){
             itemClass : ".contentNodeItem",
             itemIdKey : "data-uid"
         };
-        $(document).trigger("content:ItemClicked",[pathInfos,$bb(currentContent)]);
+        bb.jquery(document).trigger("content:ItemClicked",[pathInfos,$bb(currentContent)]);
         return true;
     }
         
@@ -814,40 +814,40 @@ var ContentEditionManager = (function(){
         var _contextMenuExists = false;
         var contextMenu = null;
         var position = contextMenuParams.menuPosition;
-        if($(_settings.contextMenuClass).length){
-            contextMenu  = $(_settings.contextMenuClass).first();
+        if(bb.jquery(_settings.contextMenuClass).length){
+            contextMenu  = bb.jquery(_settings.contextMenuClass).first();
             _contextMenuExists = true;
         }else{
-            var contextMenu = $("<div></div>").clone();
+            var contextMenu = bb.jquery("<div></div>").clone();
             contextMenu.addClass(_settings.contextMenuClass.replace('.',''));
-            $(contextMenu).css({
+            bb.jquery(contextMenu).css({
                 border: "1px solid red",
                 width: "150px",
                 height: "150px",
                 position: "absolute",
                 background : "white"
             });
-            var actionContainer = $("<ul></ul>").clone();
-            actionContainer.append($("<li class='contextBtn btnShowInfos'><a>Infos</a></li>"));
-            actionContainer.append($("<li class='contextBtn btnShowParams'><a>Paramètres</a></li>"));
-            actionContainer.append($("<li class='contextBtn btnDelete'><a>Effacer</a></li>"));
-            actionContainer.append($("<li class='contextBtn btnSelect'><a>Selectionner</a></li>"));
-            $(actionContainer).find("a").attr("href","javascript:;");
+            var actionContainer = bb.jquery("<ul></ul>").clone();
+            actionContainer.append(bb.jquery("<li class='contextBtn btnShowInfos'><a>Infos</a></li>"));
+            actionContainer.append(bb.jquery("<li class='contextBtn btnShowParams'><a>Paramètres</a></li>"));
+            actionContainer.append(bb.jquery("<li class='contextBtn btnDelete'><a>Effacer</a></li>"));
+            actionContainer.append(bb.jquery("<li class='contextBtn btnSelect'><a>Selectionner</a></li>"));
+            bb.jquery(actionContainer).find("a").attr("href","javascript:;");
             contextMenu.append(actionContainer);
         }
-        $(contextMenu).css({
+        bb.jquery(contextMenu).css({
             top:position.top+"px", 
             left:position.left+"px"
         });
       
-        $(contextMenu).data("currentContentInfos",contextMenuParams);
+        bb.jquery(contextMenu).data("currentContentInfos",contextMenuParams);
         if(!_contextMenuExists){
-            $(contextMenu).appendTo($("body")); 
+            bb.jquery(contextMenu).appendTo(bb.jquery("body")); 
         }else{
-            $(contextMenu).show();
+            bb.jquery(contextMenu).show();
         }
         
-        return $(contextMenu);
+        return bb.jquery(contextMenu);
     }*/
     
     
@@ -855,14 +855,14 @@ var ContentEditionManager = (function(){
     /*actionEvents*/
     var _bindContentActionEvents = function(){
         
-        $(_settings.actionBtnCls).live("click",function(e){
+        bb.jquery(_settings.actionBtnCls).live("click",function(e){
             
             e.preventDefault();    
             e.stopPropagation();
             if(!_selectedContent) return false;
            
-            var contentUid = $(_selectedContent).attr("data-uid")||null;
-            var contentType = $(_selectedContent).attr("data-type")||null;    
+            var contentUid = bb.jquery(_selectedContent).attr("data-uid")||null;
+            var contentType = bb.jquery(_selectedContent).attr("data-type")||null;    
             var _selectedNodeInfo = {};
             
             _selectedNodeInfo.infos = {
@@ -871,12 +871,12 @@ var ContentEditionManager = (function(){
                 contentEl : _selectedContent
             }; 
             
-            $(e.currentTarget).css({
+            bb.jquery(e.currentTarget).css({
                 position:"relative"
             });
             //_currentContentInfos = _selectedNodeInfo; 
             
-            var btnType = $(e.currentTarget).attr("data-type")|| null;
+            var btnType = bb.jquery(e.currentTarget).attr("data-type")|| null;
             if(!btnType) return false;
             
             /*execute Callbacks*/
@@ -892,26 +892,26 @@ var ContentEditionManager = (function(){
     }
     
     var _bindContextActionEvents = function(){
-        $(_settings.contextBtnClass).live("click",function(e){
+        bb.jquery(_settings.contextBtnClass).live("click",function(e){
             
-            var parent = $(this).parents(_settings.contextMenuClass);
-            var currentContentInfos = $(parent).data("currentContentInfos");
+            var parent = bb.jquery(this).parents(_settings.contextMenuClass);
+            var currentContentInfos = bb.jquery(parent).data("currentContentInfos");
            
            
-            if($(this).hasClass("btnShowInfos")){
+            if(bb.jquery(this).hasClass("btnShowInfos")){
                 var mc = bb.ManagersContainer.getInstance();
                 var contentManager = mc.getManager("ContentManager");   
             }
             
-            if($(this).hasClass("btnShowParams")){
+            if(bb.jquery(this).hasClass("btnShowParams")){
                 _showCurrentContentparams(currentContentInfos.infos);
             }
             
-            if($(this).hasClass("btnDelete")){
+            if(bb.jquery(this).hasClass("btnDelete")){
                 _deleteContent(currentContentInfos.infos);
             }
             
-            if($(this).hasClass("btnSelect")){
+            if(bb.jquery(this).hasClass("btnSelect")){
                 _selectNodeContent(currentContentInfos.infos.contentEl);
             }
             
@@ -921,8 +921,8 @@ var ContentEditionManager = (function(){
     
     var _actionsBeforeRender = function(selectedContent,actionsBar){
         var newContent = actionsBar;
-        if($(selectedContent).hasClass(_settings.rootContentSetCls)){
-            $(actionsBar).find("."+_settings.delBtnCls).remove();
+        if(bb.jquery(selectedContent).hasClass(_settings.rootContentSetCls)){
+            bb.jquery(actionsBar).find("."+_settings.delBtnCls).remove();
         } 
         return newContent;
     }
@@ -930,29 +930,29 @@ var ContentEditionManager = (function(){
     
     var _checkEmptyBlocks = function(content){
         /*block avec des sous-contenus*/
-        var emptyBlocks = $(content).find(_settings.droppableItemClass).filter(function(){
-            return !$(this).children("not:"+_settings.contentClass).length;
+        var emptyBlocks = bb.jquery(content).find(_settings.droppableItemClass).filter(function(){
+            return !bb.jquery(this).children("not:"+_settings.contentClass).length;
         });
         if(emptyBlocks){
-            $(emptyBlocks).addClass(_settings.emptyContentCls);
+            bb.jquery(emptyBlocks).addClass(_settings.emptyContentCls);
         }
         return; 
     }
     
     var _markEmptyBlocks = function(content){
-        var containers = $(content).find(_settings.droppableItemClass);
-        $.each(containers,function(i,item){
+        var containers = bb.jquery(content).find(_settings.droppableItemClass);
+        bb.jquery.each(containers,function(i,item){
             _markEmptyBlocks(item);
         });
        
         if(containers.length==0){
-            if($(content).hasClass(_settings.droppableItemClass.replace(".",""))){
-                var bbContents = $(content).children(_settings.contentClass);
+            if(bb.jquery(content).hasClass(_settings.droppableItemClass.replace(".",""))){
+                var bbContents = bb.jquery(content).children(_settings.contentClass);
                 if(bbContents.length==0){
                     var bbContent = $bb(content);
                     bbContent.showEmptyZone();
-                /*$(content).addClass(_settings.emptyContentCls);*/
-                //$(content).animate({
+                /*bb.jquery(content).addClass(_settings.emptyContentCls);*/
+                //bb.jquery(content).animate({
                 //    minHeight:"100px"
                 //},"slow");
                 }
@@ -966,15 +966,15 @@ var ContentEditionManager = (function(){
         if(!newContent) return false;
         var contentChildren = $bb(newContent).getChildren();
         if(contentChildren.length){
-            $.each(contentChildren,function(i,child){
+            bb.jquery.each(contentChildren,function(i,child){
                 _handleEmptyContent(child);
             });
         }
         $bb(newContent).showEmptyZone(); 
-    /*if($(newContent).hasClass(_settings.droppableItemClass.replace(".",""))){
-            if($(newContent).find(_settings.contentClass).length==0){
-                $(newContent).addClass(_settings.emptyContentCls);
-            $(newContent).animate({
+    /*if(bb.jquery(newContent).hasClass(_settings.droppableItemClass.replace(".",""))){
+            if(bb.jquery(newContent).find(_settings.contentClass).length==0){
+                bb.jquery(newContent).addClass(_settings.emptyContentCls);
+            bb.jquery(newContent).animate({
                 minHeight:"100px"
             },"slow");
             }
@@ -986,7 +986,7 @@ var ContentEditionManager = (function(){
         if (mode) {
             _markEmptyBlocks(_getMainRootContainer());
         } else {
-            $('.'+_settings.emptyContentCls).removeClass(_settings.emptyContentCls);
+            bb.jquery('.'+_settings.emptyContentCls).removeClass(_settings.emptyContentCls);
         }
     }
 	
@@ -995,7 +995,7 @@ var ContentEditionManager = (function(){
         var contentPath = [];
         
         if(content){
-            var result = $(content).parentsUntil('div[class *="span"]"');
+            var result = bb.jquery(content).parentsUntil('div[class *="span"]"');
             var layoutsOnPath = [];
             var total = result.length;
             var i = total-1; 
@@ -1010,14 +1010,14 @@ var ContentEditionManager = (function(){
     
     
     var _hideActionMenu = function(){
-        $(_settings.actionCtnClass).remove(); //remove actions menu
+        bb.jquery(_settings.actionCtnClass).remove(); //remove actions menu
     }
     
     var _isRootContentSetLinked = function(bbContent){
         if(bbContent && bbContent.isARootContentSet){
             var contentUid = bbContent.getUid();
             /*si la zone n'est pas liée ou si c'est la zone principale*/
-            if($.inArray( contentUid,_pageLinkedZonesInfos.linkedZones )==-1 || ($.inArray(contentUid,_pageLinkedZonesInfos.mainZones)!=-1)){
+            if(bb.jquery.inArray( contentUid,_pageLinkedZonesInfos.linkedZones )==-1 || (bb.jquery.inArray(contentUid,_pageLinkedZonesInfos.mainZones)!=-1)){
                 return false;
             }else{
                 return true;   
@@ -1027,7 +1027,7 @@ var ContentEditionManager = (function(){
     var _isAMainZone = function(bbContent){
         if(bbContent && bbContent.isARootContentSet){
             var contentUid = bbContent.getUid();
-            if($.inArray(contentUid,_pageLinkedZonesInfos.mainZones)==-1){
+            if(bb.jquery.inArray(contentUid,_pageLinkedZonesInfos.mainZones)==-1){
                 return false;
             }else{
                 return true;
@@ -1038,7 +1038,7 @@ var ContentEditionManager = (function(){
     
     var _showActionsForContent = function(clickedContent){
         /*hideAction*/
-        $(_settings.actionCtnClass).remove(); //remove previous actions
+        bb.jquery(_settings.actionCtnClass).remove(); //remove previous actions
         _updateSelectedContent(clickedContent);
         var bbContent = $bb(clickedContent);
         
@@ -1085,12 +1085,12 @@ var ContentEditionManager = (function(){
           
         var contentAction = _buildContentActions(filters);
         var contentAction =_actionsBeforeRender(clickedContent,contentAction);
-        $(clickedContent).css("position","relative");
-        $(contentAction).css({
+        bb.jquery(clickedContent).css("position","relative");
+        bb.jquery(contentAction).css({
             "position":"absolute"
         });
        
-        $(clickedContent).append(contentAction); 
+        bb.jquery(clickedContent).append(contentAction); 
     }
     
     var _deleteContent = function(currentContentInfos){
@@ -1101,7 +1101,7 @@ var ContentEditionManager = (function(){
                     onDestroy : function(){
                         _hideActionMenu();
                         _selectedContent = false;
-                        $(document).trigger("content:ItemDeleted",[currentContentInfos]);
+                        bb.jquery(document).trigger("content:ItemDeleted",[currentContentInfos]);
                     }
                 });
                 return true;
@@ -1125,7 +1125,7 @@ var ContentEditionManager = (function(){
     
     var _showCurrentContentparams = function(contentParams){
         var form = _buildParamsForm(contentParams);
-        _paramsEditorPopup.setContent($(form));
+        _paramsEditorPopup.setContent(bb.jquery(form));
         _paramsEditorPopup.show();      
     }
     
@@ -1145,8 +1145,8 @@ var ContentEditionManager = (function(){
   
     var _selectContent = function(nodeInfo,scrollToContent){
         var block = nodeInfo || "";
-        var node = (typeof nodeInfo =="string") ? $('[data-uid="'+nodeInfo+'"]') : $(nodeInfo);
-        if(_isEnable) bb.Utils.scrollToContent($(node),1000,250);
+        var node = (typeof nodeInfo =="string") ? bb.jquery('[data-uid="'+nodeInfo+'"]') : bb.jquery(nodeInfo);
+        if(_isEnable) bb.Utils.scrollToContent(bb.jquery(node),1000,250);
         _selectNodeContent(node);
     }
     
@@ -1168,10 +1168,11 @@ var ContentEditionManager = (function(){
         init:_init
     };
        
-})();
+})(bb.jquery);
 
+(function($) {
 /* Form Builder to put to a file*/
-var FormBuilder = function(settings){
+FormBuilder = function(settings){
     this.settings = {
         formCls : "paramCls",
         noParams : bb.i18n.__('contentmanager.none_parameter')
@@ -1182,11 +1183,11 @@ var FormBuilder = function(settings){
     
     if(typeof this.init!="function"){
         FormBuilder.prototype.init = function(userSettings){
-            this.settings = $.extend(true,{},this.settings,userSettings);
-            this.formTemplate = $("<form></form>").clone();
+            this.settings = bb.jquery.extend(true,{},this.settings,userSettings);
+            this.formTemplate = bb.jquery("<form></form>").clone();
             this.formId = bb.Utils.generateId("form");
-            $(this.formTemplate).addClass(this.settings.formCls);
-            $(this.formTemplate).attr("id",this.formId);
+            bb.jquery(this.formTemplate).addClass(this.settings.formCls);
+            bb.jquery(this.formTemplate).attr("id",this.formId);
         }
     }
     
@@ -1208,16 +1209,16 @@ var FormBuilder = function(settings){
  
     this.fieldsBuilder = {
         getWrapper : function(){
-            var fieldWrapper = $("<div></div>").clone();
+            var fieldWrapper = bb.jquery("<div></div>").clone();
             fieldWrapper.addClass("fromField");
             return fieldWrapper;
         },
         
         noParams : function(){
-            var fieldWrapper = $("<div></div>").clone();
-            $(fieldWrapper).addClass("fromField");
+            var fieldWrapper = bb.jquery("<div></div>").clone();
+            bb.jquery(fieldWrapper).addClass("fromField");
             var msg = "<p>"+this.settings.noParams+"</p>"; 
-            $(fieldWrapper).append($(msg));
+            bb.jquery(fieldWrapper).append(bb.jquery(msg));
             return fieldWrapper;
         }
     };
@@ -1228,20 +1229,20 @@ var FormBuilder = function(settings){
         var disabledParams = this.settings.params["disabledparams"]||[];
         disabledParams = ("array" in disabledParams) ? disabledParams.array : [];
         /*remove item if it's in the disable array*/
-        var cloneParams = $.extend({},this.settings.params);
+        var cloneParams = bb.jquery.extend({},this.settings.params);
         
         if(disabledParams.length){
             delete(cloneParams["disabledparams"]);
         }
         
         /*disable edit for some params*/
-        $.each(disabledParams,function(index,paramName){
+        bb.jquery.each(disabledParams,function(index,paramName){
             var keyInfos = paramName.split("::");
             if(keyInfos.length == 1){
                 delete(cloneParams[keyInfos[0]]);
                 self.disabledInfos[paramName] = true;
             }else{
-                if(!$.isArray(self.disabledInfos[keyInfos[0]])){
+                if(!bb.jquery.isArray(self.disabledInfos[keyInfos[0]])){
                     self.disabledInfos[keyInfos[0]] = new Array();
                 }  
                 var disabledProp = self.disabledInfos[keyInfos[0]];
@@ -1263,12 +1264,12 @@ var FormBuilder = function(settings){
         var self = this;     
         if(!params){
             var msg = self.fieldsBuilder["noParams"].call(self);
-            var fieldSet = $("<fieldset></fieldset>").clone();
-            $(fieldSet).append(msg);
-            result.appendChild($(fieldSet).get(0));
+            var fieldSet = bb.jquery("<fieldset></fieldset>").clone();
+            bb.jquery(fieldSet).append(msg);
+            result.appendChild(bb.jquery(fieldSet).get(0));
         }
         else{
-            $.each(params,function(key,param){
+            bb.jquery.each(params,function(key,param){
                 var fieldInfos = {};
                 fieldInfos.fieldLabel = key;
                 fieldInfos.param = param;
@@ -1288,19 +1289,19 @@ var FormBuilder = function(settings){
                 var formRender = renderer.render();
                 self.rendererArr[key] = renderer;
                 
-                var fieldSet = $("<fieldset></fieldset>").clone();
-                $(fieldSet).append(formRender);
-                result.appendChild($(fieldSet).get(0));
+                var fieldSet = bb.jquery("<fieldset></fieldset>").clone();
+                bb.jquery(fieldSet).append(formRender);
+                result.appendChild(bb.jquery(fieldSet).get(0));
             });
         }
         /*wrap form*/
-        result = $(this.formTemplate).html($(result));
+        result = bb.jquery(this.formTemplate).html(bb.jquery(result));
         return result;
     }   
     
     FormBuilder.prototype.parse = function(){
         var result = {};
-        $.each(this.rendererArr,function(key,renderer){
+        bb.jquery.each(this.rendererArr,function(key,renderer){
             result[key] =  renderer.parse();
         });
         return result;
@@ -1308,7 +1309,7 @@ var FormBuilder = function(settings){
     
     FormBuilder.prototype.validate = function(){
         var hasError = false;
-        $.each(this.rendererArr,function(key,renderer){
+        bb.jquery.each(this.rendererArr,function(key,renderer){
             if(!renderer.validate()){ 
                 hasError = true;
                 return true;
@@ -1340,10 +1341,10 @@ FormBuilder.registerRenderTypePlugin = function(rendererName,rendererConfig){
             } 
         },
         render : function(){
-            return $("<p>render function must be overwitten in <strong>"+rendererName+"</strong> plugin</p>").clone();
+            return bb.jquery("<p>render function must be overwitten in <strong>"+rendererName+"</strong> plugin</p>").clone();
         },
         parse : function(){
-            return $("<p>parse function must be overwitten in <strong>"+rendererName+"</strong> plugin</p>").clone();
+            return bb.jquery("<p>parse function must be overwitten in <strong>"+rendererName+"</strong> plugin</p>").clone();
         },
         /**
          * valide le formulaire avant de le poster
@@ -1365,13 +1366,13 @@ FormBuilder.registerRenderTypePlugin = function(rendererName,rendererConfig){
                 properties[property] = rendererConfig[property];    
             }
         }  
-        $.extend(true,this,rendererConfig);
+        bb.jquery.extend(true,this,rendererConfig);
     };
    
     /*Renderer Contructor*/
     var RendererConstructor = function(userSettings){
         MockFunc.call(this);
-        this._settings = $.extend(true,this._settings,userSettings);
+        this._settings = bb.jquery.extend(true,this._settings,userSettings);
         this._initialize();
         /*should bind only once*/
         this.mainContainer.unbind("open").on("open", this.onOpen,this);
@@ -1383,11 +1384,10 @@ FormBuilder.registerRenderTypePlugin = function(rendererName,rendererConfig){
     for (prop in rendererConfig){
         if(typeof rendererConfig[prop]=="function") protoFunc[prop] = rendererConfig[prop];
     }
-    var PluginPrototype = $.extend({},AbstractPluginPrototype);
-    RendererConstructor.prototype = $.extend(true,PluginPrototype,protoFunc);
+    var PluginPrototype = bb.jquery.extend({},AbstractPluginPrototype);
+    RendererConstructor.prototype = bb.jquery.extend(true,PluginPrototype,protoFunc);
     FormBuilder.rendererPlugins[rendererName] = RendererConstructor;
 }
-
 
 FormBuilder.createSubformRenderer = function(paramName,paramsOption,mainFormId){
     /**
@@ -1395,7 +1395,7 @@ FormBuilder.createSubformRenderer = function(paramName,paramsOption,mainFormId){
      * Step 1. wrap params with an array
      * Step 2. adapt paramsOption for renderer 
      **/
-    if(!$.isPlainObject(paramsOption)) throw "paramsOption MUST BE AN OBJECT [FormBuilder.createSubformRenderer]";
+    if(!bb.jquery.isPlainObject(paramsOption)) throw "paramsOption MUST BE AN OBJECT [FormBuilder.createSubformRenderer]";
     if(typeof paramName != "string") throw "paramName MUST BE A STRING [FormBuilder.createSubformRenderer]";
     if(typeof mainFormId != "string") throw "mainFormId MUST BE A STRING [FormBuilder.createSubformRenderer]";
     if(typeof paramsOption.rendertype=="string"){
@@ -1440,3 +1440,5 @@ FormBuilder.createRenderer = function(renderName,userConfig){
 }
 
 bb.FormBuilder = FormBuilder;
+
+}) (bb.jquery);

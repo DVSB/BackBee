@@ -45,7 +45,7 @@ class Entity
     /**
      * A tag associated to the cache
      * @var string
-     * @Column(type="string", name="tag")
+     * @Column(type="string", name="tag", nullable=true)
      */
     protected $_tag;
 
@@ -59,7 +59,7 @@ class Entity
     /**
      * The expire date time for the stored data
      * @var \DateTime
-     * @Column(type="datetime", name="expire")
+     * @Column(type="datetime", name="expire", nullable=true)
      */
     protected $_expire;
 
@@ -73,6 +73,7 @@ class Entity
     /**
      * Class constructor
      * @param string $uid Optional, the cache id
+     * @codeCoverageIgnore
      */
     public function __construct($uid = null)
     {
@@ -84,6 +85,7 @@ class Entity
      * Sets the cache id
      * @param string $uid
      * @return \BackBuilder\Cache\DAO\Entity
+     * @codeCoverageIgnore
      */
     public function setUid($uid)
     {
@@ -95,6 +97,7 @@ class Entity
      * Sets the data to store
      * @param string $data
      * @return \BackBuilder\Cache\DAO\Entity
+     * @codeCoverageIgnore
      */
     public function setData($data)
     {
@@ -106,6 +109,7 @@ class Entity
      * Sets the expire date time
      * @param \DateTime $expire
      * @return \BackBuilder\Cache\DAO\Entity
+     * @codeCoverageIgnore
      */
     public function setExpire(\DateTime $expire = null)
     {
@@ -117,6 +121,7 @@ class Entity
      * Set the associated tag
      * @param string $tag
      * @return \BackBuilder\Cache\DAO\Entity
+     * @codeCoverageIgnore
      */
     public function setTag($tag = NULL)
     {
@@ -127,6 +132,7 @@ class Entity
     /**
      * Returns the cache id
      * @return string
+     * @codeCoverageIgnore
      */
     public function getId()
     {
@@ -136,6 +142,7 @@ class Entity
     /**
      * Returns the stored data
      * @return string
+     * @codeCoverageIgnore
      */
     public function getData()
     {
@@ -145,6 +152,7 @@ class Entity
     /**
      * Returns the data time expiration
      * @return \DateTime
+     * @codeCoverageIgnore
      */
     public function getExpire()
     {

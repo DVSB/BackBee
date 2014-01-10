@@ -82,8 +82,16 @@ class datacontent extends AHelper
      */
     public function __invoke($datacontent = array(), $params = array())
     {
-        $this->_content = $this->_renderer->getObject();
-        $this->_attributes = $this->_toRegularBag($datacontent);
+        if ($datacontent instanceof BackBuilder\Renderer\IRenderable) {
+            $this->_content = $datacontent;
+        } else {
+            $this->_content = $this->_renderer->getObject();
+        }
+
+        if (true === is_array($datacontent)) {
+            $this->_attributes = $this->_toRegularBag($datacontent);
+        }
+
         $this->_addValueToAttribute('class', $this->_renderer->getParam('class'));
 
         // Store initial basic attributes to content
@@ -341,10 +349,11 @@ class datacontent extends AHelper
         $securityContext = $this->_renderer->getApplication()->getSecurityContext();
 
         try {
-            return (true === $securityContext->isGranted('sudo')
+            return (null !== $this->getRenderer()->getApplication()->getBBUserToken()
+                    && (true === $securityContext->isGranted('sudo')
                     || null === $securityContext->getACLProvider()
-                    || true === $securityContext->isGranted('VIEW', $this->_content));
-        } catch (\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException $e) {
+                    || true === $securityContext->isGranted('VIEW', $this->_content)));
+         } catch (\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException $e) {
             return false;
         }
     }

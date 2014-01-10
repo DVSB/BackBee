@@ -1,5 +1,5 @@
 (function($){
-    $.widget('ui.bbContentTypeBrowser',{
+    bb.jquery.widget('ui.bbContentTypeBrowser',{
         
         options: {
             popup: {
@@ -45,7 +45,7 @@
         _init :function(){ 
             var myself = this;
             if(this.options.popup){
-                $(this.element).dialog({
+                bb.jquery(this.element).dialog({
                     title : bb.i18n.__('contenttypebrowser.title'),
                     dialogClass: 'bb5-ui bb5-dialog-wrapper bb5-dialog-treeviewer',
                     width: this.options.popup.width,
@@ -56,42 +56,42 @@
                     zIndex: 500001,
                     create: function(event, ui) {
                         var context = myself.getContext();
-                        $(event.target).parent().css('position', 'fixed');
+                        bb.jquery(event.target).parent().css('position', 'fixed');
                     }
                     
                 });
                 
                   // fixme save dialog Position
-                  $(this.element).bind("dialogresizestop",function(event,ui){
-                    var position = [(Math.floor(ui.position.left) - $(window).scrollLeft()),
-                    (Math.floor(ui.position.top) - $(window).scrollTop())];
-                    $(event.target).parent().css('position', 'fixed');
-                    $(myself.element).dialog('option','position',position);
+                  bb.jquery(this.element).bind("dialogresizestop",function(event,ui){
+                    var position = [(Math.floor(ui.position.left) - bb.jquery(window).scrollLeft()),
+                    (Math.floor(ui.position.top) - bb.jquery(window).scrollTop())];
+                    bb.jquery(event.target).parent().css('position', 'fixed');
+                    bb.jquery(myself.element).dialog('option','position',position);
                 });
                 
                 if (this.options.popup.height)
-                    $(this.element).dialog('option', 'height', this.options.popup.height);
+                    bb.jquery(this.element).dialog('option', 'height', this.options.popup.height);
                 
                 if (this.options.popup.position)
-                    $(this.element).dialog('option', 'position', this.options.popup.position);
+                    bb.jquery(this.element).dialog('option', 'position', this.options.popup.position);
                 
-                $(this.element).dialog('open');
+                bb.jquery(this.element).dialog('open');
             }else{
-                $(this.element).show();
+                bb.jquery(this.element).show();
             }
             this._initContentTree();
             this._bindEvents();   
         },
-        _bindEvents : $.noop,
+        _bindEvents : bb.jquery.noop,
         callbacks : {
             nodeClickHandler : function(e){
                 var context = this.getContext();
                 var selectedNode = context.treeview.jstree('get_selected');
-                if (($(e.target).parents('a:first').hasClass('jstree-clicked')) || ($(e.target).hasClass('jstree-clicked'))) {
-                    var nodeType = $(selectedNode).attr('rel');
+                if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
+                    var nodeType = bb.jquery(selectedNode).attr('rel');
                     var isAContentType = (nodeType.search("contentType")==-1) ? false : true;
                     var nodeType = (!isAContentType)?"cat":"contentType";
-                    var nodeId = $(selectedNode).attr("id").replace("node_");  
+                    var nodeId = bb.jquery(selectedNode).attr("id").replace("node_");  
                     this._trigger("select",e,{node_id:nodeId, node:context.treeview.jstree('get_selected'), nodeType:nodeType});
                 }
             },
@@ -118,7 +118,7 @@
             } 
             
             /*Création de l'arbre*/
-            context.treeview = $(myself.element).find('.bb5-windowpane-treewrapper-inner').jstree({   
+            context.treeview = bb.jquery(myself.element).find('.bb5-windowpane-treewrapper-inner').jstree({   
                 plugins : plugins,
                 rpc_data : { 
                     ajax : {
@@ -178,21 +178,21 @@
                     }
                 }
             }).bind('loaded.jstree', function (e, data) {
-                if ($(e.target).find('ul > li:first').length > 0) {
+                if (bb.jquery(e.target).find('ul > li:first').length > 0) {
                     data.inst.select_node('ul > li:first');
                 }
                 myself._trigger('ready');
                         
-            }).bind('click.jstree',$.proxy(myself.callbacks.nodeClickHandler,myself)).bind("create.jstree", $.proxy(myself.callbacks.createHandler,myself));
+            }).bind('click.jstree',bb.jquery.proxy(myself.callbacks.nodeClickHandler,myself)).bind("create.jstree", bb.jquery.proxy(myself.callbacks.createHandler,myself));
             this.setContext(context);
         },
         
         setContext: function(context) {
-            return $(this.element).data('context', $.extend($(this.element).data('context'), context));
+            return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
         
         getContext: function() {
-            return ( (typeof $(this.element).data('context') != 'undefined') ? $(this.element).data('context') : {} );
+            return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         },
         
         destroy: function(){
@@ -201,20 +201,20 @@
             context.site = null;
             
             if (this.options.popup) {
-                $(this.element).dialog('destroy');
+                bb.jquery(this.element).dialog('destroy');
             } else {
-                $(this.element).hide();
+                bb.jquery(this.element).hide();
             }
-            $.Widget.prototype.destroy.apply(this, arguments);
+            bb.jquery.Widget.prototype.destroy.apply(this, arguments);
             this.setContext(context);
         },
         
         close : function(){
-            $(this.element).dialog("close");
+            bb.jquery(this.element).dialog("close");
         },
         
         open:function(){
-            $(this.element).dialog("open");
+            bb.jquery(this.element).dialog("open");
         }
         
         
@@ -222,4 +222,4 @@
         
         
     });
-})(jQuery);
+})(bb.jquery);

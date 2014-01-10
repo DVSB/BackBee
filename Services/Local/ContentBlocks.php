@@ -194,7 +194,7 @@ class ContentBlocks extends AbstractServiceLocal
             $contents = $this->getContentsByCategory(strtolower($catName));
         } else {
             $contents = array();
-            $nodeInfos = explode("_", $catName);
+            $nodeInfos = explode("_", $catName, 2);
             $mock = new \stdClass();
             $mock->name = $nodeInfos[1];
             $contents[] = $mock;
@@ -256,7 +256,7 @@ class ContentBlocks extends AbstractServiceLocal
             $contents = $this->getContentsByCategory(strtolower($catName));
         } else {
             $contents = array();
-            $nodeInfos = explode("_", $catName);
+            $nodeInfos = explode("_", $catName, 2);
             $mock = new \stdClass();
             $mock->name = $nodeInfos[1];
             $contents[] = $mock;

@@ -2,47 +2,47 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder;
 
+use Exception;
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
+    BackBuilder\Exception\DatabaseConnectionException,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
-
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager;
-
 use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
     Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
-    Symfony\Component\DependencyInjection\Loader\XMLFileLoader,
+    Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * The main BackBuilder5 application
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder
  * @copyright   Lp digital system
@@ -50,6 +50,7 @@ use Symfony\Component\Config\FileLocator,
  */
 class BBApplication
 {
+
     const VERSION = '0.8.0';
 
     /**
@@ -65,6 +66,7 @@ class BBApplication
     private $_cachedir;
     private $_mediadir;
     private $_repository;
+    private $_base_repository;
     private $_resourcedir;
     private $_starttime;
     private $_storagedir;
@@ -72,6 +74,7 @@ class BBApplication
     private $_bundles;
     private $_classcontentdir;
     private $_theme;
+    private $_overwrite_config;
 
     public function __call($method, $args)
     {
@@ -80,18 +83,28 @@ class BBApplication
         }
     }
 
-    public function __construct($context = null, $debug = false)
+    /**
+     * @param string $context
+     * @param true $debug
+     * @param true $overwrite_config set true if you need overide base config with the context config
+     */
+    public function __construct($context = null, $debug = false, $overwrite_config = false)
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
         $this->_debug = (Boolean) $debug;
         $this->_isinitialized = false;
         $this->_isstarted = false;
+        $this->_overwrite_config = $overwrite_config;
 
         $this->_initContainer()
-            ->_initAutoloader()
-            ->_initContentWrapper()
-            ->_initBundles();
+                ->_initContextConfig()
+                ->_initAutoloader()
+                ->_initContentWrapper()
+                ->_initBundles();
+
+        // Force container to create SecurityContext object to activate listener
+        $this->getSecurityContext();
 
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
@@ -125,23 +138,25 @@ class BBApplication
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
-        
-        // Define where to looking for services.yml
-        $loader = new YamlFileLoader($this->_container, new FileLocator(array(
-            $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config')
-        ));
 
-        // Load every services definitions into our container
-        $loader->load('services.yml');
+        $dir_to_looking_for = array();
+        $dir_to_looking_for[] = $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
+        $dir_to_looking_for[] = $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
+        $dir_to_looking_for[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
+
+        foreach ($dir_to_looking_for as $dir) {
+            if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
+                // Define where to looking for services.yml
+                $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
+                // Load every services definitions into our container
+                $loader->load('services.yml');
+            }
+        }
 
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
-        
-        $this->_initBBAppParamsIntoContainer();
 
-        // Force container to create SecurityContext object to activate listener
-        $this->getSecurityContext();        
-        $this->_initRenderer();
+        $this->_initBBAppParamsIntoContainer();
 
         $this->_initExternalBundleServices();
 
@@ -151,9 +166,10 @@ class BBApplication
     private function _initBBAppParamsIntoContainer()
     {
         // Set every bbapp parameters
+        $this->_container->setParameter('bbapp.context', $this->getContext());
         $this->_container->setParameter('bbapp.cache.dir', $this->getCacheDir());
         $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
-        $this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
+        //$this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
     }
 
     private function _initExternalBundleServices()
@@ -165,9 +181,7 @@ class BBApplication
                 $bundle = new $datas['class']();
                 if (false === ($bundle instanceof ExtensionInterface)) {
                     $errorMsg = sprintf(
-                        'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', 
-                        $datas['class'],
-                        'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
+                            'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', $datas['class'], 'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
                     );
                     $this->debug($errorMsg);
 
@@ -260,6 +274,18 @@ class BBApplication
     }
 
     /**
+     * @param string $configdir
+     * @return \BackBuilder\BBApplication
+     */
+    private function _initContextConfig()
+    {
+        if (NULL !== $this->_context && 'default' != $this->_context) {
+            $this->getContainer()->get('config')->extend($this->getRepository(), $this->_overwrite_config);
+        }
+        return $this;
+    }
+
+    /**
      * @return \BackBuilder\BBApplication
      * @throws BBException
      */
@@ -309,7 +335,7 @@ class BBApplication
         try {
             $this->getContainer()->get('em')->getConnection()->connect();
         } catch (\Exception $e) {
-            throw new Exception\DatabaseConnectionException('Enable to connect to the database.', 0, $e);
+            throw new DatabaseConnectionException('Enable to connect to the database.', 0, $e);
         }
 
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
@@ -335,27 +361,6 @@ class BBApplication
         return $this;
     }
 
-    /**
-     * @return \BackBuilder\BBApplication
-     * @throws BBException
-     */
-    private function _initRenderer()
-    {
-        if (null === $rendererConfig = $this->getConfig()->getRendererConfig()) {
-            throw new BBException('None renderer configuration found');            
-        }
-
-        if (false === isset($rendererConfig['adapter'])) {
-            throw new BBException('None renderer adapter found');            
-        }
-
-        $this->getContainer()->setParameter('bbapp.renderer.class', $rendererConfig['adapter']);
-
-        $this->debug(sprintf('%s(): Renderer initialized with adapter `%s`', __METHOD__, $rendererConfig['adapter']));
-
-        return $this;
-    }
-
     private function _initBundles()
     {
         if (null === $this->_bundles)
@@ -364,10 +369,35 @@ class BBApplication
         if (null !== $bundles = $this->getConfig()->getBundlesConfig()) {
             foreach ($bundles as $name => $classname) {
                 $bundle = new $classname($this);
-                if ($bundle->init()) {
-                    $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
-                    $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
+                $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
+            }
+        }
+
+        $this->initBundlesServices();
+
+        if (0 < count($this->_bundles)) {
+            foreach ($this->_bundles as $bundle) {
+                $bundle->init();
+                $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
+            }
+        }
+    }
+
+    /**
+     * Load every service definition defined in bundle
+     */
+    private function initBundlesServices()
+    {
+        foreach ($this->_bundles as $b) {
+            $xml = $b->getResourcesDir() . DIRECTORY_SEPARATOR . 'services.xml';
+            if (true === is_file($xml)) {
+                $loader = new XmlFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
+                try {
+                    $loader->load('services.xml');
+                } catch (Exception $e) { /* nothing to do, just ignore it */
                 }
+
+                unset($loader);
             }
         }
     }
@@ -480,7 +510,7 @@ class BBApplication
                 $token = unserialize($token);
 
                 if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken')) {
-                    $token = null;                    
+                    $token = null;
                 }
             }
         }
@@ -543,7 +573,7 @@ class BBApplication
 
     public function getConfigDir()
     {
-        return $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
+        return $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
     }
 
     /**
@@ -594,13 +624,21 @@ class BBApplication
     public function getRepository()
     {
         if (null === $this->_repository) {
-            $this->_repository = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'repository';
+            $this->_repository = $this->getBaseRepository();
             if (null !== $this->_context && 'default' != $this->_context) {
-                $this->_repository .= DIRECTORY_SEPARATOR . $this->_context;                
+                $this->_repository .= DIRECTORY_SEPARATOR . $this->_context;
             }
         }
 
         return $this->_repository;
+    }
+
+    public function getBaseRepository()
+    {
+        if (NULL === $this->_base_repository) {
+            $this->_base_repository = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'repository';
+        }
+        return $this->_base_repository;
     }
 
     /**
@@ -669,7 +707,7 @@ class BBApplication
             $this->_resourcedir = array();
 
             $this->addResourceDir($this->getBaseDir() . '/BackBuilder/Resources')
-                ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
+                    ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
 
             if (null !== $this->_context && 'default' != $this->_context) {
                 $this->addResourceDir($this->getRepository() . '/Ressources');
@@ -865,4 +903,5 @@ class BBApplication
     {
         return (true === $this->_isstarted);
     }
+
 }

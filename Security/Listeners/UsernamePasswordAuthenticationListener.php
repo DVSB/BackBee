@@ -61,7 +61,7 @@ class UsernamePasswordAuthenticationListener implements ListenerInterface
 
         $token = $this->_context->getToken();
         $errmsg = '';
-
+        
         if (null !== $request->request->get('login') && null !== $request->request->get('password')) {
             $token = new UsernamePasswordToken($request->request->get('login'), $request->request->get('password'));
             $token->setUser($request->request->get('login'), $request->request->get('password'));

@@ -35,12 +35,17 @@ class isGranted extends AHelper
     {
         $application = $this->_renderer->getApplication();
 
-        if (true === $bypassBBUser && null !== $application->getBBUserToken())
+        if (true === $bypassBBUser && null !== $application->getBBUserToken()) {
+            return true;            
+        }
+
+        if (null === $token = $application->getSecurityContext()->getToken()) {
+            return false;            
+        }
+
+        if (null === $attributes) {
             return true;
-        if (null === $token = $application->getSecurityContext()->getToken())
-            return false;
-        if (null === $attributes)
-            return true;
+        }
 
         $attributes = (array) $attributes;
 

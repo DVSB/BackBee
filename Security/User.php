@@ -73,7 +73,7 @@ class User implements UserInterface
     /**
      * The firstame of this user
      * @var string
-     * @Column(type="string", name="firstname")
+     * @Column(type="string", name="firstname", nullable=true)
      * @fixture(type="firstName")
      */
     protected $_firstname;
@@ -81,7 +81,7 @@ class User implements UserInterface
     /**
      * The lastname of this user
      * @var string
-     * @Column(type="string", name="lastname")
+     * @Column(type="string", name="lastname", nullable=true)
      * @fixture(type="lastName")
      */
     protected $_lastname;

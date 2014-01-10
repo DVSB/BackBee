@@ -78,7 +78,7 @@ class Database
      */
     public function updateBackbuilderSchema()
     {
-        $this->_schemaTool->updateSchema($this->_getBackbuilderSchema());
+        $this->_schemaTool->updateSchema($this->_getBackbuilderSchema(), true);
     }
     
     /**
@@ -86,7 +86,7 @@ class Database
      */
     public function updateBundlesSchema()
     {
-        $this->_schemaTool->updateSchema($this->_getBundlesClasses());
+        $this->_schemaTool->updateSchema($this->_getBundlesClasses(), true);
     }
 
     /**
@@ -97,7 +97,7 @@ class Database
     public function updateBundleSchema($bundleName)
     {
         $classes = $this->_getBundleSchema($this->_application->getBundle($bundleName));
-        $this->_schemaTool->updateSchema($classes);
+        $this->_schemaTool->updateSchema($classes, true);
     }
 
     /**
