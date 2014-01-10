@@ -93,8 +93,8 @@ $(function(){
      *  label: "Choisissez un Media",
      *  maxentry: 1
      *  minentry: 0,
-     *  accept: [bbMedianame],
-     *  medias: ""
+     *  accept: [bbMedianame], //not used
+     *  medias: "" //json encoded list
      ******/
     /**************Media selection render type **************/
     FormBuilder.registerRenderTypePlugin("media-list",{
@@ -103,9 +103,7 @@ $(function(){
             removeBtnClass: ".bb5-ico-del"
         },
             
-        _context: {
-            mediaSelector : null
-        },
+       
             
         _template: {
             
@@ -131,16 +129,23 @@ $(function(){
         },
             
         _init: function(){
+            this._context = {};
+            this._context.mediaSelector = null;
             this.form = $(this._template.mediaWrapper).clone();
             this._addBtn = this.form.find(".add_media_btn").eq(0);
             this._mediaContainer = $(this.form).find(".bb5-list-media").eq(0);
             var label = this._settings.fieldInfos.param.array.label;
             $(this.form).find(".fieldLabel").html(label); //i18nkey
             /* use for populate */
-             var mediaInfos = this._settings.fieldInfos.param.array.medias;
+            var mediaInfos = this._settings.fieldInfos.param.array.medias;
+            var maxEntry = this._settings.fieldInfos.param.array.maxentry;
+            var minEntry = this._settings.fieldInfos.param.array.minentry;
+            this.maxEntry = ( maxEntry == "undefined" || isNaN(parseInt(maxEntry)) ) ? 999 : parseInt(maxEntry);
+            this.minEntry = ( maxEntry == "undefined" || isNaN(parseInt(minEntry)) ) ? 0 : parseInt(minEntry);
+            this.minEntry = ( this.maxEntry > this.minEntry ) ? this.minEntry : 0; 
             this._mediaList =  new bb.SmartList({
                 idKey : "uid",
-                maxEntry: 1,
+                maxEntry: maxEntry,
                 onChange: $.proxy(this._handleListChange,this),
                 onDelete: $.proxy(this._removeMedia,this)
             });
@@ -170,17 +175,17 @@ $(function(){
         _removeMedia : function(container,name,id){
             $(this._mediaContainer).find(".media-"+id).remove();
         },
-        
+        /* add accept list in param*/
         _typeIsValid : function(media){
-          var valid = false;
-          if(media.data.content.classname.indexOf("Media\\image") != -1){
-              valid = true; 
-          }
-          if(!valid){
-              alert("Media of type " +media.data.content.classname+" is not allowed!");
-          }
-          
-          return valid;  
+            var valid = false;
+            if(media.data.content.classname.indexOf("Media\\image") != -1){
+                valid = true; 
+            }
+            if(!valid){
+                alert("Media of type " +media.data.content.classname+" is not allowed!");
+            }
+            valid = true;
+            return valid;  
         },
         
         /* add media */
@@ -210,7 +215,8 @@ $(function(){
      
             if (!this._context.mediaSelector) {
                 var selectorMedia = bb.i18n.__('toolbar.editing.mediaselectorLabel');
-                var mediaSelectorContainer = $("<div id='bb5-param-mediasselector' class='bb5-selector-wrapper'></div>").clone();
+                var mediaSelectorContainer = $("<div id='bb5-form-mediasselector'/>").clone();
+                $("body").append(mediaSelectorContainer);
                 this._context.mediaSelector = $(mediaSelectorContainer).bbSelector({
                     popup: true,
                     pageSelector: false,
@@ -220,10 +226,9 @@ $(function(){
                     resizable: false,
                     selectorTitle : selectorMedia,
                     callback: function(item) {
-                        $('#bbb5-param-mediasselector').bbSelector('close');
+                        $('#bb5-param-mediasselector').bbSelector('close');
                     },
-                  
-                    beforeWidgetInit:function(){
+                    beforeWidgetInit : function(){
                         var bbSelector = $(this.element).data('bbSelector');
                         bbSelector.onWidgetInit(bbSelector._panel.MEDIA_LINK, function () {
                             var bbMediaSelector = $(this).data('bbMediaSelector') || false;
@@ -242,7 +247,7 @@ $(function(){
            
            
         validate: function(){
-               
+            return true;    
         },
            
         render : function(){

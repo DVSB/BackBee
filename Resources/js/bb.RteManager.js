@@ -1,5 +1,6 @@
 var bb = bb || {};  
 
+    
 var module = {
     dependencies: ["jscore","aintnolove"],
     moduleName: "RteManager",

@@ -81,25 +81,29 @@
             upload_only_type_allowed: 'Only #type# are allowed!'
         },
 
-        _templates: {
-            panel: $('#bb5-ui-bbmediaselector-panel-tpl').clone(),
-            view: $('#bb5-ui-bbmediaselector-view-tpl').clone(),
-            viewgrid: null,
-            viewlist: null
-        },
-        cachedResult : false, //useful for grid list
-        _context: {
-            selected: null,
-            treeview: null,
-            messageBox: null,
-            confirmBox: null,
-            availableMedias: null,
-            callback: null,
-            mediaPager : null,
-            searchEngine: null
-        },
+      
+      
 
         _create: function() {
+            this.cachedResult = false;
+            
+            this._templates = {
+                panel: $('#bb5-ui-bbmediaselector-panel-tpl').clone(),
+                view: $('#bb5-ui-bbmediaselector-view-tpl').clone(),
+                viewgrid: null,
+                viewlist: null
+            };
+            this._context = {
+                selected: null,
+                treeview: null,
+                messageBox: null,
+                confirmBox: null,
+                availableMedias: null,
+                callback: null,
+                mediaPager : null,
+                searchEngine: null
+            };
+
             var myself = bb.StateManager.extend(this, 'uibbMediaSelector');
             var viewMode = ($.inArray(this.options.viewMode,["list","grid"]!=-1)) ? this.options.viewMode : "list";
             this.setContext({
@@ -729,7 +733,7 @@
             var uploadedContent = $(mediaForm).find(".uploadedmedia").eq(0).val();
             var MediapreviewCtn = $(mediaForm).find(".bbMediaPreview").eq(0); 
             if($.trim(uploadedContent)==""){
-               // errors.push(MediapreviewCtn);
+            // errors.push(MediapreviewCtn);
             }
             
             if(errors.length){
@@ -746,7 +750,7 @@
                         $(this).removeClass("hasError");
                     });
                 });
-                /*preview error*/
+            /*preview error*/
                 
             }
             
@@ -1012,7 +1016,7 @@
         _createPreview: function(file, dropbox) {
             dropbox.empty();
             var fileType = (typeof $(dropbox).attr("data-mediatype")=="string") ? $(dropbox).attr("data-mediatype") : false;  
-            if(fileType) new Error("Le type du media n'a pas pu être trouvé.");
+            if(fileType) new Error("Media type .");
             var methodName = fileType.charAt(0).toUpperCase() + fileType.slice(1);
             var methodToCall = "_create{mediaType}Preview".replace("{mediaType}",methodName);
             if(typeof this[methodToCall]=="function"){
@@ -1123,7 +1127,7 @@
             context.messageBox.dialog('destroy');
             context.messageBox.remove();
             $(this.element).empty();
-
+            alert("here");
             context.selected = null;
             context.treeview = null;
             context.messageBox = null;
