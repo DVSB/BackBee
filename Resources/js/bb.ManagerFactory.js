@@ -1,6 +1,9 @@
 var bb = bb || {};
-/* bb Module factory don't load jsCore */
+
 var ManagerFactory = null;
+
+(function($) {
+/* bb Module factory don't load jsCore */
 define(["jscore"], function(){
     
     ManagerFactory = (function(){
@@ -153,6 +156,8 @@ define(["jscore"], function(){
     })();
     
     /* 1. Extend the bb core */
-    $.extend(bb.core,ManagerFactory);
+    bb.jquery.extend(bb.core,ManagerFactory);
     return ManagerFactory;
 });
+
+}) (bb.jquery);

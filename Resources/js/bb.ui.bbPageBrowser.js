@@ -4,7 +4,7 @@
  *
  **/
 (function($){
-    $.widget('ui.bbPageBrowser', {
+    bb.jquery.widget('ui.bbPageBrowser', {
         options: {
             popup: {
                 width: 200,
@@ -82,7 +82,7 @@
             });
             //treeviewer
             if (this.options.popup) {
-                $(this.element).dialog({
+                bb.jquery(this.element).dialog({
                     dialogClass: 'bb5-ui bb5-dialog-wrapper bb5-dialog-treeviewer',
                     width: this.options.popup.width,
                     minWidth: 200,
@@ -93,19 +93,19 @@
                     title: this.options.title,
                     create: function(event, ui) {
                         context = myself.getContext();
-                        $(event.target).parent().css('position', 'fixed');
-                        var utilsMenu = $("<span></span>").clone();
-                        $(utilsMenu).addClass("bb5-dialog-title-tools");
+                        bb.jquery(event.target).parent().css('position', 'fixed');
+                        var utilsMenu = bb.jquery("<span></span>").clone();
+                        bb.jquery(utilsMenu).addClass("bb5-dialog-title-tools");
                         if(myself.options.editMode){
-                            var utilsBtn = $("<a></a>").clone();
-                            $(utilsBtn).addClass("bb5-button-link bb5-button bb5-toolsbtn bb5-button-square bb5-invert").attr("href","javascript:;").text(bb.i18n.__('pageselector.utils'));
-                            utilsBtn.appendTo($(utilsMenu));
+                            var utilsBtn = bb.jquery("<a></a>").clone();
+                            bb.jquery(utilsBtn).addClass("bb5-button-link bb5-button bb5-toolsbtn bb5-button-square bb5-invert").attr("href","javascript:;").text(bb.i18n.__('pageselector.utils'));
+                            utilsBtn.appendTo(bb.jquery(utilsMenu));
                       
-                            $(event.target).parent().find('.ui-dialog-titlebar .ui-dialog-titlebar-close').before(utilsMenu);
+                            bb.jquery(event.target).parent().find('.ui-dialog-titlebar .ui-dialog-titlebar-close').before(utilsMenu);
                             
-                            $(event.target).parent().find('a.bb5-toolsbtn').bind('click', function(e) {
+                            bb.jquery(event.target).parent().find('a.bb5-toolsbtn').bind('click', function(e) {
                                 if ((context.selected) && (context.treeview) ) {
-                                    context.treeview.jstree('show_contextmenu', $(myself.element).find('#node_' + context.selected), e.pageX, e.pageY + 10);
+                                    context.treeview.jstree('show_contextmenu', bb.jquery(myself.element).find('#node_' + context.selected), e.pageX, e.pageY + 10);
                                 }
                                 return false;
                             });
@@ -117,68 +117,68 @@
                 
                 /*jquery ui bug cf http://old.nabble.com/binding-the-dialog-resizeStop-event--after--dialog-creation-td25588022s27240.html*/
                 // fixme position save the current dialog position
-                $(this.element).bind("dialogresizestop",function(event,ui){
-                    var position = [(Math.floor(ui.position.left) - $(window).scrollLeft()),(Math.floor(ui.position.top) - $(window).scrollTop())];
-                    $(event.target).parent().css('position', 'fixed');
-                    $(myself.element).dialog('option','position',position);
+                bb.jquery(this.element).bind("dialogresizestop",function(event,ui){
+                    var position = [(Math.floor(ui.position.left) - bb.jquery(window).scrollLeft()),(Math.floor(ui.position.top) - bb.jquery(window).scrollTop())];
+                    bb.jquery(event.target).parent().css('position', 'fixed');
+                    bb.jquery(myself.element).dialog('option','position',position);
                 });
                 
                 /*fix dialog position*/
-                $(this.element).bind("dialogclose",function(event,ui){
+                bb.jquery(this.element).bind("dialogclose",function(event,ui){
                     myself.setStateOpen(false);
                     var context = myself.getContext();
-                    context.previousDialogPosition = $(this).dialog("option","position");
+                    context.previousDialogPosition = bb.jquery(this).dialog("option","position");
                     myself.setContext(context);
                 });
                 
-                $(this.element).bind("dialogopen",function(event,ui){
+                bb.jquery(this.element).bind("dialogopen",function(event,ui){
                     myself.setStateOpen(true);
-                    var top = parseInt($(this).parent(".bb5-dialog-wrapper").css("top"));
+                    var top = parseInt(bb.jquery(this).parent(".bb5-dialog-wrapper").css("top"));
                     if( top < 0 ){
                         top = Math.abs(top);
-                        var position = $(myself.element).dialog('option', 'position');
+                        var position = bb.jquery(myself.element).dialog('option', 'position');
                         position[1] = top;
-                        $(myself.element).dialog('option', 'position', position);
+                        bb.jquery(myself.element).dialog('option', 'position', position);
                     }
                 });
                 
-                $(this.element).bind("dialogdragstop",function(event,ui){
-                    var top = parseInt($(this).parent(".bb5-dialog-wrapper").css("top"));
+                bb.jquery(this.element).bind("dialogdragstop",function(event,ui){
+                    var top = parseInt(bb.jquery(this).parent(".bb5-dialog-wrapper").css("top"));
                     /*move up*/
                     if(top < 0){
                         top = Math.abs(top);
-                        var position = $(myself.element).dialog('option', 'position');
+                        var position = bb.jquery(myself.element).dialog('option', 'position');
                         position[1] = top;
-                        $(myself.element).dialog('option', 'position', position);
+                        bb.jquery(myself.element).dialog('option', 'position', position);
                         return;
                     }
                     /*move down*/
                     var dialogHeight = parseInt(myself.element.dialog("option","height"));
                     var offsetTop = ui.offset.top; 
-                    var winHeight = $(window).height();
+                    var winHeight = bb.jquery(window).height();
                     var dialogCurrentTop = ui.position.top;
                     /*as dialog is fixed*/
                     var adjustPosition = ((dialogCurrentTop+dialogHeight) > winHeight) ? true : false;
                     if(adjustPosition){
                         var adjustSize =  dialogCurrentTop+dialogHeight -  winHeight; 
-                        var dialogWrapper = $(this).parent(".bb5-dialog-wrapper").eq(0);
+                        var dialogWrapper = bb.jquery(this).parent(".bb5-dialog-wrapper").eq(0);
                         var newTop = (dialogCurrentTop - adjustSize) - 15; // margin de 15px
-                        $(dialogWrapper).animate({
+                        bb.jquery(dialogWrapper).animate({
                             top:newTop+"px"
                         });
                     }         
                 }); 
                 
-                $(document).ajaxComplete(function() {
+                bb.jquery(document).ajaxComplete(function() {
                     myself._unmask();
                 });
                 if (this.options.popup.height)
-                    $(this.element).dialog('option', 'height', this.options.popup.height);
+                    bb.jquery(this.element).dialog('option', 'height', this.options.popup.height);
                 
                 if (this.options.popup.position)
-                    $(this.element).dialog('option', 'position', this.options.popup.position);
+                    bb.jquery(this.element).dialog('option', 'position', this.options.popup.position);
             } else {
-                $(this.element).show();
+                bb.jquery(this.element).show();
             }
             
             bb.webserviceManager.getInstance('ws_local_layout').request('getLayoutsFromSite', {
@@ -193,7 +193,7 @@
                     myself._initTree(myself.options.site);
                 }
             });
-            $(this.element).disableSelection();
+            bb.jquery(this.element).disableSelection();
         },
         
         _initTree: function(site_uid) {
@@ -214,7 +214,7 @@
                         
             if ((site_uid) && (site_uid.length > 0)) {
                 context.site = site_uid;
-                context.treeview = $(this.element).find('#browser').jstree({
+                context.treeview = bb.jquery(this.element).find('#browser').jstree({
                     plugins : plugins,
 
                     rpc_data : { 
@@ -366,14 +366,14 @@
                     //selected node
                     if ((myself.options.breadcrumb) && (myself.options.breadcrumb.length > 0)) {
                         context.selected = myself.options.breadcrumb[myself.options.breadcrumb.length-1];
-                        $(myself.element).find('#node_' + myself.options.breadcrumb[myself.options.breadcrumb.length-1] + ' a:first').attr('class', 'jstree-clicked');
+                        bb.jquery(myself.element).find('#node_' + myself.options.breadcrumb[myself.options.breadcrumb.length-1] + ' a:first').attr('class', 'jstree-clicked');
                         myself.setContext(context);
                     }
                     
                     //disable specific actions for node
-                    $(document).live('context_show.vakata', function(e) {
+                    bb.jquery(document).live('context_show.vakata', function(e) {
                         var context = myself.getContext();
-                        context.selected = $.vakata.context.par.attr('id').replace('node_','');
+                        context.selected = bb.jquery.vakata.context.par.attr('id').replace('node_','');
                         var treeContainer = context.treeview.jstree("get_container");
                         myself._trigger('select', e, {
                             node_id: context.selected 
@@ -382,41 +382,41 @@
                         // console.log("context",context.selected);
                         //console.log("clipboard",context.clipboard);
                         //root change
-                        if ($.vakata.context.par.attr('url') == '/') {
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-remove"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-copy"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-cut"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
+                        if (bb.jquery.vakata.context.par.attr('url') == '/') {
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-remove"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-copy"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-cut"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
                         }
                        
                         if(!("clipboard" in context) || (("clipboard" in context) && !context.clipboard)){
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
                         }
                         
                         if(("clipboard" in context) && (context.selected==context.clipboard)){
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-copy"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-cut"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-copy"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-cut"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
                         }
                         /* ne pas coller un parent dans son enfant*/
-                        var selectedIsChildOfClipboard = $(treeContainer).find("#node_"+context.clipboard).find("#node_"+context.selected);
+                        var selectedIsChildOfClipboard = bb.jquery(treeContainer).find("#node_"+context.clipboard).find("#node_"+context.selected);
                         if(("clipboard" in context) && selectedIsChildOfClipboard.length!=0){
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
-                            $($.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide(); 
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide(); 
                         }
                         
                     });
                     
                     myself._trigger('ready');
                 }).bind('click.jstree', function (e) {
-                    if (($(e.target).parents('a:first').hasClass('jstree-clicked')) || ($(e.target).hasClass('jstree-clicked'))) {
-                        context.selected = $(e.target).parents('li:first').attr('id').replace('node_','');
+                    if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
+                        context.selected = bb.jquery(e.target).parents('li:first').attr('id').replace('node_','');
                         myself._trigger('select', e, {
                             node_id: context.selected 
                         });
@@ -424,8 +424,8 @@
                     }
                 }).bind('dblclick.jstree', function (e) {
                     if(!myself.options.enableNavigation) return;
-                    if (($(e.target).parents('a:first').hasClass('jstree-clicked')) || ($(e.target).hasClass('jstree-clicked'))) {
-                        myself.browsePage($(e.target).parents('li:first').attr('id').replace('node_',''), false);
+                    if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
+                        myself.browsePage(bb.jquery(e.target).parents('li:first').attr('id').replace('node_',''), false);
                     }
                 }).bind("create.jstree", function (e, data) {
                     bb.webserviceManager.getInstance('ws_local_page').request('insertBBBrowserTree', {  
@@ -435,10 +435,10 @@
                         },
                         success: function(result) {
                             if (!result.result)
-                                $.jstree.rollback(data.rlbk);
+                                bb.jquery.jstree.rollback(data.rlbk);
                             else {
-                                $(data.rslt.obj).attr('id', result.result.attr.id);
-                                $(data.rslt.obj).attr('rel', result.result.attr.rel);
+                                bb.jquery(data.rslt.obj).attr('id', result.result.attr.id);
+                                bb.jquery(data.rslt.obj).attr('rel', result.result.attr.rel);
                                
                             }
                         }
@@ -451,7 +451,7 @@
                         },
                         success: function(result) {
                             if (!result.result)
-                                $.jstree.rollback(data.rlbk);
+                                bb.jquery.jstree.rollback(data.rlbk);
                         }
                     });
                 }).bind("delete.jstree", function (e, data) {
@@ -459,7 +459,7 @@
                     if ((data) && !(data.rslt)) {
                         data = {
                             rslt: {
-                                obj: $(data)
+                                obj: bb.jquery(data)
                             }
                         };
                     }
@@ -472,13 +472,13 @@
                             },
                             success: function(result) {
                                 if (!result.result) {
-                                    $.jstree.rollback(data.rlbk);
+                                    bb.jquery.jstree.rollback(data.rlbk);
                                 }
                             }
                         });
                     } else {
                         if (data && data.rlbk)
-                            $.jstree.rollback(data.rlbk);
+                            bb.jquery.jstree.rollback(data.rlbk);
                     }
                     e.stopPropagation();
                 }).bind("move_node.jstree", function (e, data) {
@@ -486,23 +486,23 @@
                     var widget = myself;
                     data.rslt.o.each(function (i) {
                         var myself = this;
-                        var id = $(myself).attr('id');
+                        var id = bb.jquery(myself).attr('id');
                         //remove from the dom if exitst the element's phantom after it has been pasted
-                        var oldcontent = $(this).parents(".jstree-bb5").eq(0).find("[id='"+id+"']").not(this); 
+                        var oldcontent = bb.jquery(this).parents(".jstree-bb5").eq(0).find("[id='"+id+"']").not(this); 
                         if(oldcontent.length){
-                            $(oldcontent).remove();
+                            bb.jquery(oldcontent).remove();
                         }                       
                         if (data.rslt.cr !== -1) {
                             widget._mask();
                             bb.webserviceManager.getInstance('ws_local_page').request('moveBBBrowserTree', {  
                                 params: {
-                                    page_uid: $(myself).attr('id').replace('node_',''),
+                                    page_uid: bb.jquery(myself).attr('id').replace('node_',''),
                                     root_uid: data.rslt.np.attr('id').replace('node_',''),
                                     next_uid: (((data.rslt.or.length == 0) ? null : data.rslt.or.attr('id').replace('node_','')))
                                 },
                                 success: function(result) {
                                     if (!result.result)
-                                        $.jstree.rollback(data.rlbk);
+                                        bb.jquery.jstree.rollback(data.rlbk);
                                     widget._unmask();
                                 },
                                 error:function(){
@@ -510,7 +510,7 @@
                                 }
                             });
                         } else {
-                            $.jstree.rollback(data.rlbk);
+                            bb.jquery.jstree.rollback(data.rlbk);
                         }
                     });
                 });
@@ -524,7 +524,7 @@
             
             if (context.treeview) {
                 context.treeview.jstree('destroy');
-                $(this.element).find('#browser').children().remove();
+                bb.jquery(this.element).find('#browser').children().remove();
                 this.setContext(context);
             }
         },
@@ -534,8 +534,8 @@
             context = this.getContext();
             
             if (!context.messageBox) {
-                $('body').append($('<div id="bb5-ui-bbpagebrowser-message"/>')); 
-                context.messageBox = $('#bb5-ui-bbpagebrowser-message');
+                bb.jquery('body').append(bb.jquery('<div id="bb5-ui-bbpagebrowser-message"/>')); 
+                context.messageBox = bb.jquery('#bb5-ui-bbpagebrowser-message');
             }
             
             context.messageBox.html('<p><span class="ui-icon ui-icon-' + icon + '" style="float:left; margin:0 7px 50px 0;"></span>' + message + '</p>');
@@ -565,18 +565,18 @@
         },
         
         _mask: function() {
-            $(this.element).parent().mask(bb.i18n.__('loading'));
+            bb.jquery(this.element).parent().mask(bb.i18n.__('loading'));
         },
         
         _unmask: function() {
-            $(this.element).parent().unmask();
+            bb.jquery(this.element).parent().unmask();
         },
         
         open: function() {
             if (this.options.popup) {
-                $(this.element).dialog('open');
+                bb.jquery(this.element).dialog('open');
             } else {
-                $(this.element).show();
+                bb.jquery(this.element).show();
             }
             
             this._trigger('open');
@@ -584,9 +584,9 @@
         
         close: function() {
             if (this.options.popup) {
-                $(this.element).dialog('close');
+                bb.jquery(this.element).dialog('close');
             } else {
-                $(this.element).hide();
+                bb.jquery(this.element).hide();
                 
                 
             }
@@ -603,12 +603,12 @@
             
             //popin
             if (this.options.popup) {
-                $(this.element).dialog('destroy');
+                bb.jquery(this.element).dialog('destroy');
             } else {
-                $(this.element).hide();
+                bb.jquery(this.element).hide();
             }
             
-            $.Widget.prototype.destroy.apply(this, arguments);
+            bb.jquery.Widget.prototype.destroy.apply(this, arguments);
             
             this.setContext(context);
         },
@@ -641,33 +641,33 @@
 
                 success: function(result) {
                  
-                    $('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled",true);
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled",true);
                     var buttons = {};
                     buttons[bb.i18n.__('popupmanager.button.save')] = function() {
                         var editDialog = this;
-                        var title = ($.trim($(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()).length) ? $.trim($(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()) : false;
+                        var title = (bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()).length) ? bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()) : false;
                         var errors = [];
                         if(!title){
-                            errors.push($(editDialog).find('#bb-ui-bbpagebrowser-form-title'));
+                            errors.push(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title'));
                         }
                        
                         if(errors.length){
                             myself._showErrors(errors);
-                            $(editDialog).parents('.ui-dialog:first').unmask();
+                            bb.jquery(editDialog).parents('.ui-dialog:first').unmask();
                             return;
                         }
                         
-                        $(editDialog).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
+                        bb.jquery(editDialog).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
                         bb.webserviceManager.getInstance('ws_local_page').request('cloneBBPage', {
                             params: {
                                 page_uid: page_uid,
-                                title: $(editDialog).find('#bb-ui-bbpagebrowser-form-title').val(),
-                                url: $(editDialog).find('#bb-ui-bbpagebrowser-form-url').val(),
-                                redirect: $(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val()
+                                title: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val(),
+                                url: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-url').val(),
+                                redirect: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val()
                             },
 
                             success: function(response) {
-                                $(editDialog).dialog("close");
+                                bb.jquery(editDialog).dialog("close");
                                 if(typeof callback=="function"){
                                     callback(response.result);
                                     return;
@@ -676,25 +676,25 @@
                             },
 
                             error: function(result) {
-                                $(this).parents('.ui-dialog:first').unmask();
+                                bb.jquery(this).parents('.ui-dialog:first').unmask();
                                 myself._showMessage(bb.i18n.__('toolbar.editing.error'), result.error.message, 'alert');
                             }
                         });
                     };
                     buttons[bb.i18n.__('popupmanager.button.close')] = function() {
-                        $(this).dialog("close");
+                        bb.jquery(this).dialog("close");
                     };
 					
                     var editDialog = myself._popupDialog.create("confirmDialog",{
                         title: ((!page_uid) ? bb.i18n.__('popupmanager.button.create') : bb.i18n.__('popupmanager.button.edit')),
                         buttons: buttons
                     });
-                    $(editDialog.dialog).html($('#bb-ui-bbpagebrowser-form').get(0).innerHTML);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-title').val(result.result.title);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').val(result.result.url);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-redirect').val(result.result.redirect);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true); 
+                    bb.jquery(editDialog.dialog).html(bb.jquery('#bb-ui-bbpagebrowser-form').get(0).innerHTML);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-title').val(result.result.title);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').val(result.result.url);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-redirect').val(result.result.redirect);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true); 
 					
                     editDialog.show();
                 },
@@ -729,12 +729,12 @@
                     this.clonePage(context.clipboard,function(newNode){
                        
                         /*first append to root then move */
-                        var rootUid = "#node_"+$("#node_"+page_uid).attr("rootuid");
+                        var rootUid = "#node_"+bb.jquery("#node_"+page_uid).attr("rootuid");
                      
                         /*new node*/
                         context.treeview.jstree('create_node',rootUid, 'first', newNode, function(){
                             //context.treeview.jstree("clear_node");
-                            var newNodeId = $("#"+newNode.attr.id);
+                            var newNodeId = bb.jquery("#"+newNode.attr.id);
                             if('inside'== position){
                                 context.treeview.jstree('move_node', newNodeId,'#node_' + page_uid, 'first');
                             }
@@ -759,11 +759,11 @@
         
         _showErrors: function(fieldWithErrors){
             var context = this.getContext();
-            if($.isArray(fieldWithErrors) && fieldWithErrors.length){
-                $.each(fieldWithErrors,function(i, field){
-                    $(field).addClass("hasError");
-                    $(field).unbind("focus.error").bind("focus.error",function(e){
-                        $(e.target).removeClass("hasError");
+            if(bb.jquery.isArray(fieldWithErrors) && fieldWithErrors.length){
+                bb.jquery.each(fieldWithErrors,function(i, field){
+                    bb.jquery(field).addClass("hasError");
+                    bb.jquery(field).unbind("focus.error").bind("focus.error",function(e){
+                        bb.jquery(e.target).removeClass("hasError");
                     });
                 });
                 context.formHasError = true;
@@ -797,33 +797,33 @@
                 },
 
                 success: function(result) {
-                    $('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled",false);
-                    $('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').empty();
-                    $('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').append($('<option/>').val("").text("")); 
-                    $.each(context.layouts, function(index, layout) {
-                        $('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').append($('<option/>').val(layout.uid).text(layout.templateTitle));
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled",false);
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').empty();
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').append(bb.jquery('<option/>').val("").text("")); 
+                    bb.jquery.each(context.layouts, function(index, layout) {
+                        bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').append(bb.jquery('<option/>').val(layout.uid).text(layout.templateTitle));
                     });
                     
-                    $('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-target').val(result.target);		
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-target').val(result.target);		
                     var buttons = {};
                     buttons[bb.i18n.__('popupmanager.button.save')] = function() {
                         var editDialog = this;
-                        $(editDialog).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
+                        bb.jquery(editDialog).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
                         
                         /*handle error: title can't be empty && handle error layout can't be empty*/
-                        var title = ($.trim($(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()).length) ? $.trim($(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()) : false;
-                        var selectedLayout = ($.trim($(editDialog).find('#bb-ui-bbpagebrowser-form-layout').val()).length) ? $.trim($(editDialog).find('#bb-ui-bbpagebrowser-form-layout').val()): false;
+                        var title = (bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()).length) ? bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()) : false;
+                        var selectedLayout = (bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout').val()).length) ? bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout').val()): false;
                         /* fixme*/
                         var errors = [];
                         if(!title){
-                            errors.push($(editDialog).find('#bb-ui-bbpagebrowser-form-title'));
+                            errors.push(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title'));
                         }
                         if(!selectedLayout){
-                            errors.push($(editDialog).find('#bb-ui-bbpagebrowser-form-layout'));
+                            errors.push(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout'));
                         }
                         if(errors.length){
                             myself._showErrors(errors);
-                            $(editDialog).parents('.ui-dialog:first').unmask();
+                            bb.jquery(editDialog).parents('.ui-dialog:first').unmask();
                             return;
                         }
                           
@@ -834,23 +834,23 @@
                                 page_uid: page_uid,
                                 root_uid: root_uid,
                                 title: title,
-                                url: $(editDialog).find('#bb-ui-bbpagebrowser-form-url').val(),
-                                target: $(editDialog).find('#bb-ui-bbpagebrowser-form-target').val(),
-                                redirect: $(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val(),
+                                url: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-url').val(),
+                                target: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-target').val(),
+                                redirect: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val(),
                                 layout_uid: selectedLayout,
                                 flag: flag_value
                             },
 
                             success: function(result) {
                                 if (page_uid === null){
-                                    context.treeview.jstree('create_node', $(myself.element).find('#node_' + root_uid), 'first', result.result);
-                                   $(myself.element).find('#' + result.result.attr.id + ' a ins').addClass('bb5-jstree-offline bb5-jstree-hidden');
+                                    context.treeview.jstree('create_node', bb.jquery(myself.element).find('#node_' + root_uid), 'first', result.result);
+                                   bb.jquery(myself.element).find('#' + result.result.attr.id + ' a ins').addClass('bb5-jstree-offline bb5-jstree-hidden');
                                 } else {
-                                    context.treeview.jstree('rename_node', $(myself.element).find('#node_' + page_uid), result.result.data);
+                                    context.treeview.jstree('rename_node', bb.jquery(myself.element).find('#node_' + page_uid), result.result.data);
                                 }
 
-                                $(editDialog).parents('.ui-dialog:first').unmask();
-                                $(editDialog).dialog("close");
+                                bb.jquery(editDialog).parents('.ui-dialog:first').unmask();
+                                bb.jquery(editDialog).dialog("close");
 
                                 if (callback) {
                                     callback(result.result);
@@ -858,26 +858,26 @@
                             },
 
                             error: function(result) {
-                                $(this).parents('.ui-dialog:first').unmask();
+                                bb.jquery(this).parents('.ui-dialog:first').unmask();
                                 myself._showMessage(bb.i18n.__('toolbar.editing.error'), result.error.message, 'alert');
                             }
                         });
                     };
                     buttons[bb.i18n.__('popupmanager.button.close')] = function() {
-                        $(this).dialog("close");
+                        bb.jquery(this).dialog("close");
                     };
 					
                     var editDialog = myself._popupDialog.create("confirmDialog",{
                         title: ((!page_uid) ? bb.i18n.__('popupmanager.button.create') : bb.i18n.__('popupmanager.button.edit')),
                         buttons: buttons
                     });
-                    $(editDialog.dialog).html($('#bb-ui-bbpagebrowser-form').get(0).innerHTML);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-title').val(result.result.title);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').val(result.result.url);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-target').val(result.result.target);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-redirect').val(result.result.redirect);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
-                    $(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true); 
+                    bb.jquery(editDialog.dialog).html(bb.jquery('#bb-ui-bbpagebrowser-form').get(0).innerHTML);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-title').val(result.result.title);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').val(result.result.url);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-target').val(result.result.target);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-redirect').val(result.result.redirect);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true); 
 					
                     editDialog.show();
                 },
@@ -891,7 +891,7 @@
             var myself = this;
             var page = page;
             if ('string' == typeof(page))
-                page = $(myself.element).find('#node_' + page)
+                page = bb.jquery(myself.element).find('#node_' + page)
 			
             if ('undefined' != typeof(myself._confirmRemoveDialog)) {
                 myself._confirmRemoveDialog.destroy();
@@ -903,14 +903,14 @@
                 title: 'Page removal',
                 buttons:{
                     "Confirm": function() {
-                        if ($(page).attr('uid') === bb.frontApplication.getPageId()) {
+                        if (bb.jquery(page).attr('uid') === bb.frontApplication.getPageId()) {
                             var pageWebservice = bb.webserviceManager.getInstance('ws_local_page');
                             pageWebservice.request('delete', {
                                 params: {
                                     uid: bb.frontApplication.getPageId()
                                 },
                                 success: function(response) {
-                                    $(this).dialog("close");
+                                    bb.jquery(this).dialog("close");
                                     if (response.result) {
                                         document.location = bb.baseurl+response.result.url;
                                     } else {
@@ -918,21 +918,21 @@
                                     }
                                 },
                                 error: function(response) {
-                                    $(confirmDialog).dialog("close");
+                                    bb.jquery(confirmDialog).dialog("close");
                                     _displayError('Unable to remove current page', response.error, _remove);
                                 }
                             });
                         } else {
-                            $(this).dialog('close');
+                            bb.jquery(this).dialog('close');
                             myself.getContext().treeview.trigger('delete.jstree', page);
                         }
                     },
                     "Cancel": function() { 
-                        $(this).dialog('close');
+                        bb.jquery(this).dialog('close');
                     }
                 }
             });
-            $(myself._confirmRemoveDialog.dialog).empty().html('Delete selected page ?');
+            bb.jquery(myself._confirmRemoveDialog.dialog).empty().html('Delete selected page ?');
 			
             myself._confirmRemoveDialog.show();
         },
@@ -963,11 +963,11 @@
         },
         
         setContext: function(context) {
-            return $(this.element).data('context', $.extend($(this.element).data('context'), context));
+            return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
         
         getContext: function() {
-            return ( (typeof $(this.element).data('context') != 'undefined') ? $(this.element).data('context') : {} );
+            return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         }
     })
-})(jQuery);
+})(bb.jquery);

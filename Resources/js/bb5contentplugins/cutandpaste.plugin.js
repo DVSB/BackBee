@@ -13,7 +13,7 @@ bb.contentPluginsManager.registerPlugins("CutAndPastePlugin",{
     },
                 
     cmdPaste: function(){
-        $(this.node).append("radical blaze");
+        bb.jquery(this.node).append("radical blaze");
         alert("paste is executed");
     },
    

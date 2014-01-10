@@ -99,8 +99,8 @@ var AlohaManager = {
         if (self._contents.length == 0) 
             bool = false;
         else {
-            $.each(self._contents, function (key, item) {
-                $.each(item, function (attr, Objectvalue) {
+            bb.jquery.each(self._contents, function (key, item) {
+                bb.jquery.each(item, function (attr, Objectvalue) {
                     if (attr == inputValue){
                         bool = true;
                     }
@@ -113,8 +113,8 @@ var AlohaManager = {
     getContent: function (name) {
         var self = this;
         var content;
-        $.each(self._contents, function (key, item) {
-            $.each(item, function (attr, value) {
+        bb.jquery.each(self._contents, function (key, item) {
+            bb.jquery.each(item, function (attr, value) {
                 if (attr == name) {
                     content = item;
                 }
@@ -125,13 +125,13 @@ var AlohaManager = {
     
     setContent: function (e) {
         var self            = this;
-        var parent          = $(e.target).parents('.contentAloha');
+        var parent          = bb.jquery(e.target).parents('.contentAloha');
         if (typeof parent.attr('class') != 'undefined')
-            self._contentName = $(parent).attr('data-type');
+            self._contentName = bb.jquery(parent).attr('data-type');
     },
     
     getMainNodeContainer : function(e){
-        var mainNode = $(e.target).parents(".bb5-content").eq(0);
+        var mainNode = bb.jquery(e.target).parents(".bb5-content").eq(0);
         return mainNode;
  
     },
@@ -143,14 +143,14 @@ var AlohaManager = {
         
         if( editablesFields.length == 0 ) return;
         
-        $.each(editablesFields, function (key, object) {
+        bb.jquery.each(editablesFields, function (key, object) {
             if (!object.length == 0) {
                 return true;
             }
             
             /*use bb content uniqId*/
             var bbContentId = self.mainContainer.id;
-            $.each(object, function (attr, value) {
+            bb.jquery.each(object, function (attr, value) {
                 /* Apply style here */
                 Aloha.settings.plugins.format.editables['[data-bbContentRef="'+bbContentId+'"][data-type="' + self._contentName + '"] [data-aloha="' + attr + '"]'] = value;
             });
@@ -159,33 +159,33 @@ var AlohaManager = {
         
         Aloha.ready(function (e) {
   
-           // $('#bb5-mainLayoutRow [data-aloha]').addClass('aloha-link-text');
-           // $('#bb5-mainLayoutRow [data-aloha]').attr('contenteditable', true);
+           // bb.jquery('#bb5-mainLayoutRow [data-aloha]').addClass('aloha-link-text');
+           // bb.jquery('#bb5-mainLayoutRow [data-aloha]').attr('contenteditable', true);
             
            var contentSelectors = [];
-            $.each(editablesFields, function (key, object) {
+            bb.jquery.each(editablesFields, function (key, object) {
                 if (!object.length == 0) { /*console.log('null Object');*/
                     return true;
                 }
              
-                $.each(object, function (attr, value) {
+                bb.jquery.each(object, function (attr, value) {
                     //contentNodes = 'div.contentAloha[data-type="' + self._contentName + '"] [data-aloha="' + attr + '"]';
                     var contentNodeSelector = '[data-aloha="' + attr + '"]';
                     contentSelectors.push(contentNodeSelector);
                 });
             });
             
-            var contentNodes = $(contentSelectors.join(','),self.mainContainer.contentEl);
+            var contentNodes = bb.jquery(contentSelectors.join(','),self.mainContainer.contentEl);
             self._editableContents.push(contentNodes);
-            $(contentNodes).addClass('aloha-link-text').attr('contenteditable', true);
+            bb.jquery(contentNodes).addClass('aloha-link-text').attr('contenteditable', true);
             Aloha.jQuery(contentNodes).aloha();
 
             //solution problemes Aloha
-            jQuery('.x-tab-panel').appendTo('#bb5-edit-tabs-data #aloha');
-            jQuery('.x-tab-panel-header').live('hover', function() {
-                $(this).css('cursor', 'auto');
+            bb.jquery('.x-tab-panel').appendTo('#bb5-edit-tabs-data #aloha');
+            bb.jquery('.x-tab-panel-header').live('hover', function() {
+                bb.jquery(this).css('cursor', 'auto');
             });
-            jQuery('.aloha-floatingmenu-pin').hide();
+            bb.jquery('.aloha-floatingmenu-pin').hide();
 
         });
        
@@ -196,7 +196,7 @@ var AlohaManager = {
             
         var self = this;
         self._isEditable = true;
-        $('div [data-aloha]:not([data-aloha="image"])').die().live('click', function (e) {
+        bb.jquery('div [data-aloha]:not([data-aloha="image"])').die().live('click', function (e) {
            if(!self._isEditable) return true;
             //e.stopPropagation();
             var mainContainer = self.getMainNodeContainer(e);
@@ -204,8 +204,8 @@ var AlohaManager = {
             self.setContent(e); 
             
             /*only load the main container*/
-            if(self._contentName != $(mainContainer).attr("data-type")){
-                self._contentName =  $(mainContainer).attr("data-type");
+            if(self._contentName != bb.jquery(mainContainer).attr("data-type")){
+                self._contentName =  bb.jquery(mainContainer).attr("data-type");
             }
             
             if (self.contentExist(self._contentName) == false)
@@ -249,7 +249,7 @@ var AlohaManager = {
     
     cleanAloha : function(){
          if(this._editableContents.length!=0){
-             $.each(this._editableContents,function(i,nodes){
+             bb.jquery.each(this._editableContents,function(i,nodes){
                 if(nodes.length){
                     Aloha.jQuery(nodes).removeClass("aloha-editable-highlight");
                     Aloha.jQuery(nodes).removeClass("aloha-link-text");
@@ -257,7 +257,7 @@ var AlohaManager = {
              });
             Aloha.jQuery('*').mahalo();
          } 
-        // $('div [data-aloha]:not([data-aloha="image"])').die()
+        // bb.jquery('div [data-aloha]:not([data-aloha="image"])').die()
     },
     
     stop: function() {
@@ -267,15 +267,15 @@ var AlohaManager = {
     
     prepareSendData: function () {
         var data = [];
-        $.each($('.bb5-tabarea_content'), function (index, item) {
-            //var contentType     = $(item).attr('data-type');
+        bb.jquery.each(bb.jquery('.bb5-tabarea_content'), function (index, item) {
+            //var contentType     = bb.jquery(item).attr('data-type');
             var dataContent     = {};
             var contentFields   = {};
-            $.each($(item).find('[data-aloha]').not('[data-type="image"]'), function (key, field) {
+            bb.jquery.each(bb.jquery(item).find('[data-aloha]').not('[data-type="image"]'), function (key, field) {
                 var dataField        = {};
-                dataField['uid']     = $(field).attr('data-uid').not();
-                dataField['type']    = $(field).attr('data-type');
-                dataField['value']   = $(field).html();
+                dataField['uid']     = bb.jquery(field).attr('data-uid').not();
+                dataField['type']    = bb.jquery(field).attr('data-type');
+                dataField['value']   = bb.jquery(field).html();
                 contentFields[key]   = dataField;
             });
             dataContent = contentFields;
@@ -286,7 +286,7 @@ var AlohaManager = {
     
     sendData: function () {
         var self = this;
-        $('.saveContent').click(function() {
+        bb.jquery('.saveContent').click(function() {
             bb.webserviceManager.getInstance('ws_local_contentBlock').request('saveContents', {
                 params: {
                     data: self.prepareSendData()

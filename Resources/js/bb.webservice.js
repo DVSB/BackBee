@@ -15,7 +15,12 @@ var bb = (bb) ? bb : {};
  *
  *
  **/
-var WsCacheManager = (function(){
+
+var WsCacheManager = null;
+
+(function($) {
+
+WsCacheManager = (function(){
     
     var _instance = null;
     var _availableCleaningMode = {
@@ -28,7 +33,7 @@ var WsCacheManager = (function(){
         this.dbContainer = DbManager.init("BB5_WEBSERVICES");        
     } 
     /*Cache Constante*/
-    $.extend(WsCacheHandler,_availableCleaningMode);
+    bb.jquery.extend(WsCacheHandler,_availableCleaningMode);
     
   /**
     * Useful function that allow retrieve cache content by tags
@@ -36,10 +41,10 @@ var WsCacheManager = (function(){
     */
     var _findByTags = function(dataList,tag){
         var result = [];
-        if(!$.isArray(dataList) && typeof tag !="string") return result;
-        $.each(dataList,function(itemId,data){
-            if(("tags" in data) && $.isArray(data.tags)){
-                if($.inArray(tag,data.tags)!=-1){
+        if(!bb.jquery.isArray(dataList) && typeof tag !="string") return result;
+        bb.jquery.each(dataList,function(itemId,data){
+            if(("tags" in data) && bb.jquery.isArray(data.tags)){
+                if(bb.jquery.inArray(tag,data.tags)!=-1){
                   result.push(itemId);
                 }
             }
@@ -60,7 +65,7 @@ var WsCacheManager = (function(){
          */
         
         save:  function(key,data,tags,lifetime){
-            var tags = (tags && $.isArray(tags)) ? tags : [];
+            var tags = (tags && bb.jquery.isArray(tags)) ? tags : [];
             var secInOneYear = 60*60*24*365;
             var currentTime = new Date().getTime();  
             var lifetime = (typeof lifetime=="number") ? lifetime : secInOneYear + currentTime;
@@ -89,7 +94,7 @@ var WsCacheManager = (function(){
                     break;
                 case _availableCleaningMode.CLEAN_BY_TAGS:
                     var cDataIds = _findByTags(this.dbContainer.getData(),params);
-                    $.each(cDataIds,function(i,cId){
+                    bb.jquery.each(cDataIds,function(i,cId){
                         self.dbContainer.deleteItemById(cId);
                     });
                     return true;
@@ -125,10 +130,10 @@ var WsCacheManager = (function(){
 bb.wsCacheManager = WsCacheManager;
 
 /***** bb.webservice ****/
-bb.webservice = $.extend({}, {
-    }, $.jsonRPC);
+bb.webservice = bb.jquery.extend({}, {
+    }, bb.jquery.jsonRPC);
 
-$.extend(bb.webservice, {
+bb.jquery.extend(bb.webservice, {
     token: null,
     
     setToken: function(token) {
@@ -153,8 +158,8 @@ $.extend(bb.webservice, {
     _handleCachedRequest : function(data,options){
         var result =  false;
         var jsonData = JSON.parse(data);
-        if($.isPlainObject(jsonData)){
-            result = this.wsCacheManager.load($.md5(data));   
+        if(bb.jquery.isPlainObject(jsonData)){
+            result = this.wsCacheManager.load(bb.jquery.md5(data));   
         }
         return result;
     },
@@ -164,7 +169,7 @@ $.extend(bb.webservice, {
         var _that = this;
         var useCache = (typeof options.useCache=="boolean") ? options.useCache : false;
         if(useCache){
-            var cacheTags = ($.isArray(options.cacheTags)) ? options.cacheTags : [];   
+            var cacheTags = (bb.jquery.isArray(options.cacheTags)) ? options.cacheTags : [];   
             var cachedResult = this._handleCachedRequest(data,options);
             if(cachedResult){
                 this._requestSuccess.call(_that, cachedResult.data, options.success, options.error);
@@ -172,7 +177,7 @@ $.extend(bb.webservice, {
             }
         }
 
-        $.ajax({
+        bb.jquery.ajax({
             type: 'POST',
             async: false !== options.async,
             dataType: 'json',
@@ -188,9 +193,9 @@ $.extend(bb.webservice, {
             processData: false,
             error: function(jqXHR) {
                 if ('401' == jqXHR.status && 'undefined' != jqXHR.getResponseHeader('X-BB-AUTH')) {
-                    $(bb.authmanager).trigger('bb-auth-required', [jqXHR.getResponseHeader('X-BB-AUTH'), this]);
+                    bb.jquery(bb.authmanager).trigger('bb-auth-required', [jqXHR.getResponseHeader('X-BB-AUTH'), this]);
                 } else if ('403' == jqXHR.status && 'undefined' != jqXHR.getResponseHeader('X-BB-AUTH')) {
-                    $(bb.authmanager).trigger('bb-auth-forbidden', [jqXHR.getResponseHeader('X-BB-AUTH'), this]);
+                    bb.jquery(bb.authmanager).trigger('bb-auth-forbidden', [jqXHR.getResponseHeader('X-BB-AUTH'), this]);
                 } else {
                     _that._requestError.call(_that, jqXHR, options.error);
                 }
@@ -201,7 +206,7 @@ $.extend(bb.webservice, {
                 if(useCache){
                     /*save only if the request return no error*/
                     if(!json.error){
-                        _that.wsCacheManager.save($.md5(data),json,cacheTags);
+                        _that.wsCacheManager.save(bb.jquery.md5(data),json,cacheTags);
                     }
                 }
                 _that._requestSuccess.call(_that, json, options.success, options.error);
@@ -214,15 +219,15 @@ $.extend(bb.webservice, {
 
 bb.webserviceManager = {};
 
-$.extend(bb.webserviceManager, {
+bb.jquery.extend(bb.webserviceManager, {
     webservices: {},
     
     setup: function(config) {
         var myself = this;
         
-        $.each(config.webservices, function(index, service) {
+        bb.jquery.each(config.webservices, function(index, service) {
             myself.webservices[service.name] = {};
-            myself.webservices[service.name] = $.extend({}, {}, bb.webservice);
+            myself.webservices[service.name] = bb.jquery.extend({}, {}, bb.webservice);
 
             myself.webservices[service.name]= myself.webservices[service.name].setup({
                 token: config.token,
@@ -233,7 +238,7 @@ $.extend(bb.webserviceManager, {
     },
     	
     setToken: function(token) {
-        $.each(this.webservices, function(index, service) {
+        bb.jquery.each(this.webservices, function(index, service) {
             service.setToken(token);
         });
     },
@@ -242,6 +247,8 @@ $.extend(bb.webserviceManager, {
         return this.webservices[name];
     }
 });
+
+}) (bb.jquery);
 
 /* requireJS module webServiceManager */
 define("webserviceMng",[],function(){

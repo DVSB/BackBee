@@ -1,18 +1,22 @@
+
+
 var bb = (bb) ? bb : {};
 
+(function($){
+    
 $.loadScript = function(url, options) {
-    options = $.extend(options || {}, {
+    options = bb.jquery.extend(options || {}, {
         dataType: 'script',
         async: false,
         cache: true,
         url: bb.baseurl+url
     });
     
-    return jQuery.ajax(options);
+    return bb.jquery.ajax(options);
 };
 
-(function($){
     bb = {
+        jquery: jq172,
         isloaded: false,
         baseurl: '',
         resourcesdir: 'ressources/',
@@ -168,16 +172,16 @@ $.loadScript = function(url, options) {
         init: function() {
             if (bb.isloaded)
                 return;
-          $(bb).trigger("bb.loading.start");
+          bb.jquery(bb).trigger("bb.loading.start");
            
-            baseurl = $('#bb5-scripts').attr('src');
+            baseurl = bb.jquery('#bb5-scripts').attr('src');
             if ('undefined' != typeof(baseurl))
                 bb.baseurl = baseurl.replace(bb.resourcesdir+'js/bb.js', '');
             
             bb.loadLibs();
 
             /*Tree themes*/
-            $.jstree._themes = bb.baseurl+bb.resourcesdir+'css/jstree/';
+            bb.jquery.jstree._themes = bb.baseurl+bb.resourcesdir+'css/jstree/';
             
             /*Scripts*/
             //bb.loadScripts();
@@ -190,21 +194,23 @@ $.loadScript = function(url, options) {
 
             /*Upload*/
             bb.uploadManager.setup(bb.uploadManagerConfig); 
-             $(bb).trigger("bb.loading.end");
+             bb.jquery(bb).trigger("bb.loading.end");
             bb.isloaded = true;
         },
         
         loadLibs: function() {
-            
-            $.each(bb.libs, function(index, script) {
-                $.loadScript(bb.resourcesdir+script);
+            jQueryTmp = jQuery;
+            jQuery = bb.jquery;
+            bb.jquery.each(bb.libs, function(index, script) {
+                bb.jquery.loadScript(bb.resourcesdir+script);
             });
-           
+
+            jQuery = jQueryTmp;
         },
         
         loadScripts: function() {
-            $.each(bb.scripts, function(index, script) {
-                $.loadScript(bb.resourcesdir+script);
+            bb.jquery.each(bb.scripts, function(index, script) {
+                bb.jquery.loadScript(bb.resourcesdir+script);
             });
         },
         
@@ -219,11 +225,11 @@ $.loadScript = function(url, options) {
                 //                useCache: true,
                 //                cacheTags:["userSession"],
                 success: function(response) {
-                    if (0 == $('#bb5-toolbar-wrapper').length) {
+                    if (0 == bb.jquery('#bb5-toolbar-wrapper').length) {
                         document.location.reload();
                         return false;
                     }
-                    $(bb).trigger('bb.started');
+                    bb.jquery(bb).trigger('bb.started');
                     bb.frontApplication.init(response.result);                
                 },
                 error: function(result) {
@@ -233,13 +239,13 @@ $.loadScript = function(url, options) {
         },
         
         end: function() {
-            $(bb).trigger('bb.ended');
+            bb.jquery(bb).trigger('bb.ended');
             bb.authmanager.logoff();
             
             for(i =0; i< bb.fixedelements.length; i++)
-                $(bb.fixedelements[i]).css('top', (1*$(bb.fixedelements[i]).css('top').replace('px', '') - 3 - 1*$('#bb5-toolbar-wrapper').css('height').replace('px', '')) + 'px');
-            $('#bb5-site-wrapper').css('padding-top', bb.storedsitepadding + 'px');
-            $('#bb5-toolbar-wrapper').hide();
+                bb.jquery(bb.fixedelements[i]).css('top', (1*bb.jquery(bb.fixedelements[i]).css('top').replace('px', '') - 3 - 1*bb.jquery('#bb5-toolbar-wrapper').css('height').replace('px', '')) + 'px');
+            bb.jquery('#bb5-site-wrapper').css('padding-top', bb.storedsitepadding + 'px');
+            bb.jquery('#bb5-toolbar-wrapper').hide();
             
             bb.isloaded = false;
         },
@@ -249,12 +255,14 @@ $.loadScript = function(url, options) {
         }
     };
   bb.core = bb.core || {};  
-})(jQuery);
 
-$(document).bind('keyup', bb.start);
-$(document).ready(function() {
+
+bb.jquery(document).bind('keyup', bb.start);
+bb.jquery(document).ready(function() {
     if (-1 != window.location.search.indexOf('bb5-autostart')) {
         window.location.search = window.location.search.replace('bb5-autostart', '');
         bb.start();
     }
 });
+
+})(jq172);
