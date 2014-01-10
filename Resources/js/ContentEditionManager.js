@@ -1169,9 +1169,12 @@ var ContentEditionManager = (function($){
     };
        
 })(bb.jquery);
+
+var FormBuilder = null;
+
 (function($) {
 /* Form Builder to put to a file*/
-var FormBuilder = function(settings){
+FormBuilder = function(settings){
     this.settings = {
         formCls : "paramCls",
         noParams : bb.i18n.__('contentmanager.none_parameter')
