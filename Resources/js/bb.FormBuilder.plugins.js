@@ -1,4 +1,7 @@
 (function($) {
+
+var FormBuilder = bb.FormBuilder;
+
 bb.jquery(function(){
    
   

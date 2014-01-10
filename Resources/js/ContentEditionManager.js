@@ -1170,8 +1170,6 @@ var ContentEditionManager = (function($){
        
 })(bb.jquery);
 
-var FormBuilder = null;
-
 (function($) {
 /* Form Builder to put to a file*/
 FormBuilder = function(settings){
@@ -1390,7 +1388,6 @@ FormBuilder.registerRenderTypePlugin = function(rendererName,rendererConfig){
     RendererConstructor.prototype = bb.jquery.extend(true,PluginPrototype,protoFunc);
     FormBuilder.rendererPlugins[rendererName] = RendererConstructor;
 }
-}) (bb.jquery);
 
 FormBuilder.createSubformRenderer = function(paramName,paramsOption,mainFormId){
     /**
@@ -1443,3 +1440,5 @@ FormBuilder.createRenderer = function(renderName,userConfig){
 }
 
 bb.FormBuilder = FormBuilder;
+
+}) (bb.jquery);
