@@ -9,20 +9,18 @@
             popup: {
                 width: 200,
                 height: null,
-                position: null  
+                position: null
             },
             site: null,
             breadcrumb: [],
             editMode: false,
-            dialogClass : 'bb5-ui bb5-dialog-wrapper',
+            dialogClass: 'bb5-ui bb5-dialog-wrapper',
             title: "",
-            enableNavigation : true   
+            enableNavigation: true
         },
-
         _statesWatchable: {
             open: false
         },
-
         i18n: {
             new_node: 'News page',
             multiple_selection: 'Multiple selection',
@@ -34,49 +32,46 @@
             cut: 'Cut',
             copy: 'Copy',
             paste: 'Paste',
-            pastebf:"Paste before",
-            pasteaft:"Paste after",
+            pastebf: "Paste before",
+            pasteaft: "Paste after",
             flyto: 'Browse to',
             save: 'Save',
             close: 'Close',
             notice: 'Notice',
             error: 'Error',
-            utils : "Outils"
+            utils: "Outils"
         },
-        
         _templates: {
         },
-        
         _context: {
             site: null,
             selected: null,
             treeview: null,
             layouts: null,
             clipboard: null,
-            pastemode: null
+            pastemode: null,
+            onclick: false
         },
-        
         _popupDialog: null,
-		
         _create: function() {
             var myself = this;
-            
+
             this.setContext({
                 site: null,
                 selected: null,
                 treeview: null,
-                layouts: null
+                layouts: null,
+                maxresult: 25
             });
-            
+
         },
-        
         _init: function() {
             var myself = bb.StateManager.extend(this, 'uibbPageBrowser'),
-            context = this.getContext();
-			
+                    context = this.getContext();
+
             // dialogs manager
             myself._popupDialog = bb.PopupManager.init({
-                dialogSettings:{
+                dialogSettings: {
                     modal: true
                 }
             });
@@ -87,7 +82,7 @@
                     width: this.options.popup.width,
                     minWidth: 200,
                     minHeight: 147,
-                    autoOpen : myself.getStateOpen(),
+                    autoOpen: myself.getStateOpen(),
                     closeOnEscape: false,
                     zIndex: 500001,
                     title: this.options.title,
@@ -110,11 +105,11 @@
                                 return false;
                             });
                         }
-                        
+
                     }
-                
+
                 });
-                
+
                 /*jquery ui bug cf http://old.nabble.com/binding-the-dialog-resizeStop-event--after--dialog-creation-td25588022s27240.html*/
                 // fixme position save the current dialog position
                 bb.jquery(this.element).bind("dialogresizestop",function(event,ui){
@@ -122,7 +117,7 @@
                     bb.jquery(event.target).parent().css('position', 'fixed');
                     bb.jquery(myself.element).dialog('option','position',position);
                 });
-                
+
                 /*fix dialog position*/
                 bb.jquery(this.element).bind("dialogclose",function(event,ui){
                     myself.setStateOpen(false);
@@ -145,7 +140,7 @@
                 bb.jquery(this.element).bind("dialogdragstop",function(event,ui){
                     var top = parseInt(bb.jquery(this).parent(".bb5-dialog-wrapper").css("top"));
                     /*move up*/
-                    if(top < 0){
+                    if (top < 0) {
                         top = Math.abs(top);
                         var position = bb.jquery(myself.element).dialog('option', 'position');
                         position[1] = top;
@@ -180,10 +175,10 @@
             } else {
                 bb.jquery(this.element).show();
             }
-            
+
             bb.webserviceManager.getInstance('ws_local_layout').request('getLayoutsFromSite', {
                 useCache: true,
-                cacheTags:["userSession"],
+                cacheTags: ["userSession"],
                 params: {
                     siteId: myself.options.site
                 },
@@ -195,23 +190,22 @@
             });
             bb.jquery(this.element).disableSelection();
         },
-        
         _initTree: function(site_uid) {
             var myself = this, self = this,
-            context = this.getContext();
+                    context = this.getContext();
             //tree
             this._destroyTree();
             context.site = null;
-            
-            var plugins = [ 
-            'themes', 'rpc_data', 'ui', 'crrm' ,'types', 'html_data'
+
+            var plugins = [
+                'themes', 'rpc_data', 'ui', 'crrm', 'types', 'html_data'
             ];
-                    
+
             if (this.options.editMode) {
                 plugins.push('dnd');
                 plugins.push('contextmenu');
             }
-                        
+
             if ((site_uid) && (site_uid.length > 0)) {
                 context.site = site_uid;
                 context.treeview = bb.jquery(this.element).find('#browser').jstree({
@@ -223,22 +217,22 @@
                                 instance: bb.webserviceManager.getInstance('ws_local_page'),
                                 method: 'getBBBrowserTree'
                             },
-
-                            data : function (n) { 
-                                return { 
+                            data: function(n) {
+                                return {
                                     'site_uid': site_uid,
-                                    'root_uid' : n.attr ? n.attr('id').replace('node_','') : null,
-                                    'current_uid': bb.frontApplication.getPageId()
-                                }; 
+                                    'root_uid': n.attr ? n.attr('id').replace('node_', '') : null,
+                                    'current_uid': bb.frontApplication.getPageId(),
+                                    'fisrtresult': 0,
+                                    'maxresult': context.maxresult
+                                };
                             }
                         }
                     },
-                    
                     types: {
-                        valid_children : ['root'],
+                        valid_children: ['root'],
                         types: {
                             root: {
-                                valid_children : [ 'default', 'folder' ],
+                                valid_children: ['default', 'folder'],
                                 start_drag: false,
                                 move_node: false,
                                 delete_node: false,
@@ -246,24 +240,20 @@
                             }
                         }
                     },
-                    
-                    themes : {
+                    themes: {
                         theme: 'bb5',
                         dots: false
                     },
-
-                    ui : {
+                    ui: {
                         select_limit: 1
                     },
-                    
-                    core : {
+                    core: {
                         strings: {
                             loading: bb.i18n.__('loading'),
                             new_node: bb.i18n.__('pageselector.new_node'),
                             multiple_selection: bb.i18n.__('pageselector.multiple_selection')
                         }
                     },
-                    
                     contextmenu: {
                         select_node: true,
                         show_at_node: false,
@@ -277,26 +267,24 @@
                                 label: bb.i18n.__('popupmanager.button.create'),
                                 action: function(obj) {
                                     if (obj)
-                                        myself.editPage(null, obj.attr("id").replace("node_",""));
+                                        myself.editPage(null, obj.attr("id").replace("node_", ""));
                                 },
                                 separator_before: false,
                                 separator_after: false,
                                 icon: 'bb5-context-menu-add'
                             },
-                            
                             "bb5-context-menu-edit": {
                                 label: bb.i18n.__('popupmanager.button.edit'),
                                 action: function(obj) {
                                     var root = obj.parents('li:first');
-                                    
+
                                     if (obj)
-                                        myself.editPage(obj.attr("id").replace("node_",""), (root.length > 0) ? root.attr("id").replace("node_","") : null);
+                                        myself.editPage(obj.attr("id").replace("node_", ""), (root.length > 0) ? root.attr("id").replace("node_", "") : null);
                                 },
                                 separator_before: false,
                                 separator_after: false,
                                 icon: 'bb5-context-menu-edit'
                             },
-                            
                             "bb5-context-menu-remove": {
                                 label: bb.i18n.__('popupmanager.button.remove'),
                                 icon: 'bb5-context-menu-remove',
@@ -305,56 +293,54 @@
                                         myself.removePage(obj);
                                 }
                             },
-                            "bb5-context-menu-copy":{
-                                label : bb.i18n.__('popupmanager.button.copy'),
-                                action: function(obj){
-                                    if(obj){
-                                        myself.handleClonePage(obj.attr("id").replace("node_",""));
+                            "bb5-context-menu-copy": {
+                                label: bb.i18n.__('popupmanager.button.copy'),
+                                action: function(obj) {
+                                    if (obj) {
+                                        myself.handleClonePage(obj.attr("id").replace("node_", ""));
                                     }
                                 },
                                 separator_before: false,
                                 separator_after: false,
-                                icon: 'bb5-context-menu-copy' 
+                                icon: 'bb5-context-menu-copy'
                             },
                             "bb5-context-menu-cut": {
                                 label: bb.i18n.__('popupmanager.button.cut'),
-                                icon:"bb5-context-menu-cut",
+                                icon: "bb5-context-menu-cut",
                                 action: function(obj) {
                                     if (obj)
-                                        myself.cutPage(obj.attr("id").replace("node_",""));
+                                        myself.cutPage(obj.attr("id").replace("node_", ""));
                                 }
                             },
-                            
-                            "bb5-context-menu-paste" : {
+                            "bb5-context-menu-paste": {
                                 label: bb.i18n.__('popupmanager.button.paste'),
-                                icon:"bb5-context-menu-paste",
+                                icon: "bb5-context-menu-paste",
                                 action: function(obj) {
                                     if (obj)
-                                        myself.pastePage(obj.attr("id").replace("node_",""),"inside");
+                                        myself.pastePage(obj.attr("id").replace("node_", ""), "inside");
                                 }
                             },
-                            "bb5-context-menu-paste-bf" : {
+                            "bb5-context-menu-paste-bf": {
                                 label: bb.i18n.__('pageselector.pastebf'),
-                                icon:"bb5-context-menu-paste",
+                                icon: "bb5-context-menu-paste",
                                 action: function(obj) {
                                     if (obj)
-                                        myself.pastePage(obj.attr("id").replace("node_",""),"before");
+                                        myself.pastePage(obj.attr("id").replace("node_", ""), "before");
                                 }
                             },
-                            "bb5-context-menu-paste-aft" : {
+                            "bb5-context-menu-paste-aft": {
                                 label: bb.i18n.__('pageselector.pasteaft'),
-                                icon:"bb5-context-menu-paste",
+                                icon: "bb5-context-menu-paste",
                                 action: function(obj) {
                                     if (obj)
-                                        myself.pastePage(obj.attr("id").replace("node_",""),"after");
+                                        myself.pastePage(obj.attr("id").replace("node_", ""), "after");
                                 }
                             },
-                           
                             "bb5-context-menu-flyto": {
                                 label: bb.i18n.__('pageselector.flyto'),
                                 action: function(obj) {
                                     if (obj)
-                                        myself.browsePage(obj.attr("id").replace("node_",""), true);
+                                        myself.browsePage(obj.attr("id").replace("node_", ""), true);
                                 },
                                 separator_before: true,
                                 separator_after: false,
@@ -362,25 +348,23 @@
                             }
                         }
                     }
-                }).bind('loaded.jstree', function (e,node) {
+                }).bind('loaded.jstree', function(e, node) {
                     //selected node
                     if ((myself.options.breadcrumb) && (myself.options.breadcrumb.length > 0)) {
                         context.selected = myself.options.breadcrumb[myself.options.breadcrumb.length-1];
                         bb.jquery(myself.element).find('#node_' + myself.options.breadcrumb[myself.options.breadcrumb.length-1] + ' a:first').attr('class', 'jstree-clicked');
                         myself.setContext(context);
                     }
-                    
+
                     //disable specific actions for node
                     bb.jquery(document).live('context_show.vakata', function(e) {
                         var context = myself.getContext();
                         context.selected = bb.jquery.vakata.context.par.attr('id').replace('node_','');
                         var treeContainer = context.treeview.jstree("get_container");
                         myself._trigger('select', e, {
-                            node_id: context.selected 
+                            node_id: context.selected
                         });
                         myself.setContext(context);
-                        // console.log("context",context.selected);
-                        //console.log("clipboard",context.clipboard);
                         //root change
                         if (bb.jquery.vakata.context.par.attr('url') == '/') {
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-remove"]').parent("li").hide();
@@ -410,28 +394,72 @@
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide(); 
                         }
-                        
+
                     });
-                    
+
                     myself._trigger('ready');
-                }).bind('click.jstree', function (e) {
-                    if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
-                        context.selected = bb.jquery(e.target).parents('li:first').attr('id').replace('node_','');
+                }).bind('click.jstree', function(e) {
+                    var context = myself.getContext();
+                    if (bb.jquery(e.target).hasClass('nextresults')) {
+                        // for next 25 results
+                        if (context.onclick == true) {
+                            return;
+                        }
+                        context.onclick = true;
+                        var next_firstresult = bb.jquery(e.target).attr('data-nextresult');
+                        var parent = bb.jquery(e.target).parent().parent().parent();
+                        var parent_uid = bb.jquery(e.target).parent().parent().parent().attr('uid');
+                        bb.webserviceManager.getInstance('ws_local_page').request('getBBBrowserTree', {
+                            params: {
+                                'site_uid': context.site,
+                                'root_uid': parent_uid,
+                                'current_uid': bb.frontApplication.getPageId(),
+                                'fisrtresult': next_firstresult,
+                                'maxresult': context.maxresult,
+                                'nextresults': context.nextresults
+                            },
+                            success: function(response) {
+                                context.onclick = false;
+                                if (!response.result) {
+                                    return;
+                                }
+                                else {
+                                    bb.jquery.each(response.result.results, function(item, node) {
+                                        context.treeview.jstree('create_node', bb.jquery(myself.element).find('#node_' + parent_uid), 'last', node);
+                                    });
+                                    bb.jquery(e.target).attr('data-nextresult', 1 * response.result.firstresult + 1 * response.result.maxresult);
+                                    try {
+                                        if (response.result.numresults < (1 * response.result.firstresult + 1 * response.result.maxresult)) {
+                                            context.treeview.jstree('delete_node', bb.jquery(e.target));
+                                        } else {
+                                            context.treeview.jstree('move_node', bb.jquery(e.target), '#node_' + parent_uid, "last");
+                                        }
+                                    } catch (e) {
+                                        // nothing to do
+                                    }
+                                }
+                            }
+                        });
+                    } else if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
+                        context.selected = bb.jquery(e.target).parents('li:first').attr('id').replace('node_', '');
                         myself._trigger('select', e, {
-                            node_id: context.selected 
+                            node_id: context.selected
                         });
                         myself.setContext(context);
                     }
-                }).bind('dblclick.jstree', function (e) {
-                    if(!myself.options.enableNavigation) return;
+                }).bind('dblclick.jstree', function(e) {
+                    if (bb.jquery(e.target).hasClass('nextresults'))
+                        return;
+                    if (!myself.options.enableNavigation)
+                        return;
                     if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
-                        myself.browsePage(bb.jquery(e.target).parents('li:first').attr('id').replace('node_',''), false);
+                        myself.browsePage(bb.jquery(e.target).parents('li:first').attr('id').replace('node_', ''), false);
                     }
-                }).bind("create.jstree", function (e, data) {
-                    bb.webserviceManager.getInstance('ws_local_page').request('insertBBBrowserTree', {  
+                }).bind("create.jstree", function(e, data) {
+                    bb.webserviceManager.getInstance('ws_local_page').request('insertBBBrowserTree', {
                         params: {
                             title: data.rslt.name,
-                            root_uid: data.rslt.parent.attr("id").replace("node_","")
+                            root_uid: data.rslt.parent.attr("id").replace("node_", "")
                         },
                         success: function(result) {
                             if (!result.result)
@@ -443,18 +471,18 @@
                             }
                         }
                     });
-                }).bind("rename.jstree", function (e, data) {
-                    bb.webserviceManager.getInstance('ws_local_page').request('renameBBBrowserTree', {  
+                }).bind("rename.jstree", function(e, data) {
+                    bb.webserviceManager.getInstance('ws_local_page').request('renameBBBrowserTree', {
                         params: {
                             title: data.rslt.new_name,
-                            page_uid: data.rslt.obj.attr("id").replace("node_","")
+                            page_uid: data.rslt.obj.attr("id").replace("node_", "")
                         },
                         success: function(result) {
                             if (!result.result)
                                 bb.jquery.jstree.rollback(data.rlbk);
                         }
                     });
-                }).bind("delete.jstree", function (e, data) {
+                }).bind("delete.jstree", function(e, data) {
                     var context = myself.getContext();
                     if ((data) && !(data.rslt)) {
                         data = {
@@ -463,12 +491,12 @@
                             }
                         };
                     }
-					
+
                     if (data && data.rslt.obj) {
                         context.treeview.jstree('delete_node', data.rslt.obj);
-                        bb.webserviceManager.getInstance('ws_local_page').request('delete', {  
+                        bb.webserviceManager.getInstance('ws_local_page').request('delete', {
                             params: {
-                                uid: data.rslt.obj.attr("id").replace("node_","")
+                                uid: data.rslt.obj.attr("id").replace("node_", "")
                             },
                             success: function(result) {
                                 if (!result.result) {
@@ -481,10 +509,10 @@
                             bb.jquery.jstree.rollback(data.rlbk);
                     }
                     e.stopPropagation();
-                }).bind("move_node.jstree", function (e, data) {
-                    
+                }).bind("move_node.jstree", function(e, data) {
+
                     var widget = myself;
-                    data.rslt.o.each(function (i) {
+                    data.rslt.o.each(function(i) {
                         var myself = this;
                         var id = bb.jquery(myself).attr('id');
                         //remove from the dom if exitst the element's phantom after it has been pasted
@@ -494,7 +522,7 @@
                         }                       
                         if (data.rslt.cr !== -1) {
                             widget._mask();
-                            bb.webserviceManager.getInstance('ws_local_page').request('moveBBBrowserTree', {  
+                            bb.webserviceManager.getInstance('ws_local_page').request('moveBBBrowserTree', {
                                 params: {
                                     page_uid: bb.jquery(myself).attr('id').replace('node_',''),
                                     root_uid: data.rslt.np.attr('id').replace('node_',''),
@@ -505,7 +533,7 @@
                                         bb.jquery.jstree.rollback(data.rlbk);
                                     widget._unmask();
                                 },
-                                error:function(){
+                                error: function() {
                                     widget._unmask();
                                 }
                             });
@@ -514,32 +542,30 @@
                         }
                     });
                 });
-                window.tree = context.treeview; 
+                window.tree = context.treeview;
                 this.setContext(context);
             }
         },
-        
         _destroyTree: function() {
             var context = this.getContext();
-            
+
             if (context.treeview) {
                 context.treeview.jstree('destroy');
                 bb.jquery(this.element).find('#browser').children().remove();
                 this.setContext(context);
             }
         },
-        
         _showMessage: function(title, message, icon) {
             var myself = this,
-            context = this.getContext();
-            
+                    context = this.getContext();
+
             if (!context.messageBox) {
                 bb.jquery('body').append(bb.jquery('<div id="bb5-ui-bbpagebrowser-message"/>')); 
                 context.messageBox = bb.jquery('#bb5-ui-bbpagebrowser-message');
             }
-            
+
             context.messageBox.html('<p><span class="ui-icon ui-icon-' + icon + '" style="float:left; margin:0 7px 50px 0;"></span>' + message + '</p>');
-           
+
             context.messageBox.dialog({
                 title: title,
                 dialogClass: myself.options.dialogClass,
@@ -548,40 +574,36 @@
                 height: 'auto',
                 modal: true,
                 resizable: false,
-                position: ['center','center'],
+                position: ['center', 'center'],
                 buttons: {},
                 close: function() {
                 }
             });
-            
+
             var buttons = {};
             buttons[bb.i18n.__('popupmanager.button.close')] = function() {
                 context.messageBox.dialog('close');
             };
-                    
-            context.messageBox.dialog('option', 'buttons', buttons );
-            
+
+            context.messageBox.dialog('option', 'buttons', buttons);
+
             this.setContext(context);
         },
-        
         _mask: function() {
             bb.jquery(this.element).parent().mask(bb.i18n.__('loading'));
         },
-        
         _unmask: function() {
             bb.jquery(this.element).parent().unmask();
         },
-        
         open: function() {
             if (this.options.popup) {
                 bb.jquery(this.element).dialog('open');
             } else {
                 bb.jquery(this.element).show();
             }
-            
+
             this._trigger('open');
         },
-        
         close: function() {
             if (this.options.popup) {
                 bb.jquery(this.element).dialog('close');
@@ -590,17 +612,16 @@
                 
                 
             }
-            
+
             this._trigger('close');
         },
-        
-        destroy: function(){
+        destroy: function() {
             var context = this.getContext();
-            
+
             this._destroyTree();
-            
+
             context.site = null;
-            
+
             //popin
             if (this.options.popup) {
                 bb.jquery(this.element).dialog('destroy');
@@ -612,33 +633,29 @@
             
             this.setContext(context);
         },
-        	
         cutPage: function(page_uid) {
-            var myself = this;	
+            var myself = this;
             var context = myself.getContext();
             context.clipboard = page_uid;
-            context.pastemode = 'cut';	
+            context.pastemode = 'cut';
             myself.setContext(context);
         },
-        
-        handleClonePage : function(page_uid){
+        handleClonePage: function(page_uid) {
             var context = this.getContext();
             context.clipboard = page_uid;
             context.pastemode = "copy";
             this.setContext(context);
         },
-        
-        clonePage: function (page_uid, callback) {
+        clonePage: function(page_uid, callback) {
             var myself = this;
             var context = myself.getContext();
-            var flyto = (typeof flyto=="boolean") ? flyto : true; //true by default
+            var flyto = (typeof flyto == "boolean") ? flyto : true; //true by default
             myself.setContext(context);
-            
+
             bb.webserviceManager.getInstance('ws_local_page').request('getBBSelectorForm', {
                 params: {
                     page_uid: page_uid
                 },
-
                 success: function(result) {
                  
                     bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled",true);
@@ -650,8 +667,8 @@
                         if(!title){
                             errors.push(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title'));
                         }
-                       
-                        if(errors.length){
+
+                        if (errors.length) {
                             myself._showErrors(errors);
                             bb.jquery(editDialog).parents('.ui-dialog:first').unmask();
                             return;
@@ -665,16 +682,14 @@
                                 url: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-url').val(),
                                 redirect: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val()
                             },
-
                             success: function(response) {
                                 bb.jquery(editDialog).dialog("close");
                                 if(typeof callback=="function"){
                                     callback(response.result);
                                     return;
                                 }
-                            //myself.browsePage(result.result.attr.id.replace('node_', '', 'i'), false);
+                                myself.browsePage(result.result.attr.id.replace('node_', '', 'i'), false);
                             },
-
                             error: function(result) {
                                 bb.jquery(this).parents('.ui-dialog:first').unmask();
                                 myself._showMessage(bb.i18n.__('toolbar.editing.error'), result.error.message, 'alert');
@@ -684,8 +699,8 @@
                     buttons[bb.i18n.__('popupmanager.button.close')] = function() {
                         bb.jquery(this).dialog("close");
                     };
-					
-                    var editDialog = myself._popupDialog.create("confirmDialog",{
+
+                    var editDialog = myself._popupDialog.create("confirmDialog", {
                         title: ((!page_uid) ? bb.i18n.__('popupmanager.button.create') : bb.i18n.__('popupmanager.button.edit')),
                         buttons: buttons
                     });
@@ -703,61 +718,59 @@
                 }
             });
         },
-       
-        pastePage: function (page_uid,position) {
+        pastePage: function(page_uid, position) {
             var myself = this;
-            var position = position || false; 
-            var context = myself.getContext(); 
+            var position = position || false;
+            var context = myself.getContext();
             if (context.clipboard && position) {
                 /* handle cut/paste */
-                if(context.pastemode=="cut"){
+                if (context.pastemode == "cut") {
                     if ('inside' == position) {
                         /*node is always added as the first child of his parent*/
-                        context.treeview.jstree('move_node', '#node_' + context.clipboard, '#node_' + page_uid,"first"); 
-                    } 
-                
-                    else if("before"==position) {
-                        context.treeview.jstree('move_node', '#node_' + context.clipboard, '#node_' + page_uid,position); 
+                        context.treeview.jstree('move_node', '#node_' + context.clipboard, '#node_' + page_uid, "first");
                     }
-                
-                    else if("after"==position){
-                        context.treeview.jstree('move_node', '#node_' + context.clipboard, '#node_' + page_uid,position);
+
+                    else if ("before" == position) {
+                        context.treeview.jstree('move_node', '#node_' + context.clipboard, '#node_' + page_uid, position);
+                    }
+
+                    else if ("after" == position) {
+                        context.treeview.jstree('move_node', '#node_' + context.clipboard, '#node_' + page_uid, position);
                     }
                 }
                 /*handle copy/paste */
-                if(context.pastemode=="copy"){
-                    this.clonePage(context.clipboard,function(newNode){
-                       
+                if (context.pastemode == "copy") {
+                    this.clonePage(context.clipboard, function(newNode) {
+
                         /*first append to root then move */
                         var rootUid = "#node_"+bb.jquery("#node_"+page_uid).attr("rootuid");
                      
                         /*new node*/
-                        context.treeview.jstree('create_node',rootUid, 'first', newNode, function(){
+                        context.treeview.jstree('create_node', rootUid, 'first', newNode, function() {
                             //context.treeview.jstree("clear_node");
                             var newNodeId = bb.jquery("#"+newNode.attr.id);
                             if('inside'== position){
                                 context.treeview.jstree('move_node', newNodeId,'#node_' + page_uid, 'first');
                             }
-                            if('before'== position){
-                                context.treeview.jstree('move_node', newNodeId,'#node_' + page_uid, 'before');
+                            if ('before' == position) {
+                                context.treeview.jstree('move_node', newNodeId, '#node_' + page_uid, 'before');
                             }
-                            if('after'== position){
+                            if ('after' == position) {
                                 context.treeview.jstree('move_node', newNodeId, '#node_' + page_uid, 'after');
                             }
                         });
-                       
-                       
-                    }); 
+
+
+                    });
                 }
                 context.treeview.jstree("clear_node");
             }
-			
+
             context.clipboard = null;
             context.pastemode = null;
             myself.setContext(context);
         },
-        
-        _showErrors: function(fieldWithErrors){
+        _showErrors: function(fieldWithErrors) {
             var context = this.getContext();
             if(bb.jquery.isArray(fieldWithErrors) && fieldWithErrors.length){
                 bb.jquery.each(fieldWithErrors,function(i, field){
@@ -769,16 +782,16 @@
                 context.formHasError = true;
                 this.setContext(context);
             }
-            
-        },	
+
+        },
         editPage: function(page_uid, root_uid, callback, flag) {
             var myself = this,
-            context = this.getContext(),
-            flag_value = 'contextual';
+                    context = this.getContext(),
+                    flag_value = 'contextual';
             if (flag) {
                 flag_value = flag;
             }
-			
+
             if (!context.layouts) {
                 bb.webserviceManager.getInstance('ws_local_layout').request('getLayoutsFromSite', {
                     params: {
@@ -795,7 +808,6 @@
                 params: {
                     page_uid: page_uid
                 },
-
                 success: function(result) {
                     bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled",false);
                     bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').empty();
@@ -821,14 +833,14 @@
                         if(!selectedLayout){
                             errors.push(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout'));
                         }
-                        if(errors.length){
+                        if (errors.length) {
                             myself._showErrors(errors);
                             bb.jquery(editDialog).parents('.ui-dialog:first').unmask();
                             return;
                         }
-                          
-                           
-                       
+
+
+
                         bb.webserviceManager.getInstance('ws_local_page').request('postBBSelectorForm', {
                             params: {
                                 page_uid: page_uid,
@@ -840,7 +852,6 @@
                                 layout_uid: selectedLayout,
                                 flag: flag_value
                             },
-
                             success: function(result) {
                                 if (page_uid === null){
                                     context.treeview.jstree('create_node', bb.jquery(myself.element).find('#node_' + root_uid), 'first', result.result);
@@ -856,7 +867,6 @@
                                     callback(result.result);
                                 }
                             },
-
                             error: function(result) {
                                 bb.jquery(this).parents('.ui-dialog:first').unmask();
                                 myself._showMessage(bb.i18n.__('toolbar.editing.error'), result.error.message, 'alert');
@@ -866,8 +876,8 @@
                     buttons[bb.i18n.__('popupmanager.button.close')] = function() {
                         bb.jquery(this).dialog("close");
                     };
-					
-                    var editDialog = myself._popupDialog.create("confirmDialog",{
+
+                    var editDialog = myself._popupDialog.create("confirmDialog", {
                         title: ((!page_uid) ? bb.i18n.__('popupmanager.button.create') : bb.i18n.__('popupmanager.button.edit')),
                         buttons: buttons
                     });
@@ -886,7 +896,6 @@
                 }
             });
         },
-        
         removePage: function(page) {
             var myself = this;
             var page = page;
@@ -896,12 +905,12 @@
             if ('undefined' != typeof(myself._confirmRemoveDialog)) {
                 myself._confirmRemoveDialog.destroy();
             }
-			
+
             var alertDialog = bb.PopupManager.init({});
-            myself._confirmRemoveDialog = alertDialog.create('confirmDialog',{
-                dialogType : alertDialog.dialogType.CONFIRMATION,
+            myself._confirmRemoveDialog = alertDialog.create('confirmDialog', {
+                dialogType: alertDialog.dialogType.CONFIRMATION,
                 title: 'Page removal',
-                buttons:{
+                buttons: {
                     "Confirm": function() {
                         if (bb.jquery(page).attr('uid') === bb.frontApplication.getPageId()) {
                             var pageWebservice = bb.webserviceManager.getInstance('ws_local_page');
@@ -912,7 +921,7 @@
                                 success: function(response) {
                                     bb.jquery(this).dialog("close");
                                     if (response.result) {
-                                        document.location = bb.baseurl+response.result.url;
+                                        document.location = bb.baseurl + response.result.url;
                                     } else {
                                         _displayError('Unable to remove current page', null, _remove);
                                     }
@@ -936,36 +945,32 @@
 			
             myself._confirmRemoveDialog.show();
         },
-		
         browsePage: function(page_uid, redirect) {
             this._mask();
             bb.webserviceManager.getInstance('ws_local_page').request('getBBSelectorForm', {
                 params: {
                     page_uid: page_uid
                 },
-
                 success: function(result) {
                     if (result.result) {
-                        var href = bb.baseurl + ((result.result.url.indexOf('/', 0)==0) ? result.result.url.substring(1, result.result.url.length) : result.result.url);
-                        if (result.result.url.lastIndexOf('/') != (result.result.url.length-1)) {
+                        var href = bb.baseurl + ((result.result.url.indexOf('/', 0) == 0) ? result.result.url.substring(1, result.result.url.length) : result.result.url);
+                        if (result.result.url.lastIndexOf('/') != (result.result.url.length - 1)) {
                             href += '.html';
                         }
-                        
+
                         var parameters = [];
                         if (false == redirect) {
                             parameters.push('bb5-redirect=false');
                         }
-                        
-                        document.location.href = href + ((0 != parameters.length) ? '?' + parameters.join('&') : '');                        
+
+                        document.location.href = href + ((0 != parameters.length) ? '?' + parameters.join('&') : '');
                     }
                 }
             });
         },
-        
         setContext: function(context) {
             return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
-        
         getContext: function() {
             return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         }
