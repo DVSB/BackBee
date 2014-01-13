@@ -2,7 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-var DbManager = (function(){
+
+var DbManager = null;
+var SmartList = null;
+
+(function($) {
+
+DbManager = (function(){
   
     var _db = null;
     var _dbName = null;
@@ -72,13 +78,13 @@ var DbManager = (function(){
         getDb:_getDb
     };
 })();
-      
+
 /*
     *Simple data container with action events
     *events : [add,change,destroy]
     *
     **/
-var SmartList = function(config){
+SmartList = function(config){
     var config = config || {}; 
     this.name = config.name || "list_"+new Date().getTime();
     this.dataContainer = {};
@@ -144,11 +150,11 @@ var SmartList = function(config){
     SmartList.prototype.toArray = function(clear){
         var cleanData = [];
         if(clear){
-            $.each(this.dataContainer,function(key,item){
+            bb.jquery.each(this.dataContainer,function(key,item){
                 cleanData.push(item);
             });
         }else{
-            var cleanData = $.makeArray(this.dataContainer);
+            var cleanData = bb.jquery.makeArray(this.dataContainer);
         }
         return cleanData;
     }
@@ -176,8 +182,8 @@ var SmartList = function(config){
     SmartList.prototype.setData = function(data,keyId){
         if(keyId) this.keyId = keyId;
         var self = this;
-        if($.isArray(data)){
-            $.each(data,function(i,item){
+        if(bb.jquery.isArray(data)){
+            bb.jquery.each(data,function(i,item){
                 var itemId = item[self.keyId];
                 self.set(itemId,item);
             });
@@ -191,8 +197,8 @@ var SmartList = function(config){
     SmartList.prototype.addData = function(data){
         var self = this;
         var items = [];
-        if($.isArray(data)){
-            $.each(data,function(i,item){
+        if(bb.jquery.isArray(data)){
+            bb.jquery.each(data,function(i,item){
                 var itemId = item[self.keyId];
                 var newKey = self.keyId+"_"+itemId;
                 self.set(itemId,item);
@@ -200,7 +206,7 @@ var SmartList = function(config){
             });
         }else{
             var data = (data) ? data : {};
-            this.dataContainer = $.extend(true,this.dataContainer,data);
+            this.dataContainer = bb.jquery.extend(true,this.dataContainer,data);
         }
         this.onAdd.call(this,items);
     }
@@ -215,6 +221,8 @@ var SmartList = function(config){
    
 /*register*/
 bb.SmartList = SmartList;
+
+}) (bb.jquery);
 
 /*
 Array.prototype.remove = function(from, to) {

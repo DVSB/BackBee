@@ -5,6 +5,7 @@
  * les rendre accessible dans un tableau
  *
  **/
+(function($) {
 BB4.ToolsbarManager.register("contenttb",{
     _settings : {
         mainContainer:"#bb5-editing",
@@ -38,8 +39,8 @@ BB4.ToolsbarManager.register("contenttb",{
     _beforeCallbacks :{
         selectPath : function(e){},
         blockClicked : function(e){
-            var content = $(e.currentTarget).data(this._settings.contentTypeDataKey);
-            $(this.blockInfosDialog.dialog).html($('<div class="bb5-dialog-info"><p class="bb5-dialog-visualclue-x"><i style="background-image:url('+content.contentPic+')"></i></p><div class="bb5-dialog-info-desc"><p><strong>'+content.label+'</strong></p><p><em>'+bb.i18n.__('toolbar.contents.desc')+'</em> <br>'+content.description+'</p></div>'));
+            var content = bb.jquery(e.currentTarget).data(this._settings.contentTypeDataKey);
+            bb.jquery(this.blockInfosDialog.dialog).html(bb.jquery('<div class="bb5-dialog-info"><p class="bb5-dialog-visualclue-x"><i style="background-image:url('+content.contentPic+')"></i></p><div class="bb5-dialog-info-desc"><p><strong>'+content.label+'</strong></p><p><em>'+bb.i18n.__('toolbar.contents.desc')+'</em> <br>'+content.description+'</p></div>'));
             this.blockInfosDialog.show();
             this._callbacks["blockClicked_action"].call(this,content);
             return true;
@@ -56,12 +57,12 @@ BB4.ToolsbarManager.register("contenttb",{
         this._bindPrivateEvents();
         this.contentBlockCategories = new SmartList({
             idKey:"uid",
-            onInit : $.proxy(this._onInitBlockCategories,this)
+            onInit : bb.jquery.proxy(this._onInitBlockCategories,this)
         });
 
         this.contentBlocksContainer = new SmartList({
             idKey:"uid",
-            onInit : $.proxy(this._onInitContentBlocks,this)
+            onInit : bb.jquery.proxy(this._onInitContentBlocks,this)
         });
 
         this.blockInfosDialog = dialogManager.create("blocksInfoDialog",{
@@ -70,7 +71,7 @@ BB4.ToolsbarManager.register("contenttb",{
                 "Cancel" : {
                     text: bb.i18n.__('popupmanager.button.cancel'),
                     click: function(){
-                        $(this).dialog("close");
+                        bb.jquery(this).dialog("close");
                         return false;
                     }
                 }
@@ -84,19 +85,19 @@ BB4.ToolsbarManager.register("contenttb",{
     /*contentType draggable*/
     _initSortable : function(){
         var self = this;
-        $(this._settings.contentBlockInfos.contentListId).sortable({
+        bb.jquery(this._settings.contentBlockInfos.contentListId).sortable({
             connectWith : this._settings.connectedSortableClass,
             placeholder:"bb5-droppable-place",
             items :this._settings.sortableClass,
             zIndex : 500001,
             clone: true,
             helper : function(e,el){
-                var contentTypeParams = $(el).data(self._settings.contentTypeDataKey);
+                var contentTypeParams = bb.jquery(el).data(self._settings.contentTypeDataKey);
                 var pictoName = bb.baseurl+'ressources/img/contents/'+contentTypeParams.name.replace('\\', '/')+'.png';
-                var helper  = $("<div></div>").clone();
-                $(helper).addClass("bb5-content-type-helper");
-                $(helper).data(self._settings.contentTypeDataKey,contentTypeParams);
-                $(helper).css({
+                var helper  = bb.jquery("<div></div>").clone();
+                bb.jquery(helper).addClass("bb5-content-type-helper");
+                bb.jquery(helper).data(self._settings.contentTypeDataKey,contentTypeParams);
+                bb.jquery(helper).css({
                     backgroundImage:"url("+pictoName+")"
                 });
                 return helper;
@@ -104,28 +105,28 @@ BB4.ToolsbarManager.register("contenttb",{
 
             itemdrop : function(event,ui){
                 if(ui.item){
-                    $(ui.item).show();
+                    bb.jquery(ui.item).show();
                 }
-            //$(this).sortable("cancel");
+            //bb.jquery(this).sortable("cancel");
             },
 
 
             start:  function(event,ui){
-                $(ui.item).show();
-            /*$(document).trigger("content:startDrag");
+                bb.jquery(ui.item).show();
+            /*bb.jquery(document).trigger("content:startDrag");
                 var clonedContentBlock = ui.item.clone();
-                $(clonedContentBlock).addClass("prevContent");
-                $(ui.item).before(clonedContentBlock);
+                bb.jquery(clonedContentBlock).addClass("prevContent");
+                bb.jquery(ui.item).before(clonedContentBlock);
                 clonedContentBlock.show();*/
 
             },
 
             stop : function(event,ui){
-                /*$(this).find(".prevContent");
-                $(this).find(".prevContent").remove();*/
-                $(ui.item).show();
-                $(document).trigger("content:stopDrag");
-            //$(this).sortable("cancel");
+                /*bb.jquery(this).find(".prevContent");
+                bb.jquery(this).find(".prevContent").remove();*/
+                bb.jquery(ui.item).show();
+                bb.jquery(document).trigger("content:stopDrag");
+            //bb.jquery(this).sortable("cancel");
 
             },
 
@@ -178,19 +179,19 @@ BB4.ToolsbarManager.register("contenttb",{
         var contentFragment = document.createDocumentFragment();
         var self = this;
 
-        $.each(blocks,function(i,data){
-            var contentBlock = $("<li></li>").clone();
-            $(contentBlock).addClass("contentBlock");
+        bb.jquery.each(blocks,function(i,data){
+            var contentBlock = bb.jquery("<li></li>").clone();
+            bb.jquery(contentBlock).addClass("contentBlock");
             data.contentPic = bb.baseurl+'ressources/img/contents/'+data.name.replace('\\', '/')+'.png';
-            $(contentBlock).data(self._settings.contentTypeDataKey,data);
-            var btn = $("<button></button>").clone();
-            $(btn).append('<i style="background-image:url('+bb.baseurl+'ressources/img/contents/'+data.name.replace('\\', '/')+'.png)"></i>');
-            $(btn).addClass(self._settings.contentBlockClass).attr("title",data.label);
+            bb.jquery(contentBlock).data(self._settings.contentTypeDataKey,data);
+            var btn = bb.jquery("<button></button>").clone();
+            bb.jquery(btn).append('<i style="background-image:url('+bb.baseurl+'ressources/img/contents/'+data.name.replace('\\', '/')+'.png)"></i>');
+            bb.jquery(btn).addClass(self._settings.contentBlockClass).attr("title",data.label);
             if(data.disable && data.disable==true){
-                $(btn).addClass("bbBtnUnavailable");
+                bb.jquery(btn).addClass("bbBtnUnavailable");
             }
-            $(contentBlock).append(btn);
-            contentFragment.appendChild($(contentBlock).get(0));
+            bb.jquery(contentBlock).append(btn);
+            contentFragment.appendChild(bb.jquery(contentBlock).get(0));
         });
 
         if(this.blockSlide){
@@ -198,14 +199,14 @@ BB4.ToolsbarManager.register("contenttb",{
             this._clearBlocksSlide();
         }
 
-        $(this.contentBlockInfos.contentListId).html($(contentFragment));
+        bb.jquery(this.contentBlockInfos.contentListId).html(bb.jquery(contentFragment));
         var hideAfter = false;
-        if( $(this._settings.mainContainer).hasClass("ui-tabs-hide")){
+        if( bb.jquery(this._settings.mainContainer).hasClass("ui-tabs-hide")){
             hideAfter = true;
-            $(this._settings.mainContainer).removeClass("ui-tabs-hide");
+            bb.jquery(this._settings.mainContainer).removeClass("ui-tabs-hide");
         }
-        $(this._settings.mainContainer).removeClass("ui-tabs-hide");
-        this.blockSlide = $(this.contentBlockInfos.contentListId).bxSlider({
+        bb.jquery(this._settings.mainContainer).removeClass("ui-tabs-hide");
+        this.blockSlide = bb.jquery(this.contentBlockInfos.contentListId).bxSlider({
             nextText:'<span><i class="bxBtn visuallyhidden focusable">'+bb.i18n.__('Next')+'</i></span>',
             prevText:'<span><i class="bxBtn visuallyhidden focusable">'+bb.i18n.__('Previous')+'</i></span>',
             displaySlideQty:4,
@@ -215,37 +216,37 @@ BB4.ToolsbarManager.register("contenttb",{
         });
         this._initSortable();
         if(hideAfter){
-            $(this._settings.mainContainer).addClass("ui-tabs-hide");
+            bb.jquery(this._settings.mainContainer).addClass("ui-tabs-hide");
         }
 
     },
 
 
     _clearBlocksSlide : function(){
-        var tpl = $("<ul class='bbGridSlide'></ul>").clone();
-        $(tpl).attr("id",this._settings.contentBlockInfos.contentListId.replace("#",""));
-        $(this.contentBlockInfos.contentListId).parents(".bx-wrapper").html($(tpl));
+        var tpl = bb.jquery("<ul class='bbGridSlide'></ul>").clone();
+        bb.jquery(tpl).attr("id",this._settings.contentBlockInfos.contentListId.replace("#",""));
+        bb.jquery(this.contentBlockInfos.contentListId).parents(".bx-wrapper").html(bb.jquery(tpl));
     },
 
     _onInitBlockCategories : function(blockCategories){
         var contentFragment = document.createDocumentFragment();
-        $.each(blockCategories, function(i,blockCategory){
-            var option = $("<option>"+blockCategory.name+"</option>").clone();
-            if(blockCategory.selected==true) $(option).attr("selected","selected");
-            $(option).attr("value",blockCategory.name);
-            contentFragment.appendChild($(option).get(0));
+        bb.jquery.each(blockCategories, function(i,blockCategory){
+            var option = bb.jquery("<option>"+blockCategory.name+"</option>").clone();
+            if(blockCategory.selected==true) bb.jquery(option).attr("selected","selected");
+            bb.jquery(option).attr("value",blockCategory.name);
+            contentFragment.appendChild(bb.jquery(option).get(0));
         });
 
-        $(this.contentBlockInfos.contentCatContainerId).html(contentFragment);
+        bb.jquery(this.contentBlockInfos.contentCatContainerId).html(contentFragment);
     },
 
 
     _blockCategoryChanged : function(e){
-        $("#bb5-slider-blocks").mask();
+        bb.jquery("#bb5-slider-blocks").mask();
         var selectCategory = e.currentTarget;
-        var currentTemplate = $(selectCategory).get(0).selectedIndex;
-        var items = $(selectCategory).get(0).options;
-        var selectedCat = $(items[currentTemplate]).val();
+        var currentTemplate = bb.jquery(selectCategory).get(0).selectedIndex;
+        var items = bb.jquery(selectCategory).get(0).options;
+        var selectedCat = bb.jquery(items[currentTemplate]).val();
         var test = this.getContentsBlockByCat(selectedCat);
     },
 
@@ -261,9 +262,9 @@ BB4.ToolsbarManager.register("contenttb",{
         this._callbacks["blockCategoryChanged_action"] = this._blockCategoryChanged;
         this._callbacks["toggleShowBlocks_action"] = this._toggleShowBlocks
 
-        $(this._settings.pathInfos.pathContainerId).delegate(this._settings.pathInfos.pathItemClass,"click",function(e){
-            var nodeId = ($(e.currentTarget).attr("path-data-uid"))? $(e.currentTarget).attr("path-data-uid") : null;
-            var pathInfos = $(e.currentTarget).data("nodeInfo");
+        bb.jquery(this._settings.pathInfos.pathContainerId).delegate(this._settings.pathInfos.pathItemClass,"click",function(e){
+            var nodeId = (bb.jquery(e.currentTarget).attr("path-data-uid"))? bb.jquery(e.currentTarget).attr("path-data-uid") : null;
+            var pathInfos = bb.jquery(e.currentTarget).data("nodeInfo");
             self._callbacks["selectPath_action"].call(self,nodeId,pathInfos);
         });
 
@@ -277,6 +278,6 @@ BB4.ToolsbarManager.register("contenttb",{
 
 });
 
-
+}) (bb.jquery);
 
 

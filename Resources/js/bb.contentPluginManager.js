@@ -13,40 +13,40 @@ bb.contentPluginsManager = (function(){
        
     /* move to an other class */
     var _watchContent = function(){
-        $(document).bind("content:ItemClicked",function(e,data,bbContent){
+        bb.jquery(document).bind("content:ItemClicked",function(e,data,bbContent){
             
             /* remove previous action here */
             if(_selectedContent == bbContent) return false;
             _selectedContent = bbContent;
             var contentActions = _getPluginActions(_selectedContent);
-            if(jQuery.isArray(contentActions)){
+            if(bb.jquery.isArray(contentActions)){
                 var cm = bb.ManagersContainer.getInstance().getManager("ContentEditionManager");
                 if(cm){
                     cm.handlePluginsActions(contentActions); 
                 }
                 /*var actionBtn = _buildPluginsButtons(contentActions);
                 console.log(actionBtn);
-                $(".bb5-content-actions").prepend($(actionBtn)); //handle condition on btns*/
+                bb.jquery(".bb5-content-actions").prepend(bb.jquery(actionBtn)); //handle condition on btns*/
                 _selectedContent = null;
             }
         }); 
     }
     
     var _cleanpluginsActions = function(){
-        $(_settings.pluginActionCls).remove(); 
+        bb.jquery(_settings.pluginActionCls).remove(); 
     } 
     
     var _buildPluginsButtons = function(actions){
         var actionsFrag = document.createDocumentFragment();
-        jQuery.each(actions,function(i,actionInfos){
+        bb.jquery.each(actions,function(i,actionInfos){
             var btnClass = "bb5-button #cls# bb5-button-square bb5-invert";
             btnClass = btnClass.replace("#cls#",actionInfos.icoCls);
-            var btn = $("<button/>").clone();
-            $(btn).attr("title",actionInfos.label);
-            $(btn).bind('click',actionInfos.command.execute);
-            $(btn).addClass(btnClass);
-            $(btn).addClass(_settings.pluginActionCls);
-            actionsFrag.appendChild($(btn).get(0)); 
+            var btn = bb.jquery("<button/>").clone();
+            bb.jquery(btn).attr("title",actionInfos.label);
+            bb.jquery(btn).bind('click',actionInfos.command.execute);
+            bb.jquery(btn).addClass(btnClass);
+            bb.jquery(btn).addClass(_settings.pluginActionCls);
+            actionsFrag.appendChild(bb.jquery(btn).get(0)); 
         });
         return actionsFrag;
     }
@@ -55,9 +55,9 @@ bb.contentPluginsManager = (function(){
         var contentPlugins = content.get("contentplugins");
         if(!(typeof contentPlugins=="string")) return;
         contentPlugins = contentPlugins.split(",");
-        if(!jQuery.isArray(contentPlugins))return;
+        if(!bb.jquery.isArray(contentPlugins))return;
         var actions = []; 
-        jQuery.each(contentPlugins,function(i,pluginName){
+        bb.jquery.each(contentPlugins,function(i,pluginName){
             bb.Utils.ScriptLoader.loadScript({
                 scriptname:_settings.pluginPath+pluginName+".plugin.js"
             });
@@ -65,8 +65,8 @@ bb.contentPluginsManager = (function(){
                 var plugin = bb.contentPluginsManager.getInstanceByName(pluginName); 
                 if(typeof plugin =="object"){
                     var pluginsActions = plugin.setNode(content).getActions();
-                    if($.isPlainObject(pluginsActions)){
-                        jQuery.each(pluginsActions, function(i,pluginAction){
+                    if(bb.jquery.isPlainObject(pluginsActions)){
+                        bb.jquery.each(pluginsActions, function(i,pluginAction){
                             actions.push(pluginAction);
                         });
                     }
@@ -147,7 +147,7 @@ bb.contentPluginsManager = (function(){
             if(!isValid) return false;
             var actionLabel = this.name+"_"+actionParams.label; 
             actionParams.command = new Command({
-                "execute":$.proxy(actionParams.command,this)
+                "execute":bb.jquery.proxy(actionParams.command,this)
             });
             this.actions[actionLabel] = actionParams;
         },
@@ -196,12 +196,12 @@ bb.contentPluginsManager = (function(){
         /*constructor*/
         var _mock = function Plugin(){
             this.onCreate();
-            $.extend(true,this,properties);
+            bb.jquery.extend(true,this,properties);
             this.init();
             this.exposeActions();
         }
         /* remove protectedMethod like[ getActions - onCreate ]*/
-        $.extend(true,_mock.prototype,PluginAbstract,methods);
+        bb.jquery.extend(true,_mock.prototype,PluginAbstract,methods);
         /* save plugin ref */
         pluginsContainer[pluginsName] = _mock;
     }
@@ -255,7 +255,7 @@ var ContentsManager = function(){
     this.bindEvents = function(){   
         var self = this;
         var contentClass = ".bb5-content";
-        $(contentClass).bind("click", function(){
+        bb.jquery(contentClass).bind("click", function(){
             if(self.selected == content) return;
             self.selected = content;
             var content = self.contents[0];                        
@@ -272,7 +272,7 @@ var ContentsManager = function(){
         for(var pluginName in bb.contentPluginsManager.getPlugins()){
             var plugin = bb.contentPluginsManager.getInstanceByName(pluginName);
             var pluginActions = plugin.setNode(content).getActions();
-            if((pluginActions) && $.isPlainObject(pluginActions)){
+            if((pluginActions) && bb.jquery.isPlainObject(pluginActions)){
                 for(var action in pluginActions){
                     actions.push(pluginActions[action]);
                 };    
@@ -286,16 +286,16 @@ var ContentsManager = function(){
         var actionsFrag = document.createDocumentFragment();
         for(var key in actions){ 
             var actionInfos = actions[key];
-            var btn = $('<button class="action">action 1</button>').clone();
-            $(btn).text(actionInfos.label);
-            $(btn).bind('click',actionInfos.command.execute);
-            actionsFrag.appendChild($(btn).get(0));
+            var btn = bb.jquery('<button class="action">action 1</button>').clone();
+            bb.jquery(btn).text(actionInfos.label);
+            bb.jquery(btn).bind('click',actionInfos.command.execute);
+            actionsFrag.appendChild(bb.jquery(btn).get(0));
         }
         return actionsFrag;
     }
     this.init();
 }
-$(function(){
+bb.jquery(function(){
     bb.contentPluginsManager.watchContents();
 });
 

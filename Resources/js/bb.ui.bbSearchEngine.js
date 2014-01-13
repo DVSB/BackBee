@@ -1,5 +1,5 @@
-(function(jQuery,global){
-    $.widget('ui.bbSearchEngine', {
+(function($,global){
+    bb.jquery.widget('ui.bbSearchEngine', {
          
         options: {
             formFields : {
@@ -20,7 +20,7 @@
         },
         
         _create: function(){  
-            this._templates.main = $("#searchEngine-tpl").clone();
+            this._templates.main = bb.jquery("#searchEngine-tpl").clone();
             this._templates.main.attr("id",bb.Utils.generateId("bbSearchEngine"));
         },
          
@@ -32,23 +32,23 @@
             this.options.appendToContainer = (typeof this.options.appendToContainer=="boolean") ? this.options.appendToContainer : true; //default append
             this._context.searchCriteria = {};
             if(this.options.appendToContainer){
-                $(this.element).html($(this._templates.main).get(0).innerHTML);  
+                bb.jquery(this.element).html(bb.jquery(this._templates.main).get(0).innerHTML);  
             }else{
-                $(this.element).html($(this._templates.main));  
+                bb.jquery(this.element).html(bb.jquery(this._templates.main));  
             }
             this._bindEvents();
-            this.typeField = ($(this.element).find(this.options.formFields.typeField).length) ? $(this.element).find(this.options.formFields.typeField).eq(0) : null;
-            this.pubBeforeField = ($(this.element).find(this.options.formFields.pubBeforeField).length) ? $(this.element).find(this.options.formFields.pubBeforeField).eq(0) : null;
-            this.pubAfterField = ($(this.element).find(this.options.formFields.pubAfterField).length) ? $(this.element).find(this.options.formFields.pubAfterField).eq(0) : null;
-            this.formFields = $(this.element).find(this.options.formFieldsClass);
-            this.selectedpageField = ($(this.element).find(this.options.formFields.selectedpageField).length) ? $(this.element).find(this.options.formFields.selectedpageField).eq(0) : null;
+            this.typeField = (bb.jquery(this.element).find(this.options.formFields.typeField).length) ? bb.jquery(this.element).find(this.options.formFields.typeField).eq(0) : null;
+            this.pubBeforeField = (bb.jquery(this.element).find(this.options.formFields.pubBeforeField).length) ? bb.jquery(this.element).find(this.options.formFields.pubBeforeField).eq(0) : null;
+            this.pubAfterField = (bb.jquery(this.element).find(this.options.formFields.pubAfterField).length) ? bb.jquery(this.element).find(this.options.formFields.pubAfterField).eq(0) : null;
+            this.formFields = bb.jquery(this.element).find(this.options.formFieldsClass);
+            this.selectedpageField = (bb.jquery(this.element).find(this.options.formFields.selectedpageField).length) ? bb.jquery(this.element).find(this.options.formFields.selectedpageField).eq(0) : null;
             this._setFilterTypes(this.options.defaultFilterTypes);
             this._initDateWidgets();
         },
          
         _bindEvents: function(){
             var self = this;
-            $(this.element).find(this.options.formFields.searchBtn).bind("click",function(e){
+            bb.jquery(this.element).find(this.options.formFields.searchBtn).bind("click",function(e){
                 e.preventDefault();
                 self._trigger("beforeSearch", {
                     "type":"beforeEvents"
@@ -64,48 +64,48 @@
         },
         
         _beforeShowDatepicker : function(dateField,dpInfos){
-            $(dpInfos.dpDiv).css('z-index', 601021);
-            $(dpInfos.dpDiv).addClass('bb5-ui bb5-dialog-wrapper');
+            bb.jquery(dpInfos.dpDiv).css('z-index', 601021);
+            bb.jquery(dpInfos.dpDiv).addClass('bb5-ui bb5-dialog-wrapper');
         },
         
         _updateDateField : function(dp){
-            var selectedDate = (typeof $(this).val() == "string" ) ? $(this).val().length : false;
+            var selectedDate = (typeof bb.jquery(this).val() == "string" ) ? bb.jquery(this).val().length : false;
             var timestamp = "";
             if(selectedDate){
                 var date = new Date(dp.selectedYear,dp.selectedMonth,parseInt(dp.selectedDay));
                 timestamp = date.getTime()/1000; //javascript's timestamps are in ms 
             }
-            $(this).attr("data-value",timestamp);
-            $(this).trigger("change");
+            bb.jquery(this).attr("data-value",timestamp);
+            bb.jquery(this).trigger("change");
         }, 
         
         /*extendsDefaultParams*/
         _setUserParams : function(userParams){
-            var userParams = ($.isPlainObject(userParams)) ? userParams : {};
-            $.extend(this._context.searchCriteria,userParams); 
+            var userParams = (bb.jquery.isPlainObject(userParams)) ? userParams : {};
+            bb.jquery.extend(this._context.searchCriteria,userParams); 
         }, 
         
         _initDateWidgets : function(){
             var self = this;
             /*modifierdaterange*/
-            $(this.pubBeforeField).datepicker({
+            bb.jquery(this.pubBeforeField).datepicker({
                 dateFormat:"dd/mm/yy",
                 changeMonth: true,
                 changeYear: true,
-                beforeShow : $.proxy(this._beforeShowDatepicker,this),
+                beforeShow : bb.jquery.proxy(this._beforeShowDatepicker,this),
                 onClose : function(selectedDate,dp){
                     self._updateDateField.call(this,dp);
                 }
                 
             });
-            $(this.pubAfterField).datepicker({
+            bb.jquery(this.pubAfterField).datepicker({
                 dateFormat:"dd/mm/yy",
                 changeMonth: true,
                 changeYear: true,
                 onClose : function(selectedDate,dp){
                     self._updateDateField.call(this,dp);
                 },
-                beforeShow : $.proxy(this._beforeShowDatepicker,this)
+                beforeShow : bb.jquery.proxy(this._beforeShowDatepicker,this)
             });   
         },
          
@@ -135,7 +135,7 @@
             searchCriteria:null
         },
         _initFormAutoBind : function(){
-            $(this.element).find(this.options.formFieldsClass).live("change",$.proxy(this._updateSearchCriteria,this)); 
+            bb.jquery(this.element).find(this.options.formFieldsClass).live("change",bb.jquery.proxy(this._updateSearchCriteria,this)); 
         },
          
         _getSearchCriteria : function(){
@@ -145,55 +145,55 @@
         _updateSearchCriteria : function(e){
             /*apply validatation here*/
            
-            var currentField = $(e.currentTarget);
-            var fieldName = $(currentField).attr("data-field-name");
+            var currentField = bb.jquery(e.currentTarget);
+            var fieldName = bb.jquery(currentField).attr("data-field-name");
             switch(fieldName){
                 case "searchField" :
-                    this._context.searchCriteria.searchField = $(currentField).val();
+                    this._context.searchCriteria.searchField = bb.jquery(currentField).val();
                     break;
                     
                 case "typeField":
-                    this._context.searchCriteria.typeField = $(currentField).val();
+                    this._context.searchCriteria.typeField = bb.jquery(currentField).val();
                     break;
                     
                 case "beforePubdateField":
-                    this._context.searchCriteria.beforePubdateField = $(currentField).attr("data-value");
+                    this._context.searchCriteria.beforePubdateField = bb.jquery(currentField).attr("data-value");
                     break;
                     
                 case "afterPubdateField":
-                    this._context.searchCriteria.afterPubdateField = $(currentField).attr("data-value");
+                    this._context.searchCriteria.afterPubdateField = bb.jquery(currentField).attr("data-value");
                     break;
                     
                case "selectedpageField":
-                   this._context.searchCriteria.selectedpageField = $(currentField).val();
+                   this._context.searchCriteria.selectedpageField = bb.jquery(currentField).val();
                    break;
             }
 
         },
         _setFilterTypes : function(types){
-            var types = ($.isArray(types)) ? types : [];
+            var types = (bb.jquery.isArray(types)) ? types : [];
             var options = document.createDocumentFragment();
-            $.each(types,function(i,typeInfos){
-                var option = $("<option></option>").clone();
-                $(option).attr("value",typeInfos.value);
-                $(option).html(typeInfos.label);
+            bb.jquery.each(types,function(i,typeInfos){
+                var option = bb.jquery("<option></option>").clone();
+                bb.jquery(option).attr("value",typeInfos.value);
+                bb.jquery(option).html(typeInfos.label);
                 options.appendChild(option.get(0));
             });
             /*update Select here*/
-            $(this.typeField).html($(options));
-            $(this.typeField).trigger("change");
+            bb.jquery(this.typeField).html(bb.jquery(options));
+            bb.jquery(this.typeField).trigger("change");
         },
         
         _setSelectedpageField :function(pageId){
             var pageId = (typeof pageId=="string") ? pageId : "";
-            $(this.selectedpageField).val(pageId);
-            $(this.selectedpageField).trigger("change");
+            bb.jquery(this.selectedpageField).val(pageId);
+            bb.jquery(this.selectedpageField).trigger("change");
         },  
         
         _reset : function(){
             this._context.searchCriteria = {};
-            $(this.formFields).each(function(i,field){
-                $(field).val("");
+            bb.jquery(this.formFields).each(function(i,field){
+                bb.jquery(field).val("");
             });
             this._setFilterTypes(this.options.defaultFilterTypes);
         },
@@ -203,11 +203,11 @@
         getWidgetApi: function(){
             var self = this;
             return{
-                setFilterTypes : $.proxy(self._setFilterTypes,self), 
-                setSelectedPage : $.proxy(self._setSelectedpageField,self), 
-                getSearchCriteria : $.proxy(self._getSearchCriteria,self),
-                setUserParams : $.proxy(self._setUserParams,self),
-                reset : $.proxy(self._reset,self)
+                setFilterTypes : bb.jquery.proxy(self._setFilterTypes,self), 
+                setSelectedPage : bb.jquery.proxy(self._setSelectedpageField,self), 
+                getSearchCriteria : bb.jquery.proxy(self._getSearchCriteria,self),
+                setUserParams : bb.jquery.proxy(self._setUserParams,self),
+                reset : bb.jquery.proxy(self._reset,self)
             }
              
              
@@ -219,4 +219,4 @@
     
     
     
-})(jQuery,document);
+})(bb.jquery,document);

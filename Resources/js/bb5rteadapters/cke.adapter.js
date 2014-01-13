@@ -14,7 +14,7 @@ bb.RteManager.registerAdapter("cke",{
         this.mode = null;
         this.editables = [];
         CKEDITOR_BASEPATH = bb.baseurl+bb.resourcesdir+"js/libs/ckeditor-releases/"; 
-        jQuery.get(CKEDITOR_BASEPATH+"ckeditor.js", function(){
+        bb.jquery.get(CKEDITOR_BASEPATH+"ckeditor.js", function(){
             self.ckeMng = CKEDITOR;
             self.ckeMng.disableAutoInline = true;
             self.ckeMng.dtd.$editable.span = 1;
@@ -45,18 +45,18 @@ bb.RteManager.registerAdapter("cke",{
         this.mainNode = node; 
         this.mode = "inline"; 
         /*load Content params via the mainnode*/
-        var editables = this.loadNodesRteParams($(this.mainNode).attr("data-type"));
+        var editables = this.loadNodesRteParams(bb.jquery(this.mainNode).attr("data-type"));
         /* apply cke to all the the fields*/
-        if(jQuery.isArray(editables)){
-            jQuery.each(editables, function(i,configObject){
-                jQuery.each(configObject,function(fieldname,nodeConfig){
+        if(bb.jquery.isArray(editables)){
+            bb.jquery.each(editables, function(i,configObject){
+                bb.jquery.each(configObject,function(fieldname,nodeConfig){
                     var node = self.mainNode.find('[data-aloha="' + fieldname + '"]').eq(0);
-                    if($(node).hasClass("cke_editable_inline")) return;
+                    if(bb.jquery(node).hasClass("cke_editable_inline")) return;
                     /* if node ha an editor */
                     /* handle config here */
-                    var element = CKEDITOR.dom.element.get( $(node).get(0) );
+                    var element = CKEDITOR.dom.element.get( bb.jquery(node).get(0) );
                     if(!element || element.getEditor()) return;
-                    var editableNode = $(node).get(0); 
+                    var editableNode = bb.jquery(node).get(0); 
                     self._applyCkToNode(editableNode,nodeConfig);
                 });
             });
@@ -64,18 +64,18 @@ bb.RteManager.registerAdapter("cke",{
     },
     onShowToolbar: function(e){
         var mode = this.mode;
-        $(".cke").hide();
+        bb.jquery(".cke").hide();
         setTimeout(function(){
             var editor = e.editor;
             var name = editor.name;
             if(!editor) return;
-            $("#aloha").css({
+            bb.jquery("#aloha").css({
                 position:"relative"
             });
             /**reset**/
-            $("#cke_"+name).removeAttr('style')
-            $("#cke_"+name).removeClass("cke_float");
-            $("#cke_"+name).css({
+            bb.jquery("#cke_"+name).removeAttr('style')
+            bb.jquery("#cke_"+name).removeClass("cke_float");
+            bb.jquery("#cke_"+name).css({
                 position: "absolute",
                 width: "490px",
                 top: "0px",
@@ -83,14 +83,14 @@ bb.RteManager.registerAdapter("cke",{
                 height: "84px",
                 border: "none"
             }).appendTo("#aloha");
-            $("#cke_"+name).css("visibility","visible"); 
+            bb.jquery("#cke_"+name).css("visibility","visible"); 
         },150);       
     },
     
     _hideEditor: function(editor){
         var editorName = editor.name;
         if(editorName){
-            $("#cke_"+editorName).hide();
+            bb.jquery("#cke_"+editorName).hide();
         }
     },
     
@@ -110,13 +110,13 @@ bb.RteManager.registerAdapter("cke",{
     
     _applyCkToNode: function(node,nodeConfig){
         if(!node) return;
-        if($(node).hasClass("cke_editable")) return;
-        $(node).attr("contenteditable",true);
-        var editor = this.ckeMng.inline($(node).get(0));
+        if(bb.jquery(node).hasClass("cke_editable")) return;
+        bb.jquery(node).attr("contenteditable",true);
+        var editor = this.ckeMng.inline(bb.jquery(node).get(0));
         if(editor){
             this.editables.push(editor);
-            editor.on("blur",jQuery.proxy(this.handleContentEdition,this));
-            editor.on("focus",jQuery.proxy(this.onShowToolbar,this));
+            editor.on("blur",bb.jquery.proxy(this.handleContentEdition,this));
+            editor.on("focus",bb.jquery.proxy(this.onShowToolbar,this));
         }
     },
                
@@ -127,7 +127,7 @@ bb.RteManager.registerAdapter("cke",{
     disable: function(){
         this.callSuper();
         if(this.editables.length){
-            jQuery.each(this.editables,function(i,editor){
+            bb.jquery.each(this.editables,function(i,editor){
                 editor.destroy();
             }); 
         }

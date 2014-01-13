@@ -49,8 +49,8 @@ bb.ToolsbarManager = (function($,gExport){
     };
     
     var _init = function(userConfigs){
-        // $(_settings.toolsBarWrapperId).mask(bb.i18n.loading); 
-        $.extend(true,_settings,userConfigs);
+        // bb.jquery(_settings.toolsBarWrapperId).mask(bb.i18n.loading); 
+        bb.jquery.extend(true,_settings,userConfigs);
 	
         if ( "bb5-editing" == _settings.selectedTab ) {
             _settings.selectedEditTab = "bb5-edit-tabs-data";
@@ -77,7 +77,7 @@ bb.ToolsbarManager = (function($,gExport){
             selected : tabToSelect,
             mainContainer: _settings.toolsbarContainerId,
             onSelect : function(event,ui){
-                var selectedTab = $(ui.panel).attr("id").replace("#","");
+                var selectedTab = bb.jquery(ui.panel).attr("id").replace("#","");
                 var previousTab = tabToSelect;
                 _tabClickHandler(selectedTab,_settings.selectedTab);
                 _settings.selectedTab = selectedTab;
@@ -85,9 +85,9 @@ bb.ToolsbarManager = (function($,gExport){
             },
             onCreate : function(event,ui){
                 setTimeout(function(){
-                    $(_settings.toolsBarWrapperId).unmask();    
+                    bb.jquery(_settings.toolsBarWrapperId).unmask();    
                 },2000);
-                $(_settings.toolsBarWrapperId).css({
+                bb.jquery(_settings.toolsBarWrapperId).css({
                     "visibility":""
                 }); //show the toolsbar
             }
@@ -100,7 +100,7 @@ bb.ToolsbarManager = (function($,gExport){
             onCreate : function(event,ui){},
            
             onSelect : function(event,ui){
-                var selectedTab = $(ui.panel).attr("id").replace("#","");
+                var selectedTab = bb.jquery(ui.panel).attr("id").replace("#","");
                 _tabClickHandler(selectedTab,_settings.selectedEditTab);  
                 _settings.selectedEditTab = selectedTab;   
                 return false;
@@ -127,20 +127,20 @@ bb.ToolsbarManager = (function($,gExport){
         if(data.length == 0) return false;
         var pathFragment = document.createDocumentFragment();
         
-        $.each(data,function(i,pathItem){
-            var pathHtml = $("<a></a>").clone();
-            $(pathHtml).addClass(pathData.itemClass.replace(".",""));
-            var pathTitle = $(pathItem).attr(pathData.itemTitleKey);
-            var itemId = $(pathItem).attr(pathData.itemIdKey);
-            $(pathHtml).html(pathTitle);
+        bb.jquery.each(data,function(i,pathItem){
+            var pathHtml = bb.jquery("<a></a>").clone();
+            bb.jquery(pathHtml).addClass(pathData.itemClass.replace(".",""));
+            var pathTitle = bb.jquery(pathItem).attr(pathData.itemTitleKey);
+            var itemId = bb.jquery(pathItem).attr(pathData.itemIdKey);
+            bb.jquery(pathHtml).html(pathTitle);
             
             /*selected item*/
             if(i+1 == data.length) {
-                $(pathHtml).addClass(_settings.activePathClass.replace(".",""));
+                bb.jquery(pathHtml).addClass(_settings.activePathClass.replace(".",""));
             }
-            $(pathHtml).attr("path-data-uid",itemId);
-            $(pathHtml).data("nodeInfo",pathItem);
-            pathFragment.appendChild($(pathHtml).get(0));
+            bb.jquery(pathHtml).attr("path-data-uid",itemId);
+            bb.jquery(pathHtml).data("nodeInfo",pathItem);
+            pathFragment.appendChild(bb.jquery(pathHtml).get(0));
         });
         
         return pathFragment;
@@ -148,7 +148,7 @@ bb.ToolsbarManager = (function($,gExport){
    
     var _updatePathContent = function(pathInfos){
         var content = _buildPath(pathInfos);
-        $(_settings.pathInfosContainerId).html($(content));
+        bb.jquery(_settings.pathInfosContainerId).html(bb.jquery(content));
         publicApi.showPath();
     };
     
@@ -158,10 +158,10 @@ bb.ToolsbarManager = (function($,gExport){
     /*Public API*/
     var publicApi = {
         showPath : function(){
-            $(_settings.pathContainerId).slideDown(); 
+            bb.jquery(_settings.pathContainerId).slideDown(); 
         },
         hidePath : function(){
-            $(_settings.pathContainerId).slideUp(); 
+            bb.jquery(_settings.pathContainerId).slideUp(); 
         },
         selectTab : function(){},
         updateContentPath : _updatePathContent,
@@ -169,22 +169,22 @@ bb.ToolsbarManager = (function($,gExport){
     };
     
     var _bindEvents = function(){
-        $('#'+_settings.userinfosId+' button').bind("click", function() {
+        bb.jquery('#'+_settings.userinfosId+' button').bind("click", function() {
             bb.end(); 
         });
 		
-        $("."+_settings.pathCloseBtnCls).bind("click",function(){
+        bb.jquery("."+_settings.pathCloseBtnCls).bind("click",function(){
             publicApi.hidePath();
         });
 		
-        $(_settings.contentActions.commit).bind('click', function(e) { 
+        bb.jquery(_settings.contentActions.commit).bind('click', function(e) { 
             bb.ContentWrapper.persist(false); //make persist a synchrone request
             bb.StatusManager.getInstance().commit(); 
         } );
-        $(_settings.contentActions.update).bind('click', function(e) {
+        bb.jquery(_settings.contentActions.update).bind('click', function(e) {
             bb.StatusManager.getInstance().update();
         } );
-        $(_settings.contentActions.revert).bind('click', function(e) {
+        bb.jquery(_settings.contentActions.revert).bind('click', function(e) {
             bb.StatusManager.getInstance().revert();
         } );
     }
@@ -192,7 +192,7 @@ bb.ToolsbarManager = (function($,gExport){
     /*a tab has been clicked*/
     var _tabClickHandler = function(selectedTab,previousTab){     
         _settings.selectedTab = selectedTab;  
-        $(document).trigger("tabItem:click",[selectedTab,previousTab]);
+        bb.jquery(document).trigger("tabItem:click",[selectedTab,previousTab]);
         return false;
     }
     
@@ -230,12 +230,12 @@ bb.ToolsbarManager = (function($,gExport){
        
         _parseEvents : function(){
             var self = this;
-            $.each(this._events,function(eventInfos,value){
+            bb.jquery.each(this._events,function(eventInfos,value){
                 var eventInfos = eventInfos.split(" ");
                 var eventO = {};
                 eventO.eventType = eventInfos.pop();
                 eventO.selector = eventInfos.join(" ");
-                eventO.eventName = $.trim(value);
+                eventO.eventName = bb.jquery.trim(value);
                 self._eventInfosContainer.push(eventO);
             });
             
@@ -246,10 +246,10 @@ bb.ToolsbarManager = (function($,gExport){
             var userEvent = (typeof userEvent=="string") ? userEvent : false;
             
             /*remove delegates*/
-            //$(this._settings.mainContainer).undelegate();
+            //bb.jquery(this._settings.mainContainer).undelegate();
             
             /* Bind Events */
-            $.each(this._eventInfosContainer,function(i,eventInfo){
+            bb.jquery.each(this._eventInfosContainer,function(i,eventInfo){
                 var methodKey = eventInfo.eventName+"_action";
                 if(userEvent){
                     if(userEvent!=methodKey){
@@ -263,13 +263,13 @@ bb.ToolsbarManager = (function($,gExport){
                 }
               
                 if(self._beforeCallbacks && self._beforeCallbacks[eventInfo.eventName]){
-                    var eventCallback = $.proxy(self._beforeCallbacks[eventInfo.eventName],self);
+                    var eventCallback = bb.jquery.proxy(self._beforeCallbacks[eventInfo.eventName],self);
 
                 }else{
-                    var eventCallback = $.proxy(self._callbacks[methodKey],self); 
+                    var eventCallback = bb.jquery.proxy(self._callbacks[methodKey],self); 
                 }
                
-                $(self._settings.mainContainer)
+                bb.jquery(self._settings.mainContainer)
                 .undelegate(eventInfo.selector,eventInfo.eventTypeeventCallback) //remove default function
                 .delegate(eventInfo.selector, eventInfo.eventType,eventCallback);
 
@@ -278,8 +278,8 @@ bb.ToolsbarManager = (function($,gExport){
         
         _initialize : function(userConfigs){
             this._eventInfosContainer = [];
-            $.extend(true,this._settings,userConfigs._settings);
-            $.extend(true,this._events,userConfigs._events);
+            bb.jquery.extend(true,this._settings,userConfigs._settings);
+            bb.jquery.extend(true,this._events,userConfigs._events);
             if(typeof this._init=="function") this._init(); 
             this._parseEvents();
             this._bindEvents();  
@@ -297,9 +297,9 @@ bb.ToolsbarManager = (function($,gExport){
         
         trigger : function(eventName, selector){
             var self = this;
-            $.each(this._eventInfosContainer,function(index,eventInfos){
+            bb.jquery.each(this._eventInfosContainer,function(index,eventInfos){
                 if (eventName == eventInfos.eventName) {
-                    var elements = $(self._settings.mainContainer).find(eventInfos.selector);
+                    var elements = bb.jquery(self._settings.mainContainer).find(eventInfos.selector);
                     if (selector) elements = elements.filter(selector);
                     elements.trigger(eventInfos.eventType);
                 }
@@ -334,7 +334,7 @@ bb.ToolsbarManager = (function($,gExport){
         
         /*user defined class methods*/
         var protoTb = {};
-        $.each(toolsbarSettings,function(key,value){
+        bb.jquery.each(toolsbarSettings,function(key,value){
             if(typeof value === "function"){
                 protoTb[key] = value; 
             }
@@ -345,7 +345,7 @@ bb.ToolsbarManager = (function($,gExport){
             }
         });
         
-        ToolsbarConstructor.prototype = $.extend(true,protoTb,AToolsbar.prototype);//extend this with that
+        ToolsbarConstructor.prototype = bb.jquery.extend(true,protoTb,AToolsbar.prototype);//extend this with that
         _setToolsbar(toolsbarName,ToolsbarConstructor);
        
     }
@@ -357,7 +357,7 @@ bb.ToolsbarManager = (function($,gExport){
         init : _init,
         getTbInstance : _getTbInstance
     };
-})(jQuery,window);
+})(bb.jquery,window);
 
 /***************************************************/
 

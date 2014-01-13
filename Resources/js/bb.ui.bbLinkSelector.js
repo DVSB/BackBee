@@ -1,5 +1,5 @@
 (function($){
-    $.widget('ui.bbLinkSelector', {
+    bb.jquery.widget('ui.bbLinkSelector', {
         options: {
             callback: null
         },
@@ -17,11 +17,11 @@
         
         _create: function() {
             var myself = this;
-            this._templates.panel = $(this._templates.panel).clone();
+            this._templates.panel = bb.jquery(this._templates.panel).clone();
             var contentId = bb.Utils.generateId("externLinksSelector");
-            $(this._templates.panel).attr("id",contentId); 
-            this.element.html($(this._templates.panel).show());
-            $(this.element).html($(this._templates.panel).html());
+            bb.jquery(this._templates.panel).attr("id",contentId); 
+            this.element.html(bb.jquery(this._templates.panel).show());
+            bb.jquery(this.element).html(bb.jquery(this._templates.panel).html());
         },
 
         _init: function() {
@@ -29,15 +29,15 @@
             context = this.getContext();
             
             context.callback = this.options.callback;
-            $(this.element).find('.bb5-ico-select').bind('click', function() {
+            bb.jquery(this.element).find('.bb5-ico-select').bind('click', function() {
                 var context = myself.getContext();
-                if ( ($(myself.element).find('#bb5-form001').val().length>0) && ($(myself.element).find('#bb5-form002').val().length>0) ) {
+                if ( (bb.jquery(myself.element).find('#bb5-form001').val().length>0) && (bb.jquery(myself.element).find('#bb5-form002').val().length>0) ) {
                     if (context.callback) {
                         context.callback({
                             type: 'link',
                             uid: null,
-                            title: $(myself.element).find('#bb5-form002').val(),
-                            value: $(myself.element).find('#bb5-form001').val(),
+                            title: bb.jquery(myself.element).find('#bb5-form002').val(),
+                            value: bb.jquery(myself.element).find('#bb5-form001').val(),
                             target: '_blank',
                             data: null
                         });
@@ -59,17 +59,17 @@
         },
                 
         setContext: function(context) {
-            return $(this.element).data('context', $.extend($(this.element).data('context'), context));
+            return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
         
         getContext: function() {
-            return ( (typeof $(this.element).data('context') != 'undefined') ? $(this.element).data('context') : {} );
+            return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         },
         
         destroy: function(){
-            $(this.element).empty();
+            bb.jquery(this.element).empty();
             
-            $.Widget.prototype.destroy.apply(this, arguments);
+            bb.jquery.Widget.prototype.destroy.apply(this, arguments);
         }
     })
-})(jQuery);
+})(bb.jquery);

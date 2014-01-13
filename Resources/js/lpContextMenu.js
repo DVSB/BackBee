@@ -1,4 +1,7 @@
 var bb = bb ||{};
+
+(function($) {
+
 LpContextMenu =  function(userConfig){
     this._settings = {
         contentSelector :null,
@@ -36,52 +39,52 @@ actionBuilder : null
 };
    
 this._isEnabled = false;
-this._template = $("<div><ul></ul></div>").clone(); 
+this._template = bb.jquery("<div><ul></ul></div>").clone(); 
 this.contextMenu = null;
 this.contextMenuTarget = null;
 this.beforeShow = null;
     
 if(typeof this._init!= "function"){
     LpContextMenu.prototype._init = function(userConfig){
-        this._settings = $.extend(true,this._settings,userConfig);
+        this._settings = bb.jquery.extend(true,this._settings,userConfig);
         this.contextMenu = this.buildContextmenu();
-        this.beforeShow = (typeof this._settings.beforeShow === "function") ? this._settings.beforeShow : $.noop;
+        this.beforeShow = (typeof this._settings.beforeShow === "function") ? this._settings.beforeShow : bb.jquery.noop;
         this._bindEvents();
     } 
 }
     
 this._applyFilters = function(filters){
     var self = this;
-    var filters = ($.isArray(filters)) ? filters : []; 
-    $(this.contextMenu).find("li").show();
-    $(filters).each(function(i,filter){
-        $(self.contextMenu).find("."+filter).eq(0).parent().hide(); //hide li
+    var filters = (bb.jquery.isArray(filters)) ? filters : []; 
+    bb.jquery(this.contextMenu).find("li").show();
+    bb.jquery(filters).each(function(i,filter){
+        bb.jquery(self.contextMenu).find("."+filter).eq(0).parent().hide(); //hide li
     });
 }
     
 /*Default builder*/
 this.defaultBuilder = function(btnInfo){
-    var btnWrapper = $("<li></li>").clone(); 
-    var btnTpl = $("<button></button>");
-    $(btnTpl).addClass(btnInfo.btnCls).text(btnInfo.btnLabel);
+    var btnWrapper = bb.jquery("<li></li>").clone(); 
+    var btnTpl = bb.jquery("<button></button>");
+    bb.jquery(btnTpl).addClass(btnInfo.btnCls).text(btnInfo.btnLabel);
     var self = this; 
-    $(btnTpl).bind("click",function(e){
+    bb.jquery(btnTpl).bind("click",function(e){
         btnInfo.btnCallback.call(this,e,self.contextMenuTarget,btnInfo.btnType);
         self.hide();
         return false;
     });
-    $(btnTpl).attr("data-type",btnInfo.btnType);
-    $(btnTpl).appendTo($(btnWrapper));
+    bb.jquery(btnTpl).attr("data-type",btnInfo.btnType);
+    bb.jquery(btnTpl).appendTo(bb.jquery(btnWrapper));
     return btnWrapper;
 } 
     
    
 LpContextMenu.prototype._bindEvents = function(){
-    $(this._settings.contentSelector).live("contextmenu",$.proxy(this.show,this));
+    bb.jquery(this._settings.contentSelector).live("contextmenu",bb.jquery.proxy(this.show,this));
 }
     
 LpContextMenu.prototype.setFilters = function(filters){
-    this.filters = ($.isArray(filters)) ? filters : [];
+    this.filters = (bb.jquery.isArray(filters)) ? filters : [];
 }
     
 LpContextMenu.prototype.show = function(e,filters){
@@ -95,25 +98,25 @@ LpContextMenu.prototype.show = function(e,filters){
         top:e.pageY
     };
             
-    $(this.contextMenu).css({
+    bb.jquery(this.contextMenu).css({
         position:"absolute",
         left: position.left+"px",
         top: position.top+"px"
     });
             
-    this.contextMenuTarget = $(e.currentTarget);
+    this.contextMenuTarget = bb.jquery(e.currentTarget);
     this._applyFilters(this.filters);
-    $(this.contextMenu).show();
+    bb.jquery(this.contextMenu).show();
 }
     
     
 LpContextMenu.prototype.hide = function(e){
-    $(this.contextMenu).hide();
+    bb.jquery(this.contextMenu).hide();
 }
 
 LpContextMenu.prototype.disable = function(){
     this._isEnabled = false;
-    $(this.contextMenu).hide();   
+    bb.jquery(this.contextMenu).hide();   
 }
     
 LpContextMenu.prototype.enable = function(){
@@ -121,23 +124,25 @@ LpContextMenu.prototype.enable = function(){
 }
     
 LpContextMenu.prototype.setFilters = function(filters){
-    this.filters = ($.isArray(filters)) ? filters : [];
+    this.filters = (bb.jquery.isArray(filters)) ? filters : [];
         
 }
     
 LpContextMenu.prototype.buildContextmenu = function(){
     var self = this;
-    $(this._template).addClass(this._settings.menuCls);
+    bb.jquery(this._template).addClass(this._settings.menuCls);
     var linksContainer = document.createDocumentFragment();
-    $.each(this._settings.menuActions,function(btnType,item){
+    bb.jquery.each(this._settings.menuActions,function(btnType,item){
         item.btnType = btnType;
         var item = self.defaultBuilder(item);
-        linksContainer.appendChild($(item).get(0));
+        linksContainer.appendChild(bb.jquery(item).get(0));
     });
-    $(this._template).find('ul').html(linksContainer);
-    $(this._template).hide().appendTo($("body"));
-    return $(this._template);   
+    bb.jquery(this._template).find('ul').html(linksContainer);
+    bb.jquery(this._template).hide().appendTo(bb.jquery("body"));
+    return bb.jquery(this._template);   
 }  
 this._init(userConfig);
 }
 bb.LpContextMenu = LpContextMenu;
+
+}) (bb.jquery);
