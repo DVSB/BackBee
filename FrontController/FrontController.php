@@ -149,6 +149,13 @@ class FrontController implements HttpKernelInterface {
 
         $this->getRequest()->attributes = new \Symfony\Component\HttpFoundation\ParameterBag($args);
         $this->_dispatch('frontcontroller.request');
+
+        // logout Event dispatch
+        if (null !== $this->getRequest()->get('logout') && TRUE == $this->getRequest()->get('logout') && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
+            $this->_dispatch('frontcontroller.request.logout');
+            //$this->defaultAction($this->getRequest()->getPathInfo(), $sendResponse);
+        }
+
         if (FALSE === method_exists($this, $matches['_action'])) {
             if (array_key_exists($matches['_action'], $this->_actions) && is_callable($this->_actions[$matches['_action']])) {
                 return call_user_func_array($this->_actions[$matches['_action']], $args);
@@ -509,12 +516,6 @@ class FrontController implements HttpKernelInterface {
             $this->_request = $request;
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
             if ($matches = $urlMatcher->match($this->getRequest()->getPathInfo())) {
-                // logout Event dispatch
-                if (null !== $this->getRequest()->get('logout') && TRUE == $this->getRequest()->get('logout') && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
-                    $this->_dispatch('frontcontroller.request.logout');
-                    //$this->defaultAction($this->getRequest()->getPathInfo(), $sendResponse);
-                }
-
                 $this->_invokeAction($matches);
             }
 
