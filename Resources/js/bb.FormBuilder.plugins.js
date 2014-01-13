@@ -1,4 +1,8 @@
-$(function(){
+(function($) {
+
+var FormBuilder = bb.FormBuilder;
+
+bb.jquery(function(){
    
   
     /*scalar type*/
@@ -6,22 +10,22 @@ $(function(){
        
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
-            this.fieldWrapper = $("<p></p>");
-            this.template = $("<label class='fieldLabel'>test</label><input class='bb5-plugin-form-field fieldText' type='text' value=''></input>").clone();
+            this.fieldWrapper = bb.jquery("<p></p>");
+            this.template = bb.jquery("<label class='fieldLabel'>test</label><input class='bb5-plugin-form-field fieldText' type='text' value=''></input>").clone();
             this.fiedId = this.id+"-"+this._settings.fieldInfos.fieldLabel;
         },
         
         render : function(){
-            $(this.fieldWrapper).append(this.template);
-            $(this.fieldWrapper).find(".fieldLabel").html(this._settings.fieldInfos.fieldLabel);
+            bb.jquery(this.fieldWrapper).append(this.template);
+            bb.jquery(this.fieldWrapper).find(".fieldLabel").html(this._settings.fieldInfos.fieldLabel);
             var value = this._settings.fieldInfos.param.scalar;
-            $(this.fieldWrapper).find(".fieldText").attr("id",this.fieldId).val(value);
+            bb.jquery(this.fieldWrapper).find(".fieldText").attr("id",this.fieldId).val(value);
             return this.fieldWrapper;
         },
        
         parse : function(){
             var result = {
-                scalar: $(this.fieldWrapper).find(".fieldText").val()
+                scalar: bb.jquery(this.fieldWrapper).find(".fieldText").val()
             };
             return result;           
         }
@@ -31,25 +35,25 @@ $(function(){
     FormBuilder.registerRenderTypePlugin("text",{
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
-            this.fieldWrapper = $("<p></p>");
+            this.fieldWrapper = bb.jquery("<p></p>");
            
             var pattern = (this._settings.fieldInfos.param.array.pattern) ? " pattern='"+this._settings.fieldInfos.param.array.pattern+"'" : '';
            
-            this.template = $("<label class='fieldLabel'>test</label><input class='bb5-plugin-form-field fieldText' type='text' value=''"+pattern+"></input>").clone();
+            this.template = bb.jquery("<label class='fieldLabel'>test</label><input class='bb5-plugin-form-field fieldText' type='text' value=''"+pattern+"></input>").clone();
             this.fiedId = this.id+"-"+this._settings.fieldInfos.fieldLabel;
         },
 
         render : function(){
-            $(this.fieldWrapper).append(this.template);
-            $(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
-            $(this.fieldWrapper).find('.fieldText').attr("id",this.fieldId).val(this._settings.fieldInfos.param.array.value);
+            bb.jquery(this.fieldWrapper).append(this.template);
+            bb.jquery(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
+            bb.jquery(this.fieldWrapper).find('.fieldText').attr("id",this.fieldId).val(this._settings.fieldInfos.param.array.value);
             return this.fieldWrapper;
         },
 
         parse : function(){
             var result = {
                 'array':{
-                    'value': $(this.fieldWrapper).find(".fieldText").val()
+                    'value': bb.jquery(this.fieldWrapper).find(".fieldText").val()
                 }
             };
             return result;           
@@ -61,26 +65,26 @@ $(function(){
     FormBuilder.registerRenderTypePlugin('checkbox', {
         _init: function(){
             this.id = this._settings.formId + '-' + this.id;
-            this.fieldWrapper = $('<p></p>');
-            this.template = $('<label class="fieldLabel">test</label><input class="bb5-plugin-form-field fieldCheck" type="checkbox" value="1">').clone();
+            this.fieldWrapper = bb.jquery('<p></p>');
+            this.template = bb.jquery('<label class="fieldLabel">test</label><input class="bb5-plugin-form-field fieldCheck" type="checkbox" value="1">').clone();
             this.fiedId = this.id + '-' + this._settings.fieldInfos.fieldLabel;
         },
 
         render: function(){
-            $(this.fieldWrapper).append(this.template);
-            $(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
+            bb.jquery(this.fieldWrapper).append(this.template);
+            bb.jquery(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
             if (this._settings.fieldInfos.param.array.checked == true) {
-                $(this.fieldWrapper).find('.fieldCheck').attr('checked', 'checked');
+                bb.jquery(this.fieldWrapper).find('.fieldCheck').attr('checked', 'checked');
             }
             var value = this._settings.fieldInfos.param.scalar;
-            $(this.fieldWrapper).find('.fieldCheck').attr('id',this.fieldId).val(value);
+            bb.jquery(this.fieldWrapper).find('.fieldCheck').attr('id',this.fieldId).val(value);
             return this.fieldWrapper;
         },
 
         parse: function(){
             var result = {
                 'array':{
-                    'checked': $(this.fieldWrapper).find('.fieldCheck').is(':checked')
+                    'checked': bb.jquery(this.fieldWrapper).find('.fieldCheck').is(':checked')
                 }
             };
             return result;
@@ -131,18 +135,18 @@ $(function(){
         },
             
         _init: function(){
-            this.form = $(this._template.mediaWrapper).clone();
+            this.form = bb.jquery(this._template.mediaWrapper).clone();
             this._addBtn = this.form.find(".add_media_btn").eq(0);
-            this._mediaContainer = $(this.form).find(".bb5-list-media").eq(0);
+            this._mediaContainer = bb.jquery(this.form).find(".bb5-list-media").eq(0);
             var label = this._settings.fieldInfos.param.array.label;
-            $(this.form).find(".fieldLabel").html(label); //i18nkey
+            bb.jquery(this.form).find(".fieldLabel").html(label); //i18nkey
             /* use for populate */
              var mediaInfos = this._settings.fieldInfos.param.array.medias;
             this._mediaList =  new bb.SmartList({
                 idKey : "uid",
                 maxEntry: 1,
-                onChange: $.proxy(this._handleListChange,this),
-                onDelete: $.proxy(this._removeMedia,this)
+                onChange: bb.jquery.proxy(this._handleListChange,this),
+                onDelete: bb.jquery.proxy(this._removeMedia,this)
             });
             if(mediaInfos && mediaInfos.length){
                 var mediaData = JSON.parse(mediaInfos);
@@ -152,23 +156,23 @@ $(function(){
         },
 
         _handleListChange : function(collection,name,mediaData){
-            var render = $(this._template.mediaItem).clone();
-            $(render).addClass("media-"+mediaData.uid);
-            $(render).find(".media-title").eq(0).html(mediaData.title);
-            $(render).find(".media-pic").eq(0).attr("src",mediaData.value).attr("alt",mediaData.title);
-            mediaData.render = $(mediaData.render).get(0);
-            $(render).find(this._settings.removeBtnClass).data("mediaUid",mediaData.uid);
+            var render = bb.jquery(this._template.mediaItem).clone();
+            bb.jquery(render).addClass("media-"+mediaData.uid);
+            bb.jquery(render).find(".media-title").eq(0).html(mediaData.title);
+            bb.jquery(render).find(".media-pic").eq(0).attr("src",mediaData.value).attr("alt",mediaData.title);
+            mediaData.render = bb.jquery(mediaData.render).get(0);
+            bb.jquery(render).find(this._settings.removeBtnClass).data("mediaUid",mediaData.uid);
             this._mediaContainer.append(render);
         },
         
         _bindEvents : function(){
-            this._addBtn.bind("click", $.proxy(this._showMediaBrowser,this));
-            this.form.delegate(this._settings.removeBtnClass,"click",$.proxy(this._deleteMedia,this));
+            this._addBtn.bind("click", bb.jquery.proxy(this._showMediaBrowser,this));
+            this.form.delegate(this._settings.removeBtnClass,"click",bb.jquery.proxy(this._deleteMedia,this));
         },
         
         /* remove media */
         _removeMedia : function(container,name,id){
-            $(this._mediaContainer).find(".media-"+id).remove();
+            bb.jquery(this._mediaContainer).find(".media-"+id).remove();
         },
         
         _typeIsValid : function(media){
@@ -192,7 +196,7 @@ $(function(){
         },
         
         _deleteMedia : function(e){
-            var mediaUid = $(e.currentTarget).data("mediaUid"); 
+            var mediaUid = bb.jquery(e.currentTarget).data("mediaUid"); 
             if(mediaUid){
                 this._mediaList.deleteItemById(mediaUid);
             }
@@ -210,8 +214,8 @@ $(function(){
      
             if (!this._context.mediaSelector) {
                 var selectorMedia = bb.i18n.__('toolbar.editing.mediaselectorLabel');
-                var mediaSelectorContainer = $("<div id='bb5-param-mediasselector' class='bb5-selector-wrapper'></div>").clone();
-                this._context.mediaSelector = $(mediaSelectorContainer).bbSelector({
+                var mediaSelectorContainer = bb.jquery("<div id='bb5-param-mediasselector' class='bb5-selector-wrapper'></div>").clone();
+                this._context.mediaSelector = bb.jquery(mediaSelectorContainer).bbSelector({
                     popup: true,
                     pageSelector: false,
                     linkSelector: false,
@@ -220,13 +224,13 @@ $(function(){
                     resizable: false,
                     selectorTitle : selectorMedia,
                     callback: function(item) {
-                        $('#bbb5-param-mediasselector').bbSelector('close');
+                        bb.jquery('#bbb5-param-mediasselector').bbSelector('close');
                     },
                   
                     beforeWidgetInit:function(){
-                        var bbSelector = $(this.element).data('bbSelector');
+                        var bbSelector = bb.jquery(this.element).data('bbSelector');
                         bbSelector.onWidgetInit(bbSelector._panel.MEDIA_LINK, function () {
-                            var bbMediaSelector = $(this).data('bbMediaSelector') || false;
+                            var bbMediaSelector = bb.jquery(this).data('bbMediaSelector') || false;
                             if(bbMediaSelector){
                                 bbMediaSelector.setCallback(function(params) {
                                     self._addMedia(params);
@@ -286,9 +290,9 @@ $(function(){
       
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
-            this.form = $(this._settings.formTplClass).eq(0).clone();
+            this.form = bb.jquery(this._settings.formTplClass).eq(0).clone();
             this._template.itemTpl = this.form.find(this._settings.itemTplClass).eq(0);
-            this.linksContainer = $(this.form).find(this._settings.itemContainerClass).eq(0);
+            this.linksContainer = bb.jquery(this.form).find(this._settings.itemContainerClass).eq(0);
             var fieldLabel = (this._settings.fieldInfos.param.array.label!="undefined") ? this._settings.fieldInfos.param.array.label:"";
             var maxEntry = this._settings.fieldInfos.param.array.maxentry;
             var minEntry = this._settings.fieldInfos.param.array.minentry;
@@ -296,9 +300,9 @@ $(function(){
             this.minEntry = ( maxEntry == "undefined" || isNaN(parseInt(minEntry)) ) ? 0 : parseInt(minEntry);
             this.minEntry = ( this.maxEntry > this.minEntry ) ? this.minEntry : 0; 
             
-            $(this.form).find(this._settings.blockLabelCls).eq(0).text(fieldLabel);
+            bb.jquery(this.form).find(this._settings.blockLabelCls).eq(0).text(fieldLabel);
             this.linksContainer.empty();
-            $(this.form).removeClass(this._settings.formTplClass.replace(".",""));
+            bb.jquery(this.form).removeClass(this._settings.formTplClass.replace(".",""));
             var linksInfos = this._settings.fieldInfos.param.array.links;
             if(linksInfos && linksInfos.length){
                 this._populate(JSON.parse(linksInfos));
@@ -308,8 +312,8 @@ $(function(){
       
         _populate : function(linksInfos){
             var self = this;
-            if($.isArray(linksInfos)){
-                $.each(linksInfos,function(i,linkData){
+            if(bb.jquery.isArray(linksInfos)){
+                bb.jquery.each(linksInfos,function(i,linkData){
                     self._populateLink(linkData);
                 });
             }
@@ -319,36 +323,36 @@ $(function(){
          **/
         _checkBondaries : function(){
             var result = false;
-            var nbItems = $(this.linksContainer).find(".bb5-link-item").length;
+            var nbItems = bb.jquery(this.linksContainer).find(".bb5-link-item").length;
             return !this.maxEntry <= nbItems;
         },
        
         _bindEvents : function(){
             var self = this;
           
-            $(this.form).find(".addLinkBtn").die().unbind().bind("click",function(e){
+            bb.jquery(this.form).find(".addLinkBtn").die().unbind().bind("click",function(e){
                 self._showLinkSelector();
             });
            
-            $(this.form).find("."+this._settings.itemCls).live("mouseenter",function(e){
+            bb.jquery(this.form).find("."+this._settings.itemCls).live("mouseenter",function(e){
                 var currentLink = e.currentTarget;
-                $("."+self._settings.itemCls).removeClass(self._settings.highLightCls);
+                bb.jquery("."+self._settings.itemCls).removeClass(self._settings.highLightCls);
                 self._highlight(currentLink);
                 return;
             });
            
-            $(this.form).find("."+this._settings.itemCls).live("mouseleave",function(e){
-                $("."+self._settings.itemCls).removeClass(self._settings.highLightCls);
-                $("."+self._settings.itemCls).find(self._settings.actionContainerClass).hide();
+            bb.jquery(this.form).find("."+this._settings.itemCls).live("mouseleave",function(e){
+                bb.jquery("."+self._settings.itemCls).removeClass(self._settings.highLightCls);
+                bb.jquery("."+self._settings.itemCls).find(self._settings.actionContainerClass).hide();
                 return;
             });
            
             /*bind delete action*/
-            $(this.form).find(".bb5-ico-del").live("click",function(e){
+            bb.jquery(this.form).find(".bb5-ico-del").live("click",function(e){
                 var target = e.target;
-                var linknode = $(target).parents("."+self._settings.itemCls).eq(0);
+                var linknode = bb.jquery(target).parents("."+self._settings.itemCls).eq(0);
                 if(linknode){
-                    $(linknode).remove();
+                    bb.jquery(linknode).remove();
                     return;
                 }
             });
@@ -356,11 +360,11 @@ $(function(){
         },
         _handleError : function(fieldsWithErrors){
             var self = this;
-            if($.isArray(fieldsWithErrors)){
-                $.each(fieldsWithErrors,function(i,node){
-                    $(node).addClass(self._settings.fieldErrorCls);
-                    $(node).unbind("click").bind("click",function(e){
-                        $(node).removeClass(self._settings.fieldErrorCls);
+            if(bb.jquery.isArray(fieldsWithErrors)){
+                bb.jquery.each(fieldsWithErrors,function(i,node){
+                    bb.jquery(node).addClass(self._settings.fieldErrorCls);
+                    bb.jquery(node).unbind("click").bind("click",function(e){
+                        bb.jquery(node).removeClass(self._settings.fieldErrorCls);
                     });
                 });
             }
@@ -369,9 +373,9 @@ $(function(){
         _highlight: function(node){
             if(!node) return;
             /*clean all*/
-            $("."+this._settings.itemCls).removeClass(this._settings.highLightCls);
-            $(node).addClass(this._settings.highLightCls);
-            $(node).find(this._settings.actionContainerClass).show();
+            bb.jquery("."+this._settings.itemCls).removeClass(this._settings.highLightCls);
+            bb.jquery(node).addClass(this._settings.highLightCls);
+            bb.jquery(node).find(this._settings.actionContainerClass).show();
             
         },
         _showLinkSelector : function(){
@@ -387,8 +391,8 @@ $(function(){
      
             if (!this._context.linkSelector) {
                 var selectorLink = bb.i18n.__('toolbar.editing.linkselectorLabel');
-                var linkSelectorContainer = $("<div id='bb5-param-linksselector' class='bb5-selector-wrapper'></div>").clone();
-                this._context.linkSelector = $(linkSelectorContainer).bbSelector({
+                var linkSelectorContainer = bb.jquery("<div id='bb5-param-linksselector' class='bb5-selector-wrapper'></div>").clone();
+                this._context.linkSelector = bb.jquery(linkSelectorContainer).bbSelector({
                     popup: true,
                     pageSelector: true,
                     linkSelector: true,
@@ -397,13 +401,13 @@ $(function(){
                     resizable: false,
                     selectorTitle : selectorLink,
                     callback: function(item) {
-                        $('#bb5-param-linksselector').bbSelector('close');
+                        bb.jquery('#bb5-param-linksselector').bbSelector('close');
                     },
                   
                     beforeWidgetInit:function(){
-                        var bbSelector = $(this.element).data('bbSelector');
+                        var bbSelector = bb.jquery(this.element).data('bbSelector');
                         bbSelector.onWidgetInit(bbSelector._panel.INTERNAL_LINK, function () {
-                            var bbPageSelector = $(this).data('bbPageSelector') || false;
+                            var bbPageSelector = bb.jquery(this).data('bbPageSelector') || false;
                             if(bbPageSelector){
                                 bbPageSelector.setCallback(function(params) {
                                     self._populateLink(params);
@@ -414,7 +418,7 @@ $(function(){
                        
                         /*for External link*/
                         bbSelector.onWidgetInit(bbSelector._panel.EXTERNAL_LINK, function () {
-                            var bbLinkSelector = $(this).data('bbLinkSelector');
+                            var bbLinkSelector = bb.jquery(this).data('bbLinkSelector');
                             bbLinkSelector.setCallback(function (params) {
                                 params.value = "http://"+params.value;
                                 self._populateLink(params);
@@ -423,9 +427,9 @@ $(function(){
                         });
                     }
                
-                //open: $.proxy(self.bbSelectorHandlers.openHandler,self,"bbLinkInternalContainer"),
-                //resizeStart: $.proxy(this.bbSelectorHandlers.resizeStartHandler,this,"bbLinkInternalContainer"),
-                //resize : $.proxy(this.bbSelectorHandlers.resizeHandler,this,"bbLinkInternalContainer")
+                //open: bb.jquery.proxy(self.bbSelectorHandlers.openHandler,self,"bbLinkInternalContainer"),
+                //resizeStart: bb.jquery.proxy(this.bbSelectorHandlers.resizeStartHandler,this,"bbLinkInternalContainer"),
+                //resize : bb.jquery.proxy(this.bbSelectorHandlers.resizeHandler,this,"bbLinkInternalContainer")
                 });
             }
             this._context.linkSelector.data("bbSelector").open();
@@ -433,21 +437,21 @@ $(function(){
        
         /*afficher le lien {url, title, target, pageuid}*/
         _populateLink: function(data){
-            var itemTpl = $(this._template.itemTpl).clone().removeClass("linkItem-tpl").addClass(this._settings.itemCls);
-            $(itemTpl).data("uid",data.uid);
+            var itemTpl = bb.jquery(this._template.itemTpl).clone().removeClass("linkItem-tpl").addClass(this._settings.itemCls);
+            bb.jquery(itemTpl).data("uid",data.uid);
             var linkId = bb.Utils.generateId("link");
-            $(itemTpl).find(".link").attr("disabled",1).val(data.value);
-            $(itemTpl).find(".title").val(data.title);
+            bb.jquery(itemTpl).find(".link").attr("disabled",1).val(data.value);
+            bb.jquery(itemTpl).find(".title").val(data.title);
             if(data.target=="_blank"){
-                $(itemTpl).find(".targetBlank").attr("checked",1);
+                bb.jquery(itemTpl).find(".targetBlank").attr("checked",1);
             }
             if(data.target=="_self"){
-                $(itemTpl).find(".targetSelf").attr("checked",1);
+                bb.jquery(itemTpl).find(".targetSelf").attr("checked",1);
             }
-            $(itemTpl).find(".targetBlank,.targetSelf").attr("name",linkId);
+            bb.jquery(itemTpl).find(".targetBlank,.targetSelf").attr("name",linkId);
             this.linksContainer.append(itemTpl);
             this.linksContainer.stop().animate({
-                scrollTop : $(this.linksContainer).height()
+                scrollTop : bb.jquery(this.linksContainer).height()
             },800);
             this._parseLinks();
         },
@@ -455,12 +459,12 @@ $(function(){
         _parseLinks: function(){
             var self = this;
             self._context.parsedData = [];
-            $.each(this.form.find("."+this._settings.itemCls),function(i,link){
+            bb.jquery.each(this.form.find("."+this._settings.itemCls),function(i,link){
                 var linksInfos = {};
-                linksInfos.uid = $(link).data("uid")||false;
-                linksInfos.target = $(link).find('.target:checked').val();
-                linksInfos.title = $(link).find(".title").val();
-                linksInfos.value = $(link).find(".link").val();
+                linksInfos.uid = bb.jquery(link).data("uid")||false;
+                linksInfos.target = bb.jquery(link).find('.target:checked').val();
+                linksInfos.title = bb.jquery(link).find(".title").val();
+                linksInfos.value = bb.jquery(link).find(".link").val();
                 self._context.parsedData.push(linksInfos);
             });
         },
@@ -476,11 +480,11 @@ $(function(){
         validate : function(){
             var isValid = true;
             var linksWithErrors = [];
-            $.each(this.form.find("."+this._settings.itemCls),function(i,linkNode){
-                var titleField = $(linkNode).find(".title").eq(0);
-                var title = $(titleField).val();
-                if(!$.trim(title).length){
-                    linksWithErrors.push($(linkNode).find(".title"));
+            bb.jquery.each(this.form.find("."+this._settings.itemCls),function(i,linkNode){
+                var titleField = bb.jquery(linkNode).find(".title").eq(0);
+                var title = bb.jquery(titleField).val();
+                if(!bb.jquery.trim(title).length){
+                    linksWithErrors.push(bb.jquery(linkNode).find(".title"));
                 }
             });
             if(linksWithErrors.length > 0){
@@ -489,7 +493,7 @@ $(function(){
             }
             /* handle minetry */
             if(this.minEntry){
-                if($(this.linksContainer).find(".bb5-link-item").length < this.minEntry){
+                if(bb.jquery(this.linksContainer).find(".bb5-link-item").length < this.minEntry){
                     isValid = false; 
                 }
             }
@@ -525,9 +529,9 @@ $(function(){
         },
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
-            this.form = $(this._settings.formTplClass).clone();
-            $(this.form).removeClass(this._settings.formTplClass.replace(".",""));
-            $(this.form).attr("id",this.id);
+            this.form = bb.jquery(this._settings.formTplClass).clone();
+            bb.jquery(this.form).removeClass(this._settings.formTplClass.replace(".",""));
+            bb.jquery(this.form).attr("id",this.id);
             this.bindEvents();
             this.kwRenderer = this._initKeywordsRenderer();
             this._populateForm();
@@ -540,12 +544,12 @@ $(function(){
         callbacks : {
             clickOnFieldHandler : function(e){
                 var currentTarget = e.currentTarget;
-                var fieldType = $(currentTarget).attr("data-key");
-                if($(currentTarget).hasClass("parentnode-tree")){
-                    this.showPageTree($(currentTarget).next());
+                var fieldType = bb.jquery(currentTarget).attr("data-key");
+                if(bb.jquery(currentTarget).hasClass("parentnode-tree")){
+                    this.showPageTree(bb.jquery(currentTarget).next());
                 }
-                if($(currentTarget).hasClass("classcontent-tree")){
-                    this.initOrShowContentSelector($(currentTarget).next());
+                if(bb.jquery(currentTarget).hasClass("classcontent-tree")){
+                    this.initOrShowContentSelector(bb.jquery(currentTarget).next());
                 }
             }
         },
@@ -553,24 +557,24 @@ $(function(){
         _populateForm : function(){
             var self = this;
             var parentnodeTitle = this._settings.fieldInfos.param.array["parentnodeTitle"]||"";
-            $(this.form).find(this._settings.formfielClass).each(function(i,field){
-                var key = $(field).attr("data-key");
-                if($.inArray(key,self._settings.disabledFields) != -1){
-                    $(field).parents(self._settings.fieldWrapperClass).hide();
+            bb.jquery(this.form).find(this._settings.formfielClass).each(function(i,field){
+                var key = bb.jquery(field).attr("data-key");
+                if(bb.jquery.inArray(key,self._settings.disabledFields) != -1){
+                    bb.jquery(field).parents(self._settings.fieldWrapperClass).hide();
                     return true;
                 }
                 var fieldValue = (key=="limit") ? parseInt(self._settings.fieldInfos.param.array[key]) : self._settings.fieldInfos.param.array[key][0];
-                $(field).val(fieldValue);
+                bb.jquery(field).val(fieldValue);
                 if(key=="parentnode"){
-                    $(field).val(parentnodeTitle);
+                    bb.jquery(field).val(parentnodeTitle);
                 }
-                if (key == 'classcontent') $(field).val($(field).val().replace('BackBuilder\\ClassContent\\',''));
-                if(key != "limit") $(field).attr("data-fieldvalue",fieldValue);
-                $(field).trigger("change");
+                if (key == 'classcontent') bb.jquery(field).val(bb.jquery(field).val().replace('BackBuilder\\ClassContent\\',''));
+                if(key != "limit") bb.jquery(field).attr("data-fieldvalue",fieldValue);
+                bb.jquery(field).trigger("change");
                 return true;
             });
             if(this.kwRenderer){
-                $(this.form).append(this.kwRenderer.render());  
+                bb.jquery(this.form).append(this.kwRenderer.render());  
             }
           
         },
@@ -589,7 +593,7 @@ $(function(){
         },
        
         showPageTree : function(formField){
-            var pageBrowser = $("<div id='bb5-form-pagebrowser'><div id='browser' class='filetree'></div></div>").clone();
+            var pageBrowser = bb.jquery("<div id='bb5-form-pagebrowser'><div id='browser' class='filetree'></div></div>").clone();
             var self = this;
             if(this._context.pageBrowser){
                 /*afficher - selectionner noeud*/
@@ -599,7 +603,7 @@ $(function(){
                 }
                
             }else{
-                this._context.pageBrowser = $(pageBrowser).bbPageBrowser({
+                this._context.pageBrowser = bb.jquery(pageBrowser).bbPageBrowser({
                     title : this.i18n.pageBrowserTitle,
                     popup: {
                         width: 269,
@@ -611,10 +615,10 @@ $(function(){
                     breadcrumb:bb.frontApplication.getBreadcrumbIds(),
                    
                     select: function(e, data){
-                        $(formField).attr("data-fieldValue",data.node_id);
-                        $(formField).val($("#node_"+data.node_id).find("a").get(0).textContent);
-                        $(formField).trigger("change");
-                        $(this).bbPageBrowser("close");
+                        bb.jquery(formField).attr("data-fieldValue",data.node_id);
+                        bb.jquery(formField).val(bb.jquery("#node_"+data.node_id).find("a").get(0).textContent);
+                        bb.jquery(formField).trigger("change");
+                        bb.jquery(this).bbPageBrowser("close");
                         self._context.pageBrowser = false;
                     }
                 });
@@ -622,7 +626,7 @@ $(function(){
             }
         },
         initOrShowContentSelector : function(formField){
-            var contentTypeSelector = $("<div id='bb5-form-contentTypeSelector'><div class='bb5-windowpane-treewrapper-inner' class='filetree'></div></div>").clone();
+            var contentTypeSelector = bb.jquery("<div id='bb5-form-contentTypeSelector'><div class='bb5-windowpane-treewrapper-inner' class='filetree'></div></div>").clone();
             var self = this;
             if(this._context.contentTypeSelector){
                 if(this._context.contentTypeSelector.data("bbContentTypeBrowser")){
@@ -631,7 +635,7 @@ $(function(){
                 }
                
             }
-            this._context.contentTypeSelector = $(contentTypeSelector).bbContentTypeBrowser({
+            this._context.contentTypeSelector = bb.jquery(contentTypeSelector).bbContentTypeBrowser({
                 popup: {
                     width: 200,
                     height: 500,
@@ -642,21 +646,21 @@ $(function(){
                 select: function(e,nodeInfos){
                     if(nodeInfos.nodeType!="contentType") return false; //main category do nothing
                     var selectedNode = nodeInfos.node;
-                    var selectedContentType = $(selectedNode).find("a").get(0).textContent;
+                    var selectedContentType = bb.jquery(selectedNode).find("a").get(0).textContent;
                     var pattern = /contentType_(\w+)/i;
                     var fieldValue = selectedContentType.substr(1);
-                    if(pattern.test(jQuery(selectedNode).attr('rel'))) {
-                        var result = pattern.exec(jQuery(selectedNode).attr('rel'));
+                    if(pattern.test(bb.jquery(selectedNode).attr('rel'))) {
+                        var result = pattern.exec(bb.jquery(selectedNode).attr('rel'));
                         fieldValue = result[1];
                     }
                     if (selectedContentType.indexOf('BackBuilder\\ClassContent\\') === -1) {
                         fieldValue = 'BackBuilder\\ClassContent\\' + fieldValue;
                     }
                   
-                    $(formField).attr("data-fieldValue", fieldValue);
-                    $(formField).trigger("change");
-                    $(formField).val(selectedContentType);
-                    $(this).bbContentTypeBrowser("close");
+                    bb.jquery(formField).attr("data-fieldValue", fieldValue);
+                    bb.jquery(formField).trigger("change");
+                    bb.jquery(formField).val(selectedContentType);
+                    bb.jquery(this).bbContentTypeBrowser("close");
                     self._context.contentTypeSelector = false;
                 }
             });
@@ -665,25 +669,25 @@ $(function(){
        
        
         bindEvents : function(){
-            $(this.form).delegate(this._settings.treeBtnClass,"click",$.proxy(this.callbacks["clickOnFieldHandler"],this));
+            bb.jquery(this.form).delegate(this._settings.treeBtnClass,"click",bb.jquery.proxy(this.callbacks["clickOnFieldHandler"],this));
             this.initFormAutoBind();
         },
        
         initFormAutoBind : function(){
-            $(this.form).delegate(this._settings.formfielClass,"change",$.proxy(this.handleFieldsChange,this));
+            bb.jquery(this.form).delegate(this._settings.formfielClass,"change",bb.jquery.proxy(this.handleFieldsChange,this));
         },
        
         handleFieldsChange :function(e){
-            var nodeType = $(e.currentTarget).attr("data-key") || "none";
-            var nodeValue = $(e.currentTarget).attr("data-fieldValue") || $(e.currentTarget).val();
+            var nodeType = bb.jquery(e.currentTarget).attr("data-key") || "none";
+            var nodeValue = bb.jquery(e.currentTarget).attr("data-fieldValue") || bb.jquery(e.currentTarget).val();
             if(nodeType=="limit"){
-                this._context.parsedData[nodeType] = parseInt($.trim(nodeValue));
+                this._context.parsedData[nodeType] = parseInt(bb.jquery.trim(nodeValue));
             }else{
                 if(nodeType!="none"){
-                    this._context.parsedData[nodeType] = [$.trim(nodeValue)];
+                    this._context.parsedData[nodeType] = [bb.jquery.trim(nodeValue)];
                 }
                 if(nodeType=="parentnode"){
-                    this._context.parsedData["parentnodeTitle"] = $(e.currentTarget).val();   
+                    this._context.parsedData["parentnodeTitle"] = bb.jquery(e.currentTarget).val();   
                 }
             }
            
@@ -741,14 +745,14 @@ $(function(){
      
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
-            var template = $("<p><label>Provide a label for this field</label><select></select></p>").clone();
-            $(template).attr("id",this.id);
+            var template = bb.jquery("<p><label>Provide a label for this field</label><select></select></p>").clone();
+            bb.jquery(template).attr("id",this.id);
             var form = this._populateForm();
             var fieldLabel = (typeof this._settings.fieldInfos.param.array.label=="string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel;
-            $(template).find("label").text(fieldLabel);
-            $(template).find("select").append(form);
+            bb.jquery(template).find("label").text(fieldLabel);
+            bb.jquery(template).find("select").append(form);
             if ('undefined' != typeof(this._settings.fieldInfos.param.array.onchange))
-                $(template).find("select").attr('onchange', this._settings.fieldInfos.param.array.onchange);
+                bb.jquery(template).find("select").attr('onchange', this._settings.fieldInfos.param.array.onchange);
             this.form = template;
           
         },
@@ -759,12 +763,12 @@ $(function(){
             var selection = this._settings.fieldInfos.param.array.selected;
             var dFragment = document.createDocumentFragment();
        
-            $.each(options,function(value,option){
-                var optionTpl = $("<option></option>").clone();
-                $(optionTpl).attr("value",value);
-                $(optionTpl).html(option);
-                if(selection==value) $(optionTpl).attr("selected","selected");
-                dFragment.appendChild($(optionTpl).get(0));
+            bb.jquery.each(options,function(value,option){
+                var optionTpl = bb.jquery("<option></option>").clone();
+                bb.jquery(optionTpl).attr("value",value);
+                bb.jquery(optionTpl).html(option);
+                if(selection==value) bb.jquery(optionTpl).attr("selected","selected");
+                dFragment.appendChild(bb.jquery(optionTpl).get(0));
             });
             return dFragment;
         },
@@ -779,7 +783,7 @@ $(function(){
         parse :function(){
             var result = {
                 "array":{
-                    selected: $(this.form).find("select").eq(0).val()
+                    selected: bb.jquery(this.form).find("select").eq(0).val()
                 }
             };
             return result;
@@ -797,32 +801,32 @@ $(function(){
             var self = this;
            
             this.id = this._settings.formId+'-'+this.id;
-            var template = $('<p><label>Provide a label for this field</label><select class="available" style="width:150px;"><option>'+bb.i18n.__('parameters.add_multiple')+'</option></select><br/><select class="selected" size="4" style="width:150px;height:65px;float:left;"></select><button style="display:block;" class="bb5-button bb5-ico-arrow_n bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-del bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-arrow_s bb5-button-square"></button></p>').clone();
-            $(template).attr("id",this.id).addClass('bb5-param-'+this._settings.fieldInfos.fieldLabel);
+            var template = bb.jquery('<p><label>Provide a label for this field</label><select class="available" style="width:150px;"><option>'+bb.i18n.__('parameters.add_multiple')+'</option></select><br/><select class="selected" size="4" style="width:150px;height:65px;float:left;"></select><button style="display:block;" class="bb5-button bb5-ico-arrow_n bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-del bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-arrow_s bb5-button-square"></button></p>').clone();
+            bb.jquery(template).attr("id",this.id).addClass('bb5-param-'+this._settings.fieldInfos.fieldLabel);
             var available = this._populateAvailable();
             var form = this._populateForm();
             var fieldLabel = (typeof this._settings.fieldInfos.param.array.label=="string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel;
-            $(template).find("label").text(fieldLabel);
-            $(template).find("select.available").append(available);
-            $(template).find("select.selected").append(form);
+            bb.jquery(template).find("label").text(fieldLabel);
+            bb.jquery(template).find("select.available").append(available);
+            bb.jquery(template).find("select.selected").append(form);
             if ('undefined' != typeof(this._settings.fieldInfos.param.array.onchange))
-                $(template).find("select").attr('onchange', this._settings.fieldInfos.param.array.onchange);
+                bb.jquery(template).find("select").attr('onchange', this._settings.fieldInfos.param.array.onchange);
            
             this.form = template;
             this.initvalues = this._settings.fieldInfos.param.array.selected;
             for(var i=0; i<this.initvalues.length; i++) this.initvalues[i] = null;
            
-            $(self.form).find("select.available").bind('change', function() {
-                $(self.form).find("select.selected").append($(this).find(':selected').remove());
+            bb.jquery(self.form).find("select.available").bind('change', function() {
+                bb.jquery(self.form).find("select.selected").append(bb.jquery(this).find(':selected').remove());
             });
-            $(self.form).find('button.bb5-ico-del').unbind('click').bind('click', function() {
-                $(self.form).find('select.available').append($(self.form).find('select.selected option:selected').remove()).get(0).selectedIndex = 0;
+            bb.jquery(self.form).find('button.bb5-ico-del').unbind('click').bind('click', function() {
+                bb.jquery(self.form).find('select.available').append(bb.jquery(self.form).find('select.selected option:selected').remove()).get(0).selectedIndex = 0;
             });
-            $(self.form).find('button.bb5-ico-arrow_n').unbind('click').bind('click', function() {
-                $(self.form).find('select.selected option:selected').after($(self.form).find('select.selected option:selected').prev().remove());
+            bb.jquery(self.form).find('button.bb5-ico-arrow_n').unbind('click').bind('click', function() {
+                bb.jquery(self.form).find('select.selected option:selected').after(bb.jquery(self.form).find('select.selected option:selected').prev().remove());
             });
-            $(self.form).find('button.bb5-ico-arrow_s').unbind('click').bind('click', function() {
-                $(self.form).find('select.selected option:selected').before($(self.form).find('select.selected option:selected').next().remove());
+            bb.jquery(self.form).find('button.bb5-ico-arrow_s').unbind('click').bind('click', function() {
+                bb.jquery(self.form).find('select.selected option:selected').before(bb.jquery(self.form).find('select.selected option:selected').next().remove());
             });
         },
        
@@ -832,12 +836,12 @@ $(function(){
             var selection = this._settings.fieldInfos.param.array.selected;
             var dFragment = document.createDocumentFragment();
 
-            $.each(selection, function(index, value) {
+            bb.jquery.each(selection, function(index, value) {
                 if (options[value]) {
-                    var optionTpl = $("<option></option>").clone();
-                    $(optionTpl).attr("value",value);
-                    $(optionTpl).html(options[value]);
-                    dFragment.appendChild($(optionTpl).get(0));       
+                    var optionTpl = bb.jquery("<option></option>").clone();
+                    bb.jquery(optionTpl).attr("value",value);
+                    bb.jquery(optionTpl).html(options[value]);
+                    dFragment.appendChild(bb.jquery(optionTpl).get(0));       
                 }
             });
 
@@ -850,12 +854,12 @@ $(function(){
             var selection = this._settings.fieldInfos.param.array.selected;
             var dFragment = document.createDocumentFragment();
 
-            $.each(options,function(value,option){
-                if(-1 == $.inArray(value+'', selection)) {
-                    var optionTpl = $("<option></option>").clone();
-                    $(optionTpl).attr("value",value);
-                    $(optionTpl).html(option);
-                    dFragment.appendChild($(optionTpl).get(0));
+            bb.jquery.each(options,function(value,option){
+                if(-1 == bb.jquery.inArray(value+'', selection)) {
+                    var optionTpl = bb.jquery("<option></option>").clone();
+                    bb.jquery(optionTpl).attr("value",value);
+                    bb.jquery(optionTpl).html(option);
+                    dFragment.appendChild(bb.jquery(optionTpl).get(0));
                 }
             });
             return dFragment;
@@ -870,13 +874,13 @@ $(function(){
      
         parse :function(){
             var values = [];
-            $(this.form).find('select.selected option').each(function() {
-                values[values.length] = $(this).val();
+            bb.jquery(this.form).find('select.selected option').each(function() {
+                values[values.length] = bb.jquery(this).val();
             })
            
             var result = {
                 "array":{
-                    selected: $.extend(this.initvalues, values)
+                    selected: bb.jquery.extend(this.initvalues, values)
                 }
             };
             return result;
@@ -893,16 +897,16 @@ $(function(){
         },
         _init : function(){
             this.id = this._settings.formId+'-'+this.id;
-            this.fieldWrapper = $("<p></p>");
-            var template = $("<label class='fieldLabel'>Choisir un mot clé</label>"
+            this.fieldWrapper = bb.jquery("<p></p>");
+            var template = bb.jquery("<label class='fieldLabel'>Choisir un mot clé</label>"
                 +"<p class='selectedContainer'><strong>Sélection(s) :</strong><span class='selectedKeywords'></span></p>"
                 +"<textarea class='bb5-plugin-form-field fieldKeyword bb5-form-inputtext' value=''></textarea>").clone();
             this.fiedId = this.id+"-"+this._settings.fieldInfos.fieldLabel;
             this.template = this.fieldWrapper.append(template);
             this.maxEntry = this._settings.fieldInfos.param.array.maxentry || 0;
-            this.keywordField = $(this.template).find(".fieldKeyword").eq(0);
-            this.keywordSelectedContainer = $(this.template).find(this._settings.selectedCtnClass).eq(0);
-            this.selectedContainer = $(this.template).find(this._settings.keywordContainerClass).eq(0);
+            this.keywordField = bb.jquery(this.template).find(".fieldKeyword").eq(0);
+            this.keywordSelectedContainer = bb.jquery(this.template).find(this._settings.selectedCtnClass).eq(0);
+            this.selectedContainer = bb.jquery(this.template).find(this._settings.keywordContainerClass).eq(0);
             this.keywordSelectedContainer.hide();
             this.selected = this._settings.fieldInfos.param.array.selected || [];
             this.selectedItems = {};
@@ -926,9 +930,9 @@ $(function(){
             var keywords = [];
             var self = this;
             var nbItem = keywordIds.length;
-            $.each(this.keywordsList,function(i,keyword){
+            bb.jquery.each(this.keywordsList,function(i,keyword){
                 if(nbItem==0) return true;
-                if($.inArray(keyword.value, keywordIds)!=-1){
+                if(bb.jquery.inArray(keyword.value, keywordIds)!=-1){
                     keywords.push(keyword.label);
                     self.selectedItems[ keyword.label] = keyword.value;
                     nbItem -=1;
@@ -938,9 +942,9 @@ $(function(){
         },
        
         _cleanSelection: function(selected){
-            var selected = ($.isPlainObject(selected)) ? selected : {};
+            var selected = (bb.jquery.isPlainObject(selected)) ? selected : {};
             var keywordIds = [];
-            $.each(selected, function(key,label){
+            bb.jquery.each(selected, function(key,label){
                 keywordIds.push(key);
             });
             return keywordIds;
@@ -959,7 +963,7 @@ $(function(){
                 terms = termArr.reverse();
             }
            
-            $.each(terms,function(i,keyword){
+            bb.jquery.each(terms,function(i,keyword){
                 var kwId = self.selectedItems[keyword];
                 if(typeof kwId=="string"){
                     selectedItems.push(self.selectedItems[keyword]);
@@ -981,12 +985,12 @@ $(function(){
                 keywordsString = keywords.join(", ");
             }
             /*handle multiple selection*/
-            $(this.keywordField).val(keywordsString);
+            bb.jquery(this.keywordField).val(keywordsString);
             this._updateFieldSpace();
         },
        
         _updateFieldSpace: function(){
-        /*$(this.keywordField).animate({
+        /*bb.jquery(this.keywordField).animate({
                 height : "16px"
             },"fast");*/
            
@@ -1011,10 +1015,10 @@ $(function(){
        
         _initAutoComplete : function(){
             var self = this;
-            $(this.keywordField).autocomplete({
+            bb.jquery(this.keywordField).autocomplete({
                 minLength :2,
                 source : function(request, response){
-                    response($.ui.autocomplete.filter(self.keywordsList,self._getLast(request.term)));
+                    response(bb.jquery.ui.autocomplete.filter(self.keywordsList,self._getLast(request.term)));
                 },
                 focus : function(){
                     return false;
@@ -1045,3 +1049,5 @@ $(function(){
 
     
 });
+
+}) (bb.jquery);

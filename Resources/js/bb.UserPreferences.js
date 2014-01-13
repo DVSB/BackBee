@@ -1,4 +1,4 @@
-(function (bb) {
+(function ($, bb) {
     "use strict";
     var _UserPreferences = function() {
 
@@ -73,11 +73,11 @@
             return result.identity;
         };
 
-        //$(bb).bind('bb.started', function () {
+        //bb.jquery(bb).bind('bb.started', function () {
             _user = _getBBUserIdentity();
         //});
 
-        $(bb).bind('bb.ended', function () {
+        bb.jquery(bb).bind('bb.ended', function () {
             save();
         });
 
@@ -90,4 +90,4 @@
         saveValues();
     };
     bb.UserPreferences = _UserPreferences;
-}(bb));
+}(bb.jquery, bb));

@@ -75,6 +75,10 @@ class Twig extends ARendererAdapter
         if (true === $isDebugMode) {
             $this->twig->addExtension(new Twig_Extension_Debug());
         }
+
+        foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $id => $datas) {
+            $this->twig->addExtension($bbapp->getContainer()->get($id));
+        }
     }
 
     /**

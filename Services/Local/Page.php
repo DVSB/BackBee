@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,7 +28,7 @@ use BackBuilder\BBApplication,
 
 /**
  * RPC services for NestedNode\Page
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Services
  * @subpackage  Local
@@ -40,7 +40,7 @@ class Page extends AbstractServiceLocal
 
     /**
      * Page entities repository
-     * @var \BackBuilder\NestedNode\Repository\PageRepository 
+     * @var \BackBuilder\NestedNode\Repository\PageRepository
      */
     private $_repo;
 
@@ -58,7 +58,7 @@ class Page extends AbstractServiceLocal
     }
 
     /**
-     * 
+     *
      * @exposed(secured=true)
      */
     public function getListAvailableStatus()
@@ -173,8 +173,7 @@ class Page extends AbstractServiceLocal
         }
 
         // Updating URL of the page is needed
-        if (true === property_exists($object, 'url')
-                && null !== $this->getApplication()->getRenderer()) {
+        if (true === property_exists($object, 'url') && null !== $this->getApplication()->getRenderer()) {
             $object->url = $this->getApplication()
                     ->getRenderer()
                     ->getRelativeUrl($object->url);
@@ -217,7 +216,7 @@ class Page extends AbstractServiceLocal
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null)
+    public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25)
     {
         if (null === $site = $this->getEntityManager()->find('\BackBuilder\Site\Site', strval($site_uid))) {
             throw new InvalidArgumentException(sprintf('Site with uid `%s` does not exist', $site_uid));
@@ -228,37 +227,35 @@ class Page extends AbstractServiceLocal
         if (null === $page = $this->_repo->find(strval($page_uid))) {
             // @todo strange call to this service with another site
             //$this->isGranted('VIEW', $site);
-
             $page = $this->_repo->getRoot($site);
-
             $leaf = new \stdClass();
             $leaf->attr = json_decode($page->serialize());
             $leaf->data = $page->getTitle();
             $leaf->state = $page->isLeaf() ? 'leaf' : 'open';
-            $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, array("field" => "leftnode", "sort" => "desc"));
+            $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult);
 
             $tree[] = $leaf;
         } else {
             try {
                 $this->isGranted('VIEW', $page);
-
-                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"));
+                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult);
+                $tree['numresults'] = $children->count();
+                $tree['firstresult'] = $firstresult;
+                $tree['maxresult'] = $maxresult;
+                $tree['results'] = array();
                 foreach ($children as $child) {
                     $leaf = new \stdClass();
                     $leaf->attr = json_decode($child->serialize());
                     $leaf->data = $child->getTitle();
                     $leaf->state = $child->isLeaf() ? 'leaf' : 'closed';
 
-                    if (false === $child->isLeaf()
-                            && null !== $current_uid
-                            && null !== $current = $this->_repo->find(strval($current_uid))) {
+                    if (false === $child->isLeaf() && null !== $current_uid && null !== $current = $this->_repo->find(strval($current_uid))) {
                         if ($child->isAncestorOf($current)) {
-                            $leaf->children = $this->getBBBrowserTree($site_uid, $child->getUid(), $current_uid, array("field" => "leftnode", "sort" => "asc"));
+                            $leaf->children = $this->getBBBrowserTree($site_uid, $child->getUid(), $current_uid, $firstresult, $maxresult);
                             $leaf->state = 'open';
                         }
                     }
-
-                    $tree[] = $leaf;
+                    $tree['results'][] = $leaf;
                 }
             } catch (\BackBuilder\Security\Exception\ForbiddenAccessException $e) {
                 // Ignore it
@@ -557,7 +554,6 @@ class Page extends AbstractServiceLocal
     public function getBBSelectorTree($site_uid, $root_uid)
     {
         $em = $this->bbapp->getEntityManager();
-
         $site = $em->find('\BackBuilder\Site\Site', $site_uid);
         $tree = array();
 
@@ -623,10 +619,6 @@ class Page extends AbstractServiceLocal
             $options['beforePubdateField'] = $beforePubdateField;
         if (NULL !== $afterPubdateField && "" !== $afterPubdateField)
             $options['afterPubdateField'] = $afterPubdateField;
-
-
-        //var_dump($options);
-
         $em = $this->bbapp->getEntityManager();
 
         $site = $em->find('\BackBuilder\Site\Site', $site_uid);

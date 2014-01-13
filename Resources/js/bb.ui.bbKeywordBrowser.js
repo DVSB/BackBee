@@ -4,7 +4,7 @@
  */
 
 (function($,global){
-    $.widget("ui.bbKeywordBrowser",{
+    bb.jquery.widget("ui.bbKeywordBrowser",{
     
         options : {
             editMode : true
@@ -14,7 +14,7 @@
         },
         
         _templates : {
-            main :$("<div class='main'><div class='bb5-windowpane-treewrapper-inner'></div></div>").clone(),
+            main :bb.jquery("<div class='main'><div class='bb5-windowpane-treewrapper-inner'></div></div>").clone(),
             keywordEditor : "<div class='keywordEditor'><form><fieldset><label for='bb-ui-keywordbrowser-form-title'>Mot clé</label>"
         +"<input type='text' style='width: 100%; margin-bottom: 10px;' value='' name='title' id='bb-ui-keywordbrowser-form-title'>"
         +"</fieldset></form></div>"
@@ -28,12 +28,12 @@
             this._popupDialog.setContent(this._templates.main);
             this.keyWordEditorDialog = bb.PopupManager.init().create("KeywordEditor",{
                 title: bb.i18n.__('keywordbrowser.create'),
-                content: $(this._templates.keywordEditor).clone()
+                content: bb.jquery(this._templates.keywordEditor).clone()
             });
             
             this.keyWordEditorDialog.addButton({
                 text: bb.i18n.__('popupmanager.button.save'),
-                click:$.proxy(this.callbacks.saveKeyword,this)
+                click:bb.jquery.proxy(this.callbacks.saveKeyword,this)
             });
                 
             this.keyWordEditorDialog.addButton({
@@ -47,7 +47,7 @@
         },
         
         _bindEvents: function(){
-            this.keyWordEditorDialog.on("close",$.proxy(this._resetEditorForm,this)); 
+            this.keyWordEditorDialog.on("close",bb.jquery.proxy(this._resetEditorForm,this)); 
         },
         
         _create : function(){},
@@ -56,11 +56,11 @@
             nodeClickHandler : function(e){
                 var context = this.getContext();
                 var selectedNode = context.treeview.jstree('get_selected');
-                if (($(e.target).parents('a:first').hasClass('jstree-clicked')) || ($(e.target).hasClass('jstree-clicked'))) {
-                    var nodeType = $(selectedNode).attr('rel');
+                if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
+                    var nodeType = bb.jquery(selectedNode).attr('rel');
                     var isAContentType = (nodeType.search("contentType")==-1) ? false : true;
                     var nodeType = (!isAContentType) ? "cat" : "contentType";
-                    var nodeId = $(selectedNode).attr("id").replace("node_");  
+                    var nodeId = bb.jquery(selectedNode).attr("id").replace("node_");  
                     this._trigger("select",e,{
                         node_id:nodeId, 
                         node:context.treeview.jstree('get_selected'), 
@@ -84,7 +84,7 @@
             showKeywordEditor :function(mode,nodeId){
                 var context = this.getContext();
                 var availableModes = ["create","edit"];
-                var mode =(typeof mode!="undefined" && $.inArray(mode,availableModes)!=-1) ? mode : "create";
+                var mode =(typeof mode!="undefined" && bb.jquery.inArray(mode,availableModes)!=-1) ? mode : "create";
                 this.keyWordEditorDialog.setExtra({
                     mode : mode, 
                     nodeId : nodeId
@@ -111,7 +111,7 @@
                 keywordInfos[nodeKey] = extra.nodeId;
                
                 /*show mask*/ 
-                $(self.keyWordEditorDialog.dialogUi).mask(bb.i18n.loading);
+                bb.jquery(self.keyWordEditorDialog.dialogUi).mask(bb.i18n.loading);
                 bb.webserviceManager.getInstance('ws_local_keyword').request("postKeywordForm",{
                     params :{
                         keywordInfos : keywordInfos
@@ -119,15 +119,15 @@
                     success: function(response) {
                          var treeContainer = context.treeview.jstree("get_container");
                         if (keywordInfos.mode=="create"){
-                            context.treeview.jstree('create_node', $(treeContainer).find('#node_' + extra.nodeId), 'first', response.result);
+                            context.treeview.jstree('create_node', bb.jquery(treeContainer).find('#node_' + extra.nodeId), 'first', response.result);
                         } else {
-                            context.treeview.jstree('rename_node', $(treeContainer ).find('#node_' + extra.nodeId), response.result.data);
+                            context.treeview.jstree('rename_node', bb.jquery(treeContainer ).find('#node_' + extra.nodeId), response.result.data);
                         }
-                        $(self.keyWordEditorDialog.dialogUi).unmask();
+                        bb.jquery(self.keyWordEditorDialog.dialogUi).unmask();
                         self.keyWordEditorDialog.close();    
                     },
                     error : function(response){
-                        $(self.keyWordEditorDialog.dialogUi).unmask();
+                        bb.jquery(self.keyWordEditorDialog.dialogUi).unmask();
                     }
                 });
             } 
@@ -156,7 +156,7 @@
             var context = this.getContext();
             if (context.treeview) {
                 context.treeview.jstree('destroy');
-                $(this.element).find('#browser').children().remove();
+                bb.jquery(this.element).find('#browser').children().remove();
                 this.setContext(context);
             }
         },
@@ -175,7 +175,7 @@
             } 
             
             /*Création de l'arbre*/
-            context.treeview = $(myself._popupDialog.dialogUi).find('.bb5-windowpane-treewrapper-inner').jstree({   
+            context.treeview = bb.jquery(myself._popupDialog.dialogUi).find('.bb5-windowpane-treewrapper-inner').jstree({   
                 plugins : plugins,
                 rpc_data : { 
                     ajax : {
@@ -290,12 +290,12 @@
                     }
                 }
             }).bind('loaded.jstree', function (e, data) {
-                if ($(e.target).find('ul > li:first').length > 0) {
+                if (bb.jquery(e.target).find('ul > li:first').length > 0) {
                     data.inst.select_node('ul > li:first');
                 }
                 myself._trigger('ready');
                         
-            }).bind('click.jstree',$.proxy(myself.callbacks.nodeClickHandler,myself)).bind("create.jstree", $.proxy(myself.callbacks.createHandler,myself));
+            }).bind('click.jstree',bb.jquery.proxy(myself.callbacks.nodeClickHandler,myself)).bind("create.jstree", bb.jquery.proxy(myself.callbacks.createHandler,myself));
             this.setContext(context);
         },
        
@@ -314,16 +314,16 @@
         },
         
         setContext: function(context) {
-            return $(this.element).data('context', $.extend($(this.element).data('context'), context));
+            return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
         
         getContext: function() {
-            return ( (typeof $(this.element).data('context') != 'undefined') ? $(this.element).data('context') : {} );
+            return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         }
     
     
        
     }); 
-})(jQuery,window);
+})(bb.jquery,window);
 
 

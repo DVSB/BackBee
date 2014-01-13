@@ -1,6 +1,6 @@
-(function($){
+(function($) {
 	
-    $.widget("ui.bbUtilsPager", {
+    bb.jquery.widget("ui.bbUtilsPager", {
         options: {
             // Options principales
             pagerContainerClass: ".bb5-windowpane-main-toolbar-nav",
@@ -35,7 +35,7 @@
         messages: {
         },
 
-        tplMaxPerPageSelector: $.template('\n\<select class="maxPerPageSelector">\n\
+        tplMaxPerPageSelector: bb.jquery.template('\n\<select class="maxPerPageSelector">\n\
 					<option value="5">5</option>\n\
 					<option value="10">10</option>\n\
 					<option value="20">20</option>\n\
@@ -48,13 +48,13 @@
 
         _create: function(){
             if(this.options.maxPerPage == null){
-                if($(document).data('bbUtilsPager.maxPerPage')){
-                    this.options.maxPerPage = $(document).data('bbUtilsPager.maxPerPage');
+                if(bb.jquery(document).data('bbUtilsPager.maxPerPage')){
+                    this.options.maxPerPage = bb.jquery(document).data('bbUtilsPager.maxPerPage');
                 }else{
                     this.options.maxPerPage = this.options.maxPerPageDefault;
                 }
             }
-            this.getRecords(jQuery.proxy(this.displayRecords, this));
+            this.getRecords(bb.jquery.proxy(this.displayRecords, this));
         },
 		
         _getDataUsingWebService : function(callback){
@@ -93,25 +93,25 @@
         /*Affiche pagination et options*/
         displayRecords: function(datas){
             var self = this;
-            $(this.options.pagerContainerClass).html("");
+            bb.jquery(this.options.pagerContainerClass).html("");
             if(this.options.maxPerPageSelector){
-                $(this.options.selectPerPageCtnClass).remove();
-                $(this.element).find(this.options.maxItemSelectorCtnClass).eq(0).append(this.tplMaxPerPageSelector);                
-                $(this.element).find("select").val(this.options.maxPerPage);
-                $(this.element).find("select").unbind("change").change(function(){
-                    self.options.maxPerPage = $(this).val();
-                    $(document).data('bbUtilsPager.maxPerPage', self.options.maxPerPage);
+                bb.jquery(this.options.selectPerPageCtnClass).remove();
+                bb.jquery(this.element).find(this.options.maxItemSelectorCtnClass).eq(0).append(this.tplMaxPerPageSelector);                
+                bb.jquery(this.element).find("select").val(this.options.maxPerPage);
+                bb.jquery(this.element).find("select").unbind("change").change(function(){
+                    self.options.maxPerPage = bb.jquery(this).val();
+                    bb.jquery(document).data('bbUtilsPager.maxPerPage', self.options.maxPerPage);
                     self.options.start = 0;
-                    var callback = jQuery.proxy(self.displayRecords, self);
-                    self.getRecords(jQuery.proxy(self.displayRecords, self));
+                    var callback = bb.jquery.proxy(self.displayRecords, self);
+                    self.getRecords(bb.jquery.proxy(self.displayRecords, self));
                 //self.displayRecords();
                 });
             }
             if(this.options.numResults > this.options.maxPerPage){
-                $(this.options.pagerContainerClass).html("");
-                this.pager = $(this.element).find(this.options.pagerContainerClass).eq(0);
+                bb.jquery(this.options.pagerContainerClass).html("");
+                this.pager = bb.jquery(this.element).find(this.options.pagerContainerClass).eq(0);
                             
-                $(this.pager).paging(self.options.numResults, {
+                bb.jquery(this.pager).paging(self.options.numResults, {
                     perpage: self.options.maxPerPage,
                     onSelect: function(numPage){
                         if(self.options.oldNumPage != 0){
@@ -178,11 +178,11 @@
 		
         updatePostParams: function(postParams){
   
-            this.options.postParams = $.extend({},this.options.postParams, postParams);
+            this.options.postParams = bb.jquery.extend({},this.options.postParams, postParams);
            
            
             //this.displayRecords();
-            this.getRecords(jQuery.proxy(this.displayRecords, this),true);
+            this.getRecords(bb.jquery.proxy(this.displayRecords, this),true);
         },
          
       
@@ -203,17 +203,17 @@
                 this._getDataUsingWebService(callback);
                 return;
             }else{
-                var postParams = $.extend(this.options.postParams, {
+                var postParams = bb.jquery.extend(this.options.postParams, {
                     start: parseInt(this.options.start), 
                     limit: parseInt(this.options.maxPerPage)
                 });
-                $.post(this.options.url, postParams, function(datas){
+                bb.jquery.post(this.options.url, postParams, function(datas){
                     if(!datas.error){
                         //self.options.numResults = parseInt(datas.numResults);
                         if(callback) callback(datas.datas);
                         else self.options.callback(datas.view);
                         /*var numPage = Math.ceil((self.options.start+1)/self.options.maxPerPage);
-					$(this.element).find(".pageBtn").css("font-weight", "normal");*/
+					bb.jquery(this.element).find(".pageBtn").css("font-weight", "normal");*/
                         self.afterRequest(datas.numResults);
                     }else{
                         bb.utils.dialog(datas.error);
@@ -225,11 +225,11 @@
         afterRequest: function(numResults){
             if(parseInt(numResults)==-1) throw "numResults must be provided"; 
             this.options.numResults = parseInt(numResults);
-            $(this.element).find(".pageBtn").css("font-weight", "normal");
+            bb.jquery(this.element).find(".pageBtn").css("font-weight", "normal");
         }, 
                 
         destroy: function(){
-            $.Widget.prototype.destroy.apply(this, arguments);
+            bb.jquery.Widget.prototype.destroy.apply(this, arguments);
         }
     })
-})(jQuery);
+})(bb.jquery);

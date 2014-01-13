@@ -1,4 +1,7 @@
 /*LayoutToolsbar*/
+
+(function($) {
+
 BB4.ToolsbarManager.register("bundletb",{
 
     _settings : {
@@ -24,7 +27,7 @@ BB4.ToolsbarManager.register("bundletb",{
         delay : false
     },
     _init : function(){
-        this.toolsbar = $(this._settings.mainContainer);
+        this.toolsbar = bb.jquery(this._settings.mainContainer);
 		
         this.loaded = false;
         this.selectedBundle = null;
@@ -35,11 +38,11 @@ BB4.ToolsbarManager.register("bundletb",{
 		        
         this.bundleContainer = new SmartList({
             idKey:"id",
-            onInit : $.proxy(this._buildBundleSlide,this)
+            onInit : bb.jquery.proxy(this._buildBundleSlide,this)
         });
         
         this._callbacks["bundleClick_action"] = function(e) {
-            var selectedBundleId = $(e.currentTarget).attr("id").replace("bundle_","");
+            var selectedBundleId = bb.jquery(e.currentTarget).attr("id").replace("bundle_","");
             this._selectBundle(selectedBundleId);
         };
         this._bindPrivateEvents();
@@ -50,12 +53,12 @@ BB4.ToolsbarManager.register("bundletb",{
     
     _handleWindowsResize :function(){
         var self = this;
-        $(window).resize(function(e){
+        bb.jquery(window).resize(function(e){
             if(this._delay != false) clearTimeout(this._delay);
             var onResize = function(){
                 if(self.bundleAdminDialog && self.bundleAdminDialog.invoke("isOpen")){
-                    self.bundleAdminDialog.setOption("width",$(window).innerWidth() - 100);
-                    self.bundleAdminDialog.setOption("height",$(window).innerHeight() - 100);
+                    self.bundleAdminDialog.setOption("width",bb.jquery(window).innerWidth() - 100);
+                    self.bundleAdminDialog.setOption("height",bb.jquery(window).innerHeight() - 100);
                 }
             }
             self._delay = setTimeout(onResize,100);
@@ -66,11 +69,11 @@ BB4.ToolsbarManager.register("bundletb",{
         var self = this; 
 		
         this._resetSlider();
-        $.each(bundles,function(key,bundle){
+        bb.jquery.each(bundles,function(key,bundle){
             self._addBundleItem(bundle);
         });
         
-        var slider = $(this._settings.bundleSlideId).bxSlider({
+        var slider = bb.jquery(this._settings.bundleSlideId).bxSlider({
             nextText:'<span><i class="visuallyhidden focusable">'+bb.i18n.__('Next')+'</i></span>',
             prevText:'<span><i class="visuallyhidden focusable">'+bb.i18n.__('Previous')+'</i></span>',
             displaySlideQty:4,
@@ -99,24 +102,24 @@ BB4.ToolsbarManager.register("bundletb",{
             draggable: false,
             minHeight: 560,
             minWidth: 990,
-            width: ($(window).innerWidth() - 100),
-            height: ($(window).innerHeight() - 50),
+            width: (bb.jquery(window).innerWidth() - 100),
+            height: (bb.jquery(window).innerHeight() - 50),
             position: ["center","center"],
             buttons:{
                 "Fermer":function(){
-                    $(this).dialog("close");
+                    bb.jquery(this).dialog("close");
                     return false;
                 }
             }
         });
         this.bundleAdminDialog.on('open', function() {
-            self.bundleAdminDialog.setContent($(''));
+            self.bundleAdminDialog.setContent(bb.jquery(''));
             self.selectedBundle.webservice.request('admin', {
                 success : function(response){
-                    self.bundleAdminDialog.setContent($(response.result));
+                    self.bundleAdminDialog.setContent(bb.jquery(response.result));
                 },
                 error: function(response){
-                    self.bundleAdminDialog.setContent($(response.error));
+                    self.bundleAdminDialog.setContent(bb.jquery(response.error));
                 }
             });
         });
@@ -132,13 +135,13 @@ BB4.ToolsbarManager.register("bundletb",{
         var bundle = null;
         if (bundle = this.bundleContainer.get(bundleId)) {
             this.selectedBundle = bundle;
-            $('li.pager #bundle_'+bundleId).addClass('bb5-layout-selected');
-            $(this._settings.bundleNameId).append(bundle.name || bundle.id);
+            bb.jquery('li.pager #bundle_'+bundleId).addClass('bb5-layout-selected');
+            bb.jquery(this._settings.bundleNameId).append(bundle.name || bundle.id);
             if (bundle.description)
-                $(this._settings.bundleDescId).append('<textarea rows="3" cols="50" readonly>'+bundle.description+'</textarea>');
+                bb.jquery(this._settings.bundleDescId).append('<textarea rows="3" cols="50" readonly>'+bundle.description+'</textarea>');
             if (bundle.service) {
-                $(this._settings.bundleDescId).append('<p><button class="bb5-button bb5-button-square bb5-bundle-'+bundle.id+'-admin">Administrer</button></p>');
-                $('button.bb5-bundle-'+bundle.id+'-admin', $(this._settings.bundleDescId)).bind('click', function(e) {
+                bb.jquery(this._settings.bundleDescId).append('<p><button class="bb5-button bb5-button-square bb5-bundle-'+bundle.id+'-admin">Administrer</button></p>');
+                bb.jquery('button.bb5-bundle-'+bundle.id+'-admin', bb.jquery(this._settings.bundleDescId)).bind('click', function(e) {
                     self.bundleAdmin();
                 });	
             }
@@ -148,9 +151,9 @@ BB4.ToolsbarManager.register("bundletb",{
     _unselectBundle : function() {
         this.selectedBundle = null;
 		
-        $(this._settings.bundleSlideId+' button').removeClass('bb5-layout-selected');
-        $(this._settings.bundleNameId).empty();
-        $(this._settings.bundleDescId).empty();		
+        bb.jquery(this._settings.bundleSlideId+' button').removeClass('bb5-layout-selected');
+        bb.jquery(this._settings.bundleNameId).empty();
+        bb.jquery(this._settings.bundleDescId).empty();		
     },
 	
     bundleAdmin : function() {
@@ -164,7 +167,7 @@ BB4.ToolsbarManager.register("bundletb",{
                 }]
             });
             this.selectedBundle.webservice = bb.webserviceManager.getInstance('ws_local_bundle_'+this.selectedBundle.id);
-            $(this.bundleAdminDialog).dialog('option', 'title', "Administration : "+(this.selectedBundle.name||$this.selectedBundle.id));	
+            bb.jquery(this.bundleAdminDialog).dialog('option', 'title', "Administration : "+(this.selectedBundle.name||$this.selectedBundle.id));	
             this.bundleAdminDialog.show();
         }
     },
@@ -175,27 +178,27 @@ BB4.ToolsbarManager.register("bundletb",{
 	
     //class="bbGridSlide"
     _resetSlider : function(){
-        var sliderTemplate = $('<div id="bb5-use-bundle-wrapper" class="bb5-tabarea_content">'
+        var sliderTemplate = bb.jquery('<div id="bb5-use-bundle-wrapper" class="bb5-tabarea_content">'
             +'<div class="bb5-slider-extnd-wrapper slider-fx">'
             +'<ul id="bb5-slider-extnd"></ul>'
             +'</div>'
             +'</div>');
                     
-        var slider = $(sliderTemplate).clone();
-        $("#bb5-use-bundle-wrapper").replaceWith(slider);
+        var slider = bb.jquery(sliderTemplate).clone();
+        bb.jquery("#bb5-use-bundle-wrapper").replaceWith(slider);
     },
 	
     _addBundleItem : function(bundle) {
-        var item = $('<li></li>').clone();    
-        var btn = $("<button class='bb5-button bb5-button-bulky bb5-extnd-choice-x'><i></i></button>").clone();
-        $(btn).attr("id","bundle_"+bundle.id);
-        $(btn).attr("title",bundle.name || bundle.id);
-        $('i', $(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+"img/extnd-x/picto-extnd.png);");
+        var item = bb.jquery('<li></li>').clone();    
+        var btn = bb.jquery("<button class='bb5-button bb5-button-bulky bb5-extnd-choice-x'><i></i></button>").clone();
+        bb.jquery(btn).attr("id","bundle_"+bundle.id);
+        bb.jquery(btn).attr("title",bundle.name || bundle.id);
+        bb.jquery('i', bb.jquery(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+"img/extnd-x/picto-extnd.png);");
         if ('on' == bundle.enable) {
-            $('i', $(btn)).append("<span></span>");
+            bb.jquery('i', bb.jquery(btn)).append("<span></span>");
         }
-        $(item).append(btn);
-        $(this._settings.bundleSlideId).append(item);
+        bb.jquery(item).append(btn);
+        bb.jquery(this._settings.bundleSlideId).append(item);
     },
 	
     enable : function() {
@@ -217,3 +220,5 @@ BB4.ToolsbarManager.register("bundletb",{
         }
     }
 });
+
+}) (bb.jquery);

@@ -9,7 +9,7 @@
         
         init : function(settings){
             var settings = settings || {};
-            this._settings = $.extend({},this._settings, settings);
+            this._settings = bb.jquery.extend({},this._settings, settings);
             this.title = "parents";
             this.hour = " down south"; 
             console.log("init",this);
@@ -48,12 +48,12 @@
                     self.setHour();
                 },
                 getHour: function(){},             
-                disable: $.proxy(self.disable,self),
-                enable: $.proxy(self.enable,self)
+                disable: bb.jquery.proxy(self.disable,self),
+                enable: bb.jquery.proxy(self.enable,self)
             }  
         }
     
     
     });
     
-})(jQuery)
+})(bb.jquery)
