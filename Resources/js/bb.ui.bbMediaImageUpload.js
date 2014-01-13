@@ -1,5 +1,5 @@
 (function($){
-    $.widget('ui.bbMediaImageUpload', {
+    bb.jquery.widget('ui.bbMediaImageUpload', {
         options: {
             media_uid: null,
             media_classname: null
@@ -24,7 +24,7 @@
 
         _init: function() {
             var myself = this;
-            var dropbox = $(this.element);
+            var dropbox = bb.jquery(this.element);
             bb.uploadManager.getInstance('ws_local_media').filedrop('uploadImage', {
                 paramname: 'image',
                 maxfiles: 1,
@@ -110,10 +110,10 @@
         },
         
         destroy: function() {
-            $(this.element).unbind('drop').unbind('dragenter').unbind('dragover').unbind('dragleave');
-            $(document).unbind('drop').unbind('dragenter').unbind('dragover').unbind('dragleave');
+            bb.jquery(this.element).unbind('drop').unbind('dragenter').unbind('dragover').unbind('dragleave');
+            bb.jquery(document).unbind('drop').unbind('dragenter').unbind('dragover').unbind('dragleave');
             
-            $.Widget.prototype.destroy.apply(this, arguments);
+            bb.jquery.Widget.prototype.destroy.apply(this, arguments);
         }
     })
-})(jQuery);
+})(bb.jquery);

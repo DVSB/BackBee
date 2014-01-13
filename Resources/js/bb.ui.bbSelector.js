@@ -1,5 +1,5 @@
 (function($){
-    $.widget("ui.bbSelector", {
+    bb.jquery.widget("ui.bbSelector", {
         options: {
             popup: false,
             autoOpen: false,
@@ -18,8 +18,8 @@
             resizeStart :null,
             site:null
         //            popup: {
-        //                width: $(window).innerWidth(),
-        //                height: $(window).innerHeight()
+        //                width: bb.jquery(window).innerWidth(),
+        //                height: bb.jquery(window).innerHeight()
         //            }
         },
         i18n: {
@@ -95,13 +95,13 @@
                 mainContainer :"#bb5-selectortabs-tpl",
                 disabled: tabsToDisable,
                 cloneContainer:true,
-                onShow : $.proxy(this._renderSelector,this),
+                onShow : bb.jquery.proxy(this._renderSelector,this),
                 hideHeaderIfonlyOne : true
             });
            
             this._trigger('ready');
             /*add tab*/
-            $(this.element).html(this._context.selectorTabs.getTab());
+            bb.jquery(this.element).html(this._context.selectorTabs.getTab());
         },
             
         /*add Some useful functions to selector's Children*/
@@ -120,25 +120,25 @@
                 }
             };
             if(typeof selectorWidget=="function"){
-                $.extend(true,selectorWidget.prototype,api);  
+                bb.jquery.extend(true,selectorWidget.prototype,api);  
             } 
         },
         
         onWidgetInit : function(widgetName,callback){
             var widgetName = widgetName || false;
             if(!widgetName) return;
-            this._onInitCallbacks[widgetName] = (typeof callback =="function") ? callback : $.noop;
+            this._onInitCallbacks[widgetName] = (typeof callback =="function") ? callback : bb.jquery.noop;
         }, 
         
         _renderSelector : function(e,ui){
             var myself = this;
             var context = myself.getContext();
             var widgetName = null;
-            switch($(ui.panel).attr("class")){
+            switch(bb.jquery(ui.panel).attr("class")){
                 case this._panel.INTERNAL_LINK:
                     if (!context.panels[this._panel.INTERNAL_LINK]){ 
-                        this.extendChildWidget($.ui.bbPageSelector); 
-                        context.panels[this._panel.INTERNAL_LINK] = $(ui.panel).bbPageSelector({
+                        this.extendChildWidget(bb.jquery.ui.bbPageSelector); 
+                        context.panels[this._panel.INTERNAL_LINK] = bb.jquery(ui.panel).bbPageSelector({
                             site: myself.options.site,
                             callback: context.callback,
                             ready: function() {
@@ -154,8 +154,8 @@
                     break;
                 case this._panel.EXTERNAL_LINK:
                     if (!context.panels[this._panel.EXTERNAL_LINK]){
-                        this.extendChildWidget($.ui.bbLinkSelector);                        
-                        context.panels[this._panel.EXTERNAL_LINK] = $(ui.panel).bbLinkSelector({
+                        this.extendChildWidget(bb.jquery.ui.bbLinkSelector);                        
+                        context.panels[this._panel.EXTERNAL_LINK] = bb.jquery(ui.panel).bbLinkSelector({
                             callback: context.callback,
                             ready: function() {
                                 if (typeof myself._onInitCallbacks[myself._panel.EXTERNAL_LINK] == "function") {
@@ -168,8 +168,8 @@
                     break;
                 case this._panel.MEDIA_LINK:
                     if (!context.panels[this._panel.MEDIA_LINK]){
-                        this.extendChildWidget($.ui.bbMediaSelector);                        
-                        context.panels[this._panel.MEDIA_LINK] = $(ui.panel).bbMediaSelector({
+                        this.extendChildWidget(bb.jquery.ui.bbMediaSelector);                        
+                        context.panels[this._panel.MEDIA_LINK] = bb.jquery(ui.panel).bbMediaSelector({
                             callback: context.callback,
                             editMode: true,
                             ready: function() {
@@ -184,8 +184,8 @@
                     
                 case this._panel.CONTENT_LINK:
                     if(!context.panels[this._panel.CONTENT_LINK]){
-                        this.extendChildWidget($.ui.bbContentSelector);                        
-                        context.panels[this._panel.CONTENT_LINK] = $(ui.panel).bbContentSelector({
+                        this.extendChildWidget(bb.jquery.ui.bbContentSelector);                        
+                        context.panels[this._panel.CONTENT_LINK] = bb.jquery(ui.panel).bbContentSelector({
                             ready: function(){
                                 if (typeof myself._onInitCallbacks[myself._panel.CONTENT_LINK] == "function") {
                                     myself._onInitCallbacks[myself._panel.CONTENT_LINK].call(this);
@@ -215,20 +215,20 @@
             /*handle toolsbar here*/
             if(!this.options.popup) return false;
             var selectedTab =  this._context.selectorTabs.getSelectedTab();
-            var selectedWidget = this.getWidget($(selectedTab.tabPanel).attr("class"));
+            var selectedWidget = this.getWidget(bb.jquery(selectedTab.tabPanel).attr("class"));
             var dialogUi = this.mainDialog.dialogUi;
-            $(dialogUi).find(".bb5-dialog-title-tools").remove();
+            bb.jquery(dialogUi).find(".bb5-dialog-title-tools").remove();
             if(selectedWidget){
-                var tbMenu = this.toolsbarsCtn[$(selectedTab.tabPanel).attr("class")] || false ;
+                var tbMenu = this.toolsbarsCtn[bb.jquery(selectedTab.tabPanel).attr("class")] || false ;
                 if(!tbMenu){
-                    var selectedWidget = $(selectedWidget).data(this.widgetClasses[$(selectedTab.tabPanel).attr("class")]);
+                    var selectedWidget = bb.jquery(selectedWidget).data(this.widgetClasses[bb.jquery(selectedTab.tabPanel).attr("class")]);
                     if(typeof selectedWidget.initToolsbarMenu=="function"){
                         var tbMenu = selectedWidget.initToolsbarMenu();
-                        this.toolsbarsCtn[$(selectedTab.tabPanel).attr("class")] = tbMenu;
+                        this.toolsbarsCtn[bb.jquery(selectedTab.tabPanel).attr("class")] = tbMenu;
                     }
                 }
                 if(tbMenu.length){
-                    $(dialogUi).find('.ui-dialog-titlebar .ui-dialog-titlebar-close').before($(tbMenu).clone(true)); 
+                    bb.jquery(dialogUi).find('.ui-dialog-titlebar .ui-dialog-titlebar-close').before(bb.jquery(tbMenu).clone(true)); 
                 }
             }
         },
@@ -236,7 +236,7 @@
         _init: function() {
             var myself = this,
             context = myself.getContext();
-            this.options.resize = (typeof this.options.resize =="function")? this.options.resize : $.noop;
+            this.options.resize = (typeof this.options.resize =="function")? this.options.resize : bb.jquery.noop;
            
             if (this.options.popup) {
                 var popupManager = bb.PopupManager.init();
@@ -251,12 +251,12 @@
                     position: ["center","center"],
                     minWidth: 990,
                     minHeight: 560,
-                    width: ($(window).innerWidth() - 100),
-                    height: ($(window).innerHeight() - 50),
-                    close : $.proxy(this.onMainDialogClose,this),
-                    open : $.proxy(this._handleSelectedTabActions,this),
+                    width: (bb.jquery(window).innerWidth() - 100),
+                    height: (bb.jquery(window).innerHeight() - 50),
+                    close : bb.jquery.proxy(this.onMainDialogClose,this),
+                    open : bb.jquery.proxy(this._handleSelectedTabActions,this),
                     resizeStart: function(e,ui){
-                        myself.resizeInfos.originalContainerHeight = $(e.target).height();
+                        myself.resizeInfos.originalContainerHeight = bb.jquery(e.target).height();
                         myself.resizeInfos.resizeStep = 0;
                         myself._trigger("resizeStart");
                         if(typeof myself.options.resizeStart=="function"){
@@ -264,7 +264,7 @@
                         }
                     },
                     resize :function(e,ui){
-                        var delta =  $(e.target).height() - myself.resizeInfos.originalContainerHeight;
+                        var delta =  bb.jquery(e.target).height() - myself.resizeInfos.originalContainerHeight;
                         var deltaStep = delta - myself.resizeInfos.resizeStep;
                         myself.resizeInfos.resizeStep = delta;
                         myself._trigger("resize",0,{
@@ -281,14 +281,14 @@
                         myself._trigger("resizeStop");
                         /*explicit call*/
                         if(typeof myself.options.resize=="function"){
-                            $.proxy(myself.options.resizeStop,myself);
+                            bb.jquery.proxy(myself.options.resizeStop,myself);
                         }
                         
                     }
                 }); 
                 
                 this.mainDialog.setOption("title",this.options.selectorTitle);
-                /*$(this.element).dialog({
+                /*bb.jquery(this.element).dialog({
                     dialogClass: 'bb5-ui bb5-dialog-wrapper bb5-dialog-selector',
                     resizable: this.options.resizable,
                     draggable:this.options.draggable,
@@ -299,19 +299,19 @@
                     position: ["center","center"],
                     minWidth: 990,
                     minHeight: 580,
-                    close : $.proxy(this.onMainDialogClose,this),
-                    open : $.proxy(this._handleSelectedTabActions,this)
+                    close : bb.jquery.proxy(this.onMainDialogClose,this),
+                    open : bb.jquery.proxy(this._handleSelectedTabActions,this)
                 });*/
                 
-                this.mainDialog.setContent($(this.element));
+                this.mainDialog.setContent(bb.jquery(this.element));
                 if (this.options.autoOpen){
                     this.mainDialog.open();
-                //$(this.element).dialog('open');
+                //bb.jquery(this.element).dialog('open');
                 }
                     
             } else {
                 if (this.options.autoOpen)
-                    $(this.element).show();
+                    bb.jquery(this.element).show();
             }
             
             context.callback = this.options.callback;
@@ -325,9 +325,9 @@
         open: function() {
             if (this.options.popup) {
                 this.mainDialog.open();
-            //$(this.element).dialog('open');
+            //bb.jquery(this.element).dialog('open');
             } else {
-                $(this.element).show();
+                bb.jquery(this.element).show();
             }
             this._context.isOpen = true;
             this._trigger('open');
@@ -336,9 +336,9 @@
         close: function() {
             if (this.options.popup) {
                 this.mainDialog.close();
-            //$(this.element).dialog('close');
+            //bb.jquery(this.element).dialog('close');
             } else {
-                $(this.element).hide();
+                bb.jquery(this.element).hide();
             }
              this._context.isOpen = false;
             this._trigger('close');
@@ -350,9 +350,9 @@
                 return "Callback should be a function";
             };
             var eventName = (typeof eventName =="string") ? eventName : false;
-            if(!eventName || $.inArray(eventName,availableEvents)==-1) return;
+            if(!eventName || bb.jquery.inArray(eventName,availableEvents)==-1) return;
             var eventName = "bbselector"+eventName.toLowerCase();
-            $(this.element).bind(eventName,callback);
+            bb.jquery(this.element).bind(eventName,callback);
         },
         
         onMainDialogClose :function(){
@@ -362,13 +362,13 @@
         _bindEvents :function(){
             var self = this;
             var context = this.getContext(); 
-            $(window).resize(function(e){
+            bb.jquery(window).resize(function(e){
             if(("delay" in context) && context.delay != false) clearTimeout(context.delay);
             var onResize = function(){
                 if(!self._context.isOpen) return;
-                 self.mainDialog.setOption("width",$(window).innerWidth() - 100);
-                 self.mainDialog.setOption("height",$(window).innerHeight() - 100);
-                 //$(self.element).dialog("options","position",);
+                 self.mainDialog.setOption("width",bb.jquery(window).innerWidth() - 100);
+                 self.mainDialog.setOption("height",bb.jquery(window).innerHeight() - 100);
+                 //bb.jquery(self.element).dialog("options","position",);
             }
             context.delay = setTimeout(onResize,100);
             self.setContext(context);
@@ -393,11 +393,11 @@
         },
                 
         setContext: function(context) {
-            return $(this.element).data('context', $.extend($(this.element).data('context'), context));
+            return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
         
         getContext: function() {
-            return ( (typeof $(this.element).data('context') != 'undefined') ? $(this.element).data('context') : {} );
+            return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         },
         
         destroy: function(){ 
@@ -419,14 +419,14 @@
             //popin
             if (this.options.popup) {
                 this.mainDialog.destroy();
-            //$(this.element).dialog('destroy');
+            //bb.jquery(this.element).dialog('destroy');
             } else {
-                $(this.element).hide();
+                bb.jquery(this.element).hide();
             }
             
-            $.Widget.prototype.destroy.apply(this, arguments);
+            bb.jquery.Widget.prototype.destroy.apply(this, arguments);
             
             this.setContext(context);
         }
     })
-})(jQuery);
+})(bb.jquery);
