@@ -424,11 +424,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (true === array_key_exists('site_uid', $cond)) {
-            $uids = $this->_em->getConnection()->executeQuery('SELECT content_uid FROM idx_site_content WHERE site_uid = :site_uid', array('site_uid' => $cond['site_uid']))->fetchAll(\PDO::FETCH_COLUMN);
-            // @todo
-            if (0 < count($uids)) {
-                $qb = $qb->andWhere('c._uid IN (:uids)')->setParameter('uids', $uids);
-            }
+            $qb = $qb->andWhere('c._uid IN (SELECT i.content_uid FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)')->setParameter('site_uid', $cond['site_uid']);
         }
 
         /* @fixme handle keywords here using join */
@@ -601,11 +597,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (true === array_key_exists('site_uid', $cond)) {
-            $uids = $this->_em->getConnection()->executeQuery('SELECT content_uid FROM idx_site_content WHERE site_uid = :site_uid', array('site_uid' => $cond['site_uid']))->fetchAll(\PDO::FETCH_COLUMN);
-            // @todo
-            if (0 < count($uids)) {
-                $qb = $qb->andWhere('c._uid IN (:uids)')->setParameter('uids', $uids);
-            }
+            $qb = $qb->andWhere('c._uid IN (SELECT i.content_uid FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)')->setParameter('site_uid', $cond['site_uid']);
         }
 
         /* Keywords */

@@ -27,7 +27,7 @@ bb.jquery(function(){
             var result = {
                 scalar: bb.jquery(this.fieldWrapper).find(".fieldText").val()
             };
-            return result;           
+            return result;          
         }
     });
 
@@ -56,7 +56,7 @@ bb.jquery(function(){
                     'value': bb.jquery(this.fieldWrapper).find(".fieldText").val()
                 }
             };
-            return result;           
+            return result;    
         }
 
     });
@@ -179,16 +179,16 @@ bb.jquery(function(){
         _removeMedia : function(container,name,id){
             bb.jquery(this._mediaContainer).find(".media-"+id).remove();
         },
-        /* add accept list in param*/
+        /* add an accept key in params*/
         _typeIsValid : function(media){
-            var valid = false;
-            if(media.data.content.classname.indexOf("Media\\image") != -1){
+            var valid = true;
+            /*if(media.data.content.classname.indexOf("Media\\image") != -1){
                 valid = true; 
             }
             if(!valid){
                 alert("Media of type " +media.data.content.classname+" is not allowed!");
             }
-            valid = true;
+            valid = true;*/
             return valid;  
         },
         
@@ -251,7 +251,7 @@ bb.jquery(function(){
            
            
         validate: function(){
-            return true;    
+            return true;
         },
            
         render : function(){
@@ -265,7 +265,7 @@ bb.jquery(function(){
                     medias: JSON.stringify(mediaContent)
                 }
             }; 
-            return result; 
+            return result;
         }
     });
    
