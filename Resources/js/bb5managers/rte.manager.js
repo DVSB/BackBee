@@ -63,12 +63,14 @@
         
         handleRte: function(){  
             var self = this;
+           
             bb.jquery(document).bind("content:ItemClicked",function(e, path, bbContent){
                 if(self.isDisabled()) return;
                 if(!bbContent) throw "rte.manager bbContent can't be found"; 
                 self.rteAdapter.applyInlineTo(bbContent.contentEl);
                 return true;
-            });                
+            }); 
+            bb.jquery(bb).trigger("bb:rteReady",{data: self.rteAdapter});
         },
         
         handleRteEdit: function(data){
