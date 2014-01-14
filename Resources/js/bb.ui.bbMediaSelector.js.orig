@@ -81,8 +81,28 @@
             upload_only_type_allowed: 'Only #type# are allowed!'
         },
 
+<<<<<<< HEAD
       
       
+=======
+        _templates: {
+            panel: bb.jquery('#bb5-ui-bbmediaselector-panel-tpl').clone(),
+            view: bb.jquery('#bb5-ui-bbmediaselector-view-tpl').clone(),
+            viewgrid: null,
+            viewlist: null
+        },
+        cachedResult : false, //useful for grid list
+        _context: {
+            selected: null,
+            treeview: null,
+            messageBox: null,
+            confirmBox: null,
+            availableMedias: null,
+            callback: null,
+            mediaPager : null,
+            searchEngine: null
+        },
+>>>>>>> 7df5a5d3cca10bbd57c35a84e13e3a8c93d5cd07
 
         _create: function() {
             this.cachedResult = false;
@@ -730,10 +750,17 @@
                 });
             }
             /*empêcher le champ média d'être vide*/
+<<<<<<< HEAD
+            var uploadedContent = $(mediaForm).find(".uploadedmedia").eq(0).val();
+            var MediapreviewCtn = $(mediaForm).find(".bbMediaPreview").eq(0); 
+            if($.trim(uploadedContent)==""){
+            // errors.push(MediapreviewCtn);
+=======
             var uploadedContent = bb.jquery(mediaForm).find(".uploadedmedia").eq(0).val();
             var MediapreviewCtn = bb.jquery(mediaForm).find(".bbMediaPreview").eq(0); 
             if(bb.jquery.trim(uploadedContent)==""){
-            // errors.push(MediapreviewCtn);
+               // errors.push(MediapreviewCtn);
+>>>>>>> 7df5a5d3cca10bbd57c35a84e13e3a8c93d5cd07
             }
             
             if(errors.length){
@@ -1015,8 +1042,13 @@
         /* move outside*/
         _createPreview: function(file, dropbox) {
             dropbox.empty();
-            var fileType = (typeof bb.jquery(dropbox).attr("data-mediatype")=="string") ? bb.jquery(dropbox).attr("data-mediatype") : false;  
+<<<<<<< HEAD
+            var fileType = (typeof $(dropbox).attr("data-mediatype")=="string") ? $(dropbox).attr("data-mediatype") : false;  
             if(fileType) new Error("Media type .");
+=======
+            var fileType = (typeof bb.jquery(dropbox).attr("data-mediatype")=="string") ? bb.jquery(dropbox).attr("data-mediatype") : false;  
+            if(fileType) new Error("Le type du media n'a pas pu être trouvé.");
+>>>>>>> 7df5a5d3cca10bbd57c35a84e13e3a8c93d5cd07
             var methodName = fileType.charAt(0).toUpperCase() + fileType.slice(1);
             var methodToCall = "_create{mediaType}Preview".replace("{mediaType}",methodName);
             if(typeof this[methodToCall]=="function"){
@@ -1126,8 +1158,13 @@
             this._destroyView();
             context.messageBox.dialog('destroy');
             context.messageBox.remove();
-            bb.jquery(this.element).empty();
+<<<<<<< HEAD
+            $(this.element).empty();
             alert("here");
+=======
+            bb.jquery(this.element).empty();
+
+>>>>>>> 7df5a5d3cca10bbd57c35a84e13e3a8c93d5cd07
             context.selected = null;
             context.treeview = null;
             context.messageBox = null;
