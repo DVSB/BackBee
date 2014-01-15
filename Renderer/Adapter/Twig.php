@@ -53,7 +53,11 @@ class Twig extends ARendererAdapter
      * Extensions to include in searching file
      * @var array
      */
-    protected $includeExtensions = array('.twig');
+    protected $includeExtensions = array(
+        '.twig',
+        '.html.twig',
+        '.xml.twig'
+    );
 
     /**
      * Constructor
