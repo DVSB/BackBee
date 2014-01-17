@@ -339,13 +339,13 @@ class Page extends AbstractServiceLocal
         }
 
         if (null === $next = $this->_repo->find(strval($next_uid))) {
-            $this->_repo->moveAsFirstChildOf($page, $parent);
+            $this->_repo->moveAsLastChildOf($page, $parent);
         } else {
             if (false === $next->getParent()->equals($parent)) {
                 throw new InvalidArgumentException('Previous sibling must have the same parent node');
             }
 
-            $this->_repo->moveAsNextSiblingOf($page, $next);
+            $this->_repo->moveAsPrevSiblingOf($page, $next); 
         }
 
         $this->getEntityManager()->flush($page);
