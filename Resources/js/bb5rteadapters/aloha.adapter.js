@@ -10,19 +10,19 @@
         toolbar: {
             floating : false,
             pin: false,
-            draggable: false
+            draggable: false,
+            tabs: [{ label:"Styles", components: ["formatStyle"], showOn: {scope: "bb.customstyle"}}]
         },
         bundles: {
             // Path for custom bundle relative from Aloha.settings.baseUrl usually path of aloha.js
-            cmsplugin: '../../../aloha-plugins'
+             bbplugin: '../../../../bb5rteadapters/plugins/aloha'
         },
         plugins :{
             "format": {
                 // all elements with no specific configuration get this configuration
                 config : [ 'b', 'i','sub','sup'],
                 editables: {}
-            },
-            "links":{}
+            }
         }
     }
 })(window,$);
@@ -57,12 +57,15 @@ function loadScript(url, callback, config){
 /* declaring aloha adapter */
 bb.RteManager.registerAdapter("aloha",{
     
-    onInit : function(){
+    onInit : function(rteConfig){
         var self = this;
         this.contentNode = null;
         this.mode = null;
         this.editables = [];
-        /*handle all settings here*/
+        /*handle plugins conf here*/
+         if("pluginsconf" in rteConfig){
+           //bb.jquery.extend(true,Aloha.settings.plugins,rteConfig.pluginsconf);
+        }
         loadScript(bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
             Aloha.ready(function(){
                 self.trigger("onReady");
@@ -153,6 +156,7 @@ bb.RteManager.registerAdapter("aloha",{
     disable: function(){
         this.callSuper();
         if(!this.editables.length) return;
+        $(".aloha-editable-highlight").removeClass("aloha-editable-highlight");
         Aloha.jQuery(this.editables).mahalo();
         this.editables = []; 
     }
