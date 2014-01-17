@@ -360,7 +360,7 @@ class NestedNodeRepository extends EntityRepository
         if ($node->getRightnode() + 1 == $dest->getLeftnode())
             return false; /* $node is already the prev of $dest -> do nothing */
 
-        if ($node->getParent() == $dest->getParent()) {
+        if ($node->getParent() == $dest->getParent() && $dest->getLeftnode() < $node->getLeftnode()) {
             $newLeft = $dest->getLeftnode();
         } else {
             $newLeft = $dest->getLeftnode() - $node->getWeight();
@@ -372,13 +372,11 @@ class NestedNodeRepository extends EntityRepository
         /* move the removed subtree back to the main tree */
         $delta = $newLeft - 1; /* newleft - currentSubtreeleft always starts at 1) */
         $levelDiff = $dest->getLevel() - 1; /* -1 as substree level starts with 1 */
-        $this->_insertSubtreeAt($node, $dest, $delta, $levelDiff); //$levelDiff
         $node->setLeftnode($newLeft)
                 ->setRightnode($newRight)
                 ->setLevel($dest->getLevel())
                 ->setParent($dest->getParent())
                 ->setRoot($dest->getRoot());
-        //$this->_em->persist($node);*/
         return true;
     }
 
@@ -414,7 +412,7 @@ class NestedNodeRepository extends EntityRepository
     {
         if ($dest->isAncestorOf($node))
             return FALSE;
-        $newLeft = $dest->getRightnode() + 1;
+        $newLeft = $dest->getLeftnode() + $dest->getWeight();
         $newRight = $newLeft + ($node->getRightnode() - $node->getLeftnode());
         $this->shiftRLValues($dest, $newLeft, $node->getRightnode() - $node->getLeftnode() + 1);
         $node->setLeftnode($newLeft)
@@ -447,11 +445,11 @@ class NestedNodeRepository extends EntityRepository
      */
     public function moveAsLastChildOf(ANestedNode $node, ANestedNode $dest)
     {
-//        if ($dest->isAncestorOf($node))
+//        if ($nodet->isAncestorOf($dest))
 //            return FALSE;
 
         $newLeft = $dest->getRightnode();
-        $newRight = $newLeft + ($node->getRightnode() - $node->getLeftnode()) + 1;
+        $newRight = $newLeft + ($node->getRightnode() - $node->getLeftnode());
         $this->shiftRLValues($dest, $newLeft, $node->getRightnode() - $node->getLeftnode() + 1);
         $node->setLeftnode($newLeft)
                 ->setRightnode($newRight)
@@ -620,24 +618,6 @@ class NestedNodeRepository extends EntityRepository
         $currentRoot = $node->getRoot();
         $currentLeft = $node->getLeftnode();
         $currentRight = $node->getRightnode();
-        //$node->setParent(NULL);
-        $q = $this->createQueryBuilder('n')
-                        ->set('n._root', ':root')
-                        ->set('n._leftnode', 'n._leftnode - :delta')
-                        ->set('n._rightnode', 'n._rightnode - :delta')
-                        ->set('n._level', 'n._level - :level')
-                        ->andWhere('n._root = :croot')
-                        ->andWhere('n._leftnode >= :left')
-                        ->andWhere('n._rightnode <= :right')
-                        ->setParameters(array(
-                            'root' => $node,
-                            'delta' => $currentLeft - 1,
-                            'level' => $node->getLevel() - 1,
-                            'croot' => $currentRoot,
-                            'left' => $currentLeft,
-                            'right' => $currentRight
-                        ))
-                        ->update()->getQuery()->execute();
         $q = $this->createQueryBuilder('n')
                         ->set('n._leftnode', 'n._leftnode - :delta')
                         ->andWhere('n._root = :root')
@@ -651,11 +631,11 @@ class NestedNodeRepository extends EntityRepository
         $q = $this->createQueryBuilder('n')
                         ->set('n._rightnode', 'n._rightnode - :delta')
                         ->andWhere('n._root = :root')
-                        ->andWhere('n._rightnode > :left')
+                        ->andWhere('n._rightnode > :right')
                         ->setParameters(array(
                             'delta' => $node->getWeight(),
                             'root' => $currentRoot,
-                            'left' => $currentLeft
+                            'right' => $currentRight
                         ))
                         ->update()->getQuery()->execute();
         return $this;
