@@ -97,8 +97,7 @@ class ContentRender
     private function initFields()
     {
         $fields = array();
-        $alohaConf = $this->bbapp->getConfig()->getSection('rteconfig');
-        $alohaConf = $alohaConf['aloha'];
+        $alohaConf = $this->bbapp->getConfig()->getSection('alohapluginstable');
         $content = $this->content;
         if (!is_a($content, 'BackBuilder\ClassContent\ContentSet')) {
             $elements = $content->getData();
@@ -106,7 +105,7 @@ class ContentRender
                 if (is_a($content->$key, "BackBuilder\ClassContent\AClassContent")) {
                     if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == TRUE && NULL !== ($content->{$key}->getParam('aloha', 'scalar')))) {
                         $stdClassObj = new \stdClass();
-                        $stdClassObj->{$key} = $alohaConf['styles'][$content->{$key}->getParam('aloha', 'scalar')];
+                        $stdClassObj->{$key} = $alohaConf[$content->{$key}->getParam('aloha', 'scalar')];
                         $fields[] = $stdClassObj;
                     }
                 }
@@ -129,7 +128,9 @@ class ContentRender
         $this->content = NULL;
 
         $this->initContentObject();
-        $this->initFields();
+        // Useless init cause it's already done by BackBuilder\Services\Local\ClassContent::getContentsRteParams(); and it used the wrong config.yml's section
+        // (alohapluginstable instead of rteconfig)
+        //$this->initFields();
     }
 
     /**
