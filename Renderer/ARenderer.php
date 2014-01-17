@@ -176,8 +176,9 @@ abstract class ARenderer implements IRenderer
      */
     public function addHelperDir($dir)
     {
-        $this->getApplication()->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $dir);
-
+        if (true === file_exists($dir) && true === is_dir($dir)) {
+            $this->getApplication()->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $dir);
+        }
         return $this;
     }
 
@@ -190,7 +191,9 @@ abstract class ARenderer implements IRenderer
      */
     public function addLayoutDir($new_dir, $position = 0)
     {
-        $this->insertInArrayOnPostion($this->_layoutdir, $new_dir, $position);
+        if (true === file_exists($new_dir) && true === is_dir($new_dir)) {
+            $this->insertInArrayOnPostion($this->_layoutdir, $new_dir, $position);
+        }
         return $this;
     }
 
@@ -203,7 +206,9 @@ abstract class ARenderer implements IRenderer
      */
     public function addScriptDir($new_dir, $position = 0)
     {
-        $this->insertInArrayOnPostion($this->_scriptdir, $new_dir, $position);
+        if (true === file_exists($new_dir) && true === is_dir($new_dir)) {
+            $this->insertInArrayOnPostion($this->_scriptdir, $new_dir, $position);
+        }
         return $this;
     }
 
@@ -270,12 +275,43 @@ abstract class ARenderer implements IRenderer
         }
 
         if (is_array($config)) {
-            foreach ($config as $dir => $path) {
-                $dir = '_' . strtolower($dir);
-                if (false !== strpos($dir, 'dir') && property_exists($this, $dir)) {
-                    $path = (array) $path;
-                    array_walk($path, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $repdir));
-                    $this->$dir = $path;
+            if (true === array_key_exists('scriptdir', $config)) {
+                $dirs = (array) $config['scriptdir'];
+                array_walk($dirs, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
+                foreach ($dirs as $dir) {
+                    if (true === file_exists($dir) && true === is_dir($dir)) {
+                        $this->_scriptdir[] = $dir;
+                    }
+                }
+
+                if (true === $this->getApplication()->hasContext()) {
+                    $dirs = (array) $config['scriptdir'];
+                    array_walk($dirs, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
+                    foreach ($dirs as $dir) {
+                        if (true === file_exists($dir) && true === is_dir($dir)) {
+                            $this->_scriptdir[] = $dir;
+                        }
+                    }
+                }
+            }
+
+            if (true === array_key_exists('layoutdir', $config)) {
+                $dirs = (array) $config['layoutdir'];
+                array_walk($dirs, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
+                foreach ($dirs as $dir) {
+                    if (true === file_exists($dir) && true === is_dir($dir)) {
+                        $this->_layoutdir[] = $dir;
+                    }
+                }
+
+                if (true === $this->getApplication()->hasContext()) {
+                    $dirs = (array) $config['layoutdir'];
+                    array_walk($dirs, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
+                    foreach ($dirs as $dir) {
+                        if (true === file_exists($dir) && true === is_dir($dir)) {
+                            $this->_layoutdir[] = $dir;
+                        }
+                    }
                 }
             }
         }
