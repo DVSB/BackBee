@@ -332,8 +332,7 @@ define([
             if(formatInsideTableWorkaround(tagname)){
                 return false;
             }
-            console.log("tagname:" +tagname);
-		
+            
             if(textLevelSemantics[tagname] || tagname=="span"){
                 formatPlugin.addMarkup(tagname,{
                     'class':styleConf.markup
@@ -375,25 +374,7 @@ define([
 		 */
             availableButtons: [ 'u', 'strong','del', 'em', 'b', 'i', 's', 'sub', 'sup', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'removeFormat' ],
 
-            /**
-		 * HotKeys used for special actions
-		 */
-            hotKey: { 
-                formatBold: 'ctrl+b',
-                formatItalic: 'ctrl+i',
-                formatParagraph: 'alt+ctrl+0',
-                formatH1: 'alt+ctrl+1',
-                formatH2: 'alt+ctrl+2',
-                formatH3: 'alt+ctrl+3',
-                formatH4: 'alt+ctrl+4',
-                formatH5: 'alt+ctrl+5',
-                formatH6: 'alt+ctrl+6',
-                formatPre: 'ctrl+p',
-                formatDel: 'ctrl+d',
-                formatSub: 'alt+shift+s',
-                formatSup: 'ctrl+shift+s'
-            },
-
+           
             /**
 		 * Initialize the plugin and set initialize flag on true
 		 */
@@ -401,9 +382,6 @@ define([
                 // Prepare
                 
                 var me = this;
-                if (typeof this.settings.hotKey !== 'undefined') {
-                    jQuery.extend(true, this.hotKey, this.settings.hotKey);
-                }
                 this.availableStyles = jQuery.isArray(this.settings.styles) ? this.settings.styles : [];
                 if(jQuery.isArray(this.availableStyles) && this.availableStyles.length==0) return;
                 
@@ -415,62 +393,7 @@ define([
                 Aloha.bind('aloha-editable-deactivated', function (e, params) {});
             },
             
-            createStyleTab: function(){
-                Aloha.settings.toolbar.tabs.push({
-                    label:"Styles", 
-                    components: ["formatStyle"]
-                    });
-                console.log( Aloha.settings.toolbar);
-            //jQuery.extend(true,Aloha.settings.toolbar,{label:"Styles", components: ["formatStyle"]});
-            //console.log(Aloha.settings);
-            },
-            /**
-		 * applys a configuration specific for an editable
-		 * buttons not available in this configuration are hidden
-		 * @param {Object} id of the activated editable
-		 * @return void
-		 */
-            applyButtonConfig: function (obj) {
-                return false; // no used yet
-                var config = this.getEditableConfig(obj),
-                button, i, len;
-
-                if ( typeof config === 'object' ) {
-                    var config_old = [];
-                    jQuery.each(config, function(j, button) {
-                        if ( !(typeof j === 'number' && typeof button === 'string') ) {
-                            config_old.push(j);
-                        }
-                    });
-				
-                    if ( config_old.length > 0 ) {
-                        config = config_old;
-                    }
-                }
-                this.formatOptions = config;
-
-                // now iterate all buttons and show/hide them according to the config
-                for ( button in this.buttons) {
-                    if (this.buttons.hasOwnProperty(button)) {
-                        if (jQuery.inArray(button, config) !== -1) {
-                            this.buttons[button].handle.show();
-                        } else {
-                            this.buttons[button].handle.hide();
-                        }
-                    }
-                }
-
-                // and the same for multisplit items
-                len = this.multiSplitItems.length;
-                for (i = 0; i < len; i++) {
-                    if (jQuery.inArray(this.multiSplitItems[i].name, config) !== -1) {
-                        this.multiSplitButton.showItem(this.multiSplitItems[i].name); //enable
-                    } else {
-                        this.multiSplitButton.hideItem(this.multiSplitItems[i].name); //disable
-                    }
-                }
-            },
-
+            
             /**
 		 * initialize the buttons and register them on floating menu
 		 * @param event event object
@@ -478,43 +401,9 @@ define([
 		 */
             initButtons: function () {
                 var that = this;
-                return; 
-                
                 this.buttons = {};
                 this.multiSplitItems = [];
                 this.multiSplitStyleButtons = [];
-                jQuery.each(this.availableButtons, function(j, button) {
-                    var button_config = false;
-
-                    if (typeof j !== 'number' && typeof button !== 'string') {
-                        button_config = button;
-                        button = j;
-                    }
-				
-                    if (textLevelSemantics[button]) {
-                        that.buttons[button] = {
-                            handle: makeTextLevelButton(that, button),
-                            markup: jQuery('<'+button+'>', {
-                                'class': button_config || ''
-                            })
-                        };
-                    } else if (blockLevelSemantics[button]) {
-					
-                        that.multiSplitItems.push(makeBlockLevelButton(that, button));
-                    } else if ('removeFormat' === button) {
-                        that.multiSplitItems.push(makeRemoveFormatButton(that, button));
-                    } else {
-                        Aloha.log('warn', that, 'Button "' + button + '" is not defined');
-                    }
-                });
-
-                this.multiSplitButton = MultiSplitButton({
-                    name: 'notUsed',
-                    items: this.multiSplitItems,
-                    hideIfEmpty: true,
-                    scope: 'bb.customstyle'
-                });
-
                 PubSub.sub('aloha.selection.context-change', function(message) {
                     onSelectionChanged(that, message.range);
                 });
@@ -526,8 +415,14 @@ define([
                 this.availableStyleItems = [];
                 /*handle text level style & */
                 jQuery.each(this.availableStyles, function(i,styleInfo){
-                    if("tagname" in styleInfo){
+                    if(typeof styleInfo.markup=="string"){
+                        var cp = i + 1;
+                        styleInfo.tagname = (typeof styleInfo.tagname=="string")? styleInfo.tagname : "span";
+                        styleInfo.tooltip = (typeof styleInfo.tooltip=="string") ? styleInfo.tooltip :"style "+cp;
                         that.availableStyleItems.push(makeStyleButton(that,styleInfo));
+                    }
+                    else{
+                        console.warn("bbformatstyle"  +"[markup] key should be a string!");
                     }
                 });
 					
