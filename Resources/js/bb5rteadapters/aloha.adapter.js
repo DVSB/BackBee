@@ -64,7 +64,7 @@ bb.RteManager.registerAdapter("aloha",{
         this.editables = [];
         /*handle plugins conf here*/
          if("pluginsconf" in rteConfig){
-           //bb.jquery.extend(true,Aloha.settings.plugins,rteConfig.pluginsconf);
+           bb.jquery.extend(true,Aloha.settings.plugins,rteConfig.pluginsconf);
         }
         loadScript(bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
             Aloha.ready(function(){
