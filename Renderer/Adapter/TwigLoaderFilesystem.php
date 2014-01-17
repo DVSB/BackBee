@@ -52,6 +52,12 @@ class TwigLoaderFilesystem extends Twig_Loader_Filesystem
         return $readable;
     }
 
+    public function removeAllPaths()
+    {
+        $this->paths = array();
+        $this->cache = array();
+    }
+
     /**
      * Do same stuff than Twig_Loader_Filesystem::exists() plus returns the file 
      * itself if it is readable
