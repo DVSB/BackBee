@@ -15,7 +15,7 @@
         },
         bundles: {
             // Path for custom bundle relative from Aloha.settings.baseUrl usually path of aloha.js
-             bbplugin: '../../../../bb5rteadapters/plugins/aloha'
+             bbplugin: bb.baseurl+bb.resourcesdir+"js/bb5rteadapters/plugins/aloha"
         },
         plugins :{
             "format": {
