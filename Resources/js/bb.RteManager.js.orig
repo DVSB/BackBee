@@ -1,8 +1,19 @@
 var bb = bb || {};  
 
+<<<<<<< HEAD
+    
+var module = {
+=======
+var module = null;
 
 (function($) {
 
+module = {
+>>>>>>> 7df5a5d3cca10bbd57c35a84e13e3a8c93d5cd07
+    dependencies: ["jscore","aintnolove"],
+    moduleName: "RteManager",
+    exports: {}
+};
 
 define(["jscore","webserviceMng"], function(a,webserviceMng){
     
@@ -55,7 +66,7 @@ define(["jscore","webserviceMng"], function(a,webserviceMng){
                 }
             },
             
-           
+            /* ne proposer*/
             onReady : function(callback,context){
                 if(typeof callback!="function"){
                     throw new Error("bb.RteAbstractAdapter onReady must be a function");

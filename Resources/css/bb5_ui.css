@@ -1,4 +1,5 @@
 /* CSS Document - Groupe Lp - BB5 UI - june-dec2012-feb2013 v1.132 */
+/* lastmod: l:96 by:Harris content: remove background-color*/
 /* -> !!! content type picker at work */
 
 
@@ -94,7 +95,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5b5b5b', end
 		/*Aloha editable data*/
 #bb5-site-wrapper .aloha-editable-highlight {outline-width:0!important /*5px*/; -webkit-box-shadow:0px 0px 1px 3px rgba(227,78,38,0.85); box-shadow:0px 0px 1px 3px rgba(227,78,38,0.85);} /*clicked block -> orange*/
 #bb5-site-wrapper .aloha-editable-active, 
-#bb5-site-wrapper .aloha-editable-active[contenteditable="true"]:focus {outline-width:0!important /*5px*/; -webkit-box-shadow:0px 0px 1px 3px rgba(54, 140, 211, 0.85); box-shadow:0px 0px 1px 3px rgba(54, 140, 211, 0.85); background-color:rgba(255,255,255,0.9); } /*clicked block in edit mode -> blue*/ /*-webkit-transform:scale(1.02,1.02); -moz-transform:scale(1.02,1.02); transform:scale(1.02,1.02); -moz-transform: scaleX(-1); -webkit-transform: scaleX(-1); transform: scaleX(-1);*/
+#bb5-site-wrapper .aloha-editable-active[contenteditable="true"]:focus {outline-width:0!important /*5px*/; -webkit-box-shadow:0px 0px 1px 3px rgba(54, 140, 211, 0.85); box-shadow:0px 0px 1px 3px rgba(54, 140, 211, 0.85); /*background-color:rgba(255,255,255,0.9)*/; } /*clicked block in edit mode -> blue*/ /*-webkit-transform:scale(1.02,1.02); -moz-transform:scale(1.02,1.02); transform:scale(1.02,1.02); -moz-transform: scaleX(-1); -webkit-transform: scaleX(-1); transform: scaleX(-1);*/
 #bb5-site-wrapper .aloha-editable-active {-moz-transition:all 0.5s ease-out; -webkit-transition:all 0.5s ease-out; transition:all 0.5s ease-out;}
  		/*Aloha mumble jumble*/
 div.x-tab-panel{position: relative!important;top:-3px!important;left:0px!important;z-index:700000!important}
@@ -1261,8 +1262,8 @@ Twitter //zindex causing trouble with bb5 contextual menu
 #bb-box-wrapper .success p{color:#2d8241}
 #bb-box-wrapper .error{background:#f75454;border:1px solid #e03333}
 #bb-box-wrapper .error p{color:#8b2828}
-#bb-box-wrapper.annimated .bb-box-notify{display:block;-webkit-animation:fadeOut 5s linear forwards;-moz-animation:fadeOut 5s linear forwards;-o-animation:fadeOut 5s linear forwards;-ms-animation:fadeOut 5s linear forwards;animation:fadeOut 5s linear forwards}
-#bb-box-wrapper.annimated .bb-box-notify .bb-box-progress{-webkit-animation:runProgress 4s linear forwards .5s;-moz-animation:runProgress 4s linear forwards .5s;-o-animation:runProgress 4s linear forwards .5s;-ms-animation:runProgress 4s linear forwards .5s;animation:runProgress 4s linear forwards .5s}
+#bb-box-wrapper .bb-box-notify{display:block;-webkit-animation:fadeOut 5s linear forwards;-moz-animation:fadeOut 5s linear forwards;-o-animation:fadeOut 5s linear forwards;-ms-animation:fadeOut 5s linear forwards;animation:fadeOut 5s linear forwards}
+#bb-box-wrapper .bb-box-notify .bb-box-progress{-webkit-animation:runProgress 4s linear forwards .5s;-moz-animation:runProgress 4s linear forwards .5s;-o-animation:runProgress 4s linear forwards .5s;-ms-animation:runProgress 4s linear forwards .5s;animation:runProgress 4s linear forwards .5s}
 @-webkit-keyframes fadeOut{0%{opacity:0}10%{opacity:1}90%{opacity:1;-webkit-transform:translateY(0px)}99%{opacity:0;-webkit-transform:translateY(-30px)}100%{opacity:0}}
 @-moz-keyframes fadeOut{0%{opacity:0}10%{opacity:1}90%{opacity:1;-moz-transform:translateY(0px)}99%{opacity:0;-moz-transform:translateY(-30px)}100%{opacity:0}}
 @-o-keyframes fadeOut{0%{opacity:0}10%{opacity:1}90%{opacity:1;-o-transform:translateY(0px)}99%{opacity:0;-o-transform:translateY(-30px)}100%{opacity:0}}
@@ -1274,3 +1275,10 @@ Twitter //zindex causing trouble with bb5 contextual menu
 @-ms-keyframes runProgress{0%{width:0;background:rgba(255,255,255,.3)}100%{width:96%;background:rgba(255,255,255,1)}}
 @keyframes runProgress{0%{width:0;background:rgba(255,255,255,.3)}100%{width:96%;background:rgba(255,255,255,1)}}
 /* bb notify css end */
+
+
+
+/* bb5 bundles content */
+.bb5-bundle-content h1 {padding-bottom: 20px;font-size:22px;font-weight: normal;margin: 0;line-height: 100%;}
+.bb5-bundle-content h2 {padding-bottom: 20px;font-size:17px;font-weight: normal;margin: 0;line-height: 100%;}
+

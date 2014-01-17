@@ -27,7 +27,7 @@ bb.jquery(function(){
             var result = {
                 scalar: bb.jquery(this.fieldWrapper).find(".fieldText").val()
             };
-            return result;           
+            return result;          
         }
     });
 
@@ -56,7 +56,7 @@ bb.jquery(function(){
                     'value': bb.jquery(this.fieldWrapper).find(".fieldText").val()
                 }
             };
-            return result;           
+            return result;    
         }
 
     });
@@ -97,8 +97,8 @@ bb.jquery(function(){
      *  label: "Choisissez un Media",
      *  maxentry: 1
      *  minentry: 0,
-     *  accept: [bbMedianame],
-     *  medias: ""
+     *  accept: [bbMedianame], //not used
+     *  medias: "" //json encoded list
      ******/
     /**************Media selection render type **************/
     FormBuilder.registerRenderTypePlugin("media-list",{
@@ -107,9 +107,7 @@ bb.jquery(function(){
             removeBtnClass: ".bb5-ico-del"
         },
             
-        _context: {
-            mediaSelector : null
-        },
+       
             
         _template: {
             
@@ -135,16 +133,23 @@ bb.jquery(function(){
         },
             
         _init: function(){
-            this.form = bb.jquery(this._template.mediaWrapper).clone();
+            this._context = {};
+            this._context.mediaSelector = null;
+            this.form = $(this._template.mediaWrapper).clone();
             this._addBtn = this.form.find(".add_media_btn").eq(0);
             this._mediaContainer = bb.jquery(this.form).find(".bb5-list-media").eq(0);
             var label = this._settings.fieldInfos.param.array.label;
             bb.jquery(this.form).find(".fieldLabel").html(label); //i18nkey
             /* use for populate */
-             var mediaInfos = this._settings.fieldInfos.param.array.medias;
+            var mediaInfos = this._settings.fieldInfos.param.array.medias;
+            var maxEntry = this._settings.fieldInfos.param.array.maxentry;
+            var minEntry = this._settings.fieldInfos.param.array.minentry;
+            this.maxEntry = ( maxEntry == "undefined" || isNaN(parseInt(maxEntry)) ) ? 999 : parseInt(maxEntry);
+            this.minEntry = ( maxEntry == "undefined" || isNaN(parseInt(minEntry)) ) ? 0 : parseInt(minEntry);
+            this.minEntry = ( this.maxEntry > this.minEntry ) ? this.minEntry : 0; 
             this._mediaList =  new bb.SmartList({
                 idKey : "uid",
-                maxEntry: 1,
+                maxEntry: maxEntry,
                 onChange: bb.jquery.proxy(this._handleListChange,this),
                 onDelete: bb.jquery.proxy(this._removeMedia,this)
             });
@@ -174,17 +179,17 @@ bb.jquery(function(){
         _removeMedia : function(container,name,id){
             bb.jquery(this._mediaContainer).find(".media-"+id).remove();
         },
-        
+        /* add an accept key in params*/
         _typeIsValid : function(media){
-          var valid = false;
-          if(media.data.content.classname.indexOf("Media\\image") != -1){
-              valid = true; 
-          }
-          if(!valid){
-              alert("Media of type " +media.data.content.classname+" is not allowed!");
-          }
-          
-          return valid;  
+            var valid = true;
+            /*if(media.data.content.classname.indexOf("Media\\image") != -1){
+                valid = true; 
+            }
+            if(!valid){
+                alert("Media of type " +media.data.content.classname+" is not allowed!");
+            }
+            valid = true;*/
+            return valid;  
         },
         
         /* add media */
@@ -214,8 +219,9 @@ bb.jquery(function(){
      
             if (!this._context.mediaSelector) {
                 var selectorMedia = bb.i18n.__('toolbar.editing.mediaselectorLabel');
-                var mediaSelectorContainer = bb.jquery("<div id='bb5-param-mediasselector' class='bb5-selector-wrapper'></div>").clone();
-                this._context.mediaSelector = bb.jquery(mediaSelectorContainer).bbSelector({
+                var mediaSelectorContainer = $("<div id='bb5-form-mediasselector'/>").clone();
+                $("body").append(mediaSelectorContainer);
+                this._context.mediaSelector = $(mediaSelectorContainer).bbSelector({
                     popup: true,
                     pageSelector: false,
                     linkSelector: false,
@@ -224,10 +230,9 @@ bb.jquery(function(){
                     resizable: false,
                     selectorTitle : selectorMedia,
                     callback: function(item) {
-                        bb.jquery('#bbb5-param-mediasselector').bbSelector('close');
+                        bb.jquery('#bb5-param-mediasselector').bbSelector('close');
                     },
-                  
-                    beforeWidgetInit:function(){
+                    beforeWidgetInit : function(){
                         var bbSelector = bb.jquery(this.element).data('bbSelector');
                         bbSelector.onWidgetInit(bbSelector._panel.MEDIA_LINK, function () {
                             var bbMediaSelector = bb.jquery(this).data('bbMediaSelector') || false;
@@ -246,7 +251,7 @@ bb.jquery(function(){
            
            
         validate: function(){
-               
+            return true;
         },
            
         render : function(){
@@ -260,7 +265,7 @@ bb.jquery(function(){
                     medias: JSON.stringify(mediaContent)
                 }
             }; 
-            return result; 
+            return result;
         }
     });
    
