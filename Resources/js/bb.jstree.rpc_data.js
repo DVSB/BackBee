@@ -247,7 +247,7 @@
                     d = this._parse_json(js.results, obj, true);
 
                     if (js.numresults > js.firstresult + js.maxresult) {
-                        d = d.add(bb.jquery('<li><a class = "nextresults" id = "nextresults" href = "#" data-nextresults="' + (js.firstresult + js.maxresult) + '">...next results...</a></li>'));
+                        d = d.add(bb.jquery('<li><a class = "nextresults dontmove" id = "nextresults" href = "#" data-nextresults="' + (js.firstresult + js.maxresult) + '">...next results...</a></li>'));
                     }
 
                 } else {

@@ -3,7 +3,7 @@
  *
  *
  **/
-(function($){
+(function($) {
     bb.jquery.widget('ui.bbPageBrowser', {
         options: {
             popup: {
@@ -91,15 +91,15 @@
                         bb.jquery(event.target).parent().css('position', 'fixed');
                         var utilsMenu = bb.jquery("<span></span>").clone();
                         bb.jquery(utilsMenu).addClass("bb5-dialog-title-tools");
-                        if(myself.options.editMode){
+                        if (myself.options.editMode) {
                             var utilsBtn = bb.jquery("<a></a>").clone();
-                            bb.jquery(utilsBtn).addClass("bb5-button-link bb5-button bb5-toolsbtn bb5-button-square bb5-invert").attr("href","javascript:;").text(bb.i18n.__('pageselector.utils'));
+                            bb.jquery(utilsBtn).addClass("bb5-button-link bb5-button bb5-toolsbtn bb5-button-square bb5-invert").attr("href", "javascript:;").text(bb.i18n.__('pageselector.utils'));
                             utilsBtn.appendTo(bb.jquery(utilsMenu));
-                      
+
                             bb.jquery(event.target).parent().find('.ui-dialog-titlebar .ui-dialog-titlebar-close').before(utilsMenu);
-                            
+
                             bb.jquery(event.target).parent().find('a.bb5-toolsbtn').bind('click', function(e) {
-                                if ((context.selected) && (context.treeview) ) {
+                                if ((context.selected) && (context.treeview)) {
                                     context.treeview.jstree('show_contextmenu', bb.jquery(myself.element).find('#node_' + context.selected), e.pageX, e.pageY + 10);
                                 }
                                 return false;
@@ -112,32 +112,32 @@
 
                 /*jquery ui bug cf http://old.nabble.com/binding-the-dialog-resizeStop-event--after--dialog-creation-td25588022s27240.html*/
                 // fixme position save the current dialog position
-                bb.jquery(this.element).bind("dialogresizestop",function(event,ui){
-                    var position = [(Math.floor(ui.position.left) - bb.jquery(window).scrollLeft()),(Math.floor(ui.position.top) - bb.jquery(window).scrollTop())];
+                bb.jquery(this.element).bind("dialogresizestop", function(event, ui) {
+                    var position = [(Math.floor(ui.position.left) - bb.jquery(window).scrollLeft()), (Math.floor(ui.position.top) - bb.jquery(window).scrollTop())];
                     bb.jquery(event.target).parent().css('position', 'fixed');
-                    bb.jquery(myself.element).dialog('option','position',position);
+                    bb.jquery(myself.element).dialog('option', 'position', position);
                 });
 
                 /*fix dialog position*/
-                bb.jquery(this.element).bind("dialogclose",function(event,ui){
+                bb.jquery(this.element).bind("dialogclose", function(event, ui) {
                     myself.setStateOpen(false);
                     var context = myself.getContext();
-                    context.previousDialogPosition = bb.jquery(this).dialog("option","position");
+                    context.previousDialogPosition = bb.jquery(this).dialog("option", "position");
                     myself.setContext(context);
                 });
-                
-                bb.jquery(this.element).bind("dialogopen",function(event,ui){
+
+                bb.jquery(this.element).bind("dialogopen", function(event, ui) {
                     myself.setStateOpen(true);
                     var top = parseInt(bb.jquery(this).parent(".bb5-dialog-wrapper").css("top"));
-                    if( top < 0 ){
+                    if (top < 0) {
                         top = Math.abs(top);
                         var position = bb.jquery(myself.element).dialog('option', 'position');
                         position[1] = top;
                         bb.jquery(myself.element).dialog('option', 'position', position);
                     }
                 });
-                
-                bb.jquery(this.element).bind("dialogdragstop",function(event,ui){
+
+                bb.jquery(this.element).bind("dialogdragstop", function(event, ui) {
                     var top = parseInt(bb.jquery(this).parent(".bb5-dialog-wrapper").css("top"));
                     /*move up*/
                     if (top < 0) {
@@ -148,28 +148,28 @@
                         return;
                     }
                     /*move down*/
-                    var dialogHeight = parseInt(myself.element.dialog("option","height"));
-                    var offsetTop = ui.offset.top; 
+                    var dialogHeight = parseInt(myself.element.dialog("option", "height"));
+                    var offsetTop = ui.offset.top;
                     var winHeight = bb.jquery(window).height();
                     var dialogCurrentTop = ui.position.top;
                     /*as dialog is fixed*/
-                    var adjustPosition = ((dialogCurrentTop+dialogHeight) > winHeight) ? true : false;
-                    if(adjustPosition){
-                        var adjustSize =  dialogCurrentTop+dialogHeight -  winHeight; 
+                    var adjustPosition = ((dialogCurrentTop + dialogHeight) > winHeight) ? true : false;
+                    if (adjustPosition) {
+                        var adjustSize = dialogCurrentTop + dialogHeight - winHeight;
                         var dialogWrapper = bb.jquery(this).parent(".bb5-dialog-wrapper").eq(0);
                         var newTop = (dialogCurrentTop - adjustSize) - 15; // margin de 15px
                         bb.jquery(dialogWrapper).animate({
-                            top:newTop+"px"
+                            top: newTop + "px"
                         });
-                    }         
-                }); 
-                
+                    }
+                });
+
                 bb.jquery(document).ajaxComplete(function() {
                     myself._unmask();
                 });
                 if (this.options.popup.height)
                     bb.jquery(this.element).dialog('option', 'height', this.options.popup.height);
-                
+
                 if (this.options.popup.position)
                     bb.jquery(this.element).dialog('option', 'position', this.options.popup.position);
             } else {
@@ -209,11 +209,10 @@
             if ((site_uid) && (site_uid.length > 0)) {
                 context.site = site_uid;
                 context.treeview = bb.jquery(this.element).find('#browser').jstree({
-                    plugins : plugins,
-
-                    rpc_data : { 
-                        ajax : {
-                            webservice : {
+                    plugins: plugins,
+                    rpc_data: {
+                        ajax: {
+                            webservice: {
                                 instance: bb.webserviceManager.getInstance('ws_local_page'),
                                 method: 'getBBBrowserTree'
                             },
@@ -351,15 +350,15 @@
                 }).bind('loaded.jstree', function(e, node) {
                     //selected node
                     if ((myself.options.breadcrumb) && (myself.options.breadcrumb.length > 0)) {
-                        context.selected = myself.options.breadcrumb[myself.options.breadcrumb.length-1];
-                        bb.jquery(myself.element).find('#node_' + myself.options.breadcrumb[myself.options.breadcrumb.length-1] + ' a:first').attr('class', 'jstree-clicked');
+                        context.selected = myself.options.breadcrumb[myself.options.breadcrumb.length - 1];
+                        bb.jquery(myself.element).find('#node_' + myself.options.breadcrumb[myself.options.breadcrumb.length - 1] + ' a:first').attr('class', 'jstree-clicked');
                         myself.setContext(context);
                     }
 
                     //disable specific actions for node
                     bb.jquery(document).live('context_show.vakata', function(e) {
                         var context = myself.getContext();
-                        context.selected = bb.jquery.vakata.context.par.attr('id').replace('node_','');
+                        context.selected = bb.jquery.vakata.context.par.attr('id').replace('node_', '');
                         var treeContainer = context.treeview.jstree("get_container");
                         myself._trigger('select', e, {
                             node_id: context.selected
@@ -373,14 +372,14 @@
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
                         }
-                       
-                        if(!("clipboard" in context) || (("clipboard" in context) && !context.clipboard)){
+
+                        if (!("clipboard" in context) || (("clipboard" in context) && !context.clipboard)) {
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
                         }
-                        
-                        if(("clipboard" in context) && (context.selected==context.clipboard)){
+
+                        if (("clipboard" in context) && (context.selected == context.clipboard)) {
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-copy"]').parent("li").hide();
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-cut"]').parent("li").hide();
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
@@ -388,11 +387,11 @@
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
                         }
                         /* ne pas coller un parent dans son enfant*/
-                        var selectedIsChildOfClipboard = bb.jquery(treeContainer).find("#node_"+context.clipboard).find("#node_"+context.selected);
-                        if(("clipboard" in context) && selectedIsChildOfClipboard.length!=0){
+                        var selectedIsChildOfClipboard = bb.jquery(treeContainer).find("#node_" + context.clipboard).find("#node_" + context.selected);
+                        if (("clipboard" in context) && selectedIsChildOfClipboard.length != 0) {
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste"]').parent("li").hide();
                             bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-bf"]').parent("li").hide();
-                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide(); 
+                            bb.jquery(bb.jquery.vakata.context.cnt).find('a[rel="bb5-context-menu-paste-aft"]').parent("li").hide();
                         }
 
                     });
@@ -401,6 +400,8 @@
                 }).bind('click.jstree', function(e) {
                     var context = myself.getContext();
                     if (bb.jquery(e.target).hasClass('nextresults')) {
+                        bb.jquery(e.target).removeClass('dontmove');
+
                         // for next 25 results
                         if (context.onclick == true) {
                             return;
@@ -467,7 +468,7 @@
                             else {
                                 bb.jquery(data.rslt.obj).attr('id', result.result.attr.id);
                                 bb.jquery(data.rslt.obj).attr('rel', result.result.attr.rel);
-                               
+
                             }
                         }
                     });
@@ -491,7 +492,6 @@
                             }
                         };
                     }
-
                     if (data && data.rslt.obj) {
                         context.treeview.jstree('delete_node', data.rslt.obj);
                         bb.webserviceManager.getInstance('ws_local_page').request('delete', {
@@ -510,33 +510,45 @@
                     }
                     e.stopPropagation();
                 }).bind("move_node.jstree", function(e, data) {
-
                     var widget = myself;
                     data.rslt.o.each(function(i) {
                         var myself = this;
                         var id = bb.jquery(myself).attr('id');
                         //remove from the dom if exitst the element's phantom after it has been pasted
-                        var oldcontent = bb.jquery(this).parents(".jstree-bb5").eq(0).find("[id='"+id+"']").not(this); 
-                        if(oldcontent.length){
+                        var oldcontent = bb.jquery(this).parents(".jstree-bb5").eq(0).find("[id='" + id + "']").not(this);
+                        if (oldcontent.length) {
                             bb.jquery(oldcontent).remove();
-                        }                       
+                        }
                         if (data.rslt.cr !== -1) {
-                            widget._mask();
-                            bb.webserviceManager.getInstance('ws_local_page').request('moveBBBrowserTree', {
-                                params: {
-                                    page_uid: bb.jquery(myself).attr('id').replace('node_',''),
-                                    root_uid: data.rslt.np.attr('id').replace('node_',''),
-                                    next_uid: (((data.rslt.or.length == 0) ? null : data.rslt.or.attr('id').replace('node_','')))
-                                },
-                                success: function(result) {
-                                    if (!result.result)
-                                        bb.jquery.jstree.rollback(data.rlbk);
-                                    widget._unmask();
-                                },
-                                error: function() {
-                                    widget._unmask();
+                            if (bb.jquery(data.rslt.or).find('a').hasClass('nextresults')) {
+                                bb.jquery.jstree.rollback(data.rlbk);
+                                return;
+                            }
+                            if ('undefined' !== typeof (bb.jquery(myself).attr('id'))) {
+                                widget._mask();
+                                bb.webserviceManager.getInstance('ws_local_page').request('moveBBBrowserTree', {
+                                    params: {
+                                        page_uid: bb.jquery(myself).attr('id').replace('node_', ''),
+                                        root_uid: data.rslt.np.attr('id').replace('node_', ''),
+                                        next_uid: (((data.rslt.or.length == 0) ? null : data.rslt.or.attr('id').replace('node_', '')))
+                                    },
+                                    success: function(result) {
+                                        if (!result.result)
+                                            bb.jquery.jstree.rollback(data.rlbk);
+                                        widget._unmask();
+                                    },
+                                    error: function() {
+                                        widget._unmask();
+                                    }
+                                });
+                            } else {
+                                if (bb.jquery(myself).find('a').hasClass('dontmove')) {
+                                    bb.jquery.jstree.rollback(data.rlbk);
+                                    return;
+                                } else {
+                                    bb.jquery(myself).find('a').addClass('dontmove');
                                 }
-                            });
+                            }
                         } else {
                             bb.jquery.jstree.rollback(data.rlbk);
                         }
@@ -560,7 +572,7 @@
                     context = this.getContext();
 
             if (!context.messageBox) {
-                bb.jquery('body').append(bb.jquery('<div id="bb5-ui-bbpagebrowser-message"/>')); 
+                bb.jquery('body').append(bb.jquery('<div id="bb5-ui-bbpagebrowser-message"/>'));
                 context.messageBox = bb.jquery('#bb5-ui-bbpagebrowser-message');
             }
 
@@ -609,8 +621,8 @@
                 bb.jquery(this.element).dialog('close');
             } else {
                 bb.jquery(this.element).hide();
-                
-                
+
+
             }
 
             this._trigger('close');
@@ -628,9 +640,9 @@
             } else {
                 bb.jquery(this.element).hide();
             }
-            
+
             bb.jquery.Widget.prototype.destroy.apply(this, arguments);
-            
+
             this.setContext(context);
         },
         cutPage: function(page_uid) {
@@ -657,14 +669,14 @@
                     page_uid: page_uid
                 },
                 success: function(result) {
-                 
-                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled",true);
+
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled", true);
                     var buttons = {};
                     buttons[bb.i18n.__('popupmanager.button.save')] = function() {
                         var editDialog = this;
                         var title = (bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()).length) ? bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()) : false;
                         var errors = [];
-                        if(!title){
+                        if (!title) {
                             errors.push(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title'));
                         }
 
@@ -673,7 +685,7 @@
                             bb.jquery(editDialog).parents('.ui-dialog:first').unmask();
                             return;
                         }
-                        
+
                         bb.jquery(editDialog).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
                         bb.webserviceManager.getInstance('ws_local_page').request('cloneBBPage', {
                             params: {
@@ -684,7 +696,7 @@
                             },
                             success: function(response) {
                                 bb.jquery(editDialog).dialog("close");
-                                if(typeof callback=="function"){
+                                if (typeof callback == "function") {
                                     callback(response.result);
                                     return;
                                 }
@@ -709,8 +721,8 @@
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').val(result.result.url);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-redirect').val(result.result.redirect);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
-                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true); 
-					
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true);
+
                     editDialog.show();
                 },
                 error: function(result) {
@@ -743,14 +755,14 @@
                     this.clonePage(context.clipboard, function(newNode) {
 
                         /*first append to root then move */
-                        var rootUid = "#node_"+bb.jquery("#node_"+page_uid).attr("rootuid");
-                     
+                        var rootUid = "#node_" + bb.jquery("#node_" + page_uid).attr("rootuid");
+
                         /*new node*/
                         context.treeview.jstree('create_node', rootUid, 'first', newNode, function() {
                             //context.treeview.jstree("clear_node");
-                            var newNodeId = bb.jquery("#"+newNode.attr.id);
-                            if('inside'== position){
-                                context.treeview.jstree('move_node', newNodeId,'#node_' + page_uid, 'first');
+                            var newNodeId = bb.jquery("#" + newNode.attr.id);
+                            if ('inside' == position) {
+                                context.treeview.jstree('move_node', newNodeId, '#node_' + page_uid, 'first');
                             }
                             if ('before' == position) {
                                 context.treeview.jstree('move_node', newNodeId, '#node_' + page_uid, 'before');
@@ -772,10 +784,10 @@
         },
         _showErrors: function(fieldWithErrors) {
             var context = this.getContext();
-            if(bb.jquery.isArray(fieldWithErrors) && fieldWithErrors.length){
-                bb.jquery.each(fieldWithErrors,function(i, field){
+            if (bb.jquery.isArray(fieldWithErrors) && fieldWithErrors.length) {
+                bb.jquery.each(fieldWithErrors, function(i, field) {
                     bb.jquery(field).addClass("hasError");
-                    bb.jquery(field).unbind("focus.error").bind("focus.error",function(e){
+                    bb.jquery(field).unbind("focus.error").bind("focus.error", function(e) {
                         bb.jquery(e.target).removeClass("hasError");
                     });
                 });
@@ -809,28 +821,28 @@
                     page_uid: page_uid
                 },
                 success: function(result) {
-                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled",false);
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').attr("disabled", false);
                     bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').empty();
-                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').append(bb.jquery('<option/>').val("").text("")); 
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').append(bb.jquery('<option/>').val("").text(""));
                     bb.jquery.each(context.layouts, function(index, layout) {
                         bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-layout').append(bb.jquery('<option/>').val(layout.uid).text(layout.templateTitle));
                     });
-                    
-                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-target').val(result.target);		
+
+                    bb.jquery('#bb-ui-bbpagebrowser-form #bb-ui-bbpagebrowser-form-target').val(result.target);
                     var buttons = {};
                     buttons[bb.i18n.__('popupmanager.button.save')] = function() {
                         var editDialog = this;
                         bb.jquery(editDialog).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
-                        
+
                         /*handle error: title can't be empty && handle error layout can't be empty*/
                         var title = (bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()).length) ? bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val()) : false;
-                        var selectedLayout = (bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout').val()).length) ? bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout').val()): false;
+                        var selectedLayout = (bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout').val()).length) ? bb.jquery.trim(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout').val()) : false;
                         /* fixme*/
                         var errors = [];
-                        if(!title){
+                        if (!title) {
                             errors.push(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title'));
                         }
-                        if(!selectedLayout){
+                        if (!selectedLayout) {
                             errors.push(bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-layout'));
                         }
                         if (errors.length) {
@@ -853,9 +865,9 @@
                                 flag: flag_value
                             },
                             success: function(result) {
-                                if (page_uid === null){
+                                if (page_uid === null) {
                                     context.treeview.jstree('create_node', bb.jquery(myself.element).find('#node_' + root_uid), 'first', result.result);
-                                   bb.jquery(myself.element).find('#' + result.result.attr.id + ' a ins').addClass('bb5-jstree-offline bb5-jstree-hidden');
+                                    bb.jquery(myself.element).find('#' + result.result.attr.id + ' a ins').addClass('bb5-jstree-offline bb5-jstree-hidden');
                                 } else {
                                     context.treeview.jstree('rename_node', bb.jquery(myself.element).find('#node_' + page_uid), result.result.data);
                                 }
@@ -887,8 +899,8 @@
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-target').val(result.result.target);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-redirect').val(result.result.redirect);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
-                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true); 
-					
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true);
+
                     editDialog.show();
                 },
                 error: function(result) {
@@ -899,10 +911,10 @@
         removePage: function(page) {
             var myself = this;
             var page = page;
-            if ('string' == typeof(page))
+            if ('string' == typeof (page))
                 page = bb.jquery(myself.element).find('#node_' + page)
-			
-            if ('undefined' != typeof(myself._confirmRemoveDialog)) {
+
+            if ('undefined' != typeof (myself._confirmRemoveDialog)) {
                 myself._confirmRemoveDialog.destroy();
             }
 
@@ -936,13 +948,13 @@
                             myself.getContext().treeview.trigger('delete.jstree', page);
                         }
                     },
-                    "Cancel": function() { 
+                    "Cancel": function() {
                         bb.jquery(this).dialog('close');
                     }
                 }
             });
             bb.jquery(myself._confirmRemoveDialog.dialog).empty().html('Delete selected page ?');
-			
+
             myself._confirmRemoveDialog.show();
         },
         browsePage: function(page_uid, redirect) {
@@ -972,7 +984,7 @@
             return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
         getContext: function() {
-            return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
+            return ((typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {});
         }
     })
 })(bb.jquery);
