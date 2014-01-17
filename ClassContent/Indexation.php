@@ -69,7 +69,7 @@ class Indexation
     /**
      * The optional callback to apply while indexing
      * @var string
-     * @Column(type="string", name="callback")
+     * @Column(type="string", name="callback", nullable=true)
      */
     protected $_callback;
 
