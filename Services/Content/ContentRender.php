@@ -97,7 +97,8 @@ class ContentRender
     private function initFields()
     {
         $fields = array();
-        $alohaConf = $this->bbapp->getConfig()->getSection('alohapluginstable');
+        $alohaConf = $this->bbapp->getConfig()->getSection('rteconfig');
+        $alohaConf = $alohaConf['aloha'];
         $content = $this->content;
         if (!is_a($content, 'BackBuilder\ClassContent\ContentSet')) {
             $elements = $content->getData();
@@ -105,7 +106,7 @@ class ContentRender
                 if (is_a($content->$key, "BackBuilder\ClassContent\AClassContent")) {
                     if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == TRUE && NULL !== ($content->{$key}->getParam('aloha', 'scalar')))) {
                         $stdClassObj = new \stdClass();
-                        $stdClassObj->{$key} = $alohaConf[$content->{$key}->getParam('aloha', 'scalar')];
+                        $stdClassObj->{$key} = $alohaConf['styles'][$content->{$key}->getParam('aloha', 'scalar')];
                         $fields[] = $stdClassObj;
                     }
                 }
