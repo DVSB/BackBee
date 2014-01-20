@@ -165,7 +165,7 @@ bb.jquery(function(){
             bb.jquery(render).addClass("media-"+mediaData.uid);
             bb.jquery(render).find(".media-title").eq(0).html(mediaData.title);
             bb.jquery(render).find(".media-pic").eq(0).attr("src",mediaData.value).attr("alt",mediaData.title);
-            mediaData.render = bb.jquery(mediaData.render).get(0);
+            mediaData.render = "";//bb.jquery(mediaData.render).get(0);
             bb.jquery(render).find(this._settings.removeBtnClass).data("mediaUid",mediaData.uid);
             this._mediaContainer.append(render);
         },
@@ -196,6 +196,7 @@ bb.jquery(function(){
         _addMedia : function(params){
             if(!this._typeIsValid(params)) return;
             if("uid" in params){
+                params.render = "";
                 this._mediaList.set(params.uid,params);
             }
         },
@@ -259,7 +260,8 @@ bb.jquery(function(){
         },
            
         parse : function(){
-            var mediaContent = this._mediaList.toArray(true); 
+            var mediaContent = this._mediaList.toArray(true);
+            
             var result = {
                 'array':{
                     medias: JSON.stringify(mediaContent)

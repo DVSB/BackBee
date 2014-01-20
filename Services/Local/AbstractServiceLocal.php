@@ -34,13 +34,21 @@ use BackBuilder\BBApplication;
  */
 class AbstractServiceLocal implements IServiceLocal
 {
-
+    /**
+     * Directory list
+     * @var \stdClass
+     */
+    protected $_dir;
+    /**
+     * Bundle name identifier
+     * @var string
+     */
+    protected $identifier;
     /**
      * Current BackBuilder application
      * @var \BackBuilder\BBApplication
      */
     private $_application;
-
     /**
      * Current EntityManager for the application
      * @var \Doctrine\ORM\EntityManager
@@ -74,6 +82,11 @@ class AbstractServiceLocal implements IServiceLocal
     {
         $this->_application = $this->bbapp = $application;
         $this->_em = $application->getEntityManager();
+        $this->_dir = new \stdClass();
+        if (NULL !== $application && null !== $this->identifier) {
+            $this->_dir->bundle = implode(DIRECTORY_SEPARATOR, array($this->application->getBundle($this->identifier)->getResourcesDir(), 'Templates', 'scripts'));
+            $this->_dir->bundle .= DIRECTORY_SEPARATOR;
+        }
     }
 
     /**
@@ -151,6 +164,7 @@ class AbstractServiceLocal implements IServiceLocal
                 $this->application->getRenderer()->assign($key, $param);
             }
         }
+        $this->application->getRenderer()->assign('dir', $this->_dir);
     }
 
     public function __get($name)
