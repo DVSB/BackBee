@@ -161,7 +161,8 @@ var ContentEditionManager = (function($){
                         content.modified = new Date(content.modified.date);
                         var pict = content.contentPic;
                         var name = content.properties.name;
-                        var descLabel = bb.i18n.__('contentmanager.description');;
+                        var descLabel = bb.i18n.__('contentmanager.description');
+                        ;
                         var desc = content.properties.description;
                         var cdateLabel = bb.i18n.__('contentmanager.creation_date');
                         var cdate = content.created.getDate() + '/' +  content.created.getMonth() + '/' +  content.created.getFullYear() + ' ' + content.created.getHours() + ':' + content.created.getMinutes();
@@ -705,7 +706,7 @@ var ContentEditionManager = (function($){
             action.btnClass = btnClass;
             action.btnTitle = actionInfos.label;
             action.btnCallback = actionInfos.command.execute;
-           _availablePluginsBtns[actionInfos.icoCls] = action;
+            _availablePluginsBtns[actionInfos.icoCls] = action;
         });
         /* refresh content actions */
         _showActionsForContent(_selectedContent);
@@ -755,7 +756,7 @@ var ContentEditionManager = (function($){
             var bbContent = $bb(e.currentTarget);
             var currentContent = e.currentTarget;
             _selectContent(currentContent);
-          /*  bb.jquery(document).trigger("bbcontent:clicked",{
+            /*  bb.jquery(document).trigger("bbcontent:clicked",{
                 content : bbContent
             });*/
             //_selectNodeContent(currentContent);
@@ -806,6 +807,7 @@ var ContentEditionManager = (function($){
 
     var _selectNodeContent = function(currentContent){
         _showActionsForContent(currentContent);
+        
         /*chemin*/
         var path = _getContentPath(currentContent);
         var pathInfos = {
@@ -1007,12 +1009,13 @@ var ContentEditionManager = (function($){
 
         if(content){
             var result = bb.jquery(content).parentsUntil('div[class *="span"]"');
-            var layoutsOnPath = [];
             var total = result.length;
             var i = total-1;
             for(i; i>=0;i--){
                 var node = result[i];
-                contentPath.push(node);
+                if($(node).hasClass("rootContentSet") || $(node).hasClass(_settings.contentClass.replace(".",""))){
+                    contentPath.push(node);
+                }   
             }
             contentPath.push(content);
         }
@@ -1182,28 +1185,28 @@ var ContentEditionManager = (function($){
 })(bb.jquery);
 
 (function($) {
-/* Form Builder to put to a file*/
-FormBuilder = function(settings){
-    this.settings = {
-        formCls : "paramCls",
-        noParams : bb.i18n.__('contentmanager.none_parameter')
-    }
-    this.cleanParams = null;
-    this.disabledInfos = {};
-    this.rendererArr = {};
-
-    if(typeof this.init!="function"){
-        FormBuilder.prototype.init = function(userSettings){
-            this.settings = bb.jquery.extend(true,{},this.settings,userSettings);
-            this.formTemplate = bb.jquery("<form></form>").clone();
-            this.formId = bb.Utils.generateId("form");
-            bb.jquery(this.formTemplate).addClass(this.settings.formCls);
-            bb.jquery(this.formTemplate).attr("id",this.formId);
+    /* Form Builder to put to a file*/
+    FormBuilder = function(settings){
+        this.settings = {
+            formCls : "paramCls",
+            noParams : bb.i18n.__('contentmanager.none_parameter')
         }
-    }
+        this.cleanParams = null;
+        this.disabledInfos = {};
+        this.rendererArr = {};
 
-    // fixme how to process values
-    /*this.valuesProcessor = {
+        if(typeof this.init!="function"){
+            FormBuilder.prototype.init = function(userSettings){
+                this.settings = bb.jquery.extend(true,{},this.settings,userSettings);
+                this.formTemplate = bb.jquery("<form></form>").clone();
+                this.formId = bb.Utils.generateId("form");
+                bb.jquery(this.formTemplate).addClass(this.settings.formCls);
+                bb.jquery(this.formTemplate).attr("id",this.formId);
+            }
+        }
+
+        // fixme how to process values
+        /*this.valuesProcessor = {
         "array" : function(value){
             return JSON.stringify(value);
         },
@@ -1218,238 +1221,238 @@ FormBuilder = function(settings){
         }
     };*/
 
-    this.fieldsBuilder = {
-        getWrapper : function(){
-            var fieldWrapper = bb.jquery("<div></div>").clone();
-            fieldWrapper.addClass("fromField");
-            return fieldWrapper;
-        },
+        this.fieldsBuilder = {
+            getWrapper : function(){
+                var fieldWrapper = bb.jquery("<div></div>").clone();
+                fieldWrapper.addClass("fromField");
+                return fieldWrapper;
+            },
 
-        noParams : function(){
-            var fieldWrapper = bb.jquery("<div></div>").clone();
-            bb.jquery(fieldWrapper).addClass("fromField");
-            var msg = "<p>"+this.settings.noParams+"</p>";
-            bb.jquery(fieldWrapper).append(bb.jquery(msg));
-            return fieldWrapper;
-        }
-    };
-
-    /*handle param filters*/
-    FormBuilder.prototype.applyParamsFilter = function(disabledParams){
-        var self = this;
-        var disabledParams = this.settings.params["disabledparams"]||[];
-        disabledParams = ("array" in disabledParams) ? disabledParams.array : [];
-        /*remove item if it's in the disable array*/
-        var cloneParams = bb.jquery.extend({},this.settings.params);
-
-        if(disabledParams.length){
-            delete(cloneParams["disabledparams"]);
-        }
-
-        /*disable edit for some params*/
-        bb.jquery.each(disabledParams,function(index,paramName){
-            var keyInfos = paramName.split("::");
-            if(keyInfos.length == 1){
-                delete(cloneParams[keyInfos[0]]);
-                self.disabledInfos[paramName] = true;
-            }else{
-                if(!bb.jquery.isArray(self.disabledInfos[keyInfos[0]])){
-                    self.disabledInfos[keyInfos[0]] = new Array();
-                }
-                var disabledProp = self.disabledInfos[keyInfos[0]];
-                disabledProp.push(keyInfos[1]); /*ref to new Array*/
-                var props = cloneParams[keyInfos[0]]["array"];
-                delete(props[keyInfos[1]]);
+            noParams : function(){
+                var fieldWrapper = bb.jquery("<div></div>").clone();
+                bb.jquery(fieldWrapper).addClass("fromField");
+                var msg = "<p>"+this.settings.noParams+"</p>";
+                bb.jquery(fieldWrapper).append(bb.jquery(msg));
+                return fieldWrapper;
             }
-        });
-        return cloneParams;
+        };
 
-    }
+        /*handle param filters*/
+        FormBuilder.prototype.applyParamsFilter = function(disabledParams){
+            var self = this;
+            var disabledParams = this.settings.params["disabledparams"]||[];
+            disabledParams = ("array" in disabledParams) ? disabledParams.array : [];
+            /*remove item if it's in the disable array*/
+            var cloneParams = bb.jquery.extend({},this.settings.params);
 
-    FormBuilder.prototype.render = function(){
-        var result = document.createDocumentFragment();
-        var params = this.applyParamsFilter(this.settings.params);
-        this.cleanParams = params;
+            if(disabledParams.length){
+                delete(cloneParams["disabledparams"]);
+            }
 
+            /*disable edit for some params*/
+            bb.jquery.each(disabledParams,function(index,paramName){
+                var keyInfos = paramName.split("::");
+                if(keyInfos.length == 1){
+                    delete(cloneParams[keyInfos[0]]);
+                    self.disabledInfos[paramName] = true;
+                }else{
+                    if(!bb.jquery.isArray(self.disabledInfos[keyInfos[0]])){
+                        self.disabledInfos[keyInfos[0]] = new Array();
+                    }
+                    var disabledProp = self.disabledInfos[keyInfos[0]];
+                    disabledProp.push(keyInfos[1]); /*ref to new Array*/
+                    var props = cloneParams[keyInfos[0]]["array"];
+                    delete(props[keyInfos[1]]);
+                }
+            });
+            return cloneParams;
 
-        var self = this;
-        if(!params){
-            var msg = self.fieldsBuilder["noParams"].call(self);
-            var fieldSet = bb.jquery("<fieldset></fieldset>").clone();
-            bb.jquery(fieldSet).append(msg);
-            result.appendChild(bb.jquery(fieldSet).get(0));
         }
-        else{
-            bb.jquery.each(params,function(key,param){
-                var fieldInfos = {};
-                fieldInfos.fieldLabel = key;
-                fieldInfos.param = param;
-                /*FieldInfos*/
-                var renderType = ( "array" in param ) ? param.array.rendertype : "scalar";
 
-                var renderer = FormBuilder.createRenderer(renderType,{
-                    fieldInfos : fieldInfos,
-                    formId : self.formId,
-                    disabledFields : self.disabledInfos[key]
+        FormBuilder.prototype.render = function(){
+            var result = document.createDocumentFragment();
+            var params = this.applyParamsFilter(this.settings.params);
+            this.cleanParams = params;
+
+
+            var self = this;
+            if(!params){
+                var msg = self.fieldsBuilder["noParams"].call(self);
+                var fieldSet = bb.jquery("<fieldset></fieldset>").clone();
+                bb.jquery(fieldSet).append(msg);
+                result.appendChild(bb.jquery(fieldSet).get(0));
+            }
+            else{
+                bb.jquery.each(params,function(key,param){
+                    var fieldInfos = {};
+                    fieldInfos.fieldLabel = key;
+                    fieldInfos.param = param;
+                    /*FieldInfos*/
+                    var renderType = ( "array" in param ) ? param.array.rendertype : "scalar";
+
+                    var renderer = FormBuilder.createRenderer(renderType,{
+                        fieldInfos : fieldInfos,
+                        formId : self.formId,
+                        disabledFields : self.disabledInfos[key]
+                    });
+
+                    if(!renderer){
+                        console.warn(" Renderer ["+renderType+"] Can't be found");
+                        return true;
+                    }
+                    var formRender = renderer.render();
+                    self.rendererArr[key] = renderer;
+
+                    var fieldSet = bb.jquery("<fieldset></fieldset>").clone();
+                    bb.jquery(fieldSet).append(formRender);
+                    result.appendChild(bb.jquery(fieldSet).get(0));
                 });
+            }
+            /*wrap form*/
+            result = bb.jquery(this.formTemplate).html(bb.jquery(result));
+            return result;
+        }
 
-                if(!renderer){
-                    console.warn(" Renderer ["+renderType+"] Can't be found");
+        FormBuilder.prototype.parse = function(){
+            var result = {};
+            bb.jquery.each(this.rendererArr,function(key,renderer){
+                result[key] =  renderer.parse();
+            });
+            return result;
+        }
+
+        FormBuilder.prototype.validate = function(){
+            var hasError = false;
+            bb.jquery.each(this.rendererArr,function(key,renderer){
+                if(!renderer.validate()){
+                    hasError = true;
                     return true;
                 }
-                var formRender = renderer.render();
-                self.rendererArr[key] = renderer;
-
-                var fieldSet = bb.jquery("<fieldset></fieldset>").clone();
-                bb.jquery(fieldSet).append(formRender);
-                result.appendChild(bb.jquery(fieldSet).get(0));
             });
+            return hasError;
         }
-        /*wrap form*/
-        result = bb.jquery(this.formTemplate).html(bb.jquery(result));
-        return result;
+
+
+
+
+        /*init here*/
+        this.init(settings);
     }
 
-    FormBuilder.prototype.parse = function(){
-        var result = {};
-        bb.jquery.each(this.rendererArr,function(key,renderer){
-            result[key] =  renderer.parse();
-        });
-        return result;
-    }
+    /*RenderType Manager*/
+    FormBuilder.rendererPlugins = [];
+    FormBuilder.registerRenderTypePlugin = function(rendererName,rendererConfig){
+        var renderName = rendererName || false;
+        if(!renderName) throw " renderName can't be null";
 
-    FormBuilder.prototype.validate = function(){
-        var hasError = false;
-        bb.jquery.each(this.rendererArr,function(key,renderer){
-            if(!renderer.validate()){
-                hasError = true;
-                return true;
-            }
-        });
-        return hasError;
-    }
-
-
-
-
-    /*init here*/
-    this.init(settings);
-}
-
-/*RenderType Manager*/
-FormBuilder.rendererPlugins = [];
-FormBuilder.registerRenderTypePlugin = function(rendererName,rendererConfig){
-    var renderName = rendererName || false;
-    if(!renderName) throw " renderName can't be null";
-
-    var AbstractPluginPrototype = {
-        _initialize: function(){
-            this.id = bb.Utils.generateId(rendererName);
-            this.name = rendererName;
-            this.mainContainer = FormBuilder.mainContainer;
-            if(typeof this._init=="function"){
-                this._init();
-            }
-        },
-        render : function(){
-            return bb.jquery("<p>render function must be overwitten in <strong>"+rendererName+"</strong> plugin</p>").clone();
-        },
-        parse : function(){
-            return bb.jquery("<p>parse function must be overwitten in <strong>"+rendererName+"</strong> plugin</p>").clone();
-        },
-        /**
+        var AbstractPluginPrototype = {
+            _initialize: function(){
+                this.id = bb.Utils.generateId(rendererName);
+                this.name = rendererName;
+                this.mainContainer = FormBuilder.mainContainer;
+                if(typeof this._init=="function"){
+                    this._init();
+                }
+            },
+            render : function(){
+                return bb.jquery("<p>render function must be overwitten in <strong>"+rendererName+"</strong> plugin</p>").clone();
+            },
+            parse : function(){
+                return bb.jquery("<p>parse function must be overwitten in <strong>"+rendererName+"</strong> plugin</p>").clone();
+            },
+            /**
          * valide le formulaire avant de le poster
          * si aucune fonction n'est fournie, le formulaire est considéré comme étant valide
          * return true
          */
-        validate: function(){
-            return true;
-        },
-        onOpen: function(){},
-        onClose : function(){}
-    }
-
-    var MockFunc = function(){
-        /*cleanRenderConfig*/
-        var properties = {};
-        for (property in rendererConfig){
-            if(typeof property != "function"){
-                properties[property] = rendererConfig[property];
-            }
+            validate: function(){
+                return true;
+            },
+            onOpen: function(){},
+            onClose : function(){}
         }
-        bb.jquery.extend(true,this,rendererConfig);
-    };
 
-    /*Renderer Contructor*/
-    var RendererConstructor = function(userSettings){
-        MockFunc.call(this);
-        this._settings = bb.jquery.extend(true,this._settings,userSettings);
-        this._initialize();
-        /*should bind only once*/
-        this.mainContainer.unbind("open").on("open", this.onOpen,this);
-        this.mainContainer.unbind("close").on("close",this.onClose,this);
+        var MockFunc = function(){
+            /*cleanRenderConfig*/
+            var properties = {};
+            for (property in rendererConfig){
+                if(typeof property != "function"){
+                    properties[property] = rendererConfig[property];
+                }
+            }
+            bb.jquery.extend(true,this,rendererConfig);
+        };
+
+        /*Renderer Contructor*/
+        var RendererConstructor = function(userSettings){
+            MockFunc.call(this);
+            this._settings = bb.jquery.extend(true,this._settings,userSettings);
+            this._initialize();
+            /*should bind only once*/
+            this.mainContainer.unbind("open").on("open", this.onOpen,this);
+            this.mainContainer.unbind("close").on("close",this.onClose,this);
+        }
+
+        /*all functions in prototype*/
+        var protoFunc = {};
+        for (prop in rendererConfig){
+            if(typeof rendererConfig[prop]=="function") protoFunc[prop] = rendererConfig[prop];
+        }
+        var PluginPrototype = bb.jquery.extend({},AbstractPluginPrototype);
+        RendererConstructor.prototype = bb.jquery.extend(true,PluginPrototype,protoFunc);
+        FormBuilder.rendererPlugins[rendererName] = RendererConstructor;
     }
 
-    /*all functions in prototype*/
-    var protoFunc = {};
-    for (prop in rendererConfig){
-        if(typeof rendererConfig[prop]=="function") protoFunc[prop] = rendererConfig[prop];
-    }
-    var PluginPrototype = bb.jquery.extend({},AbstractPluginPrototype);
-    RendererConstructor.prototype = bb.jquery.extend(true,PluginPrototype,protoFunc);
-    FormBuilder.rendererPlugins[rendererName] = RendererConstructor;
-}
-
-FormBuilder.createSubformRenderer = function(paramName,paramsOption,mainFormId){
-    /**
+    FormBuilder.createSubformRenderer = function(paramName,paramsOption,mainFormId){
+        /**
      * cf the yaml format of the params
      * Step 1. wrap params with an array
      * Step 2. adapt paramsOption for renderer
      **/
-    if(!bb.jquery.isPlainObject(paramsOption)) throw "paramsOption MUST BE AN OBJECT [FormBuilder.createSubformRenderer]";
-    if(typeof paramName != "string") throw "paramName MUST BE A STRING [FormBuilder.createSubformRenderer]";
-    if(typeof mainFormId != "string") throw "mainFormId MUST BE A STRING [FormBuilder.createSubformRenderer]";
-    if(typeof paramsOption.rendertype=="string"){
-        var paramsWithArr = {
-            "array" : paramsOption
-        };
-        var cleanParams = {};
-        cleanParams[paramName] = paramsWithArr;
+        if(!bb.jquery.isPlainObject(paramsOption)) throw "paramsOption MUST BE AN OBJECT [FormBuilder.createSubformRenderer]";
+        if(typeof paramName != "string") throw "paramName MUST BE A STRING [FormBuilder.createSubformRenderer]";
+        if(typeof mainFormId != "string") throw "mainFormId MUST BE A STRING [FormBuilder.createSubformRenderer]";
+        if(typeof paramsOption.rendertype=="string"){
+            var paramsWithArr = {
+                "array" : paramsOption
+            };
+            var cleanParams = {};
+            cleanParams[paramName] = paramsWithArr;
+        }
+
+
+        /*paramsOption*/
+        var fieldInfos = {};
+        fieldInfos.fieldLabel = paramName;
+        fieldInfos.param = paramsWithArr;
+
+        var renderer = FormBuilder.createRenderer(paramsOption.rendertype,{
+            fieldInfos : fieldInfos,
+            formId : mainFormId,
+            disabledFields :[]
+        });
+        if(!renderer){
+            console.warn(" Renderer ["+paramsOption.renderType+"] Can't be found");
+            return false;
+        }
+        return renderer;
+
+
+
+
     }
 
-
-    /*paramsOption*/
-    var fieldInfos = {};
-    fieldInfos.fieldLabel = paramName;
-    fieldInfos.param = paramsWithArr;
-
-    var renderer = FormBuilder.createRenderer(paramsOption.rendertype,{
-        fieldInfos : fieldInfos,
-        formId : mainFormId,
-        disabledFields :[]
-    });
-    if(!renderer){
-        console.warn(" Renderer ["+paramsOption.renderType+"] Can't be found");
-        return false;
+    /*get renderer*/
+    FormBuilder.createRenderer = function(renderName,userConfig){
+        try{
+            var renderer = FormBuilder.rendererPlugins[renderName]|| false;
+            if(!renderer) throw "RENDERER NOT FOUND";
+            return new FormBuilder.rendererPlugins[renderName](userConfig);
+        }catch(e){
+            console.log(e+" "+renderName+" not found");
+        }
     }
-    return renderer;
 
-
-
-
-}
-
-/*get renderer*/
-FormBuilder.createRenderer = function(renderName,userConfig){
-    try{
-        var renderer = FormBuilder.rendererPlugins[renderName]|| false;
-        if(!renderer) throw "RENDERER NOT FOUND";
-        return new FormBuilder.rendererPlugins[renderName](userConfig);
-    }catch(e){
-        console.log(e+" "+renderName+" not found");
-    }
-}
-
-bb.FormBuilder = FormBuilder;
+    bb.FormBuilder = FormBuilder;
 
 }) (bb.jquery);
