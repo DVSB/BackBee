@@ -69,12 +69,14 @@ class Twig extends ARendererAdapter
     {
         parent::__construct($renderer);
 
+        $this->loader = new TwigLoaderFilesystem(array());       
+        
         $bbapp = $this->renderer->getApplication();
-        $this->loader = new TwigLoaderFilesystem(array());
         $isDebugMode = null !== $bbapp ? $bbapp->isDebugMode() : false;
+        
         $this->twig = new Twig_Environment($this->loader, array(
-                    'debug' => $isDebugMode
-                ));
+            'debug' => $isDebugMode
+        ));
 
         if (true === $isDebugMode) {
             $this->twig->addExtension(new Twig_Extension_Debug());
@@ -119,10 +121,9 @@ class Twig extends ARendererAdapter
     private function addDirPathIntoLoaderIfNotExists(array $templateDir)
     {
         $paths = $this->loader->getPaths();
-        foreach ($templateDir as $dir) {
-            if (false === in_array($dir, $paths)) {
-                $this->loader->addPath($dir);
-            }
+        if ((count($paths) !== count($templateDir)) || (0 < count(array_diff($paths, $templateDir)))) {
+            $this->loader->removeAllPaths();
+            $this->loader->setPaths($templateDir);
         }
     }
 

@@ -215,14 +215,15 @@ class Renderer extends ARenderer
         if (null === $obj) {
             return null;
         }
+
         $bbapp = $this->getApplication();
         if (false === $obj->isRenderable() && null === $bbapp->getBBUserToken()) {
             return null;
         }
 
         $bbapp->debug(sprintf(
-                        'Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($obj), $obj->getUid(), $mode, $ignoreModeIfNotSet
-                ));
+            'Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($obj), $obj->getUid(), $mode, $ignoreModeIfNotSet
+        ));
 
         $renderer = clone $this;
 

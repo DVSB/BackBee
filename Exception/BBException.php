@@ -57,6 +57,12 @@ class BBException extends \Exception
     const INVALID_DB_CONNECTION = 1003;
 
     /**
+     * Unknown context provided
+     * @var int
+     */
+    const UNKNOWN_CONTEXT = 1004;
+    
+    /**
      * The default error code
      * @var int
      */
