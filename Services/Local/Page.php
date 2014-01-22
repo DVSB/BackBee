@@ -164,15 +164,15 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $object->uid));
         }
 
-        // User must have edit permission on page
+// User must have edit permission on page
         $this->isGranted('EDIT', $page);
 
-        // If the page is online, user must have publish permission on it
+// If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page);
         }
 
-        // Updating URL of the page is needed
+// Updating URL of the page is needed
         if (true === property_exists($object, 'url') && null !== $this->getApplication()->getRenderer()) {
             $object->url = $this->getApplication()
                     ->getRenderer()
@@ -183,7 +183,7 @@ class Page extends AbstractServiceLocal
             }
         }
 
-        // Updating workflow state if provided
+// Updating workflow state if provided
         if (null === $object->workflow_state) {
             $page->setWorkflowState(null);
         } else {
@@ -225,40 +225,44 @@ class Page extends AbstractServiceLocal
         $tree = array();
 
         if (null === $page = $this->_repo->find(strval($page_uid))) {
-            // @todo strange call to this service with another site
-            //$this->isGranted('VIEW', $site);
+// @todo strange call to this service with another site
+//$this->isGranted('VIEW', $site);
             $page = $this->_repo->getRoot($site);
             $leaf = new \stdClass();
             $leaf->attr = json_decode($page->serialize());
             $leaf->data = $page->getTitle();
             $leaf->state = $page->isLeaf() ? 'leaf' : 'open';
             $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult);
-
             $tree[] = $leaf;
         } else {
             try {
                 $this->isGranted('VIEW', $page);
                 $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult);
                 $tree['numresults'] = $children->count();
+
                 $tree['firstresult'] = $firstresult;
                 $tree['maxresult'] = $maxresult;
                 $tree['results'] = array();
-                foreach ($children as $child) {
-                    $leaf = new \stdClass();
-                    $leaf->attr = json_decode($child->serialize());
-                    $leaf->data = $child->getTitle();
-                    $leaf->state = $child->isLeaf() ? 'leaf' : 'closed';
+                if ($children->count() !== 0) {
+                    foreach ($children as $child) {
+                        $leaf = new \stdClass();
+                        $leaf->attr = json_decode($child->serialize());
+                        $leaf->data = $child->getTitle();
+                        $leaf->state = $child->isLeaf() ? 'leaf' : 'closed';
 
-                    if (false === $child->isLeaf() && null !== $current_uid && null !== $current = $this->_repo->find(strval($current_uid))) {
-                        if ($child->isAncestorOf($current)) {
-                            $leaf->children = $this->getBBBrowserTree($site_uid, $child->getUid(), $current_uid, $firstresult, $maxresult);
-                            $leaf->state = 'open';
+                        if (false === $child->isLeaf() && null !== $current_uid && null !== $current = $this->_repo->find(strval($current_uid))) {
+                            if ($child->isAncestorOf($current)) {
+                                $leaf->children = $this->getBBBrowserTree($site_uid, $child->getUid(), $current_uid, $firstresult, $maxresult);
+                                $leaf->state = 'open';
+                            }
                         }
+                        $tree['results'][] = $leaf;
                     }
-                    $tree['results'][] = $leaf;
+                } else {
+                    return;
                 }
             } catch (\BackBuilder\Security\Exception\ForbiddenAccessException $e) {
-                // Ignore it
+// Ignore it
             }
         }
 
@@ -281,17 +285,17 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $page_uid));
         }
 
-        // User must have view permission on choosen layout
+// User must have view permission on choosen layout
         $this->isGranted('VIEW', $page->getLayout());
 
-        // User must have create permission on page
+// User must have create permission on page
         $this->isGranted('CREATE', $page);
 
         if (null !== $page->getParent()) {
-            // User must have edit permission on parent
+// User must have edit permission on parent
             $this->isGranted('EDIT', $page->getParent());
         } else {
-            // User must have edit permission on site to add a new root
+// User must have edit permission on site to add a new root
             $this->isGranted('EDIT', $this->getApplication()->getSite());
         }
 
@@ -329,11 +333,11 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $parent_uid));
         }
 
-        // User must have edit permission on both page and parent
+// User must have edit permission on both page and parent
         $this->isGranted('EDIT', $page);
         $this->isGranted('EDIT', $parent);
 
-        // If the page is online, user must have publish permission on it
+// If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page);
         }
@@ -345,7 +349,7 @@ class Page extends AbstractServiceLocal
                 throw new InvalidArgumentException('Previous sibling must have the same parent node');
             }
 
-            $this->_repo->moveAsPrevSiblingOf($page, $next); 
+            $this->_repo->moveAsPrevSiblingOf($page, $next);
         }
 
         $this->getEntityManager()->flush($page);
@@ -379,10 +383,10 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException('Can not remove root page of a site');
         }
 
-        // User must have edit permission on parent
+// User must have edit permission on parent
         $this->isGranted('EDIT', $page->getParent());
 
-        // If the page is online, user must have publish permission on it
+// If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page);
         }
@@ -406,10 +410,10 @@ class Page extends AbstractServiceLocal
             $page = new \BackBuilder\NestedNode\Page();
             $page->setSite($this->getApplication()->getSite());
         } else {
-            // User must have edit permission on page
+// User must have edit permission on page
             $this->isGranted('EDIT', $page);
 
-            // If the page is online, user must have publish permission on it
+// If the page is online, user must have publish permission on it
             if ($page->isOnline(true)) {
                 $this->isGranted('PUBLISH', $page);
             }
@@ -442,20 +446,20 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
         }
 
-        // User must have view permission on choosen layout
+// User must have view permission on choosen layout
         $this->isGranted('VIEW', $layout);
 
         $parent = $this->_repo->find(strval($parent_uid));
         if (null !== $page = $this->_repo->find(strval($page_uid))) {
             $this->isGranted('EDIT', $page);
 
-            // If the page is online, user must have publish permission on it
+// If the page is online, user must have publish permission on it
             if ($page->isOnline(true)) {
                 $this->isGranted('PUBLISH', $page);
             }
 
             if (null !== $parent && false === $page->getParent()->equals($parent)) {
-                // User must have edit permission on parent
+// User must have edit permission on parent
                 $this->isGranted('EDIT', $parent);
                 $this->_repo->moveAsFirstChildOf($page, $parent);
             }
@@ -464,14 +468,14 @@ class Page extends AbstractServiceLocal
             $this->getEntityManager()->persist($page);
 
             if (null !== $parent) {
-                // User must have edit permission on parent
+// User must have edit permission on parent
                 $page->setParent($parent);
                 $this->isGranted('CREATE', $page);
                 $this->isGranted('EDIT', $parent);
 
                 $this->_repo->insertNodeAsFirstChildOf($page, $parent);
             } else {
-                // User must have edit permission on site to add a new root
+// User must have edit permission on site to add a new root
                 $this->isGranted('CREATE', $page);
                 $this->isGranted('EDIT', $this->getApplication()->getSite());
 
