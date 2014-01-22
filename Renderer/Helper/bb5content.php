@@ -86,6 +86,15 @@ class bb5content extends AHelper
      */
     public function __invoke(AClassContent $element = null, $datacontent = array(), $params = array())
     {
+        if (null === $this->_renderer->getApplication()->getBBUserToken()) {
+            $result = '';
+            if (true === isset($datacontent['class'])) {
+                $result = 'class="' . $datacontent['class'] . '"';
+                
+                return $result;
+            }
+        }
+
         if (null === $element) {
             $this->_element_name = $this->_renderer->getCurrentElement();
             $this->_content = $this->_renderer->getObject();

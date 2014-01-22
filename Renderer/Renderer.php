@@ -98,7 +98,8 @@ class Renderer extends ARenderer
     }
 
     /**
-     * Register a renderer adapter ($rendererAdapter)
+     * Register a renderer adapter ($rendererAdapter); this method also set
+     * current $rendererAdapter as default adapter if it is not set
      * 
      * @param IRendererAdapter $rendererAdapter 
      */
@@ -108,6 +109,10 @@ class Renderer extends ARenderer
         if (false === $this->rendererAdapters->has($key)) {
             $this->rendererAdapters->set($key, $rendererAdapter);
             $this->addManagedExtensions($rendererAdapter);
+        }
+
+        if (null === $this->defaultAdapter) {
+            $this->defaultAdapter = $key;
         }
     }
 
@@ -208,6 +213,17 @@ class Renderer extends ARenderer
     }
 
     /**
+     * Return template file extension of the default adapter
+     * @return String
+     */
+    public function getDefaultAdapterExt()
+    {
+        $managedExt = $this->rendererAdapters->get($this->defaultAdapter)->getManagedFileExtensions();
+        
+        return array_shift($managedExt);
+    }
+
+    /**
      * @see BackBuilder\Renderer\IRenderer::render()
      */
     public function render(IRenderable $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = false)
@@ -215,14 +231,15 @@ class Renderer extends ARenderer
         if (null === $obj) {
             return null;
         }
+
         $bbapp = $this->getApplication();
         if (false === $obj->isRenderable() && null === $bbapp->getBBUserToken()) {
             return null;
         }
 
         $bbapp->debug(sprintf(
-                        'Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($obj), $obj->getUid(), $mode, $ignoreModeIfNotSet
-                ));
+            'Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($obj), $obj->getUid(), $mode, $ignoreModeIfNotSet
+        ));
 
         $renderer = clone $this;
 
@@ -518,8 +535,8 @@ class Renderer extends ARenderer
 
         if (null === $adapter) {
             throw new RendererException(sprintf(
-                            'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
-                    ), RendererException::SCRIPTFILE_ERROR);
+                    'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
+            ), RendererException::SCRIPTFILE_ERROR);
         }
 
         $this->getApplication()->debug(sprintf('Rendering file `%s`.', $this->templateFile));

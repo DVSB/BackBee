@@ -270,6 +270,7 @@ bb.ContentWrapper = (function($,global){
                 this.id = bb.Utils.generateId("bbContent");
                 
                 this.isContentSet = this._contentProperties.isAContentSet; //change to isAContentSet
+                this.isAContentSet = this.isContentSet;
                 
                 this.isABbContent = this._contentProperties.isABbContent; //basic subcontents are not bbContent 
                 
@@ -658,8 +659,7 @@ bb.ContentWrapper = (function($,global){
                             }
                             
                             /*after newContent*/
-                            afterAppend.call(self);
-                            
+                            afterAppend.call(self,$bb(itemRender));
                             /*wired up content here
                              *
                              *Le contentSet reçoit un nouveau contenu
@@ -692,6 +692,7 @@ bb.ContentWrapper = (function($,global){
                                     }
                                 }
                                 newItem.updateData();
+                                
                             }
 
                             if(bb.jquery(self.contentEl).hasClass("row")){
@@ -717,7 +718,6 @@ bb.ContentWrapper = (function($,global){
                         });
                         self.updateData();
                         self.hideEmptyZone();
-                       
                         return;
                     },
                    
@@ -781,8 +781,6 @@ bb.ContentWrapper = (function($,global){
                     data.push(subContInfos);
                     return bb.jquery(content).attr("data-uid");
                 });
-                //console.log(this.contentEl);
-                //console.log(data);
                 this.set("data",data,notify); 
                 return subContents;
             }

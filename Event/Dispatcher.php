@@ -96,8 +96,9 @@ class Dispatcher extends EventDispatcher
      */
     public function triggerEvent($eventName, $entity, $eventArgs = null)
     {
+        $event = new Event($entity, $eventArgs);
         if (is_a($entity, 'BackBuilder\ClassContent\AClassContent')) {
-            $this->dispatch(strtolower('classcontent.' . $eventName), new Event($entity, $eventArgs));
+            $this->dispatch(strtolower('classcontent.' . $eventName), $event);
 
             if (get_parent_class($entity) != 'BackBuilder\ClassContent\AClassContent') {
                 $this->triggerEvent($eventName, get_parent_class($entity), $eventArgs);
@@ -121,7 +122,7 @@ class Dispatcher extends EventDispatcher
         if (0 === strpos($eventName, 'classcontent.'))
             $eventName = substr($eventName, 13);
 
-        $this->dispatch($eventName, new Event($entity, $eventArgs));
+        $this->dispatch($eventName, $event);
 //        $this->dispatch($this->getEventNamePrefix($entity).$eventName, new Event($entity, $eventArgs) );
     }
 

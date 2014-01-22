@@ -16,19 +16,19 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
     
     init: function(){
         this.optionDialog = null;
-        this.maxentryMsg = bb.jquery("<p><strong>No more content can be added to this  container!</strong></p>");
+        this.maxentryMsg = bb.jquery("<p><strong>No more content can be added to this container!</strong></p>");
         this.formTemplate = bb.jquery('<form class="row-fluid"><div class="span12">'
-            +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">Type de contenu <label></span><span class="span8"><select class="contentType" name="mode"></select></span></p>'
-            +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">Nombre d\'élements <label></span><span class="span8"><select class="maxentry" name="mode"></select></span></p>'
+            +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">Content type <label></span><span class="span8"><select class="contentType" name="mode"></select></span></p>'
+            +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">How many <label></span><span class="span8"><select class="maxentry" name="mode"></select></span></p>'
             +'</form>').clone();   
     /* disable maxentry on button */
     /* handle change on content too like change on content*/
     //this.bindEvents();
     },
-     /* SHOULD NOT be applied on root contentset */
-     canApplyOn: function(){
-       if(this.node.isARootContentSet) return false;
-       return true;
+    /* SHOULD NOT be applied on root contentset */
+    canApplyOn: function(){
+        if(this.node.isARootContentSet) return false;
+        return true;
     },
               
     onContentChanged : function(){
@@ -111,7 +111,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
         };
       
         var confirmButton = {
-            text: "Ajouter",
+            text: "Add",
             click: function(){
                 var selectedType = self.formTemplate.find(".contentType").eq(0).val();
                 var maxentry = self.formTemplate.find(".maxentry").eq(0).val();
@@ -141,6 +141,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
     },
     
     createContent: function(contentType,nb){
+        var self = this;
         if(!contentType) return false;
         var nb = nb || 1;
         var nb = ( parseInt(nb) !=0)? nb : 1;
@@ -151,15 +152,32 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
             var contentUid = bb.jquery.md5(new Date().toString() + i);
             var content = {
                 uid : contentUid, 
-                type:contentType,
-                rendermode: this.node.get("rendermode")
+                type:contentType
             };
             params.content.push(content);
-        }
-        
+            params.afterAppend = function(content){
+                self._warmAllSubcontents(content);
+            }
+        } 
         return params;
     },
     
+    /**
+     * when content is add we must notify them as new
+     */
+    _warmAllSubcontents : function(content){
+        var self = this;
+        var content = $bb(content);
+        if(!content.isAContentSet){
+            var children = content.getChildren();
+            if(bb.jquery.isArray(children)){
+                bb.jquery.each(children,function(i,child){
+                    self._warmAllSubcontents(child);
+                });
+            };
+        }
+        $bb(content).updateData(true);
+    },
     cmdAdd: function(){      
         var accept = this.node.getAccept();
         var allowedMaxEntry = this._getAllowedNbItems();

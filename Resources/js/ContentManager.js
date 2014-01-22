@@ -481,7 +481,6 @@ bb.ContentManager =(function($,gExport){
                                 var afterAppend = bb.jquery.noop;
                                 var placeHolder = null;
                                 
-                              
                                 /*New content*/
                                 if(dropType=="newContent"){
                                     var content = [{
@@ -500,7 +499,6 @@ bb.ContentManager =(function($,gExport){
                                         bb.jquery(draggedItem).show();
                                         bb.jquery(ui.sender).sortable("cancel");
                                     }
-                                    
                                 }else{
                                     /*Moved Content*/
                                     var content = $bb(draggedItem);
@@ -731,9 +729,9 @@ bb.ContentManager =(function($,gExport){
         _initSortable();
         _initResizable(); //only for resizable item
         _initDroppableImage(content);
-        bb.jquery(content).css({
+       /* bb.jquery(content).css({
             cursor:"move"
-        });
+        });*/
     }
    
     var _readSizeFromClasses = function(classes){
