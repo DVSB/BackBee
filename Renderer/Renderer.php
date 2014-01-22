@@ -98,7 +98,8 @@ class Renderer extends ARenderer
     }
 
     /**
-     * Register a renderer adapter ($rendererAdapter)
+     * Register a renderer adapter ($rendererAdapter); this method also set
+     * current $rendererAdapter as default adapter if it is not set
      * 
      * @param IRendererAdapter $rendererAdapter 
      */
@@ -108,6 +109,10 @@ class Renderer extends ARenderer
         if (false === $this->rendererAdapters->has($key)) {
             $this->rendererAdapters->set($key, $rendererAdapter);
             $this->addManagedExtensions($rendererAdapter);
+        }
+
+        if (null === $this->defaultAdapter) {
+            $this->defaultAdapter = $key;
         }
     }
 
@@ -205,6 +210,17 @@ class Renderer extends ARenderer
         }
 
         return $exists;
+    }
+
+    /**
+     * Return template file extension of the default adapter
+     * @return String
+     */
+    public function getDefaultAdapterExt()
+    {
+        $managedExt = $this->rendererAdapters->get($this->defaultAdapter)->getManagedFileExtensions();
+        
+        return array_shift($managedExt);
     }
 
     /**
@@ -519,8 +535,8 @@ class Renderer extends ARenderer
 
         if (null === $adapter) {
             throw new RendererException(sprintf(
-                            'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
-                    ), RendererException::SCRIPTFILE_ERROR);
+                    'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
+            ), RendererException::SCRIPTFILE_ERROR);
         }
 
         $this->getApplication()->debug(sprintf('Rendering file `%s`.', $this->templateFile));
