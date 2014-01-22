@@ -375,17 +375,10 @@
                     if (li.hasClass("jstree-open")) {
                         tmp1.state = "open";
                     }
-                   
+
                     if (li.hasClass("jstree-closed")) {
                         tmp1.state = "closed";
                     }
-                    if ( li.length <= 0) {
-                        tmp1.state = "leaf";
-                    }
-                    if ( ul.length <= 0) {
-                        tmp1.state = "leaf";
-                    }
-
                     if (li.data()) {
                         tmp1.metadata = li.data();
                     }
