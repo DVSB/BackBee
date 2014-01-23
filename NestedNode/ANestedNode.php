@@ -287,6 +287,16 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
     }
 
     /**
+     * Sets the unique identifier of the node
+     * @param string $uid
+     */
+    public function setUid($uid)
+    {
+        $this->_uid = $uid;
+        return $this;
+    }
+
+    /**
      * Sets the root node.
      * @param \BackBuilder\NestedNode\ANestedNode $root
      * @return \BackBuilder\NestedNode\ANestedNode
