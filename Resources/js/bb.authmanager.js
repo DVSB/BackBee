@@ -1,7 +1,7 @@
 var bb = (bb) ? bb : {};
 
-if ('undefined' == typeof($.md5)) {
-    $.extend($, {
+if ('undefined' == typeof(bb.jquery.md5)) {
+    bb.jquery.extend(bb.jquery, {
         md5: function(str) {
             //misc functions
             var add = function(x, y) {
@@ -168,10 +168,10 @@ bb.authmanager = (function($,gExport){
     var _debug = false;
     
     var _init = function() {
-        $(this).bind("bb-auth-required", _onAuthRequired );
-        $(this).bind("bb-sudo-auth-required", _onSudoAuthRequired );
-        $(this).bind("bb-auth-forbidden", _onAuthForbidden );
-        $(this).bind("bb-auth-succeed", _onAuthSucceed );
+        bb.jquery(this).bind("bb-auth-required", _onAuthRequired );
+        bb.jquery(this).bind("bb-sudo-auth-required", _onSudoAuthRequired );
+        bb.jquery(this).bind("bb-auth-forbidden", _onAuthForbidden );
+        bb.jquery(this).bind("bb-auth-succeed", _onAuthSucceed );
         
         _log('initialization complete');
     }
@@ -247,9 +247,9 @@ bb.authmanager = (function($,gExport){
     };
     
     var _setDigest   = function(secret) {
-        _secret = $.md5(secret);
+        _secret = bb.jquery.md5(secret);
         _created = _getCreated().toGMTString();
-        _digest = $.md5(_nonce+_created+_secret);
+        _digest = bb.jquery.md5(_nonce+_created+_secret);
 		
         if (null != sessionStorage) {
             sessionStorage.setItem('bb5-session-auth', _nonce+_secret+_username);
@@ -258,7 +258,7 @@ bb.authmanager = (function($,gExport){
 	
     var _updDigest   = function() {
         _created = _getCreated().toGMTString();
-        _digest = $.md5(_nonce+_created+_secret);
+        _digest = bb.jquery.md5(_nonce+_created+_secret);
     }
 	
     var _setNonce    = function(nonce) {
@@ -282,7 +282,7 @@ bb.authmanager = (function($,gExport){
         _log('Authentication need');
         
         if ('undefined' == typeof(token) )
-            return $(self).trigger("bb-auth-forbidden");
+            return bb.jquery(self).trigger("bb-auth-forbidden");
         
         if (_maxtries <= _numtries)
             return self.logoff();
@@ -301,23 +301,23 @@ bb.authmanager = (function($,gExport){
                     popupBtnConnect: {
                         text: bb.i18n.__('authmanager.connect'),
                         click: function() {
-                            var username = $('.bb5-dialog-authentication input[name="username"]').val();
-                            var password = $('.bb5-dialog-authentication input[name="password"]').val();
+                            var username = bb.jquery('.bb5-dialog-authentication input[name="username"]').val();
+                            var password = bb.jquery('.bb5-dialog-authentication input[name="password"]').val();
                             
                             if ('' == username || '' == password) {
-                                $(self).trigger('bb-auth-required', ['Nonce="'+self._nonce+'", ErrorCode="9002"', request]);
+                                bb.jquery(self).trigger('bb-auth-required', ['Nonce="'+self._nonce+'", ErrorCode="9002"', request]);
                             } else {
                                 request.headers['X-BB-AUTH'] = self.authenticate( username, password);
-                                $.ajax(request);
+                                bb.jquery.ajax(request);
                                 
-                                if (0 < $('#bb5-toolbar-wrapper').length) $(this).dialog('close');
+                                if (0 < bb.jquery('#bb5-toolbar-wrapper').length) bb.jquery(this).dialog('close');
                             }
                         }
                     },
                     popupBtnAbort: {
                         text: bb.i18n.__('authmanager.abort'),
                         click: function() { 
-                            $(this).dialog('close');
+                            bb.jquery(this).dialog('close');
                             return self.logoff();
                         }
                     }
@@ -329,18 +329,18 @@ bb.authmanager = (function($,gExport){
             });
         }
         
-        $(_popupDialog.dialog).find('.bb5-alert').empty();
+        bb.jquery(_popupDialog.dialog).find('.bb5-alert').empty();
         if ('undefined' != typeof(infos.errorcode) && 0 != infos.errorcode && 'undefined' != typeof(infos.errormessage) ) {
             if (0 < _numtries) {
                 var remainingtries = _maxtries-_numtries;
                 infos.errormessage = bb.i18n.__('authmanager.error.'+infos.errorcode);
                 infos.errormessage += '<br/>'+bb.i18n.__('authmanager.'+((1 < remainingtries) ? 'tries_remaining' : 'try_remaining'), remainingtries);                
             }
-            $(_popupDialog.dialog).find('.bb5-alert').html(infos.errormessage);            
+            bb.jquery(_popupDialog.dialog).find('.bb5-alert').html(infos.errormessage);            
         }
 	
         _log('Opening dialog');
-        $(_popupDialog.dialog).dialog('open');
+        bb.jquery(_popupDialog.dialog).dialog('open');
         _popupDialog.show();
         
         return false;
@@ -355,8 +355,8 @@ bb.authmanager = (function($,gExport){
                 popupBtnClose: {
                     text: bb.i18n.__('authmanager.close'),
                     click: function() { 
-                        $(this).dialog('close');
-                        $(this).dialog('destroy');
+                        bb.jquery(this).dialog('close');
+                        bb.jquery(this).dialog('destroy');
                     }
                 }
             }
@@ -364,7 +364,7 @@ bb.authmanager = (function($,gExport){
         
         _forbiddenPopup.setContent("<div class='bb5-ui bb5-dialog-authentication'><div class='bb5-alert'>"+bb.i18n.__('authmanager.error.9007')+"</div></div>");
         
-        $(_forbiddenPopup.dialog).dialog('open');
+        bb.jquery(_forbiddenPopup.dialog).dialog('open');
         _forbiddenPopup.show();
         
         return false;
@@ -381,7 +381,7 @@ bb.authmanager = (function($,gExport){
                 message:         msg,
                 isauthenticated: _isauthenticated,
                 numtries:        _numtries,
-                dialog: _popupDialog ? $(_popupDialog.dialog).dialog('isOpen') : null
+                dialog: _popupDialog ? bb.jquery(_popupDialog.dialog).dialog('isOpen') : null
             });
         }
     }
@@ -395,4 +395,4 @@ bb.authmanager = (function($,gExport){
         setDigest:   _setDigest,
         setNonce:    _setNonce
     };
-})(jQuery,window);
+})(bb.jquery,window);

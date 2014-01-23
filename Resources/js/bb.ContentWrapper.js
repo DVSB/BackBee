@@ -36,29 +36,29 @@ bb.ContentWrapper = (function($,global){
     }
     
     var _isAContentSet = function(contentNode){
-        return ($(contentNode).hasClass(_settings.contentSetClass.replace(".","")))?true:false;
+        return (bb.jquery(contentNode).hasClass(_settings.contentSetClass.replace(".","")))?true:false;
     }
     
     var _isARootContentSet = function(contentNode){
-        return $(contentNode).hasClass(_settings.rootContentSetCls);
+        return bb.jquery(contentNode).hasClass(_settings.rootContentSetCls);
     }
     
     var _isABbContent = function(contentNode){
-        return ($(contentNode).hasClass(_settings.bbContentClass.replace(".","")))?true:false;
+        return (bb.jquery(contentNode).hasClass(_settings.bbContentClass.replace(".","")))?true:false;
     }
     
     var _isASubContent = function(contentNode){
-        var isASubContent = ($(contentNode).attr("data-element"))? true : false;
+        var isASubContent = (bb.jquery(contentNode).attr("data-element"))? true : false;
         return isASubContent;
     }
     
     var _isAnAutoBlock = function(contentNode){
         var isAnAutoBlock;
-        var forbiden_action = $(contentNode).attr("data-forbidenactions");
+        var forbiden_action = bb.jquery(contentNode).attr("data-forbidenactions");
         if (forbiden_action && 0 <= forbiden_action.indexOf('subcontent-selection')) {
             isAnAutoBlock = true;
         } else {
-            var contentType = $(contentNode).attr("data-type");
+            var contentType = bb.jquery(contentNode).attr("data-type");
             var autoBlocPattern = /autoblo[c|ck]/gi;
             isAnAutoBlock = autoBlocPattern.test(contentType);
         }
@@ -67,19 +67,19 @@ bb.ContentWrapper = (function($,global){
     }
     
     var _getContentSize = function(contentNode){
-        return bb.Utils.readSizeFromClasses($(contentNode).attr("class"))||null; 
+        return bb.Utils.readSizeFromClasses(bb.jquery(contentNode).attr("class"))||null; 
     }
     
-   /* var _handleIntemContainer = function(contentNode){
+    /* var _handleIntemContainer = function(contentNode){
         var contentUid = contentNode.attr("data-uid");
         if(typeof contentUid=="string"){
-            var hasItemContainer = $(contentNode).attr("data-itemcontainer") || false;
+            var hasItemContainer = bb.jquery(contentNode).attr("data-itemcontainer") || false;
             if(!hasItemContainer){
-                var itemContainer = $(contentNode).find("[data-refparent='"+contentUid+"']").eq(0);
+                var itemContainer = bb.jquery(contentNode).find("[data-refparent='"+contentUid+"']").eq(0);
                 if(itemContainer && itemContainer.length){
                     var id = bb.Utils.generateId("itemcontainer");
-                    $(contentNode).attr("data-itemcontainer",id);
-                    $(hasItemContainer).addClass(id);
+                    bb.jquery(contentNode).attr("data-itemcontainer",id);
+                    bb.jquery(hasItemContainer).addClass(id);
                 }
                 
             }
@@ -96,11 +96,11 @@ bb.ContentWrapper = (function($,global){
         if (!_isAContentSet(contentNode))
         {
             var accept = {}; 
-            var subContent = $(contentNode).find("[data-element]").each(function(i,item){
+            var subContent = bb.jquery(contentNode).find("[data-element]").each(function(i,item){
                 /*ne prendre que les enfants immédiats du noeud*/
-                if($(item).attr("data-parent")==$(contentNode).attr("data-uid")){
-                    var nodeName = $(item).attr("data-element");
-                    accept[nodeName] = $(item).attr("data-type");  
+                if(bb.jquery(item).attr("data-parent")==bb.jquery(contentNode).attr("data-uid")){
+                    var nodeName = bb.jquery(item).attr("data-element");
+                    accept[nodeName] = bb.jquery(item).attr("data-type");  
                 }
             }); 
             return accept; 
@@ -118,8 +118,8 @@ bb.ContentWrapper = (function($,global){
         var contentInfos = {};
         /*refparent is coupled with itemcontainer*/
         var availableContentAttrs = ["uid","isloaded","rendermode","maxentry","refparent","type","accept","contentplugins","element","parent","draftuid","itemcontainer"];
-        $.each(availableContentAttrs,function(i,attr){
-            contentInfos[attr] = $(node).attr("data-"+attr)||false;
+        bb.jquery.each(availableContentAttrs,function(i,attr){
+            contentInfos[attr] = bb.jquery(node).attr("data-"+attr)||false;
         });
         return contentInfos;
       
@@ -129,7 +129,7 @@ bb.ContentWrapper = (function($,global){
     var _persist = function(asyncPersist){
         var asyncPersist = (typeof asyncPersist=="boolean") ? asyncPersist : true; /*{async:true} par defaut*/ 
         var cleanData = _dirtyContentCollection.toArray();
-        if($.isEmptyObject(cleanData[0])) return;
+        if(bb.jquery.isEmptyObject(cleanData[0])) return;
         
         wsManager = bb.webserviceManager.getInstance(_settings.classContentWebService);
         wsManager.request("update",{                                                                                                                                                                                                    
@@ -155,7 +155,7 @@ bb.ContentWrapper = (function($,global){
         }
         
         /*contentEl is a jsonObject*/
-        if($.isPlainObject(contentInfos)){
+        if(bb.jquery.isPlainObject(contentInfos)){
             contentParams = contentInfos;
             if(contentParams.contentEl){
                 contentParams.isAContentSet = _isAContentSet(contentParams.contentEl);
@@ -163,10 +163,10 @@ bb.ContentWrapper = (function($,global){
                 contentParams.isAnAutoBlock = _isAnAutoBlock(contentParams.contentEl);
             }
         }else{
-            contentNode = $(contentInfos);
+            contentNode = bb.jquery(contentInfos);
             if(contentNode.length){
                 /*if content already exist*/
-                var bbContentRef = $(contentNode).attr("data-bbContentRef")||false;
+                var bbContentRef = bb.jquery(contentNode).attr("data-bbContentRef")||false;
                 if(bbContentRef){
                     return _getContentByRef(bbContentRef);
                 }else{
@@ -195,7 +195,7 @@ bb.ContentWrapper = (function($,global){
         if("refparent" in contentParams){
             if(typeof contentParams.refparent=="string"){
                 var uid = contentParams.refparent;  
-                var mainParent = $(contentNode).parents("[data-uid='"+uid+"']").eq(0);
+                var mainParent = bb.jquery(contentNode).parents("[data-uid='"+uid+"']").eq(0);
                 if(mainParent && mainParent.length){
                     return $bb(mainParent);  
                 }else{
@@ -205,7 +205,7 @@ bb.ContentWrapper = (function($,global){
         }
         
         
-        contentParams = ((contentParams) && $.isPlainObject(contentParams)) ? contentParams : false;
+        contentParams = ((contentParams) && bb.jquery.isPlainObject(contentParams)) ? contentParams : false;
         var persistOnChange = (persistOnChange && persistOnChange==true) ? true : false;
         if(!contentParams) return false;
         
@@ -261,15 +261,16 @@ bb.ContentWrapper = (function($,global){
         if(typeof this._init!=="function"){        
             this._init = function(contentParams){
                 
-                this._settings = $.extend({},this._settings,contentParams);
+                this._settings = bb.jquery.extend({},this._settings,contentParams);
                 
-                this._contentProperties = ($.isPlainObject(this._settings.bbContent))? $.extend({},defaultContent,this._settings.bbContent) : {};
+                this._contentProperties = (bb.jquery.isPlainObject(this._settings.bbContent))? bb.jquery.extend({},defaultContent,this._settings.bbContent) : {};
                 if("contentEl" in this._contentProperties) delete(this._contentProperties["contentEl"]); //fixes chrome recursive json encode
                 this.persistOnChange = contentParams.persistOnChange;
                 
                 this.id = bb.Utils.generateId("bbContent");
                 
                 this.isContentSet = this._contentProperties.isAContentSet; //change to isAContentSet
+                this.isAContentSet = this.isContentSet;
                 
                 this.isABbContent = this._contentProperties.isABbContent; //basic subcontents are not bbContent 
                 
@@ -281,11 +282,11 @@ bb.ContentWrapper = (function($,global){
                 this.contentEl = this._settings.bbContent.contentEl || false; 
                 this.parentNode = null;
                 if(this.contentEl && this.isABbContent){ //rootContentSets don't have parent
-                    $(this.contentEl).attr("data-bbContentRef",this.id); //update les autres contenus avec  le même uid??
-                    var parentNode = ($(this.contentEl).hasClass(_settings.rootContentSetCls)) ? null : $(this.contentEl).parents(_settings.bbContentClass).eq(0);  //contentSet doesn't have parent -- parent(".bb5-content")
+                    bb.jquery(this.contentEl).attr("data-bbContentRef",this.id); //update les autres contenus avec  le même uid??
+                    var parentNode = (bb.jquery(this.contentEl).hasClass(_settings.rootContentSetCls)) ? null : bb.jquery(this.contentEl).parents(_settings.bbContentClass).eq(0);  //contentSet doesn't have parent -- parent(".bb5-content")
                     /*it MUST be a contentset*/
                     if(parentNode && parentNode.length==0){
-                        parentNode = $(this.contentEl).parents('.'+_settings.rootContentSetCls);  
+                        parentNode = bb.jquery(this.contentEl).parents('.'+_settings.rootContentSetCls);  
                     }
                     if(parentNode && parentNode.length){
                         this.parentNode = $bb(parentNode);
@@ -293,14 +294,14 @@ bb.ContentWrapper = (function($,global){
                 } 
                 if(this.isASubContent && !this.isABbContent){
                     /*Cas des sous-contenus de base*/
-                    var parentNodeUid = $(this.contentEl).attr("data-parent");
-                    var parentNode = $(this.contentEl).parents(_settings.bbContentClass).eq(0);
+                    var parentNodeUid = bb.jquery(this.contentEl).attr("data-parent");
+                    var parentNode = bb.jquery(this.contentEl).parents(_settings.bbContentClass).eq(0);
                     if(parentNode && parentNode.length){
                         this.parentNode = $bb(parentNode);
                     } 
                 }
-                if ($(this.contentEl).attr("data-forbidenactions")) {
-                    var forbiden_action = $(this.contentEl).attr("data-forbidenactions");
+                if (bb.jquery(this.contentEl).attr("data-forbidenactions")) {
+                    var forbiden_action = bb.jquery(this.contentEl).attr("data-forbidenactions");
                     this.forbidenActions = forbiden_action.split(',');
                 }
                 
@@ -317,13 +318,18 @@ bb.ContentWrapper = (function($,global){
             }
         }
         
+        BbContentWrapper.prototype.updateContentRendermode = function(){
+            var currentRm = bb.jquery(this.contentEl).attr("data-rendermode") || false; 
+            this.set("rendermode",currentRm,true);
+        }
+        
         BbContentWrapper.prototype.updateParentNode = function(){
-            var parentNode = ($(this.contentEl).hasClass(_settings.rootContentSetCls)) ? null : $(this.contentEl).parents(_settings.bbContentClass).eq(0);
+            var parentNode = (bb.jquery(this.contentEl).hasClass(_settings.rootContentSetCls)) ? null : bb.jquery(this.contentEl).parents(_settings.bbContentClass).eq(0);
             /*it MUST be a contentset*/
             if(parentNode && parentNode.length==0){
-                parentNode = $(this.contentEl).parents('.'+_settings.rootContentSetCls);  
+                parentNode = bb.jquery(this.contentEl).parents('.'+_settings.rootContentSetCls);  
             }
-            if($.isArray(parentNode) && parentNode.length){
+            if(bb.jquery.isArray(parentNode) && parentNode.length){
                 this.parentNode = (parentNode) ? $bb(parentNode) : null;
             }
         }
@@ -331,7 +337,7 @@ bb.ContentWrapper = (function($,global){
         /*ajouter plusieurs valeur*/   
         BbContentWrapper.prototype.set = function(key,newValue,notify){
             var notify = (typeof notify=="boolean") ? notify : true; 
-            if($.inArray(key,unmutableProperties)!=-1) return; //do nothing
+            if(bb.jquery.inArray(key,unmutableProperties)!=-1) return; //do nothing
            
             if(!(key in this._contentProperties)) throw "property ["+key+"] doesn\'t exist";
             var changeEventParams = {
@@ -373,7 +379,7 @@ bb.ContentWrapper = (function($,global){
         BbContentWrapper.prototype.getContentParams = function(){
             var params = this.get("param") || false; 
             var self = this;
-            /*new content without params --> retrieve form serveur*/
+            /*new content without params --> retrieve form serveur*/ 
             if(params==-1){
                 wsManager = bb.webserviceManager.getInstance(_settings.classContentWebService);
                 wsManager.request("getContentParameters",{
@@ -382,7 +388,7 @@ bb.ContentWrapper = (function($,global){
                     },
                     async : false,
                     success : function(response){
-                        self.set("param",response.result);
+                        self.set("param", response.result);
                         params = response.result;
                     },
                     error: function(){
@@ -400,7 +406,7 @@ bb.ContentWrapper = (function($,global){
             var callback = (typeof callback =="function")? callback : false;
             if(!eventName || !callback) return false;
             if(context){
-                callback = $.proxy(callback,context);
+                callback = bb.jquery.proxy(callback,context);
             }
             this.callbacks[eventName] = callback;            
             return this;
@@ -411,7 +417,7 @@ bb.ContentWrapper = (function($,global){
             var params = params || {};
             
             /*effacer le noeud*/
-            $(this.contentEl).remove();
+            bb.jquery(this.contentEl).remove();
             /*mettre à jour la collection*/
             if(this.parentNode) this.parentNode.updateData();
             if(this.parentNode.isEmpty()){
@@ -434,16 +440,16 @@ bb.ContentWrapper = (function($,global){
             var container = (this.itemContainer) ? this.itemContainer : this.contentEl;
             var nbContent = this.getNbContent();
             if(nbContent > 0 ) return;
-            $(container).addClass(_settings.emptyContentCls);
-            $(container).animate({
+            bb.jquery(container).addClass(_settings.emptyContentCls);
+            bb.jquery(container).animate({
                 minHeight:"100px"
             },"slow");
         }
         
         BbContentWrapper.prototype.hideEmptyZone = function(){
-            $(this.contentEl).removeClass(_settings.emptyContentCls);
+            bb.jquery(this.contentEl).removeClass(_settings.emptyContentCls);
             var container = (this.itemContainer) ? this.itemContainer : this.contentEl;
-            $(container).removeClass(_settings.emptyContentCls);
+            bb.jquery(container).removeClass(_settings.emptyContentCls);
         }
         
         
@@ -461,13 +467,14 @@ bb.ContentWrapper = (function($,global){
         }
         
         BbContentWrapper.prototype.getContentEl = function(){
-            return $(this.contentEl);
+            return bb.jquery(this.contentEl);
         }        
         
         BbContentWrapper.prototype.setContentEl = function(contentEl){
             if(!contentEl) throw "contentEl can't be null";
             this.contentEl = contentEl;
-            $(this.contentEl).attr("data-bbContentRef",this.id); //update properties from Dom? 
+            bb.jquery(this.contentEl).attr("data-bbContentRef",this.id); //update properties from Dom? 
+            this.updateContentRendermode();
         }
         
         /*update*/
@@ -485,13 +492,16 @@ bb.ContentWrapper = (function($,global){
                 success : function(response){
                     try{
                         var result = response.result;
-                        var render = $(result.render).get(0).innerHTML;
-                        if(!$.trim(render).length){
-                             self.updateData();
-                             return;
-                        }//handle empty content
-                        self.contentEl.replaceWith($(result.render)); //$(render)
-                        //old self.contentEl.html(//$(render));
+                        var render = bb.jquery(result.render).get(0).innerHTML;
+                        if(!bb.jquery.trim(render).length){
+                            self.updateData();
+                            return;
+                        }
+                        
+                        /*As we replace the main content we should update */
+                        var newContentRender = bb.jquery(result.render);
+                        self.contentEl.replaceWith(newContentRender);
+                        self.setContentEl(newContentRender);
                         self.updateData();
                         var contentManager = bb.ManagersContainer.getInstance().getManager("ContentManager"); 
                         contentManager.initDroppableImage(self.contentEl); 
@@ -523,15 +533,15 @@ bb.ContentWrapper = (function($,global){
         /*Will be overridden by ContentSet*/
         BbContentWrapper.prototype.updateData = function(notify){
             var notify = (typeof notify=="boolean") ? notify : true; 
-            var subContents = $(this.contentEl).find("[data-element]");
+            var subContents = bb.jquery(this.contentEl).find("[data-element]");
             var self = this;
             var data = {};
             //var hasChanged = false; 
             if(subContents.length){
                 subContents.each(function(i,element){
-                    if($(element).attr('data-parent') == self.getUid()){
-                        var elName =  $(element).attr("data-element");
-                        data[elName] = $(element).attr("data-uid");
+                    if(bb.jquery(element).attr('data-parent') == self.getUid()){
+                        var elName =  bb.jquery(element).attr("data-element");
+                        data[elName] = bb.jquery(element).attr("data-uid");
                     // hasChanged = true;
                     }
                 });
@@ -554,8 +564,8 @@ bb.ContentWrapper = (function($,global){
         /*getContent children bbContent only*/
         BbContentWrapper.prototype.getChildren = function(){
             var container = [];
-            var contents = $(this.contentEl).find(_settings.bbContentClass);
-            $(contents).each(function(i,content){
+            var contents = bb.jquery(this.contentEl).find(_settings.bbContentClass);
+            bb.jquery(contents).each(function(i,content){
                 var bbContent = $bb(content);
                 container.push(bbContent);
             });
@@ -582,8 +592,8 @@ bb.ContentWrapper = (function($,global){
                 var bbContenTtype = bbContenTtype || "none";
                
                 var accept = (this.get("accept")==-1)? "all" : this.get("accept").split(',');
-                accept = $.isArray(accept) ? accept : $.makeArray(accept);
-                if( ($.inArray(bbContenTtype,accept) != -1) || (accept[0]=="all") && this.getMaxEntry()){
+                accept = bb.jquery.isArray(accept) ? accept : bb.jquery.makeArray(accept);
+                if( (bb.jquery.inArray(bbContenTtype,accept) != -1) || (accept[0]=="all") && this.getMaxEntry()){
                     result = true;
                 }
                 return result;
@@ -593,7 +603,7 @@ bb.ContentWrapper = (function($,global){
             
             
             this.append = function(params){
-               var self = this;
+                var self = this;
                 /*  params {content:content,
                  *   placeHolder:null,
                  *   beforeAppend : func
@@ -606,16 +616,16 @@ bb.ContentWrapper = (function($,global){
                 var sender = (params.sender)? $bb(sender) : null;
                 var content = (params.content)? params.content : null;
                 var placeHolder =(params.placeHolder)? params.placeHolder :null;
-                var beforeRequest = (typeof params.beforeRequest == "function")? params.beforeRequest : $.noop;
-                var afterAppend = (typeof params.afterAppend == "function")? params.afterAppend :$.noop;
+                var beforeRequest = (typeof params.beforeRequest == "function")? params.beforeRequest : bb.jquery.noop;
+                var afterAppend = (typeof params.afterAppend == "function")? params.afterAppend :bb.jquery.noop;
                 var dropType = (typeof params.dropType == "string")? params.dropType : "none";
                 if(!content) return false;
                 /* Same container no Need to make request */
                 if(content instanceof BbContentWrapper){
                     var bbContent = content; 
-                    var recieverRenderMode = this.get("rendermode");
-                    var contentRenderMode = content.get("rendermode");
-                    var content = {};
+                    //var recieverRenderMode = this.get("rendermode");
+                    //var contentRenderMode = content.get("rendermode");
+                    content = {};
                     content.uid = bbContent.get("uid");
                     content.type = bbContent.get("type");
                     content.serializedContent = bbContent._contentProperties;
@@ -641,25 +651,24 @@ bb.ContentWrapper = (function($,global){
                         var result = response.result;
                         var nbItem = result.length;
                        
-                        $.each(result,function(i,item){
+                        bb.jquery.each(result,function(i,item){
                             var cp = i+1;
-                            var itemRender = $(item.render).eq(0);
-                            $(itemRender).addClass(_settings.draggableContentClass.replace("."," "));
+                            var itemRender = bb.jquery(item.render).eq(0);
+                            bb.jquery(itemRender).addClass(_settings.draggableContentClass.replace("."," "));
                             if(placeHolder){
-                                $(placeHolder).replaceWith(itemRender);
+                                bb.jquery(placeHolder).replaceWith(itemRender);
                             }else{
-                                // $(self.contentEl).append(itemRender); dont append
+                                // bb.jquery(self.contentEl).append(itemRender); dont append
                                 /*if subcontent has an itemContainer useit instead of the contentEl*/
                                 if(self.itemContainer){
-                                    $(self.itemContainer).prepend(itemRender); 
+                                    bb.jquery(self.itemContainer).prepend(itemRender); 
                                 }else{
-                                    $(self.contentEl).prepend(itemRender);
+                                    bb.jquery(self.contentEl).prepend(itemRender);
                                 }
                             }
                             
                             /*after newContent*/
-                            afterAppend.call(self);
-                            
+                            afterAppend.call(self,$bb(itemRender));
                             /*wired up content here
                              *
                              *Le contentSet reçoit un nouveau contenu
@@ -692,32 +701,32 @@ bb.ContentWrapper = (function($,global){
                                     }
                                 }
                                 newItem.updateData();
+                                
                             }
 
-                            if($(self.contentEl).hasClass("row")){
+                            if(bb.jquery(self.contentEl).hasClass("row")){
                                 var itemSize = self.getSize(); 
                            
-                                $(itemRender).addClass("span"+itemSize);
-                                $(itemRender).addClass(_settings.resizableContentClass.replace(".",""));
+                                bb.jquery(itemRender).addClass("span"+itemSize);
+                                bb.jquery(itemRender).addClass(_settings.resizableContentClass.replace(".",""));
                                 newItem.setSize(itemSize);
                             }
                             
                             var contentManager = bb.ManagersContainer.getInstance().getManager("ContentManager"); //passer en after
                             contentManager.handleNewContent(itemRender);//show media path
-                            $(document).trigger("content:newContentAdded",[self,$(itemRender),null]);
-                        //if(cp == nbItem) bb.Utils.scrollToContent($(itemRender)); //scroll to last
+                            bb.jquery(document).trigger("content:newContentAdded",[self,bb.jquery(itemRender),null]);
+                            //if(cp == nbItem) bb.Utils.scrollToContent(bb.jquery(itemRender)); //scroll to last
                         
-                            var scripts = $(item.render,"script").slice(1);
-                            if (0 < $(item.render,"script").slice(1).length) {
-                                $.each(scripts, function(i, script) {
-                                    eval($(script).get(0).innerHTML);                                
+                            var scripts = bb.jquery(item.render,"script").slice(1);
+                            if (0 < bb.jquery(item.render,"script").slice(1).length) {
+                                bb.jquery.each(scripts, function(i, script) {
+                                    eval(bb.jquery(script).get(0).innerHTML);                                
                                 });
                             }
 
                         });
                         self.updateData();
                         self.hideEmptyZone();
-                       
                         return;
                     },
                    
@@ -774,22 +783,20 @@ bb.ContentWrapper = (function($,global){
                 var notify = (typeof notify=="boolean") ? notify : true; 
                 /*find all contentSet's subContents*/
                 var data = [];
-                var subContents = $(this.getAllContents()).map(function(i,content){
+                var subContents = bb.jquery(this.getAllContents()).map(function(i,content){
                     var subContInfos = {};
-                    subContInfos.nodeType = $(content).attr("data-type");
-                    subContInfos.uid = $(content).attr("data-uid");
+                    subContInfos.nodeType = bb.jquery(content).attr("data-type");
+                    subContInfos.uid = bb.jquery(content).attr("data-uid");
                     data.push(subContInfos);
-                    return $(content).attr("data-uid");
+                    return bb.jquery(content).attr("data-uid");
                 });
-                //console.log(this.contentEl);
-                //console.log(data);
                 this.set("data",data,notify); 
                 return subContents;
             }
             
             this.getAllContents = function(){
                 var itemContainer = (this.itemContainer) ? this.itemContainer : this.contentEl;
-                return $(itemContainer).children(_settings.bbContentClass);
+                return bb.jquery(itemContainer).children(_settings.bbContentClass);
             } 
             
             /*initContentSet Data*/
@@ -815,7 +822,7 @@ bb.ContentWrapper = (function($,global){
     global.$bb =  global.bbContentWrapper = _wrapContent;
     return publicApi;
 
-})(jQuery,window);
+})(bb.jquery,window);
 
 
 

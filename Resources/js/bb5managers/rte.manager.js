@@ -24,7 +24,7 @@
         /*avoir l'assurance que les dépendances seront chargées*/
         init: function(userSettings){
             var userSettings = userSettings || {};
-            this._settings = $.extend({},this._settings,userSettings);
+            this._settings = bb.jquery.extend({},this._settings,userSettings);
             this.rteAdapter = null;
             var self = this;
             this.rteConfig = {};
@@ -39,14 +39,14 @@
                     self.managerSettings.adapter = adapter;
                     var adapterConfig = rteConfig[adapter];
                     if(adapterConfig == "undefined") throw "rte.manager config can't be found for "+adaper+" adapter";
-                    $.extend(self.rteConfig,rteConfig.config,adapterConfig);
+                    bb.jquery.extend(self.rteConfig,rteConfig.config,adapterConfig);
                 },
                 error : function(e){
                     console.log("getRTEConfig sends and error");
                 }
             });
             /* try to load rte config here */
-            bb.require(["RteManager"],$.proxy(this.applyRte,this));
+            bb.require(["RteManager"],bb.jquery.proxy(this.applyRte,this));
             return this;
         },
         
@@ -63,12 +63,14 @@
         
         handleRte: function(){  
             var self = this;
-            $(document).bind("content:ItemClicked",function(e, path, bbContent){
+           
+            bb.jquery(document).bind("content:ItemClicked",function(e, path, bbContent){
                 if(self.isDisabled()) return;
                 if(!bbContent) throw "rte.manager bbContent can't be found"; 
                 self.rteAdapter.applyInlineTo(bbContent.contentEl);
                 return true;
-            });                
+            }); 
+            bb.jquery(bb).trigger("bb:rteReady",{data: self.rteAdapter});
         },
         
         handleRteEdit: function(data){
@@ -93,7 +95,7 @@
         
     });
         
-})(jQuery);
+})(bb.query);
 
 /* usage losqu'on clique sur contenu 
  * Comment utilser un mediator

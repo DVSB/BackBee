@@ -1,13 +1,28 @@
 <?php
 
-namespace BackBuilder\Renderer\Adapter;
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-use Exception,
-	Twig_Error_Loader;
+namespace BackBuilder\Renderer\Adapter;
 
 use Twig_Environment,
     Twig_Extension_Debug;
-
 use BackBuilder\Renderer\Adapter\TwigLoaderFilesystem,
     BackBuilder\Renderer\ARenderer,
     BackBuilder\Renderer\Exception\RendererException,
@@ -23,43 +38,54 @@ use BackBuilder\Renderer\Adapter\TwigLoaderFilesystem,
  */
 class Twig extends ARendererAdapter
 {
-	/**
-	 * @var BackBuilder\Renderer\Adapter\TwigLoaderFilesystem
-	 */
-	private $loader;
 
-	/**
-	 * @var Twig_Environment
-	 */
-	private $twig;
+    /**
+     * @var BackBuilder\Renderer\Adapter\TwigLoaderFilesystem
+     */
+    private $loader;
 
-	/**
-	 * Extensions to include in searching file
-	 * @var array
-	 */
-	protected $includeExtensions = array('.twig');
+    /**
+     * @var Twig_Environment
+     */
+    private $twig;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param BackBuilder\BBApplication|null $bbapp  
-	 * @param array|null 					 $config
-	 */
-	public function __construct(ARenderer $renderer)
-	{
+    /**
+     * Extensions to include in searching file
+     * @var array
+     */
+    protected $includeExtensions = array(
+        '.twig',
+        '.html.twig',
+        '.xml.twig'
+    );
+
+    /**
+     * Constructor
+     * 
+     * @param BackBuilder\BBApplication|null $bbapp  
+     * @param array|null 					 $config
+     */
+    public function __construct(ARenderer $renderer)
+    {
         parent::__construct($renderer);
 
+        $this->loader = new TwigLoaderFilesystem(array());       
+        
         $bbapp = $this->renderer->getApplication();
-		$this->loader = new TwigLoaderFilesystem(array());
         $isDebugMode = null !== $bbapp ? $bbapp->isDebugMode() : false;
-		$this->twig = new Twig_Environment($this->loader, array(
-			'debug' => $isDebugMode
-		));
+        
+        $this->twig = new Twig_Environment($this->loader, array(
+            'debug' => $isDebugMode
+        ));
 
         if (true === $isDebugMode) {
             $this->twig->addExtension(new Twig_Extension_Debug());
         }
-	}
+
+        foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $id => $datas) {
+            $this->twig->addExtension($bbapp->getContainer()->get($id));
+        }
+    }
 
     /**
      * @see BackBuilder\Renderer\IRendererAdapter::getManagedFileExtensions()
@@ -95,10 +121,9 @@ class Twig extends ARendererAdapter
     private function addDirPathIntoLoaderIfNotExists(array $templateDir)
     {
         $paths = $this->loader->getPaths();
-        foreach ($templateDir as $dir) {
-            if (false === in_array($dir, $paths)) {
-                $this->loader->addPath($dir);
-            }
+        if ((count($paths) !== count($templateDir)) || (0 < count(array_diff($paths, $templateDir)))) {
+            $this->loader->removeAllPaths();
+            $this->loader->setPaths($templateDir);
         }
     }
 
@@ -119,12 +144,13 @@ class Twig extends ARendererAdapter
             $params['this'] = $this;
             $params = array_merge($params, $vars);
             $render = $this->twig->render($filename, $params);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new RendererException(
-                $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
+                    $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
             );
         }
 
         return $render;
-    }	
+    }
+
 }

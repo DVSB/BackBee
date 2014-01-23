@@ -308,7 +308,7 @@ abstract class AClassContent extends AContent
      * @return \BackBuilder\ClassContent\AClassContent the current instance
      * @codeCoverageIgnore
      */
-    public function setDraft(Revision $draft)
+    public function setDraft(Revision $draft = null)
     {
         $this->_draft = $draft;
         return $this;
@@ -995,7 +995,6 @@ abstract class AClassContent extends AContent
     }
 
     /**
-     * ??????????????????????????????
      * Returns a subcontent instance by its type and value, FALSE if not found
      * @param string $type The classname of the subcontent
      * @param string $value The value of the subcontent (uid)

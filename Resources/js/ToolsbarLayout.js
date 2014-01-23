@@ -1,4 +1,7 @@
 /*LayoutToolsbar*/
+
+(function($) {
+
 BB4.ToolsbarManager.register("layouttb",{
   
     _settings : {
@@ -59,20 +62,20 @@ BB4.ToolsbarManager.register("layouttb",{
     _beforeCallbacks : {
         
         "templateClick" : function(e){
-            var selectedTemplateId = $(e.currentTarget).attr("id").replace("template_","");
+            var selectedTemplateId = bb.jquery(e.currentTarget).attr("id").replace("template_","");
             this._selectTemplate(selectedTemplateId);
         },
         
         "modelTemplateClick" : function(e){
-            $(this.layoutEditorInfos.defaultModelCtnId).hide();
-            var selectedModelId = $(e.currentTarget).attr("id").replace("template_","");
+            bb.jquery(this.layoutEditorInfos.defaultModelCtnId).hide();
+            var selectedModelId = bb.jquery(e.currentTarget).attr("id").replace("template_","");
             var template = this.templateModelsContainer.get(selectedModelId);
             this._callbacks["modelTemplateClick_action"].call(this,template);
         },
         
         "deleteLayout" : function(e){
             if(!this._selectedTemplate) return;
-            $(this.confirmSupprDialog.dialog).html("Are you sure you wan to delete `"+this._selectedTemplate.templateTitle+"` layout.");
+            bb.jquery(this.confirmSupprDialog.dialog).html("Are you sure you wan to delete `"+this._selectedTemplate.templateTitle+"` layout.");
             this.confirmSupprDialog.show();
         }
     },
@@ -80,21 +83,21 @@ BB4.ToolsbarManager.register("layouttb",{
     _init : function(){
         this.layoutEditorInfos = this._settings.layoutEditorInfos;
         this.gridEditorInfos = this._settings.gridEditorInfos;
-        this.toolsbar = $(this._settings.mainContainer);
+        this.toolsbar = bb.jquery(this._settings.mainContainer);
         this._bindPrivateEvents();
         this.availableModelFormats = ["2-1","1-2","2-2-V","2-2-H","1-1-1"];
         
         this.templateContainer = new SmartList({
             idKey:"uid", 
-            onAdd : $.proxy(this._addUserTpl,this),
-            onInit : $.proxy(this._buildTemplateSlide,this),
-            onReplace : $.proxy(this._onReplaceTemplate,this),
-            onDelete : $.proxy(this._onDelete,this)
+            onAdd : bb.jquery.proxy(this._addUserTpl,this),
+            onInit : bb.jquery.proxy(this._buildTemplateSlide,this),
+            onReplace : bb.jquery.proxy(this._onReplaceTemplate,this),
+            onDelete : bb.jquery.proxy(this._onDelete,this)
         });
         
         this.templateModelsContainer = new SmartList({
             idKey:"uid", 
-            onInit:$.proxy(this._onModelTplChanged,this)
+            onInit:bb.jquery.proxy(this._onModelTplChanged,this)
         });
         
         this.layoutEditorDialog = null;
@@ -108,33 +111,33 @@ BB4.ToolsbarManager.register("layouttb",{
     },
     
     _onReplaceTemplate : function(data,listName,item){
-        $("#template_"+item.uid).attr("title",item.templateTitle);
-        $("#template_"+item.uid).find("i").attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+item.picpath+"?"+(new Date()).getTime()+");");
+        bb.jquery("#template_"+item.uid).attr("title",item.templateTitle);
+        bb.jquery("#template_"+item.uid).find("i").attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+item.picpath+"?"+(new Date()).getTime()+");");
     },
      
     _onDelete : function(data,name,item) {
-        //        $("#template_"+item.uid).parents(".pager").remove();
+        //        bb.jquery("#template_"+item.uid).parents(".pager").remove();
         this._selectedTemplate = null;
         this._buildTemplateSlide(this.templateContainer.dataContainer);
     },
 
     _buildTemplateItem : function(item){
-        var templateItem = $('<li></li>').clone();    
-        var btn = $("<button class='bbBtn_square templateBtn'><i></i></button>").clone();
-        $(btn).attr("id","template_"+item.uid);
-        $(btn).attr("title",item.templateTitle);
-        $(templateItem).append(btn);
+        var templateItem = bb.jquery('<li></li>').clone();    
+        var btn = bb.jquery("<button class='bbBtn_square templateBtn'><i></i></button>").clone();
+        bb.jquery(btn).attr("id","template_"+item.uid);
+        bb.jquery(btn).attr("title",item.templateTitle);
+        bb.jquery(templateItem).append(btn);
         return templateItem;
     },
      
     _buildTemplateSlide : function(templates){
         this._resetSlider();
         var self = this; 
-        $.each(templates,function(key,template){
+        bb.jquery.each(templates,function(key,template){
             self._onUserTplChanged(template);
         });
         
-        var slider = $(this.layoutEditorInfos.bbGridSlideId).bxSlider({
+        var slider = bb.jquery(this.layoutEditorInfos.bbGridSlideId).bxSlider({
             nextText:'<span><i class="visuallyhidden focusable">'+bb.i18n.__('Next')+'</i></span>',
             prevText:'<span><i class="visuallyhidden focusable">'+bb.i18n.__('Previous')+'</i></span>',
             displaySlideQty:4,
@@ -168,7 +171,7 @@ BB4.ToolsbarManager.register("layouttb",{
                 },
                         
                 "Annuler":function(a){
-                    $(this).dialog("close");
+                    bb.jquery(this).dialog("close");
                     return false;
                 }
             }
@@ -184,7 +187,7 @@ BB4.ToolsbarManager.register("layouttb",{
                 },
                     
                 "Annuler" :function(){
-                    $(this).dialog("close");
+                    bb.jquery(this).dialog("close");
                     return false;
                 }       
             }
@@ -195,12 +198,12 @@ BB4.ToolsbarManager.register("layouttb",{
             buttons:{
                 "Delete" : function(){
                     self._callbacks["deleteLayout_action"].call(self,self._selectedTemplate);
-                    $(this).dialog("close");
+                    bb.jquery(this).dialog("close");
                     return;
                 },
                 
                 "Cancel" :function(){
-                    $(this).dialog("close");
+                    bb.jquery(this).dialog("close");
                     return false;
                 }       
             }
@@ -211,13 +214,13 @@ BB4.ToolsbarManager.register("layouttb",{
         var editorInfos = this._settings.gridEditorInfos;
         var self = this;
         
-        $(editorInfos.showBtnClass).bind("click",function(e){
-            $(editorInfos.editorClass).show();
+        bb.jquery(editorInfos.showBtnClass).bind("click",function(e){
+            bb.jquery(editorInfos.editorClass).show();
             e.stopPropagation();
         });
         
-        $(editorInfos.validBtnClass).bind("click",function(e){
-            $(editorInfos.editorClass).hide();
+        bb.jquery(editorInfos.validBtnClass).bind("click",function(e){
+            bb.jquery(editorInfos.editorClass).hide();
             
             var sizeO = {
                 colWidth:"",
@@ -230,8 +233,8 @@ BB4.ToolsbarManager.register("layouttb",{
         });
         
         /*change col and gutter*/
-        $(editorInfos.gutterSizeBtnClass).bind("click",function(e){
-            var action = ($(e.currentTarget).hasClass("upAction")) ? "up" : "down";
+        bb.jquery(editorInfos.gutterSizeBtnClass).bind("click",function(e){
+            var action = (bb.jquery(e.currentTarget).hasClass("upAction")) ? "up" : "down";
             
             if(action=="up"){
                 var newValue = self._gutterWidth() + editorInfos.gridSizeInfos.stepUnit;
@@ -247,8 +250,8 @@ BB4.ToolsbarManager.register("layouttb",{
         });
           
         /*change col and gutter*/
-        $(editorInfos.colBSizeBtnClass).bind("click",function(e){
-            var action = ($(e.currentTarget).hasClass("upAction")) ? "up" : "down";
+        bb.jquery(editorInfos.colBSizeBtnClass).bind("click",function(e){
+            var action = (bb.jquery(e.currentTarget).hasClass("upAction")) ? "up" : "down";
             
             if(action=="up"){
                 var newValue = self._colWidth() + editorInfos.gridSizeInfos.stepUnit;
@@ -264,7 +267,7 @@ BB4.ToolsbarManager.register("layouttb",{
         });
         
         /*delegate click on editor*/
-        $(editorInfos.editorClass).bind("click",function(e){
+        bb.jquery(editorInfos.editorClass).bind("click",function(e){
             //e.stopPropagation();
             });    
     },
@@ -279,7 +282,7 @@ BB4.ToolsbarManager.register("layouttb",{
         if(newVal=="none") {
             result = editorInfos.gridSizeInfos.colWidth; 
         }else{
-            $(editorInfos.colSizeFieldId).val(newVal);
+            bb.jquery(editorInfos.colSizeFieldId).val(newVal);
             editorInfos.gridSizeInfos.colWidth = newVal;
             result = newVal;
         }  
@@ -294,7 +297,7 @@ BB4.ToolsbarManager.register("layouttb",{
         if(newVal=="none"){
             result = editorInfos.gridSizeInfos.gutterWidth; 
         }else{
-            $(editorInfos.gutterSizeFieldId).val(newVal);
+            bb.jquery(editorInfos.gutterSizeFieldId).val(newVal);
             editorInfos.gridSizeInfos.gutterWidth = newVal;
             result = newVal; 
         }
@@ -305,13 +308,13 @@ BB4.ToolsbarManager.register("layouttb",{
     _bindPrivateEvents : function() {
         var self = this;
         this._callbacks["_showTplModel_action"] = this._showTplModel;
-        $(this._settings.pathInfos.pathCtnId).delegate(this._settings.pathInfos.pathItemClass,"click",function(e){
-            //var nodeId = ($(e.currentTarget).attr("path-data-uid"))? $(e.currentTarget).attr("path-data-uid") : null;
+        bb.jquery(this._settings.pathInfos.pathCtnId).delegate(this._settings.pathInfos.pathItemClass,"click",function(e){
+            //var nodeId = (bb.jquery(e.currentTarget).attr("path-data-uid"))? bb.jquery(e.currentTarget).attr("path-data-uid") : null;
             self._callbacks["selectPath_action"].call(self,e);
         });
         
-        $(document).bind('click', function(e) {
-            $('.bb5-grid-extras').hide();
+        bb.jquery(document).bind('click', function(e) {
+            bb.jquery('.bb5-grid-extras').hide();
         });
         
     },
@@ -322,13 +325,13 @@ BB4.ToolsbarManager.register("layouttb",{
             this._callbacks["templateClick_action"].call(this,template);
             this._selectedTemplate = template;
             this.updateCurrentTemplateTitle(template.templateTitle);
-            $(this._settings.layoutEditorInfos.bbGridSlideId+' button').removeClass('bb5-layout-selected');
-            $('li.pager #template_'+templateId).addClass('bb5-layout-selected');
+            bb.jquery(this._settings.layoutEditorInfos.bbGridSlideId+' button').removeClass('bb5-layout-selected');
+            bb.jquery('li.pager #template_'+templateId).addClass('bb5-layout-selected');
         }
     },
 	
     _selectLastTemplate: function() {
-        $(this._settings.layoutEditorInfos.bbGridSlideId).find('.bbBtn_square.templateBtn').last().trigger('click');
+        bb.jquery(this._settings.layoutEditorInfos.bbGridSlideId).find('.bbBtn_square.templateBtn').last().trigger('click');
     },
 	
     enableZoneProperties : function(data) {
@@ -341,7 +344,7 @@ BB4.ToolsbarManager.register("layouttb",{
     
     setZoneName : function(zoneName){
         var zoneName = zoneName || "";
-        $(this._settings.zoneNameFieldId).val(zoneName);
+        bb.jquery(this._settings.zoneNameFieldId).val(zoneName);
     },
     
     getlayoutEditorDialog : function(){
@@ -354,7 +357,7 @@ BB4.ToolsbarManager.register("layouttb",{
     
     updatePath : function(layoutItem){
         var pathToUpdate = "#"+this._settings.pathInfos.pathPrefix+layoutItem.getId();
-        $(pathToUpdate).html(layoutItem.getTitle());
+        bb.jquery(pathToUpdate).html(layoutItem.getTitle());
         return false;
     },
     
@@ -364,21 +367,21 @@ BB4.ToolsbarManager.register("layouttb",{
         var pathFragment = document.createDocumentFragment();
         var layoutClass = data[0]._settings.layoutClass;
         var self = this;
-        $.each(data,function(i,layoutItem){
-            var pathHtml = $("<a></a>").clone();
-            $(pathHtml).addClass(self._settings.pathInfos.pathItemClass.replace(".",''));
-            $(pathHtml).html(layoutItem.getTitle());
+        bb.jquery.each(data,function(i,layoutItem){
+            var pathHtml = bb.jquery("<a></a>").clone();
+            bb.jquery(pathHtml).addClass(self._settings.pathInfos.pathItemClass.replace(".",''));
+            bb.jquery(pathHtml).html(layoutItem.getTitle());
           
             /*last layout*/
             if(i+1 == data.length) {
-                $(pathHtml).addClass(self._settings.pathInfos.pathItemActive);
+                bb.jquery(pathHtml).addClass(self._settings.pathInfos.pathItemActive);
             }
-            $(pathHtml).attr("id",self._settings.pathInfos.pathPrefix+layoutItem.getId()); 
-            pathFragment.appendChild($(pathHtml).get(0));
+            bb.jquery(pathHtml).attr("id",self._settings.pathInfos.pathPrefix+layoutItem.getId()); 
+            pathFragment.appendChild(bb.jquery(pathHtml).get(0));
         /*append path*/
         });
-        $(this._settings.pathInfos.pathCtnId).html($(pathFragment));
-        $("#bbPathWrapper").slideDown();
+        bb.jquery(this._settings.pathInfos.pathCtnId).html(bb.jquery(pathFragment));
+        bb.jquery("#bbPathWrapper").slideDown();
     },
 	
     removeTempTemplate: function() {
@@ -391,40 +394,40 @@ BB4.ToolsbarManager.register("layouttb",{
     },
 	
     _showTplModel : function(e){
-        $(this.layoutEditorInfos.defaultModelCtnId).show();
+        bb.jquery(this.layoutEditorInfos.defaultModelCtnId).show();
         return false;
     },
     
     
     /*user Template*/
     _onUserTplChanged : function(item){
-        var templateItem = $('<li></li>').clone();    
-        var btn = $("<button class='bb5-button bb5-button-bulky bb5-layout-choice-x templateBtn'><i></i></button>").clone();
-        $(btn).attr("id","template_"+item.uid);
-        $(btn).attr("title",item.templateTitle);
-        $('i', $(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+item.picpath+"?"+(new Date()).getTime()+");");
-        $(templateItem).append(btn);
-        $(this.layoutEditorInfos.bbGridSlideId).append(templateItem);
+        var templateItem = bb.jquery('<li></li>').clone();    
+        var btn = bb.jquery("<button class='bb5-button bb5-button-bulky bb5-layout-choice-x templateBtn'><i></i></button>").clone();
+        bb.jquery(btn).attr("id","template_"+item.uid);
+        bb.jquery(btn).attr("title",item.templateTitle);
+        bb.jquery('i', bb.jquery(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+item.picpath+"?"+(new Date()).getTime()+");");
+        bb.jquery(templateItem).append(btn);
+        bb.jquery(this.layoutEditorInfos.bbGridSlideId).append(templateItem);
     },
     
     /*model template*/
     _onModelTplChanged : function(data){
         var modelTemplates = document.createDocumentFragment();
-        $.each(data,function(i,item){
-            var templateItem = $("<li></li>").clone();
-            var btn = $("<label><button class='bb5-button bb5-button-bulky bb5-layout-choice-x tplModel'><i></i></button></label>").clone();
-            $(btn).find("button").attr("id","template_"+item.uid);
-            $(btn).find("button").attr("title",item.templateTitle);
-            $('i', $(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+item.picpath+"?"+(new Date()).getTime()+");");
-            var templateName = $("<span>"+item.templateTitle+"</span>").clone();
-            $(templateName).appendTo($(btn).find("label"));
-            $(btn).find("button").after(templateName);
+        bb.jquery.each(data,function(i,item){
+            var templateItem = bb.jquery("<li></li>").clone();
+            var btn = bb.jquery("<label><button class='bb5-button bb5-button-bulky bb5-layout-choice-x tplModel'><i></i></button></label>").clone();
+            bb.jquery(btn).find("button").attr("id","template_"+item.uid);
+            bb.jquery(btn).find("button").attr("title",item.templateTitle);
+            bb.jquery('i', bb.jquery(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+item.picpath+"?"+(new Date()).getTime()+");");
+            var templateName = bb.jquery("<span>"+item.templateTitle+"</span>").clone();
+            bb.jquery(templateName).appendTo(bb.jquery(btn).find("label"));
+            bb.jquery(btn).find("button").after(templateName);
             
-            $(templateItem).append(btn);
+            bb.jquery(templateItem).append(btn);
             
-            modelTemplates.appendChild($(templateItem).get(0));
+            modelTemplates.appendChild(bb.jquery(templateItem).get(0));
         }); 
-        $(this.layoutEditorInfos.bbModelGridSlideId).append(modelTemplates);
+        bb.jquery(this.layoutEditorInfos.bbModelGridSlideId).append(modelTemplates);
     },
     
     
@@ -435,14 +438,14 @@ BB4.ToolsbarManager.register("layouttb",{
     
     //class="bbGridSlide"
     _resetSlider : function(){
-        var sliderTemplate = $('<div id="bb5-use-template-wrapper" class="bb5-tabarea_content">'
+        var sliderTemplate = bb.jquery('<div id="bb5-use-template-wrapper" class="bb5-tabarea_content">'
             +'<div class="bb5-slider-layout-wrapper slider-fx">'
             +'<ul id="bb5-slider-layout"></ul>'
             +'</div>'
             +'</div>');
                     
-        var slider = $(sliderTemplate).clone();
-        $("#bb5-use-template-wrapper").replaceWith(slider);
+        var slider = bb.jquery(sliderTemplate).clone();
+        bb.jquery("#bb5-use-template-wrapper").replaceWith(slider);
     },
     
     /*addUserTemplate*/
@@ -493,7 +496,7 @@ BB4.ToolsbarManager.register("layouttb",{
 		
     /*recréer le scroll*/
     /*
-        $(this.layoutEditorInfos.bbGridSlideId).bxSlider({
+        bb.jquery(this.layoutEditorInfos.bbGridSlideId).bxSlider({
             nextText:'<span><i class="visuallyhidden focusable">Suivant</i></span>',
             prevText:'<span><i class="visuallyhidden focusable">Précédent</i></span>',
             displaySlideQty:4,
@@ -505,31 +508,28 @@ BB4.ToolsbarManager.register("layouttb",{
     },
     
     setGridSize : function(gridSize){
-        $.extend(true,this.gridEditorInfos.gridSizeInfos,gridSize);
+        bb.jquery.extend(true,this.gridEditorInfos.gridSizeInfos,gridSize);
         this._colWidth(gridSize.colWidth);
         this._gutterWidth(gridSize.gutterWidth);
         /*update grid infos*/
         var widthSize = (gridSize.nbColumns * gridSize.colWidth) + (gridSize.gutterWidth * (gridSize.nbColumns - 1)) + (2*gridSize.gutterWidth);
         var widthSize = 960;
-        $(this.toolsbar).find(this.gridEditorInfos.gridSizeClass).html($("<strong>"+widthSize+"</strong>"));
+        bb.jquery(this.toolsbar).find(this.gridEditorInfos.gridSizeClass).html(bb.jquery("<strong>"+widthSize+"</strong>"));
     },
     
     updateCurrentTemplateTitle : function(newTitle){
         var layoutInfos = this._settings.layoutEditorInfos;
         var newTitle = newTitle || "";
-        $(layoutInfos.layoutNameFieldId).val(newTitle);
+        bb.jquery(layoutInfos.layoutNameFieldId).val(newTitle);
         return false;
     },
    
    
    
     selectGridBtn : function(){
-        $(this._settings.gridEditorInfos.showGridBtn).attr("checked","checked");
+        bb.jquery(this._settings.gridEditorInfos.showGridBtn).attr("checked","checked");
     }
-   
-   
-    
-   
-    
     
 });
+
+}) (bb.jquery);

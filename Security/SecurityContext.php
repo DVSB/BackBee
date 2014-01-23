@@ -32,8 +32,10 @@ use BackBuilder\Security\Exception\SecurityException,
     BackBuilder\Security\Authentication\AuthenticationManager,
     BackBuilder\Security\Authentication\Provider\BBAuthenticationProvider,
     BackBuilder\Security\Listeners\ContextListener,
-    BackBuilder\Security\Logout\LogoutSuccessHandler;
-use Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider;
+    BackBuilder\Security\Logout\LogoutSuccessHandler,
+    BackBuilder\Security\Context\ContextInterface;
+use Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider,
+    Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\Firewall;
 use Symfony\Component\Security\Http\FirewallMap;
 use BackBuilder\Routing\Matcher\RequestMatcher;
@@ -69,6 +71,7 @@ class SecurityContext extends sfSecurityContext
     private $_userproviders;
     private $_aclprovider;
     private $_logout_listener;
+    private $_config;
 
     public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager = NULL, AccessDecisionManagerInterface $accessDecisionManager = NULL)
     {
@@ -83,6 +86,7 @@ class SecurityContext extends sfSecurityContext
             trigger_error('None security configuration found', E_USER_NOTICE);
             return;
         }
+        $this->_config = $securityConfig;
 
         $this->_authmanager = $authenticationManager;
 
@@ -92,9 +96,9 @@ class SecurityContext extends sfSecurityContext
         }
 
         $this->createProviders($securityConfig)
-                ->_createACLProvider($securityConfig)
-                ->_createFirewallMap($securityConfig)
-                ->_registerFirewall();
+             ->_createACLProvider($securityConfig)
+             ->_createFirewallMap($securityConfig)
+             ->_registerFirewall();
 
         if (NULL === $accessDecisionManager) {
             $trustResolver = new TrustResolver('BackBuilder\Security\Token\AnonymousToken', 'BackBuilder\Security\Token\RememberMeToken');
@@ -129,6 +133,9 @@ class SecurityContext extends sfSecurityContext
 
     public function createFirewall($name, $config)
     {
+        $config['firewall_name'] = $name;
+        $listeners = array();
+
         if (NULL === $this->_firewallmap)
             return $this;
 
@@ -150,74 +157,39 @@ class SecurityContext extends sfSecurityContext
         }
 
         $defaultProvider = reset($this->_userproviders);
-        if (array_key_exists('provider', $config) && array_key_exists($config['provider'], $this->_userproviders))
+        if (array_key_exists('provider', $config) && array_key_exists($config['provider'], $this->_userproviders)) {
             $defaultProvider = $this->_userproviders[$config['provider']];
-
-        $listeners = array();
-
-        if (!array_key_exists('stateless', $config) || FALSE === $config['stateless']) {
-            $contextKey = array_key_exists('context', $config) ? $config['context'] : $name;
-            $listener = new ContextListener($this, $this->_userproviders, $contextKey, $this->_logger, $this->_dispatcher);
-            $listeners[] = $listener;
         }
-
-        if (array_key_exists('anonymous', $config)) {
-            $key = array_key_exists('key', (array) $config['anonymous']) ? $config['anonymous']['key'] : 'anom';
-            $this->_authproviders[] = new AnonymousAuthenticationProvider($key);
-            $listener = new AnonymousAuthenticationListener($this, $key, $this->_logger);
-            $listeners[] = $listener;
-        }
-
-        if (array_key_exists('bb_auth', $config)) {
-            $config = array_merge(array('nonce_dir' => 'security/nonces', 'lifetime' => 1200), $config);
-            $this->_authproviders['bb_auth'] = new BBAuthenticationProvider($defaultProvider, $this->_application->getCacheDir() . DIRECTORY_SEPARATOR . $config['nonce_dir'], $config['lifetime']);
-            $this->_authmanager->addProvider($this->_authproviders['bb_auth']);
-            $listener = new BBAuthenticationListener($this, $this->_authmanager, $this->_logger);
-            $listeners[] = $listener;
-
-            if (null === $this->_logout_listener) {
-                $this->_logout_listener = new LogoutListener($this, $httpUtils = new HttpUtils(), new Logout\BBLogoutSuccessHandler($httpUtils));
-            }
-
-            $this->_logout_listener->addHandler(new Logout\BBLogoutHandler($this->_authproviders['bb_auth']));
-        }
-
-        if (array_key_exists('form_login', $config)) {
-            $login_path = array_key_exists('login_path', $config['form_login']) ? $config['form_login']['login_path'] : null;
-            $check_path = array_key_exists('check_path', $config['form_login']) ? $config['form_login']['check_path'] : null;
-            $this->_authmanager->addProvider(new UserAuthenticationProvider($defaultProvider));
-            $listener = new UsernamePasswordAuthenticationListener($this, $this->_authmanager, $login_path, $check_path, $this->_logger);
-            $listeners[] = $listener;
-
-            if (array_key_exists('rememberme', $config) && class_exists($config['rememberme'])) {
-                $classname = $config['rememberme'];
-                $listener = new $classname($this, $this->_authmanager, $this->_logger);
-                $listeners[] = $listener;
-            }
-        }
-
-        if (array_key_exists('logout', $config)) {
-            if (array_key_exists('handlers', $config['logout']) && is_array($handlers = $config['logout']['handlers'])) {
-                if (null === $this->_logout_listener) {
-                    $this->_logout_listener = new LogoutListener($this, $httpUtils = new HttpUtils(), new LogoutSuccessHandler($httpUtils));
-                }
-
-                foreach ($handlers as $handler) {
-                    $this->_logout_listener->addHandler(new $handler());
-                }
-            }
+//        var_dump($this->_config);die;
+        if (array_key_exists('contexts', $this->_config)) {
+            $listeners = $this->loadContexts($config);
         }
 
         if (null !== $this->_logout_listener) {
             $this->_dispatcher->addListener('frontcontroller.request.logout', array($this->_logout_listener, 'handle'));
         }
 
-        if (0 == count($listeners))
+        if (0 == count($listeners)) {
             throw new SecurityException(sprintf('No authentication listener registered for firewall "%s".', $name));
-
+        }
         $this->_firewallmap->add($requestMatcher, $listeners, NULL);
 
         return $this;
+    }
+
+    public function loadContexts($config)
+    {
+        $listeners = array();
+        foreach ($this->_config['contexts'] as $namespace => $classnames) {
+            foreach ($classnames as $classname) {
+                $class = implode(NAMESPACE_SEPARATOR, array($namespace, $classname));
+                $context = new $class($this);
+                if ($context instanceof ContextInterface) {
+                    $listeners = array_merge($listeners, $context->loadListeners($config));
+                }
+            }
+        }
+        return $listeners;
     }
 
     /**
@@ -293,6 +265,15 @@ class SecurityContext extends sfSecurityContext
         return $this;
     }
 
+    public function addAuthProvider(AuthenticationProviderInterface $provider, $key = null)
+    {
+        if (is_null($key)) {
+            $this->_authproviders[] = $provider;
+        } else {
+            $this->_authproviders[$key] = $provider;
+        }
+    }
+
     /**
      * @codeCoverageIgnore
      * @param string $name
@@ -316,7 +297,7 @@ class SecurityContext extends sfSecurityContext
     /**
      * @codeCoverageIgnore
      */
-    private function _registerFirewall()
+    public function _registerFirewall()
     {
         $this->_firewall = new Firewall($this->_firewallmap, $this->_dispatcher);
         $this->_dispatcher->addListener('frontcontroller.request', array($this->_firewall, 'onKernelRequest'));
@@ -342,11 +323,32 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
-     * @return type
+     * @return AuthenticationManager
      */
     public function getAuthenticationManager()
     {
         return $this->_authmanager;
     }
 
+    public function getLogger()
+    {
+        return $this->_logger;
+    }
+
+    public function getLogoutListener()
+    {
+        return $this->_logout_listener;
+    }
+
+    public function setLogoutListener(LogoutListener $listener)
+    {
+        if (null === $this->_logout_listener) {
+            $this->_logout_listener = $listener;
+        }
+    }
+
+    public function getDispatcher()
+    {
+        return $this->_dispatcher;
+    }
 }

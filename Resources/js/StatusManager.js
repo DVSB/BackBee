@@ -26,7 +26,7 @@ bb.StatusManager = (function($,gExport){
     
     var _init = function(userSettings){
         var userConfig = userConfig || {};
-        $.extend(true,_settings,userSettings);
+        bb.jquery.extend(true,_settings,userSettings);
         
         _initWebservice();
         _initDialogs();
@@ -126,8 +126,8 @@ bb.StatusManager = (function($,gExport){
     };
     
     var _edit = function() {
-        var context = $('#bb5-dialog-treeview').bbPageBrowser('getContext');
-        $('#bb5-dialog-treeview').bbPageBrowser('editPage', bb.frontApplication.getPageId(), null);
+        var context = bb.jquery('#bb5-dialog-treeview').bbPageBrowser('getContext');
+        bb.jquery('#bb5-dialog-treeview').bbPageBrowser('editPage', bb.frontApplication.getPageId(), null);
     };
     
     var _remove = function() {
@@ -138,13 +138,13 @@ bb.StatusManager = (function($,gExport){
                     text: bb.i18n.__('popupmanager.button.delete'),
                     click: function() {
                         var confirmDialog = this;
-                        $(confirmDialog).parent().mask(bb.i18n.loading);
+                        bb.jquery(confirmDialog).parent().mask(bb.i18n.loading);
                         pageWebservice.request('delete', {
                             params: {
                                 uid: bb.frontApplication.getPageId()
                             },
                             success: function(response) {
-                                $(confirmDialog).dialog("close");
+                                bb.jquery(confirmDialog).dialog("close");
                                 if (response.result) {
                                     document.location = bb.baseurl+response.result.url;
                                 } else {
@@ -152,7 +152,7 @@ bb.StatusManager = (function($,gExport){
                                 }
                             },
                             error: function(response) {
-                                $(confirmDialog).dialog("close");
+                                bb.jquery(confirmDialog).dialog("close");
                                 _displayError(bb.i18n.__('statusmanager.error.deleting_page'), response.error, _remove);
                             }
                         });
@@ -161,21 +161,21 @@ bb.StatusManager = (function($,gExport){
                 "Cancel": {
                     text: bb.i18n.__('popupmanager.button.cancel'),
                     click: function() {
-                        $(this).dialog("close");
+                        bb.jquery(this).dialog("close");
                         return false;
                     }
                 }
             }
         });
-        $(confirmDialog.dialog).html(bb.i18n.__('statusmanager.delete_page'));
+        bb.jquery(confirmDialog.dialog).html(bb.i18n.__('statusmanager.delete_page'));
         confirmDialog.show();
     };
     
     var _enable = function() {
         if (!currentPage) {
-			var layoutId = $('#bb5-toolbar-wrapper').attr('data-layout');
+			var layoutId = bb.jquery('#bb5-toolbar-wrapper').attr('data-layout');
 			while (!layoutId) {
-				layoutId = $('#bb5-toolbar-wrapper').attr('data-layout');
+				layoutId = bb.jquery('#bb5-toolbar-wrapper').attr('data-layout');
 			}
 			
             pageWebservice.request('getWorkflowStatus', {
@@ -204,7 +204,7 @@ bb.StatusManager = (function($,gExport){
                         currentPage = response.result;
                         if (null == currentPage.publishing) currentPage.publishing = 0;
                         if (null == currentPage.archiving) currentPage.archiving = 0;
-                        $('#bb5-status').trigger('page:onload');
+                        bb.jquery('#bb5-status').trigger('page:onload');
                     } else {
                         _displayError(bb.i18n.__('statusmanager.error.loading_page'), null, _enable);
                     }
@@ -226,7 +226,7 @@ bb.StatusManager = (function($,gExport){
                         text: bb.i18n.__('popupmanager.button.save'),
                         click: function(){
                             _update();
-                            $(this).dialog("close");
+                            bb.jquery(this).dialog("close");
                             return (callback) ? callback(arg) : false;
                         }
                     },
@@ -234,13 +234,13 @@ bb.StatusManager = (function($,gExport){
                         text: bb.i18n.__('popupmanager.button.cancel'),
                         click: function(a){
                             _reset();
-                            $(this).dialog("close");
+                            bb.jquery(this).dialog("close");
                             return false;
                         }
                     }
                 }
             });
-            $(confirmDialog.dialog).html(bb.i18n.__('statusmanager.save_page'));
+            bb.jquery(confirmDialog.dialog).html(bb.i18n.__('statusmanager.save_page'));
             confirmDialog.show();
         }
     };
@@ -272,7 +272,7 @@ bb.StatusManager = (function($,gExport){
                                 "Reload": {
                                     text: bb.i18n.__('popupmanager.button.reload'),
                                     click: function() {
-                                        $(this).dialog("close");
+                                        bb.jquery(this).dialog("close");
                                         if (response.result.url) {
                                             document.location.href = bb.baseurl + response.result.url;
                                         } else {
@@ -283,13 +283,13 @@ bb.StatusManager = (function($,gExport){
                                 "Cancel": {
                                     text: bb.i18n.__('popupmanager.button.cancel'),
                                     click: function(a){
-                                        $(this).dialog("close");
+                                        bb.jquery(this).dialog("close");
                                         return false;
                                     }
                                 }
                             }
                         });
-                        $(dialog.dialog).html(html);
+                        bb.jquery(dialog.dialog).html(html);
                         dialog.show();
                     } else
                         _displayError(bb.i18n.__('statusmanager.error.updating_page'), null, _update);
@@ -314,13 +314,13 @@ bb.StatusManager = (function($,gExport){
                             "Close":{
                                 text: bb.i18n.__('popupmanager.button.close'),
                                 click: function(a){
-                                    $(this).dialog("close");
+                                    bb.jquery(this).dialog("close");
                                     return false;
                                 }
                             }
                         }
                     });
-                    $(alertDialog.dialog).html(bb.i18n.__('statusmanager.none_revert_content'));
+                    bb.jquery(alertDialog.dialog).html(bb.i18n.__('statusmanager.none_revert_content'));
                     alertDialog.show();
                 } else {
                     var confirmDialog = popupDialog.create("confirmDialog",{
@@ -329,11 +329,11 @@ bb.StatusManager = (function($,gExport){
                             "Confirm" :{
                                 text: bb.i18n.__('popupmanager.button.confirm'),
                                 click: function(){
-                                    $(this).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
+                                    bb.jquery(this).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
                                     revisionWebservice.request('revert', {
                                         success: function(response) {
-                                            $(this).parents('.ui-dialog:first').unmask();
-                                            $(this).dialog('close');
+                                            bb.jquery(this).parents('.ui-dialog:first').unmask();
+                                            bb.jquery(this).dialog('close');
                                             confirmDialog.destroy();
                                             
                                             var html = bb.i18n.__('statusmanager.reload_page');
@@ -343,25 +343,25 @@ bb.StatusManager = (function($,gExport){
                                                     "Reload": {
                                                         text: bb.i18n.__('popupmanager.button.reload'),
                                                         click: function() {
-                                                            $(this).dialog("close");
+                                                            bb.jquery(this).dialog("close");
                                                             document.location.reload();
                                                         }
                                                     },
                                                     "Cancel": {
                                                         text: bb.i18n.__('popupmanager.button.cancel'),
                                                         click: function(a){
-                                                            $(this).dialog("close");
+                                                            bb.jquery(this).dialog("close");
                                                             return false;
                                                         }
                                                     }
                                                 }
                                             });
-                                            $(dialog.dialog).html(html);
+                                            bb.jquery(dialog.dialog).html(html);
                                             dialog.show();
                                         },
                                         error:function(response){
-                                            $(this).parents('.ui-dialog:first').unmask();
-                                            $(this).dialog('close');
+                                            bb.jquery(this).parents('.ui-dialog:first').unmask();
+                                            bb.jquery(this).dialog('close');
                                             confirmDialog.destroy();
                                             
                                             _displayError(bb.i18n.__('statusmanager.error.reverting'), response.error);
@@ -373,13 +373,13 @@ bb.StatusManager = (function($,gExport){
                             "Cancel":{
                                 text: bb.i18n.__('popupmanager.button.cancel'),
                                 click: function(a){
-                                    $(this).dialog("close");
+                                    bb.jquery(this).dialog("close");
                                     return false;
                                 }
                             }
                         }
                     });
-                    $(confirmDialog.dialog).html(response.result.length + bb.i18n.__('statusmanager.content_to_revert'));
+                    bb.jquery(confirmDialog.dialog).html(response.result.length + bb.i18n.__('statusmanager.content_to_revert'));
                     confirmDialog.show();
                 }
             },
@@ -400,13 +400,13 @@ bb.StatusManager = (function($,gExport){
                             "Close":{
                                 text: bb.i18n.__('popupmanager.button.close'),
                                 click: function(a){
-                                    $(this).dialog("close");
+                                    bb.jquery(this).dialog("close");
                                     return false;
                                 }
                             }
                         }
                     });
-                    $(alertDialog.dialog).html(bb.i18n.__('statusmanager.none_commit_content'));
+                    bb.jquery(alertDialog.dialog).html(bb.i18n.__('statusmanager.none_commit_content'));
                     alertDialog.show();
                 } else {
                     var confirmDialog = popupDialog.create("confirmDialog",{
@@ -415,16 +415,16 @@ bb.StatusManager = (function($,gExport){
                             "Confirm" :{
                                 text: bb.i18n.__('popupmanager.button.confirm'),
                                 click: function(){
-                                    $(confirmDialog.dialogUi).mask(bb.i18n.__('loading'));
+                                    bb.jquery(confirmDialog.dialogUi).mask(bb.i18n.__('loading'));
                                     revisionWebservice.request('commit', {
                                         success: function(response) {
-                                            $(this).parents('.ui-dialog:first').unmask();
-                                            $(this).dialog('close');
+                                            bb.jquery(this).parents('.ui-dialog:first').unmask();
+                                            bb.jquery(this).dialog('close');
                                             confirmDialog.destroy();
                                         },
                                         error:function(response){
-                                            $(this).parents('.ui-dialog:first').unmask();
-                                            $(this).dialog("close");
+                                            bb.jquery(this).parents('.ui-dialog:first').unmask();
+                                            bb.jquery(this).dialog("close");
                                             confirmDialog.destroy();
                                             
                                             if (7100 == response.error.code) {
@@ -439,13 +439,13 @@ bb.StatusManager = (function($,gExport){
                             "Cancel":{
                                 text: bb.i18n.__('popupmanager.button.cancel'),
                                 click: function(a){
-                                    $(this).dialog("close");
+                                    bb.jquery(this).dialog("close");
                                     return false;
                                 }
                             }
                         }
                     });
-                    $(confirmDialog.dialog).html(response.result.length + bb.i18n.__('statusmanager.content_to_commit'));
+                    bb.jquery(confirmDialog.dialog).html(response.result.length + bb.i18n.__('statusmanager.content_to_commit'));
                     confirmDialog.show();
                 }
             },
@@ -463,7 +463,7 @@ bb.StatusManager = (function($,gExport){
         if (retry) buttons.retry = {
             text: bb.i18n.__('popupmanager.button.retry'), 
             click: function() {
-                $(this).dialog("close");
+                bb.jquery(this).dialog("close");
                 return retry.call();
             }
         };
@@ -471,7 +471,7 @@ bb.StatusManager = (function($,gExport){
         buttons.close = {
             text: bb.i18n.__('popupmanager.button.close'), 
             click: function() {
-                $(this).dialog("close");
+                bb.jquery(this).dialog("close");
             }
         };
         
@@ -480,7 +480,7 @@ bb.StatusManager = (function($,gExport){
             buttons: buttons
         });
                 
-        $(errorDialog.dialog).html(msg+(previous ? ":<br/><em>"+previous.message+" ("+bb.i18n.__('statusmanager.error.code')+" "+previous.code+")</em>" : ''));
+        bb.jquery(errorDialog.dialog).html(msg+(previous ? ":<br/><em>"+previous.message+" ("+bb.i18n.__('statusmanager.error.code')+" "+previous.code+")</em>" : ''));
             errorDialog.show();
     };
 
@@ -518,4 +518,4 @@ bb.StatusManager = (function($,gExport){
         init: _init,
         getInstance: _getInstance
     };
-})(jQuery,window);
+})(bb.jquery,window);

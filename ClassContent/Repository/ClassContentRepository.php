@@ -424,11 +424,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (true === array_key_exists('site_uid', $cond)) {
-            $uids = $this->_em->getConnection()->executeQuery('SELECT content_uid FROM idx_site_content WHERE site_uid = :site_uid', array('site_uid' => $cond['site_uid']))->fetchAll(\PDO::FETCH_COLUMN);
-            // @todo
-            if (0 < count($uids)) {
-                $qb = $qb->andWhere('c._uid IN (:uids)')->setParameter('uids', $uids);
-            }
+            $qb = $qb->andWhere('c._uid IN (SELECT i.content_uid FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)')->setParameter('site_uid', $cond['site_uid']);
         }
 
         /* @fixme handle keywords here using join */
@@ -601,11 +597,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (true === array_key_exists('site_uid', $cond)) {
-            $uids = $this->_em->getConnection()->executeQuery('SELECT content_uid FROM idx_site_content WHERE site_uid = :site_uid', array('site_uid' => $cond['site_uid']))->fetchAll(\PDO::FETCH_COLUMN);
-            // @todo
-            if (0 < count($uids)) {
-                $qb = $qb->andWhere('c._uid IN (:uids)')->setParameter('uids', $uids);
-            }
+            $qb = $qb->andWhere('c._uid IN (SELECT i.content_uid FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)')->setParameter('site_uid', $cond['site_uid']);
         }
 
         /* Keywords */
@@ -775,6 +767,34 @@ class ClassContentRepository extends EntityRepository
     public function setMediaDir($media_dir = null)
     {
         return $this;
+    }
+
+    /**
+     * Load content if need, the user's revision is also set
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param \BackBuilder\Security\Token\BBUserToken $token
+     * @param boolean $checkoutOnMissing If true, checks out a new revision if none was found
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    public function load(AClassContent $content, \BackBuilder\Security\Token\BBUserToken $token = null, $checkoutOnMissing = false)
+    {
+        $revision = null;
+        if (null !== $token) {
+            $revision = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, $checkoutOnMissing);
+        }
+
+        if (false === $content->isLoaded()) {
+            $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content);
+            if (null !== $refresh = $this->_em->find($classname, $content->getUid())) {
+                $content = $refresh;
+            }
+        }
+
+        if (null !== $content) {
+            $content->setDraft($revision);
+        }
+
+        return $content;
     }
 
 }

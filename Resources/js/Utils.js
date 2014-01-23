@@ -3,6 +3,9 @@
  * and open the template in the editor.
  */
 var bb = (bb) ? bb : {};
+
+(function($) {
+
 bb.Utils = {
     
     generateId : (function(){
@@ -16,22 +19,22 @@ bb.Utils = {
     })(),
     /*Scroll to new content*/
     scrollToContent : function(contentEl,delay,topDistance){
-        var documentBody = (($.browser.chrome)||($.browser.safari)) ? document.body : document.documentElement;
+        var documentBody = ((bb.jquery.browser.chrome)||(bb.jquery.browser.safari)) ? document.body : document.documentElement;
         var contentEl = contentEl || null;
         var delay = (delay && parseInt(delay)!=0) ? parseInt(delay) : 1000;
         if(!contentEl) return false;
         var topDistance = parseInt(topDistance)|| 220;  // [220 : taille Toolbar + taille ContentPath]
-        if($(contentEl).offset()){
-            $(documentBody).animate({
-                scrollTop: $(contentEl).offset().top - topDistance
+        if(bb.jquery(contentEl).offset()){
+            bb.jquery(documentBody).animate({
+                scrollTop: bb.jquery(contentEl).offset().top - topDistance
             }, delay,'easeInOutCubic',function(){
-                //$(contentEl).effect("highlight",{},500); 
+                //bb.jquery(contentEl).effect("highlight",{},500); 
                 });
         }
     },
     handleAppError : function(message,response){
         var message = (typeof message =="String" )? message : "An error occured";
-        $(document).trigger("application:error", {
+        bb.jquery(document).trigger("application:error", {
             title: "An error occured", 
             message: message, 
             error: response.error
@@ -71,28 +74,28 @@ var FilterManager = function(data,onCompleteCallback){
 /*permet de construire une fonction qui sera ensuite exécutée*/
 FilterManager.prototype._buildCriterion = function(field, operator, value, link){
     var availableLinks = ["and","or","none"];
-    var link = ($.inArray(link,availableLinks)) ? link : "and";
+    var link = (bb.jquery.inArray(link,availableLinks)) ? link : "and";
                      
     var operator = (operator=="=") ? "==" : operator;
                     
                      
     /* special filter IN and [Regexp [contains, endWith, beginWith]] */
     var specialOperators = ["IN","contains","beginsWith","endsWith"];
-    var operatorIsSpecial = ($.inArray(operator,specialOperators)!=-1)? true : false;
+    var operatorIsSpecial = (bb.jquery.inArray(operator,specialOperators)!=-1)? true : false;
     if(!operatorIsSpecial){
         var searchMethod = new Function("item","return item['"+field+"']"+operator+" '"+value+"';");
     }else{
         /*IN case*/
         if(operator.toUpperCase()==="IN"){
-            var value = ($.isArray(value)) ? value: [value]; 
+            var value = (bb.jquery.isArray(value)) ? value: [value]; 
             var searchMethod = function(item){
-                return ($.inArray(item[field],value)!= -1);
+                return (bb.jquery.inArray(item[field],value)!= -1);
             }  
         }
                         
         /*regex operators*/
         var regexpOperator = ["CONTAINS","BEGINSWITH","ENDSWITH"];
-        if($.inArray(operator.toUpperCase(),regexpOperator)!=-1){
+        if(bb.jquery.inArray(operator.toUpperCase(),regexpOperator)!=-1){
             /*beginsWith*/
             var regexp = "";
             if(operator.toUpperCase()=="CONTAINS"){
@@ -142,7 +145,7 @@ FilterManager.prototype.orderBy = function(field,order){
     var orderCriterion = {};
     orderCriterion.field = field || "";
     var availableOrders = ["ASC","DESC"];
-    orderCriterion.order = ($.inArray(order.toUpperCase(),availableOrders)) ? order.toUpperCase() : "ASC";
+    orderCriterion.order = (bb.jquery.inArray(order.toUpperCase(),availableOrders)) ? order.toUpperCase() : "ASC";
                  
     /*order fonction*/
     orderCriterion.filter = function(a,b){       
@@ -169,7 +172,7 @@ FilterManager.prototype.execute = function(){
     var searchData = this._data; 
                     
     /*criteria*/
-    $.each(this._queriesInfos.criteria,function(i,criterion){
+    bb.jquery.each(this._queriesInfos.criteria,function(i,criterion){
         var linkType = criterion.link;
                         
         if(i!=0){
@@ -178,7 +181,7 @@ FilterManager.prototype.execute = function(){
                 tempResult = [];  
             }
         }
-        $.each(searchData,function(i,item){
+        bb.jquery.each(searchData,function(i,item){
             var checker = criterion.searchMethod;
             if(checker(item)) tempResult.push(item); 
         }); 
@@ -216,7 +219,7 @@ var ScriptLoader = function(params){
     this.getPublicApi = function(){
         var self = this;
         return {
-            loadScript : $.proxy(self._buildScript,self)
+            loadScript : bb.jquery.proxy(self._buildScript,self)
         }
     }
     
@@ -239,7 +242,7 @@ var ScriptLoader = function(params){
         script.type = "text/javascript";
         script.src = source;
         script.async = (typeof params.async=="boolean") ? params.async: true;
-        var id = $.md5(source);
+        var id = bb.jquery.md5(source);
         /*do nothing if the script is already loaded*/
         if(this._isLoaded(id)){
             return;  
@@ -262,7 +265,7 @@ var ScriptLoader = function(params){
                 params.onSuccess();
             };
         }
-        $("body").eq(0).append(script);
+        bb.jquery("body").eq(0).append(script);
     } 
     
     return this._init(params);  
@@ -270,3 +273,5 @@ var ScriptLoader = function(params){
 
 bb.Utils.ScriptLoader = new ScriptLoader;
 /*test branche js*/
+
+}) (bb.jquery);

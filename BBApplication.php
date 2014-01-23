@@ -27,6 +27,7 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
     BackBuilder\Exception\DatabaseConnectionException,
+    BackBuilder\Exception\UnknownContextException,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
@@ -220,7 +221,17 @@ class BBApplication
                 ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'ClassContent', 'Repositories')))
                 ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
-                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')))
+                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')));
+
+        if (true === $this->hasContext()) {
+            $this->getAutoloader()
+                    ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
+                    ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Templates', 'helpers')))
+                    ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Listeners')))
+                    ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')));
+        }
+
+        $this->getAutoloader()
                 ->setEventDispatcher($this->getEventDispatcher())
                 ->setLogger($this->getLogging());
 
@@ -276,10 +287,15 @@ class BBApplication
     /**
      * @param string $configdir
      * @return \BackBuilder\BBApplication
+     * @throws \BackBuilder\Exception\UnknownContextException Thrown if unknown context provided
      */
     private function _initContextConfig()
     {
-        if (NULL !== $this->_context && 'default' != $this->_context) {
+        if (true === $this->hasContext()) {
+            if (false === is_dir($this->getBaseRepository() . DIRECTORY_SEPARATOR . $this->_context)) {
+                throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
+            }
+
             $this->getContainer()->get('config')->extend($this->getRepository(), $this->_overwrite_config);
         }
         return $this;
@@ -335,7 +351,7 @@ class BBApplication
         try {
             $this->getContainer()->get('em')->getConnection()->connect();
         } catch (\Exception $e) {
-            throw new DatabaseConnectionException('Enable to connect to the database.', 0, $e);
+            throw new DatabaseConnectionException('Unable to connect to the database.', 0, $e);
         }
 
         if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
@@ -369,14 +385,18 @@ class BBApplication
         if (null !== $bundles = $this->getConfig()->getBundlesConfig()) {
             foreach ($bundles as $name => $classname) {
                 $bundle = new $classname($this);
-                if ($bundle->init()) {
-                    $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
-                    $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
-                }
+                $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
             }
         }
 
         $this->initBundlesServices();
+
+        if (0 < count($this->_bundles)) {
+            foreach ($this->_bundles as $bundle) {
+                $bundle->init();
+                $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
+            }
+        }
     }
 
     /**
@@ -489,6 +509,19 @@ class BBApplication
         return dirname($this->getBBDir());
     }
 
+    /**
+     * Returns TRUE if a starting context is defined, FALSE otherwise
+     * @return boolean
+     */
+    public function hasContext()
+    {
+        return (null !== $this->_context && 'default' != $this->_context);
+    }
+
+    /**
+     * Returns the starting context
+     * @return string|NULL
+     */
     public function getContext()
     {
         return $this->_context;
@@ -620,7 +653,7 @@ class BBApplication
     {
         if (null === $this->_repository) {
             $this->_repository = $this->getBaseRepository();
-            if (null !== $this->_context && 'default' != $this->_context) {
+            if (true === $this->hasContext()) {
                 $this->_repository .= DIRECTORY_SEPARATOR . $this->_context;
             }
         }
@@ -648,7 +681,7 @@ class BBApplication
             array_unshift($this->_classcontentdir, $this->getBaseDir() . '/BackBuilder/ClassContent');
             array_unshift($this->_classcontentdir, $this->getBaseDir() . '/repository/ClassContent');
 
-            if (null !== $this->_context && 'default' != $this->_context) {
+            if (true === $this->hasContext()) {
                 array_unshift($this->_classcontentdir, $this->getRepository() . '/ClassContent');
             }
 
@@ -704,8 +737,12 @@ class BBApplication
             $this->addResourceDir($this->getBaseDir() . '/BackBuilder/Resources')
                     ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
 
-            if (null !== $this->_context && 'default' != $this->_context) {
-                $this->addResourceDir($this->getRepository() . '/Ressources');
+            if (true === $this->hasContext()) {
+                try {
+                    $this->addResourceDir($this->getRepository() . '/Ressources');
+                } catch (BBException $e) {
+                    // Ignore it
+                }
             }
 
             array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));

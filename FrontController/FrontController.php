@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -146,6 +146,15 @@ class FrontController implements HttpKernelInterface {
         foreach ($matches as $key => $value)
             if ('_' != substr($key, 0, 1))
                 $args[$key] = $value;
+
+        $this->getRequest()->attributes = new \Symfony\Component\HttpFoundation\ParameterBag($args);
+        $this->_dispatch('frontcontroller.request');
+
+        // logout Event dispatch
+        if (null !== $this->getRequest()->get('logout') && TRUE == $this->getRequest()->get('logout') && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
+            $this->_dispatch('frontcontroller.request.logout');
+            //$this->defaultAction($this->getRequest()->getPathInfo(), $sendResponse);
+        }
 
         if (FALSE === method_exists($this, $matches['_action'])) {
             if (array_key_exists($matches['_action'], $this->_actions) && is_callable($this->_actions[$matches['_action']])) {
@@ -505,15 +514,8 @@ class FrontController implements HttpKernelInterface {
     public function handle(Request $request = NULL, $type = self::MASTER_REQUEST, $catch = true) {
         try {
             $this->_request = $request;
-            $this->_dispatch('frontcontroller.request');
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
             if ($matches = $urlMatcher->match($this->getRequest()->getPathInfo())) {
-                // logout Event dispatch
-                if (null !== $this->getRequest()->get('logout') && TRUE == $this->getRequest()->get('logout') && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
-                    $this->_dispatch('frontcontroller.request.logout');
-                    //$this->defaultAction($this->getRequest()->getPathInfo(), $sendResponse);
-                }
-
                 $this->_invokeAction($matches);
             }
 

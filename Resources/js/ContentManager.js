@@ -34,7 +34,7 @@ bb.ContentManager =(function($,gExport){
         CONTENT_RENDER_TYPE : "data-rendermode",
         CONTENT_MAXENTRY_KEY :"data-maxentry",
         ITEM_UID_KEY : "data-uid",
-        emptyFileDropImg: "/ressources/img/filedrop.png"
+        emptyFileDropImg: "ressources/img/filedrop.png"
     };
     
     var _enableContentSelection = false;
@@ -51,20 +51,20 @@ bb.ContentManager =(function($,gExport){
     var _paddingBottomSaved = false;
     
     var _initDroppableImage = function(content) {
-        content = (content) ? content : $('body');
+        content = (content) ? content : bb.jquery('body');
         
         var replaceDroppableImage = function(img) {
             if (!img.complete) {
-                $(img).error(function() {
-                    $(this).attr('src', bb.baseurl+_settings.emptyFileDropImg);
-                    $(this).addClass(_settings.emptyFileCls);
-                    $(this).parents('[data-type^="Media\\"]').addClass(_settings.emptyFileCls);
+                bb.jquery(img).error(function() {
+                    bb.jquery(this).attr('src', bb.baseurl+_settings.emptyFileDropImg);
+                    bb.jquery(this).addClass(_settings.emptyFileCls);
+                    bb.jquery(this).parents('[data-type^="Media\\"]').addClass(_settings.emptyFileCls);
                 });
             } else{ 
                 if((typeof img.naturalWidth != 'undefined' && img.naturalWidth == 0 ) || img.readyState == 'uninitialized' ) {
-                    $(img).attr('src', bb.baseurl+_settings.emptyFileDropImg);
-                    $(img).addClass(_settings.emptyFileCls);
-                    $(img).parents('[data-type^="Media\\"]').addClass(_settings.emptyFileCls);
+                    bb.jquery(img).attr('src', bb.baseurl+_settings.emptyFileDropImg);
+                    bb.jquery(img).addClass(_settings.emptyFileCls);
+                    bb.jquery(img).parents('[data-type^="Media\\"]').addClass(_settings.emptyFileCls);
                 }
             }
         }
@@ -82,21 +82,21 @@ bb.ContentManager =(function($,gExport){
     
     var _toggleEditionMode = function(mode) {
         if (mode)
-            $('.'+_settings.emptyFileCls).show();
+            bb.jquery('.'+_settings.emptyFileCls).show();
         else
-            $('.'+_settings.emptyFileCls).hide();
+            bb.jquery('.'+_settings.emptyFileCls).hide();
     };
 	
     var _cleanSortableClonedItem = function(){
         if(_itemClone){
-            $(_itemClone).remove();
+            bb.jquery(_itemClone).remove();
             _itemClone = null;
         }
     };
         
     var _init = function(userConfig){
         var userConfig = userConfig || {};
-        $.extend(true,_settings,userConfig);
+        bb.jquery.extend(true,_settings,userConfig);
         _settings.gridStep = _setResponsiveGridInfos();
         //console.log(_settings.gridStep);
         _extendSortable();
@@ -117,41 +117,41 @@ bb.ContentManager =(function($,gExport){
     }
     /* itemdrop event added to jquery*/
     var _extendSortable = function(){
-        var _mouseStop = $.extend(true,{},$.ui.sortable.prototype)._mouseStop;
+        var _mouseStop = bb.jquery.extend(true,{},bb.jquery.ui.sortable.prototype)._mouseStop;
         var nwMouseStop = function(a,b){
             this._trigger("itemdrop",a,this._uiHash());
             _mouseStop.apply(this,arguments);
         };
-        $.ui.sortable.prototype._mouseStop = nwMouseStop; 
+        bb.jquery.ui.sortable.prototype._mouseStop = nwMouseStop; 
     } 
     
     var _enable = function() {
         _enableContentSelection = true;
-        var nodeData = $(_settings.layoutDroppabableClass).data();
+        var nodeData = bb.jquery(_settings.layoutDroppabableClass).data();
         if(nodeData.sortable){ //useful cf LayoutManager _clone
            
-            $(_settings.layoutDroppabableClass).sortable("enable");
+            bb.jquery(_settings.layoutDroppabableClass).sortable("enable");
         }else{
             _initSortable();
         }
         _initResizable();
-        $(_settings.contentClass).css({
+        bb.jquery(_settings.contentClass).css({
             //cursor:"move"
             });
     };
     
     var _disable = function(){
         _enableContentSelection = false;
-        $(_settings.contentClass).css({
+        bb.jquery(_settings.contentClass).css({
             cursor:""
         });
         /*remove Sortable*/
-        $(_settings.layoutDroppabableClass).sortable("disable");
-        $(_settings.layoutDroppabableClass).removeClass(_settings.droppableRenderFlag);
-        $(_settings.layoutDroppabableClass).enableSelection(); 
+        bb.jquery(_settings.layoutDroppabableClass).sortable("disable");
+        bb.jquery(_settings.layoutDroppabableClass).removeClass(_settings.droppableRenderFlag);
+        bb.jquery(_settings.layoutDroppabableClass).enableSelection(); 
 
         /*remove resizable*/
-        $.each(_resizableItems,function(key,resizableItem){
+        bb.jquery.each(_resizableItems,function(key,resizableItem){
             resizableItem.destroy();
         });
         _resizableItems = {};
@@ -163,8 +163,8 @@ bb.ContentManager =(function($,gExport){
     };
     
     //    var _handleBodyDrop = function(){
-    //        $("body").attr("data-bodydropzone","1");
-    //        $("body").sortable({
+    //        bb.jquery("body").attr("data-bodydropzone","1");
+    //        bb.jquery("body").sortable({
     //            connectWith : _settings.layoutDroppabableClass,
     //            over: function(e,ui){
     //                console.log('dire');
@@ -176,26 +176,26 @@ bb.ContentManager =(function($,gExport){
     //    }
     
     var _unselectAllContents = function(){
-        $(_settings.contentSelectedClass).removeClass(_settings.contentSelectedClass.replace(".",""));
+        bb.jquery(_settings.contentSelectedClass).removeClass(_settings.contentSelectedClass.replace(".",""));
     }    
         
     var _bindEvents = function(){  
         /*Mouse over content*/
         //var selectableContent = _settings.draggableContentClass+","+_settings.resizableContentClass;
         var selectableContent = _settings.contentClass;
-        /*$(selectableContent).live("mouseenter",function(e){
+        /*bb.jquery(selectableContent).live("mouseenter",function(e){
             if(!_enableContentSelection) return false;
             _unselectAllContents(); //usefull for subcontents
-            $(e.currentTarget).addClass(_settings.contentSelectedClass.replace(".",""));
+            bb.jquery(e.currentTarget).addClass(_settings.contentSelectedClass.replace(".",""));
         });
         
-        $(selectableContent).live("mouseleave",function(e){
+        bb.jquery(selectableContent).live("mouseleave",function(e){
             if(!_enableContentSelection) return false;
-            $(e.currentTarget).removeClass(_settings.contentSelectedClass.replace(".",""));
+            bb.jquery(e.currentTarget).removeClass(_settings.contentSelectedClass.replace(".",""));
         });
      */
         /*Click*/
-        /*$(selectableContent).bind("click",function(e){
+        /*bb.jquery(selectableContent).bind("click",function(e){
            // e.stopPropagation();
             var path = _getContentPath(e.currentTarget);
             path.push(e.currentTarget);
@@ -206,19 +206,19 @@ bb.ContentManager =(function($,gExport){
                 itemClass : ".contentNodeItem",
                 itemIdKey : "data-uid"
             };
-            $(document).trigger("content:ItemClicked",[pathInfos]);
+            bb.jquery(document).trigger("content:ItemClicked",[pathInfos]);
             return true;
         });*/
         
         var delay = false;
         /*hack When resize*/
-        $(window).resize(function(e){
+        bb.jquery(window).resize(function(e){
             if(delay != false) clearTimeout(delay);
             var onResize = function(){
-                var isWindow = ($(e.target).hasClass(_settings.resizableContentClass.replace(".","")))?false:true;
+                var isWindow = (bb.jquery(e.target).hasClass(_settings.resizableContentClass.replace(".","")))?false:true;
                 if(isWindow){
                     var resizeStep = _setResponsiveGridInfos();
-                    $.each(_resizableItems,function(key,resizableItem){
+                    bb.jquery.each(_resizableItems,function(key,resizableItem){
                         resizableItem.setGridStep(parseInt(resizeStep));
                     });
                 }
@@ -226,11 +226,11 @@ bb.ContentManager =(function($,gExport){
             delay = setTimeout(onResize,1000);
         });
      
-        $(_settings.mainContensetContainerClass).live("mouseenter",_insideDropZone);
-        $(_settings.mainContensetContainerClass).live("mouseleave",_outsideDropZone);
-        $(_settings.mainContensetContainerClass).bind("mousestop",_handleMousestop);
-        $(document).bind("bbcontent:contentSelected",function(e,data){
-            $(".bb5-droppable-place").show();
+        bb.jquery(_settings.mainContensetContainerClass).live("mouseenter",_insideDropZone);
+        bb.jquery(_settings.mainContensetContainerClass).live("mouseleave",_outsideDropZone);
+        bb.jquery(_settings.mainContensetContainerClass).bind("mousestop",_handleMousestop);
+        bb.jquery(document).bind("bbcontent:contentSelected",function(e,data){
+            bb.jquery(".bb5-droppable-place").show();
             _insideDropZone();
         });
     };
@@ -245,12 +245,12 @@ bb.ContentManager =(function($,gExport){
     var _outsideDropZone = function(e){
         _inAllowedZone = false;
         _outOfDroppableZone = true;
-        $(".bb5-droppable-place").hide();
+        bb.jquery(".bb5-droppable-place").hide();
         return true;
     }
     
     var _handleMousestop = function(e){
-        if($(e.target).hasClass(_settings.mainContensetContainerClass.replace(".",""))){
+        if(bb.jquery(e.target).hasClass(_settings.mainContensetContainerClass.replace(".",""))){
             _insideDropZone();
         }else{
             _outsideDropZone();
@@ -263,12 +263,12 @@ bb.ContentManager =(function($,gExport){
     var _filterAutoBlocks = function(i,content){
         var result = true;
         var autoBlocPattern = /autobloc/gi;
-        var isAnAutoBlock = autoBlocPattern.test($(content).attr("data-type"));
+        var isAnAutoBlock = autoBlocPattern.test(bb.jquery(content).attr("data-type"));
         if(isAnAutoBlock){
             /*enlever la class droppable pour le container*/
-            $(this).removeClass(_settings.droppableContentClass.replace(".",""));
-            var contentChildren = $(this).find(_settings.contentClass); 
-            $(this).find(_settings.contentClass).removeClass(_settings.draggableContentClass.replace(".",""));
+            bb.jquery(this).removeClass(_settings.droppableContentClass.replace(".",""));
+            var contentChildren = bb.jquery(this).find(_settings.contentClass); 
+            bb.jquery(this).find(_settings.contentClass).removeClass(_settings.draggableContentClass.replace(".",""));
             result = false;
         }
         return result;  
@@ -276,10 +276,10 @@ bb.ContentManager =(function($,gExport){
    
     /*hack to get the layout grid step*/
     var _setResponsiveGridInfos = function(){
-        var layoutStepTester = $("<div id='sizeTester' style='visibility:hidden' class='row'><div id='firstSpan' class='span1'></div><div id='secondSpan' class='span2'></div></div>");
-        $("body").append(layoutStepTester);
-        var resizeStep = $("#secondSpan").width() - $("#firstSpan").width();
-        $("#sizeTester").remove();
+        var layoutStepTester = bb.jquery("<div id='sizeTester' style='visibility:hidden' class='row'><div id='firstSpan' class='span1'></div><div id='secondSpan' class='span2'></div></div>");
+        bb.jquery("body").append(layoutStepTester);
+        var resizeStep = bb.jquery("#secondSpan").width() - bb.jquery("#firstSpan").width();
+        bb.jquery("#sizeTester").remove();
         return parseInt(resizeStep);
     }
     
@@ -287,25 +287,25 @@ bb.ContentManager =(function($,gExport){
         var action = (typeof action=="string") ? action : false;
         if(!action) throw "Action must be a string";
         if(action=="add"){
-            $(_settings.mainContensetContainerClass).css("paddingTop","50px"); 
+            bb.jquery(_settings.mainContensetContainerClass).css("paddingTop","50px"); 
         }
         if(action=="remove"){
-            $(_settings.mainContensetContainerClass).css("paddingTop",""); 
+            bb.jquery(_settings.mainContensetContainerClass).css("paddingTop",""); 
         }
         
     } 
     
     /*initSortable for content node*/
     var _initSortable = function(){
-        var droppables = $(_settings.layoutDroppabableClass).not(_settings.droppableRenderFlag);
+        var droppables = bb.jquery(_settings.layoutDroppabableClass).not(_settings.droppableRenderFlag);
         if(droppables.length==0) return false;
         droppables = droppables.filter(_filterAutoBlocks); //enlever les autoblocs
         var scripts = null;
         /*build sortable here*/        
-        $.each(droppables,function(id, droppable){
+        bb.jquery.each(droppables,function(id, droppable){
           
             try{
-                $(droppable).sortable({
+                bb.jquery(droppable).sortable({
                     connectWith :_settings.layoutDroppabableClass, //   connect to other sortable
                     placeholder : "bb5-droppable-place",
                     revert :0,
@@ -317,16 +317,16 @@ bb.ContentManager =(function($,gExport){
                     //handle: ".bb5-ui.bb5-content-actions",
                     helper : function(event,draggedContent){
                         var contentCls = _settings.contentClass.replace(".","");
-                        _draggedContent = ($(draggedContent).hasClass(contentCls)) ? draggedContent : $(draggedContent).parent(_settings.contentClass);
-                        var contentTypeParams = $(_draggedContent).data();
+                        _draggedContent = (bb.jquery(draggedContent).hasClass(contentCls)) ? draggedContent : bb.jquery(draggedContent).parent(_settings.contentClass);
+                        var contentTypeParams = bb.jquery(_draggedContent).data();
                         var pictoName = bb.baseurl+'ressources/img/contents/'+contentTypeParams.type.replace('\\', '/')+'.png';
-                        var contentHelper = $("<div></div>").clone(); 
-                        $(contentHelper).addClass("bb5-content-type-helper");
-                        $(contentHelper).css({
+                        var contentHelper = bb.jquery("<div></div>").clone(); 
+                        bb.jquery(contentHelper).addClass("bb5-content-type-helper");
+                        bb.jquery(contentHelper).css({
                             height:"50px",
                             width:"50px"                          
                         });
-                        $(contentHelper).css({
+                        bb.jquery(contentHelper).css({
                             backgroundImage:"url("+pictoName+")"
                         });
                         return contentHelper;
@@ -342,7 +342,7 @@ bb.ContentManager =(function($,gExport){
                     /*placeholder:{
                         element : function(currentItem){
                             console.log("iocic");
-                            return $("<li><em>test</em></li>")[0];
+                            return bb.jquery("<li><em>test</em></li>")[0];
                         },
                         update: function(container, p) {
                            container.refreshPositions();
@@ -350,14 +350,14 @@ bb.ContentManager =(function($,gExport){
                         }
                     },*/
                     itemdrop : function(e,ui){
-                        var prevPlaceHolder = $(ui.placeholder.prev());
+                        var prevPlaceHolder = bb.jquery(ui.placeholder.prev());
                         if(ui.item.get(0) == prevPlaceHolder.get(0)){
-                            $(".bb5-content-type-helper").hide();
+                            bb.jquery(".bb5-content-type-helper").hide();
                             _mustCancel = true;
                         }
                         if(!_inAllowedZone){ 
-                            $(ui.placeholder).hide();
-                            $(ui.helper).hide();
+                            bb.jquery(ui.placeholder).hide();
+                            bb.jquery(ui.helper).hide();
                             _mustCancel = true;
                         }
                         return true;
@@ -378,26 +378,26 @@ bb.ContentManager =(function($,gExport){
                         if(!_inAllowedZone){
                             hidePlaceHolder = true;  
                         }
-                        if(hidePlaceHolder) $(ui.placeholder).hide();
-                        if(!hidePlaceHolder) $(ui.placeholder).show();
+                        if(hidePlaceHolder) bb.jquery(ui.placeholder).hide();
+                        if(!hidePlaceHolder) bb.jquery(ui.placeholder).show();
                     },
                     
                     start : function(e,ui){
                         var contentCls = _settings.contentClass.replace(".","");
-                        ui.item = ($(ui.item).hasClass(contentCls) || $(ui.item).hasClass())? ui.item : $(ui.item).parent(_settings.contentClass);
-                        var scriptsCopy = $(ui.item).find("script").clone();
+                        ui.item = (bb.jquery(ui.item).hasClass(contentCls) || bb.jquery(ui.item).hasClass())? ui.item : bb.jquery(ui.item).parent(_settings.contentClass);
+                        var scriptsCopy = bb.jquery(ui.item).find("script").clone();
                         if(scriptsCopy.length){
                             scriptsCopy = scriptsCopy;
-                            $(ui.item).find("script").remove();
+                            bb.jquery(ui.item).find("script").remove();
                         }
                         _enableContentSelection = false; 
                         
                         /*create new bbContent*/
                         var newContent = $bb(ui.item);
                         var currentItemClone = ui.item;
-                        $(ui.item).addClass(_settings.draggedContentCls).show();
-                        _currentSortable = $(this).data("sortable");
-                        $(document).trigger("content:startDrag");
+                        bb.jquery(ui.item).addClass(_settings.draggedContentCls).show();
+                        _currentSortable = bb.jquery(this).data("sortable");
+                        bb.jquery(document).trigger("content:startDrag");
                     },
                     
                     stop : function(e,ui){
@@ -406,40 +406,40 @@ bb.ContentManager =(function($,gExport){
                             _cleanSortableClonedItem(); 
                             _mustCancel = false;
                         }else{
-                            $(ui.placeholder).hide();
+                            bb.jquery(ui.placeholder).hide();
                             var sender = this;                       
                             _currentSortable = false;
                             $bb(sender).updateData();
                            
                         }
-                        $(document).trigger("content:stopDrag");
+                        bb.jquery(document).trigger("content:stopDrag");
                         _enableContentSelection = true;
-                        $(this).find(_settings.draggedContentCls).removeClass(_settings.draggedContentCls); 
+                        bb.jquery(this).find(_settings.draggedContentCls).removeClass(_settings.draggedContentCls); 
                     },
                     
                     over : function(event,ui){
                         _outOfDroppableZone = false;
-                        $(ui.placeholder).show();
+                        bb.jquery(ui.placeholder).show();
                         var receiver = $bb(this); 
-                        var itemDatas = $(ui.item).data();
+                        var itemDatas = bb.jquery(ui.item).data();
                         var itemType = ("contentTypeInfos" in itemDatas) ? itemDatas.contentTypeInfos.name : itemDatas.type;
                         //console.log("itemType",itemType);
                         var canAccept = receiver.checkAcceptMaxEntry(itemType);
-                        if(!canAccept) $(ui.placeholder).addClass(_settings.invalidPlaceHolderCls);
-                        if(canAccept) $(ui.placeholder).removeClass(_settings.invalidPlaceHolderCls); 
-                        $(document).trigger("content:overItem");
-                        if (false == _paddingTopSaved) _paddingTopSaved = $(this).css('padding-top');
-                        if (false == _paddingBottomSaved) _paddingBottomSaved = $(this).css('padding-bottom');
-                        $(this).css('padding-top', '50px');
-                        $(this).css('padding-bottom', '50px');
+                        if(!canAccept) bb.jquery(ui.placeholder).addClass(_settings.invalidPlaceHolderCls);
+                        if(canAccept) bb.jquery(ui.placeholder).removeClass(_settings.invalidPlaceHolderCls); 
+                        bb.jquery(document).trigger("content:overItem");
+                        if (false == _paddingTopSaved) _paddingTopSaved = bb.jquery(this).css('padding-top');
+                        if (false == _paddingBottomSaved) _paddingBottomSaved = bb.jquery(this).css('padding-bottom');
+                        bb.jquery(this).css('padding-top', '50px');
+                        bb.jquery(this).css('padding-bottom', '50px');
                         return true;
                     },
                     
                     out: function(event,ui){
                         _outOfDroppableZone = true;
-                        $(ui.placeholder).hide();
-                        $(this).css('padding-top', _paddingTopSaved);
-                        $(this).css('padding-bottom', _paddingBottomSaved);
+                        bb.jquery(ui.placeholder).hide();
+                        bb.jquery(this).css('padding-top', _paddingTopSaved);
+                        bb.jquery(this).css('padding-bottom', _paddingBottomSaved);
                         _paddingTopSaved = false;
                         _paddingBottomSaved = false;
                     },
@@ -451,37 +451,36 @@ bb.ContentManager =(function($,gExport){
                         try{
                             var contentCls = _settings.contentClass.replace(".","");
                             var acceptCls = _settings.acceptClass.replace(".","");
-                            var draggedItem = ($(ui.item).hasClass(contentCls))? ui.item : $(ui.item).parent(_settings.contentClass);
+                            var draggedItem = (bb.jquery(ui.item).hasClass(contentCls))? ui.item : bb.jquery(ui.item).parent(_settings.contentClass);
                             
                             /*fix strange bug*/
-                            if($(_draggedContent).get(0) != $(draggedItem).get(0)){
+                            if(bb.jquery(_draggedContent).get(0) != bb.jquery(draggedItem).get(0)){
                                 draggedItem = _draggedContent;
                                 fixContent = true;
-                                $(oldContent).hide();
+                                bb.jquery(oldContent).hide();
                             }
                             /*new Content has contentBlock Class so we must switch draggedItem to oldContent*/
-                            draggedItem = ((!draggedItem || !draggedItem.length) || $(draggedItem).hasClass(acceptCls))? oldContent : draggedItem;
+                            draggedItem = ((!draggedItem || !draggedItem.length) || bb.jquery(draggedItem).hasClass(acceptCls))? oldContent : draggedItem;
                             
                             /*if a new content is dropped ouside of a droppable zone*/
-                            if($(draggedItem).hasClass(acceptCls) && (_outOfDroppableZone || !_inAllowedZone)){
-                                $(draggedItem).show();
+                            if(bb.jquery(draggedItem).hasClass(acceptCls) && (_outOfDroppableZone || !_inAllowedZone)){
+                                bb.jquery(draggedItem).show();
                                 if(ui.sender){
-                                    $(ui.sender).sortable("cancel");
+                                    bb.jquery(ui.sender).sortable("cancel");
                                 }
                                 return false;
                             }
                             
-                            if(draggedItem.parent()[0]==$(this)[0] || fixContent){
+                            if(draggedItem.parent()[0]==bb.jquery(this)[0] || fixContent){
                                 if( _mustCancel ) return true;
-                                var nodeInfos = $(draggedItem).data();
+                                var nodeInfos = bb.jquery(draggedItem).data();
                                 var contentTypeInfos = (nodeInfos.contentTypeInfos) ? nodeInfos.contentTypeInfos : {}; 
                                 var dropType = ("contentTypeInfos" in nodeInfos) ? "newContent" : "moveContent";
                                 var newContentType = ""; 
-                                var beforeRequest = $.noop;
-                                var afterAppend = $.noop;
+                                var beforeRequest = bb.jquery.noop;
+                                var afterAppend = bb.jquery.noop;
                                 var placeHolder = null;
                                 
-                              
                                 /*New content*/
                                 if(dropType=="newContent"){
                                     var content = [{
@@ -491,29 +490,28 @@ bb.ContentManager =(function($,gExport){
                                     placeHolder = ui.placeholder;
                                     newContentType = nodeInfos.contentTypeInfos.name;
                                     beforeRequest = function(){
-                                        $(draggedItem).hide();
-                                        $(draggedItem).before(ui.placeholder);
+                                        bb.jquery(draggedItem).hide();
+                                        bb.jquery(draggedItem).before(ui.placeholder);
                                     }
                                     afterAppend = function(){
                                         ui.sender.find('.prevContent').remove();
-                                        $(draggedItem).data("contentTypeInfos",contentTypeInfos); 
-                                        $(draggedItem).show();
-                                        $(ui.sender).sortable("cancel");
+                                        bb.jquery(draggedItem).data("contentTypeInfos",contentTypeInfos); 
+                                        bb.jquery(draggedItem).show();
+                                        bb.jquery(ui.sender).sortable("cancel");
                                     }
-                                    
                                 }else{
                                     /*Moved Content*/
                                     var content = $bb(draggedItem);
                                     newContentType = content.getType();
                                     var beforeRequest = function(){
                                         if(fixContent){
-                                            $(draggedItem).remove();  
+                                            bb.jquery(draggedItem).remove();  
                                         }else{
-                                            $(draggedItem).hide();  
+                                            bb.jquery(draggedItem).hide();  
                                         } 
                                     }
                                     var afterAppend = function(){
-                                        if($(draggedItem).length) $(draggedItem).show();
+                                        if(bb.jquery(draggedItem).length) bb.jquery(draggedItem).show();
                                     }
                                     placeHolder = (!fixContent) ? draggedItem : oldContent; //replace content
                                 }
@@ -523,11 +521,11 @@ bb.ContentManager =(function($,gExport){
                                 /*Si drop invalid*/
                                 if(!canAccept && dropType=="newContent"){
                                     ui.sender.find('.prevContent').remove();
-                                    $(ui.sender).sortable("cancel");
+                                    bb.jquery(ui.sender).sortable("cancel");
                                     return false;
                                 }
                                 if(!canAccept && dropType=="moveContent"){
-                                    $(ui.sender).sortable("cancel");
+                                    bb.jquery(ui.sender).sortable("cancel");
                                     return false; 
                                 }
                                 var params = {
@@ -554,10 +552,10 @@ bb.ContentManager =(function($,gExport){
                 
                 /**/
                 if(_enableContentSelection){
-                    $(droppable).disableSelection();
+                    bb.jquery(droppable).disableSelection();
                 }
                 /*ignore:enable Once*/
-                $(droppable).addClass(_settings.droppableRenderFlag);
+                bb.jquery(droppable).addClass(_settings.droppableRenderFlag);
             }catch(err){}
             
            
@@ -570,19 +568,19 @@ bb.ContentManager =(function($,gExport){
         
     }
     var _isNewContentValid = function(event,ui){
-        return !$(ui.placeholder).hasClass("invalid");
+        return !bb.jquery(ui.placeholder).hasClass("invalid");
     }
   
     
     var _initResizable = function(){
-        var resizableItems = $(_settings.resizableContentClass).not(_settings.resizableRenderFlag);
+        var resizableItems = bb.jquery(_settings.resizableContentClass).not(_settings.resizableRenderFlag);
         if(resizableItems.length==0) return false;
-        $.each(resizableItems,function(id,resizableItem){
+        bb.jquery.each(resizableItems,function(id,resizableItem){
             var resizableItem = new bb.ResizableItem({
                 el:resizableItem,
                 gridStep : _settings.gridStep
             });
-            $(resizableItem.getElement()).addClass(_settings.resizableRenderFlag);
+            bb.jquery(resizableItem.getElement()).addClass(_settings.resizableRenderFlag);
             var resizableId = resizableItem.getId();
             _resizableItems[resizableId] = resizableItem;
         });
@@ -597,8 +595,8 @@ bb.ContentManager =(function($,gExport){
  *
  **/
     var _checkReceiverMaxEntry = function(reciever,newItem){
-        var nbContent = $(reciever).find(_settings.contentClass).length;
-        var receiverMaxEntry  = ($(reciever).attr(_settings.CONTENT_MAXENTRY_KEY)=="") ? 999 : $(reciever).attr(_settings.CONTENT_MAXENTRY_KEY);
+        var nbContent = bb.jquery(reciever).find(_settings.contentClass).length;
+        var receiverMaxEntry  = (bb.jquery(reciever).attr(_settings.CONTENT_MAXENTRY_KEY)=="") ? 999 : bb.jquery(reciever).attr(_settings.CONTENT_MAXENTRY_KEY);
         return nbContent < receiverMaxEntry; 
     }
     
@@ -608,16 +606,16 @@ bb.ContentManager =(function($,gExport){
         onReceive : function(event,ui){
             /*this==reciever*/
             _enableContentSelection = true;
-            var acceptedContentType = $(this).attr(_settings.ACCEPTED_ITEM_KEY);
-            var containerRenderType = $(this).attr(_settings.CONTENT_RENDER_TYPE)||null;
-            var selectedItemRenderType = $(ui.item).attr(_settings.CONTENT_RENDER_TYPE)||"";
-            var selectedItemType = $(ui.item).attr(_settings.CONTENT_TYPE_ITEM_KEY)||"";
+            var acceptedContentType = bb.jquery(this).attr(_settings.ACCEPTED_ITEM_KEY);
+            var containerRenderType = bb.jquery(this).attr(_settings.CONTENT_RENDER_TYPE)||null;
+            var selectedItemRenderType = bb.jquery(ui.item).attr(_settings.CONTENT_RENDER_TYPE)||"";
+            var selectedItemType = bb.jquery(ui.item).attr(_settings.CONTENT_TYPE_ITEM_KEY)||"";
             var maxAccept = _checkReceiverMaxEntry(this,ui.item);
-            var itemUid = $(ui.item).attr(_settings.ITEM_UID_KEY)||null;
+            var itemUid = bb.jquery(ui.item).attr(_settings.ITEM_UID_KEY)||null;
             
             /*mainContentTypeBlock*/
             if(ui.item.hasClass(_settings.acceptClass.replace(".",""))){
-                var selectedContentBlockInfos = $(ui.item).data("contentTypeInfos");               
+                var selectedContentBlockInfos = bb.jquery(ui.item).data("contentTypeInfos");               
                 itemUid = selectedContentBlockInfos.uid;
                 selectedItemType = selectedContentBlockInfos.name;
                 var accept =_isNewContentValid(event,ui);
@@ -626,15 +624,15 @@ bb.ContentManager =(function($,gExport){
                 if(accept && maxAccept){
                     ui.item.hide();
                     ui.item.before(ui.placeholder);
-                    //$(ui.placeholder).css("border","2px solid blue");
+                    //bb.jquery(ui.placeholder).css("border","2px solid blue");
                     _loadContent.call(this,selectedContentBlockInfos,containerRenderType,event.target,ui.placeholder,function(){
                         ui.sender.find('.prevContent').remove();
                         ui.item.show();
-                        $(ui.sender).sortable("cancel");
+                        bb.jquery(ui.sender).sortable("cancel");
                     }); 
                 }else{
                     ui.sender.find('.prevContent').remove();
-                    $(ui.sender).sortable("cancel");
+                    bb.jquery(ui.sender).sortable("cancel");
                 }
                 
                 return;  
@@ -650,25 +648,25 @@ bb.ContentManager =(function($,gExport){
             } */
             
             var acceptedContainer = acceptedContentType.split(",");
-            $.each(acceptedContainer,function(key,item){
-                acceptedContainer[key] = $.trim(item);
+            bb.jquery.each(acceptedContainer,function(key,item){
+                acceptedContainer[key] = bb.jquery.trim(item);
             });
             
-            if(($.inArray(selectedItemType,acceptedContainer)!=-1) || (maxAccept==true)){
+            if((bb.jquery.inArray(selectedItemType,acceptedContainer)!=-1) || (maxAccept==true)){
                 
                 /*when we have a match
              *Reload the content according to the render type if necessary
              **/
                 if(containerRenderType !=selectedItemRenderType){
-                    $(ui.item).hide();
+                    bb.jquery(ui.item).hide();
                     _loadContent.call(this,currentItemConf,containerRenderType,event.target,ui.item,null,ui.sender);
                     return false;
                 }else{
-                    $(document).trigger("content:newContentAdded",[event.target,ui.item,ui.sender]);
+                    bb.jquery(document).trigger("content:newContentAdded",[event.target,ui.item,ui.sender]);
                 }
                 return true;
             }else{  
-                $(ui.sender).sortable("cancel");
+                bb.jquery(ui.sender).sortable("cancel");
                 return false;
             }
         },
@@ -680,17 +678,17 @@ bb.ContentManager =(function($,gExport){
     
     /*use for contentType*/
     var _initDroppable = function(){
-        $(_settings.layoutDroppabableClass).droppable({
+        bb.jquery(_settings.layoutDroppabableClass).droppable({
             accept : _checkContentType,
             greedy : true,
             hoverClass : "contentBlock-drophover",
             over: function(event,ui){
-                $(_settings.contentTypeHelperClass).css("outline","");
+                bb.jquery(_settings.contentTypeHelperClass).css("outline","");
             },
             drop : function(event,ui){
                 /*check target contentType*/
-                var contentTypeParams = $(ui.helper).data("contentTypeInfos");
-                var renderType = $(this).attr(_settings.CONTENT_RENDER_TYPE)||null;
+                var contentTypeParams = bb.jquery(ui.helper).data("contentTypeInfos");
+                var renderType = bb.jquery(this).attr(_settings.CONTENT_RENDER_TYPE)||null;
                 _loadContent.call(this,contentTypeParams,renderType,event.target);
             } 
         });
@@ -698,23 +696,23 @@ bb.ContentManager =(function($,gExport){
     
     var _checkContentType = function(draggedContent){
         var isValid = false;
-        var isAcceptable = $(draggedContent).hasClass(_settings.acceptClass.replace(".",""));
-        $(_settings.contentTypeHelperClass).css("outline","2px solid red");
+        var isAcceptable = bb.jquery(draggedContent).hasClass(_settings.acceptClass.replace(".",""));
+        bb.jquery(_settings.contentTypeHelperClass).css("outline","2px solid red");
         
         if(isAcceptable){
             isValid = true;
             /*match accepted*/
-            var contentTypeParams = $(draggedContent).data("contentTypeInfos");
-            var acceptedContentType = $(this).attr(_settings.ACCEPTED_ITEM_KEY)||"";
+            var contentTypeParams = bb.jquery(draggedContent).data("contentTypeInfos");
+            var acceptedContentType = bb.jquery(this).attr(_settings.ACCEPTED_ITEM_KEY)||"";
             var acceptedContainer = acceptedContentType.split(","); 
             
             /*clean type*/
-            $.each(acceptedContainer,function(key,item){
-                acceptedContainer[key] = $.trim(item);
+            bb.jquery.each(acceptedContainer,function(key,item){
+                acceptedContainer[key] = bb.jquery.trim(item);
             });
             
             /*check match*/
-            if($.inArray($.trim(contentTypeParams.name),acceptedContainer) == -1){
+            if(bb.jquery.inArray(bb.jquery.trim(contentTypeParams.name),acceptedContainer) == -1){
                 isValid = false;
             }
             if(acceptedContentType.length==0){
@@ -731,9 +729,9 @@ bb.ContentManager =(function($,gExport){
         _initSortable();
         _initResizable(); //only for resizable item
         _initDroppableImage(content);
-        $(content).css({
+       /* bb.jquery(content).css({
             cursor:"move"
-        });
+        });*/
     }
    
     var _readSizeFromClasses = function(classes){
@@ -746,8 +744,8 @@ bb.ContentManager =(function($,gExport){
     };
     
     var _findMainRowSize = function(item){
-        var mainParent = $(item).parents('div[class *="span"]').get(0);
-        var containerSize = _readSizeFromClasses($(mainParent).attr("class"));
+        var mainParent = bb.jquery(item).parents('div[class *="span"]').get(0);
+        var containerSize = _readSizeFromClasses(bb.jquery(mainParent).attr("class"));
         return containerSize;
     };
     
@@ -759,35 +757,35 @@ bb.ContentManager =(function($,gExport){
                 name:contentTypeParams.name,
                 mode:renderType,
                 uid:contentTypeParams.uid,
-                receiverclass: $(receiver).attr('data-type'),
-                receiveruid: $(receiver).attr('data-uid')
+                receiverclass: bb.jquery(receiver).attr('data-type'),
+                receiveruid: bb.jquery(receiver).attr('data-uid')
             },
             success:function(response){
                 var content = _renderNodeContentTypeNode(contentTypeParams,response.result.render);
-                //   $(content).css("");
-                $(content).addClass(_settings.draggableContentClass.replace("."," "));
+                //   bb.jquery(content).css("");
+                bb.jquery(content).addClass(_settings.draggableContentClass.replace("."," "));
                 if(placeHolder){
-                    $(placeHolder).replaceWith(content);
+                    bb.jquery(placeHolder).replaceWith(content);
                 }else{
-                    $(receiver).append(content);
-                    $(receiver).attr('data-draftuid', response.result.draftuid);
+                    bb.jquery(receiver).append(content);
+                    bb.jquery(receiver).attr('data-draftuid', response.result.draftuid);
                 }
                 if(typeof callback=="function"){
                     callback();
                 }
                 /*si c'est un container*/
-                if($(receiver).hasClass("row")){
+                if(bb.jquery(receiver).hasClass("row")){
                     var itemSize = _findMainRowSize(receiver); 
-                    $(content).addClass("span"+itemSize);
-                    $(content).addClass(_settings.resizableContentClass.replace(".",""));
+                    bb.jquery(content).addClass("span"+itemSize);
+                    bb.jquery(content).addClass(_settings.resizableContentClass.replace(".",""));
                 }
                
-                bb.Utils.scrollToContent($(content));
+                bb.Utils.scrollToContent(bb.jquery(content));
                 
                 /*sortable - resizable for the new content*/
                 _handleNewContent(content); 
                 /*remove emptyCls*/
-                $(document).trigger("content:newContentAdded",[receiver,$(content),sender]);
+                bb.jquery(document).trigger("content:newContentAdded",[receiver,bb.jquery(content),sender]);
             },
             error:function(response){
                 throw response.error;
@@ -806,26 +804,26 @@ bb.ContentManager =(function($,gExport){
             params : {
                 renderMode : receiverInfos.rendermode, 
                 contents : contents,
-                receiverclass: $(receiver).attr('data-type'),
-                receiveruid: $(receiver).attr('data-uid'),
+                receiverclass: bb.jquery(receiver).attr('data-type'),
+                receiveruid: bb.jquery(receiver).attr('data-uid'),
                 page_uid : bb.frontApplication.getPageId()
             },
             success : function(response){
                 var result = response.result;
                 var nbItem = result.length;
-                $.each(result,function(i,item){
+                bb.jquery.each(result,function(i,item){
                     var cp = i+1;
                     var content = _renderNodeContentTypeNode(item,item.render); //strange to remove
-                    $(content).addClass(_settings.draggableContentClass.replace("."," "));
-                    $(receiver).append(content);
-                    if($(receiver).hasClass("row")){
+                    bb.jquery(content).addClass(_settings.draggableContentClass.replace("."," "));
+                    bb.jquery(receiver).append(content);
+                    if(bb.jquery(receiver).hasClass("row")){
                         var itemSize = _findMainRowSize(receiver); 
-                        $(content).addClass("span"+itemSize);
-                        $(content).addClass(_settings.resizableContentClass.replace(".",""));
+                        bb.jquery(content).addClass("span"+itemSize);
+                        bb.jquery(content).addClass(_settings.resizableContentClass.replace(".",""));
                         _handleNewContent(content);
                     }
-                    $(document).trigger("content:newContentAdded",[receiver,$(content),null]);
-                    if(cp == nbItem) bb.Utils.scrollToContent($(content));     
+                    bb.jquery(document).trigger("content:newContentAdded",[receiver,bb.jquery(content),null]);
+                    if(cp == nbItem) bb.Utils.scrollToContent(bb.jquery(content));     
                 });
             },
             
@@ -841,17 +839,17 @@ bb.ContentManager =(function($,gExport){
     var _renderNodeContentTypeNode = function(contentTypeParams,nodeHtml){
         /*build params*/
         //var availableParams = ["item_type","accepted_items","isDroppable","isDraggable","isResizable","disable"];
-        //var nodeHtml = $(nodeHtml);
+        //var nodeHtml = bb.jquery(nodeHtml);
         
-        //       if($(nodeHtml).hasClass("draggable_item")){
-        //$(nodeHtml).addClass(_settings.resizableContentClass.replace(".",""));    
+        //       if(bb.jquery(nodeHtml).hasClass("draggable_item")){
+        //bb.jquery(nodeHtml).addClass(_settings.resizableContentClass.replace(".",""));    
         //     }
-        //   var itemClasses = $(nodeHtml).attr("class");
+        //   var itemClasses = bb.jquery(nodeHtml).attr("class");
         // var sizePattern = /span\d/gi;
         //var isResizable = sizePattern.test(itemClasses); 
         
-        $(nodeHtml).data("contentParams",contentTypeParams);
-        return $(nodeHtml);
+        bb.jquery(nodeHtml).data("contentParams",contentTypeParams);
+        return bb.jquery(nodeHtml);
     }
     
     /*Public*/
@@ -868,13 +866,14 @@ bb.ContentManager =(function($,gExport){
         init : _init
     };      
         
-})(jQuery,window);
+})(bb.jquery,window);
 
 
 
 /*bb.DrabableItem*/
 /*bb.droppableItem*/
 
+(function($) {
 
 /*resizableItem --> resizable zone*/
 var ResizableItem = function(userSettings){
@@ -907,9 +906,9 @@ var ResizableItem = function(userSettings){
             this._parentSize = 0;
             this._maxContainerSize = 0;
             
-            $.extend(true,this._settings,userSettings); 
+            bb.jquery.extend(true,this._settings,userSettings); 
             var settings = this._settings;
-            this._element = $(this._settings.el);
+            this._element = bb.jquery(this._settings.el);
             /*this.bbContent = $bb(this._element);
             console.log(this.bbContent);*/
             
@@ -922,13 +921,13 @@ var ResizableItem = function(userSettings){
             resizableconfig.handles = settings.handles;
             resizableconfig.helper = settings.helper;
             resizableconfig.grid = settings.gridStep;
-            resizableconfig.maxWidth = $(this._element).parent().width();
-            $(this._element).resizable(resizableconfig);
+            resizableconfig.maxWidth = bb.jquery(this._element).parent().width();
+            bb.jquery(this._element).resizable(resizableconfig);
             this.resizableId = bb.Utils.generateId("resizableContent");
-            $(this._element).attr("resizableId",this.resizableId);
+            bb.jquery(this._element).attr("resizableId",this.resizableId);
             this._itemSize = this._readSize(this._element);
             if(!this._itemSize){
-                this._itemSize = $(this._element).outerWidth(true)/settings.gridStep;
+                this._itemSize = bb.jquery(this._element).outerWidth(true)/settings.gridStep;
             }
             
             this._bindResizableEvent(); 
@@ -937,7 +936,7 @@ var ResizableItem = function(userSettings){
     ResizableItem.prototype._readSize = function(el){
         var currentSize = null
         var sizePattern = /span\d+/gi;
-        var classes = $(el).attr("class");
+        var classes = bb.jquery(el).attr("class");
         var result = sizePattern.exec(classes);
         if(result && result.length){
             currentSize = parseInt(result[0].replace("span",""));  
@@ -945,15 +944,15 @@ var ResizableItem = function(userSettings){
         return currentSize;
     } 
     ResizableItem.prototype.getElement = function(){
-        return $(this._element);
+        return bb.jquery(this._element);
     }
    
    
     ResizableItem.prototype._bindResizableEvent = function(){
-        $(this._element).bind("resizecreate",$.proxy(this._onCreate,this));
-        $(this._element).bind("resize",$.proxy(this._onResize,this));  
-        $(this._element).bind("resizestop",$.proxy(this._onResizeStop,this));  
-        $(this._element).bind("resizestart",$.proxy(this._onResizeStart,this));  
+        bb.jquery(this._element).bind("resizecreate",bb.jquery.proxy(this._onCreate,this));
+        bb.jquery(this._element).bind("resize",bb.jquery.proxy(this._onResize,this));  
+        bb.jquery(this._element).bind("resizestop",bb.jquery.proxy(this._onResizeStop,this));  
+        bb.jquery(this._element).bind("resizestart",bb.jquery.proxy(this._onResizeStart,this));  
     }
    
     ResizableItem.prototype._onCreate = function(){}       
@@ -975,14 +974,14 @@ var ResizableItem = function(userSettings){
     
     ResizableItem.prototype.setGridStep = function(gridStep){
         this._settings.gridStep = gridStep;
-        $(this._element).resizable("option","grid",this._settings.gridStep);
-        var maxWidth = $(this._element).parent().width();
-        $(this._element).resizable("option","maxWidth",maxWidth);
+        bb.jquery(this._element).resizable("option","grid",this._settings.gridStep);
+        var maxWidth = bb.jquery(this._element).parent().width();
+        bb.jquery(this._element).resizable("option","maxWidth",maxWidth);
     }
     
     ResizableItem.prototype._onResizeStop = function(event,ui){
         this._resizeDirection = (event.clientX < this._currentmousePosition ) ? "left" : "right";
-        var width = $(event.target).outerWidth(true);
+        var width = bb.jquery(event.target).outerWidth(true);
         var delta = ui.originalSize.width - width; //ne pas dépasser la taille d'une colonne
         
         var step = delta / this._settings.gridStep;
@@ -1018,7 +1017,7 @@ var ResizableItem = function(userSettings){
         /*reset*/
         this._resizeDirection = null;
         this._currentmousePosition = null;
-        $(ui.element).css({
+        bb.jquery(ui.element).css({
             width:"",
             left:"",
             height:"auto"
@@ -1055,11 +1054,11 @@ var ResizableItem = function(userSettings){
         if(itemSize){
             /*remove previous class*/
             if(this._itemSize){
-                $(this._element).removeClass(this._settings.sizePrefix+parseInt(this._itemSize));
+                bb.jquery(this._element).removeClass(this._settings.sizePrefix+parseInt(this._itemSize));
             }
             
             /*add new*/
-            $(this._element).addClass(this._settings.sizePrefix+Math.abs(parseInt(itemSize)));
+            bb.jquery(this._element).addClass(this._settings.sizePrefix+Math.abs(parseInt(itemSize)));
             this._itemSize = itemSize;  
             if (this._bbContent.parentNode){}   
         }  
@@ -1070,13 +1069,13 @@ var ResizableItem = function(userSettings){
     }
     
     ResizableItem.prototype.destroy = function(){
-        $(this._element).resizable("destroy");
-        $(this._element).removeClass(this._settings.resizableRenderFlag);
+        bb.jquery(this._element).resizable("destroy");
+        bb.jquery(this._element).removeClass(this._settings.resizableRenderFlag);
         /*clean events*/
-        $(this._element).unbind("resizecreate");
-        $(this._element).unbind("resize");
-        $(this._element).unbind("resizestop"); 
-        $(this._element).unbind("resizestart");
+        bb.jquery(this._element).unbind("resizecreate");
+        bb.jquery(this._element).unbind("resize");
+        bb.jquery(this._element).unbind("resizestop"); 
+        bb.jquery(this._element).unbind("resizestart");
         
     }
     
@@ -1089,7 +1088,7 @@ var ResizableItem = function(userSettings){
     ResizableItem.prototype.notify = function(eventName,data){
         var eventName = (typeof eventName =="string") ? eventName: "none";
         var data = data || null;
-        $(document).trigger("ContentResized:"+eventName,data);
+        bb.jquery(document).trigger("ContentResized:"+eventName,data);
     } 
 
     return this._init(userSettings);
@@ -1097,3 +1096,5 @@ var ResizableItem = function(userSettings){
 
 
 bb.ResizableItem = ResizableItem;
+
+}) (bb.jquery);

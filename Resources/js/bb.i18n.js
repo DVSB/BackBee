@@ -7,7 +7,7 @@ var bb = (bb) ? bb : {};
  * @author      c.rouillon
  */
 var bbTranslator = function(locale, options) {
-    var _options = $.extend(options || {}, {
+    var _options = bb.jquery.extend(options || {}, {
         strict: true,
         default_locale: 'en',
         path: bb.resourcesdir+'js/lang/',
@@ -28,10 +28,10 @@ var bbTranslator = function(locale, options) {
             _locale = navigator.language;
         }
 
-        $('#bb5-i18n-choice').empty();
-        $.each(_options.available_language, function(index, language) {
-            $('#bb5-i18n-choice').append('<a href="#'+language+'" onclick="return bb.i18n.setLocale(\''+language+'\');">'+language+'</a>');
-            if (index+1 < _options.available_language.length) $('#bb5-i18n-choice').append(' - ');
+        bb.jquery('#bb5-i18n-choice').empty();
+        bb.jquery.each(_options.available_language, function(index, language) {
+            bb.jquery('#bb5-i18n-choice').append('<a href="#'+language+'" onclick="return bb.i18n.setLocale(\''+language+'\');">'+language+'</a>');
+            if (index+1 < _options.available_language.length) bb.jquery('#bb5-i18n-choice').append(' - ');
         });
 
         _setLocale(_locale);
@@ -40,12 +40,12 @@ var bbTranslator = function(locale, options) {
     };
 
     _loadLangFile = function(locale) {
-        if (-1 < $.inArray(locale, _loaded_cache)) return;
+        if (-1 < bb.jquery.inArray(locale, _loaded_cache)) return;
 
         var url = _options.path+locale+'.js';
 
         _log("Loading translation file "+url);
-        jQuery.ajax({
+        bb.jquery.ajax({
             dataType: 'text',
             contentType: 'text/plaintext; charset=UTF-8',
             async: false,
@@ -65,11 +65,11 @@ var bbTranslator = function(locale, options) {
 
     _parseLangFile = function(responseText) {
         try {
-            $.globalEval('var translate = '+responseText);
+            bb.jquery.globalEval('var translate = '+responseText);
             if ('undefined' == typeof(_translate) || null == _translate) {
                 _translate = translate;
             } else {
-                $.each(translate, function(item, value) {
+                bb.jquery.each(translate, function(item, value) {
                     _translate = _addTraduction(_translate, item, value);
                 });
             }
@@ -82,7 +82,7 @@ var bbTranslator = function(locale, options) {
         if (_options.strict) {
             if (typeof(value) == typeof(translate[item])) {
                 if ('object' == typeof(value)) {
-                    $.each(value, function(i, v) {
+                    bb.jquery.each(value, function(i, v) {
                         translate[item] = _addTraduction(translate[item], i, v);
                     })
                 } else {
@@ -92,7 +92,7 @@ var bbTranslator = function(locale, options) {
         } else {
             switch (typeof(translate[item])) {
                 case 'object':
-                    translate[item] = $.extend({}, translate[item], value);
+                    translate[item] = bb.jquery.extend({}, translate[item], value);
                     break;
                 default:
                     translate[item] = value;
@@ -128,16 +128,16 @@ var bbTranslator = function(locale, options) {
 
         _i18nparse(document);
 
-        if ($.datepicker && _translate.datepicker) {
-            $.datepicker.regional[_locale] = _translate.datepicker;
-            $.datepicker.setDefaults($.datepicker.regional[_locale]);
+        if (bb.jquery.datepicker && _translate.datepicker) {
+            bb.jquery.datepicker.regional[_locale] = _translate.datepicker;
+            bb.jquery.datepicker.setDefaults(bb.jquery.datepicker.regional[_locale]);
         }
-        if ($.timepicker && _translate.timepicker) {
-            $.timepicker.regional[_locale] = _translate.timepicker;
-            $.timepicker.setDefaults($.timepicker.regional[_locale]);
+        if (bb.jquery.timepicker && _translate.timepicker) {
+            bb.jquery.timepicker.regional[_locale] = _translate.timepicker;
+            bb.jquery.timepicker.setDefaults(bb.jquery.timepicker.regional[_locale]);
         }
         
-        $(document).trigger('locale.change');
+        bb.jquery(document).trigger('locale.change');
         
         _log("Locale set to "+_locale);
 
@@ -165,13 +165,13 @@ var bbTranslator = function(locale, options) {
     };
 
     _i18nparse = function(node) {
-        $.each($(node).find('[data-i18n]'), function(index, element) {
-            var attr = $(element).attr('data-i18n');
+        bb.jquery.each(bb.jquery(node).find('[data-i18n]'), function(index, element) {
+            var attr = bb.jquery(element).attr('data-i18n');
             var comp = attr.split(':');
             if (1 == comp.length) {
-                $(element).empty().html(_getTranslation($(element).attr('data-i18n')));
+                bb.jquery(element).empty().html(_getTranslation(bb.jquery(element).attr('data-i18n')));
             } else if (2 == comp.length) {
-                $(element).attr(comp[0], _getTranslation(comp[1]));
+                bb.jquery(element).attr(comp[0], _getTranslation(comp[1]));
             }
         });
     };
@@ -203,6 +203,6 @@ var bbTranslator = function(locale, options) {
 
 bb.i18n = new bbTranslator();
 
-jQuery.fn.extend({
+bb.jquery.fn.extend({
     bb_i18nparse: bb.i18n.i18nparsef
 });

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -34,13 +34,21 @@ use BackBuilder\BBApplication;
  */
 class AbstractServiceLocal implements IServiceLocal
 {
-
+    /**
+     * Directory list
+     * @var \stdClass
+     */
+    protected $_dir;
+    /**
+     * Bundle name identifier
+     * @var string
+     */
+    protected $identifier;
     /**
      * Current BackBuilder application
      * @var \BackBuilder\BBApplication
      */
     private $_application;
-
     /**
      * Current EntityManager for the application
      * @var \Doctrine\ORM\EntityManager
@@ -53,7 +61,7 @@ class AbstractServiceLocal implements IServiceLocal
      */
     public function __construct()
     {
-        
+
     }
 
     /**
@@ -74,6 +82,11 @@ class AbstractServiceLocal implements IServiceLocal
     {
         $this->_application = $this->bbapp = $application;
         $this->_em = $application->getEntityManager();
+        $this->_dir = new \stdClass();
+        if (NULL !== $application && null !== $this->identifier) {
+            $this->_dir->bundle = implode(DIRECTORY_SEPARATOR, array($this->application->getBundle($this->identifier)->getResourcesDir(), 'Templates', 'scripts'));
+            $this->_dir->bundle .= DIRECTORY_SEPARATOR;
+        }
     }
 
     /**
@@ -126,13 +139,42 @@ class AbstractServiceLocal implements IServiceLocal
         return true;
     }
 
+    /**
+     * Render template
+     *
+     * @param string $template
+     * @param array $params
+     * @return string
+     */
+    public function render($template, $params = array())
+    {
+        $result = "";
+        if (isset($template) && is_string($template)) {
+            $this->_assignParams($params);
+            $result = $this->application->getRenderer()->partial($template);
+        }
+
+        return $result;
+    }
+
+    private function _assignParams($params)
+    {
+        if (is_array($params)) {
+            foreach ($params as $key => $param) {
+                $this->application->getRenderer()->assign($key, $param);
+            }
+        }
+        $this->application->getRenderer()->assign('dir', $this->_dir);
+    }
+
     public function __get($name)
     {
-        if ($name === 'bbapp')
+        if ($name === 'bbapp') {
             return $this->_application;
-
-        if ($name === 'application' || $name === 'em')
+        }
+        if ($name === 'application' || $name === 'em') {
             return $this->{'_' . $name};
+        }
     }
 
 }

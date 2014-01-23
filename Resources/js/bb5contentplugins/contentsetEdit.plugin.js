@@ -16,19 +16,19 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
     
     init: function(){
         this.optionDialog = null;
-        this.maxentryMsg = $("<p><strong>No more content can be added to this  container!</strong></p>");
-        this.formTemplate = $('<form class="row-fluid"><div class="span12">'
-            +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">Type de contenu <label></span><span class="span8"><select class="contentType" name="mode"></select></span></p>'
-            +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">Nombre d\'élements <label></span><span class="span8"><select class="maxentry" name="mode"></select></span></p>'
+        this.maxentryMsg = bb.jquery("<p><strong>No more content can be added to this container!</strong></p>");
+        this.formTemplate = bb.jquery('<form class="row-fluid"><div class="span12">'
+            +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">Content type <label></span><span class="span8"><select class="contentType" name="mode"></select></span></p>'
+            +'<p class="row-fluid"><span class="span4"><label class="fieldLabel">How many <label></span><span class="span8"><select class="maxentry" name="mode"></select></span></p>'
             +'</form>').clone();   
     /* disable maxentry on button */
     /* handle change on content too like change on content*/
     //this.bindEvents();
     },
-     /* SHOULD NOT be applied on root contentset */
-     canApplyOn: function(){
-       if(this.node.isARootContentSet) return false;
-       return true;
+    /* SHOULD NOT be applied on root contentset */
+    canApplyOn: function(){
+        if(this.node.isARootContentSet) return false;
+        return true;
     },
               
     onContentChanged : function(){
@@ -48,24 +48,24 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
         this.allowedMaxentry = (this._getAllowedNbItems() == 9999) ? 10 : this._getAllowedNbItems();
         var self = this;
         /* clean options */
-        $(this.formTemplate).find(".contentType").empty();
-        $(this.formTemplate).find(".maxentry").empty();
+        bb.jquery(this.formTemplate).find(".contentType").empty();
+        bb.jquery(this.formTemplate).find(".maxentry").empty();
         /* build */
         var options = document.createDocumentFragment();
-        $.each(acceptList,function(i,contentType){
-            var option = $("<option/>");
-            $(option).attr("value",contentType);
-            $(option).text(contentType);
-            options.appendChild($(option).get(0));
+        bb.jquery.each(acceptList,function(i,contentType){
+            var option = bb.jquery("<option/>");
+            bb.jquery(option).attr("value",contentType);
+            bb.jquery(option).text(contentType);
+            options.appendChild(bb.jquery(option).get(0));
         });
         
         var maxentryOptions = document.createDocumentFragment();
         
         for(var i=1; i <= this.allowedMaxentry; i++){
-            var option = $("<option/>");
-            $(option).attr("value",i);
-            $(option).text(i);
-            maxentryOptions.appendChild($(option).get(0));
+            var option = bb.jquery("<option/>");
+            bb.jquery(option).attr("value",i);
+            bb.jquery(option).text(i);
+            maxentryOptions.appendChild(bb.jquery(option).get(0));
         }
         
         /*add contenttype options*/
@@ -74,8 +74,8 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
         self.formTemplate.find(".maxentry").append(maxentryOptions);
         
         var popupMng = bb.PopupManager.init({});
-        var content = $("<div/>");
-        $(content).append(this.formTemplate);
+        var content = bb.jquery("<div/>");
+        bb.jquery(content).append(this.formTemplate);
         this.content = content; 
         /* create dialog up */
         if(!this.optionDialog){
@@ -87,7 +87,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
                 position: ["center","center"]
             //dialogEl: content
             }); 
-            this.optionDialog.on("open",$.proxy(this._showDialog,this));
+            this.optionDialog.on("open",bb.jquery.proxy(this._showDialog,this));
         }
         this.optionDialog.show();
     },
@@ -111,7 +111,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
         };
       
         var confirmButton = {
-            text: "Ajouter",
+            text: "Add",
             click: function(){
                 var selectedType = self.formTemplate.find(".contentType").eq(0).val();
                 var maxentry = self.formTemplate.find(".maxentry").eq(0).val();
@@ -141,6 +141,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
     },
     
     createContent: function(contentType,nb){
+        var self = this;
         if(!contentType) return false;
         var nb = nb || 1;
         var nb = ( parseInt(nb) !=0)? nb : 1;
@@ -148,18 +149,35 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
             content : []
         };
         for(var i=0; i < nb; i++){
-            var contentUid = $.md5(new Date().toString() + i);
+            var contentUid = bb.jquery.md5(new Date().toString() + i);
             var content = {
                 uid : contentUid, 
-                type:contentType,
-                rendermode: this.node.get("rendermode")
+                type:contentType
             };
             params.content.push(content);
-        }
-        
+            params.afterAppend = function(content){
+                self._warmAllSubcontents(content);
+            }
+        } 
         return params;
     },
     
+    /**
+     * when content is add we must notify them as new
+     */
+    _warmAllSubcontents : function(content){
+        var self = this;
+        var content = $bb(content);
+        if(!content.isAContentSet){
+            var children = content.getChildren();
+            if(bb.jquery.isArray(children)){
+                bb.jquery.each(children,function(i,child){
+                    self._warmAllSubcontents(child);
+                });
+            };
+        }
+        $bb(content).updateData(true);
+    },
     cmdAdd: function(){      
         var accept = this.node.getAccept();
         var allowedMaxEntry = this._getAllowedNbItems();
@@ -169,7 +187,7 @@ bb.contentPluginsManager.registerPlugins("contentsetEdit",{
             this.showPluginOptions(accept);
         }else{
             if(allowedMaxEntry){
-                var contentInfos = this.createContent($.trim(accept[0]));
+                var contentInfos = this.createContent(bb.jquery.trim(accept[0]));
                 this.node.append(contentInfos);
             }
             

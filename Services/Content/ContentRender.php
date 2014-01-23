@@ -128,7 +128,9 @@ class ContentRender
         $this->content = NULL;
 
         $this->initContentObject();
-        $this->initFields();
+        // Useless init cause it's already done by BackBuilder\Services\Local\ClassContent::getContentsRteParams(); and it used the wrong config.yml's section
+        // (alohapluginstable instead of rteconfig)
+        //$this->initFields();
     }
 
     /**

@@ -50,7 +50,7 @@ class KeyWord extends ANestedNode implements IRenderable
      * The root node, cannot be NULL.
      * @var \BackBuilder\NestedNode\KeyWord
      * @ManyToOne(targetEntity="BackBuilder\NestedNode\KeyWord", inversedBy="_descendants")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid")
+     * @JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
      */
     protected $_root;
 
