@@ -107,13 +107,14 @@ var ContentEditionManager = (function($){
     var _menuCallbacks = {
 
         /*Afficher l*/
-        showContentParams:function(bbContent){
+        showContentParams: function(bbContent){
             if('infos' in bbContent){
                 var bbContent = $bb(bbContent.infos.contentEl);
             }
             var contentParams = bbContent.getContentParams();
+            // content is updated when params are saved
             //async persist before params edition
-            bb.ContentWrapper.persist(false);
+            //bb.ContentWrapper.persist(false);
             _showCurrentContentparams(contentParams);
         },
 
@@ -289,9 +290,10 @@ var ContentEditionManager = (function($){
         bb.jquery.extend({},_settings,userConfig);
         var popupDialog = bb.PopupManager.init({});
         _paramsEditorPopup = popupDialog.create("contentParamsEditor",{
+            
             title: bb.i18n.__('contentmanager.parameters'),
             buttons : {
-                "Enregister" : {
+                "Save" : {
                     text: bb.i18n.__('popupmanager.button.save'),
                     click: function(){
                         /* add validation */
@@ -306,13 +308,15 @@ var ContentEditionManager = (function($){
                             bb.jquery.each(content.get("param"),function(key,item){
                                 result[key] = bb.jquery.extend(true,item,params[key]);
                             });
-                            content.updateContentRender();
+                            /*content.set("param","")*/
+                            bb.ContentWrapper.persist(false);//save first
+                            content.updateContentRender(); //then update
                         }
                         _paramsEditorPopup.close();
                         return;
                     }
                 },
-                "Annuler" :  {
+                "Cancel" :  {
                     text : bb.i18n.__('popupmanager.button.cancel'),
                     click: function(){
                         _paramsEditorPopup.close();

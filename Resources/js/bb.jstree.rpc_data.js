@@ -1,6 +1,6 @@
-(function ($) {
+(function($) {
     bb.jquery.jstree.plugin("rpc_data", {
-        __init : function() {
+        __init: function() {
             var s = this._get_settings().rpc_data;
             if (s.progressive_unload) {
                 this.get_container().bind("after_close.jstree", function(e, data) {
@@ -38,7 +38,7 @@
             refresh: function(obj) {
                 obj = this._get_node(obj);
                 var s = this._get_settings().rpc_data;
-                if(obj && obj !== -1 && s.progressive_unload && (bb.jquery.isFunction(s.data) || !!s.ajax)) {
+                if (obj && obj !== -1 && s.progressive_unload && (bb.jquery.isFunction(s.data) || !!s.ajax)) {
                     obj.removeData("jstree_children");
                 }
                 return this.__call_old();
@@ -85,9 +85,9 @@
                 switch (!0) {
                     case (!s.data && !s.ajax):
                         throw "Neither data nor ajax settings supplied.";
-                    // function option added here for easier model integration (also supporting async - see callback)
+                        // function option added here for easier model integration (also supporting async - see callback)
                     case (bb.jquery.isFunction(s.data)):
-                        s.data.call(this, obj, bb.jquery.proxy(function (d) {
+                        s.data.call(this, obj, bb.jquery.proxy(function(d) {
                             d = this._parse_json(d, obj);
                             if (!d) {
                                 if (obj === -1 || !obj) {
@@ -160,7 +160,7 @@
                             if (sf) {
                                 d = sf.call(myself, d, t, x) || d;
                             }
-                            if (d === "" || (d && d.toString && d.toString().replace(/^[\s\n]+$/,"") === "") || (!bb.jquery.isArray(d) && !bb.jquery.isPlainObject(d))) {
+                            if (d === "" || (d && d.toString && d.toString().replace(/^[\s\n]+$/, "") === "") || (!bb.jquery.isArray(d) && !bb.jquery.isPlainObject(d))) {
                                 return error_func.call(myself, x, t, "");
                             }
                             d = myself._parse_json(d.result, obj);
@@ -272,7 +272,7 @@
                         js.data = [];
                         js.data.push(tmp);
                     }
-                    bb.jquery.each(js.data, function (i, m) {
+                    bb.jquery.each(js.data, function(i, m) {
                         tmp = bb.jquery("<a />");
                         if (bb.jquery.isFunction(m)) {
                             m = m.call(this, js);
@@ -308,12 +308,18 @@
                     d.prepend("<ins class='jstree-icon'>&#160;</ins>");
                     if (js.children) {
                         if (s.progressive_render && js.state !== "open") {
+
                             d.addClass("jstree-closed").data("jstree_children", js.children);
+
                         }
                         else {
                             if (s.progressive_unload) {
                                 d.data("jstree_children", js.children);
                             }
+                            if (bb.jquery.isArray(js.children) == false) {
+                                d.addClass("jstree-open").data("jstree_children", js.children);
+                            }
+
                             if (bb.jquery.isArray(js.children) && js.children.length) {
                                 tmp = this._parse_json(js.children, obj, true);
                                 if (tmp.length) {
@@ -348,17 +354,19 @@
                 if (!obj || obj === -1) {
                     obj = this.get_container().find("> ul > li");
                 }
-                li_attr = bb.jquery.isArray(li_attr) ? li_attr : [ "id", "class" ];
+                li_attr = bb.jquery.isArray(li_attr) ? li_attr : ["id", "class"];
                 if (!is_callback && this.data.types) {
                     li_attr.push(s.types.type_attr);
                 }
-                a_attr = bb.jquery.isArray(a_attr) ? a_attr : [ ];
+                a_attr = bb.jquery.isArray(a_attr) ? a_attr : [];
 
-                obj.each(function () {
+                obj.each(function() {
                     li = bb.jquery(this);
-                    tmp1 = { data : [] };
-                    if (li_attr.length) { tmp1.attr = { }; }
-                    bb.jquery.each(li_attr, function (i, v) {
+                    tmp1 = {data: []};
+                    if (li_attr.length) {
+                        tmp1.attr = {};
+                    }
+                    bb.jquery.each(li_attr, function(i, v) {
                         tmp2 = li.attr(v);
                         if (tmp2 && tmp2.length && tmp2.replace(/jstree[^ ]*/ig, '').length) {
                             tmp1.attr[v] = (" " + tmp2).replace(/ jstree[^ ]*/ig, '').replace(/\s+$/ig, " ").replace(/^ /, "").replace(/ $/, "");
@@ -367,6 +375,7 @@
                     if (li.hasClass("jstree-open")) {
                         tmp1.state = "open";
                     }
+
                     if (li.hasClass("jstree-closed")) {
                         tmp1.state = "closed";
                     }
@@ -374,30 +383,33 @@
                         tmp1.metadata = li.data();
                     }
                     a = li.children("a");
-                    a.each(function () {
+                    a.each(function() {
                         t = bb.jquery(this);
                         if (
-                            a_attr.length ||
-                            bb.jquery.inArray("languages", s.plugins) !== -1 ||
-                            t.children("ins").get(0).style.backgroundImage.length ||
-                            (t.children("ins").get(0).className && t.children("ins").get(0).className.replace(/jstree[^ ]*|$/ig,'').length)
-                        ) {
+                                a_attr.length ||
+                                bb.jquery.inArray("languages", s.plugins) !== -1 ||
+                                t.children("ins").get(0).style.backgroundImage.length ||
+                                (t.children("ins").get(0).className && t.children("ins").get(0).className.replace(/jstree[^ ]*|$/ig, '').length)
+                                ) {
                             lang = false;
-                            if(bb.jquery.inArray("languages", s.plugins) !== -1 && bb.jquery.isArray(s.languages) && s.languages.length) {
-                                bb.jquery.each(s.languages, function (l, lv) {
-                                    if(t.hasClass(lv)) {
+                            if (bb.jquery.inArray("languages", s.plugins) !== -1 && bb.jquery.isArray(s.languages) && s.languages.length) {
+                                bb.jquery.each(s.languages, function(l, lv) {
+                                    if (t.hasClass(lv)) {
                                         lang = lv;
                                         return false;
                                     }
                                 });
                             }
-                            tmp2 = {attr: { }, title: _this.get_text(t, lang)};
-                            bb.jquery.each(a_attr, function (k, z) {
-                                tmp2.attr[z] = (" " + (t.attr(z) || "")).replace(/ jstree[^ ]*/ig,'').replace(/\s+$/ig," ").replace(/^ /,"").replace(/ $/,"");
+                            tmp2 = {attr: {}, title: _this.get_text(t, lang)};
+                            bb.jquery.each(a_attr, function(k, z) {
+                                tmp2.attr[z] = (" " + (t.attr(z) || "")).replace(/ jstree[^ ]*/ig, '').replace(/\s+$/ig, " ").replace(/^ /, "").replace(/ $/, "");
                             });
                             if (bb.jquery.inArray("languages", s.plugins) !== -1 && bb.jquery.isArray(s.languages) && s.languages.length) {
-                                bb.jquery.each(s.languages, function (k, z) {
-                                    if(t.hasClass(z)) { tmp2.language = z; return true; }
+                                bb.jquery.each(s.languages, function(k, z) {
+                                    if (t.hasClass(z)) {
+                                        tmp2.language = z;
+                                        return true;
+                                    }
                                 });
                             }
                             if (t.children("ins").get(0).className.replace(/jstree[^ ]*|$/ig, '').replace(/^\s+$/ig, "").length) {

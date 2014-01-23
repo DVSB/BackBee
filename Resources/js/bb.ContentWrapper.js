@@ -70,7 +70,7 @@ bb.ContentWrapper = (function($,global){
         return bb.Utils.readSizeFromClasses(bb.jquery(contentNode).attr("class"))||null; 
     }
     
-   /* var _handleIntemContainer = function(contentNode){
+    /* var _handleIntemContainer = function(contentNode){
         var contentUid = contentNode.attr("data-uid");
         if(typeof contentUid=="string"){
             var hasItemContainer = bb.jquery(contentNode).attr("data-itemcontainer") || false;
@@ -318,6 +318,11 @@ bb.ContentWrapper = (function($,global){
             }
         }
         
+        BbContentWrapper.prototype.updateContentRendermode = function(){
+            var currentRm = bb.jquery(this.contentEl).attr("data-rendermode") || false; 
+            this.set("rendermode",currentRm,true);
+        }
+        
         BbContentWrapper.prototype.updateParentNode = function(){
             var parentNode = (bb.jquery(this.contentEl).hasClass(_settings.rootContentSetCls)) ? null : bb.jquery(this.contentEl).parents(_settings.bbContentClass).eq(0);
             /*it MUST be a contentset*/
@@ -374,7 +379,7 @@ bb.ContentWrapper = (function($,global){
         BbContentWrapper.prototype.getContentParams = function(){
             var params = this.get("param") || false; 
             var self = this;
-            /*new content without params --> retrieve form serveur*/
+            /*new content without params --> retrieve form serveur*/ 
             if(params==-1){
                 wsManager = bb.webserviceManager.getInstance(_settings.classContentWebService);
                 wsManager.request("getContentParameters",{
@@ -383,7 +388,7 @@ bb.ContentWrapper = (function($,global){
                     },
                     async : false,
                     success : function(response){
-                        self.set("param",response.result);
+                        self.set("param", response.result);
                         params = response.result;
                     },
                     error: function(){
@@ -469,6 +474,7 @@ bb.ContentWrapper = (function($,global){
             if(!contentEl) throw "contentEl can't be null";
             this.contentEl = contentEl;
             bb.jquery(this.contentEl).attr("data-bbContentRef",this.id); //update properties from Dom? 
+            this.updateContentRendermode();
         }
         
         /*update*/
@@ -488,11 +494,14 @@ bb.ContentWrapper = (function($,global){
                         var result = response.result;
                         var render = bb.jquery(result.render).get(0).innerHTML;
                         if(!bb.jquery.trim(render).length){
-                             self.updateData();
-                             return;
-                        }//handle empty content
-                        self.contentEl.replaceWith(bb.jquery(result.render)); //bb.jquery(render)
-                        //old self.contentEl.html(//bb.jquery(render));
+                            self.updateData();
+                            return;
+                        }
+                        
+                        /*As we replace the main content we should update */
+                        var newContentRender = bb.jquery(result.render);
+                        self.contentEl.replaceWith(newContentRender);
+                        self.setContentEl(newContentRender);
                         self.updateData();
                         var contentManager = bb.ManagersContainer.getInstance().getManager("ContentManager"); 
                         contentManager.initDroppableImage(self.contentEl); 
@@ -594,7 +603,7 @@ bb.ContentWrapper = (function($,global){
             
             
             this.append = function(params){
-               var self = this;
+                var self = this;
                 /*  params {content:content,
                  *   placeHolder:null,
                  *   beforeAppend : func
@@ -614,9 +623,9 @@ bb.ContentWrapper = (function($,global){
                 /* Same container no Need to make request */
                 if(content instanceof BbContentWrapper){
                     var bbContent = content; 
-                    var recieverRenderMode = this.get("rendermode");
-                    var contentRenderMode = content.get("rendermode");
-                    var content = {};
+                    //var recieverRenderMode = this.get("rendermode");
+                    //var contentRenderMode = content.get("rendermode");
+                    content = {};
                     content.uid = bbContent.get("uid");
                     content.type = bbContent.get("type");
                     content.serializedContent = bbContent._contentProperties;
@@ -706,7 +715,7 @@ bb.ContentWrapper = (function($,global){
                             var contentManager = bb.ManagersContainer.getInstance().getManager("ContentManager"); //passer en after
                             contentManager.handleNewContent(itemRender);//show media path
                             bb.jquery(document).trigger("content:newContentAdded",[self,bb.jquery(itemRender),null]);
-                        //if(cp == nbItem) bb.Utils.scrollToContent(bb.jquery(itemRender)); //scroll to last
+                            //if(cp == nbItem) bb.Utils.scrollToContent(bb.jquery(itemRender)); //scroll to last
                         
                             var scripts = bb.jquery(item.render,"script").slice(1);
                             if (0 < bb.jquery(item.render,"script").slice(1).length) {
