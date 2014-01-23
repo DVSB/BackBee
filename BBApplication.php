@@ -499,9 +499,8 @@ class BBApplication
      */
     public function getBBUserToken()
     {
-        $token = null;
-
-        if ($this->getContainer()->has('bb_session')) {
+        $token = $this->getSecurityContext()->getToken();
+        if ((null === $token || !($token instanceof BackBuilder\Security\Token\BBUserToken)) && $this->getContainer()->has('bb_session')) {
             if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
                 $token = unserialize($token);
 
