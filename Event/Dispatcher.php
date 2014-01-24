@@ -110,12 +110,11 @@ class Dispatcher extends EventDispatcher
         }
 
         $this->dispatch($this->formatEventName($eventName, $entity), $event);
-        // $this->dispatch($this->getEventNamePrefix($entity).$eventName, new Event($entity, $eventArgs) );
     }
 
     private function formatEventName($eventName, $entity)
     {
-         if (is_object($entity)) {
+        if (is_object($entity)) {
             $eventName = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', get_class($entity)) . '.' . $eventName);
 
             if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
