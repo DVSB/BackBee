@@ -21,7 +21,8 @@
 
 namespace BackBuilder\Security\Token;
 
-use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
+use Symfony\Component\Security\Core\Authentication\Token\AbstractToken,
+    Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @category    BackBuilder
@@ -46,8 +47,17 @@ class UsernamePasswordToken extends AbstractToken
         $this->setUser($user);
         $this->_credentials = $credentials;
 //        $this->roles = $roles;
+//        parent::setAuthenticated(count($roles) > 0);
+    }
 
-        parent::setAuthenticated(count($roles) > 0);
+    /**
+     * @codeCoverageIgnore
+     * @return type
+     * todo Function added: problem with redirection - authentification lost.
+     */
+    public function isAuthenticated()
+    {
+        return ($this->getUser() instanceof UserInterface) ? (count($this->getUser()->getRoles()) > 0) : false;
     }
 
     /**
