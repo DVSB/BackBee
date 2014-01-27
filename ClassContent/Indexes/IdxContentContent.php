@@ -22,26 +22,29 @@
 namespace BackBuilder\ClassContent\Indexes;
 
 /**
- * Entity class for Site-Content join table
+ * Entity class for Content-Content join table
+ * 
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent
  * @subpackage  Indexes
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity
- * @Table(name="idx_site_content")
+ * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
+ * @Table(name="idx_content_content")
  */
-class IdxSiteContent
+class IdxContentContent
 {
-    /**
-     * @var string
-     * @Id @Column
-     */
-    private $site_uid;
-    
+
     /**
      * @var string
      * @Id @Column
      */
     private $content_uid;
+
+    /**
+     * @var string
+     * @Id @Column
+     */
+    private $subcontent_uid;
+
 }

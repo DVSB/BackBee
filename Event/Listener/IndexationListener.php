@@ -22,8 +22,11 @@
 namespace BackBuilder\Event\Listener;
 
 use BackBuilder\Event\Event,
+    BackBuilder\Site\Site,
     BackBuilder\ClassContent\Indexation,
-    BackBuilder\ClassContent\AClassContent;
+    BackBuilder\ClassContent\AClassContent,
+    BackBuilder\Util\Doctrine\ScheduledEntities;
+use Doctrine\ORM\EntityManager;
 
 /**
  * Listener to indexation events
@@ -37,16 +40,59 @@ use BackBuilder\Event\Event,
 class IndexationListener
 {
 
+    private static $_content_content_done = false;
+    private static $_site_content_done = false;
+
+    /**
+     * Replaces the site-content indexes for the scheduled AClassContent
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param \BackBuilder\Site\Site $site
+     */
+    private static function _updateIdxSiteContents(EntityManager $em, Site $site)
+    {
+        if (false === self::$_site_content_done) {
+            $em->getRepository('BackBuilder\ClassContent\Indexes\IdxSiteContent')
+                    ->replaceIdxSiteContents($site, ScheduledEntities::getScheduledAClassContentInsertions($em));
+
+            self::$_site_content_done = true;
+        }
+    }
+
+    /**
+     * Replaces the content-content indexes for the scheduled AClassContent
+     * @param \Doctrine\ORM\EntityManager $em
+     */
+    private static function _updateIdxContentContents(EntityManager $em)
+    {
+        if (false === self::$_content_content_done) {
+            $em->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
+                    ->replaceIdxContentContents(ScheduledEntities::getScheduledAClassContentNotForDeletions($em, true));
+
+            self::$_content_content_done = true;
+        }
+    }
+
     /**
      * Subscriber to nestednode.page.onflush event
      *     - Replace page-content and site-content indexes if 
      *       the Page target is inserted or updated
-     *     - Remove page-content ad site-content if the Page target is deleted
+     *     - Remove page-content and site-content if the Page target is deleted
      * @param \BackBuilder\Event\Event $event
      */
     public static function onFlushPage(Event $event)
     {
-        // @todo
+        $page = $event->getTarget();
+        $dispatcher = $event->getDispatcher();
+        $application = $dispatcher->getApplication();
+        $em = $application->getEntityManager();
+        $uow = $em->getUnitOfWork();
+
+        if ($uow->isScheduledForInsert($page)
+                || $uow->isScheduledForUpdate($page)) {
+            self::_updateIdxSiteContents($em, $page->getSite());
+        } elseif ($uow->isScheduledForDeletion($page)) {
+            // @todo
+        }
     }
 
     public static function onFlushContent(Event $event)
@@ -62,14 +108,14 @@ class IndexationListener
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
 
-        if ($uow->isScheduledForInsert($content) || $uow->isScheduledForUpdate($content)) {
-            if (null !== $site = $application->getSite()) {
- //               if (null !== $content->getMainNode()) {
-                    $em->getRepository('BackBuilder\ClassContent\Indexation')
-                            ->updateIdxSiteContent($site, $content);
- //               }
-            }
+        if ($uow->isScheduledForInsert($content)
+                && false === ScheduledEntities::hasScheduledPageNotForDeletions($em)
+                && null !== $application->getSite()) {
+            self::_updateIdxSiteContents($em, $application->getSite());
+        }
 
+        if ($uow->isScheduledForInsert($content) || $uow->isScheduledForUpdate($content)) {
+            self::_updateIdxContentContents($em);
 
             if (is_array($content->getProperty()) && array_key_exists('indexation', $content->getProperty())) {
                 foreach ($content->getProperty('indexation') as $indexedElement) {

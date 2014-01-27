@@ -23,8 +23,10 @@ namespace BackBuilder\ClassContent\Repository;
 
 use BackBuilder\Site\Site,
     BackBuilder\NestedNode\Page,
-    BackBuilder\ClassContent\AClassContent;
-use Doctrine\ORM\EntityRepository;
+    BackBuilder\ClassContent\AClassContent,
+    \BackBuilder\Util\Doctrine\DriverFeatures;
+use Doctrine\ORM\EntityRepository,
+    Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * The Indexation repository provides methods to update and access to the 
@@ -42,6 +44,176 @@ use Doctrine\ORM\EntityRepository;
  */
 class IndexationRepository extends EntityRepository
 {
+
+    /**
+     * Is REPLACE command is supported
+     * @var boolean 
+     */
+    private $_replace_supported;
+
+    /**
+     * Initializes a new EntityRepository
+     * @param \Doctrine\ORM\EntityManager $em The EntityManager to use.
+     * @param \Doctrine\ORM\Mapping\ClassMetadata $classMetadata The class descriptor.
+     */
+    public function __construct($em, ClassMetadata $class)
+    {
+        parent::__construct($em, $class);
+
+        $this->_replace_supported = DriverFeatures::replaceSupported($em->getConnection()->getDriver());
+    }
+
+    /**
+     * Replaces site-content indexes for an array of contents in a site
+     * @param \BackBuilder\Site\Site $site
+     * @param array $contents An array of AClassContent
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    public function replaceIdxSiteContents(Site $site, array $contents)
+    {
+        $content_uids = $this->_getAClassContentUids($contents);
+
+        return $this->_replaceIdxSiteContents($site->getUid(), $content_uids);
+    }
+
+    /**
+     * Removes site-content indexes for an array of contents in a site
+     * @param \BackBuilder\Site\Site $site
+     * @param array $contents An array of AClassContent
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    public function removeIdxSiteContents(Site $site, array $contents)
+    {
+        return $this->_removeIdxSiteContents($site->getUid(), $this->_getAClassContentUids($contents));
+    }
+
+    /**
+     * Replaces content-content indexes for an array of contents
+     * @param array $contents An array of AClassContent
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    public function replaceIdxContentContents(array $contents)
+    {
+        $parent_uids = array();
+        foreach ($contents as $content) {
+            if (false === array_key_exists($content->getUid(), $parent_uids)) {
+                $parent_uids[$content->getUid()] = array();
+            }
+
+            $parent_uids[$content->getUid()] = array_merge($parent_uids[$content->getUid()], $this->_getAClassContentUids($content->getSubcontent()->toArray()));
+        }
+
+        return $this->_replaceIdxContentContents($parent_uids);
+    }
+
+    /**
+     * Replaces or inserts a set of Site-Content indexes
+     * @param string $site_uid
+     * @param array $content_uids
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    private function _replaceIdxSiteContents($site_uid, array $content_uids)
+    {
+        if (0 < count($content_uids)) {
+            $command = 'REPLACE';
+            if (false === $this->_replace_supported) {
+                // REPLACE command not supported, remove first then insert
+                $this->_removeIdxSiteContents($site_uid, $content_uids);
+                $command = 'INSERT';
+            }
+
+            $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxSiteContent');
+            $query = $command . ' INTO ' . $meta->getTableName() .
+                    ' (' . $meta->getColumnName('site_uid') . ', ' . $meta->getColumnName('content_uid') . ')' .
+                    ' VALUES ("' . $site_uid . '", "' . implode('"), ("' . $site_uid . '", "', $content_uids) . '")';
+
+            $this->_em->getConnection()->executeQuery($query);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removes a set of Site-Content indexes
+     * @param string $site_uid
+     * @param array $content_uids
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    private function _removeIdxSiteContents($site_uid, array $content_uids)
+    {
+        if (0 < count($content_uids)) {
+            $this->getEntityManager()
+                    ->createQuery('DELETE FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i 
+                        WHERE i.site_uid=:site_uid
+                        AND i.content_uid IN (:content_uids)')
+                    ->setParameters(array(
+                        'site_uid' => $site_uid,
+                        'content_uids' => $content_uids))
+                    ->execute();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Replaces a set of Site-Content indexes
+     * @param string $site_uid
+     * @param array $content_uids
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    private function _replaceIdxContentContents(array $parent_uids)
+    {
+        if (0 < count($parent_uids)) {
+            $command = 'REPLACE';
+            if (false === $this->_replace_supported) {
+                // REPLACE command not supported, remove first then insert
+                $this->_removeIdxContentContents($parent_uids);
+                $command = 'INSERT';
+            }
+
+            $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
+            $insert_children = array();
+            foreach ($parent_uids as $parent_uid => $subcontent_uids) {
+                $insert_children[] = 'SELECT "' . $parent_uid . '", "' . $parent_uid . '"';
+                foreach ($subcontent_uids as $subcontent_uid) {
+                    $insert_children[] = 'SELECT ' . $meta->getColumnName('content_uid') . ', "' . $subcontent_uid . '"' .
+                            ' FROM ' . $meta->getTableName() .
+                            ' WHERE ' . $meta->getColumnName('subcontent_uid') . ' = "' . $parent_uid . '"';
+                }
+            }
+
+            if (0 < count($insert_children)) {
+                $query = $command . ' INTO ' . $meta->getTableName() .
+                        ' (' . $meta->getColumnName('content_uid') . ', ' . $meta->getColumnName('subcontent_uid') . ') ' .
+                        implode(' UNION ALL ', $insert_children);
+                $this->_em->getConnection()->executeQuery($query);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removes a set of Content-Content indexes
+     * @param array $parent_uids
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    public function _removeIdxContentContents(array $parent_uids)
+    {
+        $content_uids = array_keys($parent_uids);
+        if (0 < count($content_uids)) {
+            $this->getEntityManager()
+                    ->createQuery('DELETE FROM BackBuilder\ClassContent\Indexes\IdxContentContent i 
+                        WHERE i.content_uid IN(:content_uids) 
+                        OR i.subcontent_uid IN(:subcontent_uids)')
+                    ->setParameters(array(
+                        'content_uids' => $content_uids,
+                        'subcontent_uids' => $content_uids))
+                    ->execute();
+        }
+
+        return $this;
+    }
 
     /**
      * Executes an, optionally parameterized, SQL query
@@ -206,6 +378,23 @@ class IndexationRepository extends EntityRepository
 
         return $this->removeIdxSiteContent($site, $content)
                         ->_executeQuery($query, $params);
+    }
+
+    /**
+     * Returns an array of AClassContent uid
+     * @param array $contents An array of object
+     * @return array
+     */
+    private function _getAClassContentUids(array $contents)
+    {
+        $content_uids = array();
+        foreach ($contents as $content) {
+            if ($content instanceof AClassContent) {
+                $content_uids[] = $content->getUid();
+            }
+        }
+
+        return $content_uids;
     }
 
     /**
