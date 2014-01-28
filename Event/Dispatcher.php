@@ -100,30 +100,41 @@ class Dispatcher extends EventDispatcher
         if (is_a($entity, 'BackBuilder\ClassContent\AClassContent')) {
             $this->dispatch(strtolower('classcontent.' . $eventName), $event);
 
-            if (get_parent_class($entity) != 'BackBuilder\ClassContent\AClassContent') {
-                $this->triggerEvent($eventName, get_parent_class($entity), $eventArgs);
+            foreach (class_parents($entity) as $class) {
+                if ($class === 'BackBuilder\ClassContent\AClassContent') {
+                    break;
+                }
+
+                $this->dispatch($this->formatEventName($eventName, $class), $event);
             }
         }
 
+        $this->dispatch($this->formatEventName($eventName, $entity), $event);
+    }
+
+    private function formatEventName($eventName, $entity)
+    {
         if (is_object($entity)) {
             $eventName = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', get_class($entity)) . '.' . $eventName);
+
+            if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
+                $prefix = str_replace(NAMESPACE_SEPARATOR, '.', $this->_application->getEntityManager()->getConfiguration()->getProxyNamespace());
+                $prefix .= '.' . $entity::MARKER . '.';
+
+                $eventName = str_replace(strtolower($prefix), '', $eventName);
+            }
         } else {
             $eventName = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', $entity) . '.' . $eventName);
         }
-        if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
-            $prefix = str_replace(NAMESPACE_SEPARATOR, '.', $this->_application->getEntityManager()->getConfiguration()->getProxyNamespace());
-            $prefix .= '.' . $entity::MARKER . '.';
 
-            $eventName = str_replace(strtolower($prefix), '', $eventName);
+        if (0 === strpos($eventName, 'backbuilder.')) {
+            $eventName = substr($eventName, 12);
+        }
+        if (0 === strpos($eventName, 'classcontent.')) {
+            $eventName = substr($eventName, 13);
         }
 
-        if (0 === strpos($eventName, 'backbuilder.'))
-            $eventName = substr($eventName, 12);
-        if (0 === strpos($eventName, 'classcontent.'))
-            $eventName = substr($eventName, 13);
-
-        $this->dispatch($eventName, $event);
-//        $this->dispatch($this->getEventNamePrefix($entity).$eventName, new Event($entity, $eventArgs) );
+        return $eventName;
     }
 
     /**

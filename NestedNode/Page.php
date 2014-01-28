@@ -312,7 +312,12 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         );
 
         if ($this->_uid) {
-            $this->_contentset = $this->_contentset->createClone($this);
+            if (null !== $this->_contentset) {
+                $this->_contentset = $this->_contentset->createClone($this);
+            } else {
+                $this->_contentset = new ContentSet();
+            }
+            
             $this->_uid = md5(uniqid('', true));
             $this->_leftnode = 1;
             $this->_rightnode = $this->_leftnode + 1;
