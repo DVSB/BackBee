@@ -48,7 +48,9 @@ bb.ContentWrapper = (function($,global){
     }
     
     var _isASubContent = function(contentNode){
-        var isASubContent = (bb.jquery(contentNode).attr("data-element"))? true : false;
+        var dataElement = bb.jquery(contentNode).attr("data-element");
+        var isASubContent = (dataElement && dataElement != 0) ? true : false;
+
         return isASubContent;
     }
     
@@ -483,9 +485,11 @@ bb.ContentWrapper = (function($,global){
             wsManager = bb.webserviceManager.getInstance(_settings.classContentWebService);
             var serializeContent = this._contentProperties; 
             var parentNode = this.parentNode;
+            var rendermode = (parentNode.isAContentSet) ? parentNode.get("rendermode"):this.get("rendermode");
+            rendermode = (rendermode < 0) ? "" : rendermode;
             wsManager.request("updateContentRender", {
                 params : {
-                    renderMode : (!this.parentNode) ? "" : (this.parentNode.get("rendermode") == -1)? "" : this.parentNode.get("rendermode"), 
+                    renderMode : rendermode, /*(!this.parentNode) ? "" : (this.parentNode.get("rendermode") == -1)? "" : this.parentNode.get("rendermode")*/
                     content : serializeContent,
                     page_uid : bb.frontApplication.getPageId()
                 },
@@ -541,6 +545,7 @@ bb.ContentWrapper = (function($,global){
                 subContents.each(function(i,element){
                     if(bb.jquery(element).attr('data-parent') == self.getUid()){
                         var elName =  bb.jquery(element).attr("data-element");
+                        //if (elName != "0")
                         data[elName] = bb.jquery(element).attr("data-uid");
                     // hasChanged = true;
                     }
