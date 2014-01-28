@@ -220,7 +220,7 @@ $.loadScript = function(url, options) {
                     return;
                 } else {
                     if (!bb.isloaded) {
-                        document.getElementById('bb-loading').style.display = "block";
+                        document.getElementById('bb-loader').style.display = "block";
                     }
                 }
             }
@@ -228,6 +228,7 @@ $.loadScript = function(url, options) {
                 if (!bb.isloaded) {
                     bb.init();
                 }
+                document.getElementById('bb-loader').style.display = "none";
                 bb.webserviceManager.getInstance('ws_local_user').request('getUser', {
                     //                useCache: true,
                     //                cacheTags:["userSession"],
