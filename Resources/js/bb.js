@@ -216,26 +216,34 @@ $.loadScript = function(url, options) {
         
         start: function(event) {
             if ('undefined' != typeof(event)) {
-                if (!event.altKey || !event.ctrlKey || 66 != event.keyCode)
+                if (!event.altKey || !event.ctrlKey || 66 !== event.keyCode) {
                     return;
-            }
-            if (!bb.isloaded) bb.init();
-            
-            bb.webserviceManager.getInstance('ws_local_user').request('getUser', {
-                //                useCache: true,
-                //                cacheTags:["userSession"],
-                success: function(response) {
-                    if (0 == bb.jquery('#bb5-toolbar-wrapper').length) {
-                        document.location.reload();
-                        return false;
+                } else {
+                    if (!bb.isloaded) {
+                        document.getElementById('bb-loading').style.display = "block";
                     }
-                    bb.jquery(bb).trigger('bb.started');
-                    bb.frontApplication.init(response.result);                
-                },
-                error: function(result) {
-                    bb.end();
                 }
-            });
+            }
+            setTimeout(function(){
+                if (!bb.isloaded) {
+                    bb.init();
+                }
+                bb.webserviceManager.getInstance('ws_local_user').request('getUser', {
+                    //                useCache: true,
+                    //                cacheTags:["userSession"],
+                    success: function(response) {
+                        if (0 == bb.jquery('#bb5-toolbar-wrapper').length) {
+                            document.location.reload();
+                            return false;
+                        }
+                        bb.jquery(bb).trigger('bb.started');
+                        bb.frontApplication.init(response.result);                
+                    },
+                    error: function(result) {
+                        bb.end();
+                    }
+                });
+            }, 0);
         },
         
         end: function() {
