@@ -38,10 +38,13 @@ class metadata extends AHelper
 
     public function __invoke()
     {
-        if (NULL === $renderer = $this->_renderer)
+        if (null === $renderer = $this->_renderer) {
             return '';
-        if (null === $page = $renderer->getCurrentPage())
+        }
+
+        if (null === $page = $renderer->getCurrentPage()) {
             return '';
+        }
 
         if (null === $metadata = $page->getMetaData()) {
             $metadata = new MetaDataBag($renderer->getApplication()->getConfig()->getMetadataConfig(), $page);

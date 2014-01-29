@@ -64,7 +64,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
         }
 
         foreach ($this->_metadatas as $metadata) {
-            $metadata->computeAttributes($page->getContentSet());
+            $metadata->computeAttributes($page->getContentSet(), $page);
         }
 
         return clone $this;
@@ -78,7 +78,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
     public function update(array $definitions = null, Page $page = null)
     {
         $content = (null === $page) ? null : $page->getContentSet();
-
+        
         if (null !== $definitions) {
             foreach ($definitions as $name => $definition) {
                 if (false === is_array($definition)) {
