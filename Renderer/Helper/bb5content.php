@@ -86,43 +86,32 @@ class bb5content extends AHelper
      */
     public function __invoke(AClassContent $element = null, $datacontent = array(), $params = array())
     {
-        if (null === $this->_renderer->getApplication()->getBBUserToken()) {
-            $result = '';
-            if (true === isset($datacontent['class'])) {
-                $result = 'class="' . $datacontent['class'] . '"';
-                
-                return $result;
-            }
-        }
-
-        if (null === $element) {
-            $this->_element_name = $this->_renderer->getCurrentElement();
-            $this->_content = $this->_renderer->getObject();
-            $this->_parent = $this->getRenderer()->getClassContainer();
-            $this->_parent_uid = $this->_renderer->getParentUid();
-        } else {
-            $this->_content = $element;
-
-            $this->_element_name = null;
-            $this->_parent = $this->_renderer->getObject();
-
-            if (null !== $this->_parent) {
-                $this->_setElementName($this->_parent, $element);
-            }
-
-            $this->_parent_uid = $this->_renderer->getObject()->getUid();
-        }
+        $this->_content = (null === $element) ? $this->_renderer->getObject() : $element;
 
         $this->_attributes = $this->_toRegularBag($datacontent);
         $this->_addValueToAttribute('class', $this->_content->getParam('class'));
-
-        // Store initial basic attributes to content
-        $this->_basic_attributes = $this->_attributes;
 
         // If a valid BB user is granted to access this content
         if (null !== $this->_content
                 && true === $this->_isGranted()
                 && false !== $this->_content->getParam('bb5.editable')) {
+
+            // Defining hierarchical content structure
+            if (null === $element) {
+                $this->_element_name = $this->_renderer->getCurrentElement();
+                $this->_parent = $this->getRenderer()->getClassContainer();
+                $this->_parent_uid = $this->_renderer->getParentUid();
+            } else {
+                $this->_element_name = null;
+                if (null !== $this->_parent = $this->_renderer->getObject()) {
+                    $this->_setElementName($this->_parent, $element);
+                    $this->_parent_uid = $this->_renderer->getObject()->getUid();
+                }
+            }
+
+            // Store initial basic attributes to content
+            $this->_basic_attributes = $this->_attributes;
+
             $this->_addCommonContentMarkup($params)
                     ->_addContentSetMarkup($params)
                     ->_addClassContainerMarkup($params)
