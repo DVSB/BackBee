@@ -219,7 +219,7 @@ $.loadScript = function(url, options) {
                 if (!event.altKey || !event.ctrlKey || 66 !== event.keyCode) {
                     return;
                 } else {
-                    if (!bb.isloaded) {
+                    if (!bb.isloaded && document.getElementById('bb-loader')) {
                         document.getElementById('bb-loader').style.display = "block";
                     }
                 }
@@ -228,7 +228,9 @@ $.loadScript = function(url, options) {
                 if (!bb.isloaded) {
                     bb.init();
                 }
-                document.getElementById('bb-loader').style.display = "none";
+                if (document.getElementById('bb-loader')) {
+                    document.getElementById('bb-loader').style.display = "none";
+                }
                 bb.webserviceManager.getInstance('ws_local_user').request('getUser', {
                     //                useCache: true,
                     //                cacheTags:["userSession"],
