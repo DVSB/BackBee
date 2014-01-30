@@ -1,8 +1,8 @@
 <?php
+
 namespace BackBuilder\Installer;
 
 use BackBuilder\BBApplication;
-
 use Doctrine\ORM\Tools\SchemaTool;
 
 /**
@@ -13,18 +13,22 @@ use Doctrine\ORM\Tools\SchemaTool;
  */
 class Database
 {
+
     /**
      * @var \Doctrine\ORM\EntityManager 
      */
     private $_em;
+
     /**
      * @var BBApplication 
      */
     private $_application;
+
     /**
      * @var SchemaTool 
      */
     private $_schemaTool;
+
     /**
      * @var EntityFinder
      */
@@ -40,7 +44,7 @@ class Database
         $this->_schemaTool = new SchemaTool($this->_em);
         $this->_entityFinder = new EntityFinder($this->_application->getBaseDir());
     }
-    
+
     /**
      * Create the BackBuilder schema
      */
@@ -56,9 +60,9 @@ class Database
      */
     public function createBundlesSchema()
     {
-        $classes = $this->_getBundlesClasses();
-        $this->_schemaTool->dropSchema($classes);
-        $this->_schemaTool->createSchema($classes);
+        foreach ($this->_application->getBundles() as $bundle) {
+            $this->createBundleSchema($bundle->getId());
+        }
     }
 
     /**
@@ -68,25 +72,33 @@ class Database
      */
     public function createBundleSchema($bundleName)
     {
-        $classes = $this->_getBundleSchema($this->_application->getBundle($bundleName));
-        $this->_schemaTool->dropSchema($classes);
-        $this->_schemaTool->createSchema($classes);
+        if (null === $bundle = $this->_application->getBundle($bundleName)) {
+            return;
+        }
+
+        $schemaTool = new SchemaTool($bundle->getEntityManager());
+        $classes = $this->_getBundleSchema($bundle);
+        $schemaTool->dropSchema($classes);
+        $schemaTool->createSchema($classes);
+        unset($schemaTool);
     }
 
-     /**
+    /**
      * update backbuilder schema.
      */
     public function updateBackbuilderSchema()
     {
         $this->_schemaTool->updateSchema($this->_getBackbuilderSchema(), true);
     }
-    
+
     /**
      * update all bundles schema.
      */
     public function updateBundlesSchema()
     {
-        $this->_schemaTool->updateSchema($this->_getBundlesClasses(), true);
+        foreach ($this->_application->getBundles() as $bundle) {
+            $this->updateBundleSchema($bundle->getId());
+        }
     }
 
     /**
@@ -96,8 +108,14 @@ class Database
      */
     public function updateBundleSchema($bundleName)
     {
-        $classes = $this->_getBundleSchema($this->_application->getBundle($bundleName));
-        $this->_schemaTool->updateSchema($classes, true);
+        if (null === $bundle = $this->_application->getBundle($bundleName)) {
+            return;
+        }
+
+        $schemaTool = new SchemaTool($bundle->getEntityManager());
+        $classes = $this->_getBundleSchema($bundle);
+        $schemaTool->updateSchema($classes, true);
+        unset($schemaTool);
     }
 
     /**
@@ -112,7 +130,7 @@ class Database
         }
         return $classes;
     }
-    
+
     /**
      * @return array
      */
@@ -138,4 +156,5 @@ class Database
         }
         return $classes;
     }
+
 }
