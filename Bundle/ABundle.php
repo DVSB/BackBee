@@ -26,8 +26,8 @@ use BackBuilder\BBApplication,
     BackBuilder\Routing\RouteCollection as Routing,
     BackBuilder\Logging\Logger,
     BackBuilder\Security\Acl\Domain\IObjectIdentifiable,
-    BackBuilder\Util\Arrays;
-
+    BackBuilder\Util\Arrays,
+    BackBuilder\Bundle\Exception\BundleException;
 use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Yaml\Yaml;
 
@@ -41,6 +41,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils,
  */
 abstract class ABundle implements IObjectIdentifiable, \Serializable
 {
+
     private $_id;
     private $_application;
     private $_em;
@@ -66,7 +67,6 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      */
     private $isConfigFullyInit = false;
 
-
     public function __call($method, $args)
     {
         if (NULL !== $this->getLogger()) {
@@ -81,9 +81,6 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     public function __construct(BBApplication $application, Logger $logger = null)
     {
         $this->_application = $application;
-
-        // To do : check for a specific EntityManager
-        $this->_em = $this->_application->getEntityManager();
 
         $r = new \ReflectionObject($this);
         $this->_basedir = dirname($r->getFileName());
@@ -104,15 +101,46 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $allSections = $this->_config->getAllSections();
         $this->configDefaultSections = $allSections;
         if (
-            true === array_key_exists('bundle', $allSections) &&
-            true === array_key_exists('manage_multisite', $allSections['bundle']) &&
-            false === $allSections['bundle']['manage_multisite']
+                true === array_key_exists('bundle', $allSections) &&
+                true === array_key_exists('manage_multisite', $allSections['bundle']) &&
+                false === $allSections['bundle']['manage_multisite']
         ) {
             $this->manageMultisiteConfig = false;
         }
 
 
         return $this;
+    }
+
+    /**
+     * Returns an Entity Manager for the bundle
+     * If a valid doctrine configuration is provided, a new connection is established
+     * If none doctrine configuration is provided, returns the BBApplication entity manager
+     * @param array $doctrine_config Connection informations
+     * @return \Doctrine\ORM\EntityManager
+     * @throws \BackBuilder\Bundle\Exception\BundleException Occure on database connection error
+     */
+    private function _initEntityManager($doctrine_config = NULL)
+    {
+        if (NULL === $doctrine_config || false === array_key_exists('dbal', $doctrine_config)) {
+            return $this->getApplication()->getEntityManager();
+        }
+
+        try {
+            if (false === array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
+                $doctrine_config['dbal']['proxy_ns'] = 'Proxies';
+            }
+
+            if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
+                $doctrine_config['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir() . DIRECTORY_SEPARATOR . 'Proxies';
+            }
+
+            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogger());
+        } catch (\Exception $e) {
+            throw new Exception\BundleException('Database connection error', BundleException::INIT_ERROR, $e);
+        }
+
+        return $em;
     }
 
     private function completeConfigInit()
@@ -125,9 +153,8 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
                 $siteConfig = $overrideSection[$site->getUid()];
                 foreach ($siteConfig as $section => $datas) {
                     $this->_config->setSection($section, Arrays::array_merge_assoc_recursive(
-                        $this->_config->getSection($section),
-                        $siteConfig[$section]
-                    ), true);
+                                    $this->_config->getSection($section), $siteConfig[$section]
+                            ), true);
                 }
             }
         }
@@ -157,11 +184,15 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     }
 
     /**
-     * @codeCoverageIgnore
+     * Returns the entity manager used by the bundle
      * @return \Doctrine\ORM\EntityManager
      */
     public function getEntityManager()
     {
+        if (null === $this->_em) {
+            $this->_em = $this->_initEntityManager($this->getConfig()->getDoctrineConfig());
+        }
+
         return $this->_em;
     }
 
@@ -229,9 +260,9 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         }
 
         if (
-            true === $this->manageMultisiteConfig &&
-            false === $this->isConfigFullyInit &&
-            null !== $this->getApplication()->getSite()
+                true === $this->manageMultisiteConfig &&
+                false === $this->isConfigFullyInit &&
+                null !== $this->getApplication()->getSite()
         ) {
             $this->completeConfigInit();
         }
@@ -265,8 +296,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     private function doSaveConfig(array $config)
     {
         file_put_contents(
-            $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml',
-            Yaml::dump($config)
+                $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml', Yaml::dump($config)
         );
     }
 
@@ -306,7 +336,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
     public function unserialize($serialized)
     {
-
+        
     }
 
     abstract function init();
@@ -366,4 +396,5 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         return ($this->getType() === $identity->getType()
                 && $this->getIdentifier() === $identity->getIdentifier());
     }
+
 }
