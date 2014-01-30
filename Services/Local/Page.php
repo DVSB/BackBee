@@ -221,9 +221,7 @@ class Page extends AbstractServiceLocal
         if (null === $site = $this->getEntityManager()->find('\BackBuilder\Site\Site', strval($site_uid))) {
             throw new InvalidArgumentException(sprintf('Site with uid `%s` does not exist', $site_uid));
         }
-
         $tree = array();
-
         if (null === $page = $this->_repo->find(strval($page_uid))) {
 // @todo strange call to this service with another site
 //$this->isGranted('VIEW', $site);
@@ -239,7 +237,6 @@ class Page extends AbstractServiceLocal
                 $this->isGranted('VIEW', $page);
                 $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult);
                 $tree['numresults'] = $children->count();
-
                 $tree['firstresult'] = $firstresult;
                 $tree['maxresult'] = $maxresult;
                 $tree['results'] = array();
@@ -249,7 +246,6 @@ class Page extends AbstractServiceLocal
                         $leaf->attr = json_decode($child->serialize());
                         $leaf->data = $child->getTitle();
                         $leaf->state = $child->isLeaf() ? 'leaf' : 'closed';
-
                         if (false === $child->isLeaf() && null !== $current_uid && null !== $current = $this->_repo->find(strval($current_uid))) {
                             if ($child->isAncestorOf($current)) {
                                 $leaf->children = $this->getBBBrowserTree($site_uid, $child->getUid(), $current_uid, $firstresult, $maxresult);
@@ -262,10 +258,9 @@ class Page extends AbstractServiceLocal
                     return;
                 }
             } catch (\BackBuilder\Security\Exception\ForbiddenAccessException $e) {
-// Ignore it
+                // Ignore it
             }
         }
-
         return $tree;
     }
 

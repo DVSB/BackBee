@@ -3,6 +3,7 @@
 namespace BackBuilder\Renderer;
 
 use BackBuilder\BBApplication,
+    BackBuilder\ClassContent\AClassContent,
     BackBuilder\NestedNode\Page,
     BackBuilder\Renderer\ARenderer,
     BackBuilder\Renderer\Exception\RendererException,
@@ -241,11 +242,21 @@ class Renderer extends ARenderer
             'Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($obj), $obj->getUid(), $mode, $ignoreModeIfNotSet
         ));
 
+        $parent = $this->getObject();
+
         $renderer = clone $this;
 
         $renderer->setObject($obj)
                 ->setMode($mode, $ignoreModeIfNotSet)
                 ->_triggerEvent('prerender');
+
+        if (
+            null !== $renderer->getClassContainer() && 
+            ($renderer->getClassContainer() instanceof AClassContent) && 
+            null === $renderer->getCurrentElement()
+        ) {
+            $renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
+        }
 
         if (null === $renderer->__render) {
             // Rendering a page with layout
@@ -268,6 +279,45 @@ class Renderer extends ARenderer
         unset($renderer);
 
         return $render;
+    }
+
+    public function tryResolveParentObject(AClassContent $parent, AClassContent $element)
+    {
+        foreach ($parent->getData() as $key => $values) {
+            if (false === is_array($values)) {
+                $values = array($values);
+            }
+
+            foreach ($values as $value) {
+                if ($value instanceof AClassContent) {
+                    if (false === $value->isLoaded()) {
+                        // try to load subcontent
+                        if (null !== $subcontent = $this->getApplication()
+                                ->getEntityManager()
+                                ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($value))
+                                ->load($value, $this->getRenderer()->getApplication()->getBBUserToken())) {
+                            $value = $subcontent;
+                        }
+                    }
+                    
+                    if (true === $element->equals($value)) {
+                        $this->__currentelement = $key;
+                        $this->__object = $parent;
+                        $this->_parentuid = $parent->getUid();
+                    } else {
+                        $this->tryResolveParentObject($value, $element);
+                    }
+                }
+
+                if (null !== $this->_element_name) {
+                    break;
+                }
+            }
+
+            if (null !== $this->_element_name) {
+                break;
+            }
+        }
     }
 
     /**

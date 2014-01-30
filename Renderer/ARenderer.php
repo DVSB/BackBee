@@ -118,8 +118,8 @@ abstract class ARenderer implements IRenderer
      * @var array
      */
     protected $_vars = array();
-    private $__currentelement;
-    private $__object = null;
+    protected $__currentelement;
+    protected $__object = null;
     private $__vars = array();
     private $__params = array();
     private $__overloaded = 0;
@@ -415,10 +415,6 @@ abstract class ARenderer implements IRenderer
 
     protected function _restore()
     {
-        // $this->_object = $this->__object;
-        // $this->_vars = array_pop($this->__vars);
-        // $this->_params = array_pop($this->__params);
-
         $this->updateHelpers();
 
         return $this;
@@ -757,8 +753,8 @@ abstract class ARenderer implements IRenderer
      */
     public function setObject(IRenderable $object = null)
     {
+        $this->__currentelement = null;
         $this->_object = $object;
-
         if (is_array($this->__vars) && 0 < count($this->__vars)) {
             foreach ($this->__vars[count($this->__vars) - 1] as $key => $var) {
                 if ($var === $object) {
@@ -1048,4 +1044,8 @@ abstract class ARenderer implements IRenderer
         return $helper;
     }
 
+    protected function setCurrentElement($key)
+    {
+        $this->__currentelement = $key;
+    }
 }

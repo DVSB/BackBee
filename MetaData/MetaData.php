@@ -22,7 +22,8 @@
 namespace BackBuilder\MetaData;
 
 use BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\ContentSet;
+    BackBuilder\ClassContent\ContentSet,
+    BackBuilder\NestedNode\Page;
 
 /**
  * A metadata
@@ -150,14 +151,20 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function setAttribute($attribute, $value, AClassContent $content = null)
     {
+        $originalValue = $value;
+        $functions = explode('|', $value);
+        $value = array_shift($functions);
         if (0 < preg_match('/^(\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+$/i', $value)) {
             $this->_scheme[$attribute] = $value;
             $this->_isComputed[$attribute] = true;
 
-            if (null !== $content) {
+            if (null !== $content && $originalValue === $value) {
                 $this->computeAttributes($content);
+            } else {
+                $this->_attributes[$attribute] = $originalValue;                
             }
-        } else {
+        }
+        else {
             $this->_attributes[$attribute] = $value;
             $this->_isComputed[$attribute] = false;
         }
@@ -170,18 +177,21 @@ class MetaData implements \IteratorAggregate, \Countable
      * @param \BackBuilder\ClassContent\AClassContent $content
      * @return \BackBuilder\MetaData\MetaData
      */
-    public function computeAttributes(AClassContent $content)
+    public function computeAttributes(AClassContent $content, Page $page = null)
     {
         foreach ($this->_attributes as $attribute => $value) {
             if (true === $this->_isComputed[$attribute]
                     && true === array_key_exists($attribute, $this->_scheme)) {
                 try {
+                    $functions = explode('|', $value);
                     foreach (explode('->', $this->_scheme[$attribute]) as $scheme) {
                         $draft = null;
                         if (true === is_object($content)) {
-                            if (null !== $draft = $content->getDraft())
+                            if (null !== $draft = $content->getDraft()) {
                                 $content->releaseDraft();
+                            }
                         }
+
                         $newcontent = $content;
                         $matches = array();
                         if (preg_match('/\$([a-z\/]+)(\[([0-9]+)\]){0,1}/i', $scheme, $matches)) {
@@ -205,20 +215,45 @@ class MetaData implements \IteratorAggregate, \Countable
                             }
                         }
 
-                        if (null !== $draft)
+                        if (null !== $draft) {
                             $content->setDraft($draft);
+                        }
+
                         $content = $newcontent;
                     }
 
                     if ($content instanceof AClassContent && $content->isElementContent()) {
-                        if (null !== $draft = $content->getDraft())
+                        if (null !== $draft = $content->getDraft()) {
                             $content->releaseDraft();
+                        }
+
                         $this->_attributes[$attribute] = strip_tags($content->__toString());
-                        if (null !== $draft)
+                        array_shift($functions);
+                        if (0 < count($functions)) {
+                            foreach ($functions as $fct) {
+                                $parts = explode(':', $fct);
+                                $functionName = array_shift($parts);
+                                array_unshift($parts, $this->_attributes[$attribute]);
+                                $this->_attributes[$attribute];
+                                $this->_attributes[$attribute] = call_user_func_array($functionName, $parts);
+                            }
+                        }
+
+                        if (null !== $draft) {
                             $content->setDraft($draft);
+                        }
                     }
                 } catch (\Exception $e) {
                     // Nothing to do
+                }
+            } elseif (preg_match('/^\#([a-z]+)$/i', $value, $matches)) {
+                switch (strtolower($matches[1])) {
+                    case 'url':
+                        if (null !== $page) {
+                            $this->_attributes[$attribute] = $page->getUrl();
+                        }
+                    default:
+                        break;
                 }
             }
         }
