@@ -427,7 +427,8 @@ bb.jquery(function(){
                         bbSelector.onWidgetInit(bbSelector._panel.EXTERNAL_LINK, function () {
                             var bbLinkSelector = bb.jquery(this).data('bbLinkSelector');
                             bbLinkSelector.setCallback(function (params) {
-                                params.value = "http://"+params.value;
+                                var linkPattern = /^([\w]+:\/\/)/gi//@fixme allow choices
+                                params.value = (linkPattern.test(params.value)) ? params.value : "http://"+params.value;
                                 self._populateLink(params);
                                 bbSelector.close();
                             });
