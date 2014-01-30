@@ -21,7 +21,7 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
 <link rel="stylesheet" href="<?php echo $this->getUri('ressources/css/bb5_ui.css'); ?>">
 <!--layout css-->
 <?php foreach ($layoutCssArr as $css): ?>
-    <link rel="stylesheet" href="<?php echo $this->getUri($css); ?>"></link>
+    <link rel="stylesheet" href="<?php echo $this->getUri($css); ?>" type="text/css">
 <?php endforeach; ?>
 
 <?php if (NULL !== $this->getParam('token') && is_a($this->getParam('token'), 'BackBuilder\Security\Token\BBUserToken')): ?>
