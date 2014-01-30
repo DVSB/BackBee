@@ -47,9 +47,11 @@ bb.ContentWrapper = (function($, global) {
     var _isABbContent = function(contentNode) {
         return (bb.jquery(contentNode).hasClass(_settings.bbContentClass.replace(".", ""))) ? true : false;
     }
+    
+    var _isASubContent = function(contentNode){
+        var dataElement = bb.jquery(contentNode).attr("data-element");
+        var isASubContent = (dataElement && dataElement != 0) ? true : false;
 
-    var _isASubContent = function(contentNode) {
-        var isASubContent = (bb.jquery(contentNode).attr("data-element")) ? true : false;
         return isASubContent;
     }
            
@@ -476,11 +478,13 @@ bb.ContentWrapper = (function($, global) {
             wsManager = bb.webserviceManager.getInstance(_settings.classContentWebService);
             var serializeContent = this._contentProperties;
             var parentNode = this.parentNode;
+            var rendermode = (parentNode.isAContentSet) ? parentNode.get("rendermode"):this.get("rendermode");
+            rendermode = (rendermode < 0) ? "" : rendermode;
             wsManager.request("updateContentRender", {
-                params: {
-                    renderMode: (!this.parentNode) ? "" : (this.parentNode.get("rendermode") == -1) ? "" : this.parentNode.get("rendermode"),
-                    content: serializeContent,
-                    page_uid: bb.frontApplication.getPageId()
+                params : {
+                    renderMode : rendermode, /*(!this.parentNode) ? "" : (this.parentNode.get("rendermode") == -1)? "" : this.parentNode.get("rendermode")*/
+                    content : serializeContent,
+                    page_uid : bb.frontApplication.getPageId()
                 },
                 success: function(response) {
                     try {
@@ -525,10 +529,11 @@ bb.ContentWrapper = (function($, global) {
             var self = this;
             var data = {};
             //var hasChanged = false; 
-            if (subContents.length) {
-                subContents.each(function(i, element) {
-                    if (bb.jquery(element).attr('data-parent') == self.getUid()) {
-                        var elName = bb.jquery(element).attr("data-element");
+            if(subContents.length){
+                subContents.each(function(i,element){
+                    if(bb.jquery(element).attr('data-parent') == self.getUid()){
+                        var elName =  bb.jquery(element).attr("data-element");
+                        //if (elName != "0")
                         data[elName] = bb.jquery(element).attr("data-uid");
                         // hasChanged = true;
                     }

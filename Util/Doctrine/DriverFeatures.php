@@ -19,32 +19,40 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent\Indexes;
+namespace BackBuilder\Util\Doctrine;
+
+use Doctrine\DBAL\Driver;
 
 /**
- * Entity class for Site-Content join table
+ * Utility class to know supported features by the current driver
  * 
  * @category    BackBuilder
- * @package     BackBuilder\ClassContent
- * @subpackage  Indexes
+ * @package     BackBuilder\Util
+ * @subpackage  Doctrine
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
- * @Table(name="idx_site_content")
  */
-class IdxSiteContent
+class DriverFeatures
 {
 
     /**
-     * @var string
-     * @Id @Column
+     * Drivers array supporting REPLACE command
+     * @var array
      */
-    private $site_uid;
+    static private $_replace_supported_drivers = array(
+        'Doctrine\DBAL\Driver\PDOMySql\Driver',
+        'Doctrine\DBAL\Driver\Mysqli\Driver',
+        'Doctrine\DBAL\Driver\PDOSqlite\Driver'
+    );
 
     /**
-     * @var string
-     * @Id @Column
+     * Returns TRUE if the driver support REPLACE comand
+     * @param \Doctrine\DBAL\Driver $driver
+     * @return boolean
      */
-    private $content_uid;
+    public static function replaceSupported(Driver $driver)
+    {
+        return in_array(get_class($driver), self::$_replace_supported_drivers);
+    }
 
 }
