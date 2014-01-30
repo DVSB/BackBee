@@ -73,7 +73,6 @@ class NestedNodeRepository extends EntityRepository
                 $leftnode = $child->getRightnode();
             }
         }
-
         $node->setRightnode($leftnode + 1);
         $this->createQueryBuilder('n')
                 ->update()
@@ -522,7 +521,6 @@ class NestedNodeRepository extends EntityRepository
             $left += $treeSize;
             $right += $treeSize;
         }
-
         // On met à jour les descendants
         $this->getTree()
                 ->getBaseQuery()

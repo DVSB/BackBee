@@ -36,6 +36,7 @@ use BackBuilder\Event\Event,
  */
 class MetaDataListener
 {
+    private static $onFlushPageAlreadyCalled = false;
 
     /**
      * Occur on classcontent.onflush events
@@ -44,20 +45,23 @@ class MetaDataListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent))
+        if (!($content instanceof AClassContent)) {
             return;
+        }
 
-        $dispatcher = $event->getDispatcher();
-        $application = $dispatcher->getApplication();
+        $application = $event->getApplication();
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
-        if ($uow->isScheduledForDelete($content))
+        if ($uow->isScheduledForDelete($content)) {
             return;
+        }
 
         if (null !== $page = $content->getMainNode()) {
-            $newEvent = new Event($page, $content);
-            $newEvent->setDispatcher($event->getDispatcher());
-            self::onFlushPage($newEvent);
+            if (null !== $page->getMetaData()) {
+                $newEvent = new Event($page, $content);
+                $newEvent->setDispatcher($event->getDispatcher());
+                self::onFlushPage($newEvent);
+            }
         }
 //
 //        foreach($content->getParentContent() as $parent) {
@@ -79,16 +83,21 @@ class MetaDataListener
      */
     public static function onFlushPage(Event $event)
     {
-        $page = $event->getTarget();
-        if (!($page instanceof Page))
+        if (true === self::$onFlushPageAlreadyCalled) {
             return;
+        }
 
-        $dispatcher = $event->getDispatcher();
-        $application = $dispatcher->getApplication();
+        $page = $event->getTarget();
+        if (!($page instanceof Page)) {
+            return;
+        }
+
+        $application = $event->getApplication();
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
-        if ($uow->isScheduledForDelete($page))
+        if ($uow->isScheduledForDelete($page)) {
             return;
+        }
 
         if (null === $metadata = $page->getMetaData()) {
             if (null === $metadata_config = $application->getTheme()->getConfig()->getSection('metadata')) {
@@ -97,12 +106,16 @@ class MetaDataListener
 
             $metadata = new \BackBuilder\MetaData\MetaDataBag($metadata_config, $page);
         }
+        
         $page->setMetaData($metadata->compute($page));
 
-        if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page))
+        if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {
             $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
-        elseif (!$uow->isScheduledForDelete($page))
+        } elseif (!$uow->isScheduledForDelete($page)) {
             $uow->computeChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
+        }
+
+        self::$onFlushPageAlreadyCalled = true;
     }
 
 }
