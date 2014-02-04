@@ -21,160 +21,62 @@
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\BBApplication;
-
 /**
- * Abstract class for local RPC service
+ * Abstract class for local RPC service provided by bundles
  *
  * @category    BackBuilder
  * @package     BackBuilder\Services
  * @subpackage  Local
  * @copyright   Lp digital system
- * @author      n.bremont <nicolas.bremont@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class AbstractServiceLocal implements IServiceLocal
+class AbstractBundleServiceLocal extends AbstractServiceLocal
 {
+
     /**
-     * Directory list
-     * @var \stdClass
-     */
-    protected $_dir;
-    /**
-     * Bundle name identifier
+     * The id of the bundle providing services
      * @var string
      */
-    protected $identifier;
-    /**
-     * Current BackBuilder application
-     * @var \BackBuilder\BBApplication
-     */
-    private $_application;
-    /**
-     * Current EntityManager for the application
-     * @var \Doctrine\ORM\EntityManager
-     */
-    private $_em;
+    protected $_bundle_id;
 
     /**
-     * Class constructor
-     * @codeCoverageIgnore
+     * The bundle providing services
+     * @var \BackBuilder\Bundle\ABundle
      */
-    public function __construct()
+    private $_bundle;
+
+    /**
+     * Returns the bundle providing services
+     * @return \BackBuilder\Bundle\ABundle
+     * @throws \BackBuilder\Services\Exception\ServicesException Occures if the bundle has not been specified
+     */
+    public function getBundle()
     {
+        if (null === $this->_bundle) {
+            $this->setBundle($this->_bundle_id);
+        }
 
+        return $this->_bundle;
     }
 
     /**
-     * @deprecated since version 1.0
-     * @param \BackBuilder\BBApplication $application
-     * @codeCoverageIgnore
+     * Sets the bundle providing services by its id
+     * @param string $bundleId
+     * @return \BackBuilder\Services\Local\AbstractBundleServiceLocal
+     * @throws \BackBuilder\Services\Exception\ServicesException Occures if the bundle is unknown or invalid
      */
-    public function __onInit(BBApplication $application)
+    public function setBundle($bundleId = null)
     {
-        $this->initService($application);
-    }
-
-    /**
-     * @param \BackBuilder\BBApplication $application
-     * @codeCoverageIgnore
-     */
-    public function initService(BBApplication $application)
-    {
-        $this->_application = $this->bbapp = $application;
-        $this->_em = $application->getEntityManager();
-        $this->_dir = new \stdClass();
-        if (NULL !== $application && null !== $this->identifier) {
-            $this->_dir->bundle = implode(DIRECTORY_SEPARATOR, array($this->application->getBundle($this->identifier)->getResourcesDir(), 'Templates', 'scripts'));
-            $this->_dir->bundle .= DIRECTORY_SEPARATOR;
-        }
-    }
-
-    /**
-     * Returns the current application
-     * @return \BackBuilder\BBApplication
-     * @codeCoverageIgnore
-     */
-    public function getApplication()
-    {
-        return $this->_application;
-    }
-
-    /**
-     * Returns the current entity manager of the BackBuilder application
-     * @return \Doctrine\ORM\EntityManager
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
-     */
-    public function getEntityManager()
-    {
-        if (null === $this->_application) {
-            throw new \BackBuilder\Exception\MissingApplicationException('None BackBuilder application defined');
+        if (null === $bundleId || null === $bundle = $this->getApplication()->getBundle($bundleId)) {
+            throw new \BackBuilder\Services\Exception\ServicesException(sprintf('Unknown bundle with id `%s`.', $bundleId));
         }
 
-        return $this->_application->getEntityManager();
-    }
-
-    /**
-     * Checks if the attributes are granted against the current token.
-     * @param mixed $attributes
-     * @param mixed|null $object
-     * @return boolean Return TRUE if current token if granted
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the permission
-     */
-    public function isGranted($attributes, $object = null)
-    {
-        if (null === $this->_application) {
-            throw new \BackBuilder\Exception\MissingApplicationException('None BackBuilder application defined');
+        if (false === ($bundle instanceof \BackBuilder\Bundle\ABundle)) {
+            throw new \BackBuilder\Services\Exception\ServicesException(sprintf('Invalid bundle with id `%s`.', $bundleId));
         }
 
-        $securityContext = $this->_application->getSecurityContext();
-
-        if (false === $securityContext->isGranted('sudo')) {
-            if (null !== $securityContext->getACLProvider()
-                    && false === $securityContext->isGranted($attributes, $object)) {
-                throw new \BackBuilder\Security\Exception\ForbiddenAccessException('Forbidden acces');
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Render template
-     *
-     * @param string $template
-     * @param array $params
-     * @return string
-     */
-    public function render($template, $params = array())
-    {
-        $result = "";
-        if (isset($template) && is_string($template)) {
-            $this->_assignParams($params);
-            $result = $this->application->getRenderer()->partial($template);
-        }
-
-        return $result;
-    }
-
-    private function _assignParams($params)
-    {
-        if (is_array($params)) {
-            foreach ($params as $key => $param) {
-                $this->application->getRenderer()->assign($key, $param);
-            }
-        }
-        $this->application->getRenderer()->assign('dir', $this->_dir);
-    }
-
-    public function __get($name)
-    {
-        if ($name === 'bbapp') {
-            return $this->_application;
-        }
-        if ($name === 'application' || $name === 'em') {
-            return $this->{'_' . $name};
-        }
+        $this->_bundle = $bundle;
+        return $this;
     }
 
 }
