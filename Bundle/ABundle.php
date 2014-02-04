@@ -165,8 +165,9 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     private function _initRouting()
     {
         $routing = $this->getConfig()->getRoutingConfig();
-        if (is_null($routing))
+        if (is_null($routing)) {
             $this->_routing = false;
+        }
 
         $this->_routing = new Routing($this->_application);
         $this->_routing->addBundleRouting($this);

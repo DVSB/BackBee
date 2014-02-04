@@ -140,17 +140,22 @@ class BBApplication
         // Construct service container
         $this->_container = new ContainerBuilder();
 
-        $dir_to_looking_for = array();
-        $dir_to_looking_for[] = $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
-        $dir_to_looking_for[] = $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
-        $dir_to_looking_for[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
-
-        foreach ($dir_to_looking_for as $dir) {
+        $dirToLookingFor = array();
+        $dirToLookingFor[] = $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
+        $dirToLookingFor[] = $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
+        $dirToLookingFor[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
+        
+        foreach ($dirToLookingFor as $dir) {
             if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
                 // Define where to looking for services.yml
                 $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
                 $loader->load('services.yml');
+            } elseif (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.xml')) {
+                // Define where to looking for services.yml
+                $loader = new XmlFileLoader($this->_container, new FileLocator(array($dir)));
+                // Load every services definitions into our container
+                $loader->load('services.xml');
             }
         }
 
@@ -216,12 +221,13 @@ class BBApplication
     private function _initAutoloader()
     {
         $this->getAutoloader()
-                ->register()
-                ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'bundle')))
-                ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'ClassContent', 'Repositories')))
-                ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
-                ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
-                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')));
+            ->register()
+            ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'bundle')))
+            ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'ClassContent', 'Repositories')))
+            ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
+            ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
+            ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Controller')))
+            ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
