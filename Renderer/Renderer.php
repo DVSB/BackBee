@@ -677,4 +677,15 @@ class Renderer extends ARenderer
         return $layoutfile;
     }
 
+    public function generateUrlByRouteName($routeName, array $routeParams = null)
+    {
+        $uri = $this->getApplication()->getController()->getRouteCollection()->getRoutePath($routeName);
+        if (null !== $routeParams && true === is_array($routeParams)) {
+            foreach ($routeParams as $key => $value) {
+                $uri = str_replace('{' . $key . '}', $value, $uri);
+            }
+        }
+
+        return $this->getUri($uri);
+    }
 }
