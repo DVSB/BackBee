@@ -82,18 +82,6 @@ class datacontent extends AHelper
      */
     public function __invoke($datacontent = array(), $params = array())
     {
-        if (null === $this->_renderer->getApplication()->getBBUserToken()) {
-            $result = '';
-            if (true === isset($datacontent['class'])) {
-                if (true === is_array($datacontent['class'])) 
-                    $result = 'class="' . implode(' ' , $datacontent['class']) . '"';
-                else
-                    $result = 'class="' . $datacontent['class'] . '"';
-                
-                return $result;
-            }
-        }
-
         if ($datacontent instanceof BackBuilder\Renderer\IRenderable) {
             $this->_content = $datacontent;
         } else {
@@ -330,6 +318,8 @@ class datacontent extends AHelper
         foreach ($data as $key => $value) {
             if (false === is_array($value)) {
                 $data[$key] = array_unique(explode(' ', $value));
+            } else {
+                $data[$key] = array($value);
             }
         }
 
