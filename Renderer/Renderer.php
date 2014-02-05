@@ -375,6 +375,16 @@ class Renderer extends ARenderer
     }
 
     /**
+     * Check if $filename exists
+     * @param  string  $filename 
+     * @return boolean           
+     */
+    public function isTemplateFileExists($filename)
+    {
+        return $this->isValidTemplateFile($filename);
+    }
+
+    /**
      * Render a page object
      * 
      * @param string $layoutfile A force layout script to be rendered
@@ -569,7 +579,7 @@ class Renderer extends ARenderer
         }
 
         return $adapter->isValidTemplateFile(
-                        $filename, true === $isLayout ? $this->_layoutdir : $this->_scriptdir
+            $filename, true === $isLayout ? $this->_layoutdir : $this->_scriptdir
         );
     }
 
