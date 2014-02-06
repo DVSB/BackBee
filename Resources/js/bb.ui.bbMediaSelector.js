@@ -817,6 +817,7 @@
                         },
 
                         error: function(err, file) {
+                             dropbox.empty();
                             switch(err) {
                                 case 'BrowserNotSupported':
                                     myself._showMessage(bb.i18n.__('toolbar.editing.error'), bb.i18n.__('toolbar.editing.upload_browser_not_supported'), 'alert');
@@ -831,7 +832,7 @@
                                     break;
                             }
                         },
-
+                        
                         beforeEach: function(file) {
                             if(!file.type.match(mediaType)) {
                                 myself._showMessage(bb.i18n.__('toolbar.editing.error'), bb.i18n.__('toolbar.editing.upload_only_type_allowed').replace("#type#",mediaType), 'alert');
@@ -1127,7 +1128,6 @@
             context.messageBox.dialog('destroy');
             context.messageBox.remove();
             bb.jquery(this.element).empty();
-            alert("here");
             context.selected = null;
             context.treeview = null;
             context.messageBox = null;

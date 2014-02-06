@@ -314,6 +314,8 @@
                 afterAll();
               }
               if (result === false) stop_loop = true;
+            }else{
+                 opts.error("ErrorWhileUpdatedFile");
             }
           };
 

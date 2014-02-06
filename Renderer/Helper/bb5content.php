@@ -116,8 +116,8 @@ class bb5content extends AHelper
                     ->_addContentSetMarkup($params)
                     ->_addClassContainerMarkup($params)
                     ->_addElementFileMarkup($params)
-                    ->_addAlohaMarkup($params);
-            //->_addRteMarkup($params);
+                    ->_addAlohaMarkup($params)
+                    ->_addRteMarkup($params);
         }
 
         return implode(' ', array_map(array($this, '_formatAttributes'), array_keys($this->_attributes), array_values($this->_attributes)));
@@ -277,7 +277,6 @@ class bb5content extends AHelper
     private function _addAlohaMarkup($params = array())
     {
         $this->_addValueToAttribute('class', 'contentAloha');
-
         if (false === ($this->_content instanceof ContentSet)
                 && null !== $this->_element_name) {
             $this->_addValueToAttribute('data-aloha', $this->_element_name);
@@ -290,8 +289,31 @@ class bb5content extends AHelper
      * @params aray $params Optional parameters
      * @return \BackBuilder\Renderer\Helper\datacontent
      */
+    
     private function _addRteMarkup($params = array())
     {
+        $contentParent = $this->getRenderer()->getClassContainer();
+        if (!is_null($contentParent)) {
+            if (is_a($contentParent, "BackBuilder\ClassContent\AClassContent") && (!is_a($contentParent, 'BackBuilder\ClassContent\ContentSet'))) {
+                $elementname = $this->_renderer->getCurrentElement();
+                if (!is_null($elementname)) {
+                    $contentData = $contentParent->{$elementname};
+                    /* if it's the same content */
+                    if (!is_null($contentData) && ($contentData->getUid() == $this->_content->getUid())) {
+                        if ($this->_content->isElementContent()) {
+                            $parentClassName = $contentParent->getType();
+                            $fakeParent = new $parentClassName();
+                            $contentData = $fakeParent->{$elementname};
+                            $rteconf = $contentData->getParam("aloha", "scalar");
+                            $isEditable = (boolean)$contentData->getParam("editable", "boolean");
+                            if (!is_null($rteconf) && $isEditable==TRUE) {
+                                $this->_addValueToAttribute('data-rteconf', $rteconf);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return $this;
     }
 

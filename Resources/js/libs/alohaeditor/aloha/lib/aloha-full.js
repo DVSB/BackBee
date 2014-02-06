@@ -48153,7 +48153,6 @@ $.widget( "ui.button", {
 			icons = this.options.icons,
 			multipleIcons = icons.primary && icons.secondary,
 			buttonClasses = [];
-
 		if ( icons.primary || icons.secondary ) {
 			if ( this.options.text ) {
 				buttonClasses.push( "ui-button-text-icon" + ( multipleIcons ? "s" : ( icons.primary ? "-primary" : "-secondary" ) ) );
@@ -58559,13 +58558,13 @@ define('ui/ui-plugin', [
 	PubSub
 ) {
 	
-
 	var context = new Context(),
         toolbar = new Toolbar(context, getToolbarSettings());
 
 	Aloha.bind('aloha-editable-activated', function(event, alohaEvent) {
 		Surface.show(context);
 		Container.showContainersForContext(context, event);
+		
 	});
 
 	Aloha.bind('aloha-editable-deactivated', function (event, alohaEvent) {
@@ -61000,7 +60999,7 @@ define('ui/multiSplit',[
 		 */
 		addButton: function (props) {
 			var multiSplit = this;
-
+			
 			var component = new (Button.extend({
 				tooltip: props.tooltip,
 				icon: props.wide ? props.icon : 'aloha-large-icon ' + props.icon,
@@ -67227,7 +67226,7 @@ define('format/format-plugin', [
 		applyButtonConfig: function (obj) {
 			var config = this.getEditableConfig(obj),
 			    button, i, len;
-				
+			
 			if ( typeof config === 'object' ) {
 				var config_old = [];
 				jQuery.each(config, function(j, button) {
