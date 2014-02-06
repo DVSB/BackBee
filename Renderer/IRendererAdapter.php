@@ -57,4 +57,16 @@ interface IRendererAdapter
      * @return string The filename of the updated script
      */
     public function updateLayout(Layout $layout, $layoutFile);
+
+    /**
+     * This is called everytime we clone a renderer
+     * @param  Renderer $renderer the new renderer
+     */
+    public function onNewRenderer(ARenderer $renderer);
+
+    /**
+     * This is called everytime we restore previous renderer
+     * @param  Renderer $renderer the previous renderer
+     */
+    public function onRestorePreviousRenderer(ARenderer $renderer);
 }
