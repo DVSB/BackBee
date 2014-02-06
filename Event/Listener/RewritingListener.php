@@ -74,13 +74,11 @@ class RewritingListener
 
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
-        $em = $application->getEntityManager();
 
-        self::_updateUrl($application, $page, $maincontent);
-
-        $descendants = $em->getRepository('BackBuilder\NestedNode\Page')->getDescendants($page);
-        foreach ($descendants as $descendant) {
-            self::_updateUrl($application, $descendant);
+        if (true === self::_updateUrl($application, $page, $maincontent)) {
+            foreach ($page->getChildren() as $descendant) {
+                self::_updateUrl($application, $descendant);
+            }
         }
     }
 
@@ -111,7 +109,11 @@ class RewritingListener
                 $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
             elseif (!$uow->isScheduledForDelete($page))
                 $uow->computeChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
+
+            return true;
         }
+
+        return false;
     }
 
 }

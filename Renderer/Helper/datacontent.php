@@ -351,6 +351,8 @@ class datacontent extends AHelper
         foreach ($data as $key => $value) {
             if (false === is_array($value)) {
                 $data[$key] = array_unique(explode(' ', $value));
+            } else {
+                $data[$key] = array($value);
             }
         }
 

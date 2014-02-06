@@ -124,8 +124,8 @@ class Site extends AObjectIdentifiable implements IJson
         $this->_metadata = new ArrayCollection();
 
         if (
-            true === is_array($options) && 
-            true === array_key_exists('label', $options)
+                true === is_array($options) &&
+                true === array_key_exists('label', $options)
         ) {
             $this->setLabel($options['label']);
         }
@@ -199,6 +199,17 @@ class Site extends AObjectIdentifiable implements IJson
     public function setLabel($label)
     {
         $this->_label = $label;
+        return $this;
+    }
+
+    /**
+     * Sets the server name
+     * @param string $server_name
+     * @return \BackBuilder\Site\Site
+     */
+    public function setServerName($server_name)
+    {
+        $this->_server_name = $server_name;
         return $this;
     }
 

@@ -36,17 +36,13 @@ class RouteCollection extends sfRouteCollection
 
     private $_application;
 
-    public function __construct(BBApplication $application = NULL)
+    public function __construct(BBApplication $application = null)
     {
         if (method_exists('Symfony\Component\Routing\RouteCollection', '__construct'))
             parent::__construct();
 
-        if (NULL !== $application) {
+        if (null !== $application) {
             $this->_application = $application;
-
-            if (NULL !== $routeConfig = $this->_application->getConfig()->getRouteConfig()) {
-                $this->pushRouteCollection($this, $routeConfig);
-            }
         }
     }
 
@@ -54,7 +50,7 @@ class RouteCollection extends sfRouteCollection
     {
         $router = $this->_application->getController()->getRouteCollection();
 
-        if (NULL !== $routeConfig = $bundle->getConfig()->getRouteConfig()) {
+        if (null !== $routeConfig = $bundle->getConfig()->getRouteConfig()) {
             $this->pushRouteCollection($router, $routeConfig);
             $this->moveDefaultRoute($router);
         }
@@ -63,7 +59,7 @@ class RouteCollection extends sfRouteCollection
     public function pushRouteCollection($router, $routeCollection)
     {
         foreach ($routeCollection as $name => $route) {
-            if (FALSE === array_key_exists('pattern', $route) || FALSE === array_key_exists('defaults', $route)) {
+            if (false === array_key_exists('pattern', $route) || false === array_key_exists('defaults', $route)) {
                 $this->_application->warning(sprintf('Unable to parse the route definition `%s`.', $name));
                 continue;
             }
@@ -94,7 +90,7 @@ class RouteCollection extends sfRouteCollection
             return $this->get($id)->getPath();
         }
 
-        return NULL;
+        return null;
     }
 
 }
