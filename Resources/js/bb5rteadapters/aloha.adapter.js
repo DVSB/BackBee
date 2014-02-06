@@ -1,5 +1,5 @@
 /*Aloha Settings here*/
-(function(global,jq,undefined) {
+(function(global,jq) {
     
     if (global.Aloha === undefined || global.Aloha === null) {
         var Aloha = global.Aloha = {};
@@ -11,16 +11,22 @@
             floating : false,
             pin: false,
             draggable: false,
-            tabs: [{ label:"Styles", components: ["formatStyle"], showOn: {scope: "bb.customstyle"}}]
+            tabs: [{
+                label:"Styles", 
+                components: ["formatStyle"], 
+                showOn: {
+                    scope: "bb.customstyle"
+                }
+            }],
+            exclude: ['blockquote']
         },
         bundles: {
             // Path for custom bundle relative from Aloha.settings.baseUrl usually path of aloha.js
-             bbplugin: bb.baseurl+bb.resourcesdir+"js/bb5rteadapters/plugins/aloha"
+            bbplugin: bb.baseurl+bb.resourcesdir+"js/bb5rteadapters/plugins/aloha"
         },
-        plugins :{
+        plugins : {
             "format": {
-                // all elements with no specific configuration get this configuration
-                config : [ 'b', 'i','sub','sup'],
+                config : [],
                 editables: {}
             }
         }
@@ -62,10 +68,11 @@ bb.RteManager.registerAdapter("aloha",{
         this.contentNode = null;
         this.mode = null;
         this.editables = [];
+        this.rteConfig = rteConfig;
+        this.confMap = (("customconf" in rteConfig) && rteConfig.customconf) ? rteConfig.customconf : {};
         /*handle plugins conf here*/
-         if("pluginsconf" in rteConfig){
-           bb.jquery.extend(true,Aloha.settings.plugins,rteConfig.pluginsconf);
-        }
+        var availablePlugins = this._getAvailablePlugins(rteConfig);
+        bb.jquery.extend(true,Aloha.settings,rteConfig.settings);
         loadScript(bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
             Aloha.ready(function(){
                 self.trigger("onReady");
@@ -75,8 +82,31 @@ bb.RteManager.registerAdapter("aloha",{
                 Aloha.bind("aloha-editable-deactivated",bb.jquery.proxy(self.handleContentEdition,self));
             });
         },{
-            "data-aloha-plugins" : self._settings.plugins
+            "data-aloha-plugins" : availablePlugins
         });        
+    },
+    
+    _getAvailablePlugins: function(rteConf){
+        var customConf = rteConf.customconf;
+        if(!customConf) return false;
+        var pluginsInfos = "";
+        var plugins = ["common/ui"];
+        bb.jquery.each(customConf,function(confName,conf){
+            if(conf.plugins && bb.jquery.isArray(conf.plugins)){
+                bb.jquery.merge(plugins,conf.plugins);
+            }
+        });
+        
+        if(bb.jquery.isArray(plugins)){
+            var pluginsList = plugins.filter( function(pluginName){
+                if(!this[pluginName]){
+                    this[pluginName] = true;
+                    return pluginName;
+                }
+            });
+            pluginsInfos =  pluginsList.join(", ");
+        }
+        return pluginsInfos;
     },
     
     handleContentEdition: function(e,alohaParams){
@@ -100,33 +130,78 @@ bb.RteManager.registerAdapter("aloha",{
         this.mainNode = node;
         /*find all rte enabled contents*/
         var self = this;
+        
         /*load Content params via the mainnode. this should not be needed.*/
-        var editables = this.loadNodesRteParams(bb.jquery(this.mainNode).attr("data-type"));//sync call
+       
+        //var editables = this.loadNodesRteParams(bb.jquery(this.mainNode).attr("data-type"));//sync call
+        var editables = node.getSubContents(); 
         var fieldPrefix = this._settings.fieldPrefix;
         if(!fieldPrefix || typeof fieldPrefix!="string") throw "aloha.adapter fieldPrefix must be a string";
-        
-        /* apply aloha to all the the fields*/
+        /* apply aloha to all the fields in the selected block*/
         if(bb.jquery.isArray(editables)){
-            bb.jquery.each(editables, function(i,configObject){
-                bb.jquery.each(configObject, function(fieldname,nodeConfig){
-                    var node = self.mainNode.find('['+fieldPrefix+'="' + fieldname + '"]').eq(0);
-                    var editableNode = bb.jquery(node).get(0); 
-                    if(editableNode && !Aloha.isEditable(editableNode)){
-                        Aloha.jQuery(editableNode).aloha();
-                        self.editables.push(editableNode);
-                        self._setNodeParams(node,nodeConfig); //save params for node
-                        
-                    }
-                });
+            bb.jquery.each(editables, function(i,contentEl){
+                var editableNode = bb.jquery(contentEl).get(0);
+                if(Aloha.isEditable(editableNode)) return true;           
+                var elementname = (typeof $bb(contentEl).get("element") == "string") ? $bb(contentEl).get("element") : false;
+                var rteConf = ($bb(contentEl).get("rteconf")!=-1) ? $bb(contentEl).get("rteconf") : false;
+                if( !elementname || !rteConf ) return true;
+                var editableConf = (("customconf" in self.rteConfig) && self.rteConfig.customconf) ? self.rteConfig.customconf[rteConf]: false;
+                if(!bb.jquery.isPlainObject(editableConf)) throw "aloha.adapter editableConf must be an object";
+                /* extend default conf with editableConf*/
+                var pluginsSettings = bb.jquery.extend(true,{},Aloha.settings.plugins);
+                editableConf = bb.jquery.extend({},pluginsSettings,editableConf.pluginsconf); 
+                /*prendre en compte les plugins desactivés ??*/
+                Aloha.jQuery(editableNode).aloha();
+                self.editables.push(editableNode);
+                self._handleEditablePluginsconf(contentEl,editableConf);
             });
         }
     },
-    
-    _setNodeParams: function(node,params){
        
-        if(node && bb.jquery.isArray(params)){
+    /* Apply the plugin */
+    _handleEditablePluginsconf : function(editable, nodeConfig){
+        /*pour chaque plugin associer un editable à la conf*/
+        var pluginsconf = (nodeConfig) ? nodeConfig : false;
+        if(!pluginsconf) return;
+        bb.jquery.each(pluginsconf, function(pluginName,pluginConf){
+            /* make sure plugin is in aloha plugins list */
+            
+            if(!(pluginName in Aloha.settings.plugins)){
+                Aloha.settings.plugins[pluginName] = {
+                    "config" : [], 
+                    "editables" : {}
+                };
+            }
+            
+            /* add config key if needed */
+            if(!("config" in Aloha.settings.plugins[pluginName])){
+                Aloha.settings.plugins[pluginName]["config"] = [];
+            }
+       
+            /* add editables key if needed */
+            if(!("editables" in Aloha.settings.plugins[pluginName]) || !bb.jquery.isPlainObject(Aloha.settings.plugins[pluginName]["editables"])){
+                Aloha.settings.plugins[pluginName]["editables"] = {};
+            }
+            
+            if(editable){
+                var id = "#"+bb.jquery(editable).attr("id");
+                if(!("config" in pluginConf)){
+                    console.warn("'config' key can't be found for plugin"+pluginName);
+                    return true;
+                }
+                var editablesInfos = Aloha.settings.plugins[pluginName]["editables"];
+                editablesInfos[id] =  (pluginConf.config) ? pluginConf.config : [];
+                Aloha.settings.plugins[pluginName]["editables"] = editablesInfos;
+            }
+        });        
+    },
+    
+    /* apply param to node */
+    _handleEditableStyles: function(node,nodeConfig){
+        var nodeStyle = (nodeConfig.styles) ? nodeConfig.styles : [];
+        if(node && bb.jquery.isArray(nodeStyle)){
             var id = "#"+bb.jquery(node).attr("id");
-            Aloha.settings.plugins.format.editables[id] = params;  
+            Aloha.settings.plugins.format.editables[id] = nodeStyle;
         }
     },
     
@@ -135,16 +210,16 @@ bb.RteManager.registerAdapter("aloha",{
     },
       
     /* prendre en compte le mode*/
-    onShowToolbar : function(){
+    onShowToolbar : function(){        
+        if(this.mode != "inline") return;
         bb.jquery("#aloha").css({
             position:"relative"
         });
-        if(this.mode != "inline") return;
         bb.jquery(".aloha-ui.aloha-ui-toolbar").css({
             width: "490px",
             position: "absolute",
             top: "0px"
-        });
+        });  
         bb.jquery(".aloha-multisplit-content").css("zIndex",1000);
         bb.jquery(".aloha-toolbar").appendTo("#aloha"); 
     },

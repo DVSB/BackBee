@@ -314,10 +314,11 @@ define([
             /* click handle depends on tag */
             var tagname = (typeof styleConf.tagname == "string") ? styleConf.tagname : "span";
             return {
-                name:  styleConf.tooltip,
+                name:  Aloha.jQuery.trim(styleConf.tooltip),
                 tooltip: styleConf.tooltip,
+                text: styleConf.tooltip,
                 wide: true,
-                cls: "aloha-large-button styleConf.markup",
+                cls: "aloha-large-button bb-"+styleConf.markup,
                 markup: jQuery('<'+tagname+'>',{
                     'class':styleConf.markup
                 }),
@@ -365,7 +366,7 @@ define([
             /**
 		 * default button configuration
 		 */
-            config: [ 'b', 'i', 'sub', 'sup', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'removeFormat' ],
+            config: [],
 
             /**
 		 * available options / buttons
@@ -382,14 +383,18 @@ define([
                 // Prepare
                 
                 var me = this;
-                this.availableStyles = jQuery.isArray(this.settings.styles) ? this.settings.styles : [];
-                if(jQuery.isArray(this.availableStyles) && this.availableStyles.length==0) return;
+                this.availableStyles = jQuery.isArray(this.settings.config) ? this.settings.config : [];
+                // if(jQuery.isArray(this.availableStyles) && this.availableStyles.length==0) return;
                 
                 this.initButtons();
-                this.initStyleComponents();
                 Scopes.enterScope("bb.customstyle");
+                
                 Aloha.bind('aloha-plugins-loaded', function () {});
-                Aloha.bind('aloha-editable-activated', function (e, params) {});
+                
+                Aloha.bind('aloha-editable-activated', function (e, params) {
+                    me.initStyleComponents(params.editable.obj);
+                });
+                
                 Aloha.bind('aloha-editable-deactivated', function (e, params) {});
             },
             
@@ -402,38 +407,82 @@ define([
             initButtons: function () {
                 var that = this;
                 this.buttons = {};
+                this.availableStyleItems = [];
                 this.multiSplitItems = [];
-                this.multiSplitStyleButtons = [];
+                this.multiSplitStyleButtons = null;
+                this.styleBtnMap = [];
                 PubSub.sub('aloha.selection.context-change', function(message) {
                     onSelectionChanged(that, message.range);
                 });
             },
             
             /* create style here */
-            initStyleComponents: function(availablesStyles){
+            initStyleComponents: function(obj){
                 var that = this;
-                this.availableStyleItems = [];
-                /*handle text level style & */
-                jQuery.each(this.availableStyles, function(i,styleInfo){
+               
+                var availableStyles = this.getEditableConfig(obj);
+                var btnsToShow = [];
+                if(this.availableStyleItems.length){
+                    /*masquer tous les boutons */
+                    jQuery.each(this.availableStyleItems,function(i,btn){
+                        that.multiSplitStyleButtons.hideItem(btn.name);
+                    });
+              
+                    this.availableStyleItems = [];
+                }
+              
+                /*ne rendre que les boutons qui n'existe pas encore*/
+                jQuery.each(availableStyles, function(i,styleInfo){
+                    /** Add btn only once...**/
                     if(typeof styleInfo.markup=="string"){
                         var cp = i + 1;
                         styleInfo.tagname = (typeof styleInfo.tagname=="string")? styleInfo.tagname : "span";
                         styleInfo.tooltip = (typeof styleInfo.tooltip=="string") ? styleInfo.tooltip :"style "+cp;
-                        that.availableStyleItems.push(makeStyleButton(that,styleInfo));
+                        var newStyleBtn = makeStyleButton(that,styleInfo);
+                        /* in btn doesn't exist*/
+                        that.availableStyleItems.push(newStyleBtn);
+                        that.styleBtnMap.push(styleInfo.tooltip);
+                        btnsToShow.push(styleInfo.tooltip);
                     }
                     else{
                         console.warn("bbformatstyle"  +"[markup] key should be a string!");
                     }
                 });
-					
+                
+                if(this.multiSplitStyleButtons){
+                    var component = Ui.getAdoptedComponent("formatStyle");
+                    jQuery(component.element).remove();
+                }
                 this.multiSplitStyleButtons = MultiSplitButton({
                     name: "formatStyle",
                     items: this.availableStyleItems,
                     hideIfEmpty : true,
                     scope: 'Aloha.continoustext'
-                }); 
-
+                });    
+               
+            /*
+                    var self = this;
+                    /* if new btn is available */
+            /*if(this.availableStyleItems.length){
+                        jQuery.each(this.availableStyleItems,function(i,btn){
+                            console.log("I add",btn);
+                            self.multiSplitStyleButtons.pushItem(btn); 
+                        });
+                    }*/
+                    
+            /* if(btnsToShow.length){
+                        jQuery.each(btnsToShow,function(i,btn){
+                            self.multiSplitStyleButtons.showItem(btn);
+                        });
+                    }
+                    */
+                
+              
+                
             },
+            
+            
+            
             // duplicated code from link-plugin
             //Creates string with this component's namepsace prefixed the each classname
             nsClass: function () {
@@ -486,7 +535,7 @@ define([
 		 * @return string
 		 */
             toString: function () {
-                return 'format';
+                return 'bbformatstyle';
             }
         });
     });

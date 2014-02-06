@@ -56,7 +56,7 @@ body #bb5-toolbar-wrapper textarea, body .bb5-ui textarea {font-family:Arial, He
 /*CONTENT handling*/
 #bb5-site-wrapper .bb5-content {position:relative; min-height:21px;} /*min-height*/
 #bb5-site-wrapper .bb5-content-void {position:relative; min-width:100px; background:transparent url(../img/bb5-content-void.png) no-repeat scroll 50% 50%; background-size:100%; min-height:50px;} 
-
+#bb5-site-wrapper tr.bb5-content-void {display:block;}
 #bb5-site-wrapper.bb5-editmode-block .rootContentSet {padding-bottom: 15px; padding-top: 15px; margin-bottom: 15px; margin-top: 15px;}
 #bb5-site-wrapper .bb5-content.bb5-content-hover, #bb5-site-wrapper .rootContentSet.bb5-content-hover {-webkit-box-shadow:0px 0px 1px 3px rgba(0,0,0,0.2); box-shadow:0px 0px 1px 3px rgba(0,0,0,0.2);} /*hovering a block -> gray*/
 #bb5-site-wrapper.bb5-editmode-block .bb5-draggable-item {/*cursor:url(../img/bb5-cursor_draggable.gif), move;*/}
