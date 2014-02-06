@@ -27,7 +27,7 @@ abstract class ARendererAdapter implements IRendererAdapter
 	/**
 	 * Constructor
 	 * 
-	 * @param BBApplication $bbapp [description]
+	 * @param ARenderer $renderer
 	 */
 	public function __construct(ARenderer $renderer)
 	{
@@ -83,4 +83,20 @@ abstract class ARendererAdapter implements IRendererAdapter
      * @see BackBuilder\Renderer\IRendererAdapter::updateLayout()
      */
     public function updateLayout(Layout $layout, $layoutFile) { }
+
+    /**
+     * @see BackBuilder\Renderer\IRendererAdapter::onNewRenderer()
+     */
+    public function onNewRenderer(ARenderer $renderer)
+    { 
+    	$this->setRenderer($renderer);
+    }
+
+    /**
+     * @see BackBuilder\Renderer\IRendererAdapter::onRestorePreviousRenderer()
+     */
+    public function onRestorePreviousRenderer(ARenderer $renderer)
+    { 
+    	$this->setRenderer($renderer);
+    }
 }

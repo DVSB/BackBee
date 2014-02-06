@@ -70,32 +70,32 @@ class Renderer extends ARenderer
         }
     }
 
-    public function __clone()
+     /**
+     * Update every helpers and every registered renderer adapters with the right ARenderer;
+     * this method is called everytime we clone a renderer
+     */
+    public function updatesAfterClone()
     {
-        parent::__clone();
-
-        $this->updateRendererAdapters();
-    }
-
-    protected function _restore()
-    {
-        parent::_restore();
-
-        $this->updateRendererAdapters();
+        $this->updateHelpers();
+        foreach ($this->rendererAdapters->all() as $ra) {
+            $ra->onNewRenderer($this);
+        }
 
         return $this;
     }
 
     /**
-     * Update every registered renderer adapters of the current renderer instance
-     * by updating their ARenderer; its method is used at clone and unset of
-     * ARenderer
+     * Update every helpers and every registered renderer adapters with the right ARenderer;
+     * this method is called everytime we unset a renderer
      */
-    private function updateRendererAdapters()
+    protected function updatesAfterUnset()
     {
+        $this->updateHelpers();
         foreach ($this->rendererAdapters->all() as $ra) {
-            $ra->setRenderer($this);
+            $ra->onRestorePreviousRenderer($this);
         }
+
+        return $this;
     }
 
     /**
@@ -246,6 +246,8 @@ class Renderer extends ARenderer
 
         $renderer = clone $this;
 
+        $renderer->updatesAfterClone();
+
         $renderer->setObject($obj)
                 ->setMode($mode, $ignoreModeIfNotSet)
                 ->_triggerEvent('prerender');
@@ -275,8 +277,9 @@ class Renderer extends ARenderer
         }
 
         $render = $renderer->__render;
-        $this->_restore();
         unset($renderer);
+
+        $this->updatesAfterUnset();
 
         return $render;
     }
@@ -309,12 +312,12 @@ class Renderer extends ARenderer
                     }
                 }
 
-                if (null !== $this->_element_name) {
+                if (null !== $this->__currentelement) {
                     break;
                 }
             }
 
-            if (null !== $this->_element_name) {
+            if (null !== $this->__currentelement) {
                 break;
             }
         }
