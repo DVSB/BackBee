@@ -69,14 +69,17 @@ class Media extends AbstractServiceLocal
     {
         //ini_set("upload_max_filesize","15M");
         //ini_set("post_max_size","15M");
-        $uploadedmedia = $request->files->get('uploadedmedia');
         $uploaded_file = new \stdClass();
         $uploaded_file->originalname = $request->files->get('uploadedmedia')->getClientOriginalName();
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
         $uploaded_file->filename = basename($request->files->get('uploadedmedia')->getRealPath()) . '.' . $uploaded_file->extension;
         if (FALSE === is_dir($this->bbapp->getTemporaryDir()))
             mkdir($this->bbapp->getTemporaryDir(), 0755, TRUE);
-        move_uploaded_file($request->files->get('uploadedmedia')->getRealPath(), $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $uploaded_file->filename);
+        $isFileIsMoved = move_uploaded_file($request->files->get('uploadedmedia')->getRealPath(), $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $uploaded_file->filename);
+        if(!$isFileIsMoved){
+              return "stran";
+        }
+      
         return $uploaded_file;
     }
 
