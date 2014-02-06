@@ -146,7 +146,7 @@ bb.RteManager.registerAdapter("aloha",{
                 var rteConf = ($bb(contentEl).get("rteconf")!=-1) ? $bb(contentEl).get("rteconf") : false;
                 if( !elementname || !rteConf ) return true;
                 var editableConf = (("customconf" in self.rteConfig) && self.rteConfig.customconf) ? self.rteConfig.customconf[rteConf]: false;
-                if(!bb.jquery.isPlainObject(editableConf)) throw "aloha.adapter editableConf must be an object";
+                if(!bb.jquery.isPlainObject(editableConf)) return true;
                 /* extend default conf with editableConf*/
                 var pluginsSettings = bb.jquery.extend(true,{},Aloha.settings.plugins);
                 editableConf = bb.jquery.extend({},pluginsSettings,editableConf.pluginsconf); 
