@@ -17,7 +17,12 @@
                 showOn: {
                     scope: "bb.customstyle"
                 }
-            }],
+            },
+            {
+                label:"tab.img.label",
+                components: [["imageBrowser","\n","removeImage"]]
+            }
+            ],
             exclude: ['blockquote']
         },
         bundles: {
