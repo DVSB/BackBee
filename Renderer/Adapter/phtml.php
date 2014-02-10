@@ -50,12 +50,6 @@ class phtml extends ARendererAdapter
     protected $includeExtensions = array('.phtml', '.php');
 
     /**
-     * Array that contains every declared js script (header and footer)
-     * @var array
-     */
-    private $scripts;
-
-    /**
      * @var array
      */
     private $params;
@@ -74,6 +68,7 @@ class phtml extends ARendererAdapter
         parent::__construct($renderer);
 
         $this->params = array();
+        $this->vars = array();
     }
 
     /**
@@ -267,5 +262,16 @@ class phtml extends ARendererAdapter
         libxml_clear_errors();
 
         return $layoutFile;
+    }
+
+    /**
+     * @see BackBuilder\Renderer\IRendererAdapter::onRestorePreviousRenderer()
+     */
+    public function onRestorePreviousRenderer(ARenderer $renderer)
+    { 
+        parent::onRestorePreviousRenderer($renderer);
+
+        $this->vars = $renderer->getAssignedVars();
+        $this->params = $renderer->getParam();
     }
 }

@@ -130,6 +130,7 @@ class Dispatcher extends EventDispatcher
         if (0 === strpos($eventName, 'backbuilder.')) {
             $eventName = substr($eventName, 12);
         }
+        
         if (0 === strpos($eventName, 'classcontent.')) {
             $eventName = substr($eventName, 13);
         }

@@ -121,7 +121,6 @@ abstract class ARenderer implements IRenderer
     protected $__currentelement;
     protected $__object = null;
     private $__vars = array();
-    private $__params = array();
     private $__overloaded = 0;
     protected $__render;
 
@@ -154,7 +153,7 @@ abstract class ARenderer implements IRenderer
         $this->updateHelpers();
     }
 
-    public function updateHelpers()
+    protected function updateHelpers()
     {
         foreach ($this->helpers->all() as $h) {
             $h->setRenderer($this);
@@ -407,15 +406,7 @@ abstract class ARenderer implements IRenderer
             $this->__object = $this->_application->getEntityManager()->find(get_class($this->_object), $this->_object->getUid());
         }
 
-        $this->__vars[] = $this->_vars;
-        $this->__params[] = $this->_params;
-
-        return $this;
-    }
-
-    protected function _restore()
-    {
-        $this->updateHelpers();
+        $this->__vars = $this->_vars;
 
         return $this;
     }
@@ -512,8 +503,8 @@ abstract class ARenderer implements IRenderer
 
     public function getUri($pathinfo = null)
     {
-        if (null !== $pathinfo && preg_match('/^http[s]?:\/\//', $pathinfo)) {
-            return $pathinfo;
+        if (null !== $pathinfo && preg_match('/^([a-zA-Z1-9\/_]*)http[s]?:\/\//', $pathinfo, $matches)) {
+            return substr($pathinfo, strlen($matches[1]));
         }
 
         if ('/' !== substr($pathinfo, 0, 1)) {
@@ -713,7 +704,7 @@ abstract class ARenderer implements IRenderer
     public function reset()
     {
         $this->_resetVars()
-                ->_resetParams();
+             ->_resetParams();
 
         $this->__render = null;
 
@@ -730,8 +721,9 @@ abstract class ARenderer implements IRenderer
      */
     public function setMode($mode = null, $ignoreIfRenderModeNotAvailable = true)
     {
-        $this->_mode = $mode;
+        $this->_mode = (null === $mode || '' === $mode ? null : $mode);
         $this->_ignoreIfRenderModeNotAvailable = $ignoreIfRenderModeNotAvailable;
+
         return $this;
     }
 
@@ -743,6 +735,7 @@ abstract class ARenderer implements IRenderer
     public function setNode(ANestedNode $node)
     {
         $this->_node = $node;
+
         return $this;
     }
 
@@ -755,8 +748,9 @@ abstract class ARenderer implements IRenderer
     {
         $this->__currentelement = null;
         $this->_object = $object;
+
         if (is_array($this->__vars) && 0 < count($this->__vars)) {
-            foreach ($this->__vars[count($this->__vars) - 1] as $key => $var) {
+            foreach ($this->__vars as $key => $var) {
                 if ($var === $object) {
                     $this->__currentelement = $key;
                 }
@@ -788,6 +782,7 @@ abstract class ARenderer implements IRenderer
     {
         if (is_string($param)) {
             $this->_params[$param] = $value;
+
             return $this;
         }
 
@@ -808,6 +803,7 @@ abstract class ARenderer implements IRenderer
     public function setRender($render)
     {
         $this->__render = $render;
+        
         return $this;
     }
 

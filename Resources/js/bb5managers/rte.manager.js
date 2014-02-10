@@ -38,7 +38,7 @@
                     if(!adapter) throw "rte.manager adapter can't be found";
                     self.managerSettings.adapter = adapter;
                     var adapterConfig = rteConfig[adapter];
-                    if(adapterConfig == "undefined") throw "rte.manager config can't be found for "+adaper+" adapter";
+                    if(adapterConfig == "undefined") throw "rte.manager config can't be found for "+adapter+" adapter";
                     bb.jquery.extend(self.rteConfig,rteConfig.config,adapterConfig);
                 },
                 error : function(e){
@@ -46,7 +46,7 @@
                 }
             });
             /* try to load rte config here */
-            bb.require(["RteManager"],bb.jquery.proxy(this.applyRte,this));
+            bb.require(["RteManager"], bb.jquery.proxy(this.applyRte,this));
             return this;
         },
         
@@ -67,7 +67,7 @@
             bb.jquery(document).bind("content:ItemClicked",function(e, path, bbContent){
                 if(self.isDisabled()) return;
                 if(!bbContent) throw "rte.manager bbContent can't be found"; 
-                self.rteAdapter.applyInlineTo(bbContent.contentEl);
+                self.rteAdapter.applyInlineTo(bbContent);
                 return true;
             }); 
             bb.jquery(bb).trigger("bb:rteReady",{data: self.rteAdapter});

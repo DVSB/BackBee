@@ -70,32 +70,32 @@ class Renderer extends ARenderer
         }
     }
 
-    public function __clone()
+     /**
+     * Update every helpers and every registered renderer adapters with the right ARenderer;
+     * this method is called everytime we clone a renderer
+     */
+    public function updatesAfterClone()
     {
-        parent::__clone();
-
-        $this->updateRendererAdapters();
-    }
-
-    protected function _restore()
-    {
-        parent::_restore();
-
-        $this->updateRendererAdapters();
+        $this->updateHelpers();
+        foreach ($this->rendererAdapters->all() as $ra) {
+            $ra->onNewRenderer($this);
+        }
 
         return $this;
     }
 
     /**
-     * Update every registered renderer adapters of the current renderer instance
-     * by updating their ARenderer; its method is used at clone and unset of
-     * ARenderer
+     * Update every helpers and every registered renderer adapters with the right ARenderer;
+     * this method is called everytime we unset a renderer
      */
-    private function updateRendererAdapters()
+    protected function updatesAfterUnset()
     {
+        $this->updateHelpers();
         foreach ($this->rendererAdapters->all() as $ra) {
-            $ra->setRenderer($this);
+            $ra->onRestorePreviousRenderer($this);
         }
+
+        return $this;
     }
 
     /**
@@ -246,6 +246,8 @@ class Renderer extends ARenderer
 
         $renderer = clone $this;
 
+        $renderer->updatesAfterClone();
+
         $renderer->setObject($obj)
                 ->setMode($mode, $ignoreModeIfNotSet)
                 ->_triggerEvent('prerender');
@@ -275,8 +277,9 @@ class Renderer extends ARenderer
         }
 
         $render = $renderer->__render;
-        $this->_restore();
         unset($renderer);
+
+        $this->updatesAfterUnset();
 
         return $render;
     }
@@ -309,12 +312,12 @@ class Renderer extends ARenderer
                     }
                 }
 
-                if (null !== $this->_element_name) {
+                if (null !== $this->__currentelement) {
                     break;
                 }
             }
 
-            if (null !== $this->_element_name) {
+            if (null !== $this->__currentelement) {
                 break;
             }
         }
@@ -372,6 +375,16 @@ class Renderer extends ARenderer
         $this->assign('error_trace', $trace);
 
         return $this->renderTemplate(false, true);
+    }
+
+    /**
+     * Check if $filename exists
+     * @param  string  $filename 
+     * @return boolean           
+     */
+    public function isTemplateFileExists($filename)
+    {
+        return $this->isValidTemplateFile($filename);
     }
 
     /**
@@ -569,7 +582,7 @@ class Renderer extends ARenderer
         }
 
         return $adapter->isValidTemplateFile(
-                        $filename, true === $isLayout ? $this->_layoutdir : $this->_scriptdir
+            $filename, true === $isLayout ? $this->_layoutdir : $this->_scriptdir
         );
     }
 
@@ -677,4 +690,15 @@ class Renderer extends ARenderer
         return $layoutfile;
     }
 
+    public function generateUrlByRouteName($routeName, array $routeParams = null)
+    {
+        $uri = $this->getApplication()->getController()->getRouteCollection()->getRoutePath($routeName);
+        if (null !== $routeParams && true === is_array($routeParams)) {
+            foreach ($routeParams as $key => $value) {
+                $uri = str_replace('{' . $key . '}', $value, $uri);
+            }
+        }
+
+        return $this->getUri($uri);
+    }
 }

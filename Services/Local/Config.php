@@ -21,6 +21,8 @@
 
 namespace BackBuilder\Services\Local;
 
+use BackBuilder\Services\Exception\ServicesException;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Services
@@ -36,9 +38,13 @@ class Config extends AbstractServiceLocal
      */
     public function getRTEConfig()
     {
-        $config = $this->bbapp->getConfig();
-        $config = $config->getSection("rteconfig");
-        return $config;
+        try {
+            $main_config = $this->bbapp->getConfig();
+            $config = $main_config->getSection("rteconfig");
+            return $config;
+        } catch (\Exception $e) {
+            throw new ServicesException("rteConfig.yml file can't be found");
+        }
     }
 
 }

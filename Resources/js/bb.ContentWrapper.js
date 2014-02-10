@@ -119,7 +119,7 @@ bb.ContentWrapper = (function($, global) {
             return false;
         var contentInfos = {};
         /*refparent is coupled with itemcontainer*/
-        var availableContentAttrs = ["uid", "isloaded", "rendermode", "maxentry", "refparent", "type", "accept", "contentplugins", "element", "parent", "draftuid", "itemcontainer"];
+        var availableContentAttrs = ["uid", "isloaded", "rendermode", "maxentry", "refparent", "type", "accept", "contentplugins", "element","rteconf", "parent", "draftuid", "itemcontainer"];
         bb.jquery.each(availableContentAttrs, function(i, attr) {
             contentInfos[attr] = bb.jquery(node).attr("data-" + attr) || false;
         });
@@ -541,6 +541,21 @@ bb.ContentWrapper = (function($, global) {
             }
             this.set("data", data, notify);
             return data;
+        }
+        
+        /* return */
+        BbContentWrapper.prototype.getSubContents = function(){
+            var result = [], self = this;
+            var $ = bb.jquery; 
+            var subContents = bb.jquery(this.contentEl).find("[data-element]");
+            if(subContents.length){
+                subContents.each(function(i,element){
+                    if($(element).attr('data-parent') == self.getUid()){
+                        result.push(element);
+                    }
+                });
+            }
+            return result;
         }
 
 
