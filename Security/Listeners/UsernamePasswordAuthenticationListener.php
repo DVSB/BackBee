@@ -61,7 +61,7 @@ class UsernamePasswordAuthenticationListener implements ListenerInterface
 
         $token = $this->_context->getToken();
         $errmsg = '';
-        
+
         if (null !== $request->request->get('login') && null !== $request->request->get('password')) {
             $token = new UsernamePasswordToken($request->request->get('login'), $request->request->get('password'));
             $token->setUser($request->request->get('login'), $request->request->get('password'));
@@ -79,6 +79,11 @@ class UsernamePasswordAuthenticationListener implements ListenerInterface
 
         if (is_a($token, 'BackBuilder\Security\Token\UsernamePasswordToken') && $errmsg != '') {
             if (null !== $this->_login_path) {
+                if (preg_match('/%(.*)%/s', $this->_login_path, $matches)) {
+                    if ($this->_context->getApplication()->getContainer()->hasParameter($matches[1]))
+                        $this->_login_path = $this->_context->getApplication()->getContainer()->getParameter($matches[1]);
+                }
+
                 $redirect = $request->query->get('redirect');
                 if (null === $redirect)
                     $redirect = $request->request->get('redirect', '');
@@ -87,7 +92,7 @@ class UsernamePasswordAuthenticationListener implements ListenerInterface
                 }
                 if (NULL !== $qs = $request->getQueryString())
                     $redirect .= '?' . $qs;
-
+                
                 $response = new RedirectResponse($event->getRequest()->getUriForPath($this->_login_path . '?redirect=' . urlencode($redirect) . '&errmsg=' . urlencode($errmsg) . '&login=' . urlencode($request->request->get('login'))));
                 $event->setResponse($response);
                 return;
