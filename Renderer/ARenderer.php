@@ -503,8 +503,8 @@ abstract class ARenderer implements IRenderer
 
     public function getUri($pathinfo = null)
     {
-        if (null !== $pathinfo && preg_match('/^http[s]?:\/\//', $pathinfo)) {
-            return $pathinfo;
+        if (null !== $pathinfo && preg_match('/^([a-zA-Z1-9\/_]*)http[s]?:\/\//', $pathinfo, $matches)) {
+            return substr($pathinfo, strlen($matches[1]));
         }
 
         if ('/' !== substr($pathinfo, 0, 1)) {
