@@ -315,9 +315,11 @@ class Logger implements LoggerInterface, SQLLogger
 
     public function startQuery($sql, array $params = null, array $types = null)
     {
-        $this->_start = microtime(true);
-        $this->_buffer = '[Doctrine] ' . $sql . ' with ' . var_export($params, true); //old throw error  "Nesting level too deep - recursive dependency?"
-        //$this->_buffer = '[Doctrine] '.$sql;
+        if (self::DEBUG === $this->_level) {
+            $this->_start = microtime(true);
+            //$this->_buffer = '[Doctrine] ' . $sql . ' with ' . var_export($params, true); //old throw error  "Nesting level too deep - recursive dependency?"
+            $this->_buffer = '[Doctrine] '.$sql;
+        }
     }
 
     public function stopQuery()
