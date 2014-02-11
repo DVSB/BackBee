@@ -25,7 +25,8 @@ use BackBuilder\Exception\InvalidArgumentException;
 use Doctrine\ORM\Configuration,
     Doctrine\DBAL\Connection,
     Doctrine\ORM\EntityManager,
-    Doctrine\DBAL\Logging\SQLLogger;
+    Doctrine\DBAL\Logging\SQLLogger,
+    Doctrine\Common\EventManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -51,10 +52,11 @@ class EntityManagerCreator
      *                         - collation      string                       Optional, the collation to use
      *                         - ...            mixed                        All the required parameter to open a new connection
      * @param \Psr\Log\LoggerInterface $logger Optional logger
+     * @param \Doctrine\Common\EventManager $evm Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be returned
      */
-    public static function create(array $options = array(), LoggerInterface $logger = null)
+    public static function create(array $options = array(), LoggerInterface $logger = null, EventManager $evm = null)
     {
         if (true === array_key_exists('entity_manager', $options)) {
             // Test the nature of the entity_manager parameter
@@ -65,9 +67,9 @@ class EntityManagerCreator
 
             if (true === array_key_exists('connection', $options)) {
                 // An already connection is provided
-                $em = self::_createEntityManagerWithConnection($options['connection'], $config);
+                $em = self::_createEntityManagerWithConnection($options['connection'], $config, $evm);
             } else {
-                $em = self::_createEntityManagerWithParameters($options, $config);
+                $em = self::_createEntityManagerWithParameters($options, $config, $evm);
             }
         }
 
@@ -107,6 +109,7 @@ class EntityManagerCreator
     /**
      * Returns the EntityManager provided
      * @param \Doctrine\ORM\EntityManager $entity_manager
+     * @param \Doctrine\Common\EventManager $evm Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager is not an EntityManager
      */
@@ -124,15 +127,16 @@ class EntityManagerCreator
      * Returns a new EntityManager with the provided connection
      * @param \Doctrine\DBAL\Connection $connection
      * @param \Doctrine\ORM\Configuration $config
+     * @param \Doctrine\Common\EventManager $evm Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
-    private static function _createEntityManagerWithConnection($connection, Configuration $config)
+    private static function _createEntityManagerWithConnection($connection, Configuration $config, EventManager $evm = null)
     {
         if (true === is_object($connection)
                 && $connection instanceof Connection) {
             try {
-                return EntityManager::create($connection, $config);
+                return EntityManager::create($connection, $config, $evm);
             } catch (\Exception $e) {
                 throw new InvalidArgumentException('Enable to create new EntityManager with provided Connection', InvalidArgumentException::INVALID_ARGUMENT, $e);
             }
@@ -148,10 +152,10 @@ class EntityManagerCreator
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
-    private static function _createEntityManagerWithParameters(array $options, Configuration $config)
+    private static function _createEntityManagerWithParameters(array $options, Configuration $config, EventManager $evm = null)
     {
         try {
-            return EntityManager::create($options, $config);
+            return EntityManager::create($options, $config, $evm);
         } catch (\Exception $e) {
             throw new InvalidArgumentException('Enable to create new EntityManager with provided parameters', InvalidArgumentException::INVALID_ARGUMENT, $e);
         }

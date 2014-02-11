@@ -196,7 +196,11 @@ BB4.ToolsbarManager.register("bundletb",{
         var btn = bb.jquery("<button class='bb5-button bb5-button-bulky bb5-extnd-choice-x'><i></i></button>").clone();
         bb.jquery(btn).attr("id","bundle_"+bundle.id);
         bb.jquery(btn).attr("title",bundle.name || bundle.id);
-        bb.jquery('i', bb.jquery(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+"img/extnd-x/picto-extnd.png);");
+        if(bundle.thumbnail) {
+            bb.jquery('i', bb.jquery(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+bundle.thumbnail+");");
+        } else {
+            bb.jquery('i', bb.jquery(btn)).attr("style", "background-image:url("+bb.baseurl+bb.resourcesdir+"img/extnd-x/picto-extnd.png);");
+        }
         if ('on' == bundle.enable) {
             bb.jquery('i', bb.jquery(btn)).append("<span></span>");
         }
