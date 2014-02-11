@@ -135,7 +135,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
                 $doctrine_config['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir() . DIRECTORY_SEPARATOR . 'Proxies';
             }
 
-            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogger());
+            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogger(), $this->getApplication()->getEntityManager()->getEventManager());
         } catch (\Exception $e) {
             throw new Exception\BundleException('Database connection error', BundleException::INIT_ERROR, $e);
         }
