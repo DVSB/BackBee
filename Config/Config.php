@@ -36,11 +36,11 @@ use Symfony\Component\Yaml\Exception\ParseException,
  */
 class Config
 {
+
     /**
      * Default config file to look for
      * @var string
      */
-
     const CONFIG_FILE = 'config.yml';
 
     /**
@@ -186,8 +186,17 @@ class Config
             throw new Exception\InvalidBaseDirException(sprintf('Cannot read the directory %s', $basedir));
         }
 
+        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;
         $pattern = $basedir . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]';
-        return glob($pattern, GLOB_BRACE);
+        $yml_files = glob($pattern, GLOB_BRACE);
+
+        if (true === file_exists($default_file) && 1 < count($yml_files)) {
+            // Ensure that config.yml is the first one
+            $yml_files = array_diff($yml_files, array($default_file));
+            array_unshift($yml_files, $default_file);
+        }
+
+        return $yml_files;
     }
 
     /**
@@ -284,4 +293,5 @@ class Config
             $this->_saveToCache($basedir);
         }
     }
+
 }
