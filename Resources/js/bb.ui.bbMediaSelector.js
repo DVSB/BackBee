@@ -817,7 +817,7 @@
                         },
 
                         error: function(err, file) {
-                             dropbox.empty();
+                            dropbox.empty();
                             switch(err) {
                                 case 'BrowserNotSupported':
                                     myself._showMessage(bb.i18n.__('toolbar.editing.error'), bb.i18n.__('toolbar.editing.upload_browser_not_supported'), 'alert');
@@ -850,15 +850,28 @@
                         },
 
                         dragOver: function(e) {
-                            bb.jquery(e.target).addClass('hover');
+                            if (bb.jquery(e.target).hasClass('bbImagePreview')) {
+                                bb.jquery(e.target).addClass('hover');
+                            } else {
+                                bb.jquery(e.target).parents('.bbImagePreview').addClass('hover');                            
+                            }
                         },
 
                         dragLeave: function(e) {
                             bb.jquery(e.target).removeClass('hover');
+                            if (bb.jquery(e.target).hasClass('bbImagePreview')) {
+                                bb.jquery(e.target).removeClass('hover');
+                            } else {
+                                bb.jquery(e.target).parents('.bbImagePreview').removeClass('hover');                            
+                            }
                         },
 
                         drop: function(e) {
-                            bb.jquery(e.target).removeClass('hover');
+                            if (bb.jquery(e.target).hasClass('bbImagePreview')) {
+                                bb.jquery(e.target).removeClass('hover');
+                            } else {
+                                bb.jquery(e.target).parents('.bbImagePreview').removeClass('hover');                            
+                            }
                         }
 
                     }, dropbox);

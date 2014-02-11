@@ -65,4 +65,36 @@ class Media
         return $folder . $filename . $extension;
     }
 
+    /**
+     * Returns the computed storage filename base on an uid
+     * @param string $uid
+     * @param string $originalname
+     * @param int $folder_size
+     * @param boolean $include_originalname
+     * @return string
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the provided $uid is invalid
+     */
+    public static function getPathFromUid($uid, $originalname, $folder_size = 3, $include_originalname = false)
+    {
+        if (false === is_string($uid) || true === empty($uid)) {
+            throw new InvalidArgumentException('Enable to compute path, the provided uid is not a valid string');
+        }
+
+        $folder = '';
+        $filename = $uid;
+        if (0 < $folder_size && strlen($uid) > $folder_size) {
+            $folder = substr($uid, 0, $folder_size) . DIRECTORY_SEPARATOR;
+            $filename = substr($uid, $folder_size);
+        }
+
+        if (true === $include_originalname) {
+            $filename .= DIRECTORY_SEPARATOR . $include_originalname;
+        } else {
+            $extension = File::getExtension($originalname, true);
+            $filename .= $extension;
+        }
+
+        return $folder . $filename;
+    }
+
 }

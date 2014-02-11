@@ -411,11 +411,11 @@ class FrontController implements HttpKernelInterface {
      * @param string $filename The media file to provide
      * @throws FrontControllerException
      */
-    public function mediaAction($type, $filename = null) 
+    public function mediaAction($type, $filename = null, $includePath = array())
     {
         $this->_validateResourcesAction($filename);
 
-        $includePath = array($this->_application->getStorageDir(), $this->_application->getMediaDir());
+        $includePath = array_merge($includePath, array($this->_application->getStorageDir(), $this->_application->getMediaDir()));
         if (null !== $this->_application->getBBUserToken()) {
             $includePath[] = $this->_application->getTemporaryDir();
         }
