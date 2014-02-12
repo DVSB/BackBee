@@ -52,7 +52,7 @@ class EntityFinder
             } else {
                 if (1 === preg_match('/.*(.php)$/', $subpath)) {
                     $namespace = $this->getNamespace($subpath);
-                    if ($this->_isEntity(new \ReflectionClass($namespace))) {
+                    if (true === class_exists($namespace) && $this->_isEntity(new \ReflectionClass($namespace))) {
                         $entities[] = $namespace;
                     }
                 }
