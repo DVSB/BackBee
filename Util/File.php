@@ -42,6 +42,51 @@ class File
     protected static $_prefixes = array('', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y');
 
     /**
+     * Returns canonicalized absolute pathname
+     * @param string $path
+     * @return boolean|string
+     */
+    public static function realpath($path)
+    {
+        if (false === $parse_url = parse_url($path)) {
+            return false;
+        }
+
+        if (false === array_key_exists('host', $parse_url)) {
+            return realpath($path);
+        }
+
+        if (false === array_key_exists('path', $parse_url)) {
+            return false;
+        }
+
+        $parts = array();
+        foreach (explode('/', str_replace(DIRECTORY_SEPARATOR, '/', $parse_url['path'])) as $part) {
+            if ('.' === $part) {
+                continue;
+            } elseif ('..' === $part) {
+                array_pop($parts);
+            } else {
+                $parts[] = $part;
+            }
+        }
+        
+        $path = (isset($parse_url['scheme']) ? $parse_url['scheme'].'://' : '') .
+                (isset($parse_url['user']) ? $parse_url['user'] : '') .
+                (isset($parse_url['pass']) ? ':'.$parse_url['pass'] : '') .
+                (isset($parse_url['user']) || isset($parse_url['pass']) ? '@' : '') .
+                (isset($parse_url['host']) ? $parse_url['host'] : '') .
+                (isset($parse_url['port']) ? ':'.$parse_url['port'] : '') .
+                implode('/', $parts);
+        
+        if (false === file_exists($path)) {
+            return false;
+        }
+        
+        return $path;
+    }
+
+    /**
      * Normalize a file path according to the system characteristics
      * @param string $filepath the path to normalize
      * @param string $separator The directory separator to use
@@ -91,7 +136,7 @@ class File
     public static function resolveFilepath(&$filename, $key = NULL, $options = array())
     {
         $filename = self::normalizePath($filename);
-        $realname = realpath($filename);
+        $realname = self::realpath($filename);
 
         if ($filename != $realname) {
             $basedir = (array_key_exists('base_dir', $options)) ? self::normalizePath($options['base_dir']) : '';
@@ -112,7 +157,7 @@ class File
             }
         }
 
-        if (FALSE !== $realname = realpath($filename))
+        if (FALSE !== $realname = self::realpath($filename))
             $filename = $realname;
     }
 
@@ -172,7 +217,7 @@ class File
      */
     public static function copy($from, $to)
     {
-        if (false === $frompath = realpath($from)) {
+        if (false === $frompath = self::realpath($from)) {
             throw new InvalidArgumentsException(sprintf('The file `%s` cannot be accessed', $from));
         }
 
@@ -202,7 +247,7 @@ class File
      */
     public static function move($from, $to)
     {
-        if (false === $frompath = realpath($from)) {
+        if (false === $frompath = self::realpath($from)) {
             throw new InvalidArgumentsException(sprintf('The file `%s` cannot be accessed', $from));
         }
 
