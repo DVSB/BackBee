@@ -81,4 +81,11 @@ abstract class ATransport
     public abstract function rename($old_name, $new_name);
 
     public abstract function disconnect();
+
+    protected function _trigger_error($message)
+    {
+        trigger_error($message, E_USER_WARNING);
+        return false;
+    }
+
 }
