@@ -36,11 +36,11 @@ use Symfony\Component\Yaml\Exception\ParseException,
  */
 class Config
 {
-
     /**
      * Default config file to look for
      * @var string
      */
+
     const CONFIG_FILE = 'config.yml';
 
     /**
@@ -189,7 +189,7 @@ class Config
         $yml_files = array();
         $dir_iterator = new \RecursiveDirectoryIterator($basedir);
         $iterator = new \RecursiveRegexIterator($dir_iterator, '/^.*\.yml$/i');
-        foreach($iterator as $file) {
+        foreach ($iterator as $file) {
             $yml_files[] = $file;
         }
 
@@ -289,6 +289,8 @@ class Config
         if (null === $basedir) {
             $basedir = $this->_basedir;
         }
+
+        $basedir = \BackBuilder\Util\File::realpath($basedir);
 
         if (false === $this->_loadFromCache($basedir)) {
             $this->_loadFromBaseDir($basedir, $overwrite);
