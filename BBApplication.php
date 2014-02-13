@@ -740,7 +740,7 @@ class BBApplication
         if (null === $this->_resourcedir) {
             $this->_resourcedir = array();
 
-            $this->addResourceDir($this->getBaseDir() . '/BackBuilder/Resources')
+            $this->addResourceDir($this->getBBDir() . '/Resources')
                     ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
 
             if (true === $this->hasContext()) {
