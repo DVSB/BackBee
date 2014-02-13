@@ -47,13 +47,6 @@ class File implements IAppender
         $dirname = dirname($logfile);
         $mode = array_key_exists('mode', $options) ? $options['mode'] : 'a';
 
-        if ('' == $dirname || !is_dir($dirname)) {
-            $r = new \ReflectionObject($this);
-            $logfile = dirname($r->getFileName()) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR .
-                    str_replace('/', DIRECTORY_SEPARATOR, $logfile);
-            $dirname = dirname($logfile);
-        }
-
         if (!is_dir($dirname) && !@mkdir($dirname, 0711, TRUE))
             throw new LoggingException(sprintf('Unable to create log directory `%s`.', $dirname));
 

@@ -144,7 +144,7 @@ class BBApplication
         $dirToLookingFor[] = $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
         $dirToLookingFor[] = $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
         $dirToLookingFor[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
-        
+
         foreach ($dirToLookingFor as $dir) {
             if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
                 // Define where to looking for services.yml
@@ -221,13 +221,13 @@ class BBApplication
     private function _initAutoloader()
     {
         $this->getAutoloader()
-            ->register()
-            ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'bundle')))
-            ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'ClassContent', 'Repositories')))
-            ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
-            ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
-            ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Controller')))
-            ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')));
+                ->register()
+                ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'bundle')))
+                ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'ClassContent', 'Repositories')))
+                ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
+                ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
+                ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Controller')))
+                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
@@ -302,7 +302,7 @@ class BBApplication
                 throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
             }
 
-            $this->getContainer()->get('config')->extend($this->getRepository(), $this->_overwrite_config);
+            $this->getContainer()->get('config')->extend($this->getRepository() . DIRECTORY_SEPARATOR . 'Config', $this->_overwrite_config);
         }
         return $this;
     }
@@ -740,7 +740,7 @@ class BBApplication
         if (null === $this->_resourcedir) {
             $this->_resourcedir = array();
 
-            $this->addResourceDir($this->getBaseDir() . '/BackBuilder/Resources')
+            $this->addResourceDir($this->getBBDir() . '/Resources')
                     ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
 
             if (true === $this->hasContext()) {
