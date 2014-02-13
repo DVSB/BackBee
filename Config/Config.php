@@ -187,10 +187,18 @@ class Config
         }
 
         $yml_files = array();
-        $dir_iterator = new \RecursiveDirectoryIterator($basedir);
-        $iterator = new \RecursiveRegexIterator($dir_iterator, '/^.*\.yml$/i');
-        foreach ($iterator as $file) {
-            $yml_files[] = $file;
+        $parse_url = parse_url($basedir);
+        if (false !== $parse_url && isset($parse_url['scheme'])) {
+            $directory = new \RecursiveDirectoryIterator($basedir);
+            $iterator = new \RecursiveIteratorIterator($directory);
+            $regex = new \RegexIterator($iterator, '/^.+\.yml$/i', \RecursiveRegexIterator::GET_MATCH);
+
+            foreach ($regex as $file) {
+                $yml_files[] = $file[0];
+            }
+        } else {
+            $pattern = $basedir . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]';
+            $yml_files = glob($pattern, GLOB_BRACE);
         }
 
         $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;

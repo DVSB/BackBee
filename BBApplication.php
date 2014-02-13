@@ -302,7 +302,7 @@ class BBApplication
                 throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
             }
 
-            $this->getContainer()->get('config')->extend($this->getRepository(), $this->_overwrite_config);
+            $this->getContainer()->get('config')->extend($this->getRepository().DIRECTORY_SEPARATOR.'Config', $this->_overwrite_config);
         }
         return $this;
     }
