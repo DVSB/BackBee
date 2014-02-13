@@ -186,10 +186,14 @@ class Config
             throw new Exception\InvalidBaseDirException(sprintf('Cannot read the directory %s', $basedir));
         }
 
-        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;
-        $pattern = $basedir . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]';
-        $yml_files = glob($pattern, GLOB_BRACE);
+        $yml_files = array();
+        $dir_iterator = new \RecursiveDirectoryIterator($basedir);
+        $iterator = new \RecursiveRegexIterator($dir_iterator, '/^.*\.yml$/i');
+        foreach($iterator as $file) {
+            $yml_files[] = $file;
+        }
 
+        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;
         if (true === file_exists($default_file) && 1 < count($yml_files)) {
             // Ensure that config.yml is the first one
             $yml_files = array_diff($yml_files, array($default_file));
@@ -285,8 +289,6 @@ class Config
         if (null === $basedir) {
             $basedir = $this->_basedir;
         }
-
-        $basedir = realpath($basedir) . DIRECTORY_SEPARATOR;
 
         if (false === $this->_loadFromCache($basedir)) {
             $this->_loadFromBaseDir($basedir, $overwrite);
