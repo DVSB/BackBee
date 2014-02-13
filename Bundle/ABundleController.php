@@ -119,7 +119,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function getTemplateDir()
     {
-        return realpath($this->_bundle->getResourcesDir() . DIRECTORY_SEPARATOR . $this->_config->getBundleConfig('templates_dir')) . DIRECTORY_SEPARATOR;
+        return \BackBuilder\Util\File::realpath($this->_bundle->getResourcesDir() . DIRECTORY_SEPARATOR . $this->_config->getBundleConfig('templates_dir')) . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -129,7 +129,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function getLayoutDir()
     {
-        return realpath($this->_bundle->getResourcesDir() . DIRECTORY_SEPARATOR . $this->_config->getBundleConfig('layouts_dir')) . DIRECTORY_SEPARATOR;
+        return \BackBuilder\Util\File::realpath($this->_bundle->getResourcesDir() . DIRECTORY_SEPARATOR . $this->_config->getBundleConfig('layouts_dir')) . DIRECTORY_SEPARATOR;
     }
 
     /**

@@ -136,7 +136,7 @@ class File
     public static function resolveFilepath(&$filename, $key = NULL, $options = array())
     {
         $filename = self::normalizePath($filename);
-        $realname = realpath($filename);
+        $realname = self::realpath($filename);
 
         if ($filename != $realname) {
             $basedir = (array_key_exists('base_dir', $options)) ? self::normalizePath($options['base_dir']) : '';
@@ -157,7 +157,7 @@ class File
             }
         }
 
-        if (FALSE !== $realname = realpath($filename))
+        if (FALSE !== $realname = self::realpath($filename))
             $filename = $realname;
     }
 
@@ -217,7 +217,7 @@ class File
      */
     public static function copy($from, $to)
     {
-        if (false === $frompath = realpath($from)) {
+        if (false === $frompath = self::realpath($from)) {
             throw new InvalidArgumentsException(sprintf('The file `%s` cannot be accessed', $from));
         }
 
@@ -247,7 +247,7 @@ class File
      */
     public static function move($from, $to)
     {
-        if (false === $frompath = realpath($from)) {
+        if (false === $frompath = self::realpath($from)) {
             throw new InvalidArgumentsException(sprintf('The file `%s` cannot be accessed', $from));
         }
 
