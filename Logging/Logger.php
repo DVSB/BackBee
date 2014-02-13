@@ -110,8 +110,11 @@ class Logger implements LoggerInterface, SQLLogger
 
     public function __destruct()
     {
-        foreach ($this->_appenders as $appender)
-            $appender->close();
+        if (null !== $this->_appenders) {
+            foreach ($this->_appenders as $appender) {
+                $appender->close();
+            }
+        }
     }
 
     private function _setErrorHandler()
@@ -318,7 +321,7 @@ class Logger implements LoggerInterface, SQLLogger
         if (self::DEBUG === $this->_level) {
             $this->_start = microtime(true);
             //$this->_buffer = '[Doctrine] ' . $sql . ' with ' . var_export($params, true); //old throw error  "Nesting level too deep - recursive dependency?"
-            $this->_buffer = '[Doctrine] '.$sql;
+            $this->_buffer = '[Doctrine] ' . $sql;
         }
     }
 
