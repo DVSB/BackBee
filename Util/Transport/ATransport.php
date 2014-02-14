@@ -36,6 +36,7 @@ abstract class ATransport
     protected $_port;
     protected $_username;
     protected $_password;
+    protected $_startingpath;
     protected $_remotepath = "/";
 
     public function __construct(array $config = null)
@@ -54,6 +55,8 @@ abstract class ATransport
             if (array_key_exists('remotepath', $config))
                 $this->_remotepath = $config['remotepath'];
         }
+
+        $this->_startingpath = $this->_remotepath;
     }
 
     public abstract function connect($host = null, $port = null);
@@ -82,6 +85,26 @@ abstract class ATransport
 
     public abstract function disconnect();
 
+    /**
+     * Returns the absolute remote path of a file
+     * @param string $path
+     * @return string
+     */
+    protected function _getAbsoluteRemotePath($path)
+    {
+        $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+        if (null === $parse_url = @parse_url($path)) {
+            $parse_url = array('path' => $path);
+        }
+
+        return (null === $path) ? $this->_startingpath : ('/' === substr($parse_url['path'], 0, 1) ? $path : $this->_remotepath . '/' . $path);
+    }
+
+    /**
+     * Trigger en PHP warning
+     * @param type $message
+     * @return FALSE
+     */
     protected function _trigger_error($message)
     {
         trigger_error($message, E_USER_WARNING);

@@ -144,15 +144,13 @@ class SFTP extends ATransport
             throw new TransportException(sprintf('None SSH connection available.'));
         }
 
-        if (null !== $dir) {
-            $this->_remotepath = $dir;
-        }
-
+        $dir = $this->_getAbsoluteRemotePath($dir);
         if (false === @ssh2_sftp_stat($this->_sftp_resource, $this->_remotepath)) {
-            $this->_trigger_error(sprintf('Unable to change remote directory to %s.', $this->_remotepath));
+            return $this->_trigger_error(sprintf('Unable to change remote directory to %s.', $this->_remotepath));
         }
-
-        return $this;
+        
+        $this->_remotepath = $dir;
+        return true;
     }
 
     /**
@@ -402,16 +400,6 @@ class SFTP extends ATransport
         fclose($stream);
 
         return $data;
-    }
-
-    /**
-     * Returns the absolute remote path of a file
-     * @param string $path
-     * @return string
-     */
-    private function _getAbsoluteRemotePath($path)
-    {
-        return $path = null === $path ? $this->_remotepath : ('/' === substr($path, 0, 1) ? $path : $this->_remotepath . '/' . $path);
     }
 
 }

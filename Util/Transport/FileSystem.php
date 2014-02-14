@@ -66,11 +66,11 @@ class FileSystem extends ATransport
 
     public function cd($dir = null)
     {
-        $dir = null !== $dir ? $dir : $this->_remotepath;
-
-        if (false === chdir($dir))
-            throw new TransportException(sprintf('Enable to change remote directory to %s.', $dir));
-
+        $dir = $this->_getAbsoluteRemotePath($dir);        
+        if (false === chdir($dir)) {
+            return $this->_trigger_error(sprintf('Unable to change remote directory to %s.', $dir));
+        }
+        $this->_remotepath = $dir;
         return true;
     }
 
@@ -96,7 +96,7 @@ class FileSystem extends ATransport
 
     public function send($local_file, $remote_file, $overwrite = false)
     {
-        $remote_file = $this->pwd() . DIRECTORY_SEPARATOR . $remote_file;
+        $remote_file = $this->_getAbsoluteRemotePath($remote_file);
         if (true === file_exists($remote_file) && false === $overwrite) {
             return false;
         }
@@ -110,13 +110,18 @@ class FileSystem extends ATransport
 
     public function sendRecursive($local_path, $remote_path, $overwrite = false)
     {
+        if ('.' != dirname($remote_path)) {
+            @$this->mkdir(dirname($remote_path), true);
+        }
+        
         if (false === is_dir($local_path)) {
             return $this->send($local_path, $remote_path, $overwrite);
         }
-
-        if (false === file_exists($this->pwd() . DIRECTORY_SEPARATOR . $remote_path)) {
+        
+        $remote_path = $this->_getAbsoluteRemotePath($remote_path);
+        if (false === file_exists($remote_path)) {
             $this->mkdir($remote_path, true);
-        } elseif (false === is_dir($this->pwd() . DIRECTORY_SEPARATOR . $remote_path)) {
+        } elseif (false === is_dir($remote_path)) {
             throw new TransportException(sprintf('A file named %s already exist, can\'t create folder.', $remote_path));
         }
 
@@ -176,8 +181,9 @@ class FileSystem extends ATransport
 
     public function mkdir($dir, $recursive = false)
     {
-        if (false === @mkdir($this->pwd() . DIRECTORY_SEPARATOR . $dir, 0755, $recursive)) {
-            throw new TransportException(sprintf('Enable to create folder %s.', $dir));
+        $dir = $this->_getAbsoluteRemotePath($dir);
+        if (false === @mkdir($dir, 0777, $recursive)) {
+            return $this->_trigger_error(sprintf('Unable to make directory: %s.', $dir));
         }
 
         return true;

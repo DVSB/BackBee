@@ -130,9 +130,7 @@ class BBApplication
 
     public function __destruct()
     {
-        if ($this->_isstarted) {
-            $this->info('BackBuilder application ended');
-        }
+        $this->stop();
     }
 
     private function _initContainer()
@@ -476,7 +474,30 @@ class BBApplication
 
         $this->getTheme()->init();
 
-        $this->getController()->handle();
+        if (false === $this->isClientSAPI()) {
+            $this->getController()->handle();
+        }
+    }
+
+    /**
+     * Stop the current BBApplication instance
+     */
+    public function stop()
+    {
+        if (true === $this->isStarted()) {
+            if (null !== $this->_bundles) {
+                foreach ($this->_bundles as $bundle)
+                    $bundle->stop();
+            }
+
+            if ($this->getContainer()->has('logging')) {
+                $logging = $this->getContainer()->get('logging');
+                $this->getContainer()->set('logging', null);
+                unset($logging);
+            }
+
+            $this->info('BackBuilder application ended');
+        }
     }
 
     /**
@@ -942,6 +963,11 @@ class BBApplication
     public function isStarted()
     {
         return (true === $this->_isstarted);
+    }
+
+    public function isClientSAPI()
+    {
+        return isset($GLOBALS['argv']);
     }
 
 }
