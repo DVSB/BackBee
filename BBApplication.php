@@ -175,6 +175,8 @@ class BBApplication
         $this->_container->setParameter('bbapp.context', $this->getContext());
         $this->_container->setParameter('bbapp.cache.dir', $this->getCacheDir());
         $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
+        $this->_container->setParameter('bbapp.repository.dir', $this->getRepository());
+        $this->_container->setParameter('bbapp.data.dir', $this->getRepository() . DIRECTORY_SEPARATOR . 'Data');
         //$this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
     }
 
