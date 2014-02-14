@@ -1,4 +1,4 @@
-define(['aloha','aloha/plugin','aloha/pluginmanager','aloha/jquery','ui/scopes','ui/ui','PubSub','ui/button','ui/toggleButton'],function(Aloha,Plugin,PluginMng,jQuery,Scopes,Ui,PubSub,Button,ToggleButton){
+define(['aloha','aloha/plugin','aloha/pluginmanager','aloha/jquery','ui/scopes','ui/ui','PubSub','ui/button'],function(Aloha,Plugin,PluginMng,jQuery,Scopes,Ui,PubSub,Button){
     
     
     
@@ -19,6 +19,7 @@ define(['aloha','aloha/plugin','aloha/pluginmanager','aloha/jquery','ui/scopes',
                     pageSelector: false,
                     linkSelector: false,
                     resizable: false,
+                    draggable: false,
                     selectorTitle: "Choose an image",
                     /* callback: function(){
                          bb.jquery('#bb5-aloha-plugin-mediaBrowser').bbSelector('close');
@@ -45,28 +46,86 @@ define(['aloha','aloha/plugin','aloha/pluginmanager','aloha/jquery','ui/scopes',
             this.editable = editable; 
         },
         
+        isAnImage : function(media){
+            var result = false;
+            if(media.data.type && media.data.type=="BackBuilder\\ClassContent\\Media\\image"){
+                result = true;
+            }
+            return result;
+        },
+        
         simulateClick: function(img){
+            $(this.editable).find(img).trigger("click");
             if(img) $(this.editable).find(img).eq(0).triggerHandler("click");
         },
         
+        _clearFields : function(){
+            var widthField = jQuery("#" + this.imagePlugin.ui.imgResizeWidthField.getInputId());
+            var heightField = jQuery("#" + this.imagePlugin.ui.imgResizeHeightField.getInputId());
+            var titleField = jQuery("#"+this.imagePlugin.ui.imgTitleField.getInputId())
+            titleField.val("");
+            widthField.val("");
+            heightField.val("");
+            this.imagePlugin.ui.imgSrcField.setValue("");
+        },
+        
         onMediaSelection : function(data){
+            if(!this.isAnImage(data)){console.warn("Please add a valid image!"); return;}
+            
+            var self = this;
             this.imagePlugin.ui.imgSrcField.setValue(data.value);
             var elem = this.imagePlugin.ui.imgTitleField.getInputElem();
             var target = this.imagePlugin.ui.imgTitleField.getTargetObject();
             if(target){
                 this.imagePlugin.ui.imgTitleField.setValue(data.title);
                 $(target).attr("title",data.title);
-                this.editable.activate();
+                
+                /* reset width and height */
+                var $wrapper = this.imagePlugin.imageObj.closest('.Aloha_Image_Resize');
+                /* clean size */
+                var widthField = jQuery("#" + this.imagePlugin.ui.imgResizeWidthField.getInputId());
+                var heightField = jQuery("#" + this.imagePlugin.ui.imgResizeHeightField.getInputId());
+                widthField.val("");
+                heightField.val("");
+                $(target).css("height","");
+                $(target).css("width","");
+                $($wrapper).css("height","");
+                $($wrapper).css("width","");
                 this.imagePlugin.srcChange();
+                $(target).bind("load", function(){
+                    var imgHeight = $(this).height();
+                    var imgWidth = $(this).width();
+                    $(target).css("height",imgHeight+"px");
+                    $(target).css("width",imgWidth+"px");
+                    $($wrapper).css("height",imgHeight+"px");
+                    $($wrapper).css("width",imgWidth+"px");
+                    heightField.val(imgHeight);
+                    widthField.val(imgWidth);
+                    self.editable.activate();
+                });
+                
+                /*handle error*/
+                $(target).bind("error", function(){
+                    console.warn("Image can't be loaded");
+                });
             }
         },
         
+        cleanImage:function(){
+            if(!this.imagePlugin) return false;
+            var currentImage = this.imagePlugin.getPluginFocus();
+            if(currentImage){
+                this.imagePlugin.endResize();
+            }
+        },
         removeImage: function(){
             var currentImg = this.imagePlugin.ui.imgSrcField.getTargetObject();
             if(currentImg){
                 var parent = $(currentImg).parents(".aloha-image-box-active");
                 if(parent){
-                    $(parent).remove();  
+                    $(parent).remove(); 
+                    this._clearFields();
+                    Scopes.setScope("Aloha.continuoustext");
                 }
             }
         }
@@ -89,8 +148,10 @@ define(['aloha','aloha/plugin','aloha/pluginmanager','aloha/jquery','ui/scopes',
                 Delegate.setCurrentEditable(editable.editable);
                 self.removeBtn.show();
             });
-            Aloha.bind("aloha-image-unselected",function(){
-                self.removeBtn.hide();
+            
+            /* Image must be clean before his parent get updated */
+            Aloha.bind("aloha-editable-deactivated", function(){
+                Delegate.cleanImage();
             });
         },
         
@@ -107,14 +168,14 @@ define(['aloha','aloha/plugin','aloha/pluginmanager','aloha/jquery','ui/scopes',
             
             this.removeBtn = Ui.adopt("removeImage", Button, {
                 tooltip: "Remove image",
-                icon : "bb5-button bb5-ico-del",
+                icon : "aloha-icon-eraser",
                 scope: "Aloha.continoustext",
                 click: function(){
                     Delegate.removeImage();
                 }
             });
-            /*hidden by default*/
-            this.removeBtn.hide();
+        /*hidden by default*/
+        // this.removeBtn.hide();
         },
         setScope: function(){
             Scopes.createScope('bbimage', 'Aloha.empty');

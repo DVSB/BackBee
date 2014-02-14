@@ -10,25 +10,13 @@
         toolbar: {
             floating : false,
             pin: false,
-            draggable: false,
-            tabs: [{
-                label:"Styles", 
-                components: ["formatStyle"], 
-                showOn: {
-                    scope: "bb.customstyle"
-                }
-            },
-            {
-                label:"tab.img.label",
-                components: [["imageBrowser","\n","removeImage"]]
-            }
-            ],
-            exclude: ['blockquote']
+            draggable: false
         },
         bundles: {
             // Path for custom bundle relative from Aloha.settings.baseUrl usually path of aloha.js
             bbplugin: bb.baseurl+bb.resourcesdir+"js/bb5rteadapters/plugins/aloha"
         },
+        
         plugins : {
             "format": {
                 config : [],

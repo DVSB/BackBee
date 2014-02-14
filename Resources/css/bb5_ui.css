@@ -101,6 +101,13 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5b5b5b', end
 div.x-tab-panel{position: relative!important;top:-3px!important;left:0px!important;z-index:700000!important}
 #aloha-floatingmenu-shadow{position: relative!important;top:0px!important;left:0px!important;z-index:600000!important;display:none!important}
 .aloha-multisplit-expanded, .aloha-table-createdialog{z-index:800000!important;}
+.aloha .ui-state-default .aloha-icon-eraser {background-image:url(../js/bb5rteadapters/plugins/aloha/bbimage/img/removeformat.png);} /*Adding eraser ico*/
+.aloha .ui-state-default .aloha-icon-cnr-resize, 
+.aloha .ui-state-default .aloha-icon-cnr-crop, 
+.aloha .ui-state-default .aloha-icon-cnr-reset {background: url("../js/libs/alohaeditor/aloha/plugins/common/image/img/cropnresize.png") repeat scroll 0 0 rgba(0, 0, 0, 0);}
+.aloha .ui-state-default .aloha-image-align-none {background: url("../js/libs/alohaeditor/aloha/plugins/common/image/img/image-align-none.png") repeat scroll 0 0 rgba(0, 0, 0, 0);}
+.aloha .ui-state-default .aloha-image-align-left {background: url("../js/libs/alohaeditor/aloha/plugins/common/image/img/image-align-left.png") repeat scroll 0 0 rgba(0, 0, 0, 0);}
+.aloha .ui-state-default .aloha-image-align-right {background: url("../js/libs/alohaeditor/aloha/plugins/common/image/img/image-align-right.png") repeat scroll 0 0 rgba(0, 0, 0, 0);}
 		/*Small Box Ad data(->img: auto-promo) Edition*/
 .bb5-content.box-ad.small-box-ad {padding:13px 9px 9px 9px;} /*Adding extra space to be able to select span item that holds call to image or parent container*/
 .bb5-content.box-ad.small-box-ad span {display:block;}

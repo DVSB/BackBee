@@ -273,7 +273,7 @@ class MediaFolder extends AbstractServiceLocal
                     $row->content->url = $renderer->render($media_content, 'bbselector_value');
                     $row->created = $media->getCreated()->format('c');
                     $row->modified = $media->getModified()->format('c');
-
+                    $row->type = get_class($media_content);
                     $view[] = Array(
                         'html' => $renderer->render($media_content, 'bbselector_view'),
                         'media' => $row
