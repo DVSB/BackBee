@@ -391,6 +391,7 @@ bb.StatusManager = (function($,gExport){
     };
     
     var _commit = function() {
+        bb.jquery(document).trigger("application:beforeCommit");
         revisionWebservice.request('getAllDrafts', {
             success: function(response) {
                 if (0 == response.result.length) {
