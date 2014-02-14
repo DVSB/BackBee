@@ -22,9 +22,10 @@
 namespace BackBuilder\Services\Local;
 
 use BackBuilder\BBApplication,
+    BackBuilder\Exception\InvalidArgumentException,
     BackBuilder\MetaData\MetaDataBag,
     BackBuilder\NestedNode\Page as NestedPage,
-    BackBuilder\Exception\InvalidArgumentException;
+    BackBuilder\Site\Layout as SiteLayout;
 
 /**
  * RPC services for NestedNode\Page
@@ -441,36 +442,39 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
         }
 
-// User must have view permission on choosen layout
+        // User must have view permission on choosen layout
         $this->isGranted('VIEW', $layout);
 
         $parent = $this->_repo->find(strval($parent_uid));
         if (null !== $page = $this->_repo->find(strval($page_uid))) {
             $this->isGranted('EDIT', $page);
 
-// If the page is online, user must have publish permission on it
+            // If the page is online, user must have publish permission on it
             if ($page->isOnline(true)) {
                 $this->isGranted('PUBLISH', $page);
             }
 
             if (null !== $parent && false === $page->getParent()->equals($parent)) {
-// User must have edit permission on parent
+                // User must have edit permission on parent
                 $this->isGranted('EDIT', $parent);
                 $this->_repo->moveAsFirstChildOf($page, $parent);
             }
         } else {
             $page = new NestedPage();
+
+            $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout);
+
             $this->getEntityManager()->persist($page);
 
             if (null !== $parent) {
-// User must have edit permission on parent
+                // User must have edit permission on parent
                 $page->setParent($parent);
                 $this->isGranted('CREATE', $page);
                 $this->isGranted('EDIT', $parent);
 
                 $this->_repo->insertNodeAsFirstChildOf($page, $parent);
             } else {
-// User must have edit permission on site to add a new root
+                // User must have edit permission on site to add a new root
                 $this->isGranted('CREATE', $page);
                 $this->isGranted('EDIT', $this->getApplication()->getSite());
 
@@ -478,10 +482,11 @@ class Page extends AbstractServiceLocal
             }
         }
 
-        $page->setTitle($title)
-                ->setTarget($target)
-                ->setRedirect('' === $redirect ? null : $redirect)
-                ->setLayout($layout);
+        $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout);
+
+        if (false === $this->getEntityManager()->contains($page)) {
+            $this->getEntityManager()->persist($page);
+        }
 
         $this->getEntityManager()->flush($page);
 
@@ -491,6 +496,21 @@ class Page extends AbstractServiceLocal
         $leaf->state = 'closed';
 
         return $leaf;
+    }
+
+    /**
+     * Update page's attributes with this method's arguments
+     * @param  NestedPage $page     
+     * @param  string     $target   
+     * @param  string     $redirect 
+     * @param  Layout     $layout                  
+     */
+    private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout)
+    {
+        $page->setTitle($title);
+        $page->setTarget($target);
+        $page->setRedirect('' === $redirect ? null : $redirect);
+        $page->setLayout($layout);;
     }
 
     /**
