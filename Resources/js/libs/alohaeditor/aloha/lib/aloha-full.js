@@ -68422,7 +68422,6 @@ function (
         init: function (plugin) {
 			plugin.floatingMenuControl = this;
 			this.plugin = plugin;
-
 			Scopes.createScope(plugin.name, 'Aloha.empty');
 
 			this._addUIInsertButton();
@@ -68455,6 +68454,7 @@ function (
 
 			// If the setting has been set to a number or false we need to activate the 
 			// toggle button to indicate that the aspect ratio will be preserved.
+			console.log(plugin.settings);
 			if (plugin.settings.fixedAspectRatio !== false) {
 				this._imageCnrRatioButton.setState(true);
 				plugin.keepAspectRatio = true;
@@ -69198,7 +69198,7 @@ define('image/image-plugin',[
 			// Extend the default settings with the custom ones (done by default)
 			plugin.config = plugin.defaultSettings;
 			plugin.settings = jQuery.extend(true, plugin.defaultSettings, plugin.settings);
-
+			
 			// Determine the flag and the value of the aspect ratio depending on settings
 			if ( typeof this.settings.fixedAspectRatio === 'number' ) {
 				this.aspectRatioValue = this.settings.fixedAspectRatio;
@@ -69362,7 +69362,6 @@ define('image/image-plugin',[
 					// TODO this should not be necessary here!
 					plugin.ui.doLayout();
 				}
-
 			});
 
 			Aloha.bind('aloha-editable-created', function (event, editable) {

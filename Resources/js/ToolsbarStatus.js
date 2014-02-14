@@ -35,7 +35,7 @@ BB4.ToolsbarManager.register('statustb',{
             bb.jquery(this._settings.toolsbarContainer).find(this._settings.btnSavePage).unbind('click').bind('click', function(e) { return self.onSavePage(); });
             bb.jquery(this._settings.toolsbarContainer).find(this._settings.btnEditPage).unbind('click').bind('click', function(e) { return self.onEditPage(); });
             bb.jquery(this._settings.toolsbarContainer).find(this._settings.btnRemovePage).unbind('click').bind('click', function(e) { return self.onRemovePage(); });
-            bb.jquery(this._settings.toolsbarContainer).find(this._settings.btnCommit).unbind('click').bind('click', function(e) { return self.onCommit(); });
+            bb.jquery(this._settings.toolsbarContainer).find(this._settings.btnCommit).unbind('click').bind('click', function(e) { alert("sd");return self.onCommit(); });
             bb.jquery(this._settings.toolsbarContainer).find(this._settings.btnRevert).unbind('click').bind('click', function(e) { return self.onRevert(); });
 
             bb.jquery(this._settings.toolsbarEdition).find(".bb5-tabdrawer-wrapper .bb5-tabdrawer-toggle").unbind('click').bind('click',function(){ return self.onTogglePublishingOptions(); });
@@ -310,7 +310,7 @@ BB4.ToolsbarManager.register('statustb',{
 	},
 	
 	onCommit : function() {
-                bb.ContentWrapper.persist(false);//make persist synchronerequest
+                bb.ContentWrapper.persist(false);//make persist synchronous request
 		return bb.StatusManager.getInstance().commit();
 	},
 	
