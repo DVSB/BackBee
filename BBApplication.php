@@ -213,6 +213,9 @@ class BBApplication
             $newContainer->set($id, $this->_container->get($id));
         }
 
+        // Transfert every existing parameters from old to new container
+        $newContainer->getParameterBag()->add($this->_container->getParameterBag()->all());
+        
         // Replace old container by new one
         $this->_container = $newContainer;
     }
