@@ -37,8 +37,9 @@ abstract class AImportBundle
 
         $this->setPhpConf($this->_config->getSection('php_ini'));
         foreach ($this->_relations as $class => $config) {
+            $type = true === isset($config['type']) ? $config['type'] : 'import';
             try {
-                $this->{'import' . ucfirst($class)}($config);
+                $this->{$type . ucfirst($class)}($config);
             } catch (SkippedImportException $exc) {
                 echo $exc->getMessage() . "\n";
             }
