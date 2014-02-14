@@ -13,7 +13,10 @@ bb.require({
         "ManagerFactory": "bb.ManagerFactory",
         "jscore" : "libs/jsclass/min/core",
          "webserviceMng":"bb.webservice",
-        "aloha": "libs/alohaeditor/aloha/lib/aloha"
+        "aloha": "libs/alohaeditor/aloha/lib/aloha",
+        'popupMng':'PopupManager',
+        'i18n':'bb.i18n',
+        'uploadMng': 'bb.upload'
     }
 });
 

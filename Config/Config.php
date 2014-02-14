@@ -186,8 +186,29 @@ class Config
             throw new Exception\InvalidBaseDirException(sprintf('Cannot read the directory %s', $basedir));
         }
 
-        $pattern = $basedir . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]';
-        return glob($pattern, GLOB_BRACE);
+        $yml_files = array();
+        $parse_url = parse_url($basedir);
+        if (false !== $parse_url && isset($parse_url['scheme'])) {
+            $directory = new \RecursiveDirectoryIterator($basedir);
+            $iterator = new \RecursiveIteratorIterator($directory);
+            $regex = new \RegexIterator($iterator, '/^.+\.yml$/i', \RecursiveRegexIterator::GET_MATCH);
+
+            foreach ($regex as $file) {
+                $yml_files[] = $file[0];
+            }
+        } else {
+            $pattern = $basedir . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]';
+            $yml_files = glob($pattern, GLOB_BRACE);
+        }
+
+        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;
+        if (true === file_exists($default_file) && 1 < count($yml_files)) {
+            // Ensure that config.yml is the first one
+            $yml_files = array_diff($yml_files, array($default_file));
+            array_unshift($yml_files, $default_file);
+        }
+
+        return $yml_files;
     }
 
     /**
@@ -277,11 +298,12 @@ class Config
             $basedir = $this->_basedir;
         }
 
-        $basedir = realpath($basedir) . DIRECTORY_SEPARATOR;
+        $basedir = \BackBuilder\Util\File::realpath($basedir);
 
         if (false === $this->_loadFromCache($basedir)) {
             $this->_loadFromBaseDir($basedir, $overwrite);
             $this->_saveToCache($basedir);
         }
     }
+
 }

@@ -292,10 +292,10 @@ class bb5content extends AHelper
     
     private function _addRteMarkup($params = array())
     {
-        $contentParent = $this->getRenderer()->getClassContainer();
+        $contentParent = $this->_parent;
         if (!is_null($contentParent)) {
             if (is_a($contentParent, "BackBuilder\ClassContent\AClassContent") && (!is_a($contentParent, 'BackBuilder\ClassContent\ContentSet'))) {
-                $elementname = $this->_renderer->getCurrentElement();
+                $elementname = $this->_element_name;
                 if (!is_null($elementname)) {
                     $contentData = $contentParent->{$elementname};
                     /* if it's the same content */
@@ -306,6 +306,7 @@ class bb5content extends AHelper
                             $contentData = $fakeParent->{$elementname};
                             $rteconf = $contentData->getParam("aloha", "scalar");
                             $isEditable = (boolean)$contentData->getParam("editable", "boolean");
+
                             if (!is_null($rteconf) && $isEditable==TRUE) {
                                 $this->_addValueToAttribute('data-rteconf', $rteconf);
                             }

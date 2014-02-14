@@ -91,6 +91,9 @@ class Logger implements LoggerInterface, SQLLogger
                 } else if (array_key_exists('level', $loggingConfig)) {
                     $this->setLevel(strtoupper($loggingConfig['level']));
                 }
+                if (array_key_exists('logfile', $loggingConfig)) {
+                    $loggingConfig['logfile'] = $application->getBaseDir() . DIRECTORY_SEPARATOR . $loggingConfig['logfile'];
+                }
                 if (array_key_exists('appender', $loggingConfig)) {
                     $appenders = (array) $loggingConfig['appender'];
                     foreach ($appenders as $appender) {
@@ -110,8 +113,11 @@ class Logger implements LoggerInterface, SQLLogger
 
     public function __destruct()
     {
-        foreach ($this->_appenders as $appender)
-            $appender->close();
+        if (null !== $this->_appenders) {
+            foreach ($this->_appenders as $appender) {
+                $appender->close();
+            }
+        }
     }
 
     private function _setErrorHandler()
@@ -315,9 +321,11 @@ class Logger implements LoggerInterface, SQLLogger
 
     public function startQuery($sql, array $params = null, array $types = null)
     {
-        $this->_start = microtime(true);
-        $this->_buffer = '[Doctrine] ' . $sql . ' with ' . var_export($params, true); //old throw error  "Nesting level too deep - recursive dependency?"
-        //$this->_buffer = '[Doctrine] '.$sql;
+        if (self::DEBUG === $this->_level) {
+            $this->_start = microtime(true);
+            //$this->_buffer = '[Doctrine] ' . $sql . ' with ' . var_export($params, true); //old throw error  "Nesting level too deep - recursive dependency?"
+            $this->_buffer = '[Doctrine] ' . $sql;
+        }
     }
 
     public function stopQuery()

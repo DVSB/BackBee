@@ -52,7 +52,7 @@ class Entity
     /**
      * The data stored
      * @string
-     * @Column(type="string", name="data")
+     * @Column(type="text", name="data")
      */
     protected $_data;
 
