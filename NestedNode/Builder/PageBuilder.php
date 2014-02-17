@@ -115,14 +115,14 @@ class PageBuilder
 
 	private function reset()
 	{
-		$uid = null;
-		$title = null;
-		$url = null;
-		$site = null;
-		$root = null;
-		$parent = null;
-		$layout = null;
-		$elements = array();
+		$this->uid = null;
+		$this->title = null;
+		$this->url = null;
+		$this->site = null;
+		$this->root = null;
+		$this->parent = null;
+		$this->layout = null;
+		$this->elements = array();
 	}
 
 	/**
