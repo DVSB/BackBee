@@ -98,7 +98,11 @@ class PageBuilder
 			$firstColumn = $pageContentSet->first();
 			$firstColumn->clear();
 			foreach ($this->elements as $e) {
-				$firstColumn->push($e);
+				if (true === $e['set_main_node']) {
+					$e['content']->setMainNode($page);
+				}
+
+				$firstColumn->push($e['content']);
 			}
 
 			$pageContentSet->rewind();
@@ -302,9 +306,12 @@ class PageBuilder
 	 * [getPage description]
 	 * @return [type] [description]
 	 */
-	public function pushElement(AClassContent $element)
+	public function pushElement(AClassContent $element, $setMainNode = false)
 	{
-		$this->elements[] = $element;
+		$this->elements[] = array(
+			'content' 		=> $element,
+			'set_main_node' => $setMainNode
+		);
 
 		return $this;
 	}
@@ -313,7 +320,7 @@ class PageBuilder
 	 * [getPage description]
 	 * @return [type] [description]
 	 */
-	public function addElement(AClassContent $element, $index = null)
+	public function addElement(AClassContent $element, $index = null, $setMainNode = false)
 	{
 		if (null !== $index) {
 			$index = intval($index);
@@ -321,9 +328,12 @@ class PageBuilder
 				throw new \Exception();
 			}
 
-			$this->elements[$index] = $element;
+			$this->elements[$index] = array(
+				'content' 		=> $element,
+				'set_main_node' => $setMainNode
+			);
 		} else {
-			$this->pushElement($element);
+			$this->pushElement($element, $setMainNode);
 		}
 
 		return $this;
