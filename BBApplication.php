@@ -173,7 +173,7 @@ class BBApplication
     {
         // Set every bbapp parameters
         $this->_container->setParameter('bbapp.context', $this->getContext());
-        $this->_container->setParameter('bbapp.cache.dir', $this->getCacheDir());
+        $this->_container->setParameter('bbapp.cache.dir', $this->getBaseDir() . DIRECTORY_SEPARATOR . 'cache');
         $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
         $this->_container->setParameter('bbapp.repository.dir', $this->getRepository());
         $this->_container->setParameter('bbapp.data.dir', $this->getRepository() . DIRECTORY_SEPARATOR . 'Data');
@@ -478,7 +478,7 @@ class BBApplication
         }
 
         $this->getTheme()->init();
-
+        //var_dump($this->getSite()->getLabel()); die;
         $this->getController()->handle();
     }
 
@@ -589,8 +589,16 @@ class BBApplication
     public function getCacheDir()
     {
         if (null === $this->_cachedir) {
-            $this->_cachedir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'cache';
+            $cacheConfig = $this->getConfig()->getCacheConfig();
+            if (null !== $cacheConfig && true === is_array($cacheConfig) && true === isset($cacheConfig['cache_dir'])) {
+                $this->_cachedir = true === empty($cacheConfig['cache_dir']) ? null : $cacheConfig['cache_dir'];
+            }
+            
+            if (null === $this->_cachedir) {
+                $this->_cachedir = $this->getContainer()->getParameter('bbapp.cache.dir');
+            }
         }
+        
         return $this->_cachedir;
     }
 
