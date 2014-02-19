@@ -22,6 +22,8 @@
 namespace BackBuilder\Util\Transport;
 
 /**
+ * Abstract class for transport
+ * 
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @subpackage  Transport
@@ -31,78 +33,98 @@ namespace BackBuilder\Util\Transport;
 abstract class ATransport
 {
 
+    /**
+     * The protocol used by transport
+     * @var string
+     */
     protected $_protocol;
-    protected $_host;
-    protected $_port;
-    protected $_username;
-    protected $_password;
-    protected $_startingpath;
-    protected $_remotepath = "/";
 
+    /**
+     * The remose host
+     * @var string
+     */
+    protected $_host;
+
+    /**
+     * The protocol port to be uses
+     * @var int
+     */
+    protected $_port;
+
+    /**
+     * The login indetifier
+     * @var string
+     */
+    protected $_username;
+
+    /**
+     * The passaword
+     * @var string
+     */
+    protected $_password;
+
+    /**
+     * The default remote path
+     * @var string
+     */
+    protected $_remotepath = '/';
+
+    /**
+     * The starting path e.g. the 'home' of the connection
+     * @var string
+     */
+    protected $_startingpath;
+
+    /**
+     * Class constructor, config might overwrite following options:
+     * * protocol
+     * * host
+     * * port
+     * * username
+     * * password
+     * * remotepath
+     * 
+     * Should throw a \BackBuilder\Util\Transport\Exception\MisconfigurationException
+     * on failure
+     * 
+     * @param array $config
+     */
     public function __construct(array $config = null)
     {
         if (null !== $config) {
-            if (array_key_exists('protocol', $config))
-                $this->_protocol = $config['protocol'];
-            if (array_key_exists('host', $config))
-                $this->_host = $config['host'];
-            if (array_key_exists('port', $config))
-                $this->_port = $config['port'];
-            if (array_key_exists('username', $config))
-                $this->_username = $config['username'];
-            if (array_key_exists('password', $config))
-                $this->_password = $config['password'];
-            if (array_key_exists('remotepath', $config))
-                $this->_remotepath = $config['remotepath'];
+            foreach ($config as $key => $value) {
+                $property = '_' . $key;
+                if (true === property_exists($this, $property)) {
+                    $this->$property = $value;
+                }
+            }
         }
 
         $this->_startingpath = $this->_remotepath;
     }
-
-    public abstract function connect($host = null, $port = null);
-
-    public abstract function login($username = null, $password = null);
-
-    public abstract function cd($dir = null);
-
-    public abstract function ls($dir = null);
-
-    public abstract function pwd();
-
-    public abstract function send($local_file, $remote_file, $overwrite = false);
-
-    public abstract function sendRecursive($local_path, $remote_path, $overwrite = false);
-
-    public abstract function get($local_file, $remote_file, $overwrite = false);
-
-    public abstract function getRecursive($local_path, $remote_path, $overwrite = false);
-
-    public abstract function mkdir($dir, $recursive = false);
-
-    public abstract function delete($remote_path, $recursive = false);
-
-    public abstract function rename($old_name, $new_name);
-
-    public abstract function disconnect();
 
     /**
      * Returns the absolute remote path of a file
      * @param string $path
      * @return string
      */
-    protected function _getAbsoluteRemotePath($path)
+    protected function _getAbsoluteRemotePath($path = null)
     {
+        if (null === $path) {
+            return $this->_startingpath;
+        }
+
         $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
         if (null === $parse_url = @parse_url($path)) {
             $parse_url = array('path' => $path);
         }
 
-        return (null === $path) ? $this->_startingpath : ('/' === substr($parse_url['path'], 0, 1) ? $path : $this->_remotepath . '/' . $path);
+        return ('/' === substr($parse_url['path'], 0, 1) ? $path : $this->_remotepath . '/' . $path);
     }
 
     /**
      * Trigger en PHP warning
-     * @param type $message
+     * @param string $message
      * @return FALSE
      */
     protected function _trigger_error($message)
@@ -111,4 +133,115 @@ abstract class ATransport
         return false;
     }
 
+    /**
+     * Establish a new connection to the remose server
+     * @param string $host
+     * @param string $port
+     * @return \BackBuilder\Util\Transport\ATransport
+     * @throws \BackBuilder\Util\Transport\Exception\ConnectionException Occurs if connection failed
+     */
+    public abstract function connect($host = null, $port = null);
+
+    /**
+     * Authenticate on remote server
+     * @param string $username
+     * @param string $password
+     * @return \BackBuilder\Util\Transport\ATransport
+     * @throws \BackBuilder\Util\Transport\Exception\AuthenticationException Occurs if authentication failed
+     */
+    public abstract function login($username = null, $password = null);
+
+    /**
+     * Disconnect from the remote server and unset resources
+     * @return \BackBuilder\Util\Transport\ATransport
+     */
+    public abstract function disconnect();
+
+    /**
+     * Change remote directory
+     * Should trigger an error on failure
+     * @param string $dir
+     * @return boolean TRUE on success, FALSE on failure
+     */
+    public abstract function cd($dir = null);
+
+    /**
+     * List remote files
+     * @param string $dir
+     * @return array|FALSE An array of files
+     */
+    public abstract function ls($dir = null);
+
+    /**
+     * Returns the current remote path
+     * @return string
+     */
+    public abstract function pwd();
+
+    /**
+     * Copy a local file to the remote server
+     * Should trigger an error on failure
+     * @param string $local_file
+     * @param string $remote_file
+     * @param boolean $overwrite
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
+    public abstract function send($local_file, $remote_file, $overwrite = false);
+
+    /**
+     * Copy recursively a local file and subfiles to the remote server
+     * Should trigger an error on failure
+     * @param string $local_file
+     * @param string $remote_file
+     * @param boolean $overwrite
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
+    public abstract function sendRecursive($local_path, $remote_path, $overwrite = false);
+
+    /**
+     * Receive a remote file on local filesystem
+     * Should trigger an error on failure
+     * @param string $local_file
+     * @param string $remote_file
+     * @param boolean $overwrite
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
+    public abstract function get($local_file, $remote_file, $overwrite = false);
+
+    /**
+     * Receive recursively a remote file and subfiles on local filesystem
+     * Should trigger an error on failure
+     * @param string $local_file
+     * @param string $remote_file
+     * @param boolean $overwrite
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
+    public abstract function getRecursive($local_path, $remote_path, $overwrite = false);
+
+    /**
+     * Creates a new remote directory
+     * Should trigger an error on failure
+     * @param string $dir
+     * @param boolean $recursive
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
+    public abstract function mkdir($dir, $recursive = false);
+
+    /**
+     * Deletes a remote file
+     * Should trigger an error on failure
+     * @param string $remote_path
+     * @param boolean $recursive
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
+    public abstract function delete($remote_path, $recursive = false);
+
+    /**
+     * Renames a remote file
+     * Should trigger an error on failure
+     * @param string $old_name
+     * @param string $new_name
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
+    public abstract function rename($old_name, $new_name);
 }
