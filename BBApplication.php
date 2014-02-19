@@ -292,7 +292,10 @@ class BBApplication
      */
     public function isDebugMode()
     {
-        return (bool) $this->_debug;
+        if ($this->getConfig()->sectionHasKey('parameters', 'debug')) {
+            return (bool)$this->getConfig()->getParametersConfig('debug');
+        }
+        return (bool)$this->_debug;
     }
 
     /**
@@ -449,6 +452,8 @@ class BBApplication
     }
 
     /**
+     * @deprecated since version 1.0
+     * @uses isDebugMode()
      * @return boolean
      */
     public function debugMode()
