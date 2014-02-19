@@ -261,6 +261,24 @@ class Config
     }
 
     /**
+     * Check, if the key exists in the parameter section
+     * @param string $section
+     * @param string $key
+     * @return boolean
+     */
+    public function sectionHasKey($section, $key)
+    {
+        if (
+                isset($this->_parameters[$section]) &&
+                is_array($this->_parameters[$section]) &&
+                array_key_exists($key, $this->_parameters[$section])
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Sets a parameter section
      * @param string $section
      * @param array $config

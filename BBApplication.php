@@ -239,6 +239,7 @@ class BBApplication
                     ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
                     ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Templates', 'helpers')))
                     ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Listeners')))
+                    ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Controller')))
                     ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')));
         }
 
@@ -292,7 +293,10 @@ class BBApplication
      */
     public function isDebugMode()
     {
-        return (bool) $this->_debug;
+        if ($this->getConfig()->sectionHasKey('parameters', 'debug')) {
+            return (bool)$this->getConfig()->getParametersConfig('debug');
+        }
+        return (bool)$this->_debug;
     }
 
     /**
@@ -449,6 +453,8 @@ class BBApplication
     }
 
     /**
+     * @deprecated since version 1.0
+     * @uses isDebugMode()
      * @return boolean
      */
     public function debugMode()
