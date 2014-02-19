@@ -24,6 +24,7 @@ namespace BackBuilder\Util\Transport;
 use BackBuilder\Util\Transport\Exception\TransportException;
 
 /**
+ * A local filesystem transport
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @subpackage  Transport
@@ -33,20 +34,27 @@ use BackBuilder\Util\Transport\Exception\TransportException;
 class FileSystem extends ATransport
 {
 
+    /**
+     * Class constructor, config should overwrite following option:
+     * * remotepath
+     * 
+     * @param array $config
+     */
     public function __construct(array $config = null)
     {
         parent::__construct($config);
 
-        if (null !== $this->_remotepath && false === file_exists($this->_remotepath)) {
+        if (null !== $this->_remotepath &&
+                false === file_exists($this->_remotepath)) {
             @mkdir($this->_remotepath, 0755, true);
         }
     }
 
     /**
-     * @codeCoverageIgnore
-     * @param type $host
-     * @param type $port
+     * @param string $host
+     * @param string $port
      * @return \BackBuilder\Util\Transport\FileSystem
+     * @codeCoverageIgnore
      */
     public function connect($host = null, $port = null)
     {
@@ -54,19 +62,44 @@ class FileSystem extends ATransport
     }
 
     /**
-     * @codeCoverageIgnore
-     * @param type $username
-     * @param type $password
+     * Tries to change dir to the defined remote path.
+     * An error is triggered if failed.
+     * 
+     * @param string $username
+     * @param string $password
      * @return \BackBuilder\Util\Transport\FileSystem
      */
     public function login($username = null, $password = null)
     {
+        if (false === @$this->cd()) {
+            if (true === @$this->mkdir()) {
+                $this->cd();
+            } else {
+                $this->_trigger_error(sprintf('Unable to change dir to %s', $this->_remote_path));
+            }
+        }
+
         return $this;
     }
 
+    /**
+     * Disconnects
+     * @return \BackBuilder\Util\Transport\FileSystem
+     * @codeCoverageIgnore
+     */
+    public function disconnect()
+    {
+        return $this;
+    }
+
+    /**
+     * Change remote directory
+     * @param string $dir
+     * @return boolean TRUE on success
+     */
     public function cd($dir = null)
     {
-        $dir = $this->_getAbsoluteRemotePath($dir);        
+        $dir = $this->_getAbsoluteRemotePath($dir);
         if (false === chdir($dir)) {
             return $this->_trigger_error(sprintf('Unable to change remote directory to %s.', $dir));
         }
@@ -74,59 +107,82 @@ class FileSystem extends ATransport
         return true;
     }
 
+    /**
+     * List remote files on $dir
+     * @param string $dir
+     * @return array|FALSE
+     */
     public function ls($dir = null)
     {
-        $dir = null !== $dir ? $dir : $this->pwd();
-
+        $dir = $this->_getAbsoluteRemotePath($dir);
         if (false === $ls = @scandir($dir)) {
-            throw new TransportException(sprintf('Enable to list files of remote directory %s.', $dir));
+            return $this->_trigger_error(sprintf('Unable to list files of remote directory %s.', $dir));
         }
-
         return $ls;
     }
 
+    /**
+     * Returns the current remote path
+     * @return string
+     */
     public function pwd()
     {
-        if (false === $pwd = getcwd()) {
-            throw new TransportException('Enable to obtain current directory to %s.');
-        }
-
-        return getcwd();
+        return $this->_remotepath;
     }
 
+    /**
+     * Copy a local file to the remote server
+     * @param string $local_file
+     * @param string $remote_file
+     * @param boolean $overwrite
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
     public function send($local_file, $remote_file, $overwrite = false)
     {
-        $remote_file = $this->_getAbsoluteRemotePath($remote_file);
-        if (true === file_exists($remote_file) && false === $overwrite) {
-            return false;
+        if (false === file_exists($local_file)) {
+            return $this->_trigger_error(sprintf('Could not open local file: %s.', $local_file));
         }
 
-        if (false === copy($local_file, $remote_file)) {
-            throw new TransportException(sprintf('Enable to write file %s.', $remote_file));
+        $remote_file = $this->_getAbsoluteRemotePath($remote_file);
+        if (false === $overwrite && false === file_exists($remote_file)) {
+            return $this->_trigger_error(sprintf('Remote file already exists: %s.', $remote_file));
+        }
+
+        if (false === file_exists(dirname($remote_file))) {
+            @$this->mkdir(dirname($remote_file), true);
+        }
+
+        if (false === @copy($local_file, $remote_file)) {
+            return $this->_trigger_error(sprintf('Could not send data from file %s to file %s.', $local_file, $remote_file));
         }
 
         return true;
     }
 
+    /**
+     * Copy recursively a local file and subfiles to the remote server
+     * @param string $local_file
+     * @param string $remote_file
+     * @param boolean $overwrite
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
     public function sendRecursive($local_path, $remote_path, $overwrite = false)
     {
-        if ('.' != dirname($remote_path)) {
-            @$this->mkdir(dirname($remote_path), true);
-        }
-        
         if (false === is_dir($local_path)) {
             return $this->send($local_path, $remote_path, $overwrite);
         }
-        
-        $remote_path = $this->_getAbsoluteRemotePath($remote_path);
-        if (false === file_exists($remote_path)) {
-            $this->mkdir($remote_path, true);
-        } elseif (false === is_dir($remote_path)) {
-            throw new TransportException(sprintf('A file named %s already exist, can\'t create folder.', $remote_path));
-        }
 
         if (false === $lls = @scandir($local_path)) {
-            throw new TransportException(sprintf('Enable to list files of local directory %s.', $local_path));
+            return $this->_trigger_error(sprintf('Unable to list files of local directory %s.', $local_path));
+        }
+
+        $remote_path = $this->_getAbsoluteRemotePath($remote_path);
+        if (true === file_exists($remote_path)
+                && false === is_dir($remote_path)) {
+            return $this->_trigger_error(sprintf('A file named %s already exists, can\'t create folder.', $remote_path));
+        } elseif (false === file_exists($remote_path)
+                && false === $this->mkdir($remote_path, true)) {
+            return false;
         }
 
         $currentpwd = $this->pwd();
@@ -141,15 +197,26 @@ class FileSystem extends ATransport
         return true;
     }
 
+    /**
+     * Copy a remote file on local filesystem
+     * @param string $local_file
+     * @param string $remote_file
+     * @param boolean $overwrite
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
     public function get($local_file, $remote_file, $overwrite = false)
     {
-        $remote_file = $this->pwd() . DIRECTORY_SEPARATOR . $remote_file;
-        if (true === file_exists($local_file) && false === $overwrite) {
-            return false;
+        if (false === $overwrite && true === file_exists($local_file)) {
+            return $this->_trigger_error(sprintf('Local file already exists: %s.', $local_file));
         }
 
-        if (false === copy($remote_file, $local_file)) {
-            throw new TransportException(sprintf('Enable to write local file %s.', $local_file));
+        $remote_file = $this->_getAbsoluteRemotePath($remote_file);
+        if (false === file_exists($remote_file)) {
+            return $this->_trigger_error(sprintf('Could not open remote file: %s.', $remote_file));
+        }
+
+        if (false === @copy($remote_file, $local_file)) {
+            return $this->_trigger_error(sprintf('Could not send data from file %s to file %s.', $remote_file, $local_file));
         }
 
         return true;
@@ -179,6 +246,12 @@ class FileSystem extends ATransport
         $this->cd($currentpwd);
     }
 
+    /**
+     * Creates a new remote directory
+     * @param string $dir
+     * @param boolean $recursive
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
     public function mkdir($dir, $recursive = false)
     {
         $dir = $this->_getAbsoluteRemotePath($dir);
@@ -189,49 +262,60 @@ class FileSystem extends ATransport
         return true;
     }
 
+    /**
+     * Deletes a remote file
+     * @param string $remote_path
+     * @param boolean $recursive
+     * @return boolean Returns TRUE on success or FALSE on error
+     */
     public function delete($remote_path, $recursive = false)
     {
-        if (false === file_exists($this->pwd() . DIRECTORY_SEPARATOR . $remote_path)) {
-            throw new TransportException(sprintf('Enable to delete remote file %s.', $remote_path));
-        }
-
-        if (false === is_dir($this->pwd() . DIRECTORY_SEPARATOR . $remote_path)) {
-            return @unlink($this->pwd() . DIRECTORY_SEPARATOR . $remote_path);
-        } elseif (true === $recursive) {
-            $currentpwd = $this->pwd();
-            $this->cd($remote_path);
-            foreach ($this->ls() as $file) {
-                if ($file != "." && $file != "..") {
-                    $this->delete($file, $recursive);
+        $remote_path = $this->_getAbsoluteRemotePath($remote_path);
+        if (true === @is_dir($remote_path)) {
+            if (true === $recursive) {
+                foreach ($this->ls($remote_path) as $file) {
+                    if ('.' !== $file && '..' !== $file) {
+                        $this->delete($remote_path . DIRECTORY_SEPARATOR . $file, $recursive);
+                    }
                 }
             }
-            $this->cd($currentpwd);
-            return @rmdir($this->pwd() . DIRECTORY_SEPARATOR . $remote_path);
+
+            if (false === @rmdir($remote_path)) {
+                return $this->_trigger_error(sprintf('Unable to delete directory %s', $remote_path));
+            }
+        } else {
+            if (false === @unlink($remote_path)) {
+                return $this->_trigger_error(sprintf('Unable to delete file %s', $remote_path));
+            }
         }
 
-        return false;
-    }
-
-    public function rename($old_name, $new_name)
-    {
-    	if (false === file_exists($old_name)) {
-    		return false;
-    	}
-
-    	if (false === rename($old_name, $new_name)) {
-    		throw new TransportException(sprintf('Enable to rename file %s to file %s.', $old_name, $new_name));
-    	}
-
-    	return true;
+        return true;
     }
 
     /**
-     * @codeCoverageIgnore
-     * @return \BackBuilder\Util\Transport\FileSystem
+     * Renames a remote file
+     * @param string $old_name
+     * @param string $new_name
+     * @return boolean Returns TRUE on success or FALSE on error
      */
-    public function disconnect()
+    public function rename($old_name, $new_name)
     {
-        return $this;
+        $old_name = $this->_getAbsoluteRemotePath($old_name);
+        $new_name = $this->_getAbsoluteRemotePath($new_name);
+
+        if (false === file_exists($old_name)) {
+            return $this->_trigger_error(sprintf('Could not open remote file: %s.', $old_name));
+        }
+
+        if (true === file_exists($new_name)) {
+            return $this->_trigger_error(sprintf('Remote file already exists: %s.', $new_name));
+        }
+
+        if (false === @rename($old_name, $new_name)) {
+            return $this->_trigger_error(sprintf('Unable to rename %s to %s', $old_name, $new_name));
+        }
+
+        return true;
     }
 
 }
