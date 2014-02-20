@@ -91,9 +91,13 @@ class Logger implements LoggerInterface, SQLLogger
                 } else if (array_key_exists('level', $loggingConfig)) {
                     $this->setLevel(strtoupper($loggingConfig['level']));
                 }
+                
                 if (array_key_exists('logfile', $loggingConfig)) {
-                    $loggingConfig['logfile'] = $application->getBaseDir() . DIRECTORY_SEPARATOR . $loggingConfig['logfile'];
+                    if (false === realpath(dirname($loggingConfig['logfile']))) {
+                        $loggingConfig['logfile'] = $application->getBaseDir() . DIRECTORY_SEPARATOR . $loggingConfig['logfile'];
+                    }
                 }
+
                 if (array_key_exists('appender', $loggingConfig)) {
                     $appenders = (array) $loggingConfig['appender'];
                     foreach ($appenders as $appender) {

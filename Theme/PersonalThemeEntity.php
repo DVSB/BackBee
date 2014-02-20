@@ -27,7 +27,7 @@ namespace BackBuilder\Theme;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Theme\Repository\ThemeRepository")
- * @Table(name="theme", indexes={@index(name="site_idx", columns={"_site_uid"})})
+ * @Table(name="theme", indexes={@index(name="site_idx", columns={"site_uid"})})
  */
 class PersonalThemeEntity extends AThemeEntity
 {

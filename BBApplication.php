@@ -22,6 +22,7 @@
 namespace BackBuilder;
 
 use Exception;
+
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
@@ -31,15 +32,18 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
+
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager;
+
 use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
     Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
-    Symfony\Component\HttpFoundation\Session\Session;
+    Symfony\Component\HttpFoundation\Session\Session,
+    Symfony\Component\Yaml\Yaml;
 
 /**
  * The main BackBuilder5 application
@@ -171,12 +175,39 @@ class BBApplication
 
     private function _initBBAppParamsIntoContainer()
     {
+        // Retrieving config.yml without calling Config services
+        $config = array();
+        $filename = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'config.yml';
+        if (true === is_readable($filename)) {
+            $config = Yaml::parse($filename);
+        }
+
         // Set every bbapp parameters
+        
+        // define context
         $this->_container->setParameter('bbapp.context', $this->getContext());
-        $this->_container->setParameter('bbapp.cache.dir', $this->getBaseDir() . DIRECTORY_SEPARATOR . 'cache');
+
+        // define cache dir
+        $cachedir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'cache';
+        if (true === isset($config['parameters']['cache_dir']) && false === empty($config['parameters']['cache_dir'])) {
+            $cachedir = $config['parameters']['cache_dir'];
+        }
+
+        $this->_container->setParameter('bbapp.cache.dir', $cachedir);
+
+        // define config dir
         $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
+
+        // define repository dir
         $this->_container->setParameter('bbapp.repository.dir', $this->getRepository());
-        $this->_container->setParameter('bbapp.data.dir', $this->getRepository() . DIRECTORY_SEPARATOR . 'Data');
+
+        // define data dir
+        $datadir = $this->getRepository() . DIRECTORY_SEPARATOR . 'Data';
+        if (true === isset($config['parameters']['data_dir']) && false === empty($config['parameters']['data_dir'])) {
+            $datadir = $config['parameters']['data_dir'];
+        }
+        $this->_container->setParameter('bbapp.data.dir', $datadir);
+
         //$this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
     }
 
@@ -595,14 +626,7 @@ class BBApplication
     public function getCacheDir()
     {
         if (null === $this->_cachedir) {
-            $cacheConfig = $this->getConfig()->getCacheConfig();
-            if (null !== $cacheConfig && true === is_array($cacheConfig) && true === isset($cacheConfig['cache_dir'])) {
-                $this->_cachedir = true === empty($cacheConfig['cache_dir']) ? null : $cacheConfig['cache_dir'];
-            }
-            
-            if (null === $this->_cachedir) {
-                $this->_cachedir = $this->getContainer()->getParameter('bbapp.cache.dir');
-            }
+            $this->_cachedir = $this->getContainer()->getParameter('bbapp.cache.dir');
         }
         
         return $this->_cachedir;
@@ -927,7 +951,7 @@ class BBApplication
     public function getStorageDir()
     {
         if (null === $this->_storagedir) {
-            $this->_storagedir = $this->getRepository() . DIRECTORY_SEPARATOR . 'Data' . DIRECTORY_SEPARATOR . 'Storage';
+            $this->_storagedir = $this->_container->getParameter('bbapp.data.dir') . DIRECTORY_SEPARATOR . 'Storage';
         }
 
         return $this->_storagedir;
@@ -939,7 +963,7 @@ class BBApplication
     public function getTemporaryDir()
     {
         if (null === $this->_tmpdir) {
-            $this->_tmpdir = $this->getRepository() . DIRECTORY_SEPARATOR . 'Data' . DIRECTORY_SEPARATOR . 'Tmp';
+            $this->_tmpdir = $this->_container->getParameter('bbapp.data.dir') . DIRECTORY_SEPARATOR . 'Tmp';
         }
 
         return $this->_tmpdir;

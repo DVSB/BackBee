@@ -92,7 +92,7 @@ class EntityFinder
      */
     private function _isEntity(\ReflectionClass $reflection)
     {
-        return (!$reflection->isAbstract() && !is_null($this->_getEntityAnnotation($reflection)));
+        return (!is_null($this->_getEntityAnnotation($reflection)));
     }
 
     /**
