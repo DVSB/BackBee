@@ -27,7 +27,7 @@ namespace BackBuilder\Theme;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Theme\Repository\ThemeRepository")
- * @Table(name="theme")
+ * @Table(name="theme", indexes={@index(name="site_idx", columns={"_site_uid"})})
  */
 class PersonalThemeEntity extends AThemeEntity
 {
@@ -43,6 +43,7 @@ class PersonalThemeEntity extends AThemeEntity
      * Site identifier
      * @var string
      * @Column(type="string", name="site_uid")
+     * @Index(keys={"field"="asc"}, options={"unique"=true})
      */
     protected $_site_uid;
 
