@@ -18,7 +18,8 @@ class EntityFinder
         'Test',
         'TestUnit',
         'Exception',
-        'Commands'
+        'Commands',
+        'Installer'
     );
 
     /**
@@ -59,6 +60,11 @@ class EntityFinder
             }
         }
         return $entities;
+    }
+    
+    public function addIgnoredFolder($folder)
+    {
+        $this->_ignoredFolder[] = $folder;
     }
 
     /**
