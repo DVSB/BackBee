@@ -18,7 +18,9 @@ class EntityFinder
         'Test',
         'TestUnit',
         'Exception',
-        'Commands'
+        'Commands',
+        'Installer',
+        'Assets'
     );
 
     /**
@@ -52,13 +54,18 @@ class EntityFinder
             } else {
                 if (1 === preg_match('/.*(.php)$/', $subpath)) {
                     $namespace = $this->getNamespace($subpath);
-                    if (true === class_exists($namespace) && $this->_isEntity(new \ReflectionClass($namespace))) {
+                    if ($this->_isValidNamespace($namespace)) {
                         $entities[] = $namespace;
                     }
                 }
             }
         }
         return $entities;
+    }
+    
+    public function addIgnoredFolder($folder)
+    {
+        $this->_ignoredFolder[] = $folder;
     }
 
     /**
@@ -70,6 +77,14 @@ class EntityFinder
         $classname = str_replace(array($this->_baseDir, 'bundle', '.php', '/'), array('', 'Bundle', '', '\\'), $file);
         return (strpos($classname, 'BackBuilder') === false) ? 'BackBuilder' . $classname : $classname;
     }
+    
+    private function _isValidNamespace($namespace)
+    {
+        return (
+            true === class_exists($namespace) && 
+            $this->_isEntity(new \ReflectionClass($namespace))
+        );
+    }
 
     /**
      * @param \ReflectionClass $reflection
@@ -77,7 +92,7 @@ class EntityFinder
      */
     private function _isEntity(\ReflectionClass $reflection)
     {
-        return !is_null($this->_getEntityAnnotation($reflection));
+        return (!$reflection->isAbstract() && !is_null($this->_getEntityAnnotation($reflection)));
     }
 
     /**
