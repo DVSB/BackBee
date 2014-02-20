@@ -43,7 +43,6 @@ class PersonalThemeEntity extends AThemeEntity
      * Site identifier
      * @var string
      * @Column(type="string", name="site_uid")
-     * @Index(keys={"field"="asc"}, options={"unique"=true})
      */
     protected $_site_uid;
 

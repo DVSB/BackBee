@@ -43,7 +43,7 @@ class CacheListener
             return;
         if (NULL !== $token = $application->getBBUserToken())
             return;
-        if (true === $application->isDebugMode())
+        if (true === $application->debugMode())
             return;
         
         $content = $event->getTarget();
