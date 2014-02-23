@@ -68454,7 +68454,6 @@ function (
 
 			// If the setting has been set to a number or false we need to activate the 
 			// toggle button to indicate that the aspect ratio will be preserved.
-			console.log(plugin.settings);
 			if (plugin.settings.fixedAspectRatio !== false) {
 				this._imageCnrRatioButton.setState(true);
 				plugin.keepAspectRatio = true;
@@ -69458,8 +69457,6 @@ define('image/image-plugin',[
 				//this.ui._imageCnrRatioButton.setState(false);
 
 			} else {
-
-
 				this.endResize();
 				if (!this.keepAspectRatio) {
 					this.aspectRatioValue = false;
@@ -69617,7 +69614,7 @@ define('image/image-plugin',[
 		 * It will if enabled activate the resizing action.
 		 */
 		clickImage: function (e) {
-
+			
 			var plugin = this;
 			plugin.endResize(); // removes previous resize handler
 			plugin.imageObj = jQuery(e.target);
@@ -70144,7 +70141,7 @@ define('image/image-plugin',[
 				'max-height': '',
 				'max-width'	: ''
 			});
-
+		
 			currentImageObj.resizable({
 				maxHeight : plugin.settings.maxHeight,
 				minHeight : plugin.settings.minHeight,
@@ -70198,6 +70195,7 @@ define('image/image-plugin',[
 		 * This method will end resizing and toggle buttons accordingly and remove all markup that has been added for cropping
 		 */
 		endResize: function () {
+			
 			// Find the nearest contenteditable and reenable it since resizing is finished
 			if (this.imageObj) {
 				var editable = this.imageObj.closest('.aloha-editable');

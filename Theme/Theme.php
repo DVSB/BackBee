@@ -155,7 +155,14 @@ class Theme extends ThemeConst
     {
         if (array_key_exists($type, $this->_themes_dir)) {
             $theme_dir = $this->_themes_dir[$type];
-            File::resolveFilepath($theme_dir, NULL, array('base_dir' => $this->_application->getBaseDir()));
+            $options = '/' === $theme_dir[0] ? 
+                array() :
+                array(
+                    'base_dir' => $this->_application->getBaseDir()
+                )
+            ;
+            File::resolveFilepath($theme_dir, NULL, $options);
+            
             return $theme_dir . DIRECTORY_SEPARATOR;
         }
         return false;
