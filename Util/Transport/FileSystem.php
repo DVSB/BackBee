@@ -25,6 +25,7 @@ use BackBuilder\Util\Transport\Exception\TransportException;
 
 /**
  * A local filesystem transport
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @subpackage  Transport
@@ -37,8 +38,9 @@ class FileSystem extends ATransport
     /**
      * Class constructor, config should overwrite following option:
      * * remotepath
-     * 
+     *
      * @param array $config
+     * @throws Exception\MisconfigurationException Occures if the remote path can not be created
      */
     public function __construct(array $config = null)
     {
@@ -46,7 +48,9 @@ class FileSystem extends ATransport
 
         if (null !== $this->_remotepath &&
                 false === file_exists($this->_remotepath)) {
-            @mkdir($this->_remotepath, 0755, true);
+            if (false === @mkdir($this->_remotepath, 0755, true)) {
+                throw new Exception\MisconfigurationException(sprintf('Can not create remote path %s', $this->_remotepath));
+            }
         }
     }
 
@@ -64,18 +68,19 @@ class FileSystem extends ATransport
     /**
      * Tries to change dir to the defined remote path.
      * An error is triggered if failed.
-     * 
+     *
      * @param string $username
      * @param string $password
      * @return \BackBuilder\Util\Transport\FileSystem
+     * @throws \BackBuilder\Util\Transport\Exception\AuthenticationException
      */
     public function login($username = null, $password = null)
     {
         if (false === @$this->cd()) {
             if (true === @$this->mkdir()) {
-                $this->cd();
+                @$this->cd();
             } else {
-                $this->_trigger_error(sprintf('Unable to change dir to %s', $this->_remote_path));
+                throw new Exception\AuthenticationException(sprintf('Unable to change dir to %s', $this->_remotepath));
             }
         }
 
@@ -100,7 +105,7 @@ class FileSystem extends ATransport
     public function cd($dir = null)
     {
         $dir = $this->_getAbsoluteRemotePath($dir);
-        if (false === chdir($dir)) {
+        if (false === is_dir($dir)) {
             return $this->_trigger_error(sprintf('Unable to change remote directory to %s.', $dir));
         }
         $this->_remotepath = $dir;
@@ -114,7 +119,7 @@ class FileSystem extends ATransport
      */
     public function ls($dir = null)
     {
-        $dir = $this->_getAbsoluteRemotePath($dir);
+        $dir = $this->_getAbsoluteRemotePath(null === $dir ? $this->_remotepath : $dir);
         if (false === $ls = @scandir($dir)) {
             return $this->_trigger_error(sprintf('Unable to list files of remote directory %s.', $dir));
         }
@@ -124,6 +129,7 @@ class FileSystem extends ATransport
     /**
      * Returns the current remote path
      * @return string
+     * @codeCoverageIgnore
      */
     public function pwd()
     {
@@ -144,7 +150,7 @@ class FileSystem extends ATransport
         }
 
         $remote_file = $this->_getAbsoluteRemotePath($remote_file);
-        if (false === $overwrite && false === file_exists($remote_file)) {
+        if (false === $overwrite && true === file_exists($remote_file)) {
             return $this->_trigger_error(sprintf('Remote file already exists: %s.', $remote_file));
         }
 
@@ -224,13 +230,14 @@ class FileSystem extends ATransport
 
     public function getRecursive($local_path, $remote_path, $overwrite = false)
     {
-        if (false === is_dir($this->pwd() . DIRECTORY_SEPARATOR . $remote_path)) {
+        $remote_path = $this->_getAbsoluteRemotePath($remote_path);
+        if (false === is_dir($remote_path)) {
             return $this->get($local_path, $remote_path, $overwrite);
         }
 
         if (false === file_exists($local_path)) {
             if (false === @mkdir($local_path, 0755, true)) {
-                throw new TransportException(sprintf('Enable to create local folder %s.', $local_path));
+                throw new TransportException(sprintf('Unable to create local folder %s.', $local_path));
             }
         } elseif (false === is_dir($local_path)) {
             throw new TransportException(sprintf('A file named %s already exist, can\'t create folder.', $local_path));
@@ -244,6 +251,8 @@ class FileSystem extends ATransport
             }
         }
         $this->cd($currentpwd);
+
+        return true;
     }
 
     /**

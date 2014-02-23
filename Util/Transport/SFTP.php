@@ -87,7 +87,7 @@ class SFTP extends ATransport
     }
 
     /**
-     * Establish a SSH conneciton
+     * Establish a SSH connection
      * @param string $host
      * @param int $port
      * @return \BackBuilder\Util\Transport\SFTP
@@ -366,6 +366,7 @@ class SFTP extends ATransport
 
     /**
      * Disconnect from the remote server and unset resources
+     * @return \BackBuilder\Util\Transport\SFTP
      */
     public function disconnect()
     {
@@ -374,6 +375,7 @@ class SFTP extends ATransport
             $this->_ssh_resource = null;
             $this->_sftp_resource = null;
         }
+        return $this;
     }
 
     /**

@@ -23,7 +23,7 @@ namespace BackBuilder\Util\Transport;
 
 /**
  * Abstract class for transport
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @subpackage  Transport
@@ -83,10 +83,10 @@ abstract class ATransport
      * * username
      * * password
      * * remotepath
-     * 
+     *
      * Should throw a \BackBuilder\Util\Transport\Exception\MisconfigurationException
      * on failure
-     * 
+     *
      * @param array $config
      */
     public function __construct(array $config = null)
