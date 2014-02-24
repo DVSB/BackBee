@@ -21,9 +21,18 @@
 
 namespace BackBuilder\Util\Transport;
 
-use BackBuilder\Util\Transport\Exception\TransportException;
+use BackBuilder\Util\Transport\Exception\MisconfigurationException;
 
 /**
+ * Factory to get a transport instance
+ * The array configuration should have the following structure:
+ * <code>
+ *    transport: <<Transport classname>>
+ *    host: {<<Transport host>>}
+ *    remotepath: {<<Transport remote path>>}
+ *    ...
+ * </code>
+ * 
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @subpackage  Transport
@@ -33,14 +42,23 @@ use BackBuilder\Util\Transport\Exception\TransportException;
 class TransportFactory
 {
 
+    /**
+     * Creates a new ATransport instance
+     * @param array $config An array containing the key 'transport' with the classname to use 
+     *                      and optional options depending on the transport to start
+     * @return \BackBuilder\Util\Transport\ATransport
+     * @throws MisconfigurationException occures if $config is not valid
+     */
     public static function create(array $config)
     {
-        if (!array_key_exists('transport', $config))
-            throw new TransportException(sprintf('Can not create Transport : missing classname.'));
+        if (false === array_key_exists('transport', $config)) {
+            throw new MisconfigurationException(sprintf('Can not create Transport : missing classname.'));
+        }
 
         $classname = $config['transport'];
-        if (!class_exists($classname))
-            throw new TransportException(sprintf('Can not create Transport : unknown classname %s.', $classname));
+        if (false === class_exists($classname)) {
+            throw new MisconfigurationException(sprintf('Can not create Transport : unknown classname %s.', $classname));
+        }
 
         return new $classname($config);
     }
