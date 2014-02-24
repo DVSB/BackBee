@@ -514,11 +514,12 @@ class BBApplication
                     $bundle->stop();
             }
 
-            if ($this->getContainer()->has('logging')) {
+            // FIXME
+            /*if ($this->getContainer()->has('logging')) {
                 $logging = $this->getContainer()->get('logging');
                 $this->getContainer()->set('logging', null);
                 unset($logging);
-            }
+            }*/
 
             $this->info('BackBuilder application ended');
         }
