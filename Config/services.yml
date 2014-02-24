@@ -64,3 +64,8 @@ services:
             - [setLocale, ["%bbapp.locale%"]]
     pagebuilder:
         class:      %bbapp.pagebuilder.class%
+    # synthetic services
+    site:
+        synthetic: true
+    bb_session:
+        synthetic: true
