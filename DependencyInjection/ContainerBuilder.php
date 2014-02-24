@@ -6,9 +6,22 @@ use Symfony\Component\DependencyInjection\ContainerBuilder as SfContainerBuilder
 	Symfony\Component\DependencyInjection\ContainerInterface,
 	Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
-
+/**
+ * Extended Symfony Dependency injection component
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\DependencyInjection
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
+ */
 class ContainerBuilder extends SfContainerBuilder
 {
+	/**
+	 * Change current method default behavior: if we try to get a synthetic service it will return
+	 * null instead of throwing an exception;
+	 * 
+	 * @see Symfony\Component\DependencyInjection\ContainerBuilder::get()
+	 */
 	public function get($id, $invalidBehavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
 	{
 		$service = null;
