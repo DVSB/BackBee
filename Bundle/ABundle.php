@@ -93,11 +93,21 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
     private function _initConfig($configdir = null)
     {
-        if (is_null($configdir)) {
+        if (true === is_null($configdir)) {
             $configdir = $this->getResourcesDir();
         }
 
-        $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
+        $filename = $this->_application->getDataDir() . DIRECTORY_SEPARATOR . 'Bundles' .
+            DIRECTORY_SEPARATOR . $this->getId() . DIRECTORY_SEPARATOR . 'config.yml';
+        if (false === is_file($filename)) {
+            if (false === is_dir(dirname($filename))) {
+                mkdir(dirname($filename), 0755, true);
+            }
+
+            copy($this->getResourcesDir() . DIRECTORY_SEPARATOR . 'config.yml', $filename);
+        }
+
+        $this->_config = new Config(dirname($filename), $this->getApplication()->getBootstrapCache());
         $allSections = $this->_config->getAllSections();
         $this->configDefaultSections = $allSections;
         if (
@@ -271,6 +281,9 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         return $this->_config;
     }
 
+    /**
+     * Do save of bundle new config, allow and manage multisite config
+     */
     public function saveConfig()
     {
         if (false === $this->manageMultisiteConfig) {
@@ -294,11 +307,14 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         }
     }
 
+    /**
+     * Puts new settings into config files
+     * 
+     * @param  array  $config 
+     */
     private function doSaveConfig(array $config)
     {
-        file_put_contents(
-                $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml', Yaml::dump($config)
-        );
+        file_put_contents($this->_config->getBaseDir() . DIRECTORY_SEPARATOR . 'config.yml', Yaml::dump($config));
     }
 
     public function getProperty($key = null)

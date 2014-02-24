@@ -534,6 +534,15 @@ class BBApplication
     }
 
     /**
+     * Returns path to Data directory
+     * @return string absolute path to Data directory
+     */
+    public function getDataDir()
+    {
+        return $this->_container->getParameter('bbapp.data.dir');
+    }
+
+    /**
      * @return string
      */
     public function getBaseDir()
