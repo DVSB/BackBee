@@ -513,13 +513,9 @@ class BBApplication
                 foreach ($this->_bundles as $bundle)
                     $bundle->stop();
             }
-
-            // FIXME
-            /*if ($this->getContainer()->has('logging')) {
-                $logging = $this->getContainer()->get('logging');
-                $this->getContainer()->set('logging', null);
-                unset($logging);
-            }*/
+            
+            // @todo
+            // stop services
 
             $this->info('BackBuilder application ended');
         }
