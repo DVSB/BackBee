@@ -324,4 +324,14 @@ class Config
         }
     }
 
+    /**
+     * Returns setted base directory
+     * 
+     * @return string absolute path to current Config base directory
+     */
+    public function getBaseDir()
+    {
+        return $this->_basedir;
+    }
+
 }
