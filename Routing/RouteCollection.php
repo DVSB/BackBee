@@ -38,8 +38,9 @@ class RouteCollection extends sfRouteCollection
 
     public function __construct(BBApplication $application = null)
     {
-        if (method_exists('Symfony\Component\Routing\RouteCollection', '__construct'))
+        if (true === method_exists('Symfony\Component\Routing\RouteCollection', '__construct')) {
             parent::__construct();
+        }
 
         if (null !== $application) {
             $this->_application = $application;
@@ -93,4 +94,73 @@ class RouteCollection extends sfRouteCollection
         return null;
     }
 
+    /**
+     * Return complete url which match with routeName and routeParams; you can also customize
+     * the base url; by default it use current site base url
+     * @param  string      $routeName   
+     * @param  array|null  $routeParams 
+     * @param  string|null $baseUrl     
+     * @return string              
+     */
+    public function getUrlByRouteName($routeName, array $routeParams = null, $baseUrl = null)
+    {
+        $uri = $this->getRoutePath($routeName);
+        if (null !== $routeParams && true === is_array($routeParams)) {
+            foreach ($routeParams as $key => $value) {
+                $uri = str_replace('{' . $key . '}', $value, $uri);
+            }
+        }
+
+        return null !== $baseUrl && true === is_string($baseUrl)
+            ? $baseUrl . $uri
+            : $this->getUri($uri);
+    }
+
+    /**
+     * Return $pathinfo with base url of current page if pahtinfo does not contains 'http' string
+     * @param  string|null $pathinfo   
+     * @param  string|null $defaultExt 
+     * @return string             
+     */
+    public function getUri($pathinfo = null, $defaultExt = null)
+    {
+        if (null !== $pathinfo && preg_match('/^([a-zA-Z1-9\/_]*)http[s]?:\/\//', $pathinfo, $matches)) {
+            return substr($pathinfo, strlen($matches[1]));
+        }
+
+        if ('/' !== substr($pathinfo, 0, 1)) {
+            $pathinfo = '/' . $pathinfo;
+        }
+
+        $application = $this->_application;
+        if (true === $application->isStarted() && null !== $application->getRequest()) {
+            $request = $application->getRequest();
+
+            if (null === $pathinfo) {
+                $pathinfo = $request->getBaseUrl();
+            }
+
+            if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
+                return $request->getSchemeAndHttpHost() 
+                    . substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl())))) 
+                    . $pathinfo;
+            } else {
+                return $request->getUriForPath($pathinfo);
+            }
+        }
+
+        if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
+            if (null === $defaultExt) {
+                if (null !== $application) {
+                    if (null !== $this->getApplication()->getContainer()->get('site')) {
+                        $defaultExt = $application->getContainer()->get('site')->getDefaultExtension();
+                    }
+                }
+            }
+
+            $pathinfo .= $defaultExt;
+        }
+
+        return $pathinfo;
+    }
 }
