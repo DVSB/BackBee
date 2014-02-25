@@ -7,6 +7,13 @@ var bb = bb || {};
 
         return (function(global){
             /**
+             * bundle popin identifier
+             * 
+             * @type {string}
+             */
+            var popinClass = '.bb5-dialog-admin-bundle';
+
+            /**
              * Bundle controller object.
              * 
              * @example How to add one action
@@ -33,37 +40,43 @@ var bb = bb || {};
              */
             var BundleController = new JS.Class({
                 
+                /**
+                 * BundleController contructor
+                 * 
+                 * @returns {undefined}
+                 */
                 initialize: function () {
-                       /**
-                        * Bundle web services
-                        *
-                        * @type {array}
-                        */
-                       this.webservices = window.bb.ToolsbarManager.getTbInstance('bundletb').selectedBundle.webservices;
 
-                       /**
-                        * actions.
-                        *
-                        * @type {array}
-                        */
-                       this.actions = [];
+                    /**
+                     * Bundle web services
+                     *
+                     * @type {array}
+                     */
+                    this.webservices = window.bb.ToolsbarManager.getTbInstance('bundletb').selectedBundle.webservices;
 
-                       /**
-                        * default action
-                        *
-                        * @type {object}
-                        */
-                       this.defaultAction = {
-                           params: function (event) {
-                               return {};
-                           },
-                           success: function (response) {
-                               console.log(response);
-                           },
-                           error: function (responce) {
-                               console.warn(responce);
-                           }
-                       };
+                    /**
+                     * actions.
+                     *
+                     * @type {array}
+                     */
+                    this.actions = [];
+
+                    /**
+                     * default action
+                     *
+                     * @type {object}
+                     */
+                    this.defaultAction = {
+                        params: function (event) {
+                            return {};
+                        },
+                        success: function (response) {
+                            window.bb.jquery(popinClass).html(response.result);
+                        },
+                        error: function (responce) {
+                            console.warn(responce);
+                        }
+                    };
                 },
 
                 /**
@@ -129,15 +142,11 @@ var bb = bb || {};
 
             var bundleController = new BundleController();
             /**
-             * Create a function callable ewternally with bb.bundle.addAction
+             * Exposing addAction function from BundleController
              */
             window.bb.bundle = {
                 addAction: function () {
                     return bundleController.addAction.apply(bundleController, arguments);
-                },
-
-                getControllerInstance: function () {
-                    return bundleController;
                 }
             };
 
@@ -145,10 +154,10 @@ var bb = bb || {};
              * Add click listener on all object with bb-bundle-link class
              * 
              * @param {object} event
-             * @todo catch the bundle request ended to reload click listeners.
              */
-            window.bb.jquery('.bb5-dialog-admin-bundle').delegate('.bb-bundle-link', 'click', function (event) {
+            window.bb.jquery(popinClass).delegate('.bb-bundle-link', 'click', function (event) {
                 event.preventDefault();
+                console.log('delegate');
                 bundleController.executeAction(window.bb.jquery(event.target).attr('data-href'), event);
             });
 
@@ -158,7 +167,7 @@ var bb = bb || {};
              * @param {object} event
              * @todo catch the bundle request ended to reload click listeners.
              */
-            window.bb.jquery('.bb5-dialog-admin-bundle').delegate('.bb-bundle-form', 'submit', function (event) {
+            window.bb.jquery(popinClass).delegate('.bb-bundle-form', 'submit', function (event) {
                 event.preventDefault();
                 bundleController.executeAction(window.bb.jquery(event.target).attr('data-action'), event);
             });
