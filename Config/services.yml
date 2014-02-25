@@ -18,6 +18,7 @@ parameters:
     bbapp.urlgenerator.class: BackBuilder\Rewriting\UrlGenerator
     bbapp.translator.selector.class: Symfony\Component\Translation\MessageSelector
     bbapp.translator.class: Symfony\Component\Translation\IdentityTranslator
+    bbapp.routing.class: BackBuilder\Routing\RouteCollection
     bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
 
 services:
@@ -68,4 +69,6 @@ services:
     site:
         synthetic: true
     bb_session:
+        synthetic: true
+    routing:
         synthetic: true

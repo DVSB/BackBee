@@ -534,6 +534,14 @@ class BBApplication
     }
 
     /**
+     * @return BackBuilder\Routing\RouteCollection
+     */
+    public function getRouting()
+    {
+        return $this->getContainer()->get('routing');
+    }
+
+    /**
      * @return AutoLoader
      */
     public function getAutoloader()

@@ -90,6 +90,8 @@ class FrontController implements HttpKernelInterface {
     public function __construct(BBApplication $application = null) 
     {
         $this->_application = $application;
+
+        //$this->_routeCollection = $application->getRouting();
     }
 
     /**
@@ -281,13 +283,14 @@ class FrontController implements HttpKernelInterface {
      */
     public function getRouteCollection() 
     {
-        if (null === $this->_routeCollection) {
-            $this->_routeCollection = new RouteCollection($this->_application);
+        $container = $this->_application->getContainer();
+        if (null === $container->get('routing')) {
+            $container->set('routing', new RouteCollection($this->_application));
             $routeConfig = $this->_application->getConfig()->getRouteConfig();
             $this->registerRoutes($this, $routeConfig);
         }
 
-        return $this->_routeCollection;
+        return $container->get('routing');
     }
 
     /**
