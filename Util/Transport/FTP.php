@@ -34,8 +34,8 @@ class FTP extends ATransport
 {
 
     protected $_port = 21;
-    private $_passive = true;
-    private $_mode = FTP_ASCII;
+    protected $_passive = true;
+    protected $_mode = FTP_ASCII;
     private $_ftp_stream = null;
 
     public function __construct(array $config = null)
