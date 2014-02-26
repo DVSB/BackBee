@@ -515,7 +515,7 @@ class BBApplication
         }
 
         $this->getTheme()->init();
-        //var_dump($this->getSite()->getLabel()); die;
+        
         $this->getController()->handle();
     }
 
