@@ -74,11 +74,6 @@ class FrontController implements HttpKernelInterface {
      */
     protected $_requestContext;
 
-    /**
-     * Routes collection defined
-     * @var \BackBuilder\Routing\RouteCollection
-     */
-    protected $_routeCollection;
     protected $_actions = array();
 
     /**
@@ -91,7 +86,8 @@ class FrontController implements HttpKernelInterface {
     {
         $this->_application = $application;
 
-        //$this->_routeCollection = $application->getRouting();
+        $routeConfig = $this->_application->getConfig()->getRouteConfig();
+        $this->registerRoutes($this, $routeConfig);
     }
 
     /**
@@ -283,14 +279,7 @@ class FrontController implements HttpKernelInterface {
      */
     public function getRouteCollection() 
     {
-        $container = $this->_application->getContainer();
-        if (null === $container->get('routing')) {
-            $container->set('routing', new RouteCollection($this->_application));
-            $routeConfig = $this->_application->getConfig()->getRouteConfig();
-            $this->registerRoutes($this, $routeConfig);
-        }
-
-        return $container->get('routing');
+        return $this->_application->getContainer()->get('routing');
     }
 
     /**

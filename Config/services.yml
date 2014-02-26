@@ -34,6 +34,8 @@ services:
     ed:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp"]
+    event.dispatcher:
+        alias: ed
     logging:
         class:      %bbapp.logger.class%
         arguments:  ["@bbapp"]
@@ -63,12 +65,13 @@ services:
         arguments:  ["@translator.selector"]
         calls:
             - [setLocale, ["%bbapp.locale%"]]
+    routing:
+        class:      %bbapp.routing.class%
+        arguments:  ["@bbapp"]
     pagebuilder:
         class:      %bbapp.pagebuilder.class%
     # synthetic services
     site:
         synthetic: true
     bb_session:
-        synthetic: true
-    routing:
         synthetic: true
