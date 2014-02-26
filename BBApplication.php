@@ -24,7 +24,9 @@ namespace BackBuilder;
 use Exception;
 
 use BackBuilder\AutoLoader\AutoLoader,
+    BackBuilder\Bundle\BundleLoader,
     BackBuilder\Config\Config,
+    BackBuilder\DependencyInjection\ContainerBuilder,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
     BackBuilder\Exception\DatabaseConnectionException,
@@ -37,10 +39,7 @@ use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager;
 
-use Symfony\Component\Config\FileLocator,
-    BackBuilder\DependencyInjection\ContainerBuilder,
-    Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
-    Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\Yaml\Yaml;
@@ -141,96 +140,10 @@ class BBApplication
 
     private function _initContainer()
     {
-        // Construct service container
-        $this->_container = new ContainerBuilder();
-
-        $dirToLookingFor = array();
-        $dirToLookingFor[] = $this->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
-        $dirToLookingFor[] = $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
-        $dirToLookingFor[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
-
-        foreach ($dirToLookingFor as $dir) {
-            if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
-                // Define where to looking for services.yml
-                $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
-                // Load every services definitions into our container
-                $loader->load('services.yml');
-            } elseif (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.xml')) {
-                // Define where to looking for services.yml
-                $loader = new XmlFileLoader($this->_container, new FileLocator(array($dir)));
-                // Load every services definitions into our container
-                $loader->load('services.xml');
-            }
-        }
-
-        // Add current BBApplication into container
-        $this->_container->set('bbapp', $this);
-
-        $this->_initBBAppParamsIntoContainer();
-
-        $this->_initExternalBundleServices();
+        ContainerBuilder::init($this);
+        $this->_container = ContainerBuilder::getContainer();
 
         return $this;
-    }
-
-    private function _initBBAppParamsIntoContainer()
-    {
-        // Retrieving config.yml without calling Config services
-        $config = array();
-        $filename = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'config.yml';
-        if (true === is_readable($filename)) {
-            $config = Yaml::parse($filename);
-        }
-
-        // Set every bbapp parameters
-        
-        // define context
-        $this->_container->setParameter('bbapp.context', $this->getContext());
-
-        // define cache dir
-        $cachedir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'cache';
-        if (true === isset($config['parameters']['cache_dir']) && false === empty($config['parameters']['cache_dir'])) {
-            $cachedir = $config['parameters']['cache_dir'];
-        }
-
-        $this->_container->setParameter('bbapp.cache.dir', $cachedir);
-
-        // define config dir
-        $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
-
-        // define repository dir
-        $this->_container->setParameter('bbapp.repository.dir', $this->getRepository());
-
-        // define data dir
-        $datadir = $this->getRepository() . DIRECTORY_SEPARATOR . 'Data';
-        if (true === isset($config['parameters']['data_dir']) && false === empty($config['parameters']['data_dir'])) {
-            $datadir = $config['parameters']['data_dir'];
-        }
-        $this->_container->setParameter('bbapp.data.dir', $datadir);
-
-        //$this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
-    }
-
-    private function _initExternalBundleServices()
-    {
-        // Load external bundle services (Symfony2 Bundle)
-        $externalServices = $this->getConfig()->getSection('external_bundles');
-        if (null !== $externalServices && 0 < count($externalServices)) {
-            foreach ($externalServices as $key => $datas) {
-                $bundle = new $datas['class']();
-                if (false === ($bundle instanceof ExtensionInterface)) {
-                    $errorMsg = sprintf(
-                            'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', $datas['class'], 'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
-                    );
-                    $this->debug($errorMsg);
-
-                    throw new BBException($errorMsg);
-                }
-
-                $config = true === isset($datas['config']) ? array($key => $datas['config']) : array();
-                $bundle->load($config, $this->_container);
-            }
-        }
     }
 
     /**
@@ -407,43 +320,9 @@ class BBApplication
 
     private function _initBundles()
     {
-        if (null === $this->_bundles)
-            $this->_bundles = array();
+        $this->_bundles = BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
 
-        if (null !== $bundles = $this->getConfig()->getBundlesConfig()) {
-            foreach ($bundles as $name => $classname) {
-                $bundle = new $classname($this);
-                $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
-            }
-        }
-
-        $this->initBundlesServices();
-
-        if (0 < count($this->_bundles)) {
-            foreach ($this->_bundles as $bundle) {
-                $bundle->init();
-                $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
-            }
-        }
-    }
-
-    /**
-     * Load every service definition defined in bundle
-     */
-    private function initBundlesServices()
-    {
-        foreach ($this->_bundles as $b) {
-            $xml = $b->getResourcesDir() . DIRECTORY_SEPARATOR . 'services.xml';
-            if (true === is_file($xml)) {
-                $loader = new XmlFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
-                try {
-                    $loader->load('services.xml');
-                } catch (Exception $e) { /* nothing to do, just ignore it */
-                }
-
-                unset($loader);
-            }
-        }
+        return $this;
     }
 
     /**
@@ -491,8 +370,8 @@ class BBApplication
         $this->_isstarted = true;
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
-        if (null !== $this->_bundles) {
-            foreach ($this->_bundles as $bundle)
+        if (null !== $this->getBundles()) {
+            foreach ($this->getBundles() as $bundle)
                 $bundle->start();
         }
 
@@ -509,8 +388,8 @@ class BBApplication
     public function stop()
     {
         if (true === $this->isStarted()) {
-            if (null !== $this->_bundles) {
-                foreach ($this->_bundles as $bundle)
+            if (null !== $this->getBundles()) {
+                foreach ($this->getBundles() as $bundle)
                     $bundle->stop();
             }
 
