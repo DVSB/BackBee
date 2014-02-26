@@ -150,7 +150,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
             $this->_application->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);
         }
 
-        return $response->send();
+        $response->send();
         exit(0);
     }
 
