@@ -1,5 +1,36 @@
 var bb = bb || {};
-
+/**
+ * @example How to route one action.
+ * 
+ * Javascript:
+ * {string} namespace can be compose like actionName or webserviceName::actionName.
+ * {object} {} optional parameter.
+ * 
+ * bb.require(['bb.BundleController'], function () {
+ *     bb.bundle.addAction(namespace, {
+ *         params: function (event) {
+ *             // Function to catch query params return object.
+ *             // By default return empty object. 
+ *         },
+ *         success: function (response) {
+ *             // Function to apply the query result.
+ *             // By default put the template into the popin content.
+ *         },
+ *         error: function (response) {
+ *             // Function to apply the query error.
+ *             // By default do console.warn of the error.
+ *         }
+ *     });
+ * });
+ * 
+ * link :
+ * <a class="bb-bundle-link" data-href="namespace">link</a>
+ * form :
+ * <form class="bb-bundle-form" data-action="namespace">inputs</form>
+ * 
+ * namespace is the same as the bb.bundle.addAction namespace parameter
+ * work on all tags
+ */
 (function (window) {
     "use strict";
 
@@ -15,28 +46,6 @@ var bb = bb || {};
 
             /**
              * Bundle controller object.
-             * 
-             * @example How to add one action
-             * 
-             * Javascript:
-             * {string} namespace can be compose like actionName or webserviceName::actionName.
-             * {object} {} all key describe under are optionals.
-             * 
-             * bb.require(['bb.BundleController'], function () {
-             *     bb.bundle.addAction(namespace, {
-             *         params: function (event) {function to catch query params return object},
-             *         success: function (response) {function to apply the query result},
-             *         error: function (response) {function to apply the query error}
-             *     });
-             * });
-             * 
-             * link :
-             * <a class="bb-bundle-link" data-href="namespace">link</a>
-             * form :
-             * <form class="bb-bundle-form" data-action="namespace">inputs</form>
-             * 
-             * namespace is the same as the bb.bundle.addAction namespace parameter
-             * work on all tags
              */
             var BundleController = new JS.Class({
                 
