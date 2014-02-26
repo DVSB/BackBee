@@ -503,38 +503,7 @@ abstract class ARenderer implements IRenderer
 
     public function getUri($pathinfo = null)
     {
-        if (null !== $pathinfo && preg_match('/^([a-zA-Z1-9\/_]*)http[s]?:\/\//', $pathinfo, $matches)) {
-            return substr($pathinfo, strlen($matches[1]));
-        }
-
-        if ('/' !== substr($pathinfo, 0, 1)) {
-            $pathinfo = '/' . $pathinfo;
-        }
-        if ($this->_application->isStarted() && null !== $this->_application->getRequest()) {
-            $request = $this->_application->getRequest();
-
-            if (null === $pathinfo) {
-                $pathinfo = $request->getBaseUrl();
-            }
-
-            if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
-                return $request->getSchemeAndHttpHost() . substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl())))) . $pathinfo;
-            } else {
-                return $request->getUriForPath($pathinfo);
-            }
-        }
-
-        if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
-            if (null === $this->_default_ext) {
-                if (null !== $this->getApplication())
-                    if ($this->getApplication()->getContainer()->has('site'))
-                        $this->_default_ext = $this->getApplication()->getContainer()->get('site')->getDefaultExtension();
-            }
-
-            $pathinfo .= $this->_default_ext;
-        }
-
-        return $pathinfo;
+        return $this->getApplication()->getRouting()->getUri($pathinfo);
     }
 
     public function getRelativeUrl($uri)

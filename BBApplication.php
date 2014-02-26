@@ -38,7 +38,7 @@ use Doctrine\Common\EventManager,
     Doctrine\ORM\EntityManager;
 
 use Symfony\Component\Config\FileLocator,
-    Symfony\Component\DependencyInjection\ContainerBuilder,
+    BackBuilder\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
     Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
@@ -119,7 +119,9 @@ class BBApplication
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
 
-        $this->_compileContainer();
+        // Compile container so it resolves every var/abstract service called in services.yml|xml
+        $this->_container->compile();
+
         $this->_isinitialized = true;
     }
 
@@ -134,9 +136,7 @@ class BBApplication
 
     public function __destruct()
     {
-        if ($this->_isstarted) {
-            $this->info('BackBuilder application ended');
-        }
+        $this->stop();
     }
 
     private function _initContainer()
@@ -231,24 +231,6 @@ class BBApplication
                 $bundle->load($config, $this->_container);
             }
         }
-    }
-
-    private function _compileContainer()
-    {
-        // Compile container
-        $this->_container->compile();
-        // Create new one
-        $newContainer = new ContainerBuilder();
-        // Transfert every existing services from old to new container
-        foreach ($this->_container->getServiceIds() as $id) {
-            $newContainer->set($id, $this->_container->get($id));
-        }
-
-        // Transfert every existing parameters from old to new container
-        $newContainer->getParameterBag()->add($this->_container->getParameterBag()->all());
-        
-        // Replace old container by new one
-        $this->_container = $newContainer;
     }
 
     /**
@@ -515,8 +497,28 @@ class BBApplication
         }
 
         $this->getTheme()->init();
-        
-        $this->getController()->handle();
+
+        if (false === $this->isClientSAPI()) {
+            $this->getController()->handle();
+        }
+    }
+
+    /**
+     * Stop the current BBApplication instance
+     */
+    public function stop()
+    {
+        if (true === $this->isStarted()) {
+            if (null !== $this->_bundles) {
+                foreach ($this->_bundles as $bundle)
+                    $bundle->stop();
+            }
+            
+            // @todo
+            // stop services
+
+            $this->info('BackBuilder application ended');
+        }
     }
 
     /**
@@ -525,6 +527,14 @@ class BBApplication
     public function getController()
     {
         return $this->getContainer()->get('controller');
+    }
+
+    /**
+     * @return BackBuilder\Routing\RouteCollection
+     */
+    public function getRouting()
+    {
+        return $this->getContainer()->get('routing');
     }
 
     /**
@@ -547,6 +557,15 @@ class BBApplication
         }
 
         return $this->_bbdir;
+    }
+
+    /**
+     * Returns path to Data directory
+     * @return string absolute path to Data directory
+     */
+    public function getDataDir()
+    {
+        return $this->_container->getParameter('bbapp.data.dir');
     }
 
     /**
@@ -983,6 +1002,11 @@ class BBApplication
     public function isStarted()
     {
         return (true === $this->_isstarted);
+    }
+
+    public function isClientSAPI()
+    {
+        return isset($GLOBALS['argv']);
     }
 
 }
