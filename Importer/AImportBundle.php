@@ -33,7 +33,9 @@ abstract class AImportBundle
         $this->_config = new Config($this->_dir);
         $this->_relations = $this->_config->getSection('relations');
 
-        if (0 == count($this->_relations)) {return false;}
+        if (0 == count($this->_relations)) {
+            return false;
+        }
 
         $this->setPhpConf($this->_config->getSection('php_ini'));
         foreach ($this->_relations as $class => $config) {
@@ -50,6 +52,11 @@ abstract class AImportBundle
     public function __call($name, $arguments)
     {
         $config = reset($arguments);
+        
+        if (true === isset($config['do_import']) && false === $config['do_import']) {
+            $this->markAsSkipped('`' . str_replace('import', '', $name) . '`');
+        }
+
         $key = (0 === strpos($name, 'import')) ? strtolower(str_replace('import', '', $name)) : '';
         if ($key !== '') {
             $connectorName = '\BackBuilder\Importer\Connector\\' . $config['connector'];

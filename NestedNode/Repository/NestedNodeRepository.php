@@ -229,23 +229,37 @@ class NestedNodeRepository extends EntityRepository
                         ->getOneOrNullResult();
     }
 
-    public function getSiblings(ANestedNode $node, $includeNode = FALSE)
+    protected function _getSiblingsQuery(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
-        $siblings = array();
-
-        if (null !== $parent = $node->getParent()) {
-            $siblings = $parent->getChildren();
+        if (null === $order) {
+            $order = array('_leftnode' => 'asc');
         }
 
-        if (FALSE === $includeNode) {
-            $withoutNode = array();
-            foreach ($siblings as $sibling) {
-                if ($sibling != $node)
-                    $withoutNode[] = $sibling;
-            }
-            $siblings = $withoutNode;
+        $qb = $this->createQueryBuilder('n')
+            ->andWhere('n._parent = :parent')
+        ->setParameter('parent', $node->getParent());
+
+        if (false === $includeNode) {
+            $qb->andWhere('n._uid != :uid')
+                ->setParameter('uid', $node->getUid());
         }
-        return $siblings;
+
+        foreach ($order as $col => $sort) {
+            $qb->orderBy('n.' . $col, $sort);    
+        }
+
+
+        if (null !== $limit) {
+            $qb->setMaxResults($limit);
+            $qb->setFirstResult($start);
+        }
+
+        return $qb;
+    }
+
+    public function getSiblings(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
+    {
+        return $this->_getSiblingsQuery($node, $includeNode, $order, $limit, $start)->getQuery()->getResult();
     }
 
     public function getFirstChild(ANestedNode $node)
@@ -254,7 +268,7 @@ class NestedNodeRepository extends EntityRepository
         if (0 < count($children)) {
             return $children[0];
         }
-        return NULL;
+        return null;
     }
 
     public function getLastChild(ANestedNode $node)
@@ -263,7 +277,7 @@ class NestedNodeRepository extends EntityRepository
         if (0 < count($children)) {
             return $children[count($children) - 1];
         }
-        return NULL;
+        return null;
     }
 
     protected function _getAncestorQuery(ANestedNode $node, $level = 0)
