@@ -121,14 +121,15 @@ var bb = bb || {};
                  * Add a new action
                  *
                  * @param {string} namespace
-                 * @param {object} action
+                 * @param {object} action optional
                  * @returns {undefined}
                  */
                 addAction: function (namespace, action) {
                     var colonPos = namespace.indexOf('::'),
                         webservice = {},
                         name = '';
-
+                
+                    action = ((action === undefined) ? {} : action);
                     if (colonPos === -1) {
                         webservice = window.bb.ToolsbarManager.getTbInstance('bundletb').selectedBundle.webservice;
                         name = namespace;
@@ -157,7 +158,6 @@ var bb = bb || {};
              */
             window.bb.jquery(popinClass).delegate('.bb-bundle-link', 'click', function (event) {
                 event.preventDefault();
-                console.log('delegate');
                 bundleController.executeAction(window.bb.jquery(event.target).attr('data-href'), event);
             });
 
