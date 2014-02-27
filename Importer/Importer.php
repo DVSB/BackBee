@@ -235,7 +235,6 @@ class Importer
 
     final public function find($string)
     {
-        var_dump($this->_connector->find($string));
         return $this->_connector->find($string);
     }
 
