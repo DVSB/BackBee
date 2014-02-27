@@ -2,6 +2,7 @@ parameters:
     # bbapp parameters, somes will be set at init of container by BBApplication
     bbapp.context: 'default'
     bbapp.cache.dir: ''
+    bbapp.data.dir: ''
     bbapp.config.dir: ''
     bbapp.locale: 'fr_FR'
     # bbapp classes

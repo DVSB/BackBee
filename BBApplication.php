@@ -887,5 +887,4 @@ class BBApplication
     {
         return isset($GLOBALS['argv']);
     }
-
 }

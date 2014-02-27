@@ -2,102 +2,92 @@
 
 namespace BackBuilder\DependencyInjection;
 
+use Exception;
+
 use BackBuilder\BBApplication,
-	BackBuilder\DependencyInjection\Container,
-	BackBuilder\Exception\BBException;
+    BackBuilder\DependencyInjection\Container,
+    BackBuilder\Exception\BBException;
 
 use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
-	Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
-	Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
-	Symfony\Component\Yaml\Yaml;
+    Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
+    Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
+    Symfony\Component\Yaml\Yaml;
 
 class ContainerBuilder
 {
-	/**
-	 * @var boolean
-	 */
-	private static $isInit = false;
+    /**
+     * @var boolean
+     */
+    private static $isInit = false;
 
-	/**
-	 * Current project's instance configuration (in repository/Config)
-	 * @var array
-	 */
-	private static $config = array();
+    /**
+     * Current project's instance configuration (in repository/Config)
+     * @var array
+     */
+    private static $config = array();
 
-	/**
-	 * @var BackBuilder\DependencyInjection\Container
-	 */
-	private static $container = null;
+    /**
+     * @var BackBuilder\DependencyInjection\Container
+     */
+    private static $container = null;
 
-	/**
-	 * @var BBApplication
-	 */
-	private static $application = null;
+    /**
+     * @var BBApplication
+     */
+    private static $application = null;
 
-	/**
-	 * 
-	 * @param  BBApplication $application [description]
-	 */
-	public static function init(BBApplication $application)
-	{
-		// Retrieving config.yml without using Config service
-		$filename = $application->getRepository() . DIRECTORY_SEPARATOR 
-	    	. 'Config'  . DIRECTORY_SEPARATOR . 'config.yml';
-
-        if (true === is_readable($filename)) {
-            self::$config = Yaml::parse($filename);
-        } else {
-        	throw new \Exception();
-        }
-
+    /**
+     * 
+     * @param  BBApplication $application [description]
+     */
+    public static function init(BBApplication $application)
+    {
         self::$container = null;
         self::$application = $application;
 
         // Finally
         self::$isInit = true;
-	}
+    }
 
-	/**
-	 * [getContainer description]
-	 * @return [type] [description]
-	 */
-	public static function getContainer()
-	{
-		if (true === self::$isInit && null === self::$container) {
-			self::buildContainer();
-			self::initExternalBundleServices();
-		} else {
-			throw new BBException('You must call ContainerBuilder::init() before ContainerBuilder::getContainer() !');
-		}
+    /**
+     * [getContainer description]
+     * @return [type] [description]
+     */
+    public static function getContainer()
+    {
+        if (true === self::$isInit && null === self::$container) {
+            self::buildContainer();
+            // self::initExternalBundleServices();
+        } else {
+            throw new BBException('You must call ContainerBuilder::init() before ContainerBuilder::getContainer()!');
+        }
 
-		self::$isInit = false;
-		self::$config = array();
-		self::$container = null;
-		self::$application = null;
+        self::$isInit = false;
+        self::$application = null;
 
         return self::$container;
-	}
+    }
 
-	public static function loadServicesFromYamlFile(Container $container, $dir)
-	{
-		$loader = new YamlFileLoader($container, new FileLocator(array($dir)));
+    public static function loadServicesFromYamlFile(Container $container, $dir)
+    {
+        $loader = new YamlFileLoader($container, new FileLocator(array($dir)));
         $loader->load('services.yml');
-	}
+    }
 
-	public static function loadServicesFromXmlFile(Container $container, $dir)
-	{
-		$loader = new XmlFileLoader($container, new FileLocator(array($dir)));
+    public static function loadServicesFromXmlFile(Container $container, $dir)
+    {
+        $loader = new XmlFileLoader($container, new FileLocator(array($dir)));
         $loader->load('services.xml');
-	}
+    }
 
 
-	/**
-	 * @return [type] [description]
-	 */
-	private static function buildContainer()
-	{
-		// Construct container
+    /**
+     * @return [type] [description]
+     */
+    private static function buildContainer()
+    {
+        // Construct container
         self::$container = new Container();
 
         $dirToLookingFor = array();
@@ -115,11 +105,11 @@ class ContainerBuilder
         }
 
         self::initApplicationVarsIntoContainer();
-	}
+    }
 
-	private static function initApplicationVarsIntoContainer()
-	{
-		// Add BBApplication to container
+    private static function initApplicationVarsIntoContainer()
+    {
+        // Add BBApplication to container
         self::$container->set('bbapp', self::$application);
 
         // Set application others variables' values
@@ -128,13 +118,17 @@ class ContainerBuilder
         self::$container->setParameter('bbapp.context', self::$application->getContext());
 
         // define cache directory
-        $cachedir = self::$application->getBaseDir() . DIRECTORY_SEPARATOR . 'cache';
-        if (true === isset($config['parameters']['cache_dir']) 
-        	&& false === empty($config['parameters']['cache_dir'])) {
-            $cachedir = $config['parameters']['cache_dir'];
+        try {
+            $cachedir = self::$container->getParameter('bbapp.cache.dir');
+            if (true === empty($cachedir)) {
+                throw new Exception();
+            }
+        } catch (Exception $e) {
+            self::$container->setParameter(
+                'bbapp.cache.dir', 
+                self::$application->getBaseDir() . DIRECTORY_SEPARATOR . 'cache'
+            );
         }
-
-        self::$container->setParameter('bbapp.cache.dir', $cachedir);
 
         // define config directory
         self::$container->setParameter('bbapp.config.dir', self::$application->getConfigDir());
@@ -143,41 +137,45 @@ class ContainerBuilder
         self::$container->setParameter('bbapp.repository.dir', self::$application->getRepository());
 
         // define data directory
-        $datadir = self::$application->getRepository() . DIRECTORY_SEPARATOR . 'Data';
-        if (true === isset($config['parameters']['data_dir']) 
-        	&& false === empty($config['parameters']['data_dir'])) {
-            $datadir = $config['parameters']['data_dir'];
+        try {
+            $datadir = self::$container->getParameter('bbapp.data.dir');
+            if (true === empty($datadir)) {
+                throw new Exception();
+            }
+        } catch (Exception $e) {
+            self::$container->setParameter(
+                'bbapp.data.dir', 
+                self::$application->getRepository() . DIRECTORY_SEPARATOR . 'Data'
+            );
         }
 
-        self::$container->setParameter('bbapp.data.dir', $datadir);
-
         //self::$container->setParameter('bbapp.cachecontrol.class', self::$application->getCacheProvider());
-	}
+    }
 
-	private static function initExternalBundleServices()
-	{
-		if (true === array_key_exists('external_bundles', self::$config)) {
-			// Load external bundle services (Symfony2 Bundle)
-	        $externalServices = self::$config['external_bundles'];
-	        
-	        if (null !== $externalServices && 0 < count($externalServices)) {
-	            foreach ($externalServices as $key => $datas) {
-	                $bundle = new $datas['class']();
-	                if (false === ($bundle instanceof ExtensionInterface)) {
-	                    $errorMsg = sprintf(
+    private static function initExternalBundleServices()
+    {
+        if (true === array_key_exists('external_bundles', self::$config)) {
+            // Load external bundle services (Symfony2 Bundle)
+            $externalServices = self::$config['external_bundles'];
+            
+            if (null !== $externalServices && 0 < count($externalServices)) {
+                foreach ($externalServices as $key => $datas) {
+                    $bundle = new $datas['class']();
+                    if (false === ($bundle instanceof ExtensionInterface)) {
+                        $errorMsg = sprintf(
                             'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', 
                             $datas['class'], 
                             'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
-	                    );
-	                    self::$debug($errorMsg);
+                        );
+                        self::$debug($errorMsg);
 
-	                    throw new BBException($errorMsg);
-	                }
+                        throw new BBException($errorMsg);
+                    }
 
-	                $config = true === isset($datas['config']) ? array($key => $datas['config']) : array();
-	                $bundle->load($config, self::$_container);
-	            }
-	        }
-		}
-	}
+                    $config = true === isset($datas['config']) ? array($key => $datas['config']) : array();
+                    $bundle->load($config, self::$_container);
+                }
+            }
+        }
+    }
 }
