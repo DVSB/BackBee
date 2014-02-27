@@ -148,7 +148,7 @@ class Importer
      * @param array $entities
      */
     public function save(array $entities, $check_for_existing = true)
-    {
+    { 
         $id_label = 'get' . ucfirst(array_key_exists('id_label', $this->_import_config) ? $this->_import_config['id_label'] : 'uid');
 
         \BackBuilder\Util\Buffer::dump('Saving...' . "\n");$i= 0;
@@ -162,15 +162,26 @@ class Importer
         }
 
         $this->_application->getEntityManager()->flush();
+
         $this->getConverter()->afterEntitiesFlush($this, $entities);
         $this->flushMemory();
     }
 
     public function flushMemory()
     {
+
+        
         $this->_application->getEntityManager()->clear();
         gc_collect_cycles();
+
+
         $this->getConverter()->beforeImport($this, $this->_import_config);
+    }
+
+    private function convert($size)
+    {
+        $unit=array('b','kb','mb','gb','tb','pb');
+        return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
     }
 
     /**
