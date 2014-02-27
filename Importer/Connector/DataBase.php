@@ -71,7 +71,7 @@ class DataBase implements IImporterConnector
     {
         $statement = $this->_connector->getConnection()->executeQuery($string);
 
-        return $statement->fetchAll();
+        return $statement;
     }
 
     /**
