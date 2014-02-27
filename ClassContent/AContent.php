@@ -762,6 +762,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
 
     /**
      * Returns defined parameters
+     * Upgrade of getParam method - parameter $var can follow this pattern:
+     *     rendermode:array:selected
+     * this will return $this->_parameters['rendermode']['array']['selected'] is it exists
      * @param string $var The parameter to be return, if NULL, all parameters are returned
      * @param string $type The casting type of the parameter
      * @return mixed the parameter value or NULL if unfound
@@ -772,16 +775,38 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
             return $this->_parameters;
         }
 
-        if (isset($this->_parameters[$var])) {
-            if (null === $type)
-                return $this->_parameters[$var];
-            else if (isset($this->_parameters[$var][$type]))
-                return $this->_parameters[$var][$type];
-            else
-                return null;
+        $pieces = explode(':', $var);
+        $var = array_shift($pieces);
+        if (false === array_key_exists($var, $this->_parameters)) {
+            return null;
         }
 
-        return null;
+        if (null !== $type && true === is_string($type)) {
+            array_unshift($pieces, $type);
+        }
+
+        return $this->_getRecursivelyParam($this->_parameters[$var], $pieces);
+    }
+
+    /**
+     * Goes all over the $param and keep looping until $pieces is empty to return
+     * the values user is looking for
+     * @param  mixed $param   
+     * @param  array  $pieces 
+     * @return mixed
+     */
+    private function _getRecursivelyParam($param, array $pieces)
+    {
+        if (0 === count($pieces)) {
+            return $param;
+        }
+
+        $key = array_shift($pieces);
+        if (false === isset($param[$key])) {
+            return null;
+        }
+
+        return $this->_getRecursivelyParam($param[$key], $pieces);
     }
 
     /**
