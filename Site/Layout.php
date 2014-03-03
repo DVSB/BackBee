@@ -492,7 +492,7 @@ class Layout extends AObjectIdentifiable implements IJson
      * @param \StdClass $zone
      * @return array
      */
-    private function _getZoneOptions(\StdClass $zone)
+    private function _getZoneOptions(\stdClass $zone)
     {
         $options = array(
             'parameters' => array(
