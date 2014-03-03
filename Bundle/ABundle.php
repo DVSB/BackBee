@@ -97,14 +97,45 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
             $configdir = $this->getResourcesDir();
         }
 
-        $filename = $this->_application->getDataDir() . DIRECTORY_SEPARATOR . 'Bundles' .
-            DIRECTORY_SEPARATOR . $this->getId() . DIRECTORY_SEPARATOR . 'config.yml';
+        // default bundle's config.yml
+        $srcConfigFilename = $this->getResourcesDir() . DIRECTORY_SEPARATOR . 'config.yml';
+
+        $dataBundlesDir = $this->_application->getDataDir() . DIRECTORY_SEPARATOR 
+            . 'Bundles' . DIRECTORY_SEPARATOR . $this->getId();
+
+        // Looking for bundle's config.yml in data repository
+        $filename = $dataBundlesDir . DIRECTORY_SEPARATOR . 'config.yml';
         if (false === is_file($filename)) {
             if (false === is_dir(dirname($filename))) {
                 mkdir(dirname($filename), 0755, true);
             }
 
-            copy($this->getResourcesDir() . DIRECTORY_SEPARATOR . 'config.yml', $filename);
+            copy($srcConfigFilename, $filename);
+        } else {
+            $srcFileStat = stat($srcConfigFilename);
+            $dataFileStat = stat($filename);
+            if ($srcFileStat[9] > $dataFileStat[9]) {
+                // parsing config.yml from bundle and data directory
+                $srcConfig = Yaml::parse($srcConfigFilename);
+                $dataConfig = Yaml::parse($filename);
+
+                // compute entry to add to data config.yml
+                $entryToAdd = Arrays::array_diff_assoc_recursive($srcConfig, $dataConfig);
+                // compute entry to delete from data config.yml
+                $entryToDelete = Arrays::array_diff_assoc_recursive($dataConfig, $srcConfig);
+                
+                if (true === array_key_exists('override_site', $entryToDelete)) {
+                    unset($entryToDelete['override_site']);
+                }
+
+                // add entry to data config.yml
+                $dataConfig = Arrays::array_merge_assoc_recursive($dataConfig, $entryToAdd);
+
+                // remove entry from data config.yml
+                Arrays::array_remove_assoc_recursive($dataConfig, $entryToDelete);
+
+                $this->doSaveConfig($dataConfig, $dataBundlesDir);
+            }
         }
 
         $this->_config = new Config(dirname($filename), $this->getApplication()->getBootstrapCache());
@@ -312,9 +343,13 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      * 
      * @param  array  $config 
      */
-    private function doSaveConfig(array $config)
+    private function doSaveConfig(array $config, $configDir = null)
     {
-        file_put_contents($this->_config->getBaseDir() . DIRECTORY_SEPARATOR . 'config.yml', Yaml::dump($config));
+        $configDir = null === $configDir 
+            ? $this->_config->getBaseDir() . DIRECTORY_SEPARATOR 
+            : $configDir . DIRECTORY_SEPARATOR;
+            
+        file_put_contents($configDir . 'config.yml', Yaml::dump($config));
     }
 
     public function getProperty($key = null)

@@ -148,10 +148,31 @@ class Arrays
             } else {
                 $array1[$key] = $value;
             }
-
         }
 
         return $array1;
+    }
+
+    /**
+     * [array_remove_assoc_recursive description]
+     * @param  [type] $array1 
+     * @param  [type] $array2 
+     * @return [type]         
+     */
+    public static function array_remove_assoc_recursive(&$array1, $array2)
+    {
+        foreach ($array2 as $key => $value) {
+            if (false === array_key_exists($key, $array1)) {
+                return $array1;
+            } elseif (true === is_array($value)) {
+                self::array_remove_assoc_recursive($array1[$key], $value);
+                if (0 === count($array1[$key])) {
+                    unset($array1[$key]);
+                }
+            } else {
+                unset($array1[$key]);
+            }
+        }
     }
 
     private static function convertChild(array $array)
