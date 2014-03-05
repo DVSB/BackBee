@@ -143,7 +143,7 @@ class UrlGenerator implements IUrlGenerator
      */
     public function generate(Page $page, AClassContent $content = NULL, $exceptionOnMissingScheme = true)
     {
-        if ($this->_preserveOnline && ($page->getState() & Page::STATE_ONLINE)) {
+        if (null !== $page->getUrl() && $this->_preserveOnline && ($page->getState() & Page::STATE_ONLINE)) {
             return $page->getUrl();
         }
 
