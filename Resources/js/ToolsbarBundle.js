@@ -65,9 +65,10 @@
             });
 
         },
+        
         _buildBundleSlide : function(bundles){
+            
             var self = this;
-
             this._resetSlider();
             bb.jquery.each(bundles,function(key,bundle){
                 self._addBundleItem(bundle);

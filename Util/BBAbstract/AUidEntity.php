@@ -54,6 +54,15 @@ abstract class AUidEntity implements DomainObjectInterface
         $this->_uid = $uid;
     }
 
+    public function __clone()
+    {
+        $clone = $this;
+        $clone->_uid = md5(uniqid('', TRUE));
+        $clone->_is_new = true;
+
+        return $clone;
+    }
+
     /**
      * return the unique identifier
      *
