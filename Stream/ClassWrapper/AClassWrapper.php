@@ -85,6 +85,10 @@ abstract class AClassWrapper implements IStreamWrapper
      */
     protected $extends = '\BackBuilder\ClassContent\AClassContent';
 
+    /**
+     * Trait(s) used by the class content
+     * @var string
+     */
     protected $traits;
 
     /**
