@@ -86,6 +86,12 @@ abstract class AClassWrapper implements IStreamWrapper
     protected $extends = '\BackBuilder\ClassContent\AClassContent';
 
     /**
+     * Trait(s) used by the class content
+     * @var string
+     */
+    protected $traits;
+
+    /**
      * The doctrine repository associated to the class content loaded
      * @var string
      */
@@ -128,13 +134,17 @@ namespace <namespace>;
  * @Table(name="content")
  * @HasLifecycleCallbacks
  */
-class <classname> extends <extends> {
-    public function __construct($uid = NULL, $options = NULL) {
+class <classname> extends <extends> 
+{
+    <trait>
+    public function __construct($uid = NULL, $options = NULL) 
+    {
         parent::__construct($uid, $options);
         $this->_initData();
     }
 
-    protected function _initData() {
+    protected function _initData() 
+    {
         <defineDatas>
         <defineParam>
         <defineProps>
@@ -187,16 +197,18 @@ class <classname> extends <extends> {
             '<classname>',
             '<repository>',
             '<extends>',
+            '<trait>',
             '<defineDatas>',
             '<defineParam>',
             '<defineProps>'), array($this->namespace,
             $this->classname,
             $this->repository,
             $this->extends,
+            $this->traits,
             (0 < count($defineDatas)) ? '$this' . implode('', $defineDatas) . ';' : '',
             (0 < count($defineParam)) ? '$this' . implode('', $defineParam) . ';' : '',
             (0 < count($defineProps)) ? '$this' . implode('', $defineProps) . ';' : ''), $this->template);
-
+        
         return $phpCode;
     }
 
