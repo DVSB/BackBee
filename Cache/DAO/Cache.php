@@ -222,7 +222,7 @@ class Cache extends AExtendedCache
             $this->_repository
                     ->createQueryBuilder('c')
                     ->delete()
-                    ->andWhere('c._uid = :uid')
+                    ->where('c._uid = :uid')
                     ->setParameters(array('uid' => $this->_getContextualId($id)))
                     ->getQuery()
                     ->execute();
@@ -252,7 +252,7 @@ class Cache extends AExtendedCache
             $this->_repository
                     ->createQueryBuilder('c')
                     ->delete()
-                    ->andWhere('c._tag IN (:tags)')
+                    ->where('c._tag IN (:tags)')
                     ->setParameters(array('tags' => $this->_getContextualTags($tags)))
                     ->getQuery()
                     ->execute();
@@ -288,7 +288,7 @@ class Cache extends AExtendedCache
                     ->createQueryBuilder('c')
                     ->update()
                     ->set('c._expire', ':expire')
-                    ->andWhere('c._tag IN (:tags)')
+                    ->where('c._tag IN (:tags)')
                     ->setParameters(array(
                         'expire' => $expire,
                         'tags' => $this->_getContextualTags($tags)))
@@ -313,7 +313,7 @@ class Cache extends AExtendedCache
             $this->_repository
                     ->createQueryBuilder('c')
                     ->delete()
-                    ->andWhere('1 = 1')
+                    ->where('1 = 1')
                     ->getQuery()
                     ->execute();
             $this->_resetCacheEntity();
