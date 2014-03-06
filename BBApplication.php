@@ -150,12 +150,14 @@ class BBApplication
         $dirToLookingFor[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
 
         foreach ($dirToLookingFor as $dir) {
-            if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
+            $fileService = $dir . DIRECTORY_SEPARATOR . 'services.yml';
+
+            if (file_exists($fileService) && true === is_readable($fileService)) {
                 // Define where to looking for services.yml
                 $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
                 $loader->load('services.yml');
-            } elseif (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.xml')) {
+            } elseif (file_exists($fileService) && true === is_readable($fileService)) {
                 // Define where to looking for services.yml
                 $loader = new XmlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
@@ -813,7 +815,8 @@ class BBApplication
                 }
             }
 
-            array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            //array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            array_map( array('BackBuilder\Util\File','resolveFilepath') , $this->_resourcedir);
         }
 
         return $this->_resourcedir;
