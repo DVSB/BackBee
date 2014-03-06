@@ -67,3 +67,5 @@ services:
         synthetic: true
     routing:
         synthetic: true
+    mailer:
+        synthetic: true
