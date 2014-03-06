@@ -281,7 +281,7 @@ class BBApplication
      */
     public function getMailer()
     {
-        if (false === $this->getContainer()->has('mailer')) {
+        if (false === $this->getContainer()->has('mailer') || is_null($this->getContainer()->get('mailer'))) {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
                 $smtp = (is_array($mailer_config['smtp'])) ? reset($mailer_config['smtp']) : $mailer_config['smtp'];
                 $port = (is_array($mailer_config['port'])) ? reset($mailer_config['port']) : $mailer_config['port'];

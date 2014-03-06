@@ -48,6 +48,11 @@ class PageBuilder
 	private $layout;
 
 	/**
+	 * @var BackBuilder\ClassContent\AClassContent
+	 */
+	private $itemToPushInMainZone;
+
+	/**
 	 * @var array of BackBuilder\ClassContent\AClassContent
 	 */
 	private $elements;
@@ -73,7 +78,7 @@ class PageBuilder
 		$page = new Page($this->uid);
 		$page->setTitle($this->title);
 		$page->setSite($this->site);
-		$page->setLayout($this->layout);
+		$page->setLayout($this->layout, $this->itemToPushInMainZone);
 
 		if (null !== $this->root) {
 			$page->setRoot($this->root);
@@ -95,14 +100,13 @@ class PageBuilder
 		$this->updateContentRevision($pageContentSet);
 
 		if (0 < count($this->elements)) {
-			$firstColumn = $pageContentSet->first();
-			$firstColumn->clear();
 			foreach ($this->elements as $e) {
+				$column = $pageContentSet->item($e['content_set_position']);
 				if (true === $e['set_main_node']) {
 					$e['content']->setMainNode($page);
 				}
 
-				$firstColumn->push($e['content']);
+				$column->push($e['content']);
 			}
 
 			$pageContentSet->rewind();
@@ -257,9 +261,10 @@ class PageBuilder
 	 * [getPage description]
 	 * @return [type] [description]
 	 */
-	public function setLayout(Layout $layout)
+	public function setLayout(Layout $layout, AClassContent $toPushInMainZone = null)
 	{
 		$this->layout = $layout;
+		$this->itemToPushInMainZone = $toPushInMainZone;
 
 		return $this;
 	}
@@ -306,11 +311,12 @@ class PageBuilder
 	 * [getPage description]
 	 * @return [type] [description]
 	 */
-	public function pushElement(AClassContent $element, $setMainNode = false)
+	public function pushElement(AClassContent $element, $setMainNode = false, $contentSetPos = 0)
 	{
 		$this->elements[] = array(
-			'content' 		=> $element,
-			'set_main_node' => $setMainNode
+			'content' 				=> $element,
+			'set_main_node' 		=> $setMainNode,
+			'content_set_position'	=> $contentSetPos
 		);
 
 		return $this;
@@ -320,7 +326,7 @@ class PageBuilder
 	 * [getPage description]
 	 * @return [type] [description]
 	 */
-	public function addElement(AClassContent $element, $index = null, $setMainNode = false)
+	public function addElement(AClassContent $element, $index = null, $setMainNode = false, $contentSetPos = 0)
 	{
 		if (null !== $index) {
 			$index = intval($index);
@@ -329,11 +335,12 @@ class PageBuilder
 			}
 
 			$this->elements[$index] = array(
-				'content' 		=> $element,
-				'set_main_node' => $setMainNode
+				'content' 				=> $element,
+				'set_main_node' 		=> $setMainNode,
+				'content_set_position'	=> $contentSetPos
 			);
 		} else {
-			$this->pushElement($element, $setMainNode);
+			$this->pushElement($element, $setMainNode, $contentSetPos);
 		}
 
 		return $this;

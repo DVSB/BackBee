@@ -184,4 +184,9 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
         }
     }
 
+    protected function _sendResponse($content, $status = 200, $headers = array())
+    {
+        $response = new Response($content, $status, $headers);
+        $this->_send($response);
+    }
 }
