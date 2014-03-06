@@ -21,6 +21,7 @@ parameters:
     bbapp.translator.class: BackBuilder\Translation\Translator
     bbapp.routing.class: BackBuilder\Routing\RouteCollection
     bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
+    bbapp.registry.class: Symfony\Component\HttpFoundation\ParameterBag
 
 services:
     cache.bootstrap:
@@ -68,6 +69,8 @@ services:
         arguments:  ["@bbapp"]
     pagebuilder:
         class:      %bbapp.pagebuilder.class%
+    registry:
+        class:      %bbapp.registry.class%
     # synthetic services
     site:
         synthetic: true
