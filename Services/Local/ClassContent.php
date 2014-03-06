@@ -450,24 +450,24 @@ class ClassContent extends AbstractServiceLocal
             if (array_key_exists("adapter", $rteConfig)) {
                 $adapter = $rteConfig["adapter"];
                 $adapterConfig = $rteMainConfig[$adapter];
-                if (!is_array($adapterConfig) || empty($adapterConfig) || !array_key_exists("customconf", $adapterConfig)){
+                if (!is_array($adapterConfig) || empty($adapterConfig) || !array_key_exists("customconf", $adapterConfig)) {
                     throw new \Exception("adapter config is not valid");
                 }
-                $customConf = (is_array($adapterConfig["customconf"])) ? $adapterConfig["customconf"]: array();
-                
+                $customConf = (is_array($adapterConfig["customconf"])) ? $adapterConfig["customconf"] : array();
+
                 /* handle default config here */
 
                 $elements = $content->getData();
+                $editable = new \stdClass();
                 foreach ($elements as $key => $item) {
                     if (is_a($content->$key, "BackBuilder\ClassContent\AClassContent")) {
                         $rteStyle = $content->{$key}->getParam('aloha', 'scalar');
                         if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == TRUE && NULL !== $rteStyle)) {
-                            $stdClassObj = new \stdClass();
+
                             /* if the style doesn't exist */
                             if (!array_key_exists($rteStyle, $customConf))
                                 throw new \Exception("rte conf '" . $rteStyle . "' can't be found. Add it to your config.");
-                            $stdClassObj->{$key} = $customConf[$rteStyle];
-                            $editable[] = $stdClassObj;
+                            $editable->{$key} = $rteStyle;
                         }
                     }
                 }
