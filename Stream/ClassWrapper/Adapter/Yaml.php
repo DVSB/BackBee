@@ -179,9 +179,13 @@ class Yaml extends AClassWrapper
                                     $trait = NAMESPACE_SEPARATOR . $t;
                                 }
 
-                                $this->traits[] = $trait;
+                                // add traits only if it exists
+                                if (true === trait_exists($trait)) {
+                                    $this->traits[] = $trait;
+                                }
                             }
 
+                            // build up trait use string
                             $str = implode(', ', $this->traits);
                             if (0 < count($this->traits)) {
                                 $this->traits = 'use ' . $str . ';';
