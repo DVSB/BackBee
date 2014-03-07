@@ -180,6 +180,7 @@ BB4.ToolsbarManager.register("contenttb",{
         var self = this;
 
         bb.jquery.each(blocks,function(i,data){
+           if(data.hasOwnProperty("isVisible") && data.isVisible==false) return true;
             var contentBlock = bb.jquery("<li></li>").clone();
             bb.jquery(contentBlock).addClass("contentBlock");
             data.contentPic = bb.baseurl+'ressources/img/contents/'+data.name.replace('\\', '/')+'.png';
