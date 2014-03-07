@@ -27,6 +27,7 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Bundle\BundleLoader,
     BackBuilder\Config\Config,
     BackBuilder\DependencyInjection\ContainerBuilder,
+    BackBuilder\Event\Event,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
     BackBuilder\Exception\DatabaseConnectionException,
@@ -122,6 +123,9 @@ class BBApplication
         $this->_container->compile();
 
         $this->_isinitialized = true;
+
+        // trigger bbapplication.init
+        $this->getEventDispatcher()->dispatch('bbapplication.init', new Event($this));
     }
 
     public function runImport()
@@ -377,6 +381,9 @@ class BBApplication
 
         $this->getTheme()->init();
 
+        // trigger bbapplication.start
+        $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
+
         if (false === $this->isClientSAPI()) {
             $this->getController()->handle();
         }
@@ -396,6 +403,8 @@ class BBApplication
             // @todo
             // stop services
 
+            // trigger bbapplication.stop
+            $this->getEventDispatcher()->dispatch('bbapplication.stop', new Event($this));
             $this->info('BackBuilder application ended');
         }
     }
