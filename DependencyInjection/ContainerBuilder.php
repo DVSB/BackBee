@@ -14,168 +14,131 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\Yaml\Yaml;
 
+/**
+ * @author e.chau <eric.chau@lp-digital.fr>
+ */
 class ContainerBuilder
 {
     /**
-     * @var boolean
+     * Every time you invoke this method it will return a new BackBuilder\DependencyInjection\Container
+     * @return BackBuilder\DependencyInjection\Container
      */
-    private static $isInit = false;
-
-    /**
-     * Current project's instance configuration (in repository/Config)
-     * @var array
-     */
-    private static $config = array();
-
-    /**
-     * @var BackBuilder\DependencyInjection\Container
-     */
-    private static $container = null;
-
-    /**
-     * @var BBApplication
-     */
-    private static $application = null;
-
-    /**
-     * 
-     * @param  BBApplication $application [description]
-     */
-    public static function init(BBApplication $application)
+    public static function getContainer(BBApplication $application)
     {
-        self::$container = null;
-        self::$application = $application;
+        // Construct container
+        $container = new Container();
 
-        // Finally
-        self::$isInit = true;
-    }
+        $dirToLookingFor = array();
+        $dirToLookingFor[] = $application->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
+        $dirToLookingFor[] = $application->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
 
-    /**
-     * [getContainer description]
-     * @return [type] [description]
-     */
-    public static function getContainer()
-    {
-        if (true === self::$isInit && null === self::$container) {
-            self::buildContainer();
-            // self::initExternalBundleServices();
-        } else {
-            throw new BBException('You must call ContainerBuilder::init() before ContainerBuilder::getContainer()!');
+        if ($application->getBaseRepository() !== $application->getRepository()) {
+            $dirToLookingFor[] = $application->getRepository() . DIRECTORY_SEPARATOR . 'Config';
         }
 
-        self::$isInit = false;
-        self::$application = null;
+        // Loop into every directory where we can potentially found a services.yml or services.xml
+        foreach ($dirToLookingFor as $dir) {
+            if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
+                self::loadServicesFromYamlFile($container, $dir);
+            } elseif (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.xml')) {
+                self::loadServicesFromXmlFile($container, $dir);
+            }
+        }
 
-        return self::$container;
+        self::initApplicationVarsIntoContainer($application, $container);
+
+        // register container listener directory namespace
+        $container->get('autoloader')->registerNamespace(
+            'BackBuilder\Event\Listener',
+            implode(DIRECTORY_SEPARATOR, array($application->getBBDir(), 'DependencyInjection', 'Listener'))
+        );
+
+        // add ContainerListener event (bbapplication.init)
+        /*$container->get('event.dispatcher')->addListeners(array(
+            'bbapplication.init' => array(
+                'listeners' => array(
+                    array(
+                        'BackBuilder\Event\Listener\ContainerListener',
+                        'onApplicationInit'
+                    )
+                )
+            )
+        ));*/
+
+        return $container;
     }
 
+    /**
+     * [loadServicesFromYamlFile description]
+     * @param  Container $container [description]
+     * @param  [type]    $dir       [description]
+     * @return [type]               [description]
+     */
     public static function loadServicesFromYamlFile(Container $container, $dir)
     {
         $loader = new YamlFileLoader($container, new FileLocator(array($dir)));
         $loader->load('services.yml');
     }
 
+    /**
+     * [loadServicesFromXmlFile description]
+     * @param  Container $container [description]
+     * @param  [type]    $dir       [description]
+     * @return [type]               [description]
+     */
     public static function loadServicesFromXmlFile(Container $container, $dir)
     {
         $loader = new XmlFileLoader($container, new FileLocator(array($dir)));
         $loader->load('services.xml');
     }
 
-
     /**
-     * @return [type] [description]
+     * [initApplicationVarsIntoContainer description]
+     * @param  BBApplication $application [description]
+     * @return [type]                     [description]
      */
-    private static function buildContainer()
-    {
-        // Construct container
-        self::$container = new Container();
-
-        $dirToLookingFor = array();
-        $dirToLookingFor[] = self::$application->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
-        $dirToLookingFor[] = self::$application->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
-        $dirToLookingFor[] = self::$application->getRepository() . DIRECTORY_SEPARATOR . 'Config';
-
-        // Loop into every directory where we can potentially found a services.yml or services.xml
-        foreach ($dirToLookingFor as $dir) {
-            if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
-                self::loadServicesFromYamlFile(self::$container, $dir);
-            } elseif (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.xml')) {
-                self::loadServicesFromXmlFile(self::$container, $dir);
-            }
-        }
-
-        self::initApplicationVarsIntoContainer();
-    }
-
-    private static function initApplicationVarsIntoContainer()
+    private static function initApplicationVarsIntoContainer(BBApplication $application, Container $container)
     {
         // Add BBApplication to container
-        self::$container->set('bbapp', self::$application);
+        $container->set('bbapp', $application);
 
         // Set application others variables' values
         
         // define context
-        self::$container->setParameter('bbapp.context', self::$application->getContext());
+        $container->setParameter('bbapp.context', $application->getContext());
 
         // define cache directory
         try {
-            $cachedir = self::$container->getParameter('bbapp.cache.dir');
+            $cachedir = $container->getParameter('bbapp.cache.dir');
             if (true === empty($cachedir)) {
                 throw new Exception();
             }
         } catch (Exception $e) {
-            self::$container->setParameter(
+            $container->setParameter(
                 'bbapp.cache.dir', 
-                self::$application->getBaseDir() . DIRECTORY_SEPARATOR . 'cache'
+                $application->getBaseDir() . DIRECTORY_SEPARATOR . 'cache'
             );
         }
 
         // define config directory
-        self::$container->setParameter('bbapp.config.dir', self::$application->getConfigDir());
+        $container->setParameter('bbapp.config.dir', $application->getConfigDir());
 
         // define repository directory
-        self::$container->setParameter('bbapp.repository.dir', self::$application->getRepository());
+        $container->setParameter('bbapp.repository.dir', $application->getRepository());
 
         // define data directory
         try {
-            $datadir = self::$container->getParameter('bbapp.data.dir');
+            $datadir = $container->getParameter('bbapp.data.dir');
             if (true === empty($datadir)) {
                 throw new Exception();
             }
         } catch (Exception $e) {
-            self::$container->setParameter(
+            $container->setParameter(
                 'bbapp.data.dir', 
-                self::$application->getRepository() . DIRECTORY_SEPARATOR . 'Data'
+                $application->getRepository() . DIRECTORY_SEPARATOR . 'Data'
             );
         }
 
-        //self::$container->setParameter('bbapp.cachecontrol.class', self::$application->getCacheProvider());
-    }
-
-    private static function initExternalBundleServices()
-    {
-        if (true === array_key_exists('external_bundles', self::$config)) {
-            // Load external bundle services (Symfony2 Bundle)
-            $externalServices = self::$config['external_bundles'];
-            
-            if (null !== $externalServices && 0 < count($externalServices)) {
-                foreach ($externalServices as $key => $datas) {
-                    $bundle = new $datas['class']();
-                    if (false === ($bundle instanceof ExtensionInterface)) {
-                        $errorMsg = sprintf(
-                            'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', 
-                            $datas['class'], 
-                            'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
-                        );
-                        self::$debug($errorMsg);
-
-                        throw new BBException($errorMsg);
-                    }
-
-                    $config = true === isset($datas['config']) ? array($key => $datas['config']) : array();
-                    $bundle->load($config, self::$_container);
-                }
-            }
-        }
+        //$container->setParameter('bbapp.cachecontrol.class', $application->getCacheProvider());
     }
 }

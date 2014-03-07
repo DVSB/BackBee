@@ -22,6 +22,7 @@ parameters:
     bbapp.routing.class: BackBuilder\Routing\RouteCollection
     bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
     bbapp.registry.class: Symfony\Component\HttpFoundation\ParameterBag
+    bbapp.autoloader.class: BackBuilder\AutoLoader\AutoLoader
 
 services:
     cache.bootstrap:
@@ -71,6 +72,9 @@ services:
         class:      %bbapp.pagebuilder.class%
     registry:
         class:      %bbapp.registry.class%
+    autoloader:
+        class:      %bbapp.autoloader.class%
+        arguments:  ["@bbapp"]
     # synthetic services
     site:
         synthetic: true

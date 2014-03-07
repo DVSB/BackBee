@@ -59,7 +59,7 @@ class BBApplication
     const VERSION = '0.8.0';
 
     /**
-     * @var Symfony\Component\DependencyInjection\ContainerBuilder
+     * @var BackBuilder\DependencyInjection\Container
      */
     private $_container;
     private $_context;
@@ -119,9 +119,6 @@ class BBApplication
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
 
-        // Compile container so it resolves every var/abstract service called in services.yml|xml
-        $this->_container->compile();
-
         $this->_isinitialized = true;
 
         // trigger bbapplication.init
@@ -144,8 +141,7 @@ class BBApplication
 
     private function _initContainer()
     {
-        ContainerBuilder::init($this);
-        $this->_container = ContainerBuilder::getContainer();
+        $this->_container = ContainerBuilder::getContainer($this);
 
         return $this;
     }
@@ -430,13 +426,12 @@ class BBApplication
      */
     public function getAutoloader()
     {
-        if (null === $this->_autoloader) {
-            $this->_autoloader = new AutoLoader($this);
-        }
-
-        return $this->_autoloader;
+        return $this->getContainer()->get('autoloader');
     }
 
+    /**
+     * @return string
+     */
     public function getBBDir()
     {
         if (null === $this->_bbdir) {
@@ -540,7 +535,7 @@ class BBApplication
     }
 
     /**
-     * @return ContainerBuilder
+     * @return BackBuilder\DependencyInjection\Container
      */
     public function getContainer()
     {
