@@ -21,13 +21,15 @@
 
 namespace BackBuilder\Config;
 
-use BackBuilder\Cache\ACache;
+use BackBuilder\Cache\ACache,
+    BackBuilder\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Yaml\Exception\ParseException,
     Symfony\Component\Yaml\Yaml;
 
 /**
  * A set of configuration parameters store in a yaml file
  * The parameters had to be filtered by section
+ * Note that parameters and services will be set only if setContainer() is called
  *
  * @category    BackBuilder
  * @package     BackBuilder\Config
@@ -36,11 +38,11 @@ use Symfony\Component\Yaml\Exception\ParseException,
  */
 class Config
 {
+
     /**
      * Default config file to look for
      * @var string
      */
-
     const CONFIG_FILE = 'config.yml';
 
     /**
@@ -53,6 +55,12 @@ class Config
      * The extracted configuration parameters from the config file
      * @var array
      */
+    private $_raw_parameters;
+
+    /**
+     * The already compiled parameters
+     * @var array
+     */
     private $_parameters;
 
     /**
@@ -60,6 +68,12 @@ class Config
      * @var \BackBuilder\Cache\ACache
      */
     private $_cache;
+
+    /**
+     * The service container
+     * @var \BackBuilder\DependencyInjection\ContainerBuilder
+     */
+    private $_container;
 
     /**
      * Magic function to get configuration section
@@ -93,37 +107,56 @@ class Config
      * Class constructor
      * @param string $basedir The base directory in which look for config files
      * @param \BackBuilder\Cache\ACache $cache Optional cache system
+     * @param \BackBuilder\DependencyInjection\ContainerBuilder $container
      */
-    public function __construct($basedir, ACache $cache = null)
+    public function __construct($basedir, ACache $cache = null, ContainerBuilder $container = null)
     {
         $this->_basedir = $basedir;
-        $this->_parameters = array();
+        $this->_raw_parameters = array();
         $this->_cache = $cache;
-
-        $this->extend();
+        $this->setContainer($container)
+                ->extend();
     }
 
     /**
-     * If a cache system is defined, try to load a cache for the current instance
+     * Set the service container to be able to parse parameter and service in config
+     * Resets the compiled parameters array
+     * @param \BackBuilder\DependencyInjection\ContainerBuilder $container
+     * @return \BackBuilder\Config\Config
+     */
+    public function setContainer(ContainerBuilder $container = null)
+    {
+        $this->_container = $container;
+        $this->_parameters = array();
+        return $this;
+    }
+
+    /**
+     * If a cache system is defined, try to load a cache for the current basedir
      * @param string $basedir The base directory
      * @return boolean Returns TRUE if a valid cache has been found, FALSE otherwise
      */
     private function _loadFromCache($basedir)
     {
-        if (null !== $this->_cache) {
-            if (false !== $parameters = $this->_cache->load($this->_getCacheId($basedir), false, $this->_getCacheExpire($basedir))) {
-                $parameters = @unserialize($parameters);
-                if (true === is_array($parameters)) {
-                    foreach ($parameters as $section => $data) {
-                        $this->setSection($section, $data, true);
-                    }
-
-                    return true;
-                }
-            }
+        if (null === $this->_cache) {
+            return false;
         }
 
-        return false;
+        $cached_parameters = $this->_cache->load($this->_getCacheId($basedir), false, $this->_getCacheExpire($basedir));
+        if (false === $cached_parameters) {
+            return false;
+        }
+
+        $parameters = @\unserialize($cached_parameters);
+        if (false === is_array($parameters)) {
+            return false;
+        }
+
+        foreach ($parameters as $section => $data) {
+            $this->setSection($section, $data, true);
+        }
+
+        return true;
     }
 
     /**
@@ -134,7 +167,7 @@ class Config
     private function _saveToCache($basedir)
     {
         if (null !== $this->_cache) {
-            return $this->_cache->save($this->_getCacheId($basedir), serialize($this->_parameters));
+            return $this->_cache->save($this->_getCacheId($basedir), serialize($this->_raw_parameters));
         }
 
         return false;
@@ -247,34 +280,107 @@ class Config
     }
 
     /**
+     * Returns, if exists, the raw parameter section, NULL otherwise
+     * @param string $section
+     * @return mixed|NULL
+     */
+    public function getRawSection($section = null)
+    {
+        if (null === $section) {
+            return $this->_raw_parameters;
+        } elseif (true === array_key_exists($section, $this->_raw_parameters)) {
+            return $this->_raw_parameters[$section];
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns all raw paramter sections
+     * @return array
+     */
+    public function getAllRawSections()
+    {
+        return $this->getRawSection();
+    }
+
+    /**
      * Returns, if exists, the parameter section
      * @param string $section
      * @return array|NULL
      */
     public function getSection($section = null)
     {
-        if (null === $section) {
-            return $this->_parameters;
+        if (null === $this->_container) {
+            return $this->getRawSection($section);
         }
 
-        return (isset($this->_parameters[$section])) ? $this->_parameters[$section] : null;
+        return $this->_compileParameters($section);
     }
 
     /**
-     * Check, if the key exists in the parameter section
+     * Returns all sections
+     * @return array
+     */
+    public function getAllSections()
+    {
+        return $this->getSection();
+    }
+
+    /**
+     * Replace services and container parameters keys by their values for the whole config
+     * @return array
+     */
+    private function _compileAllParameters()
+    {
+        foreach (array_keys($this->_raw_parameters) as $section) {
+            $this->_parameters[$section] = $this->_compileParameters($section);
+        }
+
+        return $this->_parameters;
+    }
+
+    /**
+     * Replace services and container parameters keys by their values for the provided section
+     * @return array
+     */
+    private function _compileParameters($section = null)
+    {
+        if (null === $section) {
+            return $this->_compileAllParameters();
+        }
+
+        if (false === array_key_exists($section, $this->_raw_parameters)) {
+            return null;
+        }
+
+        if (false === array_key_exists($section, $this->_parameters)) {
+            $value = $this->_raw_parameters[$section];
+            if (true === is_array($value)) {
+                array_walk_recursive($value, array($this->_container, 'getContainerValues'));
+            } else {
+                $this->_container->getContainerValues($value);
+            }
+            $this->_parameters[$section] = $value;
+        }
+
+        return $this->_parameters[$section];
+    }
+
+    /**
+     * Checks if the key exists in the parameter section
      * @param string $section
      * @param string $key
      * @return boolean
      */
     public function sectionHasKey($section, $key)
     {
-        if (
-                isset($this->_parameters[$section]) &&
-                is_array($this->_parameters[$section]) &&
-                array_key_exists($key, $this->_parameters[$section])
-        ) {
+        if (isset($this->_raw_parameters[$section]) &&
+                is_array($this->_raw_parameters[$section]) &&
+                array_key_exists($key, $this->_raw_parameters[$section])) {
             return true;
         }
+
         return false;
     }
 
@@ -287,23 +393,17 @@ class Config
      */
     public function setSection($section, array $config, $overwrite = false)
     {
-        if (false === $overwrite && array_key_exists($section, $this->_parameters)) {
-            $this->_parameters[$section] = array_replace_recursive($this->_parameters[$section], $config);
+        if (false === $overwrite && array_key_exists($section, $this->_raw_parameters)) {
+            $this->_raw_parameters[$section] = array_replace_recursive($this->_raw_parameters[$section], $config);
         } else {
-            $this->_parameters[$section] = $config;
+            $this->_raw_parameters[$section] = $config;
+        }
+
+        if (true === array_key_exists($section, $this->_parameters)) {
+            unset($this->_parameters[$section]);
         }
 
         return $this;
-    }
-
-    /**
-     * Returns every sections
-     *
-     * @return array
-     */
-    public function getAllSections()
-    {
-        return $this->_parameters;
     }
 
     /**
@@ -326,7 +426,6 @@ class Config
 
     /**
      * Returns setted base directory
-     * 
      * @return string absolute path to current Config base directory
      */
     public function getBaseDir()
