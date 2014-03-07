@@ -139,7 +139,8 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         }
 
         $this->_config = new Config(dirname($filename), $this->getApplication()->getBootstrapCache());
-        $allSections = $this->_config->getAllSections();
+        $this->_config->setContainer($this->getApplication()->getContainer());
+        $allSections = $this->_config->getAllRawSections();
         $this->configDefaultSections = $allSections;
         if (
                 true === array_key_exists('bundle', $allSections) &&
