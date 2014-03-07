@@ -666,7 +666,9 @@ class BBApplication
      */
     public function getConfig()
     {
-        return $this->getContainer()->get('config');
+        return $this->getContainer()
+                ->get('config')
+                ->setContainer($this->getContainer());
     }
 
     public function getConfigDir()

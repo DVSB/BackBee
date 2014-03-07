@@ -49,6 +49,7 @@ class Logger implements LoggerInterface, SQLLogger
     private $_appenders;
     private $_level;
     private $_priorities;
+    private $_priorities_name;
     private $_errorHandling = FALSE;
     private $_errorHandlers;
     private $_exceptionHandling = FALSE;
@@ -80,7 +81,8 @@ class Logger implements LoggerInterface, SQLLogger
         $this->_uniqid = uniqid();
 
         $r = new \ReflectionClass($this);
-        $this->_priorities = array_flip($r->getConstants());
+        $this->_priorities_name = $r->getConstants();
+        $this->_priorities = array_flip($this->_priorities_name);
 
         $this->setLevel(self::ERROR);
         if (NULL !== $this->_application) {
@@ -299,9 +301,14 @@ class Logger implements LoggerInterface, SQLLogger
         if (0 == count($this->_appenders))
             throw new LoggingException('None appenders defined.');
 
-        if (!array_key_exists($level, $this->_priorities))
+        if (array_key_exists(strtoupper($level), $this->_priorities_name)) {
+            $level = $this->_priorities_name[strtoupper($level)];
+        }
+        
+        if (!array_key_exists($level, $this->_priorities)) {
             throw new LoggingException(sprintf('Unkown priority level `%d`.', $level));
-
+        }
+        
         if ($level > $this->_level)
             return;
 
