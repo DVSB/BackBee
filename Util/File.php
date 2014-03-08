@@ -186,7 +186,21 @@ class File
 
         return substr($filename, strrpos($filename, '.') - strlen($filename) + ($withDot ? 0 : 1));
     }
+    
+    /**
+     * Removes the extension file from its name
+     * @param string $filename
+     * @return string
+     */
+    public static function removeExtension($filename)
+    {
+        if (false === strrpos($filename, '.')) {
+            return $filename;
+        }
 
+        return substr($filename, 0, strrpos($filename, '.'));
+    }
+    
     /**
      * Makes directory
      * @param string $path The directory path
