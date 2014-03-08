@@ -215,25 +215,7 @@ class Config
      */
     private function _getYmlFiles($basedir)
     {
-        if (false === is_readable($basedir)) {
-            throw new Exception\InvalidBaseDirException(sprintf('Cannot read the directory %s', $basedir));
-        }
-
-        $yml_files = array();
-        $parse_url = parse_url($basedir);
-        if (false !== $parse_url && isset($parse_url['scheme'])) {
-            $directory = new \RecursiveDirectoryIterator($basedir);
-            $iterator = new \RecursiveIteratorIterator($directory);
-            $regex = new \RegexIterator($iterator, '/^.+\.yml$/i', \RecursiveRegexIterator::GET_MATCH);
-
-            foreach ($regex as $file) {
-                $yml_files[] = $file[0];
-            }
-        } else {
-            $pattern = $basedir . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]';
-            $yml_files = glob($pattern, GLOB_BRACE);
-        }
-
+        $yml_files = \BackBuilder\Util\File::getFilesRecursivelyByExtension($basedir, 'yml');
         $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;
         if (true === file_exists($default_file) && 1 < count($yml_files)) {
             // Ensure that config.yml is the first one
