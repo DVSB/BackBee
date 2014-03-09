@@ -202,7 +202,7 @@ class ContentRender
         $withRender = is_bool($withRender) ? $withRender : true; //send render by default
         $stdClass = new \stdClass();
         $stdClass->name = $this->getname();
-        $stdClass->label = $this->getLabel();
+        $stdClass->label = null === $this->content->getProperty('name') ? $this->getName() : $this->content->getProperty('name');
         $stdClass->description = $this->content->getProperty('description');
         $stdClass->category = $this->getCategory();
         $stdClass->editables = $this->getFields();
