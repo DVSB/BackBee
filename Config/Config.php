@@ -22,7 +22,8 @@
 namespace BackBuilder\Config;
 
 use BackBuilder\Cache\ACache,
-    BackBuilder\DependencyInjection\ContainerBuilder;
+    BackBuilder\DependencyInjection\Container;
+    
 use Symfony\Component\Yaml\Exception\ParseException,
     Symfony\Component\Yaml\Yaml;
 
@@ -124,7 +125,7 @@ class Config
      * @param \BackBuilder\DependencyInjection\ContainerBuilder $container
      * @return \BackBuilder\Config\Config
      */
-    public function setContainer(ContainerBuilder $container = null)
+    public function setContainer(Container $container = null)
     {
         $this->_container = $container;
         $this->_parameters = array();
