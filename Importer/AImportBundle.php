@@ -66,6 +66,8 @@ abstract class AImportBundle
             $flushEvery = array_key_exists('flush_every', $config) ? (int)$config['flush_every'] : 1000;
             $checkForExisting = array_key_exists('check_exists', $config) ? (boolean)$config['check_exists'] : true;
             $importer->run($key, $config, $flushEvery, $checkForExisting);
+            unset($connector);
+            unset($importer);
         }
     }
 
