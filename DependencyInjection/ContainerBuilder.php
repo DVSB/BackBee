@@ -54,7 +54,7 @@ class ContainerBuilder
         );
 
         // add ContainerListener event (bbapplication.init)
-        /*$container->get('event.dispatcher')->addListeners(array(
+        $container->get('event.dispatcher')->addListeners(array(
             'bbapplication.init' => array(
                 'listeners' => array(
                     array(
@@ -63,7 +63,7 @@ class ContainerBuilder
                     )
                 )
             )
-        ));*/
+        ));
 
         return $container;
     }

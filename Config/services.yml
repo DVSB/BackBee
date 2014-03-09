@@ -36,7 +36,7 @@ services:
         arguments:  ["%bbapp.config.dir%", "@cache.bootstrap"]
     ed:
         class:      %bbapp.ed.class%
-        arguments:  ["@bbapp"]
+        arguments:  ["@bbapp", "@config"]
     event.dispatcher:
         alias: ed
     logging:
