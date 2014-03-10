@@ -9,6 +9,30 @@ use BackBuilder\Event\Event;
  */
 class BundleListener
 {
+
+    public static function onApplicationStart(Event $event)
+    {
+        $application = $event->getTarget();
+        if (
+            null === $application 
+            || false === is_a($application, 'BackBuilder\BBApplication')
+            || false === $application->isStarted()
+        ) {
+            return;
+        }
+
+        $bundleConfigs = $application->getContainer()->get('registry')->get('bundles.baseconfig', array());
+        $controller = $application->getContainer()->get('controller');
+        foreach ($bundleConfigs as $key => $config) {
+            $route = $config->getRouteConfig();
+            if (false === is_array($route) || 0 === count($route)) {
+                continue;
+            }
+
+            $controller->registerRoutes($key, $route);
+        }
+    }
+
     /**
      * [onGetBundleService description]
      * @param  Event  $event [description]
@@ -37,7 +61,7 @@ class BundleListener
     public static function onApplicationStop(Event $event)
     {
         $application = $event->getTarget();
-        foreach ($application->getContainer()->get('registry')->get('bundles.started') as $bundle) {
+        foreach ($application->getContainer()->get('registry')->get('bundles.started', array()) as $bundle) {
             if (true === is_object($bundle) && true === is_a($bundle, 'BackBuilder\Bundle\ABundle')) {
                 $bundle->stop();
             }

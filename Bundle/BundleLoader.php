@@ -5,6 +5,7 @@ namespace BackBuilder\Bundle;
 use ReflectionClass;
 
 use BackBuilder\BBApplication,
+    BackBuilder\Config\Config,
 	BackBuilder\DependencyInjection\ContainerBuilder;
 
 use Symfony\Component\DependencyInjection\Definition,
@@ -30,11 +31,11 @@ class BundleLoader
 		self::$application = $application;
 
 		foreach ($bundleConfig as $name => $classname) {
-            $key = 'bundle.' . strtolower($name);
             
             // Using ReflectionClass so we can read every bundle config file without the need to
             // instanciate each bundle's Config
             $r = new ReflectionClass($classname);
+            $key = 'bundle.' . strtolower(basename(dirname($r->getFileName())));
             self::$bundleBaseDir[$key] = dirname($r->getFileName());
             unset($r);
 
@@ -44,7 +45,6 @@ class BundleLoader
         }
 
         self::loadBundlesConfig();
-        self::loadBundleRoutes();
         self::loadBundleEvents();
         self::loadBundlesServices();
         self::registerBundleClassContentDir();
@@ -60,6 +60,14 @@ class BundleLoader
 
         // add BundleListener event (service.tagged.bundle)
         $application->getContainer()->get('event.dispatcher')->addListeners(array(
+            'bbapplication.start' => array(
+                'listeners' => array(
+                    array(
+                        'BackBuilder\Event\Listener\BundleListener',
+                        'onApplicationStart'
+                    )
+                )
+            ),
             'service.tagged.bundle' => array(
                 'listeners' => array(
                     array(
@@ -78,6 +86,9 @@ class BundleLoader
             )
         ));
 
+        // store bundles base config so we can register every routes on bbapplication.start
+        $application->getContainer()->get('registry')->set('bundles.baseconfig', self::$bundlesConfig);
+
         // Cleaning memory
         self::$bundleBaseDir = null;
         self::$bundlesConfig = null;
@@ -89,20 +100,8 @@ class BundleLoader
 		foreach (self::$bundleBaseDir as $key => $baseDir) {
 			$filename = $baseDir . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml';
 			if (true === is_readable($filename)) {
-				self::$bundlesConfig[$key] = Yaml::parse($filename);
+                self::$bundlesConfig[$key] = new Config(dirname($filename), self::$application->getBootstrapCache());
 			}
-		}
-	}
-
-	private static function loadBundleRoutes()
-	{
-		$controller = self::$application->getContainer()->get('controller');
-		foreach (self::$bundlesConfig as $key => $config) {
-			if (false === array_key_exists('route', $config)) {
-				continue;
-			}
-
-			$controller->registerRoutes($key, $config['route']);
 		}
 	}
 
@@ -112,11 +111,12 @@ class BundleLoader
 		$autoloader = self::$application->getAutoloader();
 
 		foreach (self::$bundlesConfig as $key => $config) {
-			if (false === array_key_exists('events', $config)) {
+            $events = $config->getEventsConfig();
+			if (false === is_array($events) || 0 === count($events)) {
 				continue;
 			}
-
-			$eventDispatcher->addListeners($config['events']);
+            
+			$eventDispatcher->addListeners($events);
 			$baseDir = self::$bundleBaseDir[$key] . DIRECTORY_SEPARATOR;
 			$autoloader->registerNamespace(
                 $baseDir . DIRECTORY_SEPARATOR . 'Listener', $baseDir . DIRECTORY_SEPARATOR . 'Listeners'

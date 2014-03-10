@@ -378,10 +378,6 @@ class BBApplication
 
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
-
-        for ($i = 0; $i < 10; $i++) {
-            $this->_container->get('bundle.comment');
-        }
         
         if (false === $this->isClientSAPI()) {
             $this->getController()->handle();
