@@ -2,17 +2,17 @@
 
 namespace BackBuilder\Bundle;
 
-use ReflectionObject;
+use ReflectionClass;
 
 use BackBuilder\BBApplication,
 	BackBuilder\DependencyInjection\ContainerBuilder;
 
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\DependencyInjection\Definition,
+    Symfony\Component\DependencyInjection\Reference,
+    Symfony\Component\Yaml\Yaml;
 
 class BundleLoader
 {
-	private static $bundles = array();
-
 	private static $bundleBaseDir = array();
 
 	private static $bundlesConfig = array();
@@ -30,17 +30,17 @@ class BundleLoader
 		self::$application = $application;
 
 		foreach ($bundleConfig as $name => $classname) {
-            $bundle = new $classname($application);
-            $key = 'bundle.' . $bundle->getId();
-
-            // Using ReflectionObject so we can read every bundle config file without the need to
+            $key = 'bundle.' . strtolower($name);
+            
+            // Using ReflectionClass so we can read every bundle config file without the need to
             // instanciate each bundle's Config
-            $r = new ReflectionObject($bundle);
+            $r = new ReflectionClass($classname);
             self::$bundleBaseDir[$key] = dirname($r->getFileName());
             unset($r);
 
-            self::$bundles[$key] = $bundle;
-            $application->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
+            $definition = new Definition($classname, array(new Reference('bbapp')));
+            $definition->addTag('bundle');
+            $application->getContainer()->setDefinition($key, $definition);
         }
 
         self::loadBundlesConfig();
@@ -52,12 +52,36 @@ class BundleLoader
         self::registerBundleScriptDir();
         self::registerBundleHelperDir();
 
+        // register bundle listener directory namespace
+        $application->getContainer()->get('autoloader')->registerNamespace(
+            'BackBuilder\Event\Listener',
+            implode(DIRECTORY_SEPARATOR, array($application->getBBDir(), 'Bundle', 'Listener'))
+        );
+
+        // add BundleListener event (service.tagged.bundle)
+        $application->getContainer()->get('event.dispatcher')->addListeners(array(
+            'service.tagged.bundle' => array(
+                'listeners' => array(
+                    array(
+                        'BackBuilder\Event\Listener\BundleListener',
+                        'onGetBundleService'
+                    )
+                )
+            ),
+            'bbapplication.stop' => array(
+                'listeners' => array(
+                    array(
+                        'BackBuilder\Event\Listener\BundleListener',
+                        'onApplicationStop'
+                    )
+                )
+            )
+        ));
+
         // Cleaning memory
         self::$bundleBaseDir = null;
         self::$bundlesConfig = null;
         self::$application = null;
-
-        return self::$bundles;
 	}
 
 	private static function loadBundlesConfig()
@@ -78,7 +102,7 @@ class BundleLoader
 				continue;
 			}
 
-			$controller->registerRoutes(self::$bundles[$key], $config['route']);
+			$controller->registerRoutes($key, $config['route']);
 		}
 	}
 

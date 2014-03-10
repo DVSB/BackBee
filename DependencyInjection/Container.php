@@ -2,6 +2,8 @@
 
 namespace BackBuilder\DependencyInjection;
 
+use BackBuilder\Event\Event;
+
 use Symfony\Component\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\ContainerInterface,
     Symfony\Component\DependencyInjection\Exception\RuntimeException;
@@ -28,9 +30,26 @@ class Container extends ContainerBuilder
         try {
             $service = parent::get($id, $invalidBehavior);
         } catch (RuntimeException $e) {
-            $definition = $this->getDefinition($id);
-            if (false === $definition->isSynthetic()) {
+            if (false === $this->hasDefinition($id)) {
                 throw $e;
+            }
+
+            if (false === $this->getDefinition($id)->isSynthetic()) {
+                throw $e;
+            }
+        }
+        
+        if (true === in_array('event.dispatcher', array_keys($this->services))) {
+            if (null !== $service && true === $this->hasDefinition($id)) {
+                $definition = $this->getDefinition($id);
+                if (0 < count($tags = $definition->getTags())) {
+                    foreach ($tags as $tag => $datas) {
+                        $this->services['event.dispatcher']->dispatch(
+                            'service.tagged.' . $tag,
+                            new Event($service)
+                        );
+                    }
+                }
             }
         }
 

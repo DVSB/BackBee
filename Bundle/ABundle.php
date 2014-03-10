@@ -52,6 +52,8 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     private $_routing;
     private $_request;
 
+    private $started;
+
     /**
      * @var array
      */
@@ -87,8 +89,11 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $this->_id = basename($this->_basedir);
 
         $this->_logger = $logger;
-        if (NULL === $this->_logger)
+        if (null === $this->_logger) {
             $this->_logger = $this->_application->getLogging();
+        }
+
+        $this->started = false;
     }
 
     private function _initConfig($configdir = null)
@@ -397,6 +402,25 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     abstract function start();
 
     abstract function stop();
+
+    /**
+     * [isStarted description]
+     * @return boolean [description]
+     */
+    public function isStarted()
+    {
+        return $this->started;
+    }
+
+    /**
+     * [started description]
+     * @return [type] [description]
+     */
+    public function started()
+    {
+        $this->started = true;
+    }
+
 
     /*     * **************************************************************** */
     /*                                                                        */

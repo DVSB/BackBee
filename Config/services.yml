@@ -34,11 +34,11 @@ services:
     config:
         class:      %bbapp.config.class%
         arguments:  ["%bbapp.config.dir%", "@cache.bootstrap"]
-    ed:
+    event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
-    event.dispatcher:
-        alias: ed
+    ed:
+        alias: event.dispatcher
     logging:
         class:      %bbapp.logger.class%
         arguments:  ["@bbapp"]

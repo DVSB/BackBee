@@ -76,7 +76,6 @@ class BBApplication
     private $_starttime;
     private $_storagedir;
     private $_tmpdir;
-    private $_bundles;
     private $_classcontentdir;
     private $_theme;
     private $_overwrite_config;
@@ -320,7 +319,7 @@ class BBApplication
 
     private function _initBundles()
     {
-        $this->_bundles = BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
+        BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
 
         return $this;
     }
@@ -332,7 +331,7 @@ class BBApplication
     public function getBundle($name)
     {
         $bundle = null;
-        if ($this->getContainer()->has('bundle.' . $name)) {
+        if (true === $this->getContainer()->has('bundle.' . $name)) {
             $bundle = $this->getContainer()->get('bundle.' . $name);
         }
 
@@ -341,7 +340,12 @@ class BBApplication
 
     public function getBundles()
     {
-        return $this->_bundles;
+        $bundles = array();
+        foreach ($this->getContainer()->findTaggedServiceIds('bundle') as $id => $datas) {
+            $bundles = $this->getContainer()->get($id);
+        }
+
+        return $bundles;
     }
 
     /**
@@ -370,16 +374,15 @@ class BBApplication
         $this->_isstarted = true;
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
-        if (null !== $this->getBundles()) {
-            foreach ($this->getBundles() as $bundle)
-                $bundle->start();
-        }
-
         $this->getTheme()->init();
 
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
 
+        for ($i = 0; $i < 10; $i++) {
+            $this->_container->get('bundle.comment');
+        }
+        
         if (false === $this->isClientSAPI()) {
             $this->getController()->handle();
         }
@@ -390,12 +393,7 @@ class BBApplication
      */
     public function stop()
     {
-        if (true === $this->isStarted()) {
-            if (null !== $this->getBundles()) {
-                foreach ($this->getBundles() as $bundle)
-                    $bundle->stop();
-            }
-            
+        if (true === $this->isStarted()) {            
             // @todo
             // stop services
 
