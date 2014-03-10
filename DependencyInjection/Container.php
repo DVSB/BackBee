@@ -4,7 +4,7 @@ namespace BackBuilder\DependencyInjection;
 
 use BackBuilder\Event\Event;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder,
+use Symfony\Component\DependencyInjection\ContainerBuilder as sfContainerBuilder,
     Symfony\Component\DependencyInjection\ContainerInterface,
     Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder,
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class Container extends ContainerBuilder
+class Container extends sfContainerBuilder
 {
     /**
      * Change current method default behavior: if we try to get a synthetic service it will return

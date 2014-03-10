@@ -342,7 +342,7 @@ class BBApplication
     {
         $bundles = array();
         foreach ($this->getContainer()->findTaggedServiceIds('bundle') as $id => $datas) {
-            $bundles = $this->getContainer()->get($id);
+            $bundles[] = $this->getContainer()->get($id);
         }
 
         return $bundles;
@@ -779,8 +779,9 @@ class BBApplication
      */
     public function getRequest()
     {
-        if (false === $this->isStarted())
+        if (false === $this->isStarted()) {
             throw new BBException('The BackBuilder application has to be started before to access request');
+        }
 
         return $this->getController()->getRequest();
     }

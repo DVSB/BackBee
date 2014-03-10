@@ -1,6 +1,6 @@
 <?php
 
-namespace BackBuilder\Event\Listener;
+namespace BackBuilder\Bundle\Listener;
 
 use BackBuilder\Event\Event;
 

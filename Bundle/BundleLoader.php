@@ -52,18 +52,12 @@ class BundleLoader
         self::registerBundleScriptDir();
         self::registerBundleHelperDir();
 
-        // register bundle listener directory namespace
-        $application->getContainer()->get('autoloader')->registerNamespace(
-            'BackBuilder\Event\Listener',
-            implode(DIRECTORY_SEPARATOR, array($application->getBBDir(), 'Bundle', 'Listener'))
-        );
-
         // add BundleListener event (service.tagged.bundle)
         $application->getContainer()->get('event.dispatcher')->addListeners(array(
             'bbapplication.start' => array(
                 'listeners' => array(
                     array(
-                        'BackBuilder\Event\Listener\BundleListener',
+                        'BackBuilder\Bundle\Listener\BundleListener',
                         'onApplicationStart'
                     )
                 )
@@ -71,7 +65,7 @@ class BundleLoader
             'service.tagged.bundle' => array(
                 'listeners' => array(
                     array(
-                        'BackBuilder\Event\Listener\BundleListener',
+                        'BackBuilder\Bundle\Listener\BundleListener',
                         'onGetBundleService'
                     )
                 )
@@ -79,7 +73,7 @@ class BundleLoader
             'bbapplication.stop' => array(
                 'listeners' => array(
                     array(
-                        'BackBuilder\Event\Listener\BundleListener',
+                        'BackBuilder\Bundle\Listener\BundleListener',
                         'onApplicationStop'
                     )
                 )

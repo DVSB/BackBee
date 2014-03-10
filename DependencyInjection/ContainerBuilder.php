@@ -47,18 +47,12 @@ class ContainerBuilder
 
         self::initApplicationVarsIntoContainer($application, $container);
 
-        // register container listener directory namespace
-        $container->get('autoloader')->registerNamespace(
-            'BackBuilder\Event\Listener',
-            implode(DIRECTORY_SEPARATOR, array($application->getBBDir(), 'DependencyInjection', 'Listener'))
-        );
-
         // add ContainerListener event (bbapplication.init)
         $container->get('event.dispatcher')->addListeners(array(
             'bbapplication.init' => array(
                 'listeners' => array(
                     array(
-                        'BackBuilder\Event\Listener\ContainerListener',
+                        'BackBuilder\DependencyInjection\Listener\ContainerListener',
                         'onApplicationInit'
                     )
                 )

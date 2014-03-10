@@ -166,6 +166,16 @@ class FrontController implements HttpKernelInterface {
 
         try {
             $actionKey = $matches['_route'] . '_' . $matches['_action'];
+            if (true === isset($this->_actions[$actionKey])) {
+                $controller = array_shift($this->_actions[$actionKey]);
+                if (true === is_string($controller)) {
+                    $controller = $this->_application->getContainer()->get($controller);
+                }
+
+                array_unshift($this->_actions[$actionKey], $controller);
+                unset($controller);
+            }
+
             if (isset($this->_actions[$actionKey]) && is_callable($this->_actions[$actionKey])) {
                 /* nothing to do */
             } elseif (array_key_exists($matches['_action'], $this->_actions) && is_callable($this->_actions[$matches['_action']])) {
@@ -700,7 +710,7 @@ class FrontController implements HttpKernelInterface {
             if (true === array_key_exists('_controller', $route['defaults'])) {
                 $container = $application->getContainer();
                 if (true === $container->has($route['defaults']['_controller'])) {
-                    $controller = $container->get($route['defaults']['_controller']);
+                    $controller = $route['defaults']['_controller'];
                 } else {
                     $application->warning(sprintf(
                         'Unable to get a valid controller with id:`%s` for the route `%s`.', 

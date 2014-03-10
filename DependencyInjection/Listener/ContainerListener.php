@@ -1,6 +1,6 @@
 <?php
 
-namespace BackBuilder\Event\Listener;
+namespace BackBuilder\DependencyInjection\Listener;
 
 use BackBuilder\DependencyInjection\Container,
     BackBuilder\Event\Event,

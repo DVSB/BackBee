@@ -397,8 +397,6 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         
     }
 
-    abstract function init();
-
     abstract function start();
 
     abstract function stop();
