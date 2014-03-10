@@ -102,7 +102,6 @@ class BundleLoader
 	private static function loadBundleEvents()
 	{
 		$eventDispatcher = self::$application->getContainer()->get('event.dispatcher');
-		$autoloader = self::$application->getAutoloader();
 
 		foreach (self::$bundlesConfig as $key => $config) {
             $events = $config->getEventsConfig();
@@ -111,10 +110,6 @@ class BundleLoader
 			}
             
 			$eventDispatcher->addListeners($events);
-			$baseDir = self::$bundleBaseDir[$key] . DIRECTORY_SEPARATOR;
-			$autoloader->registerNamespace(
-                $baseDir . DIRECTORY_SEPARATOR . 'Listener', $baseDir . DIRECTORY_SEPARATOR . 'Listeners'
-            );
 		}
 	}
 
