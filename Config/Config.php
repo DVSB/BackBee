@@ -72,7 +72,7 @@ class Config
 
     /**
      * The service container
-     * @var \BackBuilder\DependencyInjection\ContainerBuilder
+     * @var \BackBuilder\DependencyInjection\Container
      */
     private $_container;
 
@@ -108,9 +108,9 @@ class Config
      * Class constructor
      * @param string $basedir The base directory in which look for config files
      * @param \BackBuilder\Cache\ACache $cache Optional cache system
-     * @param \BackBuilder\DependencyInjection\ContainerBuilder $container
+     * @param \BackBuilder\DependencyInjection\Container $container
      */
-    public function __construct($basedir, ACache $cache = null, ContainerBuilder $container = null)
+    public function __construct($basedir, ACache $cache = null, Container $container = null)
     {
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
@@ -122,7 +122,7 @@ class Config
     /**
      * Set the service container to be able to parse parameter and service in config
      * Resets the compiled parameters array
-     * @param \BackBuilder\DependencyInjection\ContainerBuilder $container
+     * @param \BackBuilder\DependencyInjection\Container $container
      * @return \BackBuilder\Config\Config
      */
     public function setContainer(Container $container = null)
