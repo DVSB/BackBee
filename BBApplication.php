@@ -757,7 +757,8 @@ class BBApplication
                 array_unshift($this->_classcontentdir, $this->getRepository() . '/ClassContent');
             }
 
-            array_walk($this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            //array_walk($this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            array_map( array('BackBuilder\Util\File','resolveFilepath') , $this->_classcontentdir);
         }
 
         return $this->_classcontentdir;
