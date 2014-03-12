@@ -261,7 +261,9 @@ class Memcached extends AExtendedCache
      */
     public function getServerList()
     {
-        return $this->_memcached->getServerList();
+        $serverList = $this->_memcached->getServerList();
+        //FIX FOR HHVM BEHAVIOUR WHICH RETURN NULL WHEN NO SERVERS
+        return is_array($serverList) ? $serverList : array();
     }
 
     /**
@@ -456,7 +458,7 @@ class Memcached extends AExtendedCache
      */
     private function _hasServer($host, $port)
     {
-        $servers = $this->_memcached->getServerList();
+        $servers = $this->getServerList();
         foreach ($servers as $server) {
             if ($server['host'] === $host && $server['port'] === $port) {
                 return true;

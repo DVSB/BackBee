@@ -692,7 +692,8 @@ class BBApplication
                 }
             }
 
-            array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            //array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            array_map( array('BackBuilder\Util\File','resolveFilepath') , $this->_resourcedir);
         }
 
         return $this->_resourcedir;

@@ -110,8 +110,8 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
         // Looking for bundle's config.yml in data repository
         $filename = $dataBundlesDir . DIRECTORY_SEPARATOR . 'config.yml';
-        if (false === is_file($filename)) {
-            if (false === is_dir(dirname($filename))) {
+        if (false === file_exists($filename)) {
+            if (false === file_exists(dirname($filename))) {
                 mkdir(dirname($filename), 0755, true);
             }
 
