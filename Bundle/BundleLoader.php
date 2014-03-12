@@ -92,7 +92,17 @@ class BundleLoader
 	private static function loadBundlesConfig()
 	{
 		foreach (self::$bundleBaseDir as $key => $baseDir) {
-			$filename = $baseDir . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml';
+            $filename = implode('/', array(
+                self::$application->getDataDir(),
+                'Bundles',
+                basename($baseDir),
+                'config.yml'
+            ));
+            
+            if (false === is_file($filename)) {
+                $filename = $baseDir . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml';
+            }
+
 			if (true === is_readable($filename)) {
                 self::$bundlesConfig[$key] = new Config(dirname($filename), self::$application->getBootstrapCache());
 			}
@@ -108,7 +118,7 @@ class BundleLoader
 			if (false === is_array($events) || 0 === count($events)) {
 				continue;
 			}
-            
+
 			$eventDispatcher->addListeners($events);
 		}
 	}
