@@ -797,8 +797,12 @@ abstract class ARenderer implements IRenderer
         }
 
         $layoutfile = $this->_getLayoutFile($layout);
-        File::resolveFilepath($layoutfile, null, array('base_dir' => $this->_layoutdir[0]));
+        File::resolveFilepath($layoutfile, null, array('include_path' => $this->_layoutdir));
 
+        if (false === file_exists($layoutfile)) {
+            File::resolveFilepath($layoutfile, null, array('base_dir' => $this->_layoutdir[1]));            
+        }
+        
         if (false === file_exists($layoutfile) && false === touch($layoutfile)) {
             throw new RendererException(sprintf('Unable to create file %s.', $layoutfile), RendererException::LAYOUT_ERROR);
         }
