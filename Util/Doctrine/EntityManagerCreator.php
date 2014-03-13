@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -103,6 +103,41 @@ class EntityManagerCreator
             $config->setSQLLogger($logger);
         }
 
+        return self::_addCustonFunctions($config, $options);
+    }
+
+    /**
+     * Adds userdefined functions
+     * @param \Doctrine\ORM\Configuration $config
+     * @param array $options
+     * @return \Doctrine\ORM\Configuration
+     */
+    private static function _addCustonFunctions(Configuration $config, array $options = array())
+    {
+        if (null !== $string_functions = \BackBuilder\Util\Arrays::get($options, 'orm:entity_managers:default:dql:string_functions')) {
+            foreach ($string_functions as $name => $class) {
+                if (true === class_exists($class)) {
+                    $config->addCustomStringFunction($name, $class);
+                }
+            }
+        }
+
+        if (null !== $numeric_functions = \BackBuilder\Util\Arrays::get($options, 'orm:entity_managers:default:dql:numeric_functions')) {
+            foreach ($numeric_functions as $name => $class) {
+                if (true === class_exists($class)) {
+                    $config->addCustomNumericFunction($name, $class);
+                }
+            }
+        }
+
+        if (null !== $datetime_functions = \BackBuilder\Util\Arrays::get($options, 'orm:entity_managers:default:dql:datetime_functions')) {
+            foreach ($datetime_functions as $name => $class) {
+                if (true === class_exists($class)) {
+                    $config->addCustomDatetimeFunction($name, $class);
+                }
+            }
+        }
+
         return $config;
     }
 
@@ -115,8 +150,7 @@ class EntityManagerCreator
      */
     private static function _getEntityManagerWithEntityManager($entity_manager)
     {
-        if (true === is_object($entity_manager)
-                && $entity_manager instanceof EntityManager) {
+        if (true === is_object($entity_manager) && $entity_manager instanceof EntityManager) {
             return $entity_manager;
         }
 
@@ -133,8 +167,7 @@ class EntityManagerCreator
      */
     private static function _createEntityManagerWithConnection($connection, Configuration $config, EventManager $evm = null)
     {
-        if (true === is_object($connection)
-                && $connection instanceof Connection) {
+        if (true === is_object($connection) && $connection instanceof Connection) {
             try {
                 return EntityManager::create($connection, $config, $evm);
             } catch (\Exception $e) {
