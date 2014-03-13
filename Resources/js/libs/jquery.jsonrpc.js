@@ -66,9 +66,24 @@
         }
 
         // Validate method arguments
-        this._validateRequestMethod(method);
-        this._validateRequestParams(options.params);
-        this._validateRequestCallbacks(options.success, options.error);
+        try {
+          this._validateRequestMethod(method);
+          this._validateRequestParams(options.params);
+          this._validateRequestCallbacks(options.success, options.error);
+        } catch (e) {
+          var InvalidJsonRpcRequest = function (message) {
+            var err = new Error(),
+                stack = err.stack.split("\n");
+
+            this.name = 'InvalidJsonRpcRequest';
+            this.message = message;
+            this.method = method;
+            this.options = options;
+            this.stack = stack;
+          };
+          bb.lastError = new InvalidJsonRpcRequest(e);
+          throw(e);
+        }
 
         // Perform the actual request
         this._doRequest(JSON.stringify(this._requestDataObj(method, options.params, options.id)), options);
