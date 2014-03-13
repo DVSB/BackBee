@@ -220,8 +220,6 @@ class ClassContentRepository extends EntityRepository
         }
         $q->setFirstResult($start + $delta)->setMaxResults($limit ? $limit : (array_key_exists('limit', $selector) ? $selector['limit'] : 10) );
 
-        //var_dump($q->getQuery()->getSQL());
-
         return $multipage ? new Paginator($q) : $q->getQuery()->getResult();
     }
 
