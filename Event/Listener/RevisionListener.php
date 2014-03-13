@@ -113,7 +113,7 @@ class RevisionListener
             
             if (NULL == $revision->getContent()) {
                 $db = $em->getConnection();
-                $stmt = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?", array($revision->getUid()), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1));
+                $stmt = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?", array($revision->getUid()));
 
                 $items = $stmt->fetchAll();
                 if ($items) {

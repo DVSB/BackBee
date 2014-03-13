@@ -283,7 +283,7 @@ class ClassContent extends AbstractServiceLocal
 
         $contents = array();
         if ($name == "tous") {
-            $categoryList = Category::getCategories($this->bbapp);
+            $categoryList = Category::getCategories($this->getApplication()->getClassContentDir());
             //var_dump($categoryList); die();
             foreach ($categoryList as $cat) {
                 $cat->setBBapp($this->bbapp);

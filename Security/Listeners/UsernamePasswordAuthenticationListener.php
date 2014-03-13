@@ -70,6 +70,12 @@ class UsernamePasswordAuthenticationListener implements ListenerInterface
 
                 if (null !== $this->_logger)
                     $this->_logger->info(sprintf('Authentication request succeed for user "%s"', $token->getUsername()));
+            } catch (\Symfony\Component\Security\Core\Exception\AuthenticationException $e) {
+                $event->getDispatcher()
+                        ->dispatch(\Symfony\Component\Security\Core\AuthenticationEvents::AUTHENTICATION_FAILURE, new \Symfony\Component\Security\Core\Event\AuthenticationFailureEvent($token, $e));
+                $errmsg = $e->getMessage();
+                if (null !== $this->_logger)
+                    $this->_logger->info(sprintf('Authentication request failed for user "%s": %s', $token->getUsername(), $e->getMessage()));
             } catch (\Exception $e) {
                 $errmsg = $e->getMessage();
                 if (null !== $this->_logger)

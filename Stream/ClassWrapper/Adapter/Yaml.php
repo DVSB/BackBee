@@ -169,6 +169,31 @@ class Yaml extends AClassWrapper
                                         NAMESPACE_SEPARATOR . $this->repository;
                             }
                             break;
+                        case 'traits':
+                            $datas = false === is_array($datas) ? array($datas) : $datas;
+                            $this->traits = array();
+
+                            foreach ($datas as $t) {
+                                $trait = $t;
+                                if (NAMESPACE_SEPARATOR !== substr($t, 0, 1)) {
+                                    $trait = NAMESPACE_SEPARATOR . $t;
+                                }
+
+                                // add traits only if it exists
+                                if (true === trait_exists($trait)) {
+                                    $this->traits[] = $trait;
+                                }
+                            }
+
+                            // build up trait use string
+                            $str = implode(', ', $this->traits);
+                            if (0 < count($this->traits)) {
+                                $this->traits = 'use ' . $str . ';';
+                            } else {
+                                $this->traits = '';
+                            }
+
+                            break;
                         case 'elements':
                         case 'parameters':
                         case 'properties':

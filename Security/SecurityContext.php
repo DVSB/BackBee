@@ -248,13 +248,19 @@ class SecurityContext extends sfSecurityContext
             $key = array_key_exists('secret', $provider) ? $provider['secret'] : 'bb4_secret_key';
 
             if (array_key_exists('entity', $provider)) {
+                $manager = $this->_application->getEntityManager();
+                if (array_key_exists('manager_name', $provider['entity'])) {
+                    $manager = $provider['entity']['manager_name']->getEntityManager();
+                }
+                
                 if (array_key_exists('class', $provider['entity']) && array_key_exists('provider', $provider['entity'])) {
                     $providerClass = $provider['entity']['provider'];
-                    $this->_userproviders[$name] = new $providerClass($this->_application->getEntityManager()->getRepository($provider['entity']['class']));
+                    $this->_userproviders[$name] = new $providerClass($manager->getRepository($provider['entity']['class']));
                 } elseif (array_key_exists('class', $provider['entity'])) {
-                    $this->_userproviders[$name] = $this->_application->getEntityManager()->getRepository($provider['entity']['class']);
+                    $this->_userproviders[$name] = $manager->getRepository($provider['entity']['class']);
                 }
             }
+
             if (array_key_exists('webservice', $provider)) {
                 if (array_key_exists('class', $provider['webservice'])) {
                     $userprovider = $provider['webservice']['class'];

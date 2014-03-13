@@ -49,6 +49,7 @@ class Logger implements LoggerInterface, SQLLogger
     private $_appenders;
     private $_level;
     private $_priorities;
+    private $_priorities_name;
     private $_errorHandling = FALSE;
     private $_errorHandlers;
     private $_exceptionHandling = FALSE;
@@ -80,12 +81,13 @@ class Logger implements LoggerInterface, SQLLogger
         $this->_uniqid = uniqid();
 
         $r = new \ReflectionClass($this);
-        $this->_priorities = array_flip($r->getConstants());
+        $this->_priorities_name = $r->getConstants();
+        $this->_priorities = array_flip($this->_priorities_name);
 
         $this->setLevel(self::ERROR);
         if (NULL !== $this->_application) {
             if (NULL !== $loggingConfig = $this->_application->getConfig()->getLoggingConfig()) {
-                if ($this->_application->debugMode()) {
+                if ($this->_application->isDebugMode()) {
                     error_reporting(E_ALL);
                     $this->setLevel(Logger::DEBUG);
                 } else if (array_key_exists('level', $loggingConfig)) {
@@ -204,47 +206,42 @@ class Logger implements LoggerInterface, SQLLogger
             $message = $exception->getMessage();
             $error_trace = '';
 
-            if (NULL !== $this->_application && $this->_application->debugMode()) {
-                $error_trace .= '<p>Trace:</p>';
-                $error_trace .= '<ul>';
-                $error_trace .= '<li>line ' . $exception->getLine() . ': ' . $exception->getFile() . '</li>';
+            if (NULL !== $this->_application) {
+
+                $error_trace .=  ' in '.$exception->getFile() . ' on line ' . $exception->getLine() . '</th></tr>';
                 foreach ($exception->getTrace() as $trace) {
-                    $error_trace .= '<li>line ' .
-                            (array_key_exists('line', $trace) ? $trace['line'] : '-') . ': ' .
-                            (array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ', ' .
-                            (array_key_exists('class', $trace) ? $trace['class'] : '') .
-                            (array_key_exists('type', $trace) ? $trace['type'] : '') .
-                            (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()</li>';
+                    $this->getTemplateError($trace);
                 }
-                $error_trace .= '</ul>';
 
                 $previous = $exception->getPrevious();
                 while (NULL !== $previous) {
                     $this->error(sprintf('Cause By : Error occurred in file `%s` at line %d with message: %s', $previous->getFile(), $previous->getLine(), $previous->getMessage()));
-                    $error_trace .= '<p>Caused by: ' . $previous->getMessage() . '</p>';
-                    $error_trace .= '<ul>';
-                    $error_trace .= '<li>line ' . $previous->getLine() . ': ' . $previous->getFile() . '</li>';
+
+                    $error_trace .= '<tr><th colspan="5">Caused by: ' . $previous->getMessage() .
+                        ' in ' . $previous->getFile() . ' on line ' . $previous->getLine() . '</td></tr>';
                     foreach ($previous->getTrace() as $trace) {
-                        $error_trace .= '<li>line ' .
-                                (array_key_exists('line', $trace) ? $trace['line'] : '-') . ': ' .
-                                (array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ', ' .
-                                (array_key_exists('class', $trace) ? $trace['class'] : '') .
-                                (array_key_exists('type', $trace) ? $trace['type'] : '') .
-                                (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()</li>';
+                        $this->getTemplateError($trace);
                     }
-                    $error_trace .= '</ul>';
                     $previous = $previous->getPrevious();
                 }
             }
 
             if (false === $content = $this->_application->getRenderer()->reset()->error($httpCode, $title, $message, $error_trace)) {
-                $content = '<h1>' . $httpCode . ': ' . $title . '<h1>';
-                $content .= '<h2>' . $message . '<h2>';
-                $content .= $error_trace;
+                if($this->_application->isDebugMode()) {
+                    $content = '<link type="text/css" rel="stylesheet" href="ressources/css/debug.css"/>';
+                }
+                $content .= '<h1>' . $httpCode . ': ' . $title . '<h1>';
+                $content .= '<table>';
+                $content .= '<tr><th colspan="5">' . $message;
+                if($this->_application->isDebugMode()) {
+                    $content .= $error_trace;
+                }else{
+                    $content .= '</th></tr>';
+                }
+                $content .= '</table>';
             }
 
             $this->_sendErrorMail($title, '<h1>' . $httpCode . ': ' . $title . '<h1><h2>' . $message . '</h2><p>Referer : ' . $this->_application->getRequest()->server->get('HTTP_REFERER') . '</p>' . $error_trace);
-
             $response = new Response($content, $httpCode);
             $response->send();
             die();
@@ -283,6 +280,16 @@ class Logger implements LoggerInterface, SQLLogger
         die();
     }
 
+    private function getTemplateError($trace)
+    {
+        return '<tr>'.
+            '<td>'.(array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ': ' .
+            (array_key_exists('line', $trace) ? $trace['line'] : '-') . '</td>' .
+            '<td>'.(array_key_exists('class', $trace) ? $trace['class'] : '') .
+            (array_key_exists('type', $trace) ? $trace['type'] : '') .
+            (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()</td>'.
+            '</tr>';
+    }
     public function log($level, $message, array $context = array())
     {
         if (null !== $this->_buffer) {
@@ -294,9 +301,14 @@ class Logger implements LoggerInterface, SQLLogger
         if (0 == count($this->_appenders))
             throw new LoggingException('None appenders defined.');
 
-        if (!array_key_exists($level, $this->_priorities))
+        if (array_key_exists(strtoupper($level), $this->_priorities_name)) {
+            $level = $this->_priorities_name[strtoupper($level)];
+        }
+        
+        if (!array_key_exists($level, $this->_priorities)) {
             throw new LoggingException(sprintf('Unkown priority level `%d`.', $level));
-
+        }
+        
         if ($level > $this->_level)
             return;
 

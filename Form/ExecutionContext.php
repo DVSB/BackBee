@@ -71,7 +71,7 @@ class ExecutionContext implements \Symfony\Component\Validator\ExecutionContextI
         $report->pluralization = $pluralization;
         $report->code = $code;
 
-        $this->globalContext[] = $report;
+        $this->globalContext[$this->_key] = $report;
     }
 
     public function addCustomViolation($message, $key)

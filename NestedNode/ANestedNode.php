@@ -236,7 +236,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
      */
     public function isRoot()
     {
-        return (1 === $this->_leftnode);
+        return (1 === $this->_leftnode && null === $this->_parent);
     }
 
     /**
