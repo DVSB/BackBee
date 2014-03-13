@@ -363,7 +363,7 @@ class ClassContentRepository extends EntityRepository
         return $qlString;
     }
 
-    private function getPageMainContentSet($selectedNode, $online = false)
+    private function getPageMainContentSets($selectedNode, $online = false)
     {
         $rsm = new ResultSetMapping();
         $rsm->addEntityResult("BackBuilder\ClassContent\ContentSet", "c");
@@ -444,7 +444,7 @@ class ClassContentRepository extends EntityRepository
 
                 /* handle online content */
                 $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
-                $subContents = $this->getPageMainContentSet($selectedNode, $limitToOnline);
+                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
                 if(empty($subContents)){ return array(); } // should never happened
                 $newQuery = $this->_em->createQueryBuilder("q");
                 $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
@@ -611,7 +611,7 @@ class ClassContentRepository extends EntityRepository
                                     "selectedPageLeftnode" => $selectedNode->getLeftnode(),
                                     "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery();*/
                 $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
-                $subContents = $this->getPageMainContentSet($selectedNode, $limitToOnline);
+                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
                 if(empty($subContents)){ return array(); } // should never happened
                 $newQuery = $this->_em->createQueryBuilder("q");
                 $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
