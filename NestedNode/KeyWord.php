@@ -34,7 +34,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\KeyWordRepository")
- * @Table(name="keyword")
+ * @Table(name="keyword",indexes={@index(name="keyword_idx", columns={"keyword"})})
  */
 class KeyWord extends ANestedNode implements IRenderable
 {
