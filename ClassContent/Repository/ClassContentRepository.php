@@ -28,6 +28,8 @@ use BackBuilder\NestedNode\Page,
     BackBuilder\BBApplication;
 use Doctrine\ORM\Tools\Pagination\Paginator,
     Doctrine\ORM\Query,
+    Doctrine\ORM\Query\ResultSetMapping,
+    Doctrine\ORM\Query\ResultSetMappingBuilder,
     Doctrine\ORM\EntityRepository;
 
 /**
@@ -220,8 +222,6 @@ class ClassContentRepository extends EntityRepository
         }
         $q->setFirstResult($start + $delta)->setMaxResults($limit ? $limit : (array_key_exists('limit', $selector) ? $selector['limit'] : 10) );
 
-        //var_dump($q->getQuery()->getSQL());
-
         return $multipage ? new Paginator($q) : $q->getQuery()->getResult();
     }
 
@@ -315,7 +315,6 @@ class ClassContentRepository extends EntityRepository
     public function findContentsByUids(array $uids)
     {
         $result = array();
-
         try {
             if (0 < count($uids)) {
                 // Getting classnames for provided uids
@@ -362,6 +361,33 @@ class ClassContentRepository extends EntityRepository
         return $qlString;
     }
 
+    private function getPageMainContentSets($selectedNode, $online = false)
+    {
+        $rsm = new ResultSetMapping();
+        $rsm->addEntityResult("BackBuilder\ClassContent\ContentSet", "c");
+
+        $rsm->addFieldResult('c', 'uid', '_uid');
+        $sql = "Select c.uid from content c LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid";
+        $sql .= " LEFT JOIN page as p ON p.contentset = sc.parent_uid";
+        $sql .= " where p.uid = :selectedNodeUid";
+        $sql .=" AND p.root_uid = :selectedPageRoot";
+        $sql .= " AND p.leftnode >= :selectedPageLeftnode";
+        $sql .= " AND p.rightnode <= :selectedPageRightnode";
+       if($online){
+           $sql .=" AND p.state IN(:selectedPageState)";
+           }
+        $query = $this->_em->createNativeQuery($sql, $rsm);
+        $query->setParameters(array(
+            "selectedPageRoot" => $selectedNode->getRoot(),
+            "selectedNodeUid" => $selectedNode->getUid(),
+            "selectedPageLeftnode" => $selectedNode->getLeftnode(),
+            "selectedPageRightnode" => $selectedNode->getRightnode()));
+        if ($online) {  
+            $query->setParameter("selectedPageState", array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
+        }
+        return $query->getResult();
+    }
+
     /**
      * sql query example: select c.label, c.classname  FROM content c LEFT JOIN content_has_subcontent cs ON c.uid = cs.content_uid
      * where cs.parent_uid in (select cs.content_uid from page p LEFT JOIN content_has_subcontent cs ON p.contentset = cs.parent_uid
@@ -395,29 +421,34 @@ class ClassContentRepository extends EntityRepository
              * SELECT *
               FROM `content` c
               LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid
-              LEFT JOIN PAGE AS p ON p.contentset = sc.parent_uid
+              LEFT JOIN page AS p ON p.contentset = sc.parent_uid
               where p.uid ="f70d5b294dcc4d8d5c7f57b8804f4de2"
              * 94b081b46015cb451b6aa14ea3807cc3
              * c470a895d6cb09d001b5fc5bb8613306
              */
-            if ($selectedNode && !$selectedNode->isRoot()) {
-                $qbSN = $this->createQueryBuilder('ct');
-                $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
-                                //->leftJoin("BackBuilder\NestedNode\Page", "p", "WITH", "p._contentset = sc")
-                                ->leftJoin("ct._pages", "p")
-                                ->andWhere('p._root = :selectedPageRoot')
-                                ->andWhere('p._leftnode >= :selectedPageLeftnode')
-                                ->andWhere('p._rightnode <= :selectedPageRightnode')
-                                ->setParameters(array("selectedPageRoot" => $selectedNode->getRoot(),
-                                    "selectedPageLeftnode" => $selectedNode->getLeftnode(),
-                                    "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery();
+            /* as content has no relation with page we are user a native Query */
 
+            if ($selectedNode && !$selectedNode->isRoot()) {
+                /* $qbSN = $this->createQueryBuilder('ct');
+                  $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
+                  // ->leftJoin("BackBuilder\NestedNode\Page", "p", "WITH", "p._contentset = sc")
+                  //->leftJoin("ct._pages", "p")
+                  ->andWhere('p._root = :selectedPageRoot')
+                  ->andWhere('p._leftnode >= :selectedPageLeftnode')
+                  ->andWhere('p._rightnode <= :selectedPageRightnode')
+                  ->setParameters(array("selectedPageRoot" => $selectedNode->getRoot(),
+                  "selectedPageLeftnode" => $selectedNode->getLeftnode(),
+                  "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery(); */
+
+                /* handle online content */
+                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
+                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
+                if(empty($subContents)){ return array(); } // should never happened
                 $newQuery = $this->_em->createQueryBuilder("q");
                 $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
                 $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
                                 ->where("cs._uid IN (:scl)")
-                                ->setParameter("scl", $subContentsQuery->getResult())->getQuery()->getResult();
-
+                                ->setParameter("scl", $subContents)->getQuery()->getResult(); // $subContentsQuery->getResult()
                 /* filtre  parmi ces contents */
                 $qb->where("c in (:sc) ")->setParameter("sc", $contents);
             }
@@ -491,7 +522,6 @@ class ClassContentRepository extends EntityRepository
         if (array_key_exists("indexedFields", $cond) && !empty($cond["indexedFields"])) {
             $this->handleIndexedFields($qb, $cond["indexedFields"]);
         }
-
         if (is_array($paging) && count($paging)) {
             if (array_key_exists("start", $paging) && array_key_exists("limit", $paging)) {
                 $qb->setFirstResult($paging["start"])
@@ -568,7 +598,7 @@ class ClassContentRepository extends EntityRepository
         if (array_key_exists("selectedpageField", $cond) && !is_null($cond["selectedpageField"]) && !empty($cond["selectedpageField"])) {
             $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
             if ($selectedNode && !$selectedNode->isRoot()) {
-                $qbSN = $this->createQueryBuilder('ct');
+                /*$qbSN = $this->createQueryBuilder('ct');
                 $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
                                 //->leftJoin("\BackBuilder\NestedNode\Page", "p", "WITH", "sc = p._contentset")
                                 ->leftJoin("ct._pages", "p")
@@ -577,13 +607,15 @@ class ClassContentRepository extends EntityRepository
                                 ->andWhere('p._rightnode <= :selectedPageRightnode')
                                 ->setParameters(array("selectedPageRoot" => $selectedNode->getRoot(),
                                     "selectedPageLeftnode" => $selectedNode->getLeftnode(),
-                                    "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery();
-
+                                    "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery();*/
+                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
+                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
+                if(empty($subContents)){ return array(); } // should never happened
                 $newQuery = $this->_em->createQueryBuilder("q");
                 $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
                 $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
                                 ->where("cs._uid IN (:scl)")
-                                ->setParameter("scl", $subContentsQuery->getResult())->getQuery()->getResult();
+                                ->setParameter("scl", $subContents)->getQuery()->getResult();
 
                 /* filtre  parmi ces contents */
                 $qb->where("c in (:sc) ")->setParameter("sc", $contents);
