@@ -72,7 +72,13 @@ class SecurityContext extends sfSecurityContext
     private $_aclprovider;
     private $_logout_listener;
     private $_config;
-
+    
+    /**
+     * An encoder factory
+     * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
+     */
+    private $_encoderfactory;
+    
     public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager = NULL, AccessDecisionManagerInterface $accessDecisionManager = NULL)
     {
         $this->_application = $application;
@@ -95,7 +101,8 @@ class SecurityContext extends sfSecurityContext
             $this->_authmanager->setEventDispatcher($this->_dispatcher);
         }
 
-        $this->createProviders($securityConfig)
+        $this->_createEncoderFactory($securityConfig)
+             ->createProviders($securityConfig)
              ->_createACLProvider($securityConfig)
              ->_createFirewallMap($securityConfig)
              ->_registerFirewall();
@@ -131,6 +138,28 @@ class SecurityContext extends sfSecurityContext
         parent::__construct($this->_authmanager, $accessDecisionManager);
     }
 
+    /**
+     * Create an encoders factory if need
+     * @param array $config
+     * @return \BackBuilder\Security\SecurityContext
+     */
+    public function _createEncoderFactory(array $config)
+    {
+        if (true === array_key_exists('encoders', $config)) {
+            $this->_encoderfactory = new \Symfony\Component\Security\Core\Encoder\EncoderFactory($config['encoders']);
+        }
+        return $this;
+    }
+    
+    /**
+     * Returns the encoder factory or NULL if not defined
+     * @return \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface|NULL
+     */
+    public function getEncoderFactory()
+    {
+        return $this->_encoderfactory;
+    }
+    
     public function createFirewall($name, $config)
     {
         $config['firewall_name'] = $name;
