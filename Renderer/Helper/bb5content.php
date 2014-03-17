@@ -97,15 +97,15 @@ class bb5content extends AHelper
                 && false !== $this->_content->getParam('bb5.editable')) {
 
             // Defining hierarchical content structure
+                $this->_parent_uid = $this->_renderer->getParentUid();
             if (null === $element) {
                 $this->_element_name = $this->_renderer->getCurrentElement();
                 $this->_parent = $this->getRenderer()->getClassContainer();
-                $this->_parent_uid = $this->_renderer->getParentUid();
             } else {
                 $this->_element_name = null;
                 if (null !== $this->_parent = $this->_renderer->getObject()) {
                     $this->_setElementName($this->_parent, $element);
-                    $this->_parent_uid = $this->_renderer->getObject()->getUid();
+                    $this->_parent_uid = $this->_parent->getUid();
                 }
             }
 
@@ -176,7 +176,7 @@ class bb5content extends AHelper
 
         $this->_addValueToAttribute('data-uid', $this->_content->getUid())
                 ->_addValueToAttribute('data-type', $this->_getDataType())
-                ->_addValueToAttribute('data-parent', $this->_parent ? $this->_parent->getUid() : null)
+                ->_addValueToAttribute('data-parent', $this->_parent_uid)
                 ->_addValueToAttribute('data-element', $this->_element_name)
                 ->_addValueToAttribute('data-isloaded', $this->_content->isLoaded() ? 'true' : 'false')
                 ->_addValueToAttribute('data-rendermode', (null !== $this->_content->getMode()) ? $this->_content->getMode() : (string) $this->_renderer->getMode())
