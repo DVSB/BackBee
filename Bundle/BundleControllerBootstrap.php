@@ -2,10 +2,14 @@
 
 namespace BackBuilder\Bundle;
 
-use BackBuilder\Bundle\ABundle;
+use BackBuilder\Bundle\ABundle,
+    BackBuilder\Bundle\Exception\RequestErrorException;
 
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @author e.chau <eric.chau@lp-digital.fr>
+ */
 class BundleControllerBootstrap
 {
     protected $_bundle;
