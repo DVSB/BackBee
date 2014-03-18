@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -79,9 +79,9 @@ class Arrays
      *         )
      *     )
      * );
-     * 
+     *
      * return :
-     * 
+     *
      * <root id="1">
      *     <singleTag>123456789</singleTag>
      *     <multiTags>
@@ -93,7 +93,7 @@ class Arrays
      *         </tag>
      *     </multiTags>
      * </root>
-     * 
+     *
      * @codeCoverageIgnore
      * @param array $array
      * @return string
@@ -105,25 +105,25 @@ class Arrays
 
     /**
      * [array_diff_assoc_recursive description]
-     * 
-     * @param  array $array1 
-     * @param  array $array2 
-     * @return array         
+     *
+     * @param  array $array1
+     * @param  array $array2
+     * @return array
      */
-    public static function array_diff_assoc_recursive(array $array1, array $array2) 
+    public static function array_diff_assoc_recursive(array $array1, array $array2)
     {
         $diff = array();
         foreach ($array1 as $key => $value) {
             if (true === is_array($value)) {
-                if(false === isset($array2[$key]) || false === is_array($array2[$key])) {
+                if (false === isset($array2[$key]) || false === is_array($array2[$key])) {
                     $diff[$key] = $value;
                 } else {
                     $newDiff = self::array_diff_assoc_recursive($value, $array2[$key]);
-                    if(false === empty($newDiff)) {
+                    if (false === empty($newDiff)) {
                         $diff[$key] = $newDiff;
                     }
                 }
-            } elseif (false === array_key_exists($key,$array2) || $array2[$key] !== $value) {
+            } elseif (false === array_key_exists($key, $array2) || $array2[$key] !== $value) {
                 $diff[$key] = $value;
             }
         }
@@ -133,12 +133,12 @@ class Arrays
 
     /**
      * [array_merge_assoc_recursive description]
-     * 
-     * @param  array $array1 
-     * @param  array $array2 
-     * @return array         
+     *
+     * @param  array $array1
+     * @param  array $array2
+     * @return array
      */
-    public static function array_merge_assoc_recursive($array1, $array2) 
+    public static function array_merge_assoc_recursive($array1, $array2)
     {
         foreach ($array2 as $key => $value) {
             if (false === array_key_exists($key, $array1)) {
@@ -155,9 +155,9 @@ class Arrays
 
     /**
      * [array_remove_assoc_recursive description]
-     * @param  [type] $array1 
-     * @param  [type] $array2 
-     * @return [type]         
+     * @param  [type] $array1
+     * @param  [type] $array2
+     * @return [type]
      */
     public static function array_remove_assoc_recursive(&$array1, $array2)
     {
@@ -233,4 +233,54 @@ class Arrays
         }
         return $return;
     }
+
+    /**
+     * Tests if key:subkey exists in array
+     * @param array $array
+     * @param string $key
+     * @param string $separator
+     * @return boolean
+     * @throws \BackBuilder\Exception\InvalidArgumentException
+     */
+    public static function has(array $array, $key, $separator = ':', &$traverse = array())
+    {
+        if (false === is_string($key)) {
+            throw new \BackBuilder\Exception\InvalidArgumentException('$key parameter as to be a string');
+        }
+
+        if (false === is_string($separator)) {
+            throw new \BackBuilder\Exception\InvalidArgumentException('$separator parameter as to be a string');
+        }
+
+        $traverse = $array;
+        $keys = explode($separator, $key);
+        foreach ($keys as $key) {
+            if (false === is_array($traverse) || false === array_key_exists($key, $traverse)) {
+                return false;
+            }
+            $traverse = $traverse[$key];
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets the value of key:subkey in array, NULL othewise
+     * @param array $array
+     * @param string $key
+     * @param mixed $default
+     * @param string $separator
+     * @return mixed
+     * @throws \BackBuilder\Exception\InvalidArgumentException
+     */
+    public static function get(array $array, $key, $default = null, $separator = ':')
+    {
+        $traverse = array();
+        if (true === self::has($array, $key, $separator, $traverse)) {
+            return $traverse;
+        }
+
+        return $default;
+    }
+
 }

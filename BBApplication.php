@@ -22,7 +22,6 @@
 namespace BackBuilder;
 
 use Exception;
-
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Bundle\BundleLoader,
     BackBuilder\Config\Config,
@@ -35,7 +34,6 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
-
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager;
@@ -219,9 +217,9 @@ class BBApplication
     public function isDebugMode()
     {
         if ($this->getConfig()->sectionHasKey('parameters', 'debug')) {
-            return (bool)$this->getConfig()->getParametersConfig('debug');
+            return (bool) $this->getConfig()->getParametersConfig('debug');
         }
-        return (bool)$this->_debug;
+        return (bool) $this->_debug;
     }
 
     /**
@@ -265,52 +263,33 @@ class BBApplication
      */
     private function _initEntityManager()
     {
-        if (null === $doctrineConfig = $this->getConfig()->getDoctrineConfig())
+        if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
             throw new BBException('None database configuration found');
+        }
 
-        // New database configuration
-        $config = new Configuration;
-        $driverImpl = $config->newDefaultAnnotationDriver();
-        $config->setMetadataDriverImpl($driverImpl);
+        if (false === array_key_exists('dbal', $doctrine_config)) {
+            throw new BBException('None dbal configuration found');
+        }
 
-        $proxiesPath = $this->getCacheDir() . DIRECTORY_SEPARATOR . 'Proxies';
-        $config->setProxyDir($proxiesPath);
-        $config->setProxyNamespace('Proxies');
+        if (false === array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['proxy_ns'] = 'Proxies';
+        }
 
-        $config->setSQLLogger($this->getLogging());
+        if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir() . DIRECTORY_SEPARATOR . 'Proxies';
+        }
+
+        if (true === array_key_exists('orm', $doctrine_config)) {
+            $doctrine_condif['dbal']['orm'] = $doctrine_config['orm'];
+        }
 
         // Init ORM event
         $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
-        // Create EntityManager
-        $connectionOptions = isset($doctrineConfig['dbal']) ? $doctrineConfig['dbal'] : array();
-        $this->getContainer()->set('em', EntityManager::create($connectionOptions, $config, $evm));
-
-        try {
-            $this->getContainer()->get('em')->getConnection()->connect();
-        } catch (\Exception $e) {
-            throw new DatabaseConnectionException('Unable to connect to the database.', 0, $e);
-        }
-
-        if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
-            try {
-                $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_client = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
-                $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_connection = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
-                $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_results = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
-            } catch (\Exception $e) {
-                throw new BBException(sprintf('Invalid database character set `%s`', $doctrineConfig['dbal']['charset']), BBException::INVALID_ARGUMENT, $e);
-            }
-        }
-
-        if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['collation'])) {
-            try {
-                $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION collation_connection = "' . addslashes($doctrineConfig['dbal']['collation']) . '";');
-            } catch (\Exception $e) {
-                throw new BBException(sprintf('Invalid database collation `%s`', $doctrineConfig['dbal']['collation']), BBException::INVALID_ARGUMENT, $e);
-            }
-        }
+        $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogging(), $evm);
+        $this->getContainer()->set('em', $em);
 
         $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
 
@@ -389,7 +368,7 @@ class BBApplication
      */
     public function stop()
     {
-        if (true === $this->isStarted()) {            
+        if (true === $this->isStarted()) {
             // @todo
             // stop services
 
@@ -524,7 +503,7 @@ class BBApplication
         if (null === $this->_cachedir) {
             $this->_cachedir = $this->getContainer()->getParameter('bbapp.cache.dir');
         }
-        
+
         return $this->_cachedir;
     }
 
@@ -542,8 +521,8 @@ class BBApplication
     public function getConfig()
     {
         return $this->getContainer()
-                ->get('config')
-                ->setContainer($this->getContainer());
+                        ->get('config')
+                        ->setContainer($this->getContainer());
     }
 
     public function getConfigDir()
@@ -693,7 +672,7 @@ class BBApplication
             }
 
             //array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
-            array_map( array('BackBuilder\Util\File','resolveFilepath') , $this->_resourcedir);
+            array_map(array('BackBuilder\Util\File', 'resolveFilepath'), $this->_resourcedir);
         }
 
         return $this->_resourcedir;
