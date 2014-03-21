@@ -60,6 +60,7 @@ services:
         arguments:  ["@bbapp", "%bbapp.locale%"]
     pagebuilder:
         class:      %bbapp.pagebuilder.class%
+        arguments:  ["@em"]
     # synthetic services
     site:
         synthetic: true
