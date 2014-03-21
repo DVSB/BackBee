@@ -63,6 +63,11 @@ class PageBuilder
 	private $publishedAt;
 
 	/**
+	 * @var integer
+	 */
+	private $state;
+
+	/**
 	 * [__construct description]
 	 */
 	public function __construct()
@@ -140,6 +145,8 @@ class PageBuilder
 		$this->parent = null;
 		$this->layout = null;
 		$this->elements = array();
+		$this->publishedAt = null;
+		$this->state = null;
 	}
 
 	/**
