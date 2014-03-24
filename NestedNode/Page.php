@@ -147,6 +147,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @fixture(type="sentence", value=6)
      */
     protected $_title;
+    /**
+     * The alternate title of this page
+     * @var string
+     * @Column(type="string", name="alttitle", nullable=true)
+     * @fixture(type="sentence", value=6)
+     */
+    protected $_alttitle;
 
     /**
      * The URI of this page
@@ -380,6 +387,15 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         return $this->_layout;
     }
 
+    /**
+     * Returns the alternate title of the page.
+     * @codeCoverageIgnore
+     * @return string
+     */
+    public function getAltTitle()
+    {
+        return $this->_alttitle;
+    }
     /**
      * Returns the title of the page.
      * @codeCoverageIgnore
@@ -706,6 +722,17 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Sets the alternate title of the page.
+     * @codeCoverageIgnore
+     * @param string $alttitle
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setAltTitle($alttitle)
+    {
+        $this->_alttitle = $alttitle;
+        return $this;
+    }
+    /**
      * Sets the title of the page.
      * @codeCoverageIgnore
      * @param string $title
@@ -979,6 +1006,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
         $result['siteuid'] = $this->getSite()->getUid();
         $result['title'] = $this->getTitle();
+        $result['alttitle'] = $this->getAltTitle();
         $result['url'] = $this->getUrl();
         $result['target'] = $this->getTarget();
         $result['redirect'] = $this->getRedirect();
