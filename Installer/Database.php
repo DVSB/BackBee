@@ -42,7 +42,7 @@ class Database
         $this->_application = $application;
         $this->_em = $this->_application->getEntityManager();
         $this->_schemaTool = new SchemaTool($this->_em);
-        $this->_entityFinder = new EntityFinder($this->_application->getBaseDir());
+        $this->_entityFinder = new EntityFinder(dirname($this->_application->getBBDir()));
     }
 
     /**
