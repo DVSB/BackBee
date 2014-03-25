@@ -110,7 +110,8 @@ class BBApplication
 
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
-                setLocale(LC_ALL, $encoding['locale']);
+                if(setLocale(LC_ALL, $encoding['locale']) === false
+                    Throw new Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
         }
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
