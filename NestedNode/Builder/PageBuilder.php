@@ -3,392 +3,420 @@
 namespace BackBuilder\NestedNode\Builder;
 
 use BackBuilder\ClassContent\AClassContent,
-	BackBuilder\NestedNode\Page,
-	BackBuilder\Site\Layout,
-	BackBuilder\Site\Site;
+    BackBuilder\NestedNode\Page,
+    BackBuilder\Site\Layout,
+    BackBuilder\Site\Site;
+
+use Doctrine\ORM\EntityManager;
 
 /**
- * 
+ * @author e.chau <eric.chau@lp-digital.fr>
  */
 class PageBuilder
 {
-	/**
-	 * @var string
-	 */
-	private $uid;
+    const NO_PERSIST = 0;
+    const PERSIST_AS_FIRST_CHILD = 1;
+    const PERSIST_AS_LAST_CHILD = 2;
 
-	/**
-	 * @var string
-	 */
-	private $title;
+    /**
+     * @var Doctrine\ORM\EntityManager
+     */
+    private $em;
 
-	/**
-	 * @var string
-	 */
-	private $url;
+    /**
+     * @var string
+     */
+    private $uid;
 
-	/**
-	 * @var BackBuilder\Site\Site
-	 */
-	private $site;
+    /**
+     * @var string
+     */
+    private $title;
 
-	/**
-	 * @var BackBuilder\NestedNode\Page
-	 */
-	private $root;
+    /**
+     * @var string
+     */
+    private $url;
 
-	/**
-	 * BackBuilder\NestedNode\Page
-	 */
-	private $parent;
+    /**
+     * @var BackBuilder\Site\Site
+     */
+    private $site;
 
-	/**
-	 * @var BackBuilder\Site\Layout
-	 */
-	private $layout;
+    /**
+     * @var BackBuilder\NestedNode\Page
+     */
+    private $root;
 
-	/**
-	 * @var BackBuilder\ClassContent\AClassContent
-	 */
-	private $itemToPushInMainZone;
+    /**
+     * BackBuilder\NestedNode\Page
+     */
+    private $parent;
 
-	/**
-	 * @var array of BackBuilder\ClassContent\AClassContent
-	 */
-	private $elements;
+    /**
+     * @var BackBuilder\Site\Layout
+     */
+    private $layout;
 
-	/**
-	 * @var \DateTime
-	 */
-	private $publishedAt;
+    /**
+     * @var BackBuilder\ClassContent\AClassContent
+     */
+    private $itemToPushInMainZone;
 
-	/**
-	 * [__construct description]
-	 */
-	public function __construct()
-	{
-		$this->reset();
-	}
+    /**
+     * @var array of BackBuilder\ClassContent\AClassContent
+     */
+    private $elements;
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getPage()
-	{
-		if (null === $this->site || null === $this->layout || null === $this->title) {
-			throw new \Exception();
-		}
+    /**
+     * @var \DateTime
+     */
+    private $publishedAt;
 
-		$page = new Page($this->uid);
-		$page->setTitle($this->title);
-		$page->setSite($this->site);
-		$page->setLayout($this->layout, $this->itemToPushInMainZone);
+    /**
+     * @var integer
+     */
+    private $state;
 
-		if (null !== $this->root) {
-			$page->setRoot($this->root);
-		}
+    /**
+     * @var integer
+     */
+    private $persist;
 
-		if (null !== $this->parent) {
-			$page->setParent($this->parent);
-		}
+    /**
+     * [__construct description]
+     */
+    public function __construct(EntityManager $em)
+    {
+        $this->em = $em;
 
-		if (null !== $this->url) {
-			$page->setUrl($this->url);
-		}
+        $this->reset();
+    }
 
-		if (null !== $this->state) {
-			$page->setState($this->state);
-		}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getPage()
+    {
+        if (null === $this->site || null === $this->layout || null === $this->title) {
+            throw new \Exception();
+        }
 
-		if (null !== $this->publishedAt) {
-			$page->setPublishing($this->publishedAt);
-		}
+        $page = new Page($this->uid);
+        $page->setTitle($this->title);
+        $page->setSite($this->site);
+        $page->setLayout($this->layout, $this->itemToPushInMainZone);
 
-		$pageContentSet = $page->getContentSet();
-		$this->updateContentRevision($pageContentSet);
+        if (null !== $this->root) {
+            $page->setRoot($this->root);
+        }
 
-		if (0 < count($this->elements)) {
-			foreach ($this->elements as $e) {
-				$column = $pageContentSet->item($e['content_set_position']);
-				if (true === $e['set_main_node']) {
-					$e['content']->setMainNode($page);
-				}
+        if (null !== $this->parent) {
+            $page->setParent($this->parent);
+        }
 
-				$column->push($e['content']);
-			}
+        if (null !== $this->url) {
+            $page->setUrl($this->url);
+        }
 
-			$pageContentSet->rewind();
-		}
+        if (null !== $this->state) {
+            $page->setState($this->state);
+        }
 
-		while ($column = $pageContentSet->next()) {
-			$this->updateContentRevision($column);
-		}
+        if (null !== $this->publishedAt) {
+            $page->setPublishing($this->publishedAt);
+        }
 
-		$this->reset();
+        $pageContentSet = $page->getContentSet();
+        $this->updateContentRevision($pageContentSet);
 
-		return $page;
-	}
+        if (0 < count($this->elements)) {
+            foreach ($this->elements as $e) {
+                $column = $pageContentSet->item($e['content_set_position']);
+                if (true === $e['set_main_node']) {
+                    $e['content']->setMainNode($page);
+                }
 
-	private function reset()
-	{
-		$this->uid = null;
-		$this->title = null;
-		$this->url = null;
-		$this->site = null;
-		$this->root = null;
-		$this->parent = null;
-		$this->layout = null;
-		$this->elements = array();
-	}
+                $column->push($e['content']);
+            }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function setUid($uid)
-	{
-		$this->uid = $uid;
+            $pageContentSet->rewind();
+        }
 
-		return $this;
-	}
+        while ($column = $pageContentSet->next()) {
+            $this->updateContentRevision($column);
+        }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getUid()
-	{
-		return $this->uid;
-	}
+        $this->doPersistIfValid($page);
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function setTitle($title)
-	{
-		$this->title = $title;
+        $this->reset();
 
-		return $this;
-	}
+        return $page;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getTitle()
-	{
-		return $this->title;
-	}
+    private function reset()
+    {
+        $this->uid = null;
+        $this->title = null;
+        $this->url = null;
+        $this->site = null;
+        $this->root = null;
+        $this->parent = null;
+        $this->layout = null;
+        $this->elements = array();
+        $this->publishedAt = null;
+        $this->state = null;
+        $this->persist = null;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function setUrl($url)
-	{
-		$this->url = $url;
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function setUid($uid)
+    {
+        $this->uid = $uid;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getUrl()
-	{
-		return $this->url;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getUid()
+    {
+        return $this->uid;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function setSite(Site $site)
-	{
-			$this->site = $site;
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
 
-			return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getSite()
-	{
-		return $this->site;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function setRoot(Page $root, $isRoot = false)
-	{
-		$this->root = $root;
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
 
-		if (true === $isRoot) {
-			$this->setParent($root);
-		}
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getRoot()
-	{
-		return $this->root;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function setSite(Site $site)
+    {
+            $this->site = $site;
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function setParent(Page $parent)
-	{
-		$this->parent = $parent;
+            return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getSite()
+    {
+        return $this->site;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getParent()
-	{
-		return $this->parent;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function setRoot(Page $root, $isRoot = false)
+    {
+        $this->root = $root;
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function setLayout(Layout $layout, AClassContent $toPushInMainZone = null)
-	{
-		$this->layout = $layout;
-		$this->itemToPushInMainZone = $toPushInMainZone;
+        if (true === $isRoot) {
+            $this->setParent($root);
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getLayout()
-	{
-		return $this->layout;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getRoot()
+    {
+        return $this->root;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function setState($state)
-	{
-		$this->state = $state;
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function setParent(Page $parent)
+    {
+        $this->parent = $parent;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function putOnlineAndVisible()
-	{
-		return $this->setState(Page::STATE_ONLINE);
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function putOnlineAndHidden()
-	{
-		return $this->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function setLayout(Layout $layout, AClassContent $toPushInMainZone = null)
+    {
+        $this->layout = $layout;
+        $this->itemToPushInMainZone = $toPushInMainZone;
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function pushElement(AClassContent $element, $setMainNode = false, $contentSetPos = 0)
-	{
-		$this->elements[] = array(
-			'content' 				=> $element,
-			'set_main_node' 		=> $setMainNode,
-			'content_set_position'	=> $contentSetPos
-		);
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getLayout()
+    {
+        return $this->layout;
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function addElement(AClassContent $element, $index = null, $setMainNode = false, $contentSetPos = 0)
-	{
-		if (null !== $index) {
-			$index = intval($index);
-			if (false === array_key_exists($index, $this->elements)) {
-				throw new \Exception();
-			}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function setState($state)
+    {
+        $this->state = $state;
 
-			$this->elements[$index] = array(
-				'content' 				=> $element,
-				'set_main_node' 		=> $setMainNode,
-				'content_set_position'	=> $contentSetPos
-			);
-		} else {
-			$this->pushElement($element, $setMainNode, $contentSetPos);
-		}
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function putOnlineAndVisible()
+    {
+        return $this->setState(Page::STATE_ONLINE);
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function getElement($index)
-	{
-		return (true === array_key_exists((int) $index, $this->elements) ? $this->elements[$index] : null);
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function putOnlineAndHidden()
+    {
+        return $this->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
+    }
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function elements()
-	{
-		return $this->elements;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function pushElement(AClassContent $element, $setMainNode = false, $contentSetPos = 0)
+    {
+        $this->elements[] = array(
+            'content'               => $element,
+            'set_main_node'         => $setMainNode,
+            'content_set_position'  => $contentSetPos
+        );
 
-	/**
-	 * [getPage description]
-	 * @return [type] [description]
-	 */
-	public function clearElements()
-	{
-		$this->elements = array();
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function addElement(AClassContent $element, $index = null, $setMainNode = false, $contentSetPos = 0)
+    {
+        if (null !== $index) {
+            $index = intval($index);
+            if (false === array_key_exists($index, $this->elements)) {
+                throw new \Exception();
+            }
 
-	private function updateContentRevision(AClassContent $content, $revision = 1, $state = AClassContent::STATE_NORMAL)
-	{
-		$content->setRevision($revision);
-		$content->setState($state);
-	}
+            $this->elements[$index] = array(
+                'content'               => $element,
+                'set_main_node'         => $setMainNode,
+                'content_set_position'  => $contentSetPos
+            );
+        } else {
+            $this->pushElement($element, $setMainNode, $contentSetPos);
+        }
+
+        return $this;
+    }
+
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function getElement($index)
+    {
+        return (true === array_key_exists((int) $index, $this->elements) ? $this->elements[$index] : null);
+    }
+
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function elements()
+    {
+        return $this->elements;
+    }
+
+    /**
+     * [getPage description]
+     * @return [type] [description]
+     */
+    public function clearElements()
+    {
+        $this->elements = array();
+
+        return $this;
+    }
+
+    private function updateContentRevision(AClassContent $content, $revision = 1, $state = AClassContent::STATE_NORMAL)
+    {
+        $content->setRevision($revision);
+        $content->setState($state);
+    }
 
     /**
      * Gets the value of publishedAt.
@@ -412,5 +440,40 @@ class PageBuilder
         $this->publishedAt = $publishedAt;
 
         return $this;
+    }
+
+    /**
+     * Sets the persist mode;
+     * /!\ if you set a valid persist mode (SELF::INSERT_AS_FIRST_CHILD or SELF::INSERT_AS_LAST_CHILD),
+     * this page will be persist for you, it also modified the left and right node of the tree
+     * 
+     * @param integer $mode 
+     */
+    public function setPersistMode($mode)
+    {
+        $this->persist = $mode;
+    }
+
+    /**
+     * Call 
+     * @param  Page   $page [description]
+     * @return [type]       [description]
+     */
+    private function doPersistIfValid(Page $page)
+    {
+        if (null === $page->getParent()) {
+            return null;
+        }
+
+        $method = '';
+        if (self::PERSIST_AS_FIRST_CHILD === $this->persist) {
+            $method = 'insertNodeAsFirstChildOf';
+        } elseif (self::PERSIST_AS_LAST_CHILD === $this->persist) {
+            $method = 'insertNodeAsLastChildOf';
+        }
+
+        if (false === empty($method)) {
+            $this->em->getRepository('BackBuilder\NestedNode\Page')->$method($page, $page->getParent());
+        }
     }
 }

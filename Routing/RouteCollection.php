@@ -152,7 +152,7 @@ class RouteCollection extends sfRouteCollection
         if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
             if (null === $defaultExt) {
                 if (null !== $application) {
-                    if (null !== $this->getApplication()->getContainer()->get('site')) {
+                    if (null !== $application->getContainer()->get('site')) {
                         $defaultExt = $application->getContainer()->get('site')->getDefaultExtension();
                     }
                 }
