@@ -116,6 +116,7 @@
         },
         pagebrowser: {
             title: 'Title',
+            alttitle: 'AltTitle',
             url: 'URL',
             target: 'Target',
             forward: 'Redirect to',
