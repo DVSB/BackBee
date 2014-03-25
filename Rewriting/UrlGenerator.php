@@ -47,6 +47,7 @@ use BackBuilder\BBApplication,
  *    * $datetime   : the creation date formated to YYYYMMDDHHII
  *    * $time       : the creation date formated to HHIISS
  *    * $content->x : the urlized form of the 'x' property of content
+ *    * $ancestor[x]: the ancestor of level x url
  *
  * @category    BackBuilder
  * @package     BackBuilder\Rewriting
@@ -181,8 +182,8 @@ class UrlGenerator implements IUrlGenerator
         $replacement = array(
             '$parent' => ($page->isRoot()) ? '' : $page->getParent()->getUrl(),
             '$title' => String::urlize($page->getTitle()),
+            '$datetime' => $page->getCreated()->format('ymdHis'),
             '$date' => $page->getCreated()->format('ymd'),
-            '$datetime' => $page->getCreated()->format('ymdHi'),
             '$time' => $page->getCreated()->format('His'),
         );
 
@@ -193,6 +194,21 @@ class UrlGenerator implements IUrlGenerator
                     $replacement[$pattern] = eval('return \BackBuilder\Util\String::urlize(' . $pattern . ');');
                 } catch (\Exception $e) {
                     $replacement[$pattern] = '';
+                }
+            }
+        }
+
+        $matches = array();
+        if (preg_match_all('/(\$ancestor\[([0-9]+)\])/i', $scheme, $matches)) {
+            foreach ($matches[2] as $level) {
+                $ancestor = $this->_application
+                        ->getEntityManager()
+                        ->getRepository('BackBuilder\NestedNode\Page')
+                        ->getAncestor($page, $level);
+                try {
+                    $replacement['$ancestor[' . $level . ']'] = $ancestor->getUrl();
+                } catch (\Exception $e) {
+                    $replacement['$ancestor[' . $level . ']'] = '';
                 }
             }
         }

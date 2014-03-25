@@ -349,7 +349,8 @@ class Page extends AbstractServiceLocal
         }
 
         $this->getEntityManager()->flush($page);
-
+        //$this->_repo->updateHierarchicalDatas($parent, $parent->getLeftnode(), $parent->getLevel());
+        
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
         $leaf->attr->rel = 'folder';
@@ -427,13 +428,14 @@ class Page extends AbstractServiceLocal
      * @param string $target The target is redirect is defined
      * @param string $redirect  The permananet redirect URL
      * @param string $layout_uid The unique identifier of the layout to use
+     *  @param string $alttitle The alternate title bb5 #366
      * @return \stdClass
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the layout is undefined
      * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid)
+    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid, $alttitle)
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
@@ -462,7 +464,7 @@ class Page extends AbstractServiceLocal
         } else {
             $page = new NestedPage();
 
-            $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout);
+            $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
 
             $this->getEntityManager()->persist($page);
 
@@ -482,7 +484,7 @@ class Page extends AbstractServiceLocal
             }
         }
 
-        $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout);
+        $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
 
         if (false === $this->getEntityManager()->contains($page)) {
             $this->getEntityManager()->persist($page);
@@ -505,12 +507,13 @@ class Page extends AbstractServiceLocal
      * @param  string     $redirect 
      * @param  Layout     $layout                  
      */
-    private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout)
+    private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout, $alttitle)
     {
         $page->setTitle($title);
         $page->setTarget($target);
         $page->setRedirect('' === $redirect ? null : $redirect);
-        $page->setLayout($layout);;
+        $page->setLayout($layout);
+        $page->setAltTitle($alttitle);;
     }
 
     /**
