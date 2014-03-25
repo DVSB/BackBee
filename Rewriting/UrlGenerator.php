@@ -205,9 +205,9 @@ class UrlGenerator implements IUrlGenerator
                         ->getEntityManager()
                         ->getRepository('BackBuilder\NestedNode\Page')
                         ->getAncestor($page, $level);
-                try {
+                if (null !== $ancestor && $page->getLevel() > $level) {
                     $replacement['$ancestor[' . $level . ']'] = $ancestor->getUrl();
-                } catch (\Exception $e) {
+                } else {
                     $replacement['$ancestor[' . $level . ']'] = '';
                 }
             }
