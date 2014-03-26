@@ -103,6 +103,7 @@ class BBApplication
                 ->_initContextConfig()
                 ->_initAutoloader()
                 ->_initContentWrapper()
+                ->_initEntityManager()
                 ->_initBundles();
 
         // Force container to create SecurityContext object to activate listener
