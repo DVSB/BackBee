@@ -244,6 +244,7 @@ class Category
         if (null === self::$_categories) {
             self::$_categories = array("tous" => new Category("Tous", null, true));
             foreach ($classcontent_dirs as $classcontentdir) {
+                if(!is_dir($classcontentdir)) continue;
                 $files = File::getFilesRecursivelyByExtension($classcontentdir, 'yml');
                 if (true === is_array($files) && 0 < count($files)) {
                     self::_getCategoriesFromFiles($files, $classcontentdir);
