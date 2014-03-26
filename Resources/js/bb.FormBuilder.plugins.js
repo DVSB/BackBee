@@ -112,7 +112,7 @@
             _template: {
             
                 mediaWrapper : '<div>'
-                +'<p><label class="fieldLabel">Trace sonore...</label></p>'
+                +'<p><label class="fieldLabel">Media list</label></p>'
                 +'<div class="bb5-listContainer">'
                 +'<ul class="bb5-list-media bb5-list-media-is-list clearfix"></ul>'
                 +'</div>'
@@ -306,7 +306,6 @@
                 this.maxEntry = ( maxEntry == "undefined" || isNaN(parseInt(maxEntry)) ) ? 999 : parseInt(maxEntry);
                 this.minEntry = ( maxEntry == "undefined" || isNaN(parseInt(minEntry)) ) ? 0 : parseInt(minEntry);
                 this.minEntry = ( this.maxEntry > this.minEntry ) ? this.minEntry : 0; 
-            
                 bb.jquery(this.form).find(this._settings.blockLabelCls).eq(0).text(fieldLabel);
                 this.linksContainer.empty();
                 bb.jquery(this.form).removeClass(this._settings.formTplClass.replace(".",""));
@@ -529,36 +528,105 @@
                 formTplClass : ".node-selector-form-tpl",
                 formfielClass : ".bb5-plugin-form-field",
                 fieldWrapperClass:".fieldWrapper",
-                treeBtnClass :".bb5-ico-tree"
+                treeBtnClass :".bb5-ico-tree",
+                addPageBtnClass: ".add_page_btn",
+                
+                rmPageBtnClass: ".bb-remove-page"
             },
        
-            i18n : {
-                pageBrowserTitle:"Selectionner une page"
+            _template: {
+                itemTpl: "<li class='page-item'>{{title}}<i class='bb5-button bb5-ico-del bb-remove-page'></i></li>",
+                mainWrapper: '<div>'
+            +'<p><label class="fieldLabel">Page(s)</label></p>'
+            +'<div class="bb5-page-wrapper">'
+            +'<ul class="bb5-page-container clearfix"></ul>'
+            +'</div>'
+            +'<p class="bb5-edit-article-toolbar">\n\
+                                    <span class="bb5-edit-article-toolbar-label">Add a page</span> \n\
+                                    <a class="bb5-button bb5-ico-tree add_page_btn bb5-button-outline bb5-button-thick" href="#">Page browser</a> \n\
+                                </p>'
+            +'</div>' 
             },
+        
+            i18n : {
+                pageBrowserTitle: "Selectionner une page"
+            },
+            _context: {
+                parsedData: {},
+                pageBrowser: ""
+            },
+            
             _init : function(){
+                this.allowMultipleSelection = ("allowMultipleSelection" in this._settings.fieldInfos.param.array) ? this._settings.fieldInfos.param.array.allowMultipleSelection : false;
                 this.id = this._settings.formId+'-'+this.id;
                 this.form = bb.jquery(this._settings.formTplClass).clone();
+                if(this.allowMultipleSelection){
+                    var multiSelec = $(this._template.mainWrapper).clone();
+                    $(this.form).find(".parentnode-tree").closest(".fieldWrapper").replaceWith($(multiSelec));
+                }
+               
+                var fieldLabel = (typeof this._settings.fieldInfos.param.array.label=="string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel;
                 bb.jquery(this.form).removeClass(this._settings.formTplClass.replace(".",""));
                 bb.jquery(this.form).attr("id",this.id);
+                this.kwRenderer = this._initKeywordsRenderer();
+                /* for retro-compatibility we just keep ids*/
+                if(this.allowMultipleSelection){
+                    this.pagesContainer = $(this.form).find(".bb5-page-container").eq(0); 
+                    var pageInfos = this._settings.fieldInfos.param.array.nodeInfos;
+                    this.maxEntry = (this._settings.fieldInfos.param.array.maxentry) ? this._settings.fieldInfos.param.array.maxentry : 999;
+                    this._pageList =  new bb.SmartList({
+                        idKey : "uid",
+                        maxEntry: this.maxEntry,
+                        onChange: bb.jquery.proxy(this._handleListChange,this),
+                        onDelete: bb.jquery.proxy(this._removePage,this)
+                    });
+                    if(pageInfos && pageInfos.length){
+                        this._pageList.setData(JSON.parse(pageInfos));
+                    }
+                }
                 this.bindEvents();
                 this.kwRenderer = this._initKeywordsRenderer();
                 this._populateForm();
             },
-            _context: {
-                parsedData:{},
-                pageBrowser:""
+            
+            _handleListChange: function(collection,key,item){
+                var render = this._template.itemTpl.replace("{{title}}",item.title);
+                render = $(render).attr("data-page-uid",item.uid);
+                $(render).attr("id",item.uid);
+                this.pagesContainer.append(render);
+                this._updateParseData();
             },
-           
+            
+            _removePage : function(container,name,id){
+                bb.jquery(this.pagesContainer).find("#"+id).remove();
+                this._updateParseData();
+            },
+            
+            _updateParseData : function(){
+                var $ = bb.jquery;
+                var rawData = this._pageList.toArray(true); 
+                var nodeIds = [];
+                $.each(rawData,function(i,data){
+                    nodeIds.push(data.uid);
+                });
+                this._context.parsedData.nodeInfos = JSON.stringify(rawData); 
+                this._context.parsedData.parentnode = nodeIds;
+            },
+            
             callbacks : {
                 clickOnFieldHandler : function(e){
                     var currentTarget = e.currentTarget;
-                    var fieldType = bb.jquery(currentTarget).attr("data-key");
                     if(bb.jquery(currentTarget).hasClass("parentnode-tree")){
                         this.showPageTree(bb.jquery(currentTarget).next());
                     }
                     if(bb.jquery(currentTarget).hasClass("classcontent-tree")){
                         this.initOrShowContentSelector(bb.jquery(currentTarget).next());
                     }
+                },
+                showPageTree : function(){
+                    this.showPageTree({
+                        multipleSelection:true
+                    });
                 }
             },
        
@@ -600,7 +668,7 @@
                 return keywordsRender;
             },
        
-            showPageTree : function(formField){
+            showPageTree : function(context){
                 var pageBrowser = bb.jquery("<div id='bb5-form-pagebrowser'><div id='browser' class='filetree'></div></div>").clone();
                 var self = this;
                 if(this._context.pageBrowser){
@@ -623,16 +691,27 @@
                         breadcrumb:bb.frontApplication.getBreadcrumbIds(),
                    
                         select: function(e, data){
-                            bb.jquery(formField).attr("data-fieldValue",data.node_id);
-                            bb.jquery(formField).val(bb.jquery("#node_"+data.node_id).find("a").get(0).textContent);
-                            bb.jquery(formField).trigger("change");
-                            bb.jquery(this).bbPageBrowser("close");
-                            self._context.pageBrowser = false;
+                            if(typeof(context)=="object" && (context.multipleSelection)){
+                                var selectedPage = bb.jquery("#node_"+data.node_id).find("a").get(0).textContent; 
+                                var data = {
+                                    uid:data.node_id, 
+                                    title: selectedPage
+                                }; 
+                                self._pageList.set(data.uid,data);
+                               
+                            }else{
+                                bb.jquery(context).attr("data-fieldValue",data.node_id);
+                                bb.jquery(context).val(bb.jquery("#node_"+data.node_id).find("a").get(0).textContent);
+                                bb.jquery(context).trigger("change");
+                                bb.jquery(this).bbPageBrowser("close");
+                                self._context.pageBrowser = false;  
+                            }      
                         }
                     });
                     this._context.pageBrowser.data("bbPageBrowser").open();
                 }
             },
+            
             initOrShowContentSelector : function(formField){
                 var contentTypeSelector = bb.jquery("<div id='bb5-form-contentTypeSelector'><div class='bb5-windowpane-treewrapper-inner' class='filetree'></div></div>").clone();
                 var self = this;
@@ -675,12 +754,20 @@
                 this._context.contentTypeSelector.data("bbContentTypeBrowser").open();
             },
        
-       
             bindEvents : function(){
+                var $ = bb.jquery;
                 bb.jquery(this.form).delegate(this._settings.treeBtnClass,"click",bb.jquery.proxy(this.callbacks["clickOnFieldHandler"],this));
+                bb.jquery(this.form).delegate(this._settings.addPageBtnClass,"click",bb.jquery.proxy(this.callbacks["showPageTree"],this));
+                $(this.form).delegate(this._settings.rmPageBtnClass,"click",$.proxy(this.removePage,this));
                 this.initFormAutoBind();
             },
-       
+            
+            removePage: function(e){
+                var target = e.target;
+                var pageNode = $(target).closest(".page-item");
+                this._pageList.deleteItemById($(pageNode).data("pageUid"));
+            },
+            
             initFormAutoBind : function(){
                 bb.jquery(this.form).delegate(this._settings.formfielClass,"change",bb.jquery.proxy(this.handleFieldsChange,this));
             },
@@ -716,7 +803,7 @@
                         }
                     }
                 }
-           
+                /**/
                 var result = {
                     "array": this._context.parsedData
                 };
@@ -919,7 +1006,6 @@
                 this.selected = this._settings.fieldInfos.param.array.selected || [];
                 this.selectedItems = {};
                 this.keywordsList = this._getKeywordList();
- 
                 this._populateKeywords();
                 this._initAutoComplete();
             },
@@ -1023,8 +1109,9 @@
        
             _initAutoComplete : function(){
                 var self = this;
+                console.log(this.keywordField);
                 bb.jquery(this.keywordField).autocomplete({
-                    minLength :2,
+                    minLength :3,
                     source : function(request, response){
                         response(bb.jquery.ui.autocomplete.filter(self.keywordsList,self._getLast(request.term)));
                     },
