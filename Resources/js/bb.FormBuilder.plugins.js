@@ -91,6 +91,45 @@
             }
         });
    
+        /*Checkbox type*/
+        FormBuilder.registerRenderTypePlugin('checkbox-multiple', {
+            _init: function(){
+                this.id = this._settings.formId + '-' + this.id;
+                this.fieldWrapper = bb.jquery('<p></p>');
+                this.template = bb.jquery('<label class="fieldLabel">test</label>').clone();
+                this.inputtpl = bb.jquery('<label><input class="bb5-plugin-form-field fieldCheck" type="checkbox" value=""></label>');
+                this.fiedId = this.id + '-' + this._settings.fieldInfos.fieldLabel;
+            },
+
+            render: function(){
+                var self = this;
+                bb.jquery(this.fieldWrapper).append(this.template);
+                bb.jquery(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
+                bb.jquery.each(this._settings.fieldInfos.param.array.options, function(value, text) {
+                    var inputtpl = self.inputtpl.clone();
+                    bb.jquery(inputtpl).append(text).find('input').val(value);
+                    if (-1 < bb.jquery.inArray(value, self._settings.fieldInfos.param.array.checked))
+                        bb.jquery(inputtpl).find('input').attr('checked', 'checked');
+                    bb.jquery(self.fieldWrapper).append(inputtpl);
+                });
+                return this.fieldWrapper;
+            },
+
+            parse: function(){
+                var self = this;
+                var checked = new Array();
+                bb.jquery.each(this.fieldWrapper.find('input:checked'), function(item, input) {
+                    checked[checked.length] = bb.jquery(input).val();
+                });
+                
+                var result = {
+                    'array':{
+                        'checked': checked
+                    }
+                };
+                return result;
+            }
+        });
    
         /********************** media-list ************
      *my_medias:

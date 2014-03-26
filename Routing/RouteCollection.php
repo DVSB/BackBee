@@ -65,9 +65,11 @@ class RouteCollection extends sfRouteCollection
                 continue;
             }
 
-            $router->add($name, new Route($route['pattern'],
-                            $route['defaults'],
-                            array_key_exists('requirements', $route) ? $route['requirements'] : array()));
+            $router->add(
+                $name, new Route($route['pattern'],
+                $route['defaults'],
+                array_key_exists('requirements', $route) ? $route['requirements'] : array())
+            );
 
             $this->_application->debug(sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
         }
@@ -152,7 +154,7 @@ class RouteCollection extends sfRouteCollection
         if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
             if (null === $defaultExt) {
                 if (null !== $application) {
-                    if (null !== $this->getApplication()->getContainer()->get('site')) {
+                    if (null !== $application->getContainer()->get('site')) {
                         $defaultExt = $application->getContainer()->get('site')->getDefaultExtension();
                     }
                 }
