@@ -148,14 +148,14 @@ class BBApplication
         $dirToLookingFor[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
 
         foreach ($dirToLookingFor as $dir) {
-            $fileService = $dir . DIRECTORY_SEPARATOR . 'services.yml';
+            $fileService = $dir . DIRECTORY_SEPARATOR . 'services.';
 
-            if (file_exists($fileService) && true === is_readable($fileService)) {
+            if (file_exists($fileService . 'yml') && true === is_readable($fileService . 'yml')) {
                 // Define where to looking for services.yml
                 $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
                 $loader->load('services.yml');
-            } elseif (file_exists($fileService) && true === is_readable($fileService)) {
+            } elseif (file_exists($fileService . 'xml') && true === is_readable($fileService . 'xml')) {
                 // Define where to looking for services.yml
                 $loader = new XmlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
@@ -244,7 +244,8 @@ class BBApplication
                 ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
                 ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Controller')))
-                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')));
+                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')))
+                ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Traits')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
@@ -252,7 +253,8 @@ class BBApplication
                     ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Templates', 'helpers')))
                     ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Listeners')))
                     ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Controller')))
-                    ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')));
+                    ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')))
+                    ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Traits')));
         }
 
         $this->getAutoloader()
