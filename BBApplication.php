@@ -149,14 +149,14 @@ class BBApplication
         $dirToLookingFor[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
 
         foreach ($dirToLookingFor as $dir) {
-            $fileService = $dir . DIRECTORY_SEPARATOR . 'services.yml';
+            $fileService = $dir . DIRECTORY_SEPARATOR . 'services.';
 
-            if (file_exists($fileService) && true === is_readable($fileService)) {
+            if (file_exists($fileService . 'yml') && true === is_readable($fileService . 'yml')) {
                 // Define where to looking for services.yml
                 $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
                 $loader->load('services.yml');
-            } elseif (file_exists($fileService) && true === is_readable($fileService)) {
+            } elseif (file_exists($fileService . 'xml') && true === is_readable($fileService . 'xml')) {
                 // Define where to looking for services.yml
                 $loader = new XmlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
