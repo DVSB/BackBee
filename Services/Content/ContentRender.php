@@ -216,14 +216,16 @@ class ContentRender
         if (is_array($this->content->getProperty()) && array_key_exists('indexation', $this->content->getProperty())) {
             foreach ($this->content->getProperty('indexation') as $indexedElement) {
                 $indexedElement = (array) $indexedElement;
-                $elements = explode('->', $indexedElement[0]);
-                $element = $elements[0];
+                if ('@' !== substr($indexedElement[0], 0, 1)) {
+                    $elements = explode('->', $indexedElement[0]);
+                    $element = $elements[0];
 
-                $value = $this->content->$element;
-                if ($value instanceof AClassContent) {
-                    $stdClass->sortable[$indexedElement[0]] = $value->getLabel();
-                } else {
-                    $stdClass->sortable[$indexedElement[0]] = $indexedElement[0];
+                    $value = $this->content->$element;
+                    if ($value instanceof AClassContent) {
+                        $stdClass->sortable[$indexedElement[0]] = $value->getLabel();
+                    } else {
+                        $stdClass->sortable[$indexedElement[0]] = $indexedElement[0];
+                    }
                 }
             }
         }
