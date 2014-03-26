@@ -1,3 +1,4 @@
+//@ sourceURL=ressources/js/bb.FormBuilder.plugins.js
 (function($) {
 
     var FormBuilder = bb.FormBuilder;
@@ -958,7 +959,6 @@
                 this.selected = this._settings.fieldInfos.param.array.selected || [];
                 this.selectedItems = {};
                 this.keywordsList = this._getKeywordList();
- 
                 this._populateKeywords();
                 this._initAutoComplete();
             },
@@ -1065,7 +1065,19 @@
                 bb.jquery(this.keywordField).autocomplete({
                     minLength :2,
                     source : function(request, response){
-                        response(bb.jquery.ui.autocomplete.filter(self.keywordsList,self._getLast(request.term)));
+					    var term = request.term;
+						bb.webserviceManager.getInstance('ws_local_keyword').request('getKeywordsList', {
+							params: {
+								term: term
+							},
+							async : false,
+							useCache : true,
+							success: function(rservice) {
+								list = rservice.result;
+								//response(bb.jquery.ui.autocomplete.filter(self.keywordsList,self._getLast(request.term)));
+								response(list);
+							}
+						});
                     },
                     focus : function(){
                         return false;
