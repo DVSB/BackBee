@@ -141,50 +141,68 @@ class Keyword extends AbstractServiceLocal
      * @exposed : true
      * @secured : true
      */
-    public function getKeywordsList()
-    {
-        try {
-            $em = $this->bbapp->getEntityManager();
-            $root = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->getRoot();
-            if (is_null($root)) {
-                $keywordList = $em->getRepository("\BackBuilder\NestedNode\KeyWord")->getDescendants($root);
-                $keywordContainer = array();
-                if (!is_null($keywordList)) {
-                    foreach ($keywordList as $keyword) {
-                        $suggestion = new \stdClass();
-                        $suggestion->label = $keyword->getKeyWord();
-                        $suggestion->value = $keyword->getUid();
-                        $keywordContainer[] = $suggestion;
-                    }
-                }
-            }
-            /* save cache here */
-        } catch (\Exception $e) {
-            $keywordContainer = array();
-        }
-    }
-
-    public function getKeywordByIds()
+    public function getKeywordsList($term = null, $limit = 10)
     {
         $em = $this->bbapp->getEntityManager();
+
+        $q = $em->getRepository("\BackBuilder\NestedNode\KeyWord")
+                ->createQueryBuilder('k')
+                ->orderBy('k._keyWord', 'ASC')
+                ->setMaxResults($limit);
+
+        if (null !== $term) {
+            $q->where('k._keyWord LIKE :term')
+                    ->setParameter('term', $term . '%');
+        }
+
+        $keywordList = $q->getQuery()
+                ->getResult();
+
+        $keywordContainer = array();
+        if (!is_null($keywordList)) {
+            foreach ($keywordList as $keyword) {
+                $suggestion = new \stdClass();
+                $suggestion->label = $keyword->getKeyWord();
+                $suggestion->value = $keyword->getUid();
+                $keywordContainer[] = $suggestion;
+            }
+            /* save cache here */
+        }
+
+        return $keywordContainer;
     }
 
-    public function findKeyWord($term)
+    /**
+     * @exposed : true
+     * @secured : true
+     */
+    public function getKeywordByIds($uids)
     {
-        $kws = array();
-         $suggestion_1 = new \stdClass();
-         $suggestion_1->label = "test";
-         $suggestion_1->value = "q564df456qsdf";
-         
-         $suggestion_2 = new \stdClass();
-         $suggestion_2->label = "test";
-         $suggestion_2->value = "q564df456qsdf";
-         
-         $kws[] = $suggestion_1;
-         $kws[] = $suggestion_2;
-         return $kws;
+        $keywords = array();
+        if (0 < count($uids)) {
+            $keywords = $this->bbapp
+                    ->getEntityManager()
+                    ->getRepository("\BackBuilder\NestedNode\KeyWord")
+                    ->createQueryBuilder('k')
+                    ->where('k._uid IN (:uids)')
+                    ->orderBy('k._keyWord', 'ASC')
+                    ->setParameter('uids', $uids)
+                    ->getQuery()
+                    ->getResult();
+        }
+
+        $keywordContainer = array();
+        if (!is_null($keywords)) {
+            foreach ($keywords as $keyword) {
+                $suggestion = new \stdClass();
+                $suggestion->label = $keyword->getKeyWord();
+                $suggestion->value = $keyword->getUid();
+                $keywordContainer[] = $suggestion;
+            }
+            /* save cache here */
+        }
+
+        return $keywordContainer;
     }
 
 }
-
-?>
