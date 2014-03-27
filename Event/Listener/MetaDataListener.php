@@ -55,7 +55,7 @@ class MetaDataListener
         if ($uow->isScheduledForDelete($content)) {
             return;
         }
-
+        
         if (null !== $page = $content->getMainNode()) {
             if (null !== $page->getMetaData()) {
                 $newEvent = new Event($page, $content);
@@ -99,12 +99,14 @@ class MetaDataListener
             return;
         }
 
+        if (null === $metadata_config = $application->getTheme()->getConfig()->getSection('metadata')) {
+            $metadata_config = $application->getConfig()->getSection('metadata');
+        }
+        
         if (null === $metadata = $page->getMetaData()) {
-            if (null === $metadata_config = $application->getTheme()->getConfig()->getSection('metadata')) {
-                $metadata_config = $application->getConfig()->getSection('metadata');
-            }
-
             $metadata = new \BackBuilder\MetaData\MetaDataBag($metadata_config, $page);
+        } else {
+            $metadata->update($metadata_config, $page);
         }
         
         $page->setMetaData($metadata->compute($page));
