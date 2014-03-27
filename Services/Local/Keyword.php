@@ -141,11 +141,24 @@ class Keyword extends AbstractServiceLocal
      * @exposed : true
      * @secured : true
      */
-    public function getKeywordsList()
+    public function getKeywordsList($term = null, $limit = 10)
     {
         $em = $this->bbapp->getEntityManager();
-        $root = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->getRoot();
-        $keywordList = $em->getRepository("\BackBuilder\NestedNode\KeyWord")->getDescendants($root);
+		
+		if (null !== $term) {
+			$keywordList = $em->getRepository("\BackBuilder\NestedNode\KeyWord")
+								->createQueryBuilder('k')
+								->where('k._keyWord LIKE :term')
+								->orderBy('k._keyWord', 'ASC')
+								->setMaxResults($limit)
+								->setParameter('term', $term.'%')
+								->getQuery()
+								->getResult();
+		} else {
+			$root = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->getRoot();
+			$keywordList = $em->getRepository("\BackBuilder\NestedNode\KeyWord")->getDescendants($root);
+		}
+		
         $keywordContainer = array();
         if (!is_null($keywordList)) {
             foreach ($keywordList as $keyword) {
@@ -156,6 +169,7 @@ class Keyword extends AbstractServiceLocal
             }
             /* save cache here */
         }
+		
         return $keywordContainer;
     }
 

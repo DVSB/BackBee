@@ -57,6 +57,14 @@ class FTP extends ATransport
 
     public function connect($host = null, $port = null)
     {
+        if(!is_string($host)){
+            throw new TransportException(sprintf('Host expect to be string, %s given: "%s".', gettype($host), $host));
+        }
+
+        if(!is_int($port)){
+            throw new TransportException(sprintf('Port expect to be long, %s given: "%s".', gettype($port), $port));
+        }
+
         $this->_host = null !== $host ? $host : $this->_host;
         $this->_port = null !== $port ? $port : $this->_port;
 

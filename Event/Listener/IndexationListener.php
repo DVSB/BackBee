@@ -87,8 +87,7 @@ class IndexationListener
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
 
-        if ($uow->isScheduledForInsert($page)
-                || $uow->isScheduledForUpdate($page)) {
+        if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {
             self::_updateIdxSiteContents($em, $page->getSite());
         } elseif ($uow->isScheduledForDeletion($page)) {
             // @todo
@@ -108,9 +107,7 @@ class IndexationListener
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
 
-        if ($uow->isScheduledForInsert($content)
-                && false === ScheduledEntities::hasScheduledPageNotForDeletions($em)
-                && null !== $application->getSite()) {
+        if ($uow->isScheduledForInsert($content) && false === ScheduledEntities::hasScheduledPageNotForDeletions($em) && null !== $application->getSite()) {
             self::_updateIdxSiteContents($em, $application->getSite());
         }
 
@@ -120,22 +117,30 @@ class IndexationListener
             if (is_array($content->getProperty()) && array_key_exists('indexation', $content->getProperty())) {
                 foreach ($content->getProperty('indexation') as $indexedElement) {
                     $indexedElement = (array) $indexedElement;
-                    $elements = explode('->', $indexedElement[0]);
                     $callback = array_key_exists(1, $indexedElement) ? $indexedElement[1] : NULL;
 
-                    $owner = NULL;
-                    $element = NULL;
-                    $value = $content;
-                    foreach ($elements as $element) {
-                        $owner = $value;
-                        if (!$value instanceof \BackBuilder\ClassContent\AClassContent) {
-                            continue;
-                        }
+                    if ('@' === substr($indexedElement[0], 0, 1)) {
+                        // parameter indexation
+                        $param = substr($indexedElement[0], 1);
+                        $value = $content->getParam($param);
+                        $owner = $content;
+                    } else {
+                        $elements = explode('->', $indexedElement[0]);
 
-                        if (NULL !== $value) {
-                            $value = $value->getData($element);
-                            if ($value instanceof AClassContent && false == $em->contains($value))
-                                $value = $em->find(get_class($value), $value->getUid());
+                        $owner = NULL;
+                        $element = NULL;
+                        $value = $content;
+                        foreach ($elements as $element) {
+                            $owner = $value;
+                            if (!$value instanceof \BackBuilder\ClassContent\AClassContent) {
+                                continue;
+                            }
+
+                            if (NULL !== $value) {
+                                $value = $value->getData($element);
+                                if ($value instanceof AClassContent && false == $em->contains($value))
+                                    $value = $em->find(get_class($value), $value->getUid());
+                            }
                         }
                     }
 
