@@ -143,25 +143,46 @@ class Keyword extends AbstractServiceLocal
      */
     public function getKeywordsList()
     {
-        $em = $this->bbapp->getEntityManager();
-        $root = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->getRoot();
-        $keywordList = $em->getRepository("\BackBuilder\NestedNode\KeyWord")->getDescendants($root);
-        $keywordContainer = array();
-        if (!is_null($keywordList)) {
-            foreach ($keywordList as $keyword) {
-                $suggestion = new \stdClass();
-                $suggestion->label = $keyword->getKeyWord();
-                $suggestion->value = $keyword->getUid();
-                $keywordContainer[] = $suggestion;
+        try {
+            $em = $this->bbapp->getEntityManager();
+            $root = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->getRoot();
+            if (is_null($root)) {
+                $keywordList = $em->getRepository("\BackBuilder\NestedNode\KeyWord")->getDescendants($root);
+                $keywordContainer = array();
+                if (!is_null($keywordList)) {
+                    foreach ($keywordList as $keyword) {
+                        $suggestion = new \stdClass();
+                        $suggestion->label = $keyword->getKeyWord();
+                        $suggestion->value = $keyword->getUid();
+                        $keywordContainer[] = $suggestion;
+                    }
+                }
             }
             /* save cache here */
+        } catch (\Exception $e) {
+            $keywordContainer = array();
         }
-        return $keywordContainer;
     }
 
     public function getKeywordByIds()
     {
         $em = $this->bbapp->getEntityManager();
+    }
+
+    public function findKeyWord($term)
+    {
+        $kws = array();
+         $suggestion_1 = new \stdClass();
+         $suggestion_1->label = "test";
+         $suggestion_1->value = "q564df456qsdf";
+         
+         $suggestion_2 = new \stdClass();
+         $suggestion_2->label = "test";
+         $suggestion_2->value = "q564df456qsdf";
+         
+         $kws[] = $suggestion_1;
+         $kws[] = $suggestion_2;
+         return $kws;
     }
 
 }
