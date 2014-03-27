@@ -54,8 +54,17 @@ class metadata extends AHelper
         foreach ($metadata as $meta) {
             if (0 < $meta->count()) {
                 $result .= '<meta ';
-                foreach ($meta as $attribute => $value)
-                    $result .= $attribute . '="' . htmlentities($value, ENT_COMPAT, 'UTF-8') . '" ';
+                foreach ($meta as $attribute => $value) {
+                    if (false !== strpos($meta->getName(), 'keyword') && 'content' === $attribute) {
+                        $keywords = explode(',', $value);
+                        $objects = $this->getRenderer()->getKeywordObjects($keywords);
+                        foreach($objects as $object) {
+                            $value = trim(str_replace($object->getUid(), $object->getKeyWord(), $value), ',');
+                        }
+                    }
+                    
+                    $result .= $attribute . '="' . html_entity_decode($value, ENT_COMPAT, 'UTF-8') . '" ';
+                }
                 $result .= '/>';
             }
         }

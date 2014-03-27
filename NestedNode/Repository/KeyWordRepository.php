@@ -120,5 +120,43 @@ class KeyWordRepository extends NestedNodeRepository
         }
     }
 
+    /**
+     * Returns the nested keywords object according to the element keyword objects provided
+     * Also set the parameter 'objectKeyword' from the element to the nested keyword
+     * @param array $elements
+     * @return array
+     */
+    public function getKeywordsFromElements(&$elements = array())
+    {
+        if (0 === count($elements)) {
+            return array();
+        }
+        
+        $uids = array();
+        $assoc = array();
+        foreach($elements as &$element) {
+            if ($element instanceof \BackBuilder\ClassContent\Element\keyword) {
+                $uids[] = $element->value;
+                $assoc[$element->value] = &$element;
+            } elseif (true === is_string($element)) {
+                $uids[] = trim($element);
+            }
+        }
+        unset($element);
+
+        $objects = $this->createQueryBuilder('k')
+                ->where('k._uid IN (:uids)')
+                ->setParameter('uids', $uids)
+                ->getQuery()
+                ->getResult();
+
+        foreach($objects as $object) {
+            if (true === array_key_exists($object->getUid(), $assoc)) {
+                $assoc[$object->getUid()]->setParam('objectKeyword', $object, 'object');
+            }
+        }
+        
+        return $objects;
+    }
 }
 
