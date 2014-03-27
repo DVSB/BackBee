@@ -206,6 +206,23 @@ class ClassContentRepository extends EntityRepository
                 }
             }
         }
+
+        /* handle indexed values here */
+        if (true === array_key_exists('indexedcriteria', $selector) &&
+                true === is_array($selector['indexedcriteria'])) {
+            foreach ($selector['indexedcriteria'] as $field => $values) {
+                $values = array_filter((array) $values);
+                if (0 < count($values)) {
+                    $alias = md5($field);
+                    $q->leftJoin('c._indexation', $alias)
+                            ->andWhere($alias . '._field = :f' . $alias)
+                            ->andWhere($alias . '._value IN (:v' . $alias . ')')
+                            ->setParameter('f' . $alias, $field)
+                            ->setParameter('v' . $alias, $values);
+                }
+            }
+        }
+
         if (is_array($classnameArr) && count($classnameArr)) {
             $q->andWhere($this->addInstanceFilters($q->getQuery(), "c", $classnameArr));
         }
@@ -287,8 +304,8 @@ class ClassContentRepository extends EntityRepository
             if (0 < count($uids)) {
                 // Data protection
                 array_walk($uids, function(&$item) {
-                            $item = addslashes($item);
-                        });
+                    $item = addslashes($item);
+                });
 
                 // Getting classnames for provided uids
                 $classnames = $this->_em
@@ -373,16 +390,16 @@ class ClassContentRepository extends EntityRepository
         $sql .=" AND p.root_uid = :selectedPageRoot";
         $sql .= " AND p.leftnode >= :selectedPageLeftnode";
         $sql .= " AND p.rightnode <= :selectedPageRightnode";
-       if($online){
-           $sql .=" AND p.state IN(:selectedPageState)";
-           }
+        if ($online) {
+            $sql .=" AND p.state IN(:selectedPageState)";
+        }
         $query = $this->_em->createNativeQuery($sql, $rsm);
         $query->setParameters(array(
             "selectedPageRoot" => $selectedNode->getRoot(),
             "selectedNodeUid" => $selectedNode->getUid(),
             "selectedPageLeftnode" => $selectedNode->getLeftnode(),
             "selectedPageRightnode" => $selectedNode->getRightnode()));
-        if ($online) {  
+        if ($online) {
             $query->setParameter("selectedPageState", array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
         }
         return $query->getResult();
@@ -443,7 +460,9 @@ class ClassContentRepository extends EntityRepository
                 /* handle online content */
                 $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
                 $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
-                if(empty($subContents)){ return array(); } // should never happened
+                if (empty($subContents)) {
+                    return array();
+                } // should never happened
                 $newQuery = $this->_em->createQueryBuilder("q");
                 $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
                 $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
@@ -598,19 +617,21 @@ class ClassContentRepository extends EntityRepository
         if (array_key_exists("selectedpageField", $cond) && !is_null($cond["selectedpageField"]) && !empty($cond["selectedpageField"])) {
             $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
             if ($selectedNode && !$selectedNode->isRoot()) {
-                /*$qbSN = $this->createQueryBuilder('ct');
-                $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
-                                //->leftJoin("\BackBuilder\NestedNode\Page", "p", "WITH", "sc = p._contentset")
-                                ->leftJoin("ct._pages", "p")
-                                ->andWhere('p._root = :selectedPageRoot')
-                                ->andWhere('p._leftnode >= :selectedPageLeftnode')
-                                ->andWhere('p._rightnode <= :selectedPageRightnode')
-                                ->setParameters(array("selectedPageRoot" => $selectedNode->getRoot(),
-                                    "selectedPageLeftnode" => $selectedNode->getLeftnode(),
-                                    "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery();*/
+                /* $qbSN = $this->createQueryBuilder('ct');
+                  $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
+                  //->leftJoin("\BackBuilder\NestedNode\Page", "p", "WITH", "sc = p._contentset")
+                  ->leftJoin("ct._pages", "p")
+                  ->andWhere('p._root = :selectedPageRoot')
+                  ->andWhere('p._leftnode >= :selectedPageLeftnode')
+                  ->andWhere('p._rightnode <= :selectedPageRightnode')
+                  ->setParameters(array("selectedPageRoot" => $selectedNode->getRoot(),
+                  "selectedPageLeftnode" => $selectedNode->getLeftnode(),
+                  "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery(); */
                 $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
                 $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
-                if(empty($subContents)){ return array(); } // should never happened
+                if (empty($subContents)) {
+                    return array();
+                } // should never happened
                 $newQuery = $this->_em->createQueryBuilder("q");
                 $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
                 $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
