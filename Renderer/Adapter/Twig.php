@@ -123,7 +123,11 @@ class Twig extends ARendererAdapter
         $paths = $this->loader->getPaths();
         if ((count($paths) !== count($templateDir)) || (0 < count(array_diff($paths, $templateDir)))) {
             $this->loader->removeAllPaths();
-            $this->loader->setPaths($templateDir);
+            try{
+                $this->loader->setPaths($templateDir);
+            }catch(\Twig_Error_Loader $e){
+                //@Todo what to do when one of path does not exist
+            }
         }
     }
 

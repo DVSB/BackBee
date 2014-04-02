@@ -692,7 +692,8 @@
                                 page_uid: page_uid,
                                 title: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-title').val(),
                                 url: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-url').val(),
-                                redirect: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val()
+                                redirect: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val(),
+                                alttitle: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-alttitle').val()
                             },
                             success: function(response) {
                                 bb.jquery(editDialog).dialog("close");
@@ -721,6 +722,7 @@
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').val(result.result.url);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-redirect').val(result.result.redirect);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-alttitle').val(result.result.alttitle);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true);
 
                     editDialog.show();
@@ -862,6 +864,7 @@
                                 target: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-target').val(),
                                 redirect: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val(),
                                 layout_uid: selectedLayout,
+                                alttitle: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-alttitle').val(),
                                 flag: flag_value
                             },
                             success: function(result) {
@@ -899,6 +902,7 @@
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-target').val(result.result.target);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-redirect').val(result.result.redirect);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
+                    bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-alttitle').val(result.result.alttitle);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true);
 
                     editDialog.show();

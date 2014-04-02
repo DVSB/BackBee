@@ -242,7 +242,7 @@ class AutoLoader
 
                         if (true === file_exists($filename) && true === is_readable($filename)) {
                             try {
-                                include($filename);
+                                include_once($filename);
                                 return true;
                             } catch (\RuntimeException $e) {
                                 // The include php file is not valid

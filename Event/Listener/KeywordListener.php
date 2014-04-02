@@ -50,7 +50,7 @@ class KeywordListener
         }
         return $founded;
     }
-
+    
     public static function onRender(Event $event)
     {
         $dispatcher = $event->getDispatcher();

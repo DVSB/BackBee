@@ -21,7 +21,7 @@
 
 namespace BackBuilder\Util\Doctrine\CustomFunction;
 
-use Doctrine\Common\Lexer,
+use Doctrine\ORM\Query\Lexer,
         Doctrine\ORM\Query\Parser,
         Doctrine\ORM\Query\SqlWalker,
         Doctrine\ORM\Query\AST\Functions\FunctionNode;
