@@ -182,6 +182,16 @@ class BBApplication
             $config = Yaml::parse($filename);
         }
 
+
+
+        // Set timezone
+        if (true === isset($config['date']) && true === isset($config['date']['timezone'])) {
+            date_default_timezone_set($config['date']['timezone']);
+        }
+        else {
+            date_default_timezone_set('UTC');
+        }
+
         // Set every bbapp parameters
         // define context
         $this->_container->setParameter('bbapp.context', $this->getContext());
