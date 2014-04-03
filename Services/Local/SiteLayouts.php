@@ -43,35 +43,35 @@ class SiteLayouts extends AbstractServiceLocal
         $sitesLayoutContainer = array();
         /* layout 1 */
         $layoutItem = new \stdClass();
-        $layoutItem->uid = uniqid("layout_");
+        $layoutItem->uid = uniqid("layout_".rand());
         $layoutItem->templateTitle = "This is my  first layout";
         $layoutItem->templateLayouts = array();
         $layoutItem->picPath = "";
         $sitesLayoutContainer[] = $layoutItem;
         /* layout 2 */
         $layoutItem = new \stdClass();
-        $layoutItem->uid = uniqid("layout_");
+        $layoutItem->uid = uniqid("layout_".rand());
         $layoutItem->templateTitle = "This is my second layout";
         $layoutItem->templateLayouts = array();
         $layoutItem->picPath = "";
         $sitesLayoutContainer[] = $layoutItem;
         /* layout 3 */
         $layoutItem = new \stdClass();
-        $layoutItem->uid = uniqid("layout_");
+        $layoutItem->uid = uniqid("layout_".rand());
         $layoutItem->templateTitle = "This is my theùird layout";
         $layoutItem->templateLayouts = array();
         $layoutItem->picPath = "";
         $sitesLayoutContainer[] = $layoutItem;
         /* layout 4 */
         $layoutItem = new \stdClass();
-        $layoutItem->uid = uniqid("layout_");
+        $layoutItem->uid = uniqid("layout_".rand());
         $layoutItem->templateTitle = "This is my fourth layout";
         $layoutItem->templateLayouts = array();
         $layoutItem->picPath = "";
         $sitesLayoutContainer[] = $layoutItem;
         /* layout 5 */
         $layoutItem = new \stdClass();
-        $layoutItem->uid = uniqid("layout_");
+        $layoutItem->uid = uniqid("layout_".rand());
         $layoutItem->templateTitle = "This is é my fith";
         $layoutItem->templateLayouts = array();
         $layoutItem->picPath = "";
