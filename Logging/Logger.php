@@ -78,7 +78,7 @@ class Logger implements LoggerInterface, SQLLogger
         if (NULL !== $appender)
             $this->addAppender($appender);
 
-        $this->_uniqid = uniqid();
+        $this->_uniqid = uniqid('', TRUE);
 
         $r = new \ReflectionClass($this);
         $this->_priorities_name = $r->getConstants();

@@ -127,7 +127,7 @@ class ClassContentRepository extends EntityRepository
                 if (1 == count($crit))
                     $crit[1] = '=';
 
-                $alias = uniqid('i');
+                $alias = uniqid('i'.rand());
                 $q->leftJoin('c._indexation', $alias)
                         ->andWhere($alias . '._field = :field' . $alias)
                         ->andWhere($alias . '._value ' . $crit[1] . ' :value' . $alias)
@@ -566,7 +566,7 @@ class ClassContentRepository extends EntityRepository
             if (count($criterion) != 3)
                 continue;
             $criterion = (object) $criterion;
-            $alias = uniqid("i");
+            $alias = uniqid("i".rand());
             $qb->leftJoin("c._indexation", $alias)
                     ->andWhere($alias . "._field = :field" . $alias)
                     ->andWhere($alias . "._value " . $criterion->op . " :value" . $alias)
