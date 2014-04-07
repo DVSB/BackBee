@@ -92,6 +92,7 @@ class ContentBlocks extends AbstractServiceLocal
 
         $categories = array();
         $categoryList = Category::getCategories($this->getApplication()->getClassContentDir());
+
         foreach ($categoryList as $category) {
             $categories[] = $category->__toStdObject();
         }
@@ -160,7 +161,7 @@ class ContentBlocks extends AbstractServiceLocal
             $node = new \stdClass();
             $node->attr = new \stdClass();
             $node->attr->rel = "contentType_" . $content->name;
-            $node->attr->id = "node_" . uniqid();
+            $node->attr->id = "node_" . uniqid(rand());
             $node->data = $content->label;
             $node->state = "leaf";
             $result[] = $node;
@@ -214,7 +215,7 @@ class ContentBlocks extends AbstractServiceLocal
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
                 $leaf->attr->rel = "contentType_" . $accept;
-                $leaf->attr->id = uniqid();
+                $leaf->attr->id = uniqid(rand());
                 $leaf->data = $object->getProperty('name');
                 $leaf->state = "leaf";
                 $children[] = $leaf;
@@ -381,7 +382,7 @@ class ContentBlocks extends AbstractServiceLocal
             $stdClass->max_item = "unlimited";
             $stdClass->max_width_droppable = 16;
             $stdClass->min_width_droppable = 2;
-            $stdClass->uid = uniqid();
+            $stdClass->uid = uniqid(rand());
             return $stdClass;
         }
     }

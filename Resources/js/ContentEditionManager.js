@@ -111,6 +111,7 @@ var ContentEditionManager = (function($){
             if('infos' in bbContent){
                 var bbContent = $bb(bbContent.infos.contentEl);
             }
+            _selectContent(bbContent.contentEl);
             var contentParams = bbContent.getContentParams();
             // content is updated when params are saved
             //async persist before params edition
