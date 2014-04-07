@@ -58,27 +58,32 @@ class Importer
     }
 
     /**
-     * @param type $flushEvery if you don't need flush put 0
-     * @param boolean $checkForExisting
+     * @param type $flush_every if you don't need flush put 0
+     * @param boolean $check_existing
      * @return boolean
      */
-    public function run($class, $config, $flushEvery, $checkForExisting)
+    public function run($class, $config, $flush_every, $check_existing)
     {
         $starttime = microtime(true);
 
         $this->setConverter($this->initConvertion($config));
         $statement = $this->getConverter()->getRows($this);
-        $itemsCount = $statement->rowCount();
-
-        if (0 === $itemsCount) {
-            Buffer::dump('=== Importation of ' . $itemsCount . ' can\'t be done, there is no item to convert.' . "\n");
+        $items_count = $statement->rowCount();
+        $limit = true === isset($config['limit']) ? $config['limit'] : null;
+        if (0 === $items_count) {
+            Buffer::dump(
+                '=== Importation of ' . $items_count . ' can\'t be done, there is no item to convert.' . "\n"
+            );
 
             return;
         }
 
-        Buffer::dump("\n" . '===== Importation of ' . $itemsCount . ' ' . $class . ' was started.' . "\n\n");
+        Buffer::dump(
+            "\n" . '===== Importation of ' . (null !== $limit ? $limit . " (total: $items_count)" : $items_count) 
+            . ' ' . $class . ' was started.' . "\n\n"
+        );
 
-        $this->_doImport($statement, $flushEvery, $checkForExisting);
+        $this->_doImport($statement, $flush_every, $check_existing, $limit);
         unset($statement);
 
         $this->getConverter()->onImportationFinish();
@@ -91,7 +96,7 @@ class Importer
         );
     }
 
-    private function _doImport(PDOStatement $statement, $flushEvery, $checkForExisting)
+    private function _doImport(PDOStatement $statement, $flush_every, $check_existing, $limit = null)
     {
         $i = 0;
         $entities = array();
@@ -101,8 +106,8 @@ class Importer
             if (null !== $entity) {
                 $entities[] = $entity;
 
-                if (++$i === $flushEvery) {
-                    $this->save($entities, $checkForExisting);
+                if (++$i === $flush_every) {
+                    $this->save($entities, $check_existing);
                     $i = 0;
                     unset($entities);
                     $entities = array();
@@ -112,10 +117,17 @@ class Importer
             }
 
             unset($row);
+            
+            if (null !== $limit) {
+                $limit--;
+                if (0 === $limit) {
+                    break;
+                }
+            }
         }
 
-        if ($flushEvery > $i) {
-            $this->save($entities, $checkForExisting);
+        if ($flush_every > $i) {
+            $this->save($entities, $check_existing);
         }
 
         unset($entities);
@@ -183,7 +195,7 @@ class Importer
      *
      * @param array $entities
      */
-    public function save(array $entities, $checkForExisting = true)
+    public function save(array $entities, $check_existing = true)
     { 
         $id_label = 'get' . ucfirst(array_key_exists('id_label', $this->_import_config) ? $this->_import_config['id_label'] : 'uid');
 
@@ -191,7 +203,7 @@ class Importer
         Buffer::dump('Saving ' . count($entities) . ' items...');
 
         foreach ($entities as $entity) {
-            //if (true === $checkForExisting && !in_array($entity->{$id_label}(), $this->_ids)) {
+            //if (true === $check_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
             //  $this->_application->getEntityManager()->persist($entity);
             //}
             if (null !== $entity && false === $this->_application->getEntityManager()->contains($entity)) {
