@@ -116,7 +116,7 @@ class ContentRender
 
     public function __construct($name, $bbapp, $category = null, $mode = null, $uid = null)
     {
-        $this->uid = (NULL === $uid) ? uniqid() : $uid;
+        $this->uid = (NULL === $uid) ? uniqid(rand()) : $uid;
         $this->name = $name;
         $this->renderer = $bbapp->getRenderer();
         $this->bbapp = $bbapp;

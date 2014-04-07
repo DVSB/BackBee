@@ -114,8 +114,7 @@ class Config
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
-        $this->setContainer($container)
-                ->extend();
+        $this->setContainer($container)->extend();
     }
 
     /**
@@ -181,6 +180,7 @@ class Config
     private function _getCacheExpire($basedir)
     {
         $expire = 0;
+
         foreach ($this->_getYmlFiles($basedir) as $file) {
             $stat = @stat($file);
             if ($expire < $stat['mtime']) {
@@ -414,5 +414,4 @@ class Config
     {
         return $this->_basedir;
     }
-
 }
