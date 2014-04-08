@@ -29,7 +29,7 @@ namespace BackBuilder\ClassContent;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
- * @Table(name="indexation")
+ * @Table(name="indexation",indexes={@index(name="IDX_OWNER", columns={"owner_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_VALUE", columns={"value"})})
  */
 class Indexation
 {
