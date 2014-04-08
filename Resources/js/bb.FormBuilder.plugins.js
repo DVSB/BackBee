@@ -1,4 +1,5 @@
 //@ sourceURL=ressources/js/bb.FormBuilder.plugins.js
+
 (function($) {
 
     var FormBuilder = bb.FormBuilder;
@@ -682,6 +683,7 @@
                             position: [0, 60] //handle destroy on close
                         },
                         editMode: false,
+                        enableMultiSite: true,
                         site: bb.frontApplication.getSiteUid(),
                         breadcrumb: bb.frontApplication.getBreadcrumbIds(),
                         select: function(e, data) {
