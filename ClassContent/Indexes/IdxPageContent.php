@@ -22,7 +22,7 @@
 namespace BackBuilder\ClassContent\Indexes;
 
 /**
- * Entity class for Content-Content join table
+ * Entity class for Page-Content join table
  * 
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent
@@ -30,21 +30,21 @@ namespace BackBuilder\ClassContent\Indexes;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
- * @Table(name="idx_content_content",indexes={@index(name="IDX_SUBCONTENT", columns={"subcontent_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"})})
+ * @Table(name="idx_page_content",indexes={@index(name="IDX_PAGE", columns={"page_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"})})
  */
-class IdxContentContent
+class IdxPageContent
 {
 
     /**
      * @var string
      * @Id @Column
      */
-    private $content_uid;
+    private $page_uid;
 
     /**
      * @var string
      * @Id @Column
      */
-    private $subcontent_uid;
+    private $content_uid;
 
 }

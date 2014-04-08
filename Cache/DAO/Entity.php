@@ -30,7 +30,7 @@ namespace BackBuilder\Cache\DAO;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity
- * @Table(name="cache")
+ * @Table(name="cache",indexes={@index(name="IDX_EXPIRE", columns={"expire"}), @index(name="IDX_TAG", columns={"tag"})})
  */
 class Entity
 {
