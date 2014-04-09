@@ -19,40 +19,32 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer\Helper;
-
-use BackBuilder\ClassContent\AClassContent;
+namespace BackBuilder\ClassContent\Indexes;
 
 /**
- * Helper to get the main node uri from a content
+ * Entity class for Page-Content join table
+ * 
  * @category    BackBuilder
- * @package     BackBuilder\Renderer
- * @subpackage  Helper
+ * @package     BackBuilder\ClassContent
+ * @subpackage  Indexes
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
+ * @Table(name="idx_page_content",indexes={@index(name="IDX_PAGE", columns={"page_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"})})
  */
-class mainnodeuri extends AHelper
+class IdxPageContent
 {
 
     /**
-     * Returns the main node uri form content if found '#' otherwise
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @return string
+     * @var string
+     * @Id @Column
      */
-    public function __invoke(AClassContent $content = null)
-    {
-        if (null === $content) {
-            $content = $this->_renderer->getObject();
-        }
+    private $page_uid;
 
-        if ($content instanceof AClassContent) {
-            $page = $content->getMainNode();
-            if (null !== $page) {
-                return $this->_renderer->getUri($page->getUrl(), null, $page->getSite());
-            }
-        }
-
-        return '#';
-    }
+    /**
+     * @var string
+     * @Id @Column
+     */
+    private $content_uid;
 
 }
