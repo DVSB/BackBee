@@ -32,7 +32,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Security\Repository\UserRepository")
- * @Table(name="user")
+ * @Table(name="user", uniqueConstraints={@UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
  * @fixtures(qty=20)
  */
 class User implements UserInterface
