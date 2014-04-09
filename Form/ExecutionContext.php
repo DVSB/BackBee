@@ -79,7 +79,7 @@ class ExecutionContext implements \Symfony\Component\Validator\ExecutionContextI
         $report = new \stdClass();
         $report->message = $message;
         $report->invalidKey = $key;
-        $this->globalContext[] = $report;
+        $this->globalContext[$key] = $report;
     }
 
     public function setNext($key, $value, $message)
