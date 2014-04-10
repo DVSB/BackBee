@@ -33,14 +33,21 @@ use BackBuilder\ClassContent\AClassContent;
 class mainnodeuri extends AHelper
 {
 
-    public function __invoke(AClassContent $content = NULL)
+    public function __invoke(AClassContent $content = null)
     {
-        if (NULL === $content)
+        if (null === $content)
             $content = $this->_renderer->getObject();
         if (is_a($content, 'BackBuilder\ClassContent\AClassContent')) {
             $page = $content->getMainNode();
-            if (NULL !== $page) {
-                return $this->_renderer->getUri($page->getUrl());
+            if (null !== $page) {
+                $base_url = '';
+
+                $application = $this->getRenderer()->getApplication();
+                if ($application->getSite()->getUid() !== $page->getSite()->getUid()) {
+                    $base_url = $application->getRequest()->getScheme() . '://' . $page->getSite()->getServerName();
+                }
+
+                return $this->_renderer->getUri($base_url . $page->getUrl());
             }
         }
 
