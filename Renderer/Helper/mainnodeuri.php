@@ -24,6 +24,7 @@ namespace BackBuilder\Renderer\Helper;
 use BackBuilder\ClassContent\AClassContent;
 
 /**
+ * Helper to get the main node uri from a content
  * @category    BackBuilder
  * @package     BackBuilder\Renderer
  * @subpackage  Helper
@@ -33,21 +34,21 @@ use BackBuilder\ClassContent\AClassContent;
 class mainnodeuri extends AHelper
 {
 
+    /**
+     * Returns the main node uri form content if found '#' otherwise
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return string
+     */
     public function __invoke(AClassContent $content = null)
     {
-        if (null === $content)
+        if (null === $content) {
             $content = $this->_renderer->getObject();
-        if (is_a($content, 'BackBuilder\ClassContent\AClassContent')) {
+        }
+
+        if ($content instanceof AClassContent) {
             $page = $content->getMainNode();
             if (null !== $page) {
-                $base_url = '';
-
-                $application = $this->getRenderer()->getApplication();
-                if ($application->getSite()->getUid() !== $page->getSite()->getUid()) {
-                    $base_url = $application->getRequest()->getScheme() . '://' . $page->getSite()->getServerName();
-                }
-
-                return $this->_renderer->getUri($base_url . $page->getUrl());
+                return $this->_renderer->getUri($page->getUrl(), null, $page->getSite());
             }
         }
 

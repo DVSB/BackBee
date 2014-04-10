@@ -264,7 +264,7 @@ class Renderer extends ARenderer
             // Rendering a page with layout
             if (true === is_a($obj, '\BackBuilder\NestedNode\Page')) {
                 $renderer->setCurrentPage($obj);
-                $renderer->__render = $renderer->renderPage($template);
+                $renderer->__render = $renderer->renderPage($template, $params);
                 $renderer->insertHeaderAndFooterScript();
                 $bbapp->debug('Rendering Page OK');
             } else {
@@ -394,9 +394,11 @@ class Renderer extends ARenderer
      * @return string The rendered output
      * @throws RendererException
      */
-    private function renderPage($layoutFile = null)
+    private function renderPage($layoutFile = null, $params = null)
     {
         $this->setNode($this->getObject());
+
+        $this->setRenderParams($this, $params);
 
         $bbapp = $this->getApplication();
         // Rendering subcontent
@@ -519,18 +521,29 @@ class Renderer extends ARenderer
             $this->setParam($this->_object->getParam());
         }
 
-        if (null !== $params) {
-            $params = (array) $params;
-            foreach ($params as $param => $value) {
-                $this->setParam($param, $value);
-            }
-        }
+        $this->setRenderParams($this, $params);
 
         if (null !== $bbapp) {
             $bbapp->debug(sprintf('Rendering content `%s(%s)`.', get_class($this->_object), $this->_object->getUid()));
         }
 
         return $this->renderTemplate();
+    }
+
+    /**
+     * Set parameters to a renderer object in parameter
+     *
+     * @param ARenderer $render
+     * @param array $params
+     */
+    private function setRenderParams(ARenderer $render, $params)
+    {
+        if (null !== $params) {
+            $params = (array) $params;
+            foreach ($params as $param => $value) {
+                $render->setParam($param, $value);
+            }
+        }
     }
 
     /**
