@@ -80,7 +80,7 @@ class AbstractServiceLocal implements IServiceLocal
      */
     public function initService(BBApplication $application)
     {
-        $this->_application = $this->bbapp = $application;
+        $this->_application = $application;
         $this->_em = $application->getEntityManager();
         $this->_dir = new \stdClass();
         if (NULL !== $application && null !== $this->identifier) {
