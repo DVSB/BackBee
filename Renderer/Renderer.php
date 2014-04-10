@@ -248,6 +248,8 @@ class Renderer extends ARenderer
 
         $renderer->updatesAfterClone();
 
+        $this->setRenderParams($renderer, $params);
+
         $renderer->setObject($obj)
                 ->setMode($mode, $ignoreModeIfNotSet)
                 ->_triggerEvent('prerender');
@@ -398,8 +400,6 @@ class Renderer extends ARenderer
     {
         $this->setNode($this->getObject());
 
-        $this->setRenderParams($this, $params);
-
         $bbapp = $this->getApplication();
         // Rendering subcontent
         if (null !== $contentSet = $this->getObject()->getContentSet()) {
@@ -520,8 +520,6 @@ class Renderer extends ARenderer
             $this->assign($this->_object->getData());
             $this->setParam($this->_object->getParam());
         }
-
-        $this->setRenderParams($this, $params);
 
         if (null !== $bbapp) {
             $bbapp->debug(sprintf('Rendering content `%s(%s)`.', get_class($this->_object), $this->_object->getUid()));
