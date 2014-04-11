@@ -87,8 +87,11 @@ class ContentRender
             if (NULL === $this->content) {
                 $this->content = new $classname();
             }
-            if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
-                $this->content->setDraft($draft);
+            
+            if (null !== $this->bbapp->getBBUserToken()) {
+                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
+                    $this->content->setDraft($draft);
+                }
             }
         }
     }
