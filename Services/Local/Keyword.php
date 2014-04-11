@@ -39,7 +39,7 @@ class Keyword extends AbstractServiceLocal
      */
     public function getKeywordTree($root_uid)
     {
-        // return array();
+        return array();
 
         $em = $this->bbapp->getEntityManager();
         $tree = array();
