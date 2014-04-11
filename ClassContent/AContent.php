@@ -761,6 +761,16 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
     }
 
     /**
+     * Returns TRUE if $var is an declared element of this content
+     * @param string $var
+     * @return boolean
+     */
+    public function hasElement($var)
+    {
+        return array_key_exists($var, $this->_data);
+    }
+
+    /**
      * Returns defined parameters
      * Upgrade of getParam method - parameter $var can follow this pattern:
      *     rendermode:array:selected
