@@ -64,7 +64,7 @@
         _initTemplates : function(item){
             /*List item template*/
             var itemTemplate = '<li data-uid="${uid}" class="bb5-content-item">'
-            +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="'+bb.baseurl+'ressources/img/contents/${ico}.png"></a></p>'
+            +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
             +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
             +"<p>Date de création: <strong>${created}</strong></p>"
             +'<p><button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button><button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button></p>'
