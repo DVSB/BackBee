@@ -35,7 +35,7 @@ use Symfony\Component\Security\Core\User\UserInterface,
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Site\Repository\UserPreferencesRepository")
- * @Table(name="user_preferences")
+ * @Table(name="user_preferences",indexes={@index(name="IDX_OWNER", columns={"owner"})})
  */
 class UserPreferences
 {

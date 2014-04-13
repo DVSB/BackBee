@@ -21,38 +21,34 @@
 
 namespace BackBuilder\Renderer\Helper;
 
-use BackBuilder\ClassContent\AClassContent;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
- * Helper to get the main node uri from a content
+ * Helper returning current session bag
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Renderer
  * @subpackage  Helper
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class mainnodeuri extends AHelper
+class session extends AHelper
 {
 
     /**
-     * Returns the main node uri form content if found '#' otherwise
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @return string
+     * Return the current request parameter bag
+     * @return \Symfony\Component\HttpFoundation\ParameterBag
      */
-    public function __invoke(AClassContent $content = null)
+    public function __invoke()
     {
-        if (null === $content) {
-            $content = $this->_renderer->getObject();
+        if (null !== $this->_renderer
+                && null !== $this->_renderer->getApplication()
+                && null !== $this->_renderer->getApplication()->getController()
+                && null !== $this->_renderer->getApplication()->getController()->getRequest()) {
+            return $this->_renderer->getApplication()->getController()->getRequest()->getSession();
         }
 
-        if ($content instanceof AClassContent) {
-            $page = $content->getMainNode();
-            if (null !== $page) {
-                return $this->_renderer->getUri($page->getUrl(), null, $page->getSite());
-            }
-        }
-
-        return '#';
+        return new ParameterBag();
     }
 
 }

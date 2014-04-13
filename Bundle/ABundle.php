@@ -268,7 +268,12 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      */
     public function getResourcesDir()
     {
-        return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+        $dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Resources';
+        if (!file_exists($dir)) {
+            $dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+        }
+
+        return $dir;
     }
 
     /**

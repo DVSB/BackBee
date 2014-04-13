@@ -55,7 +55,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Site\Repository\LayoutRepository")
- * @Table(name="layout")
+ * @Table(name="layout",indexes={@index(name="IDX_SITE", columns={"site_uid"})})
  * @HasLifecycleCallbacks
  */
 class Layout extends AObjectIdentifiable implements IJson

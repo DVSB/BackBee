@@ -157,8 +157,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      */
     public function __set($var, $value)
     {
-        if ($this->_getContentInstance() instanceof ContentSet
-                || false === isset($this->_data[$var])) {
+        if ($this->_getContentInstance() instanceof ContentSet || false === isset($this->_data[$var])) {
             throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this->_getContentInstance())));
         }
 
@@ -168,8 +167,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
         $val = array();
 
         foreach ($values as $value) {
-            if ((isset($this->_maxentry[$var]) && 0 < $this->_maxentry[$var] && $this->_maxentry[$var] == count($val))
-                    || (isset($this->_minentry[$var]) && count($val) < $this->_minentry[$var] && $this->_maxentry[$var] == count($val))) {
+            if ((isset($this->_maxentry[$var]) && 0 < $this->_maxentry[$var] && $this->_maxentry[$var] == count($val)) || (isset($this->_minentry[$var]) && count($val) < $this->_minentry[$var] && $this->_maxentry[$var] == count($val))) {
                 break;
             }
 
@@ -384,9 +382,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
                 }
 
                 // A surveiller cette partie pour les revisions
-                if (true === is_array($this->_parameters)
-                        && true === array_key_exists($var, $this->_parameters)
-                        && true === is_array($this->_parameters[$var])) {
+                if (true === is_array($this->_parameters) && true === array_key_exists($var, $this->_parameters) && true === is_array($this->_parameters[$var])) {
                     $values = array_replace_recursive($this->_parameters[$var], $values);
                 }
             }
@@ -686,8 +682,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
      */
     public function equals(IObjectIdentifiable $identity)
     {
-        return ($this->getType() === $identity->getType()
-                && $this->getIdentifier() === $identity->getIdentifier());
+        return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }
 
     /*     * **************************************************************** */
@@ -758,6 +753,44 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
         }
 
         return $data;
+    }
+
+    /**
+     * Returns TRUE if $var is an declared element of this content
+     * @param string $var
+     * @return boolean
+     */
+    public function hasElement($var)
+    {
+        return array_key_exists($var, $this->_data);
+    }
+
+    /**
+     * Returns the first element of one of the provided class is exists
+     * @param mixed $classnames
+     * @return AClassContent|NULL
+     */
+    public function getFirstElementOfType($classnames)
+    {
+        if (false === is_array($classnames)) {
+            $classnames = array($classnames);
+        }
+
+        foreach (array_keys($this->_data) as $key) {
+            $element = $this->getData($key);
+
+            if (false === is_object($element)) {
+                continue;
+            }
+
+            foreach ($classnames as $classname) {
+                if (true === is_a($element, $classname)) {
+                    return $element;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -890,8 +923,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
         foreach (get_object_vars($serialized) as $property => $value) {
             $property = '_' . $property;
 
-            if (true === in_array($property, array('_created', '_modified'))
-                    || null === $value) {
+            if (true === in_array($property, array('_created', '_modified')) || null === $value) {
                 continue;
             } else if ("_param" === $property) {
                 foreach ($value as $param => $paramvalue) {

@@ -39,7 +39,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Site\Repository\SiteRepository")
- * @Table(name="site", indexes={@Index(name="url", columns={"server_name"})})
+ * @Table(name="site", indexes={@Index(name="IDX_SERVERNAME", columns={"server_name"})})
  * @fixtures(qty=1)
  */
 class Site extends AObjectIdentifiable implements IJson

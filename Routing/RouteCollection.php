@@ -22,10 +22,18 @@
 namespace BackBuilder\Routing;
 
 use BackBuilder\BBApplication,
-    BackBuilder\Bundle\ABundle;
-use Symfony\Component\Routing\RouteCollection as sfRouteCollection;
+    BackBuilder\Bundle\ABundle,
+    BackBuilder\Site\Site;
+use Symfony\Component\Routing\RouteCollection as sfRouteCollection,
+    Symfony\Component\HttpFoundation\Request;
 
 /**
+ * A RouteCollection represents a set of Route instances.
+ *
+ * When adding a route at the end of the collection, an existing route
+ * with the same name is removed first. So there can only be one route
+ * with a given name.
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Routing
  * @copyright   Lp digital system
@@ -34,8 +42,16 @@ use Symfony\Component\Routing\RouteCollection as sfRouteCollection;
 class RouteCollection extends sfRouteCollection
 {
 
+    /**
+     * The current BBApplication
+     * @var \BackBuilder\BBApplication
+     */
     private $_application;
 
+    /**
+     * Class constructor
+     * @param \BackBuilder\BBApplication $application
+     */
     public function __construct(BBApplication $application = null)
     {
         if (true === method_exists('Symfony\Component\Routing\RouteCollection', '__construct')) {
@@ -66,9 +82,7 @@ class RouteCollection extends sfRouteCollection
             }
 
             $router->add(
-                $name, new Route($route['pattern'],
-                $route['defaults'],
-                array_key_exists('requirements', $route) ? $route['requirements'] : array())
+                    $name, new Route($route['pattern'], $route['defaults'], array_key_exists('requirements', $route) ? $route['requirements'] : array())
             );
 
             $this->_application->debug(sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
@@ -85,7 +99,7 @@ class RouteCollection extends sfRouteCollection
     /**
      * Return the path associated to a route
      * @param string $id
-     * @return null|url
+     * @return url|NULL
      */
     public function getRoutePath($id)
     {
@@ -113,19 +127,20 @@ class RouteCollection extends sfRouteCollection
             }
         }
 
-        return null !== $baseUrl && true === is_string($baseUrl)
-            ? $baseUrl . $uri
-            : $this->getUri($uri);
+        return null !== $baseUrl && true === is_string($baseUrl) ? $baseUrl . $uri : $this->getUri($uri);
     }
 
     /**
-     * Return $pathinfo with base url of current page if pahtinfo does not contains 'http' string
-     * @param  string|null $pathinfo   
-     * @param  string|null $defaultExt 
-     * @return string             
+     * Returns $pathinfo with base url of current page
+     * If $site is provided, the url will be pointing on the associate domain
+     * @param string $pathinfo
+     * @param string $defaultExt
+     * @param \BackBuilder\Site\Site $site
+     * @return string         
      */
-    public function getUri($pathinfo = null, $defaultExt = null)
+    public function getUri($pathinfo = null, $defaultExt = null, Site $site = null)
     {
+        // If scheme already provided, return pathinfo
         if (null !== $pathinfo && preg_match('/^([a-zA-Z1-9\/_]*)http[s]?:\/\//', $pathinfo, $matches)) {
             return substr($pathinfo, strlen($matches[1]));
         }
@@ -134,30 +149,23 @@ class RouteCollection extends sfRouteCollection
             $pathinfo = '/' . $pathinfo;
         }
 
+        // If no BBApplication or no Request, return pathinfo
         $application = $this->_application;
-        if (true === $application->isStarted() && null !== $application->getRequest()) {
-            $request = $application->getRequest();
-
-            if (null === $pathinfo) {
-                $pathinfo = $request->getBaseUrl();
-            }
-
-            if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
-                return $request->getSchemeAndHttpHost() 
-                    . substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl())))) 
-                    . $pathinfo;
-            } else {
-                return $request->getUriForPath($pathinfo);
-            }
+        if (null === $application || false === $application->isStarted() || null === $application->getRequest()) {
+            return $pathinfo;
         }
 
+        if (null === $site || $this->_application->getSite() === $site) {
+            // If no site or current site provided, use BaseUrl
+            $pathinfo = $this->_getUriFromBaseUrl($application->getRequest(), $pathinfo);
+        } else {
+            $pathinfo = $this->_getUriForSite($application->getRequest(), $pathinfo, $site);
+        }
+
+        // If need add default extension provided or set from $site
         if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
             if (null === $defaultExt) {
-                if (null !== $application) {
-                    if (null !== $application->getContainer()->get('site')) {
-                        $defaultExt = $application->getContainer()->get('site')->getDefaultExtension();
-                    }
-                }
+                $defaultExt = $this->_getDefaultExtFromSite($site);
             }
 
             $pathinfo .= $defaultExt;
@@ -165,4 +173,59 @@ class RouteCollection extends sfRouteCollection
 
         return $pathinfo;
     }
+
+    /**
+     * Returns uri from pathinfo according to current request BaseUrl()
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param string $pathinfo
+     * @return string
+     */
+    private function _getUriFromBaseUrl(Request $request, $pathinfo)
+    {
+        if (null === $pathinfo) {
+            $pathinfo = $request->getBaseUrl();
+        }
+
+        if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
+            return $request->getSchemeAndHttpHost()
+                    . substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl()))))
+                    . $pathinfo;
+        } else {
+            return $request->getUriForPath($pathinfo);
+        }
+    }
+
+    /**
+     * Returns uri from pathinfo according to site to be reached
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param string $pathinfo
+     * @param \BackBuilder\Site\Site $site
+     * @return string
+     */
+    private function _getUriForSite(Request $request, $pathinfo, Site $site)
+    {
+        return $request->getScheme()
+                . '://'
+                . $site->getServerName()
+                . $pathinfo;
+    }
+
+    /**
+     * Returns the default extension for a site
+     * @param \BackBuilder\Site\Site $site
+     * @return string|NULL
+     */
+    private function _getDefaultExtFromSite(Site $site = null)
+    {
+        if (null === $site) {
+            $site = $this->_application->getSite();
+        }
+
+        if (null === $site) {
+            return null;
+        }
+
+        return $site->getDefaultExtension();
+    }
+
 }

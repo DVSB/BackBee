@@ -1,3 +1,4 @@
+//@ sourceURL=ressources/js/bb.ui.bbPageBrowser.js
 /*
  *Arborescence
  *
@@ -16,7 +17,8 @@
             editMode: false,
             dialogClass: 'bb5-ui bb5-dialog-wrapper',
             title: "",
-            enableNavigation: true
+            enableNavigation: true,
+            enableMultiSite: false
         },
         _statesWatchable: {
             open: false
@@ -103,6 +105,42 @@
                                     context.treeview.jstree('show_contextmenu', bb.jquery(myself.element).find('#node_' + context.selected), e.pageX, e.pageY + 10);
                                 }
                                 return false;
+                            });
+                        }
+                        if (myself.options.enableMultiSite) {
+                            var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
+                            bb.jquery(event.target).prepend(sitesMenu);
+                            bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {    
+                                useCache:true,
+                                cacheTags:["userSession"],
+                                async : false, 
+                                success: function(result) {
+                                    context = myself.getContext();
+                                    select = bb.jquery(myself.element).find('.bb5-available-sites').eq(0);
+
+                                    //select change event
+                                    select.bind('change', function() {
+                                        myself._initTree(bb.jquery(this).val());
+                                    });
+
+                                    //select sites populating
+                                    select.empty();
+                                    bb.jquery.each(result.result, function(index, site) {
+                                        var option = bb.jquery("<option></option>").clone();
+                                        bb.jquery(option).attr("value",index).text(site);
+                                        select.append(option);         
+                                    });
+
+                                    //select current site if configured
+                                    if (null != context.site_uid) {
+                                        select.val(context.site_uid);
+                                    }
+
+                                    select.trigger("change");
+
+                                    myself._unmask();
+                                    myself._trigger('ready');
+                                }
                             });
                         }
 
