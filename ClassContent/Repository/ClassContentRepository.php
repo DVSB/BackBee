@@ -431,7 +431,7 @@ class ClassContentRepository extends EntityRepository
     public function findContentsBySearch($classnameArr = array(), $orderInfos = array(), $paging = array(), $cond = array())
     {
         $qb = new ClassContentQueryBuilder($this->_em);
-        $this->addContentFilters($qb, $classnameArr, $orderInfos, $paging, $cond);
+        $this->addContentFilters($qb, $classnameArr, $orderInfos, $cond);
         if (is_array($paging) && count($paging)) {
             if (array_key_exists("start", $paging) && array_key_exists("limit", $paging)) {
                 $result = $qb->paginate($paging["start"], $paging["limit"]);
@@ -453,38 +453,36 @@ class ClassContentRepository extends EntityRepository
          return reset($result);
     }
 
-    private function addContentFilters(ClassContentQueryBuilder $qb, $classnameArr, $orderInfos, $cond)
+    private function addContentFilters(ClassContentQueryBuilder $query, $classnameArr, $orderInfos, $cond)
     {
         if (array_key_exists("selectedpageField", $cond) && !is_null($cond["selectedpageField"]) && !empty($cond["selectedpageField"])) {
             $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
-            $qb->addPageFilter($selectedNode);
+            $query->addPageFilter($selectedNode);
         }
 
         if (true === array_key_exists('site_uid', $cond)) {
-            $qb->addSiteFilter($cond['site_uid']);
+            $query->addSiteFilter($cond['site_uid']);
         }
 
         /* @fixme handle keywords here using join */
         if (array_key_exists("keywords", $cond) && is_array($cond["keywords"]) && !empty($cond["keywords"])) {
-            $qb->addKeywordsFilter($cond["keywords"]);
+            $query->addKeywordsFilter($cond["keywords"]);
         }
 
         /* filter by content id */
         if (array_key_exists("contentIds", $cond) && is_array($cond["contentIds"]) && !empty($cond["contentIds"])) {
-            $qb->addUidsFilter((array)$cond["contentIds"]);
+            $query->addUidsFilter((array)$cond["contentIds"]);
         }
 
         /* limit to online */
-
         $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
         if ($limitToOnline) {
-            $qb->limitToOnline();
+            $query->limitToOnline();
         }
 
         /* handle contentIds */
         if (is_array($classnameArr) && count($classnameArr)) {
-            $qb->addClassFilter($classnameArr);
-            // $qb->andWhere($this->addInstanceFilters($qb->getQuery(), "cc", $classnameArr));
+            $query->addClassFilter($classnameArr);
         }
 
         /* handle order info */
@@ -493,30 +491,30 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (property_exists('BackBuilder\ClassContent\AClassContent', '_' . $orderInfos["column"])) {
-            $qb->orderBy('cc._' . $orderInfos["column"], array_key_exists("dir", $orderInfos) ? $orderInfos["dir"] : 'asc');
+            $query->orderBy('cc._' . $orderInfos["column"], array_key_exists("dir", $orderInfos) ? $orderInfos["dir"] : 'asc');
         } else {
-            $qb->orderByIndex($orderInfos["column"], array_key_exists("dir", $orderInfos) ? $orderInfos["dir"] : 'ASC');
+            $query->orderByIndex($orderInfos["column"], array_key_exists("dir", $orderInfos) ? $orderInfos["dir"] : 'ASC');
         }
         /* else try to use indexation */
 
         $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
         if (null != $searchField) {
-            $qb->andWhere($qb->expr()->like('cc._label', $qb->expr()->literal('%' . $searchField . '%')));
+            $query->andWhere($query->expr()->like('cc._label', $query->expr()->literal('%' . $searchField . '%')));
         }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
         if (null != $afterPubdateField) {
-            $qb->andWhere('cc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
+            $query->andWhere('cc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
         }
 
         $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
         if (null != $beforePubdateField) {
-            $qb->andWhere('cc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
+            $query->andWhere('cc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
         }
 
         /* handle indexed fields */
         if (array_key_exists("indexedFields", $cond) && !empty($cond["indexedFields"])) {
-            $this->handleIndexedFields($qb, $cond["indexedFields"]);
+            $this->handleIndexedFields($query, $cond["indexedFields"]);
         }
     }
 
