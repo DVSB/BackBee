@@ -30,7 +30,7 @@ namespace BackBuilder\ClassContent\Indexes;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
- * @Table(name="idx_site_content",indexes={@index(name="IDX_SITE", columns={"site_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"})})
+ * @Table(name="idx_site_content",indexes={@index(name="IDX_SITE", columns={"site_uid"}), @index(name="IDX_CONTENT_SITE", columns={"content_uid"})})
  */
 class IdxSiteContent
 {
