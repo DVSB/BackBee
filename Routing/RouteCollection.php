@@ -113,21 +113,23 @@ class RouteCollection extends sfRouteCollection
     /**
      * Return complete url which match with routeName and routeParams; you can also customize
      * the base url; by default it use current site base url
-     * @param  string      $routeName   
-     * @param  array|null  $routeParams 
-     * @param  string|null $baseUrl     
+     * @param  string      $route_name   
+     * @param  array|null  $route_params 
+     * @param  string|null $base_url     
      * @return string              
      */
-    public function getUrlByRouteName($routeName, array $routeParams = null, $baseUrl = null)
+    public function getUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true)
     {
-        $uri = $this->getRoutePath($routeName);
-        if (null !== $routeParams && true === is_array($routeParams)) {
-            foreach ($routeParams as $key => $value) {
+        $uri = $this->getRoutePath($route_name);
+        if (null !== $route_params && true === is_array($route_params)) {
+            foreach ($route_params as $key => $value) {
                 $uri = str_replace('{' . $key . '}', $value, $uri);
             }
         }
 
-        return null !== $baseUrl && true === is_string($baseUrl) ? $baseUrl . $uri : $this->getUri($uri);
+        return null !== $base_url && true === is_string($base_url) 
+            ? $base_url . $uri 
+            : $this->getUri($uri, false === $add_ext ? '' : null);
     }
 
     /**

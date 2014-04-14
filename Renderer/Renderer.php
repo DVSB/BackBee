@@ -702,15 +702,16 @@ class Renderer extends ARenderer
     }
 
     /**
-     * Compute route which matched with routeName and replace every token by its values specified in routeParams;
+     * Compute route which matched with route_name and replace every token by its values specified in route_params;
      * You can also give base url (by default current site base url will be used)
-     * @param  string      $routeName   
-     * @param  array|null  $routeParams 
-     * @param  string|null $baseUrl     
+     * @param  string      $route_name   
+     * @param  array|null  $route_params 
+     * @param  string|null $base_url     
+     * @param  boolean     $add_ext
      * @return string
      */
-    public function generateUrlByRouteName($routeName, array $routeParams = null, $baseUrl = null)
+    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true)
     {
-        return $this->_application->getRouting()->getUrlByRouteName($routeName, $routeParams, $baseUrl);
+        return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext);
     }
 }
