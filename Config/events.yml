@@ -1,0 +1,78 @@
+classcontent.include:
+  listeners:
+    - [BackBuilder\Event\Listener\ClassContentListener, onInclude]
+
+classcontent.update:
+  listeners:
+    - [BackBuilder\Event\Listener\ClassContentListener, onUpdate]
+
+classcontent.commit:
+  listeners:
+    - [BackBuilder\Event\Listener\ClassContentListener, onCommit]
+
+classcontent.revert:
+  listeners:
+    - [BackBuilder\Event\Listener\ClassContentListener, onRevert]
+
+classcontent.onflush:
+  listeners:
+    - [BackBuilder\Event\Listener\ClassContentListener, onFlushContent]
+    - [BackBuilder\Event\Listener\RevisionListener, onFlushContent]
+    - [BackBuilder\Event\Listener\IndexationListener, onFlushContent]
+    - [BackBuilder\Event\Listener\CacheListener, onFlushContent]
+    - [BackBuilder\Event\Listener\MetaDataListener, onFlushContent]
+    - [BackBuilder\Event\Listener\RewritingListener, onFlushContent]
+
+classcontent.preremove:
+  listeners:
+    - [BackBuilder\Event\Listener\ClassContentListener, onPreRemove]
+
+classcontent.prerender:
+  listeners:
+    - [BackBuilder\Event\Listener\RevisionListener, onPrerenderContent]
+    - [BackBuilder\Event\Listener\CacheListener, onPreRender]
+ 
+classcontent.render:
+  listeners:
+    - [BackBuilder\Event\Listener\KeywordListener, onRender]
+
+classcontent.postrender:
+  listeners:
+    - [BackBuilder\Event\Listener\CacheListener, onPostRender]
+
+element.file.postremove:
+  listeners:
+    - [BackBuilder\Event\Listener\ClassContentListener, onRemoveElementFile]
+
+nestednode.page.onflush:
+  listeners:
+    - [BackBuilder\Event\Listener\MetaDataListener, onFlushPage]
+    - [BackBuilder\Event\Listener\RewritingListener, onFlushPage]
+
+site.layout.prepersist:
+  listeners:
+    - [BackBuilder\Event\Listener\LayoutListener, onBeforeSave]
+
+site.layout.preupdate:
+  listeners:
+    - [BackBuilder\Event\Listener\LayoutListener, onBeforeSave]
+
+site.layout.postremove:
+  listeners:
+    - [BackBuilder\Event\Listener\LayoutListener, onAfterRemove]
+
+revision.postload:
+  listeners:
+    - [BackBuilder\Event\Listener\RevisionListener, onPostLoad]
+
+element.keyword.render:
+  listeners:
+    - [BackBuilder\Event\Listener\elementListener, onRender]
+
+bloc.autobloc.render:
+  listeners:
+    - [BackBuilder\Event\Listener\autoblocListener, onRender]
+
+bloc.lastnews.render:
+  listeners:
+    - [BackBuilder\Event\Listener\lastnewsListener, onRender]

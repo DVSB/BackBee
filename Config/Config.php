@@ -44,6 +44,12 @@ class Config
      * @var string
      */
     const CONFIG_FILE = 'config.yml';
+    
+    /**
+     * System events config file to look for
+     * @var string
+     */
+    const EVENTS_FILE = 'events.yml';
 
     /**
      * The base directory to looking for configuration files
@@ -114,7 +120,17 @@ class Config
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
-        $this->setContainer($container)->extend();
+        $this->setContainer($container);
+        $this->_loadSystemConfig();
+        $this->extend();
+    }
+    
+    /**
+     * Load system configs
+     */
+    private function _loadSystemConfig() 
+    {
+        $this->_loadFromFile(__DIR__ . '/' . self::EVENTS_FILE);
     }
 
     /**
