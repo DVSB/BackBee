@@ -457,7 +457,21 @@ class ClassContentRepository extends EntityRepository
     {
         if (array_key_exists("selectedpageField", $cond) && !is_null($cond["selectedpageField"]) && !empty($cond["selectedpageField"])) {
             $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
-            $query->addPageFilter($selectedNode);
+            //$query->addPageFilter($selectedNode);
+            if ($selectedNode && !$selectedNode->isRoot()) {
+                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
+                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
+                if (empty($subContents)) {
+                    return array();
+                } // should never happened
+                $newQuery = $this->_em->createQueryBuilder("q");
+                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
+                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
+                                ->where("cs._uid IN (:scl)")
+                                ->setParameter("scl", $subContents)->getQuery()->getResult(); // $subContentsQuery->getResult()
+                /* filtre  parmi ces contents */
+                $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+            }
         }
 
         if (true === array_key_exists('site_uid', $cond)) {
@@ -475,7 +489,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         /* limit to online */
-        $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
+        $limitToOnline = (array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
         if ($limitToOnline) {
             $query->limitToOnline();
         }
