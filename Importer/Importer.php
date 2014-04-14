@@ -21,7 +21,10 @@
 namespace BackBuilder\Importer;
 
 use BackBuilder\BBApplication,
-    BackBuilder\Config\Config;
+    BackBuilder\Config\Config,
+    BackBuilder\Util\Buffer;
+
+use Doctrine\DBAL\Driver\PDOStatement;
 
 /**
  * @category    BackBuilder
@@ -38,6 +41,7 @@ class Importer
     private $_import_config;
     private $_ids;
     private $_object_identifier;
+    private $_importedItemsCount = 0;
 
     /**
      * Class constructor
@@ -55,35 +59,79 @@ class Importer
 
     /**
      * @param type $flush_every if you don't need flush put 0
-     * @param boolean $check_for_existing
+     * @param boolean $check_existing
      * @return boolean
      */
-    public function run($class, $config, $flush_every, $check_for_existing)
+    public function run($class, $config, $flush_every, $check_existing)
     {
-        $start_time = microtime(true);
+        $starttime = microtime(true);
+
         $this->setConverter($this->initConvertion($config));
-        $values = $this->getConverter()->getRows($this);
-        \BackBuilder\Util\Buffer::dump('Importation of ' . count($values) . ' ' . $class . ' was started' . "\n");
+        $statement = $this->getConverter()->getRows($this);
+        $items_count = $statement->rowCount();
+        $limit = true === isset($config['limit']) ? $config['limit'] : null;
+        if (0 === $items_count) {
+            Buffer::dump(
+                '=== Importation of ' . $items_count . ' can\'t be done, there is no item to convert.' . "\n"
+            );
+
+            return;
+        }
+
+        Buffer::dump(
+            "\n" . '===== Importation of ' . (null !== $limit ? $limit . " (total: $items_count)" : $items_count) 
+            . ' ' . $class . ' was started.' . "\n\n"
+        );
+
+        $this->_doImport($statement, $flush_every, $check_existing, $limit);
+        unset($statement);
+
+        $this->getConverter()->onImportationFinish();
+        unset($this->_converter);
+        gc_collect_cycles();
+
+        Buffer::dump(
+            "\n" . $this->_importedItemsCount . ' ' . $class . ' imported in ' 
+            . (microtime(true) - $starttime) . ' s =====' . "\n\n"
+        );
+    }
+
+    private function _doImport(PDOStatement $statement, $flush_every, $check_existing, $limit = null)
+    {
         $i = 0;
         $entities = array();
-        if (count($values) == 0) {return;}
-        foreach ($values as $value) {
-            //if (false === $check_for_existing || (array_key_exists($this->_object_identifier, (array)$value) && !in_array(md5($value[$this->_object_identifier]), $this->_ids))) {
-                $entities[] = $this->getConverter()->convert($value);
-            //}
-            if (++$i === $flush_every) {
-                $this->save($entities, $check_for_existing);
-                $i = 0;
-                unset($entities);
-                $entities = array();
+        while ($row = $statement->fetch()) {
+            $entity = $this->getConverter()->convert($row);
+
+            if (null !== $entity) {
+                $entities[] = $entity;
+
+                if (++$i === $flush_every) {
+                    $this->save($entities, $check_existing);
+                    $i = 0;
+                    unset($entities);
+                    $entities = array();
+                }
+                
+                unset($entity);
+            }
+
+            unset($row);
+            
+            if (null !== $limit) {
+                $limit--;
+                if (0 === $limit) {
+                    break;
+                }
             }
         }
-        if ($flush_every != 0) {
-            $this->save($entities, $check_for_existing);
+
+        if ($flush_every > $i) {
+            $this->save($entities, $check_existing);
         }
+
         unset($entities);
-        $this->getConverter()->onImportationFinish();
-        \BackBuilder\Util\Buffer::dump(count($values) . ' ' . $class . ' imported in ' . (microtime(true) - $start_time) . ' s' . "\n");
+        unset($statement);
     }
 
     /**
@@ -147,29 +195,45 @@ class Importer
      *
      * @param array $entities
      */
-    public function save(array $entities, $check_for_existing = true)
-    {
+    public function save(array $entities, $check_existing = true)
+    { 
         $id_label = 'get' . ucfirst(array_key_exists('id_label', $this->_import_config) ? $this->_import_config['id_label'] : 'uid');
 
-        \BackBuilder\Util\Buffer::dump('Saving...' . "\n");$i= 0;
+        $starttime = microtime(true);
+        Buffer::dump('Saving ' . count($entities) . ' items...');
+
         foreach ($entities as $entity) {
-            //if (true === $check_for_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
+            //if (true === $check_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
             //  $this->_application->getEntityManager()->persist($entity);
             //}
             if (null !== $entity && false === $this->_application->getEntityManager()->contains($entity)) {
                 $this->_application->getEntityManager()->persist($entity);
             }
+
+            $this->_importedItemsCount++;
         }
 
         $this->_application->getEntityManager()->flush();
+
         $this->getConverter()->afterEntitiesFlush($this, $entities);
         $this->flushMemory();
+
+        Buffer::dump(' in ' . (microtime(true) - $starttime) . ' s (total: ' 
+            . $this->_importedItemsCount . ' - memory status: ' . self::convertMemorySize(memory_get_usage()) . ")\n");
+    }
+
+    public static function convertMemorySize($size)
+    {
+        $unit = array('b','kb','mb','gb','tb','pb');
+
+        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
     }
 
     public function flushMemory()
-    {
+    {   
         $this->_application->getEntityManager()->clear();
         gc_collect_cycles();
+
         $this->getConverter()->beforeImport($this, $this->_import_config);
     }
 

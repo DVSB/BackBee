@@ -77,7 +77,6 @@ class ContentRender
             $classname = "BackBuilder\ClassContent\\" . $this->name;
             if (NULL !== $this->uid)
                 $this->content = $this->bbapp->getEntityManager()->find($classname, $this->uid);
-
 //            if (NULL !== $content) {
 //                
 //                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
@@ -88,8 +87,11 @@ class ContentRender
             if (NULL === $this->content) {
                 $this->content = new $classname();
             }
-            if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
-                $this->content->setDraft($draft);
+            
+            if (null !== $this->bbapp->getBBUserToken()) {
+                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
+                    $this->content->setDraft($draft);
+                }
             }
         }
     }
@@ -117,7 +119,7 @@ class ContentRender
 
     public function __construct($name, $bbapp, $category = null, $mode = null, $uid = null)
     {
-        $this->uid = (NULL === $uid) ? uniqid() : $uid;
+        $this->uid = (NULL === $uid) ? uniqid(rand()) : $uid;
         $this->name = $name;
         $this->renderer = $bbapp->getRenderer();
         $this->bbapp = $bbapp;
@@ -128,7 +130,7 @@ class ContentRender
         $this->content = NULL;
 
         $this->initContentObject();
-        // Useless init cause it's already done by BackBuilder\Services\Local\ClassContent::getContentsRteParams(); and it used the wrong config.yml's section
+        // Useless init because it's already done by BackBuilder\Services\Local\ClassContent::getContentsRteParams(); and it used the wrong config.yml's section
         // (alohapluginstable instead of rteconfig)
         //$this->initFields();
     }
@@ -203,7 +205,7 @@ class ContentRender
         $withRender = is_bool($withRender) ? $withRender : true; //send render by default
         $stdClass = new \stdClass();
         $stdClass->name = $this->getname();
-        $stdClass->label = $this->getLabel();
+        $stdClass->label = null === $this->content->getProperty('name') ? $this->getName() : $this->content->getProperty('name');
         $stdClass->description = $this->content->getProperty('description');
         $stdClass->category = $this->getCategory();
         $stdClass->editables = $this->getFields();
@@ -213,18 +215,20 @@ class ContentRender
             'created' => 'Creation date',
             'modified' => 'Last modification date'
         );
-
+        $stdClass->isVisible = (!is_null($this->content->getProperty("is-visible"))) ? (boolean)$this->content->getProperty("is-visible") : true;
         if (is_array($this->content->getProperty()) && array_key_exists('indexation', $this->content->getProperty())) {
             foreach ($this->content->getProperty('indexation') as $indexedElement) {
                 $indexedElement = (array) $indexedElement;
-                $elements = explode('->', $indexedElement[0]);
-                $element = $elements[0];
+                if ('@' !== substr($indexedElement[0], 0, 1)) {
+                    $elements = explode('->', $indexedElement[0]);
+                    $element = $elements[0];
 
-                $value = $this->content->$element;
-                if ($value instanceof AClassContent) {
-                    $stdClass->sortable[$indexedElement[0]] = $value->getLabel();
-                } else {
-                    $stdClass->sortable[$indexedElement[0]] = $indexedElement[0];
+                    $value = $this->content->$element;
+                    if ($value instanceof AClassContent) {
+                        $stdClass->sortable[$indexedElement[0]] = $value->getLabel();
+                    } else {
+                        $stdClass->sortable[$indexedElement[0]] = $indexedElement[0];
+                    }
                 }
             }
         }

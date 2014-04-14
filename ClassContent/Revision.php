@@ -47,7 +47,7 @@ use Symfony\Component\Security\Core\User\UserInterface,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\RevisionRepository")
- * @Table(name="revision")
+ * @Table(name="revision", indexes={@index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}), @index(name="IDX_DRAFT", columns={"owner", "state"})})
  * @HasLifecycleCallbacks
  */
 class Revision extends AContent implements \Iterator, \Countable

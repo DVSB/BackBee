@@ -86,6 +86,12 @@ abstract class AClassWrapper implements IStreamWrapper
     protected $extends = '\BackBuilder\ClassContent\AClassContent';
 
     /**
+     * Trait(s) used by the class content
+     * @var string
+     */
+    protected $traits;
+
+    /**
      * The doctrine repository associated to the class content loaded
      * @var string
      */
@@ -128,13 +134,17 @@ namespace <namespace>;
  * @Table(name="content")
  * @HasLifecycleCallbacks
  */
-class <classname> extends <extends> {
-    public function __construct($uid = NULL, $options = NULL) {
+class <classname> extends <extends>
+{
+    <trait>
+    public function __construct($uid = NULL, $options = NULL) 
+    {
         parent::__construct($uid, $options);
         $this->_initData();
     }
 
-    protected function _initData() {
+    protected function _initData() 
+    {
         <defineDatas>
         <defineParam>
         <defineProps>
@@ -152,8 +162,11 @@ class <classname> extends <extends> {
     {
         foreach (spl_autoload_functions() as $autoloader) {
             if (true === is_array($autoloader) && $autoloader[0] instanceof \BackBuilder\AutoLoader\AutoLoader) {
-                $this->_autoloader = $autoloader[0];
-                break;
+                if($autoloader[0] !== null && $autoloader[0]->getApplication())
+                {
+                    $this->_autoloader = $autoloader[0];
+                    break;
+                }
             }
         }
 
@@ -187,17 +200,20 @@ class <classname> extends <extends> {
             '<classname>',
             '<repository>',
             '<extends>',
+            '<trait>',
             '<defineDatas>',
             '<defineParam>',
             '<defineProps>'), array($this->namespace,
             $this->classname,
             $this->repository,
             $this->extends,
+            $this->traits,
             (0 < count($defineDatas)) ? '$this' . implode('', $defineDatas) . ';' : '',
             (0 < count($defineParam)) ? '$this' . implode('', $defineParam) . ';' : '',
             (0 < count($defineProps)) ? '$this' . implode('', $defineProps) . ';' : ''), $this->template);
 
         return $phpCode;
+
     }
 
     /**

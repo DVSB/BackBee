@@ -44,46 +44,112 @@ class ContentBlocks extends AbstractServiceLocal
     private $_availableMedias;
 
     /**
+     * Returns array of content for a category
      * @exposed(secured=true)
+     * @return array
      */
     public function getContentsByCategory($name = "tous")
     {
-        $contents = array();
-        $cache = $this->bbapp->getBootstrapCache();
-        $cachedClassContents = $cache->load(Category::getCacheKey(), true);
-
-        if ($name == "tous") {
-            if (false !== $cachedClassContents) {
-                $contents = json_decode($cachedClassContents);
-            } else {
-                $categoryList = Category::getCategories($this->bbapp);
-                foreach ($categoryList as $cat) {
-                    $cat->setBBapp($this->bbapp);
-                    foreach ($cat->getContents() as $content)
-                        $contents[] = $content->__toStdObject(false);
-                }
-                $cache->save(Category::getCacheKey(), json_encode($contents));
+        $name = ucfirst($name);
+        $cache_id = md5(__CLASS__ . __METHOD__ . $name);
+        if (false !== $cached = $this->_loadCache($cache_id)) {
+            $contents = @unserialize($cached);
+            if (false !== $contents) {
+                return $contents;
             }
-        } else {
-            $category = new Category($name, $this->bbapp);
-            foreach ($category->getContents() as $content)
-                $contents[] = $content->__toStdObject(false);
         }
 
-        return $contents;
+        $contents = array();
+        $categories = Category::getCategories($this->getApplication()->getClassContentDir());
+
+        if ('Tous' === $name) {
+            foreach ($categories as $category) {
+                $this->_getContentsByCategory($category, $contents);
+            }
+        } elseif (true === array_key_exists($name, $categories)) {
+            $category = $categories[$name];
+            $this->_getContentsByCategory($category, $contents);
+        }
+
+        $this->_saveCache($cache_id, serialize(array_values($contents)));
+        return array_values($contents);
     }
 
     /**
-     * @exposed : true
-     * @protected : true
+     * Returns an array of all content categories defined for this BBApp instance
+     * @exposed(secured=true)
+     * @return array
      */
     public function getCategories()
     {
+        $cache_id = md5(__CLASS__ . __METHOD__);
+        if (false !== $cached = $this->_loadCache($cache_id)) {
+            $categories = @unserialize($cached);
+            if (false !== $categories) {
+                return $categories;
+            }
+        }
+
         $categories = array();
-        $categoryList = Category::getCategories($this->bbapp);
-        foreach ($categoryList as $category)
+        $categoryList = Category::getCategories($this->getApplication()->getClassContentDir());
+
+        foreach ($categoryList as $category) {
             $categories[] = $category->__toStdObject();
+        }
+
+        $this->_saveCache($cache_id, serialize($categories));
         return $categories;
+    }
+
+    /**
+     * Gets ContentRender for a category
+     * @param \BackBuilder\Services\Content\Category $category
+     * @param array $contents
+     */
+    private function _getContentsByCategory(Category $category, array &$contents)
+    {
+        foreach ($category->getClassnames() as $classname) {
+            if (false === in_array($classname, $contents) &&
+                    true === class_exists($classname)) {
+                $content = new ContentRender(str_replace('\BackBuilder\ClassContent\\', '', $classname), $this->getApplication(), $category->getName());
+                $contents[$classname] = $content->__toStdObject(false);
+            }
+        }
+    }
+
+    /**
+     * Returns the cache element for îd if exists, FALSE otherwise
+     * @param string $id
+     * @return string
+     */
+    private function _loadCache($id)
+    {
+        if (true === $this->getApplication()->isDebugMode()) {
+            return false;
+        }
+
+        $cache = $this->getApplication()->getCacheControl();
+        if (null === $cache) {
+            return false;
+        }
+
+        return $cache->load($id);
+    }
+
+    /**
+     * Saves the data in cache with id $id if cache exists
+     * @param string $id
+     * @param string $data
+     * @return boolean
+     */
+    private function _saveCache($id, $data)
+    {
+        $cache = $this->getApplication()->getCacheControl();
+        if (null === $cache) {
+            return false;
+        }
+
+        return $cache->save($id, $data);
     }
 
     /* bb ContentType - methods */
@@ -95,7 +161,7 @@ class ContentBlocks extends AbstractServiceLocal
             $node = new \stdClass();
             $node->attr = new \stdClass();
             $node->attr->rel = "contentType_" . $content->name;
-            $node->attr->id = "node_" . uniqid();
+            $node->attr->id = "node_" . uniqid(rand());
             $node->data = $content->label;
             $node->state = "leaf";
             $result[] = $node;
@@ -122,12 +188,11 @@ class ContentBlocks extends AbstractServiceLocal
     /**
      * @exposed(secured=true)
      */
-    public function getBBContentBrowserTree($filters = array())
+    public function getBBContentBrowserTree($filters = array(), $site = null)
     {
 
         $tree = array();
         $children = array();
-
 
         $root = new \stdClass();
         $root->attr = new \stdClass();
@@ -140,8 +205,6 @@ class ContentBlocks extends AbstractServiceLocal
         $accepts = (array_key_exists("accept", $filters) && $filters["accept"] != 'all') ? explode(',', trim($filters["accept"])) : "all";
         $useFilter = ( $accepts == "all") ? false : true;
 
-        $categories = ($useFilter) ? null : Category::getCategories($this->bbapp);
-
         /* all */
         if ($useFilter) {
             /* Ajouter à la racine */
@@ -151,21 +214,22 @@ class ContentBlocks extends AbstractServiceLocal
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
                 $leaf->attr->rel = "contentType_" . $accept;
-                $leaf->attr->id = uniqid();
+                $leaf->attr->id = uniqid(rand());
                 $leaf->data = $object->getProperty('name');
                 $leaf->state = "leaf";
                 $children[] = $leaf;
             }
         } else {
+            $categories = $this->getCategories();
             if (is_array($categories)) {
                 foreach ($categories as $category) {
-                    $catInfos = $category->__toStdObject();
-                    $categoryContents = $this->getContentsByCategory($catInfos->name);
+                    $catInfos = $category;
+                    $categoryContents = $this->getContentsByCategory($category->name);
                     $leaf = new \stdClass();
                     $leaf->attr = new \stdClass();
-                    $leaf->attr->rel = $catInfos->name;
-                    $leaf->attr->id = 'node_' . $catInfos->uid;
-                    $leaf->data = $catInfos->label;
+                    $leaf->attr->rel = $category->name;
+                    $leaf->attr->id = 'node_' . $category->uid;
+                    $leaf->data = $category->label;
                     $leaf->state = 'leaf';
                     $leaf->children = $this->contentToLeaf($categoryContents);
                     $children[] = $leaf;
@@ -236,17 +300,17 @@ class ContentBlocks extends AbstractServiceLocal
     /**
      * @exposed(secured=true)
      */
-    public function searchContent($params = array(), $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0)
+    public function searchContent($params = array(), $site_uid = null, $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0)
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
-
         $catName = (isset($params['typeField'])) ? $params['typeField'] : $params['catName'];
         $result = array("numResults" => 0, "rows" => array());
-        if (!$catName)
+        if (!$catName) {
             return $result;
-
+        }
+        
         $em = $this->bbapp->getEntityManager();
         $contentsList = array();
         $limitInfos = array("start" => (int) $start, "limit" => (int) $limit);
@@ -269,7 +333,7 @@ class ContentBlocks extends AbstractServiceLocal
         }
         /* default value is true */
         $params["limitToOnline"] = false;
-        $params["site_uid"] = $this->bbapp->getSite()->getUid();
+        $params["site_uid"] = (null === $site_uid) ? $this->bbapp->getSite()->getUid() : $site_uid;
         $result["numResults"] = $em->getRepository("BackBuilder\ClassContent\AClassContent")->countContentsBySearch($classnames, $conditions = $params);
         $items = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findContentsBySearch($classnames, $orderInfos, $limitInfos, $conditions = $params);
         if ($items) {
@@ -283,15 +347,21 @@ class ContentBlocks extends AbstractServiceLocal
                     $contentInfos = new \stdClass();
                     $contentInfos->uid = $item->getUid();
                     $contentInfos->title = String::truncateText($currentItemTitle, 50); //truncate
-                    $contentInfos->ico = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
+                    $contentInfos->ico = 'ressources/img/contents/' . str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass) . '.png';
                     $contentInfos->type = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->classname = $itemClass;
                     $contentInfos->created = $item->getCreated()->format("d/m/Y");
                     $contentInfos->completeTitle = $currentItemTitle;
 
+                    if (null !== $image = $item->getFirstElementOfType('BackBuilder\ClassContent\Media\image')) {
+                        if (null !== $image->image && $image->image->path) {
+                            $contentInfos->ico = $this->getApplication()->getRenderer()->getUri('images/' . substr($image->image->path, 0, strrpos($image->image->path, '.')) . '/' . $image->image->originalname);
+                        }
+                    }
+
                     $contentsList[] = $contentInfos;
                 } catch (\Exception $e) {
-                    /*                     * decrément total en cas d'erreur* */
+                    /** decrément total en cas d'erreur* */
                     $result["numResults"] = (int) $result["numResults"] - 1;
                     continue;
                 }
@@ -317,7 +387,7 @@ class ContentBlocks extends AbstractServiceLocal
             $stdClass->max_item = "unlimited";
             $stdClass->max_width_droppable = 16;
             $stdClass->min_width_droppable = 2;
-            $stdClass->uid = uniqid();
+            $stdClass->uid = uniqid(rand());
             return $stdClass;
         }
     }
@@ -481,8 +551,7 @@ class ContentBlocks extends AbstractServiceLocal
                         $result->bb5_form->$key->bb5_fieldset = false;
                         $result->bb5_form->$key->bb5_isLoaded = (NULL !== $value) ? true : false;
                         $result->bb5_form->$key->bb5_value[] = htmlentities($value, ENT_QUOTES, 'UTF-8');
-                    } elseif ($value instanceof \BackBuilder\ClassContent\AClassContent
-                            && false === ($value instanceof \BackBuilder\ClassContent\ContentSet)) {
+                    } elseif ($value instanceof \BackBuilder\ClassContent\AClassContent && false === ($value instanceof \BackBuilder\ClassContent\ContentSet)) {
                         // Find a draft if exists
                         if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($value, $this->bbapp->getBBUserToken())) {
                             $value->setDraft($draft);

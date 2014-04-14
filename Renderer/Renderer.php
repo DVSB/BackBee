@@ -248,6 +248,8 @@ class Renderer extends ARenderer
 
         $renderer->updatesAfterClone();
 
+        $this->setRenderParams($renderer, $params);
+
         $renderer->setObject($obj)
                 ->setMode($mode, $ignoreModeIfNotSet)
                 ->_triggerEvent('prerender');
@@ -264,7 +266,7 @@ class Renderer extends ARenderer
             // Rendering a page with layout
             if (true === is_a($obj, '\BackBuilder\NestedNode\Page')) {
                 $renderer->setCurrentPage($obj);
-                $renderer->__render = $renderer->renderPage($template);
+                $renderer->__render = $renderer->renderPage($template, $params);
                 $renderer->insertHeaderAndFooterScript();
                 $bbapp->debug('Rendering Page OK');
             } else {
@@ -394,7 +396,7 @@ class Renderer extends ARenderer
      * @return string The rendered output
      * @throws RendererException
      */
-    private function renderPage($layoutFile = null)
+    private function renderPage($layoutFile = null, $params = null)
     {
         $this->setNode($this->getObject());
 
@@ -519,18 +521,27 @@ class Renderer extends ARenderer
             $this->setParam($this->_object->getParam());
         }
 
-        if (null !== $params) {
-            $params = (array) $params;
-            foreach ($params as $param => $value) {
-                $this->setParam($param, $value);
-            }
-        }
-
         if (null !== $bbapp) {
             $bbapp->debug(sprintf('Rendering content `%s(%s)`.', get_class($this->_object), $this->_object->getUid()));
         }
 
         return $this->renderTemplate();
+    }
+
+    /**
+     * Set parameters to a renderer object in parameter
+     *
+     * @param ARenderer $render
+     * @param array $params
+     */
+    private function setRenderParams(ARenderer $render, $params)
+    {
+        if (null !== $params) {
+            $params = (array) $params;
+            foreach ($params as $param => $value) {
+                $render->setParam($param, $value);
+            }
+        }
     }
 
     /**
@@ -691,15 +702,16 @@ class Renderer extends ARenderer
     }
 
     /**
-     * Compute route which matched with routeName and replace every token by its values specified in routeParams;
+     * Compute route which matched with route_name and replace every token by its values specified in route_params;
      * You can also give base url (by default current site base url will be used)
-     * @param  string      $routeName   
-     * @param  array|null  $routeParams 
-     * @param  string|null $baseUrl     
+     * @param  string      $route_name   
+     * @param  array|null  $route_params 
+     * @param  string|null $base_url     
+     * @param  boolean     $add_ext
      * @return string
      */
-    public function generateUrlByRouteName($routeName, array $routeParams = null, $baseUrl = null)
+    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true)
     {
-        return $this->_application->getRouting()->getUrlByRouteName($routeName, $routeParams, $baseUrl);
+        return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext);
     }
 }

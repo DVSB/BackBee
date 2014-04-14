@@ -72,7 +72,13 @@ class SecurityContext extends sfSecurityContext
     private $_aclprovider;
     private $_logout_listener;
     private $_config;
-
+    
+    /**
+     * An encoder factory
+     * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
+     */
+    private $_encoderfactory;
+    
     public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager = NULL, AccessDecisionManagerInterface $accessDecisionManager = NULL)
     {
         $this->_application = $application;
@@ -95,7 +101,8 @@ class SecurityContext extends sfSecurityContext
             $this->_authmanager->setEventDispatcher($this->_dispatcher);
         }
 
-        $this->createProviders($securityConfig)
+        $this->_createEncoderFactory($securityConfig)
+             ->createProviders($securityConfig)
              ->_createACLProvider($securityConfig)
              ->_createFirewallMap($securityConfig)
              ->_registerFirewall();
@@ -131,6 +138,28 @@ class SecurityContext extends sfSecurityContext
         parent::__construct($this->_authmanager, $accessDecisionManager);
     }
 
+    /**
+     * Create an encoders factory if need
+     * @param array $config
+     * @return \BackBuilder\Security\SecurityContext
+     */
+    public function _createEncoderFactory(array $config)
+    {
+        if (true === array_key_exists('encoders', $config)) {
+            $this->_encoderfactory = new \Symfony\Component\Security\Core\Encoder\EncoderFactory($config['encoders']);
+        }
+        return $this;
+    }
+    
+    /**
+     * Returns the encoder factory or NULL if not defined
+     * @return \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface|NULL
+     */
+    public function getEncoderFactory()
+    {
+        return $this->_encoderfactory;
+    }
+    
     public function createFirewall($name, $config)
     {
         $config['firewall_name'] = $name;
@@ -248,13 +277,19 @@ class SecurityContext extends sfSecurityContext
             $key = array_key_exists('secret', $provider) ? $provider['secret'] : 'bb4_secret_key';
 
             if (array_key_exists('entity', $provider)) {
+                $manager = $this->_application->getEntityManager();
+                if (array_key_exists('manager_name', $provider['entity'])) {
+                    $manager = $provider['entity']['manager_name']->getEntityManager();
+                }
+                
                 if (array_key_exists('class', $provider['entity']) && array_key_exists('provider', $provider['entity'])) {
                     $providerClass = $provider['entity']['provider'];
-                    $this->_userproviders[$name] = new $providerClass($this->_application->getEntityManager()->getRepository($provider['entity']['class']));
+                    $this->_userproviders[$name] = new $providerClass($manager->getRepository($provider['entity']['class']));
                 } elseif (array_key_exists('class', $provider['entity'])) {
-                    $this->_userproviders[$name] = $this->_application->getEntityManager()->getRepository($provider['entity']['class']);
+                    $this->_userproviders[$name] = $manager->getRepository($provider['entity']['class']);
                 }
             }
+
             if (array_key_exists('webservice', $provider)) {
                 if (array_key_exists('class', $provider['webservice'])) {
                     $userprovider = $provider['webservice']['class'];

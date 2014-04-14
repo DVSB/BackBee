@@ -39,6 +39,8 @@ class Keyword extends AbstractServiceLocal
      */
     public function getKeywordTree($root_uid)
     {
+        return array();
+
         $em = $this->bbapp->getEntityManager();
         $tree = array();
         if ($root_uid && $root_uid !== null) {
@@ -141,11 +143,23 @@ class Keyword extends AbstractServiceLocal
      * @exposed : true
      * @secured : true
      */
-    public function getKeywordsList()
+    public function getKeywordsList($term = null, $limit = 10)
     {
         $em = $this->bbapp->getEntityManager();
-        $root = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->getRoot();
-        $keywordList = $em->getRepository("\BackBuilder\NestedNode\KeyWord")->getDescendants($root);
+
+        $q = $em->getRepository("\BackBuilder\NestedNode\KeyWord")
+                ->createQueryBuilder('k')
+                ->orderBy('k._keyWord', 'ASC')
+                ->setMaxResults($limit);
+
+        if (null !== $term) {
+            $q->where('k._keyWord LIKE :term')
+                    ->setParameter('term', $term . '%');
+        }
+
+        $keywordList = $q->getQuery()
+                ->getResult();
+
         $keywordContainer = array();
         if (!is_null($keywordList)) {
             foreach ($keywordList as $keyword) {
@@ -156,14 +170,41 @@ class Keyword extends AbstractServiceLocal
             }
             /* save cache here */
         }
+
         return $keywordContainer;
     }
 
-    public function getKeywordByIds()
+    /**
+     * @exposed : true
+     * @secured : true
+     */
+    public function getKeywordByIds($uids)
     {
-        $em = $this->bbapp->getEntityManager();
+        $keywords = array();
+        if (0 < count($uids)) {
+            $keywords = $this->bbapp
+                    ->getEntityManager()
+                    ->getRepository("\BackBuilder\NestedNode\KeyWord")
+                    ->createQueryBuilder('k')
+                    ->where('k._uid IN (:uids)')
+                    ->orderBy('k._keyWord', 'ASC')
+                    ->setParameter('uids', $uids)
+                    ->getQuery()
+                    ->getResult();
+        }
+
+        $keywordContainer = array();
+        if (!is_null($keywords)) {
+            foreach ($keywords as $keyword) {
+                $suggestion = new \stdClass();
+                $suggestion->label = $keyword->getKeyWord();
+                $suggestion->value = $keyword->getUid();
+                $keywordContainer[] = $suggestion;
+            }
+            /* save cache here */
+        }
+
+        return $keywordContainer;
     }
 
 }
-
-?>

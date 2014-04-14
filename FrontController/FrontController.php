@@ -367,36 +367,32 @@ class FrontController implements HttpKernelInterface {
 
     public function rssAction($uri = null) 
     {
-        if (null === $this->_application) {
+    	if (NULL === $this->_application)
             throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
-        }
 
-        if (false === $this->_application->getContainer()->has('site')) {
+        if (FALSE === $this->_application->getContainer()->has('site'))
             throw new FrontControllerException('A BackBuilder\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
-        }
 
         $site = $this->_application->getContainer()->get('site');
-        if (false !== $ext = strrpos($uri, '.')) {
+        if (FALSE !== $ext = strrpos($uri, '.'))
             $uri = substr($uri, 0, $ext);
-        }
 
         if ('_root_' == $uri) {
             $page = $this->_application->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page')
-                ->getRoot($site);
+                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->getRoot($site);
         } else {
             $page = $this->_application->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page')
-                ->findOneBy(array('_site' => $site,
-                    '_url' => '/' . $uri,
-                    '_state' => Page::getUndeletedStates()
-                ));
+                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->findOneBy(array('_site' => $site,
+                '_url' => '/' . $uri,
+                '_state' => Page::getUndeletedStates()));
         }
 
         try {
             $this->_application->info(sprintf('Handling URL request `rss%s`.', $uri));
 
-            $response = new Response($this->_application->getRenderer()->render($page, 'rss', null, 'rss.phtml', true));
+            $response = new Response($this->_application->getRenderer()->render($page, 'rss', null, 'rss.phtml'));
             $response->headers->set('Content-Type', 'text/xml');
             $response->setClientTtl(15);
             $response->setTtl(15);

@@ -26,6 +26,7 @@ use BackBuilder\Security\Token\UsernamePasswordToken,
     BackBuilder\Security\Exception\SecurityException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
     Symfony\Component\Security\Core\User\UserInterface,
+    Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface,
     Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 
 /**
@@ -47,12 +48,19 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
     private $_userProvider;
 
     /**
+     * The encoders factory
+     * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
+     */
+    private $_encoderFactory;
+
+    /**
      * Class constructor
      * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
      */
-    public function __construct(UserProviderInterface $userProvider)
+    public function __construct(UserProviderInterface $userProvider, EncoderFactoryInterface $encoderFactory = null)
     {
         $this->_userProvider = $userProvider;
+        $this->_encoderFactory = $encoderFactory;
     }
 
     /**
@@ -112,15 +120,50 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function _authenticateUser(TokenInterface $token, UserInterface $user)
     {
-        if (null !== $user->getSalt() && call_user_func($user->getSalt(), $token->getCredentials()) === $user->getPassword())
-            $authenticatedToken = new UsernamePasswordToken($user, $user->getPassword(), $user->getRoles());
-        elseif ($token->getCredentials() === $user->getPassword()) {
-            $authenticatedToken = new UsernamePasswordToken($user, $user->getPassword(), $user->getRoles());
+        if (null === $this->_encoderFactory) {
+            return $this->_authenticateWithoutEncoder($token, $user);
+        } else {
+            return $this->_authenticateWithEncoder($token, $user);
+        }
+    }
+
+    /**
+     * Authenticate a token according to the user provided with password encoder
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
+     */
+    private function _authenticateWithEncoder(TokenInterface $token, UserInterface $user)
+    {
+        try {
+            $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($user);
+            if (true === $this->_encoderFactory
+                            ->getEncoder($classname)
+                            ->isPasswordValid($user->getPassword(), $token->getCredentials(), $user->getSalt())) {
+                return new UsernamePasswordToken($user, $user->getPassword(), $user->getRoles());
+            }
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Authenticate a token according to the user provided without any password encoders
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
+     */
+    private function _authenticateWithoutEncoder(TokenInterface $token, UserInterface $user)
+    {
+        //@todo: don't use salt in call_user_func anymore
+        if (null !== $user->getSalt() &&
+                call_user_func($user->getSalt(), $token->getCredentials()) === $user->getPassword()) {
+            return new UsernamePasswordToken($user, $user->getPassword(), $user->getRoles());
+        } elseif ($token->getCredentials() === $user->getPassword()) {
+            return new UsernamePasswordToken($user, $user->getPassword(), $user->getRoles());
         } else {
             return false;
         }
-
-        return $authenticatedToken;
     }
 
 }

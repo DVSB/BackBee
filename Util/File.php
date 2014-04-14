@@ -70,19 +70,19 @@ class File
                 $parts[] = $part;
             }
         }
-        
-        $path = (isset($parse_url['scheme']) ? $parse_url['scheme'].'://' : '') .
+
+        $path = (isset($parse_url['scheme']) ? $parse_url['scheme'] . '://' : '') .
                 (isset($parse_url['user']) ? $parse_url['user'] : '') .
-                (isset($parse_url['pass']) ? ':'.$parse_url['pass'] : '') .
+                (isset($parse_url['pass']) ? ':' . $parse_url['pass'] : '') .
                 (isset($parse_url['user']) || isset($parse_url['pass']) ? '@' : '') .
                 (isset($parse_url['host']) ? $parse_url['host'] : '') .
-                (isset($parse_url['port']) ? ':'.$parse_url['port'] : '') .
+                (isset($parse_url['port']) ? ':' . $parse_url['port'] : '') .
                 implode('/', $parts);
-        
+
         if (false === file_exists($path)) {
             return false;
         }
-        
+
         return $path;
     }
 
@@ -186,7 +186,21 @@ class File
 
         return substr($filename, strrpos($filename, '.') - strlen($filename) + ($withDot ? 0 : 1));
     }
+    
+    /**
+     * Removes the extension file from its name
+     * @param string $filename
+     * @return string
+     */
+    public static function removeExtension($filename)
+    {
+        if (false === strrpos($filename, '.')) {
+            return $filename;
+        }
 
+        return substr($filename, 0, strrpos($filename, '.'));
+    }
+    
     /**
      * Makes directory
      * @param string $path The directory path
@@ -262,6 +276,42 @@ class File
         }
 
         return true;
+    }
+
+    /**
+     * Looks recursively in $basedir for files with $extension
+     * @param string $basedir
+     * @param string $extension
+     * @return array
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
+     */
+    public static function getFilesRecursivelyByExtension($basedir, $extension)
+    {
+        if (false === is_readable($basedir)) {
+            throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
+        }
+
+        $files = array();
+        $parse_url = parse_url($basedir);
+        if (false !== $parse_url && isset($parse_url['scheme'])) {
+            $directory = new \RecursiveDirectoryIterator($basedir);
+            $iterator = new \RecursiveIteratorIterator($directory);
+            $regex = new \RegexIterator($iterator, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::GET_MATCH);
+
+            foreach ($regex as $file) {
+                $files[] = $file[0];
+            }
+        } else {
+            $pattern = '';
+            foreach (str_split($extension) as $letter) {
+                $pattern .= '[' . strtolower($letter) . strtoupper($letter) . ']';
+            }
+
+            $pattern = $basedir . DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.' . $pattern;
+            $files = glob($pattern, GLOB_BRACE);
+        }
+
+        return $files;
     }
 
 }

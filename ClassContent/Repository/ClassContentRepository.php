@@ -28,6 +28,8 @@ use BackBuilder\NestedNode\Page,
     BackBuilder\BBApplication;
 use Doctrine\ORM\Tools\Pagination\Paginator,
     Doctrine\ORM\Query,
+    Doctrine\ORM\Query\ResultSetMapping,
+    Doctrine\ORM\Query\ResultSetMappingBuilder,
     Doctrine\ORM\EntityRepository;
 
 /**
@@ -41,7 +43,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator,
  */
 class ClassContentRepository extends EntityRepository
 {
-
     /**
      * Get all content uids owning the provided content
      * @param \BackBuilder\ClassContent\AClassContent $content
@@ -128,7 +129,7 @@ class ClassContentRepository extends EntityRepository
                     $crit[1] = '=';
                 }
 
-                $alias = uniqid('i');
+                $alias = uniqid('i'.rand());
                 $q->leftJoin('c._indexation', $alias)
                         ->andWhere($alias . '._field = :field' . $alias)
                         ->andWhere($alias . '._value ' . $crit[1] . ' :value' . $alias)
@@ -197,6 +198,23 @@ class ClassContentRepository extends EntityRepository
                 }
             }
         }
+
+        /* handle indexed values here */
+        if (true === array_key_exists('indexedcriteria', $selector) &&
+                true === is_array($selector['indexedcriteria'])) {
+            foreach ($selector['indexedcriteria'] as $field => $values) {
+                $values = array_filter((array) $values);
+                if (0 < count($values)) {
+                    $alias = md5($field);
+                    $q->leftJoin('c._indexation', $alias)
+                            ->andWhere($alias . '._field = :f' . $alias)
+                            ->andWhere($alias . '._value IN (:v' . $alias . ')')
+                            ->setParameter('f' . $alias, $field)
+                            ->setParameter('v' . $alias, $values);
+                }
+            }
+        }
+
         if (is_array($classnameArr) && count($classnameArr)) {
             $q->andWhere($this->addInstanceFilters($q->getQuery(), "c", $classnameArr));
         }
@@ -212,8 +230,6 @@ class ClassContentRepository extends EntityRepository
                     ->orderBy('isort._value', count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'asc');
         }
         $q->setFirstResult($start + $delta)->setMaxResults($limit ? $limit : (array_key_exists('limit', $selector) ? $selector['limit'] : 10));
-
-        //var_dump($q->getQuery()->getSQL());
 
         return $multipage ? new Paginator($q) : $q->getQuery()->getResult();
     }
@@ -316,7 +332,6 @@ class ClassContentRepository extends EntityRepository
     public function findContentsByUids(array $uids)
     {
         $result = array();
-
         try {
             if (0 < count($uids)) {
                 // Getting classnames for provided uids
@@ -362,6 +377,33 @@ class ClassContentRepository extends EntityRepository
             return $classFilter;
         }
         return $qlString;
+    }
+
+    private function getPageMainContentSets($selectedNode, $online = false)
+    {
+        $rsm = new ResultSetMapping();
+        $rsm->addEntityResult("BackBuilder\ClassContent\ContentSet", "c");
+
+        $rsm->addFieldResult('c', 'uid', '_uid');
+        $sql = "Select c.uid from content c LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid";
+        $sql .= " LEFT JOIN page as p ON p.contentset = sc.parent_uid";
+        $sql .= " where p.uid = :selectedNodeUid";
+        $sql .=" AND p.root_uid = :selectedPageRoot";
+        $sql .= " AND p.leftnode >= :selectedPageLeftnode";
+        $sql .= " AND p.rightnode <= :selectedPageRightnode";
+        if ($online) {
+            $sql .=" AND p.state IN(:selectedPageState)";
+        }
+        $query = $this->_em->createNativeQuery($sql, $rsm);
+        $query->setParameters(array(
+            "selectedPageRoot" => $selectedNode->getRoot(),
+            "selectedNodeUid" => $selectedNode->getUid(),
+            "selectedPageLeftnode" => $selectedNode->getLeftnode(),
+            "selectedPageRightnode" => $selectedNode->getRightnode()));
+        if ($online) {
+            $query->setParameter("selectedPageState", array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
+        }
+        return $query->getResult();
     }
 
     /**
@@ -493,7 +535,7 @@ class ClassContentRepository extends EntityRepository
                 continue;
             }
             $criterion = (object) $criterion;
-            $alias = uniqid("i");
+            $alias = uniqid("i".rand());
             $qb->leftJoin("c._indexation", $alias)
                     ->andWhere($alias . "._field = :field" . $alias)
                     ->andWhere($alias . "._value " . $criterion->op . " :value" . $alias)

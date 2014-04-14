@@ -73,7 +73,7 @@ class IndexationRepository extends EntityRepository
     {
         $content_uids = $this->_getAClassContentUids($contents);
 
-        return $this->_replaceIdxSiteContents($site->getUid(), $content_uids);
+        return $this->replaceIdxSiteContentsUid($site->getUid(), $content_uids);
     }
 
     /**
@@ -112,7 +112,7 @@ class IndexationRepository extends EntityRepository
      * @param array $content_uids
      * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
-    private function _replaceIdxSiteContents($site_uid, array $content_uids)
+    public function replaceIdxSiteContentsUid($site_uid, array $content_uids)
     {
         if (0 < count($content_uids)) {
             $command = 'REPLACE';

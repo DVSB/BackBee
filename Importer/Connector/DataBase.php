@@ -69,9 +69,9 @@ class DataBase implements IImporterConnector
      */
     public function find($string)
     {
-        $statement = $this->_connector->getConnection()->executeQuery($string);
+        $statement = $this->_connector->getConnection()->query($string);
 
-        return $statement->fetchAll();
+        return $statement;
     }
 
     /**

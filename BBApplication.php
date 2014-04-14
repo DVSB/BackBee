@@ -22,7 +22,6 @@
 namespace BackBuilder;
 
 use Exception;
-
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
@@ -32,11 +31,9 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File;
-
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager;
-
 use Symfony\Component\Config\FileLocator,
     BackBuilder\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
@@ -106,6 +103,7 @@ class BBApplication
                 ->_initContextConfig()
                 ->_initAutoloader()
                 ->_initContentWrapper()
+                ->_initEntityManager()
                 ->_initBundles();
 
         // Force container to create SecurityContext object to activate listener
@@ -113,7 +111,8 @@ class BBApplication
 
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
-                setLocale(LC_ALL, $encoding['locale']);
+                if(setLocale(LC_ALL, $encoding['locale']) === false)
+                    Throw new Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
         }
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
@@ -150,12 +149,14 @@ class BBApplication
         $dirToLookingFor[] = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
 
         foreach ($dirToLookingFor as $dir) {
-            if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
+            $fileService = $dir . DIRECTORY_SEPARATOR . 'services.';
+
+            if (file_exists($fileService . 'yml') && true === is_readable($fileService . 'yml')) {
                 // Define where to looking for services.yml
                 $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
                 $loader->load('services.yml');
-            } elseif (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.xml')) {
+            } elseif (file_exists($fileService . 'xml') && true === is_readable($fileService . 'xml')) {
                 // Define where to looking for services.yml
                 $loader = new XmlFileLoader($this->_container, new FileLocator(array($dir)));
                 // Load every services definitions into our container
@@ -182,8 +183,17 @@ class BBApplication
             $config = Yaml::parse($filename);
         }
 
+
+
+        // Set timezone
+        if (true === isset($config['date']) && true === isset($config['date']['timezone'])) {
+            date_default_timezone_set($config['date']['timezone']);
+        }
+        else {
+            date_default_timezone_set('UTC');
+        }
+
         // Set every bbapp parameters
-        
         // define context
         $this->_container->setParameter('bbapp.context', $this->getContext());
 
@@ -245,7 +255,8 @@ class BBApplication
                 ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
                 ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Controller')))
-                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')));
+                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')))
+                ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Traits')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
@@ -253,7 +264,8 @@ class BBApplication
                     ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Templates', 'helpers')))
                     ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Listeners')))
                     ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Controller')))
-                    ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')));
+                    ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')))
+                    ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Traits')));
         }
 
         $this->getAutoloader()
@@ -281,7 +293,7 @@ class BBApplication
      */
     public function getMailer()
     {
-        if (false === $this->getContainer()->has('mailer')) {
+        if (false === $this->getContainer()->has('mailer') || is_null($this->getContainer()->get('mailer'))) {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
                 $smtp = (is_array($mailer_config['smtp'])) ? reset($mailer_config['smtp']) : $mailer_config['smtp'];
                 $port = (is_array($mailer_config['port'])) ? reset($mailer_config['port']) : $mailer_config['port'];
@@ -307,9 +319,9 @@ class BBApplication
     public function isDebugMode()
     {
         if ($this->getConfig()->sectionHasKey('parameters', 'debug')) {
-            return (bool)$this->getConfig()->getParametersConfig('debug');
+            return (bool) $this->getConfig()->getParametersConfig('debug');
         }
-        return (bool)$this->_debug;
+        return (bool) $this->_debug;
     }
 
     /**
@@ -353,52 +365,33 @@ class BBApplication
      */
     private function _initEntityManager()
     {
-        if (null === $doctrineConfig = $this->getConfig()->getDoctrineConfig())
+        if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
             throw new BBException('None database configuration found');
+        }
 
-        // New database configuration
-        $config = new Configuration;
-        $driverImpl = $config->newDefaultAnnotationDriver();
-        $config->setMetadataDriverImpl($driverImpl);
+        if (false === array_key_exists('dbal', $doctrine_config)) {
+            throw new BBException('None dbal configuration found');
+        }
 
-        $proxiesPath = $this->getCacheDir() . DIRECTORY_SEPARATOR . 'Proxies';
-        $config->setProxyDir($proxiesPath);
-        $config->setProxyNamespace('Proxies');
+        if (false === array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['proxy_ns'] = 'Proxies';
+        }
 
-        $config->setSQLLogger($this->getLogging());
+        if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir() . DIRECTORY_SEPARATOR . 'Proxies';
+        }
+
+        if (true === array_key_exists('orm', $doctrine_config)) {
+            $doctrine_condif['dbal']['orm'] = $doctrine_config['orm'];
+        }
 
         // Init ORM event
         $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
-        // Create EntityManager
-        $connectionOptions = isset($doctrineConfig['dbal']) ? $doctrineConfig['dbal'] : array();
-        $this->getContainer()->set('em', EntityManager::create($connectionOptions, $config, $evm));
-
-        try {
-            $this->getContainer()->get('em')->getConnection()->connect();
-        } catch (\Exception $e) {
-            throw new DatabaseConnectionException('Unable to connect to the database.', 0, $e);
-        }
-
-        if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['charset'])) {
-            try {
-                $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_client = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
-                $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_connection = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
-                $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION character_set_results = "' . addslashes($doctrineConfig['dbal']['charset']) . '";');
-            } catch (\Exception $e) {
-                throw new BBException(sprintf('Invalid database character set `%s`', $doctrineConfig['dbal']['charset']), BBException::INVALID_ARGUMENT, $e);
-            }
-        }
-
-        if (isset($doctrineConfig['dbal']) && isset($doctrineConfig['dbal']['collation'])) {
-            try {
-                $this->getContainer()->get('em')->getConnection()->executeQuery('SET SESSION collation_connection = "' . addslashes($doctrineConfig['dbal']['collation']) . '";');
-            } catch (\Exception $e) {
-                throw new BBException(sprintf('Invalid database collation `%s`', $doctrineConfig['dbal']['collation']), BBException::INVALID_ARGUMENT, $e);
-            }
-        }
+        $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogging(), $evm);
+        $this->getContainer()->set('em', $em);
 
         $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
 
@@ -513,7 +506,7 @@ class BBApplication
                 foreach ($this->_bundles as $bundle)
                     $bundle->stop();
             }
-            
+
             // @todo
             // stop services
 
@@ -600,12 +593,16 @@ class BBApplication
     public function getBBUserToken()
     {
         $token = $this->getSecurityContext()->getToken();
-        if ((null === $token || !($token instanceof BackBuilder\Security\Token\BBUserToken)) && $this->getContainer()->has('bb_session')) {
-            if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
-                $token = unserialize($token);
+        if ((null === $token || !($token instanceof BackBuilder\Security\Token\BBUserToken))) {
+            if (is_null($this->getContainer()->get('bb_session'))) {
+                $token = null;
+            } else {
+                if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
+                    $token = unserialize($token);
 
-                if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken')) {
-                    $token = null;
+                    if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken')) {
+                        $token = null;
+                    }
                 }
             }
         }
@@ -647,7 +644,7 @@ class BBApplication
         if (null === $this->_cachedir) {
             $this->_cachedir = $this->getContainer()->getParameter('bbapp.cache.dir');
         }
-        
+
         return $this->_cachedir;
     }
 
@@ -664,7 +661,9 @@ class BBApplication
      */
     public function getConfig()
     {
-        return $this->getContainer()->get('config');
+        return $this->getContainer()
+                        ->get('config')
+                        ->setContainer($this->getContainer());
     }
 
     public function getConfigDir()
@@ -753,7 +752,8 @@ class BBApplication
                 array_unshift($this->_classcontentdir, $this->getRepository() . '/ClassContent');
             }
 
-            array_walk($this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            //array_walk($this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            array_map( array('BackBuilder\Util\File','resolveFilepath') , $this->_classcontentdir);
         }
 
         return $this->_classcontentdir;
@@ -813,7 +813,8 @@ class BBApplication
                 }
             }
 
-            array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            //array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
+            array_map(array('BackBuilder\Util\File', 'resolveFilepath'), $this->_resourcedir);
         }
 
         return $this->_resourcedir;

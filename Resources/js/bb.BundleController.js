@@ -1,4 +1,3 @@
-var bb = bb || {};
 /**
  * @example How to route one action.
  * 
@@ -34,130 +33,142 @@ var bb = bb || {};
 (function (window) {
     "use strict";
 
+    var bb = window.bb || {};
+    bb.bundle = bb.bundle || {};
+
     define(["jscore"], function () {
 
-        return (function(global){
+        return (function () {
             /**
              * bundle popin identifier
              * 
              * @type {string}
              */
-            var popinClass = '.bb5-dialog-admin-bundle';
-
+            var popinClass = '.bb5-dialog-admin-bundle',
             /**
              * Bundle controller object.
              */
-            var BundleController = new JS.Class({
-                
-                /**
-                 * BundleController contructor
-                 * 
-                 * @returns {undefined}
-                 */
-                initialize: function () {
+                BundleController = new JS.Class({
+                    /**
+                     * BundleController contructor
+                     * 
+                     * @returns {undefined}
+                     */
+                    initialize: function () {
+
+                        /**
+                         * Bundle web services
+                         *
+                         * @type {array}
+                         */
+                        this.webservices = bb.ToolsbarManager.getTbInstance('bundletb').selectedBundle.webservices;
+
+                        /**
+                         * actions.
+                         *
+                         * @type {array}
+                         */
+                        this.actions = [];
+
+                        /**
+                         * default action
+                         *
+                         * @type {object}
+                         */
+                        this.defaultAction = {
+                            params: function () {
+                                return {};
+                            },
+                            success: function (response) {
+                                bb.jquery(popinClass).html(response.result);
+                            },
+                            error: function (responce) {
+                                console.warn(responce);
+                            }
+                        };
+                    },
 
                     /**
-                     * Bundle web services
+                     * execute the action call by a.link
                      *
-                     * @type {array}
+                     * @param {string} namespace
+                     * @param {object} event
+                     * @returns {undefined}
                      */
-                    this.webservices = window.bb.ToolsbarManager.getTbInstance('bundletb').selectedBundle.webservices;
-
-                    /**
-                     * actions.
-                     *
-                     * @type {array}
-                     */
-                    this.actions = [];
-
-                    /**
-                     * default action
-                     *
-                     * @type {object}
-                     */
-                    this.defaultAction = {
-                        params: function (event) {
-                            return {};
-                        },
-                        success: function (response) {
-                            window.bb.jquery(popinClass).html(response.result);
-                        },
-                        error: function (responce) {
-                            console.warn(responce);
+                    executeAction: function (namespace, event) {
+                        var request = this.actions[namespace];
+                        if (request !== undefined) {
+                            request.webservice.request(request.action, {
+                                params: request.params.call(event.currentTarget, event),
+                                success: request.success,
+                                error: request.error
+                            });
+                        } else {
+                            console.warn(namespace + ' is missing.');
                         }
-                    };
-                },
+                    },
 
-                /**
-                 * execute the action call by a.link
-                 *
-                 * @param {string} namespace
-                 * @param {object} event
-                 * @returns {undefined}
-                 */
-                executeAction: function (namespace, event) {
-                    var request = this.actions[namespace];
-                    if (request !== undefined) {
-                        request.webservice.request(request.action, {
-                            params: request.params.call(event.currentTarget, event),
-                            success: request.success,
-                            error: request.error
-                        });
-                    } else {
-                        console.warn(namespace + ' is missing.');
+                    /**
+                     * Compelte the action with missing options
+                     *
+                     * @param {object} action
+                     * @param {webservice} webservice
+                     * @param {string} actionName
+                     * @returns {object}
+                     */
+                    completeAction: function (action, webservice, actionName) {
+                        if (webservice !== undefined) {
+                            action.webservice = webservice;
+                        } else {
+                            console.error(action + ' webservice is missing.');
+                        }
+                        action.action = actionName;
+                        return bb.jquery.extend(true, {}, this.defaultAction, action);
+                    },
+
+                    /**
+                     * Change the default action
+                     *
+                     * @param {object} action
+                     * @returns {object}
+                     */
+                    setDefaultAction: function (action) {
+                        this.defaultAction = bb.jquery.extend(true, {}, this.defaultAction, action);
+                    },
+
+                    /**
+                     * Add a new action
+                     *
+                     * @param {string} namespace
+                     * @param {object} action optional
+                     * @returns {undefined}
+                     */
+                    addAction: function (namespace, action) {
+                        var colonPos = namespace.indexOf('::'),
+                            webservice = {},
+                            name = '';
+
+                        action = ((action === undefined) ? {} : action);
+                        if (colonPos === -1) {
+                            webservice = bb.ToolsbarManager.getTbInstance('bundletb').selectedBundle.webservice;
+                            name = namespace;
+                        } else {
+                            webservice = this.webservices[namespace.substr(0, colonPos)];
+                            name = namespace.substr(colonPos + 2);
+                        }
+                        this.actions[namespace] = this.completeAction(action, webservice, name);
                     }
-                },
+                }),
 
-                /**
-                 * Compelte the action with missing options
-                 *
-                 * @param {object} action
-                 * @param {webservice} webservice
-                 * @param {string} actionName
-                 * @returns {object}
-                 */
-                completeAction: function (action, webservice, actionName) {
-                    if (webservice !== undefined) {
-                        action.webservice = webservice;
-                    } else {
-                        console.error(action + ' webservice is missing.');
-                    }
-                    action.action = actionName;
-                    return window.bb.jquery.extend(true, {}, this.defaultAction, action);
-                },
-
-                /**
-                 * Add a new action
-                 *
-                 * @param {string} namespace
-                 * @param {object} action optional
-                 * @returns {undefined}
-                 */
-                addAction: function (namespace, action) {
-                    var colonPos = namespace.indexOf('::'),
-                        webservice = {},
-                        name = '';
-                
-                    action = ((action === undefined) ? {} : action);
-                    if (colonPos === -1) {
-                        webservice = window.bb.ToolsbarManager.getTbInstance('bundletb').selectedBundle.webservice;
-                        name = namespace;
-                    } else {
-                        webservice = this.webservices[namespace.substr(0, colonPos)];
-                        name = namespace.substr(colonPos + 2);
-                    }
-                    this.actions[namespace] = this.completeAction(action, webservice, name);
-                }
-            });
-
-            var bundleController = new BundleController();
+                bundleController = new BundleController();
             /**
              * Exposing addAction function from BundleController
              */
-            window.bb.bundle = {
-                addAction: function () {
-                    return bundleController.addAction.apply(bundleController, arguments);
-                }
+            bb.bundle.addAction = function () {
+                return bundleController.addAction.apply(bundleController, arguments);
+            };
+            bb.bundle.setDefaultAction = function () {
+                return bundleController.setDefaultAction.apply(bundleController, arguments);
             };
 
             /**
@@ -165,21 +176,20 @@ var bb = bb || {};
              * 
              * @param {object} event
              */
-            window.bb.jquery(popinClass).delegate('.bb-bundle-link', 'click', function (event) {
+            bb.jquery(popinClass).delegate('.bb-bundle-link', 'click', function (event) {
                 event.preventDefault();
-                bundleController.executeAction(window.bb.jquery(event.target).attr('data-href'), event);
+                bundleController.executeAction(bb.jquery(event.target).attr('data-href'), event);
             });
 
             /**
              * Add submit listener on all object with bb-bundle-form class
              * 
              * @param {object} event
-             * @todo catch the bundle request ended to reload click listeners.
              */
-            window.bb.jquery(popinClass).delegate('.bb-bundle-form', 'submit', function (event) {
+            bb.jquery(popinClass).delegate('.bb-bundle-form', 'submit', function (event) {
                 event.preventDefault();
-                bundleController.executeAction(window.bb.jquery(event.target).attr('data-action'), event);
+                bundleController.executeAction(bb.jquery(event.target).attr('data-action'), event);
             });
-        })(window); 
+        }(window));
     });
 }(window));

@@ -25,7 +25,9 @@ use BackBuilder\NestedNode\Page,
     BackBuilder\ClassContent\AClassContent,
     BackBuilder\ClassContent\ContentSet,
     BackBuilder\NestedNode\ANestedNode,
-    BackBuilder\Security\Token\BBUserToken;
+    BackBuilder\Security\Token\BBUserToken,
+    BackBuilder\Site\Layout;
+
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -43,9 +45,9 @@ class PageRepository extends NestedNodeRepository
     private function _andOnline(\Doctrine\ORM\QueryBuilder $q)
     {
         return $q->andWhere('n._state >= ' . Page::STATE_ONLINE)
-                        ->andWhere('n._state <' . Page::STATE_DELETED)
-                        ->andWhere('n._publishing IS NULL OR n._publishing <= CURRENT_TIMESTAMP()')
-                        ->andWhere('n._archiving IS NULL OR n._archiving > CURRENT_TIMESTAMP()');
+            ->andWhere('n._state <' . Page::STATE_DELETED)
+            ->andWhere('n._publishing IS NULL OR n._publishing <= CURRENT_TIMESTAMP()')
+            ->andWhere('n._archiving IS NULL OR n._archiving > CURRENT_TIMESTAMP()');
     }
 
     public function getOnlinePrevSibling(ANestedNode $node)
@@ -56,6 +58,17 @@ class PageRepository extends NestedNodeRepository
         $q = $this->_andOnline($q);
 
         return $q->getQuery()->getOneOrNullResult();
+    }
+
+    public function getOnlineSiblingsByLayout(Page $node, Layout $layout, $includeNode = false, $order = null, $limit = null, $start = 0)
+    {
+        $qb = $this->_getSiblingsQuery($node, $includeNode, $order, $limit, $start);
+        $this->_andOnline($qb);
+
+        $qb->andWhere('n._layout = :layout')
+            ->setParameter('layout', $layout);
+
+        return $qb->getQuery()->getResult();
     }
 
     public function getOnlineNextSibling(ANestedNode $node)
@@ -81,13 +94,13 @@ class PageRepository extends NestedNodeRepository
         return $node;
     }
 
-    public function getVisibleDescendants(ANestedNode $node, $depth = NULL, $includeNode = FALSE)
+    public function getVisibleDescendants(ANestedNode $node, $depth = null, $includeNode = false, $state = Page::STATE_ONLINE)
     {
         $q = $this->_getDescendantsQuery($node, $depth, $includeNode)
-                ->andWhere('n._state = :online')
+                ->andWhere('n._state = :state')
                 ->andWhere('n._publishing IS NULL OR n._publishing <= CURRENT_TIMESTAMP()')
                 ->andWhere('n._archiving IS NULL OR n._archiving > CURRENT_TIMESTAMP()')
-                ->setParameter('online', Page::STATE_ONLINE)
+                ->setParameter('state', $state)
                 ->orderBy('n._leftnode', 'asc');
         return $q->getQuery()->getResult();
     }

@@ -42,7 +42,7 @@ class Database
         $this->_application = $application;
         $this->_em = $this->_application->getEntityManager();
         $this->_schemaTool = new SchemaTool($this->_em);
-        $this->_entityFinder = new EntityFinder($this->_application->getBaseDir());
+        $this->_entityFinder = new EntityFinder(dirname($this->_application->getBBDir()));
     }
 
     /**
@@ -51,8 +51,12 @@ class Database
     public function createBackbuilderSchema()
     {
         $classes = $this->_getBackbuilderSchema();
-        $this->_schemaTool->dropSchema($classes);
-        $this->_schemaTool->createSchema($classes);
+        try{
+            $this->_schemaTool->dropSchema($classes);
+            $this->_schemaTool->createSchema($classes);
+        }catch(\Exception $e){
+            //echo $e->getMessage()."\n";
+        }
     }
 
     /**
@@ -76,11 +80,15 @@ class Database
             return;
         }
 
-        $schemaTool = new SchemaTool($bundle->getEntityManager());
-        $classes = $this->_getBundleSchema($bundle);
-        $schemaTool->dropSchema($classes);
-        $schemaTool->createSchema($classes);
-        unset($schemaTool);
+        try{
+            $schemaTool = new SchemaTool($bundle->getEntityManager());
+            $classes = $this->_getBundleSchema($bundle);
+            $schemaTool->dropSchema($classes);
+            $schemaTool->createSchema($classes);
+            unset($schemaTool);
+        }catch(\Exception $e){
+            //echo $e->getMessage()."\n";
+        }
     }
 
     /**
@@ -112,10 +120,14 @@ class Database
             return;
         }
 
-        $schemaTool = new SchemaTool($bundle->getEntityManager());
-        $classes = $this->_getBundleSchema($bundle);
-        $schemaTool->updateSchema($classes, true);
-        unset($schemaTool);
+        try{
+            $schemaTool = new SchemaTool($bundle->getEntityManager());
+            $classes = $this->_getBundleSchema($bundle);
+            $schemaTool->updateSchema($classes, true);
+            unset($schemaTool);
+        }catch(\Exception $e){
+            //echo $e->getMessage()."\n";
+        }
     }
 
     /**

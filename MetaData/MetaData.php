@@ -152,9 +152,9 @@ class MetaData implements \IteratorAggregate, \Countable
     public function setAttribute($attribute, $value, AClassContent $content = null)
     {
         $originalValue = $value;
-        $functions = explode('|', $value);
+        $functions = explode('||', $value);
         $value = array_shift($functions);
-        if (0 < preg_match('/^(\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+$/i', $value)) {
+        if (0 < preg_match('/(\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $value)) {
             $this->_scheme[$attribute] = $value;
             $this->_isComputed[$attribute] = true;
 
@@ -183,64 +183,86 @@ class MetaData implements \IteratorAggregate, \Countable
             if (true === $this->_isComputed[$attribute]
                     && true === array_key_exists($attribute, $this->_scheme)) {
                 try {
-                    $functions = explode('|', $value);
-                    foreach (explode('->', $this->_scheme[$attribute]) as $scheme) {
-                        $draft = null;
-                        if (true === is_object($content)) {
-                            if (null !== $draft = $content->getDraft()) {
-                                $content->releaseDraft();
-                            }
-                        }
-
-                        $newcontent = $content;
-                        $matches = array();
-                        if (preg_match('/\$([a-z\/]+)(\[([0-9]+)\]){0,1}/i', $scheme, $matches)) {
-                            if (3 < count($matches) && $content instanceof ContentSet && 'ContentSet' === $matches[1]) {
-                                $newcontent = $content->item($matches[3]);
-                            } elseif (3 < count($matches) && $content instanceof ContentSet) {
-                                $index = intval($matches[3]);
-                                $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $matches[1]);
-                                foreach ($content as $subcontent) {
-                                    if (get_class($subcontent) == $classname) {
-                                        if (0 === $index) {
-                                            $newcontent = $subcontent;
-                                        } else {
-                                            $index--;
-                                        }
+                    $functions = explode('||', $value);
+                    $matches = array();
+                    if (false !== preg_match_all('/(\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $this->_scheme[$attribute], $matches, PREG_PATTERN_ORDER)) {
+                        $this->_attributes[$attribute] = $this->_scheme[$attribute];
+                        $initial_content = $content;
+                        for($i=0; $i<count($matches[0]); $i++) {
+                            $content = $initial_content;
+                            foreach (explode('->', $matches[0][$i]) as $scheme) {
+                                $draft = null;
+                                if (true === is_object($content)) {
+                                    if (null !== $draft = $content->getDraft()) {
+                                        $content->releaseDraft();
                                     }
                                 }
-                            } elseif (true === is_object($content) && 1 < count($matches)) {
-                                $property = $matches[1];
-                                $newcontent = $content->$property;
+
+                                $newcontent = $content;
+                                $m = array();
+                                if (preg_match('/\$([a-z\/]+)(\[([0-9]+)\]){0,1}/i', $scheme, $m)) {
+                                    if (3 < count($m) && $content instanceof ContentSet && 'ContentSet' === $m[1]) {
+                                        $newcontent = $content->item($m[3]);
+                                    } elseif (3 < count($m) && $content instanceof ContentSet) {
+                                        $index = intval($m[3]);
+                                        $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $m[1]);
+                                        foreach ($content as $subcontent) {
+                                            if (get_class($subcontent) == $classname) {
+                                                if (0 === $index) {
+                                                    $newcontent = $subcontent;
+                                                } else {
+                                                    $index--;
+                                                }
+                                            }
+                                        }
+                                    } elseif (true === is_object($content) && 1 < count($m)) {
+                                        $property = $m[1];
+                                        $newcontent = $content->$property;
+                                    }
+                                }
+
+                                if (null !== $draft) {
+                                    $content->setDraft($draft);
+                                }
+
+                                $content = $newcontent;
                             }
-                        }
+                        
+                            if ($content instanceof AClassContent && $content->isElementContent()) {
+                                if (null !== $draft = $content->getDraft()) {
+                                    $content->releaseDraft();
+                                }
 
-                        if (null !== $draft) {
-                            $content->setDraft($draft);
-                        }
+                                $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$content)));
+                                $this->_attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->_attributes[$attribute]);
 
-                        $content = $newcontent;
+                                if (null !== $draft) {
+                                    $content->setDraft($draft);
+                                }
+                            } elseif (true === is_array($content)) {
+                                $v = array();
+                                foreach($content as $c) {
+                                    if ($c instanceof \BackBuilder\ClassContent\Element\keyword) {
+
+                                    }
+                                    $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$c)));
+                                }
+                                $this->_attributes[$attribute] = str_replace($matches[0][$i], join(',', $v), $this->_attributes[$attribute]);                                
+                            } else {
+                                $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags($content)));
+                                $this->_attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->_attributes[$attribute]);                                
+                            }
+                        }                            
                     }
-
-                    if ($content instanceof AClassContent && $content->isElementContent()) {
-                        if (null !== $draft = $content->getDraft()) {
-                            $content->releaseDraft();
-                        }
-
-                        $this->_attributes[$attribute] = strip_tags($content->__toString());
-                        array_shift($functions);
-                        if (0 < count($functions)) {
-                            foreach ($functions as $fct) {
-                                $parts = explode(':', $fct);
-                                $functionName = array_shift($parts);
-                                array_unshift($parts, $this->_attributes[$attribute]);
-                                $this->_attributes[$attribute];
-                                $this->_attributes[$attribute] = call_user_func_array($functionName, $parts);
-                            }
-                        }
-
-                        if (null !== $draft) {
-                            $content->setDraft($draft);
+                    
+                    array_shift($functions);
+                    if (0 < count($functions)) {
+                        foreach ($functions as $fct) {
+                            $parts = explode(':', $fct);
+                            $functionName = array_shift($parts);
+                            array_unshift($parts, $this->_attributes[$attribute]);
+                            $this->_attributes[$attribute];
+                            $this->_attributes[$attribute] = call_user_func_array($functionName, $parts);
                         }
                     }
                 } catch (\Exception $e) {

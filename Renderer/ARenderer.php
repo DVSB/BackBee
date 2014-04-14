@@ -501,9 +501,17 @@ abstract class ARenderer implements IRenderer
         return $this->__currentelement;
     }
 
-    public function getUri($pathinfo = null)
+    /**
+     * Returns $pathinfo with base url of current page
+     * If $site is provided, the url will be pointing on the associate domain
+     * @param string $pathinfo
+     * @param string $defaultExt
+     * @param \BackBuilder\Site\Site $site
+     * @return string
+     */
+    public function getUri($pathinfo = null, $defaultExt = null, \BackBuilder\Site\Site $site = null)
     {
-        return $this->getApplication()->getRouting()->getUri($pathinfo);
+        return $this->getApplication()->getRouting()->getUri($pathinfo, null, $site);
     }
 
     public function getRelativeUrl($uri)
@@ -797,8 +805,12 @@ abstract class ARenderer implements IRenderer
         }
 
         $layoutfile = $this->_getLayoutFile($layout);
-        File::resolveFilepath($layoutfile, null, array('base_dir' => $this->_layoutdir[0]));
+        File::resolveFilepath($layoutfile, null, array('include_path' => $this->_layoutdir));
 
+        if (false === file_exists($layoutfile)) {
+            File::resolveFilepath($layoutfile, null, array('base_dir' => $this->_layoutdir[1]));            
+        }
+        
         if (false === file_exists($layoutfile) && false === touch($layoutfile)) {
             throw new RendererException(sprintf('Unable to create file %s.', $layoutfile), RendererException::LAYOUT_ERROR);
         }

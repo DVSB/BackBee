@@ -35,6 +35,18 @@ use Symfony\Component\Yaml\Yaml as parserYaml,
 class Category
 {
 
+    /**
+     * All content categories for this BBApp instance
+     * @var Category[]
+     */
+    private static $_categories;
+
+    private static $_classnames_by_category = array();
+    /**
+     * Array of content classnames for this category
+     * @var array
+     */
+    private $_classnames;
     private $name;
     private $label;
     private $contents;
@@ -47,8 +59,8 @@ class Category
         $lambda = create_function('$cat', 'return strtolower($cat);');
         if (isset($catArray) && is_array($catArray)) {
             $result = array_map(function($cat) {
-                        return strtolower($cat);
-                    }, $catArray);
+                return strtolower($cat);
+            }, $catArray);
         }
         return $result;
     }
@@ -81,8 +93,10 @@ class Category
 
     public function __construct($name, $application = null, $selected = false)
     {
+        $this->_classnames = array();
         $this->contents = array();
         $this->name = $name;
+        $this->label = $name;
         $this->application = $application;
         $this->selected = $selected;
     }
@@ -203,17 +217,151 @@ class Category
         return $this->contents;
     }
 
-    public static function getCategories($application)
+    public static function getContentsByCategory(array $classcontent_dirs, $category)
     {
-        $categories = array("tous" => new Category("Tous", $application, true));
-        foreach ($application->getClassContentDir() as $classcontentdir) {
-            //$files = self::globRecursive($classcontentdir . DIRECTORY_SEPARATOR . '*.yml');
-            $files = glob($classcontentdir . DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.[yY][mM][lL]', GLOB_BRACE);
-            if (is_array($files)) {
-                $categories = array_merge($categories, self::getFilesCategory($files));
+        self::getCategories($classcontent_dirs);
+        if (false === array_key_exists($category, self::$_classnames_by_category)) {
+            self::$_classnames_by_category[$category] = array();
+        }
+
+        $contents = array();
+        foreach (self::$_classnames_by_category[$category] as $classname) {
+            $contentRender = new ContentRender($classname, $this->application, $this->name);
+            $contentRender->setLabel($label);
+            $contents[] = $contentRender;
+        }
+
+        return $contents;
+    }
+
+    /**
+     * Returns an array of defined categories for the BBApp instance
+     * @param array $classcontent_dirs
+     * @return array
+     */
+    public static function getCategories(array $classcontent_dirs)
+    {
+        if (null === self::$_categories) {
+            self::$_categories = array("tous" => new Category("Tous", null, true));
+            foreach ($classcontent_dirs as $classcontentdir) {
+                if(!is_dir($classcontentdir)) continue;
+                $files = File::getFilesRecursivelyByExtension($classcontentdir, 'yml');
+                if (true === is_array($files) && 0 < count($files)) {
+                    self::_getCategoriesFromFiles($files, $classcontentdir);
+                }
             }
         }
+        return self::$_categories;
+    }
+
+    /**
+     * Returns the content classname according to a file
+     * Can be call by array_walk
+     * @param string $item
+     * @param string $key
+     * @param string $basedir
+     * @return string
+     */
+    private static function _getClassNameFromFile(&$item, $key, $basedir)
+    {
+        $item = str_replace(array($basedir, DIRECTORY_SEPARATOR), array('\BackBuilder\ClassContent', NAMESPACE_SEPARATOR), File::removeExtension($item));
+        return $item;
+    }
+
+    /**
+     * Returns an array of Category from ClassContent files
+     * @param array $files
+     * @param string $basedir
+     * @return array
+     */
+    private static function _getCategoriesFromFiles(array $files, $basedir)
+    {
+        array_walk($files, array('\BackBuilder\Services\Content\Category', '_getClassNameFromfile'), $basedir);
+        foreach ($files as $classname) {
+            if (false === $properties = self::_getContentCategories($classname)) {
+                continue;
+            }
+
+            foreach ($properties as $property) {
+                self::_addClassnameToCategory($classname, $property);
+                if (true === array_key_exists($property, self::$_categories)) {
+                    self::$_categories[$property]->addClassname($classname);
+                    continue;
+                }
+
+                self::$_categories[$property] = new Category($property);
+                self::$_categories[$property]->addClassname($classname);
+            }
+        }
+
+        return self::$_categories;
+    }
+
+    /**
+     * Returns categories of a content by its classname
+     * @param string $classname
+     * @return array|FALSE
+     */
+    private static function _getContentCategories($classname)
+    {
+        if (false === class_exists($classname)) {
+            return false;
+        }
+
+        $content = new $classname();
+        if (null === $categories = $content->getProperty('category')) {
+            return false;
+        }
+
+        if (false === is_array($categories)) {
+            $categories = array($categories);
+        }
+
+        foreach ($categories as &$category) {
+            $category = ucfirst($category);
+        }
+        unset($category);
+
         return $categories;
+    }
+
+    /**
+     * Adds a new classname for category
+     * @param string $classname
+     * @param string $category
+     */
+    private static function _addClassnameToCategory($classname, $category)
+    {
+        if (false === array_key_exists($category, self::$_classnames_by_category)) {
+            self::$_classnames_by_category[$category] = array();
+        }
+
+        if (false === in_array($classname, self::$_classnames_by_category[$category])) {
+            self::$_classnames_by_category[$category][] = $classname;
+        }
+    }
+
+    /**
+     * Returns the content classnames for this category
+     * @return array
+     * @codeCoverageIgnore
+     */
+    public function getClassnames()
+    {
+        return $this->_classnames;
+    }
+
+    /**
+     * Add a new content classname for this category
+     * @param string $classname
+     * @return \BackBuilder\Services\Content\Category
+     */
+    public function addClassname($classname)
+    {
+        if (false === in_array($classname, $this->_classnames)) {
+            $this->_classnames[] = $classname;
+        }
+        return $this;
     }
 
     static function getFilesCategory($files = array())
@@ -251,7 +399,9 @@ class Category
     {
         $stdClass = new \stdClass();
         $stdClass->name = $this->getname();
-        $stdClass->uid = uniqid();
+        $stdClass->uid = uniqid('', TRUE);
+
+
         $stdClass->selected = $this->getSelected();
         $stdClass->label = $this->getLabel();
         return $stdClass;
@@ -271,5 +421,4 @@ class Category
 //     return $categories;
 //    }
 }
-
 ?>

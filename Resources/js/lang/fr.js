@@ -116,6 +116,7 @@
         },
         pagebrowser: {
             title: 'Titre',
+            alttitle: 'Titre alternatif',
             url: 'URL',
             target: 'Target',
             forward: 'Redirection vers',
