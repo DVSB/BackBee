@@ -176,7 +176,8 @@ class Database
 
         $sql = array_merge($sql1, $sql2);
 
-        return implode(";\n", $sql);
+        $sql = implode(";\n", $sql);
+        return $sql.';';
     }
 
     private function getBackBuilderSqlSchema()
@@ -196,6 +197,38 @@ class Database
             $classes = $this->_getBundleSchema($bundle);
 
             $sql = array_merge($sql, $this->_schemaTool->getCreateSchemaSql($classes));
+        }
+
+        return $sql;
+    }
+
+    public function getUpdateSqlSchema()
+    {
+        $sql1 = $this->getUpdateBackBuilderSqlSchema();
+        $sql2 = $this->getUpdateBundleSqlSchema();
+
+        $sql = array_merge($sql1, $sql2);
+
+        return $sql;
+    }
+
+    private function getUpdateBackBuilderSqlSchema()
+    {
+        $classes = $this->_getBackbuilderSchema();
+        $sql = $this->_schemaTool->getUpdateSchemaSql($classes, true);
+
+        return $sql;
+    }
+
+    private function getUpdateBundleSqlSchema()
+    {
+        $sql = array();
+
+        foreach ($this->_application->getBundles() as $bundle) {
+
+            $classes = $this->_getBundleSchema($bundle);
+
+            $sql = array_merge($sql, $this->_schemaTool->getUpdateSchemaSql($classes, true));
         }
 
         return $sql;
