@@ -68,11 +68,3 @@ revision.postload:
 element.keyword.render:
   listeners:
     - [BackBuilder\Event\Listener\elementListener, onRender]
-
-bloc.autobloc.render:
-  listeners:
-    - [BackBuilder\Event\Listener\autoblocListener, onRender]
-
-bloc.lastnews.render:
-  listeners:
-    - [BackBuilder\Event\Listener\lastnewsListener, onRender]
