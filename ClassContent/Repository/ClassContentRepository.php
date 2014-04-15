@@ -127,7 +127,7 @@ class ClassContentRepository extends EntityRepository
                 if (1 == count($crit))
                     $crit[1] = '=';
 
-                $alias = uniqid('i'.rand());
+                $alias = uniqid('i' . rand());
                 $q->leftJoin('c._indexation', $alias)
                         ->andWhere($alias . '._field = :field' . $alias)
                         ->andWhere($alias . '._value ' . $crit[1] . ' :value' . $alias)
@@ -446,6 +446,16 @@ class ClassContentRepository extends EntityRepository
             /* as content has no relation with page we are user a native Query */
 
             if ($selectedNode && !$selectedNode->isRoot()) {
+
+                $qb->leftJoin('c._mainnode', 'p')
+                        ->andWhere('p._root = :selectedPageRoot')
+                        ->andWhere('p._leftnode >= :selectedPageLeftnode')
+                        ->andWhere('p._rightnode <= :selectedPageRightnode')
+                        ->setParameters(array(
+                            "selectedPageRoot" => $selectedNode->getRoot(),
+                            "selectedPageLeftnode" => $selectedNode->getLeftnode(),
+                            "selectedPageRightnode" => $selectedNode->getRightnode()));
+
                 /* $qbSN = $this->createQueryBuilder('ct');
                   $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
                   // ->leftJoin("BackBuilder\NestedNode\Page", "p", "WITH", "p._contentset = sc")
@@ -458,21 +468,21 @@ class ClassContentRepository extends EntityRepository
                   "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery(); */
 
                 /* handle online content */
-                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
-                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
-                if (empty($subContents)) {
-                    return array();
-                } // should never happened
-                $newQuery = $this->_em->createQueryBuilder("q");
-                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
-                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
-                                ->where("cs._uid IN (:scl)")
-                                ->setParameter("scl", $subContents)->getQuery()->getResult(); // $subContentsQuery->getResult()
-                
-                if (0 < count($contents)) {
-                    /* filtre  parmi ces contents */
-                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
-                }
+//                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
+//                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
+//                if (empty($subContents)) {
+//                    return array();
+//                } // should never happened
+//                $newQuery = $this->_em->createQueryBuilder("q");
+//                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
+//                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
+//                                ->where("cs._uid IN (:scl)")
+//                                ->setParameter("scl", $subContents)->getQuery()->getResult(); // $subContentsQuery->getResult()
+//                
+//                if (0 < count($contents)) {
+//                    /* filtre  parmi ces contents */
+//                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+//                }
             }
         }
 
@@ -569,7 +579,7 @@ class ClassContentRepository extends EntityRepository
             if (count($criterion) != 3)
                 continue;
             $criterion = (object) $criterion;
-            $alias = uniqid("i".rand());
+            $alias = uniqid("i" . rand());
             $qb->leftJoin("c._indexation", $alias)
                     ->andWhere($alias . "._field = :field" . $alias)
                     ->andWhere($alias . "._value " . $criterion->op . " :value" . $alias)
@@ -620,6 +630,16 @@ class ClassContentRepository extends EntityRepository
         if (array_key_exists("selectedpageField", $cond) && !is_null($cond["selectedpageField"]) && !empty($cond["selectedpageField"])) {
             $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->find($cond['selectedpageField']);
             if ($selectedNode && !$selectedNode->isRoot()) {
+
+                $qb->leftJoin('c._mainnode', 'p')
+                        ->andWhere('p._root = :selectedPageRoot')
+                        ->andWhere('p._leftnode >= :selectedPageLeftnode')
+                        ->andWhere('p._rightnode <= :selectedPageRightnode')
+                        ->setParameters(array(
+                            "selectedPageRoot" => $selectedNode->getRoot(),
+                            "selectedPageLeftnode" => $selectedNode->getLeftnode(),
+                            "selectedPageRightnode" => $selectedNode->getRightnode()));
+
                 /* $qbSN = $this->createQueryBuilder('ct');
                   $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
                   //->leftJoin("\BackBuilder\NestedNode\Page", "p", "WITH", "sc = p._contentset")
@@ -630,22 +650,22 @@ class ClassContentRepository extends EntityRepository
                   ->setParameters(array("selectedPageRoot" => $selectedNode->getRoot(),
                   "selectedPageLeftnode" => $selectedNode->getLeftnode(),
                   "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery(); */
-                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
-                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
-                if (empty($subContents)) {
-                    return array();
-                } // should never happened
-                $newQuery = $this->_em->createQueryBuilder("q");
-                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
-                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
-                                ->where("cs._uid IN (:scl)")
-                                ->setParameter("scl", $subContents)->getQuery()->getResult();
-
-                if (0 < count($contents)) {
-                    /* filtre  parmi ces contents */
-                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
-                }
+//                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
+//                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
+//                if (empty($subContents)) {
+//                    return array();
+//                } // should never happened
+//                $newQuery = $this->_em->createQueryBuilder("q");
+//                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
+//                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
+//                                ->where("cs._uid IN (:scl)")
+//                                ->setParameter("scl", $subContents)->getQuery()->getResult();
+//
+//                if (0 < count($contents)) {
+//                    /* filtre  parmi ces contents */
+//                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
             }
+        }
         }
 
 
