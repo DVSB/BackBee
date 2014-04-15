@@ -120,9 +120,7 @@ class Config
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
-        $this->setContainer($container);
-        $this->_loadSystemConfig();
-        $this->extend();
+        $this->setContainer($container)->extend();
     }
     
     /**
@@ -420,6 +418,8 @@ class Config
             $this->_loadFromBaseDir($basedir, $overwrite);
             $this->_saveToCache($basedir);
         }
+        
+        return $this;
     }
 
     /**
