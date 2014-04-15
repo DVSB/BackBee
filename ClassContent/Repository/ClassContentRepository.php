@@ -666,7 +666,6 @@ class ClassContentRepository extends EntityRepository
 //                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
             }
         }
-        }
 
 
         /* contentType filter */
