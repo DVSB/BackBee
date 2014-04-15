@@ -55,7 +55,7 @@ class Database
             $this->_schemaTool->dropSchema($classes);
             $this->_schemaTool->createSchema($classes);
         }catch(\Exception $e){
-            //echo $e->getMessage()."\n";
+            echo $e->getMessage()."\n";
         }
     }
 
@@ -87,7 +87,7 @@ class Database
             $schemaTool->createSchema($classes);
             unset($schemaTool);
         }catch(\Exception $e){
-            //echo $e->getMessage()."\n";
+            echo $e->getMessage()."\n";
         }
     }
 
@@ -167,6 +167,38 @@ class Database
             $classes[] = $this->_em->getClassMetadata($className);
         }
         return $classes;
+    }
+
+    public function getSqlSchema()
+    {
+        $sql1 = $this->getBackBuilderSqlSchema();
+        $sql2 = $this->getBundleSqlSchema();
+
+        $sql = array_merge($sql1, $sql2);
+
+        return implode(";\n", $sql);
+    }
+
+    private function getBackBuilderSqlSchema()
+    {
+        $classes = $this->_getBackbuilderSchema();
+        $sql = $this->_schemaTool->getCreateSchemaSql($classes);
+
+        return $sql;
+    }
+
+    private function getBundleSqlSchema()
+    {
+        $sql = array();
+
+        foreach ($this->_application->getBundles() as $bundle) {
+
+            $classes = $this->_getBundleSchema($bundle);
+
+            $sql = array_merge($sql, $this->_schemaTool->getCreateSchemaSql($classes));
+        }
+
+        return $sql;
     }
 
 }
