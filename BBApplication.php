@@ -203,6 +203,7 @@ class BBApplication
             $cachedir = $config['parameters']['cache_dir'];
         }
 
+        $this->_container->setParameter('bbapp.base.dir', $this->getBBDir());
         $this->_container->setParameter('bbapp.cache.dir', $cachedir);
 
         // define config dir
@@ -663,7 +664,8 @@ class BBApplication
     {
         return $this->getContainer()
                         ->get('config')
-                        ->setContainer($this->getContainer());
+                        ->setContainer($this->getContainer())
+                        ->extend($this->getConfigDir());
     }
 
     public function getConfigDir()
