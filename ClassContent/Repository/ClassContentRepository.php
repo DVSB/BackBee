@@ -468,8 +468,11 @@ class ClassContentRepository extends EntityRepository
                 $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
                                 ->where("cs._uid IN (:scl)")
                                 ->setParameter("scl", $subContents)->getQuery()->getResult(); // $subContentsQuery->getResult()
-                /* filtre  parmi ces contents */
-                $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+                
+                if (0 < count($contents)) {
+                    /* filtre  parmi ces contents */
+                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+                }
             }
         }
 
@@ -615,7 +618,7 @@ class ClassContentRepository extends EntityRepository
         $qb->select($qb->expr()->count('c'))->from("BackBuilder\ClassContent\AClassContent", "c");
 
         if (array_key_exists("selectedpageField", $cond) && !is_null($cond["selectedpageField"]) && !empty($cond["selectedpageField"])) {
-            $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
+            $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->find($cond['selectedpageField']);
             if ($selectedNode && !$selectedNode->isRoot()) {
                 /* $qbSN = $this->createQueryBuilder('ct');
                   $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
@@ -638,8 +641,10 @@ class ClassContentRepository extends EntityRepository
                                 ->where("cs._uid IN (:scl)")
                                 ->setParameter("scl", $subContents)->getQuery()->getResult();
 
-                /* filtre  parmi ces contents */
-                $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+                if (0 < count($contents)) {
+                    /* filtre  parmi ces contents */
+                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+                }
             }
         }
 
