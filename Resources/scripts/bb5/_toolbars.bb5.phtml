@@ -150,6 +150,6 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
             //AlohaManager.init();
         });
     </script>
-<?php else: ?>
+<?php elseif (true !== $this->getParam('no-loading')): ?>
     <div id="bb-loader" style="display:none;">Loading</div>
 <?php endif; ?>
