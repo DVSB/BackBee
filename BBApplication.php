@@ -205,7 +205,7 @@ class BBApplication
         $this->_container->setParameter('bbapp.cache.dir', $cachedir);
 
         // define config dir
-        $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
+        $this->_container->setParameter('bbapp.config.dir', $this->getBBConfigDir());
 
         // define repository dir
         $this->_container->setParameter('bbapp.repository.dir', $this->getRepository());
@@ -667,9 +667,7 @@ class BBApplication
                  ->extend($this->getBBConfigDir());
 
             $this->_initContextConfig();
-            $this->_isConfigInit = true;
         }
-
         return $this->getContainer()->get('config');
     }
 
