@@ -77,6 +77,7 @@ class BBApplication
     private $_classcontentdir;
     private $_theme;
     private $_overwrite_config;
+    private $_isConfigInit;
 
     public function __call($method, $args)
     {
@@ -98,9 +99,10 @@ class BBApplication
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
+        $this->_isConfigInit = false;
 
         $this->_initContainer()
-                ->_initContextConfig()
+                // ->_initContextConfig()
                 ->_initAutoloader()
                 ->_initContentWrapper()
                 ->_initEntityManager()
@@ -662,13 +664,25 @@ class BBApplication
      */
     public function getConfig()
     {
-        return $this->getContainer()
-                        ->get('config')
-                        ->setContainer($this->getContainer())
-                        ->extend($this->getConfigDir());
+        if (false === $this->_isConfigInit) {
+            $this->getContainer()
+                 ->get('config')
+                 ->setContainer($this->getContainer())
+                 ->extend($this->getBBConfigDir());
+
+            $this->_initContextConfig();
+            $this->_isConfigInit = true;
+        }
+
+        return $this->getContainer()->get('config');
     }
 
     public function getConfigDir()
+    {
+        return $this->getRepository() . DIRECTORY_SEPARATOR . 'Config';
+    }
+
+    public function getBBConfigDir()
     {
         return $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
     }
