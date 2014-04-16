@@ -77,7 +77,6 @@ class BBApplication
     private $_classcontentdir;
     private $_theme;
     private $_overwrite_config;
-    private $_isConfigInit;
 
     public function __call($method, $args)
     {
@@ -99,14 +98,11 @@ class BBApplication
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
-        $this->_isConfigInit = false;
-
         $this->_initContainer()
-                // ->_initContextConfig()
-                ->_initAutoloader()
-                ->_initContentWrapper()
-                ->_initEntityManager()
-                ->_initBundles();
+             ->_initAutoloader()
+             ->_initContentWrapper()
+             ->_initEntityManager()
+             ->_initBundles();
 
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
@@ -252,23 +248,23 @@ class BBApplication
     private function _initAutoloader()
     {
         $this->getAutoloader()
-                ->register()
-                ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'bundle')))
-                ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'ClassContent', 'Repositories')))
-                ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
-                ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
-                ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Controller')))
-                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')))
-                ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Traits')));
+             ->register()
+             ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'bundle')))
+             ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'ClassContent', 'Repositories')))
+             ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
+             ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
+             ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Controller')))
+             ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')))
+             ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Traits')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
-                    ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
-                    ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Templates', 'helpers')))
-                    ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Listeners')))
-                    ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Controller')))
-                    ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')))
-                    ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Traits')));
+                 ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
+                 ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Templates', 'helpers')))
+                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Listeners')))
+                 ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Controller')))
+                 ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')))
+                 ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Traits')));
         }
 
         $this->getAutoloader()
@@ -350,9 +346,9 @@ class BBApplication
      */
     private function _initContentWrapper()
     {
-        if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig())
+        if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig()) {
             throw new BBException('None class content wrapper found');
-
+        }
         $namespace = isset($contentwrapperConfig['namespace']) ? $contentwrapperConfig['namespace'] : '';
         $protocol = isset($contentwrapperConfig['protocol']) ? $contentwrapperConfig['protocol'] : '';
         $adapter = isset($contentwrapperConfig['adapter']) ? $contentwrapperConfig['adapter'] : '';
@@ -664,7 +660,7 @@ class BBApplication
      */
     public function getConfig()
     {
-        if (false === $this->_isConfigInit) {
+        if (false === $this->getContainer()->isLoaded('config')) {
             $this->getContainer()
                  ->get('config')
                  ->setContainer($this->getContainer())
