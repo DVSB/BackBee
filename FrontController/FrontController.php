@@ -169,7 +169,8 @@ class FrontController implements HttpKernelInterface {
         }
 
         try {
-            $actionKey = $matches['_route'] . '_' . $matches['_action'];
+            $actionKey = $matches['_route'] . '_' . $matches['_action'] . '_' . $matches['_method'];
+
             if (isset($this->_actions[$actionKey]) && is_callable($this->_actions[$actionKey])) {
                 /* nothing to do */
             } elseif (array_key_exists($matches['_action'], $this->_actions) && is_callable($this->_actions[$matches['_action']])) {
@@ -572,9 +573,16 @@ class FrontController implements HttpKernelInterface {
     public function handle(Request $request = null, $type = self::MASTER_REQUEST, $catch = true) 
     {
         try {
+                        
             $this->_request = $request;
+            
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
-            if ($matches = $urlMatcher->match($this->getRequest()->getPathInfo())) {
+            $matches = $urlMatcher->match($this->getRequest()->getPathInfo());
+            
+            
+            if($matches)
+            {
+                $matches['_method'] = $this->getRequestContext()->getMethod();
                 $this->_invokeAction($matches);
             }
 
@@ -707,7 +715,16 @@ class FrontController implements HttpKernelInterface {
                 continue;
             }
 
-            $method = $route['defaults']['_action'];
+            if(!isset($route['requirements']['_method'])) {
+                $route['requirements']['_method'] = 'GET';
+            } else {
+                // uppercase for consistency
+                $route['requirements']['_method'] = strtoupper($route['requirements']['_method']);
+            }
+            
+            $action = $route['defaults']['_action'];
+            $httpMethod = $route['requirements']['_method'];
+            
             $controller = null;
             if (true === array_key_exists('_controller', $route['defaults'])) {
                 $container = $application->getContainer();
@@ -723,8 +740,10 @@ class FrontController implements HttpKernelInterface {
             } else {
                 $controller = $defaultController;
             }
+            
+            $handlerKey = $action . "_" . $httpMethod;
 
-            $this->addAction(array($controller, $method), $method, $name);
+            $this->addAction(array($controller, $action), $handlerKey, $name);
         }
     }
 }
