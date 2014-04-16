@@ -189,7 +189,12 @@ class FrontController implements HttpKernelInterface {
 
                 $eventName .= '.pre' . $matches['_action'];
                 $this->_dispatch($eventName . '.pre' . $matches['_action']);
-                call_user_func_array($this->_actions[$actionKey], $args);
+                $response = call_user_func_array($this->_actions[$actionKey], $args);
+                
+                if($response instanceof Response) {
+                    $response->send();
+                    die();
+                }
             } else {
                 throw new FrontControllerException(sprintf('Unknown action `%s`.', $matches['_action']), FrontControllerException::BAD_REQUEST);
             }
