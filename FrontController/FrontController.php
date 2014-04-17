@@ -190,7 +190,14 @@ class FrontController implements HttpKernelInterface {
 
                 $eventName .= '.pre' . $matches['_action'];
                 $this->_dispatch($eventName . '.pre' . $matches['_action']);
-                $response = call_user_func_array($this->_actions[$actionKey], $args);
+                
+
+                $actionArguments = $this->getApplication()->getContainer()->get('controller_resolver')->getArguments(
+                        $this->getRequest(),
+                        $this->_actions[$actionKey]
+                );
+                
+                $response = call_user_func_array($this->_actions[$actionKey], $actionArguments);
                 
                 if($response instanceof Response) {
                     $response->send();
