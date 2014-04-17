@@ -600,14 +600,25 @@
                 this._updateParseData();
             },
             _updateParseData: function() {
+                var self = this;
                 var $ = bb.jquery;
                 var rawData = this._pageList.toArray(true);
                 var nodeIds = [];
-                $.each(rawData, function(i, data) {
+                if (!self._context.parsedData.parentnode) {
+                        self._context.parsedData.parentnode = [];
+                }
+                bb.jquery.each(rawData, function(i, data) {
                     nodeIds.push(data.uid);
+                        if (-1 === bb.jquery.inArray(data.uid, self._context.parsedData.parentnode)) {
+                                self._context.parsedData.parentnode.push(data.uid);
+                        }
+                });
+                bb.jquery.each(this._context.parsedData.parentnode, function(i, p_uid) {
+                        if (-1 === bb.jquery.inArray(p_uid, nodeIds)) {
+                                self._context.parsedData.parentnode[i] = null;
+                        }
                 });
                 this._context.parsedData.nodeInfos = JSON.stringify(rawData);
-                this._context.parsedData.parentnode = nodeIds;
             },
             callbacks: {
                 clickOnFieldHandler: function(e) {
