@@ -169,7 +169,7 @@ class FrontController implements HttpKernelInterface {
         }
 
         try {
-            $actionKey = $matches['_route'] . '_' . $matches['_action'] . '_' . $matches['_method'];
+            $actionKey = $matches['_route'] . '_' . $matches['_action'];
 
             if (isset($this->_actions[$actionKey]) && is_callable($this->_actions[$actionKey])) {
                 /* nothing to do */
@@ -181,7 +181,7 @@ class FrontController implements HttpKernelInterface {
                 $controller = $this->_actions[$actionKey][0];
                 $eventName = str_replace('\\', '.', strtolower(get_class($controller)));
                 if (0 === strpos($eventName, 'backbuilder.')) {
-                $eventName = substr($eventName, 12);
+                    $eventName = substr($eventName, 12);
                 }
 
                 if (0 === strpos($eventName, 'frontcontroller.')) {
@@ -587,9 +587,7 @@ class FrontController implements HttpKernelInterface {
             $matches = $urlMatcher->match($this->getRequest()->getPathInfo());
             
             
-            if($matches)
-            {
-                $matches['_method'] = $this->getRequestContext()->getMethod();
+            if($matches) {
                 $this->_invokeAction($matches);
             }
 
@@ -722,15 +720,7 @@ class FrontController implements HttpKernelInterface {
                 continue;
             }
 
-            if(!isset($route['requirements']['_method'])) {
-                $route['requirements']['_method'] = 'GET';
-            } else {
-                // uppercase for consistency
-                $route['requirements']['_method'] = strtoupper($route['requirements']['_method']);
-            }
-            
             $action = $route['defaults']['_action'];
-            $httpMethod = $route['requirements']['_method'];
             
             $controller = null;
             if (true === array_key_exists('_controller', $route['defaults'])) {
@@ -748,7 +738,7 @@ class FrontController implements HttpKernelInterface {
                 $controller = $defaultController;
             }
             
-            $handlerKey = $action . "_" . $httpMethod;
+            $handlerKey = $action;
 
             $this->addAction(array($controller, $action), $handlerKey, $name);
         }
