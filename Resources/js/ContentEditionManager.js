@@ -1,3 +1,4 @@
+//@ sourceURL=ressources/js/ContentEditionManager.js
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.

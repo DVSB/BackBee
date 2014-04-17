@@ -1059,12 +1059,22 @@
                     terms = termArr.reverse();
                 }
 
-                this.selected = [];
+                var keywords = [];
                 bb.jquery.each(terms, function(i, keyword) {
                     if ('undefined' !== self.keywordsList[keyword]) {
-                        self.selected.push(self.keywordsList[keyword]);
+                        var k_uid = self.keywordsList[keyword];
+                        keywords.push(k_uid);
+                        if (-1 === bb.jquery.inArray(k_uid, self.selected)) {
+                                self.selected.push(k_uid);
+                        }
                     }
                 });
+                bb.jquery.each(this.selected, function(i, k_uid) {
+                        if (-1 === bb.jquery.inArray(k_uid, keywords)) {
+                                self.selected[i] = null;
+                        }
+                });
+                
                 this.keywordField.val(terms.join(", "));
             },
             _split: function(val) {
