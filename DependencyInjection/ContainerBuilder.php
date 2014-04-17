@@ -89,4 +89,17 @@ class ContainerBuilder extends SfContainerBuilder
         return $item;
     }
 
+    /**
+     * Returns true if the given service is loaded.
+     *
+     * @param string $id The service identifier
+     *
+     * @return Boolean true if the service is loaded, false otherwise
+     */
+    public function isLoaded($id)
+    {
+        $id = strtolower($id);
+
+        return isset($this->services[$id]) || method_exists($this, 'get'.strtr($id, array('_' => '', '.' => '_')).'Service');
+    }
 }
