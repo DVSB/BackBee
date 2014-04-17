@@ -160,6 +160,7 @@ class FrontController implements HttpKernelInterface {
         }
 
         $this->getRequest()->attributes = new \Symfony\Component\HttpFoundation\ParameterBag($args);
+        
         $this->_dispatch('frontcontroller.request');
 
         // logout Event dispatch
@@ -199,10 +200,7 @@ class FrontController implements HttpKernelInterface {
                 
                 $response = call_user_func_array($this->_actions[$actionKey], $actionArguments);
                 
-                if($response instanceof Response) {
-                    $response->send();
-                    die();
-                }
+                return $response;
             } else {
                 throw new FrontControllerException(sprintf('Unknown action `%s`.', $matches['_action']), FrontControllerException::BAD_REQUEST);
             }
@@ -588,7 +586,7 @@ class FrontController implements HttpKernelInterface {
             
             
             if($matches) {
-                $this->_invokeAction($matches);
+                return $this->_invokeAction($matches);
             }
 
             throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getHost() . '/' . $this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);
