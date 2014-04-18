@@ -525,6 +525,30 @@ class FrontController implements HttpKernelInterface {
     }
 
     /**
+     * Handles a resource file request
+     *
+     * @access public
+     * @param string $filename The resource file to provide
+     * @throws FrontControllerException
+     */
+    public function bundleResourcesAction($bundle, $filename = null) 
+    {
+        $this->_validateResourcesAction($filename);
+
+        $bundle = explode('-', $bundle);
+        array_walk($bundle, function(&$value){
+            $value = ucfirst($value);
+        });
+        $bundle = implode('', $bundle);
+        $dir = $this->_application->getBundle($bundle)->getResourcesDir();
+
+        File::resolveFilepath($filename, null, array('include_path' => $dir . DIRECTORY_SEPARATOR . 'Templates'));
+
+        $this->_application->info(sprintf('Handling resource URL `%s`.', $filename));
+        $this->_flushfile($filename);
+    }
+
+    /**
      * Handles an RPC request
      *
      * @access public
