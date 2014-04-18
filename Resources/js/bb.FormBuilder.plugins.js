@@ -6,6 +6,37 @@
 
     bb.jquery(function() {
 
+        FormBuilder.registerRenderTypePlugin("date", {
+            name: "date",
+            _init: function() {
+                this.id = this._settings.formId + '-' + this.id;
+                this.fieldWrapper = $("<p></p>");
+                this.template = $("<label class='fieldLabel'></label><input class='bb5-plugin-form-field fieldDate' type='text' value=''></input>").clone();
+                this.fiedId = this.id + "-" + this._settings.fieldInfos.fieldLabel;
+            },
+            render: function() {
+                $(this.fieldWrapper).append(this.template);
+                $(this.fieldWrapper).find(".fieldLabel").html((typeof this._settings.fieldInfos.param.array.label == "string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel);
+                var value = this._settings.fieldInfos.param.array.value;
+                $(this.fieldWrapper).find(".fieldDate").attr("id", this.fieldId).datepicker({
+                    dateFormat: 'dd/mm/yy'
+                });
+                if (value)
+                    $(this.fieldWrapper).find(".fieldDate").datepicker('setDate', new Date(value * 1000));
+                return this.fieldWrapper;
+            },
+            parse: function() {
+                var value = $(this.fieldWrapper).find(".fieldDate").datepicker('getDate');
+
+                var result = {
+                    'array': {
+                        'value': (value) ? value.getTime() / 1000 : ''
+                    }
+                };
+                return result;
+            }
+
+        });
 
         /*scalar type*/
         FormBuilder.registerRenderTypePlugin("scalar", {
@@ -58,30 +89,128 @@
 
         });
 
-        /*Checkbox type*/
-        FormBuilder.registerRenderTypePlugin('checkbox', {
+        /*Radio type*/
+        FormBuilder.registerRenderTypePlugin('radio', {
             _init: function() {
                 this.id = this._settings.formId + '-' + this.id;
-                this.fieldWrapper = bb.jquery('<p></p>');
-                this.template = bb.jquery('<label class="fieldLabel">test</label><input class="bb5-plugin-form-field fieldCheck" type="checkbox" value="1">').clone();
-                this.fiedId = this.id + '-' + this._settings.fieldInfos.fieldLabel;
+                var template = $("<p><label>Provide a label for this field</label></p>").clone();
+                $(template).attr("id", this.id).addClass('bb5-param-' + this._settings.fieldInfos.fieldLabel);
+                var form = this._populateForm();
+                var fieldLabel = (typeof this._settings.fieldInfos.param.array.label == "string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel;
+                $(template).find("label").text(fieldLabel);
+                $(template).append(form);
+                if ('undefined' != typeof (this._settings.fieldInfos.param.array.onchange))
+                    $(template).find("input").attr('onchange', this._settings.fieldInfos.param.array.onchange);
+                this.form = template;
+            },
+            _populateForm: function() {
+                var self = this;
+                var options = this._settings.fieldInfos.param.array.options;
+                var selection = this._settings.fieldInfos.param.array.checked;
+                var dFragment = document.createDocumentFragment();
+
+                $.each(options, function(value, option) {
+                    var optionTpl = $('<label class="bb5-form-label-chkbx"><input type="radio" name="radio' + self.id + '" /><span></span></label>').clone();
+                    $(optionTpl).find("input").attr("value", value);
+                    $(optionTpl).find("span").html(option);
+                    if (selection + '' == value + '')
+                        $(optionTpl).find("input").attr("checked", "checked");
+                    dFragment.appendChild($(optionTpl).get(0));
+                });
+                return dFragment;
             },
             render: function() {
-                bb.jquery(this.fieldWrapper).append(this.template);
-                bb.jquery(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
-                if (this._settings.fieldInfos.param.array.checked == true) {
-                    bb.jquery(this.fieldWrapper).find('.fieldCheck').attr('checked', 'checked');
-                }
-                var value = this._settings.fieldInfos.param.scalar;
-                bb.jquery(this.fieldWrapper).find('.fieldCheck').attr('id', this.fieldId).val(value);
-                return this.fieldWrapper;
+                if ('undefined' != typeof (this._settings.fieldInfos.param.array.onrender))
+                    eval(this._settings.fieldInfos.param.array.onrender);
+
+                return this.form;
             },
             parse: function() {
                 var result = {
                     'array': {
-                        'checked': bb.jquery(this.fieldWrapper).find('.fieldCheck').is(':checked')
+                        'checked': $(this.form).find('input:checked').val()
                     }
                 };
+                return result;
+            }
+        });
+
+        /*Checkbox type*/
+        FormBuilder.registerRenderTypePlugin('checkbox', {
+            _init: function() {
+                this.id = this._settings.formId + '-' + this.id;
+                this.fiedId = this.id + '-' + this._settings.fieldInfos.fieldLabel;
+
+                if ('undefined' == typeof (this._settings.fieldInfos.param.array.options)) {
+                    var template = $('<p><label class="fieldLabel">test</label><input class="bb5-plugin-form-field fieldCheck" type="checkbox" value="1"></p>').clone();
+                    $(template).attr("id", this.id).addClass('bb5-param-' + this._settings.fieldInfos.fieldLabel);
+                    $(template).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
+                    if (this._settings.fieldInfos.param.array.checked == true) {
+                        $(template).find('.fieldCheck').attr('checked', 'checked');
+                    }
+                    var value = this._settings.fieldInfos.param.scalar;
+                    $(template).find('.fieldCheck').attr('id', this.fieldId).val(value);
+                } else {
+                    var template = $("<p><label>Provide a label for this field</label></p>").clone();
+                    $(template).attr("id", this.id).addClass('bb5-param-' + this._settings.fieldInfos.fieldLabel);
+                    var form = this._populateForm();
+                    var fieldLabel = (typeof this._settings.fieldInfos.param.array.label == "string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel;
+                    $(template).find("label").text(fieldLabel);
+                    $(template).append(form);
+                    this.initvalues = this._settings.fieldInfos.param.array.checked;
+                    for (var i = 0; i < this.initvalues.length; i++)
+                        this.initvalues[i] = null;
+                    if ('undefined' != typeof (this._settings.fieldInfos.param.array.onchange))
+                        $(template).find("input").attr('onchange', this._settings.fieldInfos.param.array.onchange);
+                }
+
+                this.form = template;
+            },
+            _populateForm: function() {
+                var self = this;
+                var options = this._settings.fieldInfos.param.array.options;
+                var selection = this._settings.fieldInfos.param.array.checked;
+                var dFragment = document.createDocumentFragment();
+
+                $.each(options, function(value, option) {
+                    var optionTpl = $('<label class="bb5-form-label-chkbx"><input type="checkbox" name="radio' + self.id + '" /><span></span></label>').clone();
+                    $(optionTpl).find("input").attr("value", value);
+                    $(optionTpl).find("span").html(option);
+                    for (var i = 0; i < selection.length; i++) {
+                        if (selection[i] + '' == value + '') {
+                            $(optionTpl).find("input").attr("checked", "checked");
+                            break;
+                        }
+                    }
+                    dFragment.appendChild($(optionTpl).get(0));
+                });
+                return dFragment;
+            },
+            render: function() {
+                if ('undefined' != typeof (this._settings.fieldInfos.param.array.onrender))
+                    eval(this._settings.fieldInfos.param.array.onrender);
+                return this.form;
+            },
+            parse: function() {
+                if ('undefined' == typeof (this._settings.fieldInfos.param.array.options)) {
+                    var result = {
+                        'array': {
+                            'checked': $(this.form).find('.fieldCheck').is(':checked')
+                        }
+                    };
+                } else {
+                    var checked = new Array();
+                    $.each($(this.form).find('input:checked'), function(i, input) {
+                        checked[checked.length] = $(input).val()
+                    });
+
+                    var result = {
+                        'array': {
+                            'checked': $.extend(this.initvalues, checked)
+                        }
+                    };
+                }
+
                 return result;
             }
         });
@@ -605,18 +734,18 @@
                 var rawData = this._pageList.toArray(true);
                 var nodeIds = [];
                 if (!self._context.parsedData.parentnode) {
-                        self._context.parsedData.parentnode = [];
+                    self._context.parsedData.parentnode = [];
                 }
                 bb.jquery.each(rawData, function(i, data) {
                     nodeIds.push(data.uid);
-                        if (-1 === bb.jquery.inArray(data.uid, self._context.parsedData.parentnode)) {
-                                self._context.parsedData.parentnode.push(data.uid);
-                        }
+                    if (-1 === bb.jquery.inArray(data.uid, self._context.parsedData.parentnode)) {
+                        self._context.parsedData.parentnode.push(data.uid);
+                    }
                 });
                 bb.jquery.each(this._context.parsedData.parentnode, function(i, p_uid) {
-                        if (-1 === bb.jquery.inArray(p_uid, nodeIds)) {
-                                self._context.parsedData.parentnode[i] = null;
-                        }
+                    if (-1 === bb.jquery.inArray(p_uid, nodeIds)) {
+                        self._context.parsedData.parentnode[i] = null;
+                    }
                 });
                 this._context.parsedData.nodeInfos = JSON.stringify(rawData);
             },
@@ -1076,16 +1205,16 @@
                         var k_uid = self.keywordsList[keyword];
                         keywords.push(k_uid);
                         if (-1 === bb.jquery.inArray(k_uid, self.selected)) {
-                                self.selected.push(k_uid);
+                            self.selected.push(k_uid);
                         }
                     }
                 });
                 bb.jquery.each(this.selected, function(i, k_uid) {
-                        if (-1 === bb.jquery.inArray(k_uid, keywords)) {
-                                self.selected[i] = null;
-                        }
+                    if (-1 === bb.jquery.inArray(k_uid, keywords)) {
+                        self.selected[i] = null;
+                    }
                 });
-                
+
                 this.keywordField.val(terms.join(", "));
             },
             _split: function(val) {
