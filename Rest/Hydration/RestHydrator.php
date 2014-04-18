@@ -21,22 +21,17 @@
 
 namespace BackBuilder\Rest\Hydration;
 
-use Doctrine\ORM\UnitOfWork;
-use PDO;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\PersistentCollection;
-use Doctrine\ORM\Query;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Proxy\Proxy;
-
-
 use Doctrine\ORM\EntityManager;
+
+use Doctrine\DBAL\Types\Type;
+
 /**
  * The ObjectHydrator constructs an object graph out of a solr result set.
   */
 class RestHydrator
 {
     protected $em;
+    
     
     public function __construct(EntityManager $em)
     {
@@ -46,10 +41,19 @@ class RestHydrator
     
     public function hydrateEntity($entity, array $values)
     {
-        $metadata = $this->em->getClassMetadata(get_class($entity));
+        $classMetadata = $this->em->getClassMetadata(get_class($entity));
         
-        foreach($values as $field => $value) {
-            $metadata->setFieldValue($entity, $field, $value);
+        foreach($values as $fieldName => $value) {
+            try {
+                $classMetadata->getFieldMapping($fieldName);
+                
+                $type = Type::getType($classMetadata->fieldMappings[$fieldName]['type']);
+                $value = $type->convertToPHPValue($value, $this->em->getConnection()->getDatabasePlatform());
+                
+                $classMetadata->setFieldValue($entity, $fieldName, $value);
+            } catch(\Exception $e) {
+                throw new HydrationException($fieldName, $e);
+            }
         }
     }
 }
