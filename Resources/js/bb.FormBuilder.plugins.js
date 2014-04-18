@@ -600,14 +600,25 @@
                 this._updateParseData();
             },
             _updateParseData: function() {
+                var self = this;
                 var $ = bb.jquery;
                 var rawData = this._pageList.toArray(true);
                 var nodeIds = [];
-                $.each(rawData, function(i, data) {
+                if (!self._context.parsedData.parentnode) {
+                        self._context.parsedData.parentnode = [];
+                }
+                bb.jquery.each(rawData, function(i, data) {
                     nodeIds.push(data.uid);
+                        if (-1 === bb.jquery.inArray(data.uid, self._context.parsedData.parentnode)) {
+                                self._context.parsedData.parentnode.push(data.uid);
+                        }
+                });
+                bb.jquery.each(this._context.parsedData.parentnode, function(i, p_uid) {
+                        if (-1 === bb.jquery.inArray(p_uid, nodeIds)) {
+                                self._context.parsedData.parentnode[i] = null;
+                        }
                 });
                 this._context.parsedData.nodeInfos = JSON.stringify(rawData);
-                this._context.parsedData.parentnode = nodeIds;
             },
             callbacks: {
                 clickOnFieldHandler: function(e) {
@@ -1059,12 +1070,22 @@
                     terms = termArr.reverse();
                 }
 
-                this.selected = [];
+                var keywords = [];
                 bb.jquery.each(terms, function(i, keyword) {
                     if ('undefined' !== self.keywordsList[keyword]) {
-                        self.selected.push(self.keywordsList[keyword]);
+                        var k_uid = self.keywordsList[keyword];
+                        keywords.push(k_uid);
+                        if (-1 === bb.jquery.inArray(k_uid, self.selected)) {
+                                self.selected.push(k_uid);
+                        }
                     }
                 });
+                bb.jquery.each(this.selected, function(i, k_uid) {
+                        if (-1 === bb.jquery.inArray(k_uid, keywords)) {
+                                self.selected[i] = null;
+                        }
+                });
+                
                 this.keywordField.val(terms.join(", "));
             },
             _split: function(val) {
