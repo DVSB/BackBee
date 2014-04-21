@@ -105,14 +105,20 @@ class BBApplication implements IApplication
              ->_initEntityManager()
              ->_initBundles();
 
+        if (false === $this->getContainer()->has('em')) {
+            $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
+            return;
+        }
+        
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
-
+        
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
                 if(setLocale(LC_ALL, $encoding['locale']) === false)
                     Throw new Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
         }
+        
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
@@ -390,11 +396,15 @@ class BBApplication implements IApplication
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
-        $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogging(), $evm);
-        $this->getContainer()->set('em', $em);
+        try {
+            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogging(), $evm);
+            $this->getContainer()->set('em', $em);
 
-        $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
-
+            $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
+        } catch (\Exception $e) {
+            $this->warning(sprintf('%s(): Cannot initialized Doctrine EntityManager', __METHOD__));
+        }
+        
         return $this;
     }
 
