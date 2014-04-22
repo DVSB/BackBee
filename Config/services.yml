@@ -23,6 +23,11 @@ parameters:
     bbapp.controller_resolver.class: BackBuilder\Controller\ControllerResolver
     
     bbapp.rest.hydrator.class: BackBuilder\Rest\Hydration\RestHydrator
+    bbapp.rest.encoder_provider.class: BackBuilder\Rest\Encoder\ContainerEncoderProvider
+    bbapp.rest.encoder_json.class: Symfony\Component\Serializer\Encoder\JsonEncoder
+    bbapp.rest.encoder_xml.class: Symfony\Component\Serializer\Encoder\XmlEncoder
+    
+    bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
 
 services:
     cache.bootstrap:
@@ -71,6 +76,22 @@ services:
     rest.hydrator:
         class:      %bbapp.rest.hydrator.class%
         arguments:  ["@em"]
+        
+    rest.encoder_provider:
+        class:      %bbapp.rest.encoder_provider.class%
+        calls:
+            - [setContainer, [@service_container]]
+        arguments:  [{json: "rest.encoder.json", xml: "rest.encoder.xml"}]
+        
+    rest.encoder.json:
+        class:      %bbapp.rest.encoder_json.class%
+        
+    rest.encoder.xml:
+        class:      %bbapp.rest.encoder_xml.class%
+        
+    rest.listener.body:
+        class:      %bbapp.rest.listener_body.class%
+        arguments:  [@rest.encoder_provider, true, "/rest/"]
 
     # synthetic services
     site:
@@ -80,4 +101,6 @@ services:
     routing:
         synthetic: true
     mailer:
+        synthetic: true
+    service_container:
         synthetic: true

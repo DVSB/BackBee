@@ -68,3 +68,7 @@ revision.postload:
 element.keyword.render:
   listeners:
     - [BackBuilder\Event\Listener\elementListener, onRender]
+
+frontcontroller.request: 
+  listeners:
+    - [@rest.listener.body, onRequest]
