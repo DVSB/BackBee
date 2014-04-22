@@ -91,7 +91,9 @@ services:
         
     rest.listener.body:
         class:      %bbapp.rest.listener_body.class%
-        arguments:  [@rest.encoder_provider, true, "/rest/"]
+        arguments:  [@rest.encoder_provider, true]
+        calls:
+            - [setPath, ["/rest/"]]
 
     # synthetic services
     site:

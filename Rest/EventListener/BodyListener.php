@@ -27,7 +27,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
 
-use BackBuilder\Event\Listener\ARouteEnabledListener;
+use BackBuilder\Event\Listener\APathEnabledListener;
 
 /**
  * Body listener/encoder
@@ -37,7 +37,7 @@ use BackBuilder\Event\Listener\ARouteEnabledListener;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BodyListener extends ARouteEnabledListener
+class BodyListener extends APathEnabledListener
 {
     /**
      * @var IEncoderProvider
@@ -56,11 +56,10 @@ class BodyListener extends ARouteEnabledListener
      * @param boolean $throwExceptionOnUnsupportedContentType
      * @param string $path
      */
-    public function __construct(IEncoderProvider $encoderProvider, $throwExceptionOnUnsupportedContentType = false, $path = null)
+    public function __construct(IEncoderProvider $encoderProvider, $throwExceptionOnUnsupportedContentType = false)
     {
         $this->encoderProvider = $encoderProvider;
         $this->throwExceptionOnUnsupportedContentType = $throwExceptionOnUnsupportedContentType;
-        $this->path = $path;
     }
 
     /**
@@ -78,8 +77,6 @@ class BodyListener extends ARouteEnabledListener
         if(false === $this->isEnabled($request) ) {
             return;
         }
-        
-        echo 22;exit;
         
         if (!count($request->request->all())
             && in_array($request->getMethod(), array('POST', 'PUT', 'PATCH', 'DELETE'))
