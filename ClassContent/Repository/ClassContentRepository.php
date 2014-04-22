@@ -141,7 +141,7 @@ class ClassContentRepository extends EntityRepository
             if (false === empty($parentnode)) {
                 $q->leftJoin('c._mainnode', 'p');
                 if (1 === count($parentnode)) {
-                    $nodes = array($this->_em->find('BackBuilder\NestedNode\Page', $parentnode[0]));
+                    $nodes = array($this->_em->find('BackBuilder\NestedNode\Page', reset($parentnode)));
                 } else {
                     $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $parentnode));
                 }
