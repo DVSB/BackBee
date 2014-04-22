@@ -126,7 +126,7 @@ class Importer
             }
         }
 
-        if ($flush_every > $i) {
+        if ($flush_every > $i && 0 < count($entities)) {
             $this->save($entities, $check_existing);
         }
 
