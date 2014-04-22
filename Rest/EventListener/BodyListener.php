@@ -27,6 +27,8 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
 
+use BackBuilder\Event\Listener\ARouteEnabledListener;
+
 /**
  * Body listener/encoder
  *
@@ -35,7 +37,7 @@ use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BodyListener
+class BodyListener extends ARouteEnabledListener
 {
     /**
      * @var IEncoderProvider
@@ -46,24 +48,19 @@ class BodyListener
      * @var boolean
      */
     private $throwExceptionOnUnsupportedContentType;
-    
-    /**
-     * @var string
-     */
-    private $listenOnRoute;
-
+   
     /**
      * Constructor.
      *
      * @param IEncoderProvider $encoderProvider Provider for encoders
      * @param boolean $throwExceptionOnUnsupportedContentType
-     * @param string $listenOnRoute
+     * @param string $path
      */
-    public function __construct(IEncoderProvider $encoderProvider, $throwExceptionOnUnsupportedContentType = false, $listenOnRoute = '/')
+    public function __construct(IEncoderProvider $encoderProvider, $throwExceptionOnUnsupportedContentType = false, $path = null)
     {
         $this->encoderProvider = $encoderProvider;
         $this->throwExceptionOnUnsupportedContentType = $throwExceptionOnUnsupportedContentType;
-        $this->listenOnRoute = $listenOnRoute;
+        $this->path = $path;
     }
 
     /**
@@ -78,9 +75,11 @@ class BodyListener
         $request = $event->getRequest();
         
         // skip if route does not match
-        if(0 !== strpos($request->getPathInfo(), $this->listenOnRoute) ) {
+        if(false === $this->isEnabled($request) ) {
             return;
         }
+        
+        echo 22;exit;
         
         if (!count($request->request->all())
             && in_array($request->getMethod(), array('POST', 'PUT', 'PATCH', 'DELETE'))
