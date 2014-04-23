@@ -34,8 +34,10 @@ use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpKernel\KernelEvents,
     Symfony\Component\HttpKernel\HttpKernelInterface,
+    Symfony\Component\HttpKernel\Exception\HttpExceptionInterface,
     Symfony\Component\HttpKernel\Event\FilterResponseEvent,
-    Symfony\Component\HttpKernel\Event\GetResponseEvent;
+    Symfony\Component\HttpKernel\Event\GetResponseEvent,
+    Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
 /**
  * The BackBuilder front controller
@@ -169,46 +171,41 @@ class FrontController implements HttpKernelInterface {
             //$this->defaultAction($this->getRequest()->getPathInfo(), $sendResponse);
         }
 
-        try {
-            $actionKey = $matches['_route'] . '_' . $matches['_action'];
+        $actionKey = $matches['_route'] . '_' . $matches['_action'];
 
-            if (isset($this->_actions[$actionKey]) && is_callable($this->_actions[$actionKey])) {
-                /* nothing to do */
-            } elseif (array_key_exists($matches['_action'], $this->_actions) && is_callable($this->_actions[$matches['_action']])) {
-                $actionKey = $matches['_action'];
-            }
-            
-            if (null !== $actionKey) {
-                $controller = $this->_actions[$actionKey][0];
-                $eventName = str_replace('\\', '.', strtolower(get_class($controller)));
-                if (0 === strpos($eventName, 'backbuilder.')) {
-                    $eventName = substr($eventName, 12);
-                }
-
-                if (0 === strpos($eventName, 'frontcontroller.')) {
-                    $eventName = substr($eventName, 16);
-                }
-
-                $eventName .= '.pre' . $matches['_action'];
-                $this->_dispatch($eventName . '.pre' . $matches['_action']);
-                
-
-                $actionArguments = $this->getApplication()->getContainer()->get('controller_resolver')->getArguments(
-                        $this->getRequest(),
-                        $this->_actions[$actionKey]
-                );
-                
-                $response = call_user_func_array($this->_actions[$actionKey], $actionArguments);
-                
-                return $response;
-            } else {
-                throw new FrontControllerException(sprintf('Unknown action `%s`.', $matches['_action']), FrontControllerException::BAD_REQUEST);
-            }
-        } catch (FrontControllerException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            throw new FrontControllerException(sprintf('Action `%s` has generated an error.', $matches['_action']), FrontControllerException::INTERNAL_ERROR, $e);
+        if (isset($this->_actions[$actionKey]) && is_callable($this->_actions[$actionKey])) {
+            /* nothing to do */
+        } elseif (array_key_exists($matches['_action'], $this->_actions) && is_callable($this->_actions[$matches['_action']])) {
+            $actionKey = $matches['_action'];
         }
+
+        if (null !== $actionKey) {
+            $controller = $this->_actions[$actionKey][0];
+            $eventName = str_replace('\\', '.', strtolower(get_class($controller)));
+            if (0 === strpos($eventName, 'backbuilder.')) {
+                $eventName = substr($eventName, 12);
+            }
+
+            if (0 === strpos($eventName, 'frontcontroller.')) {
+                $eventName = substr($eventName, 16);
+            }
+
+            $eventName .= '.pre' . $matches['_action'];
+            $this->_dispatch($eventName . '.pre' . $matches['_action']);
+
+
+            $actionArguments = $this->getApplication()->getContainer()->get('controller_resolver')->getArguments(
+                    $this->getRequest(),
+                    $this->_actions[$actionKey]
+            );
+
+            $response = call_user_func_array($this->_actions[$actionKey], $actionArguments);
+
+            return $response;
+        } else {
+            throw new FrontControllerException(sprintf('Unknown action `%s`.', $matches['_action']), FrontControllerException::BAD_REQUEST);
+        }
+      
     }
 
     /**
@@ -578,7 +575,6 @@ class FrontController implements HttpKernelInterface {
     public function handle(Request $request = null, $type = self::MASTER_REQUEST, $catch = true) 
     {
         try {
-                        
             $this->_request = $request;
             
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
@@ -591,10 +587,56 @@ class FrontController implements HttpKernelInterface {
 
             throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getHost() . '/' . $this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);
         } catch (\Exception $e) {
-            $exception = ($e instanceof FrontControllerException ) ? $e : new FrontControllerException(sprintf('An error occured while processing URL `%s`.', $this->getRequest()->getPathInfo()), FrontControllerException::INTERNAL_ERROR, $e);
-            $exception->setRequest($this->getRequest());
-            throw $exception;
+            
+            if (false === $catch) {
+                throw $e;
+            }
+
+            return $this->handleException($e, $this->getRequest(), $type);
         }
+    }
+    
+    
+    /**
+     * Handles an exception by trying to convert it to a Response.
+     *
+     * @param \Exception $e       An \Exception instance
+     * @param Request    $request A Request instance
+     * @param integer    $type    The type of the request
+     *
+     * @return Response A Response instance
+     *
+     * @throws \Exception
+     */
+    private function handleException(\Exception $e, $request, $type)
+    {
+        $event = new GetResponseForExceptionEvent($this, $request, $type, $e);
+        $this->_application->getEventDispatcher()->dispatch(KernelEvents::EXCEPTION, $event);
+
+        // a listener might have replaced the exception
+        $e = $event->getException();
+
+        if (!$event->hasResponse()) {
+            throw $e;
+        }
+
+        $response = $event->getResponse();
+
+        if(!$response->isClientError() && !$response->isServerError() && !$response->isRedirect()) {
+            // ensure that we actually have an error response
+            if ($e instanceof HttpExceptionInterface) {
+                // keep the HTTP status code and headers
+                $response->setStatusCode($e->getStatusCode());
+                $response->headers->add($e->getHeaders());
+            } elseif ($e instanceof FrontControllerException) {
+                // keep the HTTP status code
+                $response->setStatusCode($e->getStatusCode());
+            } else {
+                $response->setStatusCode(500);
+            }
+        }
+
+        return $response;
     }
 
     /**

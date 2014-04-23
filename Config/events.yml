@@ -72,3 +72,8 @@ element.keyword.render:
 frontcontroller.request: 
   listeners:
     - [@rest.listener.body, onRequest]
+
+
+kernel.exception:
+    listeners:
+    - [@rest.listener.exception, onKernelException]
