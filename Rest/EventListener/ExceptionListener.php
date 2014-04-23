@@ -22,9 +22,12 @@
 namespace BackBuilder\Rest\EventListener;
 
 
-use BackBuilder\Event\Listener\APathEnabledListener;
+use BackBuilder\Event\Listener\APathEnabledListener,
+    BackBuilder\FrontController\Exception\FrontControllerException;
+
 use Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+    Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent,
+    Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 
 /**
@@ -55,7 +58,6 @@ class ExceptionListener extends APathEnabledListener
         }
         
         $exception = $event->getException();
-        
         $exceptionClass = get_class($exception);
         
         if(isset($this->mapping[$exceptionClass])) {
@@ -67,6 +69,19 @@ class ExceptionListener extends APathEnabledListener
             }
 
             $event->getResponse()->setStatusCode($code, $message);
+        } elseif($exception instanceof HttpExceptionInterface) {
+            if(!$event->getResponse()) {
+                $event->setResponse(new Response());
+            }
+            // keep the HTTP status code and headers
+            $event->getResponse()->setStatusCode($exception->getStatusCode(), $exception->getMessage());
+            $event->getResponse()->headers->add($exception->getHeaders());
+        } elseif($exception instanceof FrontControllerException) {
+            if(!$event->getResponse()) {
+                $event->setResponse(new Response());
+            }
+            // keep the HTTP status code
+            $event->getResponse()->setStatusCode($exception->getStatusCode());
         }
     }
 }
