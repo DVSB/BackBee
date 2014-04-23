@@ -163,5 +163,17 @@ class Controller
         
         return $response;
     }
+    
+    
+    /**
+     * Returns the validator service
+     *
+     * @access public
+     * @return \Symfony\Component\Validator\ValidatorInterface
+     */
+    public function getValidator() 
+    {
+        return $this->_application->getValidator();
+    }
  
 }

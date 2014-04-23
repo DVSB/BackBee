@@ -118,3 +118,5 @@ services:
         synthetic: true
     service_container:
         synthetic: true
+    validator:
+        synthetic: true

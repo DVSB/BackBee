@@ -33,7 +33,8 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Util\File;
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
-    Doctrine\ORM\EntityManager;
+    Doctrine\ORM\EntityManager,
+    Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\Config\FileLocator,
     BackBuilder\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
@@ -41,7 +42,8 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\Yaml\Yaml,
-    Symfony\Component\HttpFoundation\Response;
+    Symfony\Component\HttpFoundation\Response,
+    Symfony\Component\Validator\Validation;
 
 /**
  * The main BackBuilder5 application
@@ -574,6 +576,16 @@ class BBApplication implements IApplication
     {
         return dirname($this->getBBDir());
     }
+    
+    /**
+     * Get vendor dir
+     * 
+     * @return string
+     */
+    public function getVendorDir()
+    {
+        return $this->getBaseDir() . '/vendor';
+    }
 
     /**
      * Returns TRUE if a starting context is defined, FALSE otherwise
@@ -660,6 +672,28 @@ class BBApplication implements IApplication
     public function getContainer()
     {
         return $this->_container;
+    }
+    
+    /**
+     * Get validator service
+     * 
+     * @return \Symfony\Component\Validator\ValidatorInterface
+     */
+    public function getValidator()
+    {
+        if(!$this->getContainer()->get('validator')) {
+            AnnotationRegistry::registerAutoloadNamespace(
+                    'Symfony\Component\Validator\Constraint', $this->getVendorDir() . '/symfony/symfony/src/'
+            );
+            
+            $validator = Validation::createValidatorBuilder()
+                ->enableAnnotationMapping()
+                ->getValidator();
+            
+            $this->getContainer()->set('validator', $validator);
+        }
+        
+        return $this->getContainer()->get('validator');
     }
 
     /**

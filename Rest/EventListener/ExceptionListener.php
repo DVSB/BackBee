@@ -69,19 +69,25 @@ class ExceptionListener extends APathEnabledListener
             }
 
             $event->getResponse()->setStatusCode($code, $message);
+            $event->getResponse()->addHea($code, $message);
         } elseif($exception instanceof HttpExceptionInterface) {
             if(!$event->getResponse()) {
                 $event->setResponse(new Response());
             }
             // keep the HTTP status code and headers
             $event->getResponse()->setStatusCode($exception->getStatusCode(), $exception->getMessage());
-            $event->getResponse()->headers->add($exception->getHeaders());
+            $event->getResponse()->headers->add(array('Content-Type' => 'json'));
+            
+            if($exception instanceof \BackBuilder\Rest\Exception\ValidationException) {
+                $event->getResponse()->setContent(json_encode(array('errors' => $exception->getErrorsArray())));
+            }
+        
         } elseif($exception instanceof FrontControllerException) {
             if(!$event->getResponse()) {
                 $event->setResponse(new Response());
             }
             // keep the HTTP status code
             $event->getResponse()->setStatusCode($exception->getStatusCode());
-        }
+        } 
     }
 }

@@ -86,22 +86,8 @@ abstract class ARestController extends Controller implements IRestController
     {
         $response = $this->createResponse();
         $response->setStatusCode(404, $message);
-        $response->setContent(json_encode(array('Error' => $message)));
         
         return $response;
     }
     
-    /**
-     * 
-     * @param type $message
-     * @return type
-     */
-//    protected function create500Response($message = null)
-//    {
-//        $response = $this->createResponse();
-//        
-//        $response->setStatusCode(500, $message);
-//        
-//        return $response;
-//    }
 }
