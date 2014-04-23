@@ -76,7 +76,7 @@ class ExceptionListener extends APathEnabledListener
             }
             // keep the HTTP status code and headers
             $event->getResponse()->setStatusCode($exception->getStatusCode(), $exception->getMessage());
-            $event->getResponse()->headers->add(array('Content-Type' => 'json'));
+            $event->getResponse()->headers->add(array('Content-Type' => 'application/json'));
             
             if($exception instanceof \BackBuilder\Rest\Exception\ValidationException) {
                 $event->getResponse()->setContent(json_encode(array('errors' => $exception->getErrorsArray())));
