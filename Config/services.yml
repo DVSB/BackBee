@@ -28,6 +28,12 @@ parameters:
     bbapp.rest.encoder_xml.class: Symfony\Component\Serializer\Encoder\XmlEncoder
     
     bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
+    bbapp.rest.listener_exception.class: BackBuilder\Rest\EventListener\ExceptionListener
+    bbapp.rest.listener_exception.mapping:
+        Exception: 
+            code: 500
+    
+    bbapp.rest_api.path: /rest/
 
 services:
     cache.bootstrap:
@@ -93,7 +99,13 @@ services:
         class:      %bbapp.rest.listener_body.class%
         arguments:  [@rest.encoder_provider, true]
         calls:
-            - [setPath, ["/rest/"]]
+            - [setPath, [%bbapp.rest_api.path%]]
+            
+    rest.listener.exception:
+        class:      %bbapp.rest.listener_exception.class%
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+            - [setMapping, [%bbapp.rest.listener_exception.mapping%]]
 
     # synthetic services
     site:
