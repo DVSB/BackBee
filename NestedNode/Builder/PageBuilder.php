@@ -74,6 +74,11 @@ class PageBuilder
     private $publishedAt;
 
     /**
+     * @var \DateTime
+     */
+    private $createdAt;
+
+    /**
      * @var integer
      */
     private $state;
@@ -126,6 +131,10 @@ class PageBuilder
 
         if (null !== $this->publishedAt) {
             $page->setPublishing($this->publishedAt);
+        }
+
+        if (null !== $this->createdAt) {
+            $page->setCreated($this->createdAt);
         }
 
         $pageContentSet = $page->getContentSet();
@@ -438,6 +447,30 @@ class PageBuilder
     public function publishedAt(\DateTime $publishedAt)
     {
         $this->publishedAt = $publishedAt;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of createdAt.
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+    
+    /**
+     * Sets the value of createdAt.
+     *
+     * @param \DateTime $createdAt the created at
+     *
+     * @return self
+     */
+    public function createdAt(\DateTime $createdAt)
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }
