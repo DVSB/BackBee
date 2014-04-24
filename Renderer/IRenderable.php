@@ -51,4 +51,10 @@ interface IRenderable
      * @return Boolean
      */
     public function isRenderable();
+
+    /**
+     * Returns return the entity template name
+     * @return string
+     */
+    public function getTemplateName();
 }
