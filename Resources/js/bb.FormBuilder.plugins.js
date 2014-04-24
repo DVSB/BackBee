@@ -38,6 +38,39 @@
 
         });
 
+        FormBuilder.registerRenderTypePlugin("datetime", {
+            name: "datetime",
+            _init: function() {
+                this.id = this._settings.formId + '-' + this.id;
+                this.fieldWrapper = $("<p></p>");
+                this.template = $("<label class='fieldLabel'></label><input class='bb5-plugin-form-field fieldDatetime' type='text' value=''></input>").clone();
+                this.fiedId = this.id + "-" + this._settings.fieldInfos.fieldLabel;
+            },
+            render: function() {
+                $(this.fieldWrapper).append(this.template);
+                $(this.fieldWrapper).find(".fieldLabel").html((typeof this._settings.fieldInfos.param.array.label == "string") ? this._settings.fieldInfos.param.array.label : this._settings.emptyLabel);
+                var value = this._settings.fieldInfos.param.array.value;
+                $(this.fieldWrapper).find(".fieldDatetime").attr("id", this.fieldId).datetimepicker({
+                    dateFormat: 'dd/mm/yy',
+                    timeFormat: 'hh:mm'
+                });
+                if (value)
+                    $(this.fieldWrapper).find(".fieldDatetime").datetimepicker('setDate', new Date(value * 1000));
+                return this.fieldWrapper;
+            },
+            parse: function() {
+                var value = $(this.fieldWrapper).find(".fieldDatetime").datetimepicker('getDate');
+
+                var result = {
+                    'array': {
+                        'value': (value) ? value.getTime() / 1000 : ''
+                    }
+                };
+                return result;
+            }
+
+        });
+
         /*scalar type*/
         FormBuilder.registerRenderTypePlugin("scalar", {
             _init: function() {
