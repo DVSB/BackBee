@@ -1289,3 +1289,10 @@ Twitter //zindex causing trouble with bb5 contextual menu
 .bb5-bundle-content h1 {padding-bottom: 20px;font-size:22px;font-weight: normal;margin: 0;line-height: 100%;}
 .bb5-bundle-content h2 {padding-bottom: 20px;font-size:17px;font-weight: normal;margin: 0;line-height: 100%;}
 
+/* css for timepicker */
+.ui-timepicker-div .ui-widget-header{ margin-bottom: 3px; }
+.ui-timepicker-div dl{ text-align: left; }
+.ui-timepicker-div dl dt{ height: 15px; }
+.ui-timepicker-div dl dd{ margin: -5px 0 10px 65px; }
+.ui-timepicker-div, .ui-timepicker-div  td{ font-size: 80%; }
+.ui-datepicker {font-size: 0.8em}
