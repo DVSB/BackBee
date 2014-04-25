@@ -1053,7 +1053,7 @@
                 var self = this;
 
                 this.id = this._settings.formId + '-' + this.id;
-                var template = bb.jquery('<p><label>Provide a label for this field</label><select class="available" style="width:150px;"><option>' + bb.i18n.__('parameters.add_multiple') + '</option></select><br/><select class="selected" size="4" style="width:150px;height:65px;float:left;"></select><button style="display:block;" class="bb5-button bb5-ico-arrow_n bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-del bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-arrow_s bb5-button-square"></button></p>').clone();
+                var template = bb.jquery('<p><label>Provide a label for this field</label><select class="available" style="width:150px;float:left;margin-right:5px;"><option>' + bb.i18n.__('parameters.add_multiple') + '</option></select><button style="display:block;" class="bb5-button bb5-add-all">Tout ajouter</button><br/><select class="selected" size="4" style="width:150px;height:65px;float:left;"></select><button style="display:block;" class="bb5-button bb5-ico-arrow_n bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-del bb5-button-square"></button><button style="display:block;" class="bb5-button bb5-ico-arrow_s bb5-button-square"></button></p>').clone();
                 bb.jquery(template).attr("id", this.id).addClass('bb5-param-' + this._settings.fieldInfos.fieldLabel);
                 var available = this._populateAvailable();
                 var form = this._populateForm();
@@ -1071,6 +1071,11 @@
 
                 bb.jquery(self.form).find("select.available").bind('change', function() {
                     bb.jquery(self.form).find("select.selected").append(bb.jquery(this).find(':selected').remove());
+                });
+                bb.jquery(self.form).find('button.bb5-add-all').unbind('click').bind('click', function() {
+                    var availableSelectOptions = bb.jquery(self.form).find('select.available option');
+                    availableSelectOptions.splice(0, 1);
+                    bb.jquery(self.form).find('select.selected').append(availableSelectOptions.remove()).get(0).selectedIndex = 0;
                 });
                 bb.jquery(self.form).find('button.bb5-ico-del').unbind('click').bind('click', function() {
                     bb.jquery(self.form).find('select.available').append(bb.jquery(self.form).find('select.selected option:selected').remove()).get(0).selectedIndex = 0;
