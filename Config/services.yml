@@ -107,6 +107,12 @@ services:
             - [setPath, [%bbapp.rest_api.path%]]
             - [setMapping, [%bbapp.rest.listener_exception.mapping%]]
             
+    rest.encoder:
+        class:      %bbapp.rest.listener_exception.class%
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+            - [setMapping, [%bbapp.rest.listener_exception.mapping%]]
+            
 #    rest.listener.authentication:
 #        class:      %bbapp.rest.listener_authentication.class%
 #        calls:

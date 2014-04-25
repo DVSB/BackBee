@@ -22,7 +22,8 @@
 namespace BackBuilder\Security\Token;
 
 use Symfony\Component\Security\Core\Authentication\Token\AbstractToken,
-    Symfony\Component\Security\Core\User\UserInterface;
+    Symfony\Component\Security\Core\User\UserInterface,
+    Symfony\Component\HttpFoundation\Request;
 
 /**
  * @category    BackBuilder
@@ -33,7 +34,24 @@ use Symfony\Component\Security\Core\Authentication\Token\AbstractToken,
  */
 class PublicKeyToken extends AbstractToken
 {
+    
+    /**
+     *
+     * @var string
+     */
     public $publicKey;
+    
+    /**
+     *
+     * @var string
+     */
+    public $signature;
+    
+    /**
+     *
+     * @var Request
+     */
+    public $request;
     
     /**
      * Constructor.

@@ -83,7 +83,7 @@ class PublicKeyAuthenticationProvider implements AuthenticationProviderInterface
         if (false === is_array($user)) {
             $user = array($user);
         }
-
+        
         $authenticatedToken = false;
         while (false === $authenticatedToken) {
             if (null !== $provider = array_pop($user)) {
@@ -120,9 +120,10 @@ class PublicKeyAuthenticationProvider implements AuthenticationProviderInterface
     {
         try {
             $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($user);
+                    
             if (true === $this->_encoderFactory
                             ->getEncoder($classname)
-                            ->isPasswordValid($user->getPassword(), $token->getCredentials(), $user->getSalt())) {
+                            ->isApiSignatureValid($token->signature, $token->request, $user->getApiKeyPrivate())) {
                 return new UsernamePasswordToken($user, $user->getPassword(), $user->getRoles());
             }
         } catch (Exception $e) {

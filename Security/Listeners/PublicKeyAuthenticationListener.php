@@ -41,6 +41,7 @@ use Psr\Log\LoggerInterface;
 class PublicKeyAuthenticationListener implements ListenerInterface
 {
     const AUTH_PUBLIC_KEY_TOKEN = 'X-API-KEY';
+    const AUTH_SIGNATURE_TOKEN = 'X-API-SIGNATURE';
     
     
     private $_context;
@@ -67,6 +68,11 @@ class PublicKeyAuthenticationListener implements ListenerInterface
         
         $token = new PublicKeyToken();
         $token->setUser($publicKey);
+        
+        $token->publicKey = $publicKey;
+        $token->request = $request;
+        
+        $token->signature = $request->headers->get(self::AUTH_SIGNATURE_TOKEN);
         
         try {
             $token = $this->_authenticationManager->authenticate($token);
