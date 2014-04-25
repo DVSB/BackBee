@@ -69,7 +69,7 @@ class ExceptionListener extends APathEnabledListener
             }
 
             $event->getResponse()->setStatusCode($code, $message);
-            $event->getResponse()->addHea($code, $message);
+            $event->getResponse()->headers->add(array('Content-Type' => 'application/json'));
         } elseif($exception instanceof HttpExceptionInterface) {
             if(!$event->getResponse()) {
                 $event->setResponse(new Response());
