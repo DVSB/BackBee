@@ -30,10 +30,6 @@ class RequestSignatureEncoder
    {
        $signatureRequest = $this->createSignature($request, $privateKey);
        
-       var_dump($signatureRequest);
-       var_dump($signaturePresented);
-       var_dump($privateKey);exit;
-       
        return StringUtils::equals($signatureRequest, $signaturePresented);
 
    }
