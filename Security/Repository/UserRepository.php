@@ -27,6 +27,8 @@ use Symfony\Component\Security\Core\User\UserCheckerInterface,
     Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 ;
 
+use BackBuilder\Security\ApiUserProviderInterface;
+
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -36,7 +38,7 @@ use Doctrine\ORM\EntityRepository;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class UserRepository extends EntityRepository implements UserProviderInterface, UserCheckerInterface
+class UserRepository extends EntityRepository implements UserProviderInterface, UserCheckerInterface, ApiUserProviderInterface
 {
 
     public function checkPreAuth(UserInterface $user)
@@ -47,6 +49,11 @@ class UserRepository extends EntityRepository implements UserProviderInterface, 
     public function checkPostAuth(UserInterface $user)
     {
         
+    }
+    
+    public function loadUserByPublicKey($publicApiKey)
+    {
+        return $this->findOneBy(array('_api_key_public' => $publicApiKey));
     }
 
     public function loadUserByUsername($username)
