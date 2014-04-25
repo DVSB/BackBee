@@ -114,7 +114,7 @@ class PublicKeyAuthenticationProvider implements AuthenticationProviderInterface
      * Authenticate a token accoridng to the user provided
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param \Symfony\Component\Security\Core\User\UserInterface $user
-     * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
+     * @return boolean|\BackBuilder\Security\Token\PublicKeyToken
      */
     private function _authenticateUser(TokenInterface $token, UserInterface $user)
     {
@@ -124,7 +124,10 @@ class PublicKeyAuthenticationProvider implements AuthenticationProviderInterface
             if (true === $this->_encoderFactory
                             ->getEncoder($classname)
                             ->isApiSignatureValid($token->signature, $token->request, $user->getApiKeyPrivate())) {
-                return new UsernamePasswordToken($user, $user->getPassword(), $user->getRoles());
+                
+                $token = new PublicKeyToken($user->getRoles());
+                $token->setUser($user);
+                return $token;
             }
         } catch (Exception $e) {
             return false;

@@ -101,7 +101,7 @@ class PublicKeyToken extends AbstractToken
     public function getUsername()
     {
         if ($this->getUser() instanceof UserInterface) {
-            return $this->getUser()->getApiPublicKey();
+            return $this->getUser()->getApiKeyPublic();
         }
 
         return (string) $this->getUser();

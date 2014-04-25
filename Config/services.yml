@@ -32,6 +32,8 @@ parameters:
     bbapp.rest.listener_exception.mapping:
         Exception: 
             code: 500
+        Symfony\Component\Security\Core\Exception\ProviderNotFoundException:
+            code: 403
     
     bbapp.rest_api.path: /rest/
 
