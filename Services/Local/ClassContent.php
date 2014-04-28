@@ -264,13 +264,15 @@ class ClassContent extends AbstractServiceLocal
                 && true === is_array($contentParams['selector']['array']['parentnode'])
                 && 0 < count($contentParams['selector']['array']['parentnode'])) {
             $parentnodeTitle = array();
-            foreach ($contentParams['selector']['array']['parentnode'] as $page_uid) {
+            $parentnode = array_filter($contentParams['selector']['array']['parentnode']);
+            foreach ($parentnode as $page_uid) {
                 if (NULL !== $page = $em->find('BackBuilder\NestedNode\Page', $page_uid)) {
                     $parentnodeTitle[] = $page->getTitle();
                 } else {
                     $parentnodeTitle[] = '';
                 }
             }
+            $contentParams['selector']['array']['parentnode'] = $parentnode;
             $contentParams['selector']['array']['parentnodeTitle'] = $parentnodeTitle;
         }
 

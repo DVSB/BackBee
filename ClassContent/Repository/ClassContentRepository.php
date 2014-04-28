@@ -136,39 +136,44 @@ class ClassContentRepository extends EntityRepository
             }
         }
         $nodes = NULL;
-        if (array_key_exists('parentnode', $selector)) {
-            $q->leftJoin('c._mainnode', 'p');
-            if (1 == count($selector['parentnode'])) {
-                $nodes = array($this->_em->find('BackBuilder\NestedNode\Page', $selector['parentnode'][0]));
-            } else {
-                if (is_array($selector['parentnode']) && count($selector['parentnode'])) {
-                    $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $selector['parentnode']));
-                }
-            }
-            if (null != $nodes) {
-
-                foreach ($nodes as $node) {
-                    if ($recursive) {
-                        $q->andWhere('p._root = :root_' . $node->getUid())
-                                ->andWhere('p._leftnode >= :leftnode_' . $node->getUid())
-                                ->andWhere('p._rightnode <= :rightnode_' . $node->getUid())
-                                ->setParameter('root_' . $node->getUid(), $node->getRoot())
-                                ->setParameter('leftnode_' . $node->getUid(), $node->getLeftnode())
-                                ->setParameter('rightnode_' . $node->getUid(), $node->getRightnode());
-                    } else {
-                        $q->andWhere('p._parent = :parent_' . $node->getUid())
-                                ->setParameter('parent_' . $node->getUid(), $node);
-                    }
-                }
-
-                if ($limitToOnline) {
-                    $q->andWhere('p._state IN (:states)')
-                            ->andWhere('p._publishing IS NULL OR p._publishing <= CURRENT_TIMESTAMP()')
-                            ->andWhere('p._archiving IS NULL OR p._archiving > CURRENT_TIMESTAMP()')
-                            ->setParameter('states', array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
+        if (array_key_exists('parentnode', $selector) && true === is_array($selector['parentnode'])) {
+            $parentnode = array_filter($selector['parentnode']);
+            if (false === empty($parentnode)) {
+                $q->leftJoin('c._mainnode', 'p');
+                if (1 === count($parentnode)) {
+                    $nodes = array($this->_em->find('BackBuilder\NestedNode\Page', reset($parentnode)));
                 } else {
-                    $q->andWhere('p._state < :statedeleted')
-                            ->setParameter('statedeleted', Page::STATE_DELETED);
+                    $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $parentnode));
+                }
+                if (null != $nodes) {
+                    $orModule = $q->expr()->Orx();
+                    foreach ($nodes as $node) {
+                        $andModule = $q->expr()->Andx();
+                        if ($recursive) {
+                            $andModule->add('p._root = :root_' . $node->getUid());
+                            $andModule->add('p._leftnode >= :leftnode_' . $node->getUid());
+                            $andModule->add('p._rightnode <= :rightnode_' . $node->getUid());
+
+                            $q->setParameter('root_' . $node->getUid(), $node->getRoot())
+                                    ->setParameter('leftnode_' . $node->getUid(), $node->getLeftnode())
+                                    ->setParameter('rightnode_' . $node->getUid(), $node->getRightnode());
+                        } else {
+                            $andModule->add('p._parent = :parent_' . $node->getUid());
+                            $q->setParameter('parent_' . $node->getUid(), $node);
+                        }
+                        $orModule->add($andModule);
+                    }
+                    $q->andWhere($orModule);
+
+                    if ($limitToOnline) {
+                        $q->andWhere('p._state IN (:states)')
+                                ->andWhere('p._publishing IS NULL OR p._publishing <= CURRENT_TIMESTAMP()')
+                                ->andWhere('p._archiving IS NULL OR p._archiving > CURRENT_TIMESTAMP()')
+                                ->setParameter('states', array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
+                    } else {
+                        $q->andWhere('p._state < :statedeleted')
+                                ->setParameter('statedeleted', Page::STATE_DELETED);
+                    }
                 }
             }
         }
