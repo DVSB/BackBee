@@ -33,7 +33,8 @@ parameters:
         Exception: 
             code: 500
         Symfony\Component\Security\Core\Exception\ProviderNotFoundException:
-            code: 403
+            code: 401
+            message: Authentication failed - supplied public key or signature is incorrect
     
     bbapp.rest_api.path: /rest/
 

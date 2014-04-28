@@ -62,7 +62,7 @@ class PublicKeyAuthenticationListener implements ListenerInterface
         $publicKey = $request->headers->get(self::AUTH_PUBLIC_KEY_TOKEN);
         
         if(!$publicKey) {
-            $event->setResponse(new Response('No Api Key has been supplied', 403));
+            $event->setResponse(new Response('No Api Key has been supplied', 401));
             return;
         }
         
