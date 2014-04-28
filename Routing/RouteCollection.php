@@ -24,6 +24,7 @@ namespace BackBuilder\Routing;
 use BackBuilder\BBApplication,
     BackBuilder\Bundle\ABundle,
     BackBuilder\Site\Site;
+
 use Symfony\Component\Routing\RouteCollection as sfRouteCollection,
     Symfony\Component\HttpFoundation\Request;
 
@@ -82,7 +83,13 @@ class RouteCollection extends sfRouteCollection
             }
 
             $router->add(
-                    $name, new Route($route['pattern'], $route['defaults'], array_key_exists('requirements', $route) ? $route['requirements'] : array())
+                    $name, new Route(
+                        $route['pattern'], 
+                        $route['defaults'], 
+                        true === array_key_exists('requirements', $route) 
+                            ? $route['requirements'] 
+                            : array()
+                    )
             );
 
             $this->_application->debug(sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
@@ -116,9 +123,16 @@ class RouteCollection extends sfRouteCollection
      * @param  string      $route_name   
      * @param  array|null  $route_params 
      * @param  string|null $base_url     
+     * @param  boolean     $add_ext
      * @return string              
      */
-    public function getUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true)
+    public function getUrlByRouteName(
+        $route_name,
+        array $route_params = null,
+        $base_url = null,
+        $add_ext = true,
+        Site $site = null
+    )
     {
         $uri = $this->getRoutePath($route_name);
         if (null !== $route_params && true === is_array($route_params)) {
@@ -128,8 +142,8 @@ class RouteCollection extends sfRouteCollection
         }
 
         return null !== $base_url && true === is_string($base_url) 
-            ? $base_url . $uri 
-            : $this->getUri($uri, false === $add_ext ? '' : null);
+            ? $base_url . $uri . (false === $add_ext ? '' : $this->_getDefaultExtFromSite($site))
+            : $this->getUri($uri, false === $add_ext ? '' : null, $site);
     }
 
     /**

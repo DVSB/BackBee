@@ -943,4 +943,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
         return $this;
     }
 
+
+    public function getTemplateName()
+    {
+        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "ClassContent" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
 }

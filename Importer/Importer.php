@@ -30,7 +30,7 @@ use Doctrine\DBAL\Driver\PDOStatement;
  * @category    BackBuilder
  * @package     BackBuilder\Importer
  * @copyright   Lp digital system
- * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
+ * @author      e.chau <eric.chau@lp-digital.fr>, n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class Importer
 {
@@ -99,7 +99,9 @@ class Importer
     private function _doImport(PDOStatement $statement, $flush_every, $check_existing, $limit = null)
     {
         $i = 0;
+        $count_null = 0;
         $entities = array();
+
         while ($row = $statement->fetch()) {
             $entity = $this->getConverter()->convert($row);
 
@@ -113,7 +115,14 @@ class Importer
                     $entities = array();
                 }
                 
+                $count_null = 0;
                 unset($entity);
+            } else {
+                $count_null++;
+                if ($flush_every <= $count_null) {
+                    $this->flushMemory();
+                    $count_null = 0;
+                }
             }
 
             unset($row);
@@ -128,6 +137,8 @@ class Importer
 
         if ($flush_every > $i && 0 < count($entities)) {
             $this->save($entities, $check_existing);
+        } else {
+            $this->flushMemory();
         }
 
         unset($entities);

@@ -61,7 +61,13 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         // Ensure class content are known
         $datas = (array) $this->_data;
         foreach ($datas as $data) {
-            $type = @array_pop(array_flip($data));
+            $type = key($data);
+            
+            $data = array_pop($data);
+            if (true === is_array($data)) {
+                $type = key($data);
+            }
+
             if (0 === strpos($type, 'BackBuilder\ClassContent')) {
                 class_exists($type);
             }
@@ -545,5 +551,4 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         return $this;
     }
-
 }
