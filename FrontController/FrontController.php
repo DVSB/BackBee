@@ -37,7 +37,8 @@ use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpKernel\Exception\HttpExceptionInterface,
     Symfony\Component\HttpKernel\Event\FilterResponseEvent,
     Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+    Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent,
+    Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 /**
  * The BackBuilder front controller
@@ -146,9 +147,10 @@ class FrontController implements HttpKernelInterface {
      *
      * @access private
      * @param array $matches An array of parameters provided by the URL matcher
+     * @param int $type request type
      * @throws FrontControllerException
      */
-    private function _invokeAction($matches) 
+    private function _invokeAction($matches, $type = self::MASTER_REQUEST) 
     {
         if (false === array_key_exists('_action', $matches)) {
             return;
@@ -180,8 +182,9 @@ class FrontController implements HttpKernelInterface {
         }
 
         if (null !== $actionKey) {
-            $controller = $this->_actions[$actionKey][0];
-            $eventName = str_replace('\\', '.', strtolower(get_class($controller)));
+            $controller = $this->_actions[$actionKey];
+            
+            $eventName = str_replace('\\', '.', strtolower(get_class($controller[0])));
             if (0 === strpos($eventName, 'backbuilder.')) {
                 $eventName = substr($eventName, 12);
             }
@@ -193,13 +196,19 @@ class FrontController implements HttpKernelInterface {
             $eventName .= '.pre' . $matches['_action'];
             $this->_dispatch($eventName . '.pre' . $matches['_action']);
 
+            // dispatch kernel.controller event
+            $event = new FilterControllerEvent($this, $controller, $this->getRequest(), $type);
+            $this->_application->getEventDispatcher()->dispatch(KernelEvents::CONTROLLER, $event);
+            // a listener could have changed the controller
+            $controller = $event->getController();
 
+            // get controller action arguments
             $actionArguments = $this->getApplication()->getContainer()->get('controller_resolver')->getArguments(
-                    $this->getRequest(),
-                    $this->_actions[$actionKey]
+                $this->getRequest(),
+                $controller
             );
-
-            $response = call_user_func_array($this->_actions[$actionKey], $actionArguments);
+            
+            $response = call_user_func_array($controller, $actionArguments);
 
             return $response;
         } else {
@@ -604,9 +613,8 @@ class FrontController implements HttpKernelInterface {
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
             $matches = $urlMatcher->match($this->getRequest()->getPathInfo());
             
-            
             if($matches) {
-                return $this->_invokeAction($matches);
+                return $this->_invokeAction($matches, $type);
             }
 
             throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getHost() . '/' . $this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);
