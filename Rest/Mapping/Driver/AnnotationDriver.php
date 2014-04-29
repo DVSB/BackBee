@@ -55,7 +55,7 @@ class AnnotationDriver implements DriverInterface
         $classMetadata = new ClassMetadata($class->getName());
 
         foreach ($class->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
-
+           
             if(false === strpos($reflectionMethod->getName(), 'Action')) {
                 continue;
             }
@@ -65,13 +65,10 @@ class AnnotationDriver implements DriverInterface
             }
 
             $methodMetadata = new ActionMetadata($class->getName(), $reflectionMethod->getName());
- 
-            $annotation = $this->reader->getMethodAnnotation(
-                $reflectionMethod,
-                'BackBuilder\Rest\Controller\Annotations\Param'
-            );
+            
+            $annotations = $this->reader->getMethodAnnotations($reflectionMethod);
 
-            if (null !== $annotation) {
+            foreach($annotations as $annotation) {
                 $data = array(
                     'name' => $annotation->name,
                     'key' => $annotation->key ? $annotation->key : $annotation->name,
@@ -79,7 +76,6 @@ class AnnotationDriver implements DriverInterface
                     'description' => $annotation->description,
                     'requirements' => $annotation->requirements,
                 );
-
                 if($annotation instanceof \BackBuilder\Rest\Controller\Annotations\QueryParam) {
                     $methodMetadata->queryParams[] = $data;
                 } elseif($annotation instanceof \BackBuilder\Rest\Controller\Annotations\RequestParam) {
