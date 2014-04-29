@@ -36,6 +36,8 @@ parameters:
         Symfony\Component\Security\Core\Exception\ProviderNotFoundException:
             code: 401
             message: Authentication failed - supplied public key or signature is incorrect
+        Doctrine\ORM\ORMException:
+            code: 500
     
     bbapp.rest_api.path: /rest/
 
@@ -116,7 +118,6 @@ services:
         arguments:  [@service_container]
         calls:
             - [setPath, [%bbapp.rest_api.path%]]
-            
             
     rest.metadata.annotation_reader: 
         class: Doctrine\Common\Annotations\AnnotationReader
