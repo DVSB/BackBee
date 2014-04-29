@@ -86,7 +86,6 @@ class ValidationListener extends APathEnabledListener
                 // set defaults
                 $this->setDefaultValues($metadata->requestParams, $request->request);
             }
-            
             if(count($violations) > 0) {
                 $request->attributes->set('violations', $violations);
             }
@@ -102,7 +101,7 @@ class ValidationListener extends APathEnabledListener
     protected function setDefaultValues(array $params, ParameterBag $values)
     {
         foreach($params as $param) {
-            if(empty($param['default'])) {
+            if(!array_key_exists('default', $param)) {
                 continue;
             }
 
