@@ -708,10 +708,11 @@ class Renderer extends ARenderer
      * @param  array|null  $route_params 
      * @param  string|null $base_url     
      * @param  boolean     $add_ext
+     * @param  \BackBuilder\Site\Site
      * @return string
      */
-    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true)
+    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null)
     {
-        return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext);
+        return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext, $site);
     }
 }

@@ -1,0 +1,11 @@
+{
+    "name": "exploit/backbuilder",
+    "description": "BackBuilder",
+    "type": "backbuilder-package",
+    "extra": {
+        "installer-name": "BackBuilder"
+    },
+    "require": {
+        "next/composer-installers": "~1.0"
+    }
+}
