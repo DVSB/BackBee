@@ -1,6 +1,25 @@
 <?php
 
-namespace BackBuilder\Bundle\Registry;
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+namespace BackBuilder\Bundle;
 
 /**
  * @category    BackBuilder
@@ -9,6 +28,7 @@ namespace BackBuilder\Bundle\Registry;
  * @author e.chau <eric.chau@lp-digital.fr>
  *
  * @Table(name="registry", indexes={@index(name="IDX_KEY_SCOPE", columns={"key", "scope"})})
+ * @Entity(repositoryClass="BackBuilder\Bundle\Registry\Repository"))
  */
 class Registry
 {
@@ -19,28 +39,28 @@ class Registry
      * @Column(type="integer")
      * @GeneratedValue
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
      *
      * @Column(name="`key`", type="string", length=255)
      */
-    private $key;
+    protected $key;
 
     /**
      * @var string
      * 
      * @Column(name="`value`", type="text")
      */
-    private $value;
+    protected $value;
 
     /**
      * @var string
      * 
      * @Column(name="`scope`", type="string", length=255)
      */
-    private $scope;
+    protected $scope;
 
 
     /**
