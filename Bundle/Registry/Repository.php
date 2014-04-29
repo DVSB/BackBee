@@ -35,7 +35,7 @@ class Repository extends EntityRepository
      * Find 
      *
      **/
-    public function find($classname, $id)
+    public function findEntityById($classname, $id)
     {
         $query = $this->createQueryBuilder('br');
         $query->where('type = :classname')
@@ -67,7 +67,7 @@ class Repository extends EntityRepository
 
     private function countEntities($classname, $total)
     {
-        $property_number = count((new {$classname}())->getProperties());
+        $property_number = count((new $classname())->getProperties());
 
         if ($property_number != 0) {
             $count = $total / $property_number;

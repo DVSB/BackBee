@@ -41,7 +41,7 @@ class Builder
     private function buildEntity()
     {
         if ($this->isRegistryEntity()) {
-            $this->entity = new {$classname}();
+            $this->entity = new $classname();
             $this->buildEntityClass();
         } else {
             $this->entity = new \stdClass();
