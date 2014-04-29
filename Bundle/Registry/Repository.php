@@ -22,6 +22,7 @@
 namespace BackBuilder\Bundle\Registry;
 
 use Doctrine\ORM\EntityRepository;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Bundle
@@ -30,4 +31,63 @@ use Doctrine\ORM\EntityRepository;
  */
 class Repository extends EntityRepository
 {
+    /**
+     * Find 
+     *
+     **/
+    public function find($classname, $id)
+    {
+        $query = $this->createQueryBuilder('br');
+        $query->where('type = :classname')
+              ->setParameter(':classname', $classname)
+              ->andWhere('objectid = :id')
+              ->setParameter(':id', $id);
+
+        return $this->buildEntity($classname, $id, $query->getQuery()->getResult());
+    }
+
+    public function count($descriminator)
+    {
+        $query = $this->createQueryBuilder('br');
+        $query->select($qb->expr()->count('br'))
+              ->setParameter(':descriminator', $descriminator);
+
+        if ((new Builder())->isRegistryEntity($descriminator)) {
+            $query->where('type = :descriminator');
+            $count = $qb->getQuery()->getSingleResult();
+            $count = $this->countEntities($descriminator, $count);
+        } else {
+            $query->where('scope = :descriminator');
+            $count = $qb->getQuery()->getSingleResult();
+            $count = reset($count);
+        }
+
+        return $count;
+    }
+
+    public function countEntities($classname, $total)
+    {
+        $property_number = count((new {$classname}())->getDatas());
+
+        if ($property_number != 0) {
+            $count = $total / $property_number;
+        } else {
+            $count = $total;
+        }
+
+        return $count;
+    }
+
+    public function save($entity)
+    {
+        foreach ((new Builder())->setEntity($entity)->getContents() as $registry) {
+            $this->_em->persist($registry);
+        }
+        $this->_em->flush();
+    }
+
+    private function buildEntity($classname, $id, $content)
+    {
+        return (new Builder())->setContents($classname, $content)->getEntity();
+    }
 }

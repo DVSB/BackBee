@@ -42,6 +42,14 @@ class Registry
     protected $id;
 
     /**
+     * @var integer
+     * 
+     * @Column(type="integer")
+     * @GeneratedValue
+     */
+    protected $type;
+
+    /**
      * @var string
      *
      * @Column(name="`key`", type="string", length=255)
@@ -71,6 +79,30 @@ class Registry
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Gets the value of key.
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->objectid;
+    }
+    
+    /**
+     * Sets the value of key.
+     *
+     * @param string $key the key
+     *
+     * @return self
+     */
+    public function setType($id)
+    {
+        $this->objectid = $id;
+
+        return $this;
     }
 
     /**
