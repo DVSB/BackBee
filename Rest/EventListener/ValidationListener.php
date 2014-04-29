@@ -72,13 +72,19 @@ class ValidationListener extends APathEnabledListener
         
         if(null !== $metadata) {
             $violations = new ConstraintViolationList();
-            
+
             if(count($metadata->queryParams)) {
                 $queryViolations = $this->validateParams($controller[0]->getValidator(), $metadata->queryParams, $request->query);
                 $violations->addAll($queryViolations);
+                
+                // set defaults
+                $this->setDefaultValues($metadata->queryParams, $request->query);
             } elseif(count($metadata->requestParams)) {
                 $requestViolations = $this->validateParams($controller[0]->getValidator(), $metadata->requestParams, $request->request);
                 $violations->addAll($requestViolations);
+                
+                // set defaults
+                $this->setDefaultValues($metadata->requestParams, $request->request);
             }
             
             if(count($violations) > 0) {
@@ -87,12 +93,27 @@ class ValidationListener extends APathEnabledListener
         }
     }
     
-    protected function getValidator()
+    /**
+     * Set default values
+     * 
+     * @param array $params
+     * @param \Symfony\Component\HttpFoundation\ParameterBag $values
+     */
+    protected function setDefaultValues(array $params, ParameterBag $values)
     {
-        return $this->container->get('validator');
+        foreach($params as $param) {
+            if(empty($param['default'])) {
+                continue;
+            }
+
+            if(null === $values->get($param['name'])) {
+                $values->set($param['name'], $param['default']);
+            }
+        }
     }
     
     /**
+     * Validate params
      * 
      * @param \Symfony\Component\Validator\Validator $validator
      * @param array $params
