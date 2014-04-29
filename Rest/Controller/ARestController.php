@@ -23,7 +23,10 @@ namespace BackBuilder\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
 
-use BackBuilder\Controller\Controller;
+use BackBuilder\Controller\Controller,
+    BackBuilder\Rest\Formatter\IFormatter;
+
+use JMS\Serializer\SerializerBuilder;
 
 /**
  * Abstract class for an api controller
@@ -33,8 +36,13 @@ use BackBuilder\Controller\Controller;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-abstract class ARestController extends Controller implements IRestController
+abstract class ARestController extends Controller implements IRestController, IFormatter
 {
+    /**
+     *
+     * @var \JMS\Serializer\Serializer
+     */
+    protected $serializer;
     
     /**
      * 
@@ -56,12 +64,25 @@ abstract class ARestController extends Controller implements IRestController
      */
     public function formatCollection($collection) 
     {
-        $data = array();
-        foreach($collection as $object) {
-            $data[] = $this->formatItem($object);
+        $items = array();
+        
+        foreach($collection as $item) {
+            $items[] = $item;
         }
         
-        return $data;
+        return $this->getSerializer()->serialize($items, 'json');
+    }
+    
+    /**
+     * Serializes an object
+     * 
+     * Implements BackBuilder\Rest\Formatter\IFormatter::formatItem($item)
+     * @param mixed $item
+     * @return array
+     */
+    public function formatItem($item)
+    {
+        return $this->getSerializer()->serialize($item, 'json');
     }
     
     
@@ -90,4 +111,15 @@ abstract class ARestController extends Controller implements IRestController
         return $response;
     }
     
+    /**
+     * @return \JMS\Serializer\Serializer
+     */
+    protected function getSerializer()
+    {
+        if(null === $this->serializer) {
+            $this->serializer = SerializerBuilder::create()->build();
+        }
+        
+        return $this->serializer;
+    }
 }

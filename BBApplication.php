@@ -132,6 +132,7 @@ class BBApplication implements IApplication
         // doctrine annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
             'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
+            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
             'BackBuilder' => $this->getBaseDir()
         ));
         
