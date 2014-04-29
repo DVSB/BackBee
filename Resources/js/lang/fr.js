@@ -228,7 +228,7 @@
             close: 'Fermer',
             cancel: 'Annuler',
             edit: 'Éditer',
-            delete: 'Supprimer',
+            "delete": 'Supprimer',
             remove: 'Supprimer',
             save: 'Enregistrer',
             select: 'Selectionner',
