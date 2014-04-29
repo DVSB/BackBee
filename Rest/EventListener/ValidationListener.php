@@ -28,7 +28,8 @@ use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\Validator,
-    Symfony\Component\Validator\ConstraintViolationList;
+    Symfony\Component\Validator\ConstraintViolationList,
+    Symfony\Component\Validator\ConstraintViolation;
 use BackBuilder\Event\Listener\APathEnabledListener;
 
 /**
@@ -101,7 +102,7 @@ class ValidationListener extends APathEnabledListener
     protected function setDefaultValues(array $params, ParameterBag $values)
     {
         foreach($params as $param) {
-            if(!array_key_exists('default', $param)) {
+            if(!array_key_exists('default', $param) || null === $param['default']) {
                 continue;
             }
 
@@ -131,7 +132,21 @@ class ValidationListener extends APathEnabledListener
             
             $paramViolations = $validator->validateValue($value, $param['requirements']);
             
-            $violations->addAll($paramViolations);
+            // add missing data
+            foreach($paramViolations as $violation) {
+                $extendedViolation = new ConstraintViolation(
+                    $violation->getMessage(), 
+                    $violation->getMessageTemplate(), 
+                    $violation->getMessageParameters(), 
+                    $violation->getRoot(), 
+                    $param['name'], 
+                    $violation->getInvalidValue(), 
+                    $violation->getMessagePluralization(), 
+                    $violation->getCode()
+                );
+                
+                $violations->add($extendedViolation);
+            }
         }
         
         return $violations;
