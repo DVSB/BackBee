@@ -44,9 +44,9 @@ class Registry
     /**
      * @var string
      * 
-     * @Column(name="`descrimator`", type="string", length=255, nullable=true)
+     * @Column(name="`type`", type="string", length=255, nullable=true)
      */
-    protected $descrimator;
+    protected $type;
 
     /**
      * @var string
@@ -85,9 +85,9 @@ class Registry
      *
      * @return string
      */
-    public function getDescrimator()
+    public function getType()
     {
-        return $this->descrimator;
+        return $this->type;
     }
     
     /**
@@ -97,9 +97,9 @@ class Registry
      *
      * @return self
      */
-    public function setDescrimator($descrimator)
+    public function setType($type)
     {
-        $this->descrimator = $descrimator;
+        $this->type = $type;
 
         return $this;
     }
