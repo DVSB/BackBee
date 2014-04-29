@@ -221,7 +221,8 @@
     },
     popupmanager: {
         title: {
-            alert: 'Alerte'
+            alert: 'Alerte',
+            paste: '' 
         },
         button: {
             ok: 'OK',

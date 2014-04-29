@@ -215,9 +215,6 @@ bb.RteManager.registerAdapter("aloha",{
         });  
         bb.jquery(".aloha-multisplit-content").css("zIndex",1000);
         bb.jquery(".aloha-toolbar").appendTo("#aloha"); 
-        
-        /*... fixe size ... */
-        $("#aloha").find("#tab-ui-container-3")
     },
     
     enable: function(){
