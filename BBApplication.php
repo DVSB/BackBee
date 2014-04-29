@@ -127,7 +127,14 @@ class BBApplication implements IApplication
 
         // Compile container so it resolves every var/abstract service called in services.yml|xml
         $this->_container->compile();
-
+        
+        
+        // doctrine annotations require custom autoloading
+        AnnotationRegistry::registerAutoloadNamespaces(array(
+            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
+            'BackBuilder' => $this->getBaseDir()
+        ));
+        
         $this->_isinitialized = true;
     }
 
@@ -687,10 +694,6 @@ class BBApplication implements IApplication
     public function getValidator()
     {
         if(!$this->getContainer()->get('validator')) {
-            AnnotationRegistry::registerAutoloadNamespace(
-                    'Symfony\Component\Validator\Constraint', $this->getVendorDir() . '/symfony/symfony/src/'
-            );
-            
             $validator = Validation::createValidatorBuilder()
                 ->enableAnnotationMapping()
                 ->getValidator();

@@ -77,3 +77,7 @@ frontcontroller.request:
 kernel.exception:
     listeners:
     - [@rest.listener.exception, onKernelException]
+    
+kernel.controller:
+    listeners:
+    - [@rest.listener.validation, onKernelController]

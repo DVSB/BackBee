@@ -27,6 +27,7 @@ parameters:
     bbapp.rest.encoder_json.class: Symfony\Component\Serializer\Encoder\JsonEncoder
     bbapp.rest.encoder_xml.class: Symfony\Component\Serializer\Encoder\XmlEncoder
     
+    bbapp.rest.listener_validation.class: BackBuilder\Rest\EventListener\ValidationListener
     bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
     bbapp.rest.listener_exception.class: BackBuilder\Rest\EventListener\ExceptionListener
     bbapp.rest.listener_exception.mapping:
@@ -110,11 +111,23 @@ services:
             - [setPath, [%bbapp.rest_api.path%]]
             - [setMapping, [%bbapp.rest.listener_exception.mapping%]]
             
-    rest.encoder:
-        class:      %bbapp.rest.listener_exception.class%
+    rest.listener.validation:
+        class:      %bbapp.rest.listener_validation.class%
+        arguments:  [@service_container]
         calls:
             - [setPath, [%bbapp.rest_api.path%]]
-            - [setMapping, [%bbapp.rest.listener_exception.mapping%]]
+            
+            
+    rest.metadata.annotation_reader: 
+        class: Doctrine\Common\Annotations\AnnotationReader
+        
+    rest.metadata.annotation_driver: 
+        class: BackBuilder\Rest\Mapping\Driver\AnnotationDriver
+        arguments:  [@rest.metadata.annotation_reader]
+        
+    rest.metadata.factory:
+        class: Metadata\MetadataFactory
+        arguments:  [@rest.metadata.annotation_driver]
             
 #    rest.listener.authentication:
 #        class:      %bbapp.rest.listener_authentication.class%
