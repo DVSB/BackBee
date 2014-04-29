@@ -42,31 +42,30 @@ class Registry
     protected $id;
 
     /**
-     * @var integer
+     * @var string
      * 
-     * @Column(type="integer")
-     * @GeneratedValue
+     * @Column(name="`descrimator`", type="string", length=255, nullable=true)
      */
-    protected $type;
+    protected $descrimator;
 
     /**
      * @var string
      *
-     * @Column(name="`key`", type="string", length=255)
+     * @Column(name="`key`", type="string", length=255, nullable=true)
      */
     protected $key;
 
     /**
      * @var string
      * 
-     * @Column(name="`value`", type="text")
+     * @Column(name="`value`", type="text", nullable=true)
      */
     protected $value;
 
     /**
      * @var string
      * 
-     * @Column(name="`scope`", type="string", length=255)
+     * @Column(name="`scope`", type="string", length=255, nullable=true)
      */
     protected $scope;
 
@@ -86,9 +85,9 @@ class Registry
      *
      * @return string
      */
-    public function getType()
+    public function getDescrimator()
     {
-        return $this->objectid;
+        return $this->descrimator;
     }
     
     /**
@@ -98,9 +97,9 @@ class Registry
      *
      * @return self
      */
-    public function setType($id)
+    public function setDescrimator($descrimator)
     {
-        $this->objectid = $id;
+        $this->descrimator = $descrimator;
 
         return $this;
     }

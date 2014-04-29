@@ -33,7 +33,7 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
  */
 class Builder
 {
-    private $isRegistryEntity = false;
+    private $is_registry_entity = false;
     private $classname;
     private $entity;
     private $registries;
@@ -81,34 +81,45 @@ class Builder
 
     private function buildEntityClass()
     {
-        foreach ($this->contents as $content) {
-            $this->entity->setProerty($content->getKey(), $content->getValue());
+        foreach ($this->registries as $registry) {
+            $this->entity->setProerty($registry->getKey(), $registry->getValue());
         }
     }
 
     private function buildStdClass()
     {
-        foreach ($this->contents as $content) {
-            $this->entity->{$content->getKey()} = $content->getValue();
+        foreach ($this->registries as $registry) {
+            $this->entity->{$registry->getKey()} = $registry->getValue();
         }
     }
 
     private function buildRegistries()
     {
-        foreach ($this->contents as $content) {
-            $this->entity->{$content->getKey()} = $content->getValue();
+        if (is_object($this->entity) &&
+            (
+                !$this->isRegistryEntity() ||
+                !($this->entity instanceof \stdClass)
+            )
+        ) {
+            $this->buildRegistryFromObject();
+        } else {
+            $this->buildRegistryFromSomething();// @todo change func name
         }
+        foreach ($this->registries as $registry) {
+            $this->entity->{$registry->getKey()} = $registry->getValue();
+        }
+
     }
 
     public function isRegistryEntity($classname = null)
     {
         if (!is_null($classname)) {
-            $this->isRegistryEntity = (
+            $this->is_registry_entity = (
                 class_exists($classname) &&
                 $classname instanceof IRegistryEntity
             );
         }
 
-        return $this->isRegistryEntity;
+        return $this->is_registry_entity;
     }
 }

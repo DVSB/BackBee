@@ -21,7 +21,8 @@
 
 namespace BackBuilder\Bundle\Registry;
 
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\EntityRepository,
+    Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * @category    BackBuilder
@@ -37,13 +38,13 @@ class Repository extends EntityRepository
      **/
     public function findEntityById($classname, $id)
     {
-        $query = $this->createQueryBuilder('br');
-        $query->where('type = :classname')
-              ->setParameter(':classname', $classname)
-              ->andWhere('objectid = :id')
+        
+        $sql = 'SELECT * FROM BackBuilder\\Bundle\\Registry WHERE type = :type AND ((key = "id" AND value = :id) OR (scope = :id))';
+        $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
+        $query->setParameter(':type', $classname)
               ->setParameter(':id', $id);
 
-        return $this->buildEntity($classname, $id, $query->getQuery()->getResult());
+        return $this->buildEntity($classname, $query->getQuery()->getResult());
     }
 
     public function count($descriminator)
@@ -63,6 +64,19 @@ class Repository extends EntityRepository
         }
 
         return $count;
+    }
+
+    private function getResultSetMapping()
+    {
+        $rsm = new ResultSetMapping();
+        $rsm->addEntityResult('BackBuilder\Bundle\Registry', 'br');
+        $rsm->addFieldResult('br', 'id', 'id');
+        $rsm->addFieldResult('br', 'type', 'type');
+        $rsm->addMetaResult('br', 'key', 'key');
+        $rsm->addMetaResult('br', 'value', 'value');
+        $rsm->addMetaResult('br', 'scope', 'scope');
+
+        return $rsm;
     }
 
     private function countEntities($classname, $total)
