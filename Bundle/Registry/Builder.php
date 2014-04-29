@@ -31,17 +31,16 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
  * @copyright   Lp digital system
  * @author n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class EntityBuilder
+class Builder
 {
     private $isRegistryEntity = false;
+    private $classname;
     private $entity;
-    private $contents;
+    private $registries;
 
-    public function __construct()
+    private function buildEntity()
     {
-        $this->contents = $contents;
-
-        if ($this->isRegistryEntity($classname)) {
+        if ($this->isRegistryEntity()) {
             $this->entity = new {$classname}();
             $this->buildEntityClass();
         } else {
@@ -50,15 +49,54 @@ class EntityBuilder
         }
     }
 
+    public function setEntity($entity)
+    {
+        $this->entity = $entity;
+        return $this;
+    }
+
     public function getEntity()
     {
+        if (!$this->entity) {
+            $this->buildEntity();
+        }
+
         return $this->entity;
+    }
+
+    public function setRegisties($entity)
+    {
+        $this->entity = $entity;
+        return $this;
+    }
+
+    public function getRegisties()
+    {
+        if (!$this->registries) {
+            $this->buildRegistries();
+        }
+
+        return $this->registries;
     }
 
     private function buildEntityClass()
     {
         foreach ($this->contents as $content) {
-            # code...
+            $this->entity->setProerty($content->getKey(), $content->getValue());
+        }
+    }
+
+    private function buildStdClass()
+    {
+        foreach ($this->contents as $content) {
+            $this->entity->{$content->getKey()} = $content->getValue();
+        }
+    }
+
+    private function buildRegistries()
+    {
+        foreach ($this->contents as $content) {
+            $this->entity->{$content->getKey()} = $content->getValue();
         }
     }
 

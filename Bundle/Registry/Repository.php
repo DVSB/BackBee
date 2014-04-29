@@ -65,9 +65,9 @@ class Repository extends EntityRepository
         return $count;
     }
 
-    public function countEntities($classname, $total)
+    private function countEntities($classname, $total)
     {
-        $property_number = count((new {$classname}())->getDatas());
+        $property_number = count((new {$classname}())->getProperties());
 
         if ($property_number != 0) {
             $count = $total / $property_number;
@@ -86,8 +86,8 @@ class Repository extends EntityRepository
         $this->_em->flush();
     }
 
-    private function buildEntity($classname, $id, $content)
+    private function buildEntity($classname, $content)
     {
-        return (new Builder())->setContents($classname, $content)->getEntity();
+        return (new Builder())->setRegistries($content, $classname)->getEntity();
     }
 }

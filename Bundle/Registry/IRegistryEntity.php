@@ -27,19 +27,19 @@ namespace BackBuilder\Bundle\Registry;
  * @copyright   Lp digital system
  * @author n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-interface IRegistryRepository
+interface IRegistryEntity
 {
 	/**
 	 * Return all class properties.
 	 *
 	 * @return array(property_name => property_value)
 	 */
-	public function getDatas();
+	public function getProperties();
 
 	/**
 	 * Set all class properties.
 	 *
 	 * @param array();
 	 */
-	public function setDatas(array $values);
+	public function setProperty($property, $value);
 }
