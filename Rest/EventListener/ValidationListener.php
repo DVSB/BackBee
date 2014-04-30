@@ -68,7 +68,7 @@ class ValidationListener extends APathEnabledListener
     public function onKernelController(FilterControllerEvent $event)
     {
         $controller = $event->getController();
-        $request = $controller[0]->getRequest();
+        $request = $event->getRequest();
         $metadata = $this->getControllerActionMetadata($controller);
         
         if(null !== $metadata) {
