@@ -129,7 +129,20 @@ services:
     rest.metadata.factory:
         class: Metadata\MetadataFactory
         arguments:  [@rest.metadata.annotation_driver]
+        
+    annotation_reader:
+        class: BackBuilder\Annotations\ChainAnnotationReader
+        arguments: [[@annotation_reader.full, @annotation_reader.simple]]
+    
+    annotation_reader.simple:
+        class: Doctrine\Common\Annotations\SimpleAnnotationReader
+        calls:
+            - [addNamespace, ['Doctrine\ORM\Mapping']]
             
+    annotation_reader.full:
+        class: Doctrine\Common\Annotations\AnnotationReader
+
+        
 #    rest.listener.authentication:
 #        class:      %bbapp.rest.listener_authentication.class%
 #        calls:
