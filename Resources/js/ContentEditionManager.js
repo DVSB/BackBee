@@ -1309,7 +1309,14 @@ var ContentEditionManager = (function($){
                     var formRender = renderer.render();
                     self.rendererArr[key] = renderer;
 
-                    var fieldSet = bb.jquery("<fieldset></fieldset>").clone();
+                    var hidden = "";
+                    if ('undefined' != typeof (param.array.hidden)) {
+                        if (param.array.hidden == true) {
+                            hidden = "style='display:none;'";
+                        }
+                    }
+                    var fieldSet = bb.jquery("<fieldset " + hidden + "></fieldset>").clone();
+                 
                     bb.jquery(fieldSet).append(formRender);
                     result.appendChild(bb.jquery(fieldSet).get(0));
                 });

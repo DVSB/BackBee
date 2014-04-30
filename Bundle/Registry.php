@@ -28,7 +28,7 @@ namespace BackBuilder\Bundle;
  * @author e.chau <eric.chau@lp-digital.fr>
  *
  * @Table(name="registry", indexes={@index(name="IDX_KEY_SCOPE", columns={"key", "scope"})})
- * @Entity(repositoryClass="BackBuilder\Bundle\Registry\Repository"))
+ * @Entity(repositoryClass="BackBuilder\Bundle\Registry\Repository")
  */
 class Registry
 {
@@ -43,22 +43,29 @@ class Registry
 
     /**
      * @var string
+     * 
+     * @Column(name="`type`", type="string", length=255, nullable=true)
+     */
+    protected $type;
+
+    /**
+     * @var string
      *
-     * @Column(name="`key`", type="string", length=255)
+     * @Column(name="`key`", type="string", length=255, nullable=true)
      */
     protected $key;
 
     /**
      * @var string
      * 
-     * @Column(name="`value`", type="text")
+     * @Column(name="`value`", type="text", nullable=true)
      */
     protected $value;
 
     /**
      * @var string
      * 
-     * @Column(name="`scope`", type="string", length=255)
+     * @Column(name="`scope`", type="string", length=255, nullable=true)
      */
     protected $scope;
 
@@ -71,6 +78,30 @@ class Registry
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Gets the value of key.
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+    
+    /**
+     * Sets the value of key.
+     *
+     * @param string $key the key
+     *
+     * @return self
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
     }
 
     /**
