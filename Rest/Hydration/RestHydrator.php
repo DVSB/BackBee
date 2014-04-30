@@ -21,7 +21,8 @@
 
 namespace BackBuilder\Rest\Hydration;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManager,
+    Doctrine\ORM\Mapping\ClassMetadataInfo;
 
 use Doctrine\DBAL\Types\Type;
 
@@ -30,6 +31,11 @@ use Doctrine\DBAL\Types\Type;
   */
 class RestHydrator
 {
+    
+    /**
+     *
+     * @var EntityManager
+     */
     protected $em;
     
     
@@ -42,17 +48,37 @@ class RestHydrator
     public function hydrateEntity($entity, array $values)
     {
         $classMetadata = $this->em->getClassMetadata(get_class($entity));
-        
+
         foreach($values as $fieldName => $value) {
-            try {
-                $classMetadata->getFieldMapping($fieldName);
+            if($classMetadata->hasField($fieldName)) {
+                try {
+                    $classMetadata->getFieldMapping($fieldName);
+
+                    $type = Type::getType($classMetadata->fieldMappings[$fieldName]['type']);
+                    $value = $type->convertToPHPValue($value, $this->em->getConnection()->getDatabasePlatform());
+
+                    $classMetadata->setFieldValue($entity, $fieldName, $value);
+                } catch(\Exception $e) {
+                    throw new HydrationException($fieldName, $e);
+                }
+            } elseif(isset($classMetadata->associationMappings[$fieldName])) {
                 
-                $type = Type::getType($classMetadata->fieldMappings[$fieldName]['type']);
-                $value = $type->convertToPHPValue($value, $this->em->getConnection()->getDatabasePlatform());
-                
-                $classMetadata->setFieldValue($entity, $fieldName, $value);
-            } catch(\Exception $e) {
-                throw new HydrationException($fieldName, $e);
+                $fieldMapping = $classMetadata->associationMappings[$fieldName];
+
+                if(ClassMetadataInfo::MANY_TO_MANY === $fieldMapping['type']) {
+                    
+                    // expecting an array of ids in $value
+                    if(1 === count($fieldMapping['relationToTargetKeyColumns'])) {
+                        $columnName = array_pop($fieldMapping['relationToTargetKeyColumns']);
+                        $otherSideMapping = $this->em->getClassMetadata($fieldMapping['targetEntity']); 
+                        
+                        $value = $this->em->getRepository($fieldMapping['targetEntity'])->findBy(array(
+                            $otherSideMapping->fieldNames[$columnName] => $value
+                        ));
+                    }
+
+                    $classMetadata->setFieldValue($entity, $fieldName, $value);
+                }
             }
         }
     }
