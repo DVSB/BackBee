@@ -24,6 +24,8 @@ namespace BackBuilder\Bundle\Registry;
 use Doctrine\ORM\EntityRepository,
     Doctrine\ORM\Query\ResultSetMapping;
 
+use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Bundle
@@ -32,38 +34,46 @@ use Doctrine\ORM\EntityRepository,
  */
 class Repository extends EntityRepository
 {
+    private $last_inserted_id;
+
     /**
-     * Find 
+     * Find the entity by hes id
      *
+     * @param $classname
      **/
-    public function findEntityById($classname, $id)
+    public function findEntityById($identifier, $id)
     {
         
-        $sql = 'SELECT * FROM BackBuilder\\Bundle\\Registry WHERE type = :type AND ((key = "id" AND value = :id) OR (scope = :id))';
+        $sql = 'SELECT * FROM registry AS r WHERE (r.type = "' . addslashes($identifier) . '" OR r.scope = "' . addslashes($identifier) . '") AND ((r.key = "identifier" AND r.value = "' . addslashes($id) . '") OR (r.scope = "' . addslashes($id) . '"))';
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
-        $query->setParameter(':type', $classname)
-              ->setParameter(':id', $id);
 
-        return $this->buildEntity($classname, $query->getQuery()->getResult());
+        return $this->buildEntity($identifier, $query->getResult());
     }
 
     public function count($descriminator)
     {
-        $query = $this->createQueryBuilder('br');
-        $query->select($qb->expr()->count('br'))
-              ->setParameter(':descriminator', $descriminator);
+        $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "' . $descriminator . '"';
 
-        if ((new Builder())->isRegistryEntity($descriminator)) {
-            $query->where('type = :descriminator');
-            $count = $qb->getQuery()->getSingleResult();
-            $count = $this->countEntities($descriminator, $count);
+        if (class_exists($descriminator) && (new Builder())->isRegistryEntity(new $descriminator())) {
+            $count = $this->countEntities($descriminator, $this->executeSql(sprintf($sql, 'type')));
         } else {
-            $query->where('scope = :descriminator');
-            $count = $qb->getQuery()->getSingleResult();
-            $count = reset($count);
+            $count = $this->executeSql(sprintf($sql, 'scope'));
         }
 
         return $count;
+    }
+
+    public function findAllEntities($identifier)
+    {
+        $sql = 'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = "' . addslashes($identifier) . '" OR r.scope = "' . addslashes($identifier) . '") ORDER BY r.id';
+        $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
+
+        $entities = array();
+        foreach ($query->getResult() as $key => $value) {
+            $entities[$key] = $this->findEntityById($identifier, $value->getValue());
+        }
+
+        return $entities;
     }
 
     private function getResultSetMapping()
@@ -81,10 +91,10 @@ class Repository extends EntityRepository
 
     private function countEntities($classname, $total)
     {
-        $property_number = count((new $classname())->getProperties());
+        $property_number = count((new $classname())->getObjectProperties());
 
         if ($property_number != 0) {
-            $count = $total / $property_number;
+            $count = $total / ($property_number + 1);
         } else {
             $count = $total;
         }
@@ -92,16 +102,28 @@ class Repository extends EntityRepository
         return $count;
     }
 
-    public function save($entity)
+    public function persist($entity)
     {
-        foreach ((new Builder())->setEntity($entity)->getContents() as $registry) {
-            $this->_em->persist($registry);
+        if ($entity instanceof DomainObjectInterface && $entity instanceof IRegistryEntity && null === $entity->getObjectIdentifier()) {
+            if (!$this->last_inserted_id) {
+                $this->last_inserted_id = $this->getLastInsertedId();
+            }
+            $entity->setObjectIdentifier($this->last_inserted_id++);
         }
-        $this->_em->flush();
+
+        foreach ((new Builder())->setEntity($entity)->getRegistries() as $registry) {
+            $this->_em->persist($registry);
+            $this->_em->flush($registry);
+        }
     }
 
-    private function buildEntity($classname, $content)
+    private function getLastInsertedId()
     {
-        return (new Builder())->setRegistries($content, $classname)->getEntity();
+        return $this->_em->getConnection()->lastInsertId('registry');
+    }
+
+    private function buildEntity($classname, $contents)
+    {
+        return (new Builder())->setRegistries($contents, $classname)->getEntity();
     }
 }

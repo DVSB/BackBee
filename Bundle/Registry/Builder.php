@@ -21,9 +21,10 @@
 
 namespace BackBuilder\Bundle\Registry;
 
-use Doctrine\ORM\EntityRepository;
-
+use BackBuilder\Bundle\Registry;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
  * @category    BackBuilder
@@ -33,14 +34,34 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
  */
 class Builder
 {
+    /**
+     * @var EntityManager
+     */
+    private $em;
+    /**
+     * @var boolean
+     */
     private $is_registry_entity = false;
+    /**
+     * @var string
+     */
     private $classname;
+    /**
+     * @var mixed
+     */
     private $entity;
+    /**
+     * @var array
+     */
     private $registries;
 
+    /**
+     * build the entity from the registry
+     */
     private function buildEntity()
     {
-        if ($this->isRegistryEntity()) {
+        $classname = $this->classname;
+        if (class_exists($classname) && $this->isRegistryEntity(new $classname())) {
             $this->entity = new $classname();
             $this->buildEntityClass();
         } else {
@@ -49,12 +70,27 @@ class Builder
         }
     }
 
+    /**
+     * Set the entity
+     * 
+     * @param mixed $entity
+     * @return self
+     */
     public function setEntity($entity)
     {
+        if ($this->isRegistryEntity(get_class($entity))) {
+            $this->classname = get_class($entity);
+        }
         $this->entity = $entity;
+
         return $this;
     }
 
+    /**
+     * return the entity
+     * 
+     * @return mixed
+     */
     public function getEntity()
     {
         if (!$this->entity) {
@@ -64,13 +100,26 @@ class Builder
         return $this->entity;
     }
 
-    public function setRegisties($entity)
+    /**
+     * Add registries elements
+     * 
+     * @param array $registries
+     * @return self
+     */
+    public function setRegistries(array $registries, $classname)
     {
-        $this->entity = $entity;
+        $this->classname = $classname;
+        $this->registries = $registries;
+
         return $this;
     }
 
-    public function getRegisties()
+    /**
+     * return the registries elements as array
+     * 
+     * @return array
+     */
+    public function getRegistries()
     {
         if (!$this->registries) {
             $this->buildRegistries();
@@ -79,13 +128,23 @@ class Builder
         return $this->registries;
     }
 
+    /**
+     * Automatique entity builder from the registries elements
+     */
     private function buildEntityClass()
     {
         foreach ($this->registries as $registry) {
-            $this->entity->setProerty($registry->getKey(), $registry->getValue());
+            if ($registry->getKey() === 'identifier') {
+                $this->entity->setObjectIdentifier($registry->getValue());
+            } else {
+                $this->entity->setObjectProperty($registry->getKey(), $registry->getValue());
+            }
         }
     }
 
+    /**
+     * Automatique stdClass builder from the registries elements
+     */
     private function buildStdClass()
     {
         foreach ($this->registries as $registry) {
@@ -93,14 +152,12 @@ class Builder
         }
     }
 
+    /**
+     * Automatique registry builder from the current entity
+     */
     private function buildRegistries()
     {
-        if (is_object($this->entity) &&
-            (
-                !$this->isRegistryEntity() ||
-                !($this->entity instanceof \stdClass)
-            )
-        ) {
+        if (is_object($this->entity) && $this->isRegistryEntity($this->entity)) {
             $this->buildRegistryFromObject();
         } else {
             $this->buildRegistryFromSomething();// @todo change func name
@@ -111,13 +168,34 @@ class Builder
 
     }
 
-    public function isRegistryEntity($classname = null)
+    /**
+     * Automatique registry builder from the current entity object
+     */
+    private function buildRegistryFromObject()
     {
-        if (!is_null($classname)) {
-            $this->is_registry_entity = (
-                class_exists($classname) &&
-                $classname instanceof IRegistryEntity
-            );
+        if (!($this->entity instanceof DomainObjectInterface)) {
+            throw new \Exception('EntityRegistry have to implement DomainObjectInterface', 1);
+        }
+        $this->classname = get_class($this->entity);
+
+        $identifier = new Registry();
+        $this->registries[] = $identifier->setType($this->classname)->setKey('identifier')->setValue($this->entity->getObjectIdentifier());
+
+        foreach ($this->entity->getObjectProperties() as $key => $value) {
+            $registry = new Registry();
+            $this->registries[] = $registry->setType($this->classname)->setKey($key)->setValue($value)->setScope($this->entity->getObjectIdentifier());
+        }
+    }
+
+    /**
+     * Identify if the current element is IEntityRegistry
+     * 
+     * @return boolean
+     */
+    public function isRegistryEntity($class = null)
+    {
+        if (!is_null($class)) {
+            $this->is_registry_entity = ($class instanceof IRegistryEntity);
         }
 
         return $this->is_registry_entity;

@@ -28,7 +28,7 @@ namespace BackBuilder\Bundle;
  * @author e.chau <eric.chau@lp-digital.fr>
  *
  * @Table(name="registry", indexes={@index(name="IDX_KEY_SCOPE", columns={"key", "scope"})})
- * @Entity(repositoryClass="BackBuilder\Bundle\Registry\Repository"))
+ * @Entity(repositoryClass="BackBuilder\Bundle\Registry\Repository")
  */
 class Registry
 {

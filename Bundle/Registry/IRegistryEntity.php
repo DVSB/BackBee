@@ -29,17 +29,25 @@ namespace BackBuilder\Bundle\Registry;
  */
 interface IRegistryEntity
 {
-	/**
-	 * Return all class properties.
-	 *
-	 * @return array(property_name => property_value)
-	 */
-	public function getProperties();
+    /**
+     * Return all class properties.
+     *
+     * @return array(property_name => property_value)
+     */
+    public function getObjectProperties();
 
-	/**
-	 * Set all class properties.
-	 *
-	 * @param array();
-	 */
-	public function setProperty($property, $value);
+    /**
+     * Set all class properties.
+     *
+     * @param string $property the property name
+     * @param mixed $value the property value
+     */
+    public function setObjectProperty($property, $value);
+
+    /**
+     * Set class class identifier.
+     *
+     * @param sting|integer $property;
+     */
+    public function setObjectIdentifier($property);
 }
