@@ -101,6 +101,16 @@ class BBApplication implements IApplication
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
+        
+        // annotations require custom autoloading
+        AnnotationRegistry::registerAutoloadNamespaces(array(
+            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
+            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
+            'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
+            'BackBuilder' => $this->getBaseDir(),
+            'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
+        ));
+        
         $this->_initContainer()
              ->_initAutoloader()
              ->_initContentWrapper()
@@ -111,6 +121,8 @@ class BBApplication implements IApplication
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
             return;
         }
+
+        
         
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
@@ -127,14 +139,6 @@ class BBApplication implements IApplication
 
         // Compile container so it resolves every var/abstract service called in services.yml|xml
         $this->_container->compile();
-        
-        
-        // doctrine annotations require custom autoloading
-        AnnotationRegistry::registerAutoloadNamespaces(array(
-            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
-            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
-            'BackBuilder' => $this->getBaseDir()
-        ));
         
         $this->_isinitialized = true;
     }

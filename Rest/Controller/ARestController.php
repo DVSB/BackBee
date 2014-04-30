@@ -117,7 +117,9 @@ abstract class ARestController extends Controller implements IRestController, IF
     protected function getSerializer()
     {
         if(null === $this->serializer) {
-            $this->serializer = SerializerBuilder::create()->build();
+            $builder = SerializerBuilder::create();
+            $builder->setAnnotationReader($this->getContainer()->get('annotation_reader'));
+            $this->serializer = $builder->build();
         }
         
         return $this->serializer;
