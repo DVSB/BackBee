@@ -61,6 +61,12 @@ class CacheListener implements EventSubscriberInterface
      */
     private static $_object;
 
+    /**
+     * Is the deletion of ached page is done
+     * @var boolean
+     */
+    private static $_page_cache_deletion_done = false;
+
     public static function onPreRender(Event $event)
     {
         $dispatcher = $event->getDispatcher();
@@ -202,6 +208,10 @@ class CacheListener implements EventSubscriberInterface
         $application->getCacheControl()->removeByTag($parentUids);
     }
 
+    /**
+     * Looks for available cached data before rendering a page
+     * @param \BackBuilder\Event\Event $event
+     */
     public static function onPreRenderPage(Event $event)
     {
         // Checks if a renderer is available
@@ -212,6 +222,11 @@ class CacheListener implements EventSubscriberInterface
 
         // Checks if page caching is available
         if (false === self::_checkCachePageEvent($event)) {
+            return;
+        }
+
+        // Checks the cache status
+        if (false === self::_checkCacheStatus()) {
             return;
         }
 
@@ -229,6 +244,10 @@ class CacheListener implements EventSubscriberInterface
         self::$_application->debug(sprintf('Found cache for rendering `%s(%s)` with mode `%s`.', get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
     }
 
+    /**
+     * Saves in cache the rendered page data
+     * @param \BackBuilder\Event\Event $event
+     */
     public static function onPostRenderPage(Event $event)
     {
         // Checks if a renderer is available
@@ -243,6 +262,11 @@ class CacheListener implements EventSubscriberInterface
             return;
         }
 
+        // Checks the cache status
+        if (false === self::_checkCacheStatus()) {
+            return;
+        }
+
         // Checks if CacheId is available
         if (false === $cache_id = self::_getPageCacheIdFromRequest()) {
             return;
@@ -254,9 +278,34 @@ class CacheListener implements EventSubscriberInterface
         self::$_application->debug(sprintf('Save cache for rendering `%s(%s)` with mode `%s`.', get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
     }
 
+    /**
+     * Clears cached data associated to the page to be flushed
+     * @param \BackBuilder\Event\Event $event
+     */
     public static function onFlushPage(Event $event)
     {
-        
+        // Checks if page caching is available
+        if (false === self::_checkCachePageEvent($event)) {
+            return;
+        }
+
+        if (true === self::$_page_cache_deletion_done) {
+            return;
+        }
+
+        $pages = \BackBuilder\Util\Doctrine\ScheduledEntities::getScheduledEntityUpdatesByClassname(self::$_application->getEntityManager(), 'BackBuilder\NestedNode\Page');
+        if (0 === count($pages)) {
+            return;
+        }
+
+        $page_uids = array();
+        foreach ($pages as $page) {
+            $page_uids[] = $page->getUid();
+        }
+
+        self::$_cache_page->removeByTag($page_uids);
+        self::$_page_cache_deletion_done = true;
+        self::$_application->debug(sprintf('Remove cache for `%s(%s)`.', get_class(self::$_object), implode(', ', $page_uids)));
     }
 
     /**
@@ -285,6 +334,23 @@ class CacheListener implements EventSubscriberInterface
         }
 
         return self::$_object;
+    }
+
+    /**
+     * Return FALSE if debug mode is activated or a BBUser is connected
+     * @return boolean
+     */
+    private static function _checkCacheStatus()
+    {
+        if (true === self::$_application->isDebugMode()) {
+            return false;
+        }
+
+        if (null !== $token = self::$_application->getBBUserToken()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
