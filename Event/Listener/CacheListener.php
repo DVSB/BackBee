@@ -23,6 +23,7 @@ namespace BackBuilder\Event\Listener;
 
 use BackBuilder\ClassContent\AClassContent,
     BackBuilder\Event\Event;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Listener to Cache events
@@ -33,8 +34,32 @@ use BackBuilder\ClassContent\AClassContent,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class CacheListener
+class CacheListener implements EventSubscriberInterface
 {
+
+    /**
+     * The current application instance
+     * @var \BackBuilder\BBApplication
+     */
+    private static $_application;
+
+    /**
+     * The page cache system
+     * @var \BackBuilder\Cache\AExtendedCache
+     */
+    private static $_cache_page;
+
+    /**
+     * The content cache system
+     * @var \BackBuilder\Cache\AExtendedCache
+     */
+    private static $_cache_content;
+
+    /**
+     * The object to be rendered
+     * @var \BackBuilder\Renderer\IRenderable
+     */
+    private static $_object;
 
     public static function onPreRender(Event $event)
     {
@@ -45,7 +70,7 @@ class CacheListener
             return;
         if (true === $application->debugMode())
             return;
-        
+
         $content = $event->getTarget();
         if (!is_a($content, 'BackBuilder\ClassContent\AClassContent'))
             return;
@@ -98,7 +123,7 @@ class CacheListener
             return;
         if (true === $application->isDebugMode())
             return;
-        
+
         $content = $event->getTarget();
         if (!is_a($content, 'BackBuilder\ClassContent\AClassContent'))
             return;
@@ -175,6 +200,122 @@ class CacheListener
 
         $parentUids = $application->getEntityManager()->getrepository(get_class($content))->getParentContentUid($content);
         $application->getCacheControl()->removeByTag($parentUids);
+    }
+
+    public static function onPreRenderPage(Event $event)
+    {
+        // Checks if a renderer is available
+        $renderer = $event->getEventArgs();
+        if (false === ($renderer instanceof \BackBuilder\Renderer\ARenderer)) {
+            return;
+        }
+
+        // Checks if page caching is available
+        if (false === self::_checkCachePageEvent($event)) {
+            return;
+        }
+
+        // Checks if CacheId is available
+        if (false === $cache_id = self::_getPageCacheIdFromRequest()) {
+            return;
+        }
+
+        // Checks if cache data is available
+        if (false === $data = self::$_cache_page->load($cache_id)) {
+            return;
+        }
+
+        $renderer->setRender($data);
+        self::$_application->debug(sprintf('Found cache for rendering `%s(%s)` with mode `%s`.', get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
+    }
+
+    public static function onPostRenderPage(Event $event)
+    {
+        // Checks if a renderer is available
+        $args = $event->getEventArgs();
+        $renderer = array_shift($args);
+        if (false === ($renderer instanceof \BackBuilder\Renderer\ARenderer)) {
+            return;
+        }
+
+        // Checks if page caching is available
+        if (false === self::_checkCachePageEvent($event)) {
+            return;
+        }
+
+        // Checks if CacheId is available
+        if (false === $cache_id = self::_getPageCacheIdFromRequest()) {
+            return;
+        }
+
+        $lifetime = 0;
+        $render = array_shift($args);
+        self::$_cache_page->save($cache_id, $render, $lifetime, self::$_object->getUid());
+        self::$_application->debug(sprintf('Save cache for rendering `%s(%s)` with mode `%s`.', get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
+    }
+
+    public static function onFlushPage(Event $event)
+    {
+        
+    }
+
+    /**
+     * Checks the event and system validity then returns the page target, FALSE otherwise
+     * @param \BackBuilder\Event\Event $event
+     * @return \BackBuilder\NestedNode\Page|boolean
+     */
+    private static function _checkCachePageEvent(Event $event)
+    {
+        // Checks if the target event is a Page
+        self::$_object = $event->getTarget();
+        if (false === (self::$_object instanceof \BackBuilder\NestedNode\Page)) {
+            return false;
+        }
+
+        // Checks if a service cache.page exists
+        self::$_application = $event->getDispatcher()->getApplication();
+        if (null === self::$_application || false === self::$_application->getContainer()->has('cache.page')) {
+            return false;
+        }
+
+        // Checks if the service cache.page extends AExtendedCache
+        self::$_cache_page = self::$_application->getContainer()->get('cache.page');
+        if (false === (self::$_cache_page instanceof \BackBuilder\Cache\AExtendedCache)) {
+            return false;
+        }
+
+        return self::$_object;
+    }
+
+    /**
+     * Return the cache id for the current requested page
+     * @return string|FALSE
+     */
+    private static function _getPageCacheIdFromRequest()
+    {
+        if (null === self::$_application) {
+            return false;
+        }
+
+        $request = self::$_application->getRequest();
+        if ('GET' !== $request->getMethod()) {
+            return false;
+        }
+
+        return md5('_page_' . $request->getUri());
+    }
+
+    /**
+     * Returns an array of event names this subscriber wants to listen to.
+     * @return array The event names to listen to
+     */
+    public static function getSubscribedEvents()
+    {
+        return array(
+            'nestednode.page.prerender' => 'onPreRenderPage',
+            'nestednode.page.postrender' => 'onPostRenderPage',
+            'nestednode.page.onflush' => 'onFlushPage'
+        );
     }
 
 }

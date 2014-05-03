@@ -173,7 +173,7 @@ abstract class ACache
 
     /**
      * Logs a message on provided level if a logger is defined
-     * @param string $method The log level
+     * @param string $level The log level
      * @param string $message The message to log
      * @param array $context The logging context
      * @codeCoverageIgnore
@@ -183,6 +183,51 @@ abstract class ACache
         if (null !== $this->_logger) {
             $this->_logger->log($level, $message, $context);
         }
+    }
+
+    /**
+     * Returns the expiration timestamp
+     * @param int $lifetime
+     * @return int
+     * @codeCoverageIgnore
+     */
+    protected function getExpireTime($lifetime = null)
+    {
+        $expire = 0;
+
+        if (null !== $lifetime && 0 !== $lifetime) {
+            $now = new \DateTime();
+
+            if (0 < $lifetime) {
+                $now->add(new \DateInterval('PT' . $lifetime . 'S'));
+            } else {
+                $now->sub(new \DateInterval('PT' . (-1 * $lifetime) . 'S'));
+            }
+
+            $expire = $now->getTimestamp();
+        }
+
+        return $this->_getControledExpireTime($expire);
+    }
+
+    /**
+     * Control the expiration time against min and max lifetime if provided
+     * @param int $expire
+     * @return int
+     */
+    private function _getControledExpireTime($expire)
+    {
+        if (true === array_key_exists('min_cache_lifetime', $this->_instance_options) &&
+                null !== $this->_instance_options['min_cache_lifetime'] &&
+                time() + $this->_instance_options['min_cache_lifetime'] > $expire) {
+            $expire = time() + $this->_instance_options['min_cache_lifetime'];
+        } elseif (true === array_key_exists('max_cache_lifetime', $this->_instance_options) &&
+                null !== $this->_instance_options['max_cache_lifetime'] &&
+                time() + $this->_instance_options['max_cache_lifetime'] < $expire) {
+            $expire = time() + $this->_instance_options['max_cache_lifetime'];
+        }
+
+        return $expire;
     }
 
 }

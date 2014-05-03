@@ -44,10 +44,19 @@ element.file.postremove:
   listeners:
     - [BackBuilder\Event\Listener\ClassContentListener, onRemoveElementFile]
 
+nestednode.page.prerender:
+  listeners:
+    - [BackBuilder\Event\Listener\CacheListener, onPreRenderPage]
+
+nestednode.page.postrender:
+  listeners:
+    - [BackBuilder\Event\Listener\CacheListener, onPostRenderPage]
+
 nestednode.page.onflush:
   listeners:
     - [BackBuilder\Event\Listener\MetaDataListener, onFlushPage]
     - [BackBuilder\Event\Listener\RewritingListener, onFlushPage]
+    - [BackBuilder\Event\Listener\CacheListener, onFlushPage]
 
 site.layout.prepersist:
   listeners:
