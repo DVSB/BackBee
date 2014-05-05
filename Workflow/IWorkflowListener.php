@@ -22,9 +22,9 @@
 namespace BackBuilder\Workflow;
 
 use BackBuilder\BBApplication,
-    BackBuilder\Event\Event;
+    BackBuilder\Event\Event,
     BackBuilder\Renderer\Exception\RendererException,
-    BackBuilder\Renderer\Helper\HelperManager,
+    BackBuilder\Renderer\Helper\HelperManager;
 
 /**
  * class for a renderer
