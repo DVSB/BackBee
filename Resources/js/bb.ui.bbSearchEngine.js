@@ -12,7 +12,10 @@
             },
             formFieldsClass: ".searchengineField",
             appendToContainer : true, //or replace the container,
-            defaultFilterTypes : [{value:"",label:""}],
+            defaultFilterTypes : [{
+                value:"",
+                label:""
+            }],
             searchWebserviceParams : {
                 ws:null,
                 method:"searchContent"
@@ -48,6 +51,12 @@
          
         _bindEvents: function(){
             var self = this;
+            bb.jquery(this.element).enableSelection();
+            bb.jquery(this.element).find("input,select").bind("click", function(e){
+                $(this).focus();
+                return true;
+            });
+            
             bb.jquery(this.element).find(this.options.formFields.searchBtn).bind("click",function(e){
                 e.preventDefault();
                 self._trigger("beforeSearch", {
@@ -164,14 +173,14 @@
                     this._context.searchCriteria.afterPubdateField = bb.jquery(currentField).attr("data-value");
                     break;
                     
-               case "selectedpageField":
-                   this._context.searchCriteria.selectedpageField = bb.jquery(currentField).val();
-                   break;
+                case "selectedpageField":
+                    this._context.searchCriteria.selectedpageField = bb.jquery(currentField).val();
+                    break;
             }
 
         },
         _setFilterTypes : function(types){
-            var types = (bb.jquery.isArray(types)) ? types : [];
+            types = (bb.jquery.isArray(types)) ? types : [];
             var options = document.createDocumentFragment();
             bb.jquery.each(types,function(i,typeInfos){
                 var option = bb.jquery("<option></option>").clone();
