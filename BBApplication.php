@@ -33,7 +33,8 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Util\File;
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
-    Doctrine\ORM\EntityManager;
+    Doctrine\ORM\EntityManager,
+    Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\Config\FileLocator,
     BackBuilder\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
@@ -41,7 +42,8 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\Yaml\Yaml,
-    Symfony\Component\HttpFoundation\Response;
+    Symfony\Component\HttpFoundation\Response,
+    Symfony\Component\Validator\Validation;
 
 /**
  * The main BackBuilder5 application
@@ -99,6 +101,16 @@ class BBApplication implements IApplication
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
+        
+        // annotations require custom autoloading
+        AnnotationRegistry::registerAutoloadNamespaces(array(
+            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
+            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
+            'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
+            'BackBuilder' => $this->getBaseDir(),
+            'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
+        ));
+        
         $this->_initContainer()
              ->_initAutoloader()
              ->_initContentWrapper()
@@ -109,6 +121,8 @@ class BBApplication implements IApplication
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
             return;
         }
+
+        
         
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
@@ -125,7 +139,7 @@ class BBApplication implements IApplication
 
         // Compile container so it resolves every var/abstract service called in services.yml|xml
         $this->_container->compile();
-
+        
         $this->_isinitialized = true;
     }
 
@@ -171,6 +185,8 @@ class BBApplication implements IApplication
 
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
+        $this->_container->set('service_container', $this->_container);
+        
 
         $this->_initBBAppParamsIntoContainer();
 
@@ -577,6 +593,16 @@ class BBApplication implements IApplication
     {
         return dirname($this->getBBDir());
     }
+    
+    /**
+     * Get vendor dir
+     * 
+     * @return string
+     */
+    public function getVendorDir()
+    {
+        return $this->getBaseDir() . '/vendor';
+    }
 
     /**
      * Returns TRUE if a starting context is defined, FALSE otherwise
@@ -663,6 +689,24 @@ class BBApplication implements IApplication
     public function getContainer()
     {
         return $this->_container;
+    }
+    
+    /**
+     * Get validator service
+     * 
+     * @return \Symfony\Component\Validator\ValidatorInterface
+     */
+    public function getValidator()
+    {
+        if(!$this->getContainer()->get('validator')) {
+            $validator = Validation::createValidatorBuilder()
+                ->enableAnnotationMapping()
+                ->getValidator();
+            
+            $this->getContainer()->set('validator', $validator);
+        }
+        
+        return $this->getContainer()->get('validator');
     }
 
     /**

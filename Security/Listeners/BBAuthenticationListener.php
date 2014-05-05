@@ -107,7 +107,10 @@ class BBAuthenticationListener implements ListenerInterface
 
             $response = new Response();
             $response->setStatusCode(401);
-            $response->headers->set('X-BB-AUTH', sprintf('UsernameToken Nonce="%s", ErrorCode="%d", ErrorMessage="%s"', $nonce, $ecode, $emsg), true);
+            
+            // remove new line characters as php will drop the header if the exception message contains a new line character
+            $emsgSanitized = str_replace(array("\n"), " ", $emsg);
+            $response->headers->set('X-BB-AUTH', sprintf('UsernameToken Nonce="%s", ErrorCode="%d", ErrorMessage="%s"', $nonce, $ecode, $emsgSanitized), true);
 
             return $event->setResponse($response);
         }

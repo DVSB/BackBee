@@ -21,6 +21,25 @@ parameters:
     bbapp.routing.class: BackBuilder\Routing\RouteCollection
     bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
     bbapp.controller_resolver.class: BackBuilder\Controller\ControllerResolver
+    
+    bbapp.rest.hydrator.class: BackBuilder\Rest\Hydration\RestHydrator
+    bbapp.rest.encoder_provider.class: BackBuilder\Rest\Encoder\ContainerEncoderProvider
+    bbapp.rest.encoder_json.class: Symfony\Component\Serializer\Encoder\JsonEncoder
+    bbapp.rest.encoder_xml.class: Symfony\Component\Serializer\Encoder\XmlEncoder
+    
+    bbapp.rest.listener_validation.class: BackBuilder\Rest\EventListener\ValidationListener
+    bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
+    bbapp.rest.listener_exception.class: BackBuilder\Rest\EventListener\ExceptionListener
+    bbapp.rest.listener_exception.mapping:
+        Exception: 
+            code: 500
+        Symfony\Component\Security\Core\Exception\ProviderNotFoundException:
+            code: 401
+            message: Authentication failed - supplied public key or signature is incorrect
+        Doctrine\ORM\ORMException:
+            code: 500
+    
+    bbapp.rest_api.path: /rest/
 
 services:
     cache.bootstrap:
@@ -65,6 +84,69 @@ services:
     
     controller_resolver:
         class:      %bbapp.controller_resolver.class%
+        
+    rest.hydrator:
+        class:      %bbapp.rest.hydrator.class%
+        arguments:  ["@em"]
+        
+    rest.encoder_provider:
+        class:      %bbapp.rest.encoder_provider.class%
+        calls:
+            - [setContainer, [@service_container]]
+        arguments:  [{json: "rest.encoder.json", xml: "rest.encoder.xml"}]
+        
+    rest.encoder.json:
+        class:      %bbapp.rest.encoder_json.class%
+        
+    rest.encoder.xml:
+        class:      %bbapp.rest.encoder_xml.class%
+        
+    rest.listener.body:
+        class:      %bbapp.rest.listener_body.class%
+        arguments:  [@rest.encoder_provider, true]
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+            
+    rest.listener.exception:
+        class:      %bbapp.rest.listener_exception.class%
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+            - [setMapping, [%bbapp.rest.listener_exception.mapping%]]
+            
+    rest.listener.validation:
+        class:      %bbapp.rest.listener_validation.class%
+        arguments:  [@service_container]
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+            
+    rest.metadata.annotation_reader: 
+        class: Doctrine\Common\Annotations\AnnotationReader
+        
+    rest.metadata.annotation_driver: 
+        class: BackBuilder\Rest\Mapping\Driver\AnnotationDriver
+        arguments:  [@rest.metadata.annotation_reader]
+        
+    rest.metadata.factory:
+        class: Metadata\MetadataFactory
+        arguments:  [@rest.metadata.annotation_driver]
+        
+    annotation_reader:
+        class: BackBuilder\Annotations\ChainAnnotationReader
+        arguments: [[@annotation_reader.full, @annotation_reader.simple]]
+    
+    annotation_reader.simple:
+        class: Doctrine\Common\Annotations\SimpleAnnotationReader
+        calls:
+            - [addNamespace, ['Doctrine\ORM\Mapping']]
+            
+    annotation_reader.full:
+        class: Doctrine\Common\Annotations\AnnotationReader
+
+        
+#    rest.listener.authentication:
+#        class:      %bbapp.rest.listener_authentication.class%
+#        calls:
+#            - [setPath, [%bbapp.rest_api.path%]]
 
     # synthetic services
     site:
@@ -74,4 +156,8 @@ services:
     routing:
         synthetic: true
     mailer:
+        synthetic: true
+    service_container:
+        synthetic: true
+    validator:
         synthetic: true

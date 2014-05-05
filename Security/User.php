@@ -96,6 +96,30 @@ class User implements UserInterface
      * @ManyToMany(targetEntity="BackBuilder\Security\Group", mappedBy="_users")
      */
     protected $_groups;
+    
+    /**
+     * User's public api key
+     * @var String
+     * @Column(type="string", name="api_key_public", nullable=true)
+     * @fixture(type="string")
+     */
+    protected $_api_key_public;
+    
+    /**
+     * User's private api key
+     * @var String
+     * @Column(type="string", name="api_key_private", nullable=true)
+     * @fixture(type="string")
+     */
+    protected $_api_key_private;
+    
+    /**
+     * Whether the api key is enabled (default false)
+     * @var Boolean
+     * @Column(type="boolean", name="api_key_enabled")
+     * @fixture(type="boolean")
+     */
+    protected $_api_key_enabled = false;
 
     /**
      * The creation datetime
@@ -110,6 +134,9 @@ class User implements UserInterface
      * @Column(type="datetime", name="modified")
      */
     protected $_modified;
+    
+    
+    
 
     /**
      * Class constructor
@@ -341,6 +368,73 @@ class User implements UserInterface
     public function eraseCredentials()
     {
         
+    }
+    
+    
+    /**
+     * 
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function getApiKeyPublic() 
+    {
+        return $this->_api_key_public;
+    }
+    
+    /**
+     * 
+     * @param string $api_key_public
+     * @return \BackBuilder\Security\User
+     * @codeCoverageIgnore
+     */
+    public function setApiKeyPublic($api_key_public) 
+    {
+        $this->_api_key_public = $api_key_public;
+        return $this;
+    }
+    
+    /**
+     * 
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function getApiKeyPrivate() 
+    {
+        return $this->_api_key_private;
+    }
+    
+    /**
+     * 
+     * @param string $api_key_private
+     * @return \BackBuilder\Security\User
+     * @codeCoverageIgnore
+     */
+    public function setApiKeyPrivate($api_key_private) 
+    {
+        $this->_api_key_private = $api_key_private;
+        return $this;
+    }
+    
+    /**
+     * 
+     * @return bool
+     * @codeCoverageIgnore
+     */
+    public function getApiKeyEnabled() 
+    {
+        return $this->_api_key_enabled;
+    }
+    
+    /**
+     * 
+     * @param bool $api_key_enabled
+     * @return \BackBuilder\Security\User
+     * @codeCoverageIgnore
+     */
+    public function setApiKeyEnabled($api_key_enabled) 
+    {
+        $this->_api_key_enabled = (bool) $api_key_enabled;
+        return $this;
     }
 
 }

@@ -26,8 +26,16 @@ use Doctrine\ORM\Configuration,
     Doctrine\DBAL\Connection,
     Doctrine\ORM\EntityManager,
     Doctrine\DBAL\Logging\SQLLogger,
-    Doctrine\Common\EventManager;
+    Doctrine\Common\EventManager,
+    Doctrine\ORM\Mapping\Driver\AnnotationDriver,
+    Doctrine\Common\Annotations\AnnotationReader,
+    Doctrine\Common\Annotations\SimpleAnnotationReader,
+    Doctrine\Common\Annotations\CachedReader,
+    Doctrine\Common\Cache\ArrayCache;
+
 use Psr\Log\LoggerInterface;
+
+use BackBuilder\Annotations\ChainAnnotationReader;
 
 /**
  * Utility class to create a new Doctrine entity manager
@@ -88,7 +96,9 @@ class EntityManagerCreator
     private static function _getORMConfiguration(array $options = array(), LoggerInterface $logger = null)
     {
         $config = new Configuration();
+        
         $driverImpl = $config->newDefaultAnnotationDriver();
+        
         $config->setMetadataDriverImpl($driverImpl);
 
         if (true === array_key_exists('proxy_dir', $options)) {
@@ -102,7 +112,7 @@ class EntityManagerCreator
         if ($logger instanceof SQLLogger) {
             $config->setSQLLogger($logger);
         }
-
+        
         return self::_addCustonFunctions($config, $options);
     }
 
