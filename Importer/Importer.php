@@ -34,6 +34,8 @@ use Doctrine\DBAL\Driver\PDOStatement;
  */
 class Importer
 {
+    const FLUSH_MEMORY_ON_NULL_EVERY = 1000;
+
     private $_application;
     private $_config;
     private $_connector;
@@ -119,8 +121,10 @@ class Importer
                 unset($entity);
             } else {
                 $count_null++;
-                if ($flush_every <= $count_null) {
+                if (self::FLUSH_MEMORY_ON_NULL_EVERY <= $count_null) {
+                    Buffer::dump('Before cleaning memory on null: ' .  self::convertMemorySize(memory_get_usage()));
                     $this->flushMemory();
+                    Buffer::dump('After cleaning memory on null: ' . self::convertMemorySize(memory_get_usage()));
                     $count_null = 0;
                 }
             }
