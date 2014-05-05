@@ -108,7 +108,7 @@ class BBApplication implements IApplication
             'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
             'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
             'BackBuilder' => $this->getBaseDir(),
-            'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
+            //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
         ));
         
         $this->_initContainer()
