@@ -97,20 +97,7 @@ class EntityManagerCreator
     {
         $config = new Configuration();
         
-        //$driverImpl = $config->newDefaultAnnotationDriver();
-        
-        $readerSimple = new SimpleAnnotationReader();
-        $readerSimple->addNamespace('Doctrine\ORM\Mapping');
-        
-        $chainedAnnotationReader = new ChainAnnotationReader(array(
-            new AnnotationReader(),
-            $readerSimple
-        ));
-        
-        $driverImpl = new AnnotationDriver(
-            new CachedReader($chainedAnnotationReader, new ArrayCache())
-        );
-        
+        $driverImpl = $config->newDefaultAnnotationDriver();
         
         $config->setMetadataDriverImpl($driverImpl);
 
