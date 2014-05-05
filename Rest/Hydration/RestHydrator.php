@@ -78,6 +78,10 @@ class RestHydrator
                     }
 
                     $classMetadata->setFieldValue($entity, $fieldName, $value);
+                } elseif(ClassMetadataInfo::MANY_TO_ONE === $fieldMapping['type']) {
+                    // expecting an array of ids in $value
+                    $value = $this->em->getRepository($fieldMapping['targetEntity'])->find($value);
+                    $classMetadata->setFieldValue($entity, $fieldName, $value);
                 }
             }
         }
