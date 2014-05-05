@@ -51,16 +51,16 @@ class RestHydrator
 
         foreach($values as $fieldName => $value) {
             if($classMetadata->hasField($fieldName)) {
-                try {
-                    $classMetadata->getFieldMapping($fieldName);
+                $fieldMappping = $classMetadata->getFieldMapping($fieldName);
 
-                    $type = Type::getType($classMetadata->fieldMappings[$fieldName]['type']);
-                    $value = $type->convertToPHPValue($value, $this->em->getConnection()->getDatabasePlatform());
-
-                    $classMetadata->setFieldValue($entity, $fieldName, $value);
-                } catch(\Exception $e) {
-                    throw new HydrationException($fieldName, $e);
+                if(null == $fieldMappping) {
+                    throw new HydrationException($fieldName);
                 }
+
+                $type = Type::getType($classMetadata->fieldMappings[$fieldName]['type']);
+                $value = $type->convertToPHPValue($value, $this->em->getConnection()->getDatabasePlatform());
+
+                $classMetadata->setFieldValue($entity, $fieldName, $value);
             } elseif(isset($classMetadata->associationMappings[$fieldName])) {
                 
                 $fieldMapping = $classMetadata->associationMappings[$fieldName];
@@ -83,6 +83,8 @@ class RestHydrator
                     $value = $this->em->getRepository($fieldMapping['targetEntity'])->find($value);
                     $classMetadata->setFieldValue($entity, $fieldName, $value);
                 }
+            } else {
+                throw new HydrationException($fieldName);
             }
         }
     }
