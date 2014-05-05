@@ -102,7 +102,7 @@ class KeyWordRepository extends NestedNodeRepository
                     $pageStates = array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN);
                     $secondParam = \Doctrine\DBAL\Connection::PARAM_STR_ARRAY;
                 } else {
-                    $pageStates = Page::STATE_HIDDEN;
+                    $pageStates = Page::STATE_DELETED;
                     $queryString .=" AND page.state < (?)";
                     $secondParam = 1;
                 }
