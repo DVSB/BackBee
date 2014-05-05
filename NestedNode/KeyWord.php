@@ -26,6 +26,8 @@ use BackBuilder\ClassContent\AClassContent,
     BackBuilder\Renderer\IRenderable;
 use Doctrine\Common\Collections\ArrayCollection;
 
+use JMS\Serializer\Annotation as Serializer;
+
 /**
  * A keywords entry of a tree in BackBuilder
  *
@@ -35,6 +37,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\KeyWordRepository")
  * @Table(name="keyword",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_KEYWORD", columns={"root_uid", "leftnode", "rightnode"}), @index(name="IDX_KEYWORD", columns={"keyword"})})
+ * 
+ * @Serializer\ExclusionPolicy("all")
  */
 class KeyWord extends ANestedNode implements IRenderable
 {
@@ -43,6 +47,9 @@ class KeyWord extends ANestedNode implements IRenderable
      * Unique identifier of the content
      * @var string
      * @Id @Column(type="string", name="uid")
+     * 
+     * @Serializer\Expose
+     * @Serializer\SerializedName("id")
      */
     protected $_uid;
 
@@ -66,6 +73,9 @@ class KeyWord extends ANestedNode implements IRenderable
      * The keyword
      * @var string
      * @Column(type="string", name="keyword")
+     * 
+     * @Serializer\Expose
+     * @Serializer\SerializedName("keyword")
      */
     protected $_keyWord;
 
