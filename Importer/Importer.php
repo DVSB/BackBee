@@ -122,9 +122,9 @@ class Importer
             } else {
                 $count_null++;
                 if (self::FLUSH_MEMORY_ON_NULL_EVERY <= $count_null) {
-                    Buffer::dump('Before cleaning memory on null: ' .  self::convertMemorySize(memory_get_usage()));
+                    Buffer::dump('Before cleaning memory on null: ' .  self::convertMemorySize(memory_get_usage()) . "\n");
                     $this->flushMemory();
-                    Buffer::dump('After cleaning memory on null: ' . self::convertMemorySize(memory_get_usage()));
+                    Buffer::dump('After cleaning memory on null: ' . self::convertMemorySize(memory_get_usage()) . "\n");
                     $count_null = 0;
                 }
             }
