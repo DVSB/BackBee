@@ -29,7 +29,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity()
- * @Table(name="groups")
+ * @Table(name="groups", uniqueConstraints={@UniqueConstraint(name="UNI_IDENTIFIER",columns={"identifier"})})
  */
 class Group
 {

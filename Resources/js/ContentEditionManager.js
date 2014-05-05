@@ -1,3 +1,4 @@
+//@ sourceURL=ressources/js/ContentEditionManager.js
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -111,6 +112,7 @@ var ContentEditionManager = (function($){
             if('infos' in bbContent){
                 var bbContent = $bb(bbContent.infos.contentEl);
             }
+            _selectContent(bbContent.contentEl);
             var contentParams = bbContent.getContentParams();
             // content is updated when params are saved
             //async persist before params edition
@@ -1307,7 +1309,14 @@ var ContentEditionManager = (function($){
                     var formRender = renderer.render();
                     self.rendererArr[key] = renderer;
 
-                    var fieldSet = bb.jquery("<fieldset></fieldset>").clone();
+                    var hidden = "";
+                    if ('undefined' != typeof (param.array.hidden)) {
+                        if (param.array.hidden == true) {
+                            hidden = "style='display:none;'";
+                        }
+                    }
+                    var fieldSet = bb.jquery("<fieldset " + hidden + "></fieldset>").clone();
+                 
                     bb.jquery(fieldSet).append(formRender);
                     result.appendChild(bb.jquery(fieldSet).get(0));
                 });

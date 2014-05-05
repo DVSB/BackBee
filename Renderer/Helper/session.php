@@ -19,42 +19,36 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer;
+namespace BackBuilder\Renderer\Helper;
+
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
- * Interface for the object that can be rendered
+ * Helper returning current session bag
  *
  * @category    BackBuilder
  * @package     BackBuilder\Renderer
+ * @subpackage  Helper
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-interface IRenderable
+class session extends AHelper
 {
 
     /**
-     * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
-     * @return string|array|null
+     * Return the current request parameter bag
+     * @return \Symfony\Component\HttpFoundation\ParameterBag
      */
-    public function getData($var = null);
+    public function __invoke()
+    {
+        if (null !== $this->_renderer
+                && null !== $this->_renderer->getApplication()
+                && null !== $this->_renderer->getApplication()->getController()
+                && null !== $this->_renderer->getApplication()->getController()->getRequest()) {
+            return $this->_renderer->getApplication()->getController()->getRequest()->getSession();
+        }
 
-    /**
-     * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
-     * @return string|array|null
-     */
-    public function getParam($var = null);
+        return new ParameterBag();
+    }
 
-    /**
-     * Returns TRUE if the object can be rendered.
-     * @return Boolean
-     */
-    public function isRenderable();
-
-    /**
-     * Returns return the entity template name
-     * @return string
-     */
-    public function getTemplateName();
 }

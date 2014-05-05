@@ -2,59 +2,52 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer;
+namespace BackBuilder\Bundle\Registry;
 
 /**
- * Interface for the object that can be rendered
- *
  * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @package     BackBuilder\Bundle
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-interface IRenderable
+interface IRegistryEntity
 {
+    /**
+     * Return all class properties.
+     *
+     * @return array(property_name => property_value)
+     */
+    public function getObjectProperties();
 
     /**
-     * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
-     * @return string|array|null
+     * Set all class properties.
+     *
+     * @param string $property the property name
+     * @param mixed $value the property value
      */
-    public function getData($var = null);
+    public function setObjectProperty($property, $value);
 
     /**
-     * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
-     * @return string|array|null
+     * Set class class identifier.
+     *
+     * @param sting|integer $property;
      */
-    public function getParam($var = null);
-
-    /**
-     * Returns TRUE if the object can be rendered.
-     * @return Boolean
-     */
-    public function isRenderable();
-
-    /**
-     * Returns return the entity template name
-     * @return string
-     */
-    public function getTemplateName();
+    public function setObjectIdentifier($property);
 }

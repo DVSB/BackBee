@@ -20,6 +20,7 @@ parameters:
     bbapp.translator.class: BackBuilder\Translation\Translator
     bbapp.routing.class: BackBuilder\Routing\RouteCollection
     bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
+    bbapp.controller_resolver.class: BackBuilder\Controller\ControllerResolver
 
 services:
     cache.bootstrap:
@@ -30,7 +31,7 @@ services:
         arguments:  [{em: "@em"}, "%bbapp.context%", "@logging"]
     config:
         class:      %bbapp.config.class%
-        arguments:  ["%bbapp.config.dir%", "@cache.bootstrap"]
+        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap"]
     ed:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp"]
@@ -61,6 +62,10 @@ services:
     pagebuilder:
         class:      %bbapp.pagebuilder.class%
         arguments:  ["@em"]
+    
+    controller_resolver:
+        class:      %bbapp.controller_resolver.class%
+
     # synthetic services
     site:
         synthetic: true

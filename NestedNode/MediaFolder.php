@@ -34,7 +34,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\MediaFolderRepository")
- * @Table(name="media_folder")
+ * @Table(name="media_folder",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_MEDIAFOLDER", columns={"root_uid", "leftnode", "rightnode"})})
  */
 class MediaFolder extends ANestedNode
 {

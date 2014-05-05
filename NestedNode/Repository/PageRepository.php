@@ -94,13 +94,13 @@ class PageRepository extends NestedNodeRepository
         return $node;
     }
 
-    public function getVisibleDescendants(ANestedNode $node, $depth = NULL, $includeNode = FALSE)
+    public function getVisibleDescendants(ANestedNode $node, $depth = null, $includeNode = false, $state = Page::STATE_ONLINE)
     {
         $q = $this->_getDescendantsQuery($node, $depth, $includeNode)
-                ->andWhere('n._state = :online')
+                ->andWhere('n._state = :state')
                 ->andWhere('n._publishing IS NULL OR n._publishing <= CURRENT_TIMESTAMP()')
                 ->andWhere('n._archiving IS NULL OR n._archiving > CURRENT_TIMESTAMP()')
-                ->setParameter('online', Page::STATE_ONLINE)
+                ->setParameter('state', $state)
                 ->orderBy('n._leftnode', 'asc');
         return $q->getQuery()->getResult();
     }

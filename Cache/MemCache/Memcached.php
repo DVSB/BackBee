@@ -68,6 +68,8 @@ class Memcached extends AExtendedCache
      * @var array
      */
     protected $_instance_options = array(
+        'min_cache_lifetime' => null,
+        'max_cache_lifetime' => null,
         'persistent_id' => null,
         'servers' => array(),
         'options' => array()
@@ -302,9 +304,7 @@ class Memcached extends AExtendedCache
         }
 
         $last_timestamp = $this->test($id);
-        if (true === $bypassCheck
-                || 0 === $last_timestamp
-                || $expire->getTimestamp() <= $last_timestamp) {
+        if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
 
             if (false === $tmp = $this->_memcached->get($id)) {
                 return $this->_onError('load');
@@ -347,7 +347,7 @@ class Memcached extends AExtendedCache
      */
     public function save($id, $data, $lifetime = null, $tag = null)
     {
-        $expire = $this->_getExpireDateTime($lifetime);
+        $expire = $this->getExpireTime($lifetime);
         if (false === $this->_memcached->set($id, array($data, $expire), $expire)) {
             return $this->_onError('save');
         }
@@ -466,31 +466,6 @@ class Memcached extends AExtendedCache
         }
 
         return false;
-    }
-
-    /**
-     * Returns the expiration timestamp
-     * @param int $lifetime
-     * @return int
-     * @codeCoverageIgnore
-     */
-    private function _getExpireDateTime($lifetime = null)
-    {
-        $expire = 0;
-
-        if (null !== $lifetime && 0 !== $lifetime) {
-            $expire = new \DateTime ();
-
-            if (0 < $lifetime) {
-                $expire->add(new \DateInterval('PT' . $lifetime . 'S'));
-            } else {
-                $expire->sub(new \DateInterval('PT' . (-1 * $lifetime) . 'S'));
-            }
-
-            return $expire->getTimestamp();
-        }
-
-        return $expire;
     }
 
     /**

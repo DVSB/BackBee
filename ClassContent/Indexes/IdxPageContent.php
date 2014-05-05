@@ -19,42 +19,32 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer;
+namespace BackBuilder\ClassContent\Indexes;
 
 /**
- * Interface for the object that can be rendered
- *
+ * Entity class for Page-Content join table
+ * 
  * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @package     BackBuilder\ClassContent
+ * @subpackage  Indexes
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
+ * @Table(name="idx_page_content",indexes={@index(name="IDX_PAGE", columns={"page_uid"}), @index(name="IDX_CONTENT_PAGE", columns={"content_uid"})})
  */
-interface IRenderable
+class IdxPageContent
 {
 
     /**
-     * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
-     * @return string|array|null
+     * @var string
+     * @Id @Column
      */
-    public function getData($var = null);
+    private $page_uid;
 
     /**
-     * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
-     * @return string|array|null
+     * @var string
+     * @Id @Column
      */
-    public function getParam($var = null);
+    private $content_uid;
 
-    /**
-     * Returns TRUE if the object can be rendered.
-     * @return Boolean
-     */
-    public function isRenderable();
-
-    /**
-     * Returns return the entity template name
-     * @return string
-     */
-    public function getTemplateName();
 }

@@ -19,42 +19,29 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer;
+namespace BackBuilder\Renderer\Helper;
 
 /**
- * Interface for the object that can be rendered
- *
  * @category    BackBuilder
  * @package     BackBuilder\Renderer
+ * @subpackage  Helper
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-interface IRenderable
+class getKeywordObjects extends AHelper
 {
 
-    /**
-     * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
-     * @return string|array|null
-     */
-    public function getData($var = null);
+    public function __invoke($keywords)
+    {
+        if (false === is_array($keywords)) {
+            $keywords = array($keywords);
+        }
+        
+        return $this->getRenderer()
+                ->getApplication()
+                ->getEntityManager()
+                ->getRepository('BackBuilder\NestedNode\KeyWord')
+                ->getKeywordsFromElements($keywords);
+    }
 
-    /**
-     * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
-     * @return string|array|null
-     */
-    public function getParam($var = null);
-
-    /**
-     * Returns TRUE if the object can be rendered.
-     * @return Boolean
-     */
-    public function isRenderable();
-
-    /**
-     * Returns return the entity template name
-     * @return string
-     */
-    public function getTemplateName();
 }

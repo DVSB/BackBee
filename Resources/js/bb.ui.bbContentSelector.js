@@ -1,3 +1,4 @@
+//@ sourceURL=ressources/js/bb.ui.bbContentSelector.js
 (function($){
     bb.jquery.widget('ui.bbContentSelector',{
         options : {
@@ -34,7 +35,8 @@
             mainTemplate : null,  
             categoryTree : null,
             filterParameters : null,
-            selectedContent :null
+            selectedContent :null,
+            site: null
         },
         
         i18n: {
@@ -64,7 +66,7 @@
         _initTemplates : function(item){
             /*List item template*/
             var itemTemplate = '<li data-uid="${uid}" class="bb5-content-item">'
-            +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="'+bb.baseurl+'ressources/img/contents/${ico}.png"></a></p>'
+            +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
             +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
             +"<p>Date de création: <strong>${created}</strong></p>"
             +'<p><button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button><button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button></p>'
@@ -102,7 +104,8 @@
                 onDestroy : bb.jquery.proxy(this._onDestroyScContainer,this),
                 onDelete : bb.jquery.proxy(this._onSelectedContentChange,this)
             });
-            
+            context.site = bb.frontApplication.getSiteUid();
+
             this.typeFilters = {
                 contentType:[
 
@@ -156,7 +159,55 @@
             this._initSelectContentTabs();
             bb.jquery(this.element).disableSelection();
             
-          
+            var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
+            bb.jquery(self.element).find('.bb5-windowpane-tree-inner').prepend(sitesMenu);
+            bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {    
+                useCache:true,
+                cacheTags:["userSession"],
+                async : false, 
+                success: function(result) {
+                    var context = self.getContext();
+                    select = bb.jquery(self.element).find('.bb5-available-sites').eq(0);
+
+                    //select change event
+                    select.bind('change', function() {
+                        if (bb.jquery(this).val()) {
+                            context.site = bb.jquery(this).val();
+                            if(self.pageTree){
+                                self._initPageTree(bb.jquery(this).val());
+                            }
+                            
+                            context.selectedPageId = null;
+                            self.searchEngine.setSelectedPage(context.selectedPageId);
+                            var criteria = self.searchEngine.getSearchCriteria();
+                            if(context.selected){
+                                criteria.typeField = context.selected;
+                                self._showContent(criteria);
+                            }                      
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
+
+                    //select sites populating
+                    //select.empty();
+                    bb.jquery.each(result.result, function(index, site) {
+                        var option = bb.jquery("<option></option>").clone();
+                        bb.jquery(option).attr("value",index).text(site);
+                        select.append(option);         
+                    });
+
+                    //select current site if configured
+                    if (null !== context.site) {
+                        select.val(context.site);
+                    }
+
+                    select.trigger("change");
+                    self._trigger('ready');
+                }
+            });
+
             /*bb.jquery(this.element).find('.bb5-windowpane-tree').resizable({
                 handles: 'e, w',
                 maxWidth: 400,
@@ -199,12 +250,12 @@
         
         _initPageTree : function(){
             var self = this;
-            if(!this.pageTree){
+//            if(!this.pageTree){
                 var  pageTree = bb.jquery(this.element).find(this.options.pageTreeContaineClass).eq(0);
                 this.pageTree = bb.jquery(pageTree).bbPageBrowser({
                     popup : false,
                     editMode : false,
-                    site : bb.frontApplication.getSiteUid(),
+                    site : self.getContext().site,
                     // breadcrumb : bb.frontApplication.getBreadcrumbIds(),
                     enableNavigation : false,
                     select:function(e,nodeInfos){
@@ -221,7 +272,7 @@
                     }
                 });
                 
-            }
+//            }
         },
           
         selectModeView :function(viewMode){
@@ -534,6 +585,7 @@
             this._mask("show");
             var pagerParams = {
                 params : criteria,
+                site: context.site,
                 order_sort: '_title',
                 order_dir: 'asc',
                 limit:5,
@@ -647,7 +699,8 @@
                         data : function (n) { 
                             return { 
                                 //'root_uid' : n.attr ? n.attr('id').replace('node_','') : null
-                                filters : filters //accepted type
+                                filters : filters, //accepted type
+                                site : bb.frontApplication.getSiteUid()
                             }; 
                         }
                     }

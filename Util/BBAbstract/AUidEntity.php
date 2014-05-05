@@ -44,20 +44,20 @@ abstract class AUidEntity implements DomainObjectInterface
      */
     private $_is_new = false;
 
-    public function __construct($uid = NULL)
+    public function __construct($uid = null)
     {
         if (is_null($uid)) {
-            $uid = md5(uniqid('', TRUE));
+            $uid = md5(uniqid('', true));
             $this->_is_new = true;
         }
 
         $this->_uid = $uid;
     }
 
-    public function __clone()
+    public function cloneEntity()
     {
         $clone = $this;
-        $clone->_uid = md5(uniqid('', TRUE));
+        $clone->_uid = md5(uniqid('', true));
         $clone->_is_new = true;
 
         return $clone;

@@ -44,6 +44,12 @@ class Config
      * @var string
      */
     const CONFIG_FILE = 'config.yml';
+    
+    /**
+     * System events config file to look for
+     * @var string
+     */
+    const EVENTS_FILE = 'events.yml';
 
     /**
      * The base directory to looking for configuration files
@@ -114,8 +120,15 @@ class Config
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
-        $this->setContainer($container)
-                ->extend();
+        $this->setContainer($container)->extend();
+    }
+    
+    /**
+     * Load system configs
+     */
+    private function _loadSystemConfig() 
+    {
+        $this->_loadFromFile(__DIR__ . '/' . self::EVENTS_FILE);
     }
 
     /**
@@ -181,6 +194,7 @@ class Config
     private function _getCacheExpire($basedir)
     {
         $expire = 0;
+
         foreach ($this->_getYmlFiles($basedir) as $file) {
             $stat = @stat($file);
             if ($expire < $stat['mtime']) {
@@ -404,6 +418,8 @@ class Config
             $this->_loadFromBaseDir($basedir, $overwrite);
             $this->_saveToCache($basedir);
         }
+        
+        return $this;
     }
 
     /**
@@ -414,5 +430,4 @@ class Config
     {
         return $this->_basedir;
     }
-
 }

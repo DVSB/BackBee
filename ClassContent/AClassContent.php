@@ -43,7 +43,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\ClassContentRepository")
- * @Table(name="content")
+ * @Table(name="content",indexes={@index(name="IDX_NODEUID", columns={"node_uid"}), @index(name="IDX_CLASSNAME", columns={"classname"})})
  * @HasLifecycleCallbacks
  * @InheritanceType("SINGLE_TABLE")
  * @DiscriminatorColumn(name="classname", type="string")

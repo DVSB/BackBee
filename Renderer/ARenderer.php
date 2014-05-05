@@ -501,9 +501,17 @@ abstract class ARenderer implements IRenderer
         return $this->__currentelement;
     }
 
-    public function getUri($pathinfo = null)
+    /**
+     * Returns $pathinfo with base url of current page
+     * If $site is provided, the url will be pointing on the associate domain
+     * @param string $pathinfo
+     * @param string $defaultExt
+     * @param \BackBuilder\Site\Site $site
+     * @return string
+     */
+    public function getUri($pathinfo = null, $defaultExt = null, \BackBuilder\Site\Site $site = null)
     {
-        return $this->getApplication()->getRouting()->getUri($pathinfo);
+        return $this->getApplication()->getRouting()->getUri($pathinfo, null, $site);
     }
 
     public function getRelativeUrl($uri)
@@ -835,7 +843,8 @@ abstract class ARenderer implements IRenderer
      */
     protected function _getTemplatePath(IRenderable $object)
     {
-        return str_replace(array('BackBuilder' . NAMESPACE_SEPARATOR . 'ClassContent' . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array('', DIRECTORY_SEPARATOR), get_class($object));
+        return $object->getTemplateName();
+        //return str_replace(array('BackBuilder' . NAMESPACE_SEPARATOR . 'ClassContent' . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array('', DIRECTORY_SEPARATOR), get_class($object));
     }
 
     /**

@@ -109,8 +109,10 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
             if (false === file_exists(dirname($filename))) {
                 mkdir(dirname($filename), 0755, true);
             }
-
-            copy($srcConfigFilename, $filename);
+            if(file_exists($srcConfigFilename))
+            {
+                copy($srcConfigFilename, $filename);
+            }
         } else {
             $srcFileStat = stat($srcConfigFilename);
             $dataFileStat = stat($filename);
@@ -263,7 +265,17 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      */
     public function getResourcesDir()
     {
-        return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+        //return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+
+        $resources_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+        if ('test' === $this->_application->getContext()) {
+            $test_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
+            if (true === file_exists($test_dir)) {
+                $resources_dir = $test_dir;
+            }
+        }
+
+        return $resources_dir;
     }
 
     /**

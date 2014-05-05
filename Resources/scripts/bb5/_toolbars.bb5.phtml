@@ -1,7 +1,9 @@
 <script type="text/javascript" src="<?php echo $this->getUri('ressources/js/libs/jquery-1.7.2.min.js'); ?>"></script>
 <script type="text/javascript">
     jq172 = jQuery.noConflict(true);
-    jQuery = $ = jq172;
+    if (jQuery === undefined) {
+        jQuery = $ = jq172;        
+    }
 </script>
 <script type="text/javascript" src="<?php echo $this->getUri('ressources/js/bb.js'); ?>" id="bb5-scripts"></script>
 <!--handle custom script-->
@@ -148,6 +150,6 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
             //AlohaManager.init();
         });
     </script>
-<?php else: ?>
+<?php elseif (true !== $this->getParam('no-loading')): ?>
     <div id="bb-loader" style="display:none;">Loading</div>
 <?php endif; ?>

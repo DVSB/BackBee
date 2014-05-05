@@ -87,8 +87,11 @@ class ContentRender
             if (NULL === $this->content) {
                 $this->content = new $classname();
             }
-            if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
-                $this->content->setDraft($draft);
+            
+            if (null !== $this->bbapp->getBBUserToken()) {
+                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
+                    $this->content->setDraft($draft);
+                }
             }
         }
     }
@@ -116,7 +119,7 @@ class ContentRender
 
     public function __construct($name, $bbapp, $category = null, $mode = null, $uid = null)
     {
-        $this->uid = (NULL === $uid) ? uniqid() : $uid;
+        $this->uid = (NULL === $uid) ? uniqid(rand()) : $uid;
         $this->name = $name;
         $this->renderer = $bbapp->getRenderer();
         $this->bbapp = $bbapp;

@@ -449,4 +449,8 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
         return $this;
     }
 
+    public function getTemplateName()
+    {
+        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
 }

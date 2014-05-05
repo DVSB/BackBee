@@ -77,6 +77,8 @@ class Cache extends AExtendedCache
      * @var array
      */
     protected $_instance_options = array(
+        'min_cache_lifetime' => null,
+        'max_cache_lifetime' => null,
         'em' => null,
         'dbal' => array()
     );
@@ -134,9 +136,7 @@ class Cache extends AExtendedCache
         }
 
         $last_timestamp = $this->test($id);
-        if (true === $bypassCheck
-                || 0 === $last_timestamp
-                || $expire->getTimestamp() <= $last_timestamp) {
+        if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
             return $this->_getCacheEntity($id)->getData();
         }
 
@@ -178,7 +178,7 @@ class Cache extends AExtendedCache
                 'uid' => $this->_getContextualId($id),
                 'tag' => $tag,
                 'data' => $data,
-                'expire' => $this->_getExpireDateTime($lifetime),
+                'expire' => $this->getExpireTime($lifetime),
                 'created' => new \DateTime()
             );
 
@@ -281,7 +281,7 @@ class Cache extends AExtendedCache
             return false;
         }
 
-        $expire = $this->_getExpireDateTime($lifetime);
+        $expire = $this->getExpireTime($lifetime);
 
         try {
             $this->_repository
@@ -382,26 +382,16 @@ class Cache extends AExtendedCache
     }
 
     /**
-     * Returns the expiration date time
+     * Returns the expiration timestamp
      * @param int $lifetime
-     * @return \DateTime
+     * @return int
      * @codeCoverageIgnore
      */
-    private function _getExpireDateTime($lifetime = null)
+    protected function getExpireTime($lifetime = null)
     {
-        $expire = null;
+        $expire = parent::getExpireTime($lifetime);
 
-        if (null !== $lifetime && 0 !== $lifetime) {
-            $expire = new \DateTime ();
-
-            if (0 < $lifetime) {
-                $expire->add(new \DateInterval('PT' . $lifetime . 'S'));
-            } else {
-                $expire->sub(new \DateInterval('PT' . (-1 * $lifetime) . 'S'));
-            }
-        }
-
-        return $expire;
+        return (0 === $expire) ? null : date_timestamp_set(new \DateTime(), $expire);
     }
 
     /**

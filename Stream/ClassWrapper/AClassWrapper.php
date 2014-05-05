@@ -134,7 +134,7 @@ namespace <namespace>;
  * @Table(name="content")
  * @HasLifecycleCallbacks
  */
-class <classname> extends <extends> 
+class <classname> extends <extends>
 {
     <trait>
     public function __construct($uid = NULL, $options = NULL) 
@@ -162,8 +162,11 @@ class <classname> extends <extends>
     {
         foreach (spl_autoload_functions() as $autoloader) {
             if (true === is_array($autoloader) && $autoloader[0] instanceof \BackBuilder\AutoLoader\AutoLoader) {
-                $this->_autoloader = $autoloader[0];
-                break;
+                if($autoloader[0] !== null && $autoloader[0]->getApplication())
+                {
+                    $this->_autoloader = $autoloader[0];
+                    break;
+                }
             }
         }
 
@@ -208,8 +211,9 @@ class <classname> extends <extends>
             (0 < count($defineDatas)) ? '$this' . implode('', $defineDatas) . ';' : '',
             (0 < count($defineParam)) ? '$this' . implode('', $defineParam) . ';' : '',
             (0 < count($defineProps)) ? '$this' . implode('', $defineProps) . ';' : ''), $this->template);
-        
+
         return $phpCode;
+
     }
 
     /**

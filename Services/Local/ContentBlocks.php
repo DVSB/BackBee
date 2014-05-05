@@ -92,6 +92,7 @@ class ContentBlocks extends AbstractServiceLocal
 
         $categories = array();
         $categoryList = Category::getCategories($this->getApplication()->getClassContentDir());
+
         foreach ($categoryList as $category) {
             $categories[] = $category->__toStdObject();
         }
@@ -160,7 +161,7 @@ class ContentBlocks extends AbstractServiceLocal
             $node = new \stdClass();
             $node->attr = new \stdClass();
             $node->attr->rel = "contentType_" . $content->name;
-            $node->attr->id = "node_" . uniqid();
+            $node->attr->id = "node_" . uniqid(rand());
             $node->data = $content->label;
             $node->state = "leaf";
             $result[] = $node;
@@ -187,12 +188,11 @@ class ContentBlocks extends AbstractServiceLocal
     /**
      * @exposed(secured=true)
      */
-    public function getBBContentBrowserTree($filters = array())
+    public function getBBContentBrowserTree($filters = array(), $site = null)
     {
 
         $tree = array();
         $children = array();
-
 
         $root = new \stdClass();
         $root->attr = new \stdClass();
@@ -214,7 +214,7 @@ class ContentBlocks extends AbstractServiceLocal
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
                 $leaf->attr->rel = "contentType_" . $accept;
-                $leaf->attr->id = uniqid();
+                $leaf->attr->id = uniqid(rand());
                 $leaf->data = $object->getProperty('name');
                 $leaf->state = "leaf";
                 $children[] = $leaf;
@@ -300,17 +300,17 @@ class ContentBlocks extends AbstractServiceLocal
     /**
      * @exposed(secured=true)
      */
-    public function searchContent($params = array(), $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0)
+    public function searchContent($params = array(), $site_uid = null, $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0)
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
-
         $catName = (isset($params['typeField'])) ? $params['typeField'] : $params['catName'];
         $result = array("numResults" => 0, "rows" => array());
-        if (!$catName)
+        if (!$catName) {
             return $result;
-
+        }
+        
         $em = $this->bbapp->getEntityManager();
         $contentsList = array();
         $limitInfos = array("start" => (int) $start, "limit" => (int) $limit);
@@ -333,7 +333,7 @@ class ContentBlocks extends AbstractServiceLocal
         }
         /* default value is true */
         $params["limitToOnline"] = false;
-        $params["site_uid"] = $this->bbapp->getSite()->getUid();
+        $params["site_uid"] = (null === $site_uid) ? $this->bbapp->getSite()->getUid() : $site_uid;
         $result["numResults"] = $em->getRepository("BackBuilder\ClassContent\AClassContent")->countContentsBySearch($classnames, $conditions = $params);
         $items = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findContentsBySearch($classnames, $orderInfos, $limitInfos, $conditions = $params);
         if ($items) {
@@ -347,15 +347,21 @@ class ContentBlocks extends AbstractServiceLocal
                     $contentInfos = new \stdClass();
                     $contentInfos->uid = $item->getUid();
                     $contentInfos->title = String::truncateText($currentItemTitle, 50); //truncate
-                    $contentInfos->ico = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
+                    $contentInfos->ico = 'ressources/img/contents/' . str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass) . '.png';
                     $contentInfos->type = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->classname = $itemClass;
                     $contentInfos->created = $item->getCreated()->format("d/m/Y");
                     $contentInfos->completeTitle = $currentItemTitle;
 
+                    if (null !== $image = $item->getFirstElementOfType('BackBuilder\ClassContent\Media\image')) {
+                        if (null !== $image->image && $image->image->path) {
+                            $contentInfos->ico = $this->getApplication()->getRenderer()->getUri('images/' . substr($image->image->path, 0, strrpos($image->image->path, '.')) . '/' . $image->image->originalname);
+                        }
+                    }
+
                     $contentsList[] = $contentInfos;
                 } catch (\Exception $e) {
-                    /*                     * decrément total en cas d'erreur* */
+                    /** decrément total en cas d'erreur* */
                     $result["numResults"] = (int) $result["numResults"] - 1;
                     continue;
                 }
@@ -381,7 +387,7 @@ class ContentBlocks extends AbstractServiceLocal
             $stdClass->max_item = "unlimited";
             $stdClass->max_width_droppable = 16;
             $stdClass->min_width_droppable = 2;
-            $stdClass->uid = uniqid();
+            $stdClass->uid = uniqid(rand());
             return $stdClass;
         }
     }
