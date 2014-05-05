@@ -36,11 +36,20 @@ use Symfony\Component\Security\Core\User\UserInterface,
 interface ApiUserProviderInterface extends UserProviderInterface
 {
     /**
-     * Whether this provider supports the given user class
+     * Loads the user for the given public key.
      *
-     * @param string $class
+     * This method must throw UsernameNotFoundException if the user is not
+     * found.
      *
-     * @return Boolean
+     * @param string $publicApiKey The public key
+     *
+     * @return UserInterface
+     *
+     * @see UsernameNotFoundException
+     *
+     * @throws UsernameNotFoundException if the user is not found
+     *
      */
-    public function supportsClass($class);
+    public function loadUserByPublicKey($publicApiKey);
+
 }
