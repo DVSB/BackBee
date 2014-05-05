@@ -1310,7 +1310,7 @@ var ContentEditionManager = (function($){
                     self.rendererArr[key] = renderer;
 
                     var hidden = "";
-                    if ('undefined' != typeof (param.array.hidden)) {
+                    if ('undefined' != typeof (param.array) && 'undefined' != typeof (param.array.hidden)) {
                         if (param.array.hidden == true) {
                             hidden = "style='display:none;'";
                         }

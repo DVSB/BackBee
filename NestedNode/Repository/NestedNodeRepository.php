@@ -35,7 +35,8 @@ use Doctrine\ORM\EntityRepository;
  */
 class NestedNodeRepository extends EntityRepository
 {
-
+    public static $counter = 0;
+    public static $updated_node = 0;
     private function _hasValidHierarchicalDatas($node)
     {
         if ($node->getLeftnode() >= $node->getRightnode())
@@ -73,6 +74,7 @@ class NestedNodeRepository extends EntityRepository
                 $leftnode = $child->getRightnode();
             }
         }
+
         $node->setRightnode($leftnode + 1);
         $this->createQueryBuilder('n')
                 ->update()
@@ -84,7 +86,21 @@ class NestedNodeRepository extends EntityRepository
                 ->getQuery()
                 ->execute();
 
-//        $this->_em->flush($node);
+        $this->_em->detach($node);
+        self::$updated_node++;
+
+        if (self::$counter === 0) {
+            \BackBuilder\Util\Buffer::dump(
+                'memory usage during update hierarchical data:' 
+                . \BackBuilder\Importer\Importer::convertMemorySize(memory_get_usage()) 
+                . '(updated node count: ' . self::$updated_node . ")\n"
+            );
+            self::$counter++;
+        } elseif (self::$counter === 1000) {
+            self::$counter = 0;
+        } else {
+            self::$counter++;
+        }
 
         return $node;
     }
@@ -321,7 +337,7 @@ class NestedNodeRepository extends EntityRepository
             'rightnode' => $node->getRightnode() - ($includeNode ? 1 : 0)
         ));
 
-        if (!is_null($depth) && is_int($depth) && depth > 0) {
+        if (!is_null($depth) && is_int($depth) && $depth > 0) {
             $q = $q->andWhere('n._level >= :level')
                     ->setParameter('level', $node->getLevel() - $depth);
         }
@@ -516,9 +532,9 @@ class NestedNodeRepository extends EntityRepository
     /**
      * Déplace le noeud et ses enfants à la destination $destLeft et met à jour le reste de l'arbre
      *
-     * @param int     $destLeft		Noeud gauche de la destination
-     * @param int     $levelDiff	Différence de niveau entre les deux noeuds
-     * @param int     $parent		Futur parent du noeud à déplacer
+     * @param int     $destLeft     Noeud gauche de la destination
+     * @param int     $levelDiff    Différence de niveau entre les deux noeuds
+     * @param int     $parent       Futur parent du noeud à déplacer
      * @ don't use
      */
     private function updateNode($destLeft, $levelDiff, $parent)
