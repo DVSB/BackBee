@@ -58,6 +58,7 @@ class KeyWord extends ANestedNode implements IRenderable
      * @var \BackBuilder\NestedNode\KeyWord
      * @ManyToOne(targetEntity="BackBuilder\NestedNode\KeyWord", inversedBy="_descendants")
      * @JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
+     * @Serializer\Exclude
      */
     protected $_root;
 
