@@ -150,6 +150,8 @@ class Controller
                 $bundle->getBaseDir();
                 $view = $bundle->getBaseDir() . '/Ressources/views/' . $view;
             }
+        } else {
+            $view = $this->getApplication()->getBBDir() . '/Resources/views/' . $view;
         }
 
         try {
