@@ -26,7 +26,7 @@ use BackBuilder\Util\Numeric,
     BackBuilder\Exception\InvalidArgumentException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
+use JMS\Serializer\Annotation as Serializer;
 /**
  * Abstract class for nested node object in BackBuilder.
  *
@@ -42,6 +42,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @MappedSuperclass
+ * @Serializer\ExclusionPolicy("all")
  */
 abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
 {
@@ -56,6 +57,7 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
     /**
      * The root node, cannot be NULL.
      * @var \BackBuilder\NestedNode\ANestedNode
+     * @Serializer\Exclude
      */
     protected $_root;
 
