@@ -176,7 +176,7 @@ class Cache extends AExtendedCache
         try {
             $params = array(
                 'uid' => $this->_getContextualId($id),
-                'tag' => $tag,
+                'tag' => $this->_getContextualId($tag),
                 'data' => $data,
                 'expire' => $this->getExpireTime($lifetime),
                 'created' => new \DateTime()
@@ -301,6 +301,47 @@ class Cache extends AExtendedCache
         }
 
         return true;
+    }
+
+    /**
+     * Returns the minimum expire date time for all cache records 
+     * associated to one of the provided tags
+     * @param  string|array $tag
+     * @param int $lifetime Optional, the specific lifetime for this record 
+     *                      (by default 0, infinite lifetime)
+     * @return int
+     */
+    public function getMinExpireByTag($tag, $lifetime = 0)
+    {
+        $tags = (array) $tag;
+
+        if (0 == count($tags)) {
+            return $lifetime;
+        }
+        
+        $now = new \DateTime();
+        $expire = $this->getExpireTime($lifetime);
+
+        try {
+            $min = $this->_repository
+                    ->createQueryBuilder('c')
+                    ->select('MIN(c._expire)')
+                    ->where('c._tag IN (:tags)')
+                    ->andWhere('c._expire IS NOT NULL')
+                    ->setParameters(array(
+                        'tags' => $this->_getContextualTags($tags)))
+                    ->getQuery()
+                    ->execute(null, \Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
+
+            if (null !== $min) {
+                $min = new \DateTime($min);
+                $lifetime = (null === $min) ? $lifetime : (null === $expire ? $min->getTimestamp() : min(array($expire->getTimestamp(), $min->getTimestamp()))) - $now->getTimestamp();
+            }
+        } catch (\Exception $e) {
+            $this->log('warning', sprintf('Enable to get expire time for tags (%s) : %s', implode(',', $tags), $e->getMessage()));
+        }
+
+        return $lifetime;
     }
 
     /**
