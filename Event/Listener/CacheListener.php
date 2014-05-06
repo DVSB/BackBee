@@ -388,7 +388,7 @@ class CacheListener implements EventSubscriberInterface
             return false;
         }
 
-        return md5('_page_' . $request->getUri());
+        return $request->getUri();
     }
 
     /**
