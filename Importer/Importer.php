@@ -122,7 +122,10 @@ class Importer
             } else {
                 $count_null++;
                 if (self::FLUSH_MEMORY_ON_NULL_EVERY <= $count_null) {
-                    Buffer::dump('Before cleaning memory on null: ' .  self::convertMemorySize(memory_get_usage()) . "\n");
+                    Buffer::dump(
+                        'Cleaning memory on null (every ' . self::FLUSH_MEMORY_ON_NULL_EVERY . ') : [BEFORE] ' 
+                        .  self::convertMemorySize(memory_get_usage())
+                    );
                     
                     if (0 < count($entities)) {
                         $this->save($entities, $check_existing);
@@ -133,7 +136,7 @@ class Importer
                         $this->flushMemory();                        
                     }
 
-                    Buffer::dump('After cleaning memory on null: ' . self::convertMemorySize(memory_get_usage()) . "\n");
+                    Buffer::dump('; [AFTER] ' . self::convertMemorySize(memory_get_usage()) . "\n");
                     $count_null = 0;
                 }
             }
