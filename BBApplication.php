@@ -34,7 +34,8 @@ use BackBuilder\AutoLoader\AutoLoader,
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager,
-    Doctrine\Common\Annotations\AnnotationRegistry;
+    Doctrine\Common\Annotations\AnnotationRegistry,
+    Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Config\FileLocator,
     BackBuilder\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
@@ -110,6 +111,28 @@ class BBApplication implements IApplication
             'BackBuilder' => $this->getBaseDir(),
             //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
         ));
+        
+        // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
+        AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
+        AnnotationReader::addGlobalIgnoredName('Entity');
+        AnnotationReader::addGlobalIgnoredName('Column');
+        AnnotationReader::addGlobalIgnoredName('Table');
+        AnnotationReader::addGlobalIgnoredName('HasLifecycleCallbacks');
+        AnnotationReader::addGlobalIgnoredName('Index');
+        AnnotationReader::addGlobalIgnoredName('Id');
+        AnnotationReader::addGlobalIgnoredName('GeneratedValue');
+        AnnotationReader::addGlobalIgnoredName('ManyToMany');
+        AnnotationReader::addGlobalIgnoredName('JoinTable');
+        AnnotationReader::addGlobalIgnoredName('JoinColumn');
+        AnnotationReader::addGlobalIgnoredName('ManyToOne');
+        AnnotationReader::addGlobalIgnoredName('OneToOne');
+        AnnotationReader::addGlobalIgnoredName('OneToMany');
+        AnnotationReader::addGlobalIgnoredName('PreUpdate');
+        AnnotationReader::addGlobalIgnoredName('index');
+        AnnotationReader::addGlobalIgnoredName('fixtures');
+        AnnotationReader::addGlobalIgnoredName('fixture');
+        AnnotationReader::addGlobalIgnoredName('column');
+        
         
         $this->_initContainer()
              ->_initAutoloader()
