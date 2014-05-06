@@ -96,7 +96,7 @@ class NestedNodeRepository extends EntityRepository
                 . '(updated node count: ' . self::$updated_node . ")\n"
             );
             self::$counter++;
-        } elseif (self::$counter === 1000) {
+        } elseif (self::$counter === 500) {
             self::$counter = 0;
         } else {
             self::$counter++;

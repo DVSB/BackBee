@@ -233,5 +233,33 @@ class Database
 
         return $sql;
     }
+    
+    public function getClassMetadata()
+    {
+        $classes1 = $this->getBackBuilderClassMetadata();
+        $classes2 = $this->getBundleClassMetadata();
+
+        $classes = array_merge($classes1, $classes2);
+
+        return $classes;
+    }
+
+    private function getBackBuilderClassMetadata()
+    {
+        $classes = $this->_getBackbuilderSchema();
+
+        return $classes;
+    }
+
+    private function getBundleClassMetadata()
+    {
+        $classes = array();
+
+        foreach ($this->_application->getBundles() as $bundle) {
+            $classes = array_merge($classes, $this->_getBundleSchema($bundle));
+        }
+
+        return $classes;
+    }
 
 }

@@ -40,6 +40,8 @@ parameters:
             code: 500
     
     bbapp.rest_api.path: /rest/
+    
+    bbapp.rest.test_controller.class: BackBuilder\Rest\Controller\TestController
 
 services:
     cache.bootstrap:
@@ -130,7 +132,18 @@ services:
         class: Metadata\MetadataFactory
         arguments:  [@rest.metadata.annotation_driver]
         
+    rest.controller.test:
+        class:      %bbapp.rest.test_controller.class%
+        arguments:  ["@bbapp"]
+    
+    annotation_reader.cache:
+        class: Doctrine\Common\Cache\ArrayCache
+        
     annotation_reader:
+        class: Doctrine\Common\Annotations\CachedReader
+        arguments: [@annotation_reader_chained, @annotation_reader.cache]
+        
+    annotation_reader_chained:
         class: BackBuilder\Annotations\ChainAnnotationReader
         arguments: [[@annotation_reader.full, @annotation_reader.simple]]
     
