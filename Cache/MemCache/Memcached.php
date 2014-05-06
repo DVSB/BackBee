@@ -71,6 +71,7 @@ class Memcached extends AExtendedCache
         'min_cache_lifetime' => null,
         'max_cache_lifetime' => null,
         'persistent_id' => null,
+        'compression' => null,
         'servers' => array(),
         'options' => array()
     );
@@ -158,6 +159,10 @@ class Memcached extends AExtendedCache
         $this->_instance_options['options'] = array_merge($this->_memcached_options, $this->_instance_options['options']);
         foreach ($this->_instance_options['options'] as $option => $value) {
             $this->setOption($option, $value);
+        }
+
+        if(null !== $this->_instance_options['compression']){
+            $this->setOption(\Memcached::OPT_COMPRESSION, $this->_instance_options['compression']);
         }
 
         if (false === is_array($this->_instance_options['servers'])) {
@@ -348,7 +353,8 @@ class Memcached extends AExtendedCache
     public function save($id, $data, $lifetime = null, $tag = null)
     {
         $expire = $this->getExpireTime($lifetime);
-        if (false === $this->_memcached->set($id, array($data, $expire), $expire)) {
+
+        if (false === $this->_memcached->set($id, $data, $expire)) {
             return $this->_onError('save');
         }
 
