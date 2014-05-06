@@ -359,6 +359,7 @@ class CacheListener implements EventSubscriberInterface
      */
     private static function _getPageCacheIdFromRequest()
     {
+
         if (null === self::$_application) {
             return false;
         }
@@ -368,7 +369,7 @@ class CacheListener implements EventSubscriberInterface
             return false;
         }
 
-        return md5('_page_' . $request->getUri());
+        return $request->getUri();
     }
 
     /**
