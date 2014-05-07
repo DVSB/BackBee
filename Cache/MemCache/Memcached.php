@@ -71,6 +71,7 @@ class Memcached extends AExtendedCache
         'min_cache_lifetime' => null,
         'max_cache_lifetime' => null,
         'persistent_id' => null,
+        'compression' => null,
         'servers' => array(),
         'options' => array()
     );
@@ -158,6 +159,10 @@ class Memcached extends AExtendedCache
         $this->_instance_options['options'] = array_merge($this->_memcached_options, $this->_instance_options['options']);
         foreach ($this->_instance_options['options'] as $option => $value) {
             $this->setOption($option, $value);
+        }
+
+        if(null !== $this->_instance_options['compression']){
+            $this->setOption(\Memcached::OPT_COMPRESSION, $this->_instance_options['compression']);
         }
 
         if (false === is_array($this->_instance_options['servers'])) {
@@ -348,7 +353,8 @@ class Memcached extends AExtendedCache
     public function save($id, $data, $lifetime = null, $tag = null)
     {
         $expire = $this->getExpireTime($lifetime);
-        if (false === $this->_memcached->set($id, array($data, $expire), $expire)) {
+
+        if (false === $this->_memcached->set($id, $data, $expire)) {
             return $this->_onError('save');
         }
 
@@ -447,7 +453,40 @@ class Memcached extends AExtendedCache
 
         return true;
     }
+    
+    /**
+     * Returns the minimum expire date time for all cache records 
+     * associated to one of the provided tags
+     * @param  string|array $tag
+     * @param int $lifetime Optional, the specific lifetime for this record 
+     *                      (by default 0, infinite lifetime)
+     * @return int
+     */
+    public function getMinExpireByTag($tag, $lifetime = 0)
+    {
+        $tags = (array) $tag;
 
+        if (0 == count($tags)) {
+            return $lifetime;
+        }
+        
+        $now = $this->getExpireTime();
+        $expire = $this->getExpireTime($lifetime);
+        
+        foreach ($tags as $tag) {
+            if (false !== $tagged = $this->load(self::TAGS_PREFIX . $tag)) {
+                $update_tagged = array();
+                foreach ($tagged as $id) {
+                    if (false !== $last_timestamp = $this->test($id)) {
+                        $lifetime = min(array($last_timestamp, $lifetime)) - $now;
+                    }
+                }
+            }
+        }
+        
+        return $lifetime;
+    }
+    
     /**
      * Returns TRUE if the server is already added to Memcached, FALSE otherwise
      * @param string $host
