@@ -49,4 +49,14 @@ abstract class AExtendedCache extends ACache
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     abstract public function updateExpireByTag($tag, $lifetime = null);
+
+    /**
+     * Returns the minimum expire date time for all cache records 
+     * associated to one of the provided tags
+     * @param  string|array $tag
+     * @param int $lifetime Optional, the specific lifetime for this record 
+     *                      (by default 0, infinite lifetime)
+     * @return int
+     */
+    abstract public function getMinExpireByTag($tag, $lifetime = 0);
 }

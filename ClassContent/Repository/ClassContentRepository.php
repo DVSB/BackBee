@@ -882,4 +882,17 @@ class ClassContentRepository extends EntityRepository
         return $content;
     }
 
+    /**
+     * Returns the unordered children uids for $content
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return array
+     */
+    public function getUnorderedChildrenUids(AClassContent $content)
+    {
+        return $this->getEntityManager()
+                        ->getConnection()
+                        ->executeQuery('SELECT content_uid FROM content_has_subcontent WHERE parent_uid=?', array($content->getUid()))
+                        ->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
 }
