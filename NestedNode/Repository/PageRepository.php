@@ -46,15 +46,14 @@ class PageRepository extends NestedNodeRepository
     {
         return $q->andWhere('n._state >= ' . Page::STATE_ONLINE)
             ->andWhere('n._state <' . Page::STATE_DELETED)
+			->andWhere('n._state <>' . Page::STATE_HIDDEN)
             ->andWhere('n._publishing IS NULL OR n._publishing <= CURRENT_TIMESTAMP()')
             ->andWhere('n._archiving IS NULL OR n._archiving > CURRENT_TIMESTAMP()');
     }
 
     public function getOnlinePrevSibling(ANestedNode $node)
     {
-        $q = $this->_getPrevSiblingsQuery($node)
-                ->orderBy('n._leftnode', 'desc')
-                ->setMaxResults(1);
+        $q = $this->_getPrevSiblingsQuery($node)->orderBy('n._leftnode', 'desc')->setMaxResults(1);
         $q = $this->_andOnline($q);
 
         return $q->getQuery()->getOneOrNullResult();
