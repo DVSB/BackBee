@@ -102,6 +102,7 @@ class Importer
     {
         $i = 0;
         $count_null = 0;
+        $total_ignored = 0;
         $entities = array();
 
         while ($row = $statement->fetch()) {
@@ -122,8 +123,10 @@ class Importer
             } else {
                 $count_null++;
                 if (self::FLUSH_MEMORY_ON_NULL_EVERY <= $count_null) {
+                    $total_ignored += $count_null;
                     Buffer::dump(
-                        'Cleaning memory on null (every ' . self::FLUSH_MEMORY_ON_NULL_EVERY . ') : [BEFORE] ' 
+                        'Cleaning memory on null (every ' . self::FLUSH_MEMORY_ON_NULL_EVERY 
+                        . ' - total: ' . $total_ignored . ') : [BEFORE] ' 
                         .  self::convertMemorySize(memory_get_usage())
                     );
                     
