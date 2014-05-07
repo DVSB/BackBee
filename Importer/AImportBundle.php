@@ -58,6 +58,7 @@ abstract class AImportBundle
                 echo $exc->getMessage() . "\n";
             }
         }
+
         return true;
     }
 
