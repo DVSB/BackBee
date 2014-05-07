@@ -91,12 +91,12 @@ class NestedNodeRepository extends EntityRepository
 
         if (self::$counter === 0) {
             \BackBuilder\Util\Buffer::dump(
-                'memory usage during update hierarchical data:' 
+                '      memory usage during update hierarchical data:' 
                 . \BackBuilder\Importer\Importer::convertMemorySize(memory_get_usage()) 
-                . '(updated node count: ' . self::$updated_node . ")\n"
+                . ' (updated node count: ' . self::$updated_node . ")\n"
             );
             self::$counter++;
-        } elseif (self::$counter === 1000) {
+        } elseif (self::$counter === 500) {
             self::$counter = 0;
         } else {
             self::$counter++;

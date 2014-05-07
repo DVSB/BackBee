@@ -30,7 +30,7 @@ classcontent.preremove:
 classcontent.prerender:
   listeners:
     - [BackBuilder\Event\Listener\RevisionListener, onPrerenderContent]
-    - [BackBuilder\Event\Listener\CacheListener, onPreRender]
+    - [BackBuilder\Event\Listener\CacheListener, onPreRenderContent]
  
 classcontent.render:
   listeners:
@@ -38,7 +38,7 @@ classcontent.render:
 
 classcontent.postrender:
   listeners:
-    - [BackBuilder\Event\Listener\CacheListener, onPostRender]
+    - [BackBuilder\Event\Listener\CacheListener, onPostRenderContent]
 
 element.file.postremove:
   listeners:

@@ -203,7 +203,7 @@ class ClassContentRepository extends EntityRepository
                     if (true === is_array($selectedKeywords)) {
                         $selectedKeywords = array_filter($selectedKeywords);
                         if (false === empty($selectedKeywords)) {
-                            $contentIds = $this->_em->getRepository("BackBuilder\NestedNode\KeyWord")->getContentsIdByKeyWords($selectedKeywords);
+                            $contentIds = $this->_em->getRepository("BackBuilder\NestedNode\KeyWord")->getContentsIdByKeyWords($selectedKeywords, false);
                             if (is_array($contentIds) && !empty($contentIds)) {
                                 $q->andWhere("c._uid in(:kwContent)")->setParameter("kwContent", $contentIds);
                             } else {
@@ -880,6 +880,19 @@ class ClassContentRepository extends EntityRepository
         }
 
         return $content;
+    }
+
+    /**
+     * Returns the unordered children uids for $content
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return array
+     */
+    public function getUnorderedChildrenUids(AClassContent $content)
+    {
+        return $this->getEntityManager()
+                        ->getConnection()
+                        ->executeQuery('SELECT content_uid FROM content_has_subcontent WHERE parent_uid=?', array($content->getUid()))
+                        ->fetchAll(\PDO::FETCH_COLUMN);
     }
 
 }
