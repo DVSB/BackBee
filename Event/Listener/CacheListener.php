@@ -275,6 +275,7 @@ class CacheListener implements EventSubscriberInterface
 
         // Checks if the target event is not a main contentset
         if (self::$_object instanceof \BackBuilder\ClassContent\ContentSet &&
+                true === is_array(self::$_object->getPages()) &&
                 0 < self::$_object->getPages()->count()) {
             return false;
         }
