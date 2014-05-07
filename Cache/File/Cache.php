@@ -51,7 +51,8 @@ class Cache extends ACache
      * @var array
      */
     protected $_instance_options = array(
-        'cachedir' => null
+        'cachedir' => null,
+        'mode' => null
     );
 
     /**
@@ -90,12 +91,21 @@ class Cache extends ACache
                 && false === @mkdir($this->_cachedir, 0700, true)) {
             throw new CacheException(sprintf('Unable to create the cache directory `%s`.', $this->_cachedir));
         }
-
+        chmod($this->_cachedir, $this->getMode($options));
         if (false === is_writable($this->_cachedir)) {
             throw new CacheException(sprintf('Unable to write in the cache directory `%s`.', $this->_cachedir));
         }
 
         return $this;
+    }
+
+    protected function getMode($options)
+    {
+        $mode = '0700';
+        if (array_key_exists('mode', $options)) {
+            $mode = $options['mode'];
+        }
+        return octdec($mode);
     }
 
     /**
