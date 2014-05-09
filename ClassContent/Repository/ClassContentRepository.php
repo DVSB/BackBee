@@ -43,7 +43,23 @@ use Doctrine\ORM\Tools\Pagination\Paginator,
  */
 class ClassContentRepository extends EntityRepository
 {
+    /**
+     * Get all content uids owning the provided content
+     * @param string content uid
+     * @return array
+     */
+    public function getParentContentUidByUid($content_uid)
+    {
+        $q = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('c.parent_uid')
+                ->from('content_has_subcontent', 'c')
+                ->andWhere('c.content_uid = :uid')
+                ->setParameter('uid', $content_uid);
 
+        return $q->execute()->fetchAll(\PDO::FETCH_COLUMN);
+    }
+    
     /**
      * Get all content uids owning the provided content
      * @param \BackBuilder\ClassContent\AClassContent $content
@@ -51,14 +67,7 @@ class ClassContentRepository extends EntityRepository
      */
     public function getParentContentUid(AClassContent $content)
     {
-        $q = $this->_em->getConnection()
-                ->createQueryBuilder()
-                ->select('c.parent_uid')
-                ->from('content_has_subcontent', 'c')
-                ->andWhere('c.content_uid = :uid')
-                ->setParameter('uid', $content->getUid());
-
-        return $q->execute()->fetchAll(\PDO::FETCH_COLUMN);
+        return $this->getParentContentUidByUid($content->getUid());
     }
 
     /**

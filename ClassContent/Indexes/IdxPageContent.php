@@ -37,13 +37,13 @@ class IdxPageContent
 
     /**
      * @var string
-     * @Id @Column
+     * @Id @Column(type="string", length=32)
      */
     private $page_uid;
 
     /**
      * @var string
-     * @Id @Column
+     * @Id @Column(type="string", length=32)
      */
     private $content_uid;
 
