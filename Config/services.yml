@@ -47,7 +47,7 @@ services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
         arguments:  [{cachedir: "%bbapp.cache.dir%"}, "%bbapp.context%"]
-    cache-control:
+    cache.control:
         class:      %bbapp.cachecontrol.class%
         arguments:  [{em: "@em"}, "%bbapp.context%", "@logging"]
     config:
