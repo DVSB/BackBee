@@ -277,12 +277,12 @@ class CacheListener implements EventSubscriberInterface
 
         // Checks if a service cache-control exists
         self::$_application = $event->getDispatcher()->getApplication();
-        if (null === self::$_application || false === self::$_application->getContainer()->has('cache-control')) {
+        if (null === self::$_application || false === self::$_application->getContainer()->has('cache.control')) {
             return false;
         }
 
         // Checks if the service cache-control extends AExtendedCache
-        self::$_cache_content = self::$_application->getContainer()->get('cache-control');
+        self::$_cache_content = self::$_application->getContainer()->get('cache.control');
         if (false === (self::$_cache_content instanceof \BackBuilder\Cache\AExtendedCache)) {
             return false;
         }

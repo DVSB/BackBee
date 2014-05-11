@@ -4,7 +4,8 @@ namespace BackBuilder\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder as SfContainerBuilder,
     Symfony\Component\DependencyInjection\ContainerInterface,
-    Symfony\Component\DependencyInjection\Exception\RuntimeException;
+    Symfony\Component\DependencyInjection\Exception\RuntimeException,
+    Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
 /**
  * Extended Symfony Dependency injection component
@@ -33,6 +34,13 @@ class ContainerBuilder extends SfContainerBuilder
             if (false === $definition->isSynthetic()) {
                 throw $e;
             }
+        } catch (InvalidArgumentException $ex) {
+            $method = 'get' . ucfirst($id) . 'Service';
+            if (true === method_exists($this, $method)) {
+                return $this->$method();
+            }
+
+            throw $ex;
         }
 
         return $service;
@@ -100,6 +108,7 @@ class ContainerBuilder extends SfContainerBuilder
     {
         $id = strtolower($id);
 
-        return isset($this->services[$id]) || method_exists($this, 'get'.strtr($id, array('_' => '', '.' => '_')).'Service');
+        return isset($this->services[$id]) || method_exists($this, 'get' . strtr($id, array('_' => '', '.' => '_')) . 'Service');
     }
+
 }
