@@ -41,7 +41,6 @@ firewalls:
         pattern: ^/rest
         provider: public_key
         restful:  ~
-        public_key: ~
 
 providers:
     public_key:
