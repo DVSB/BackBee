@@ -30,7 +30,7 @@ use BackBuilder\BBApplication,
  * 
  * Zip Archive connector. 
  * 
- * Unzips archive into a tmp dir for faster 
+ * Unzips archive into a tmp dir for faster processing
  * 
  * @category    BackBuilder
  * @package     BackBuilder\Importer
@@ -77,7 +77,7 @@ class ZipArchive implements IImporterConnector
         }
         
         $this->_config = array_merge_recursive(array(
-            'extractedDir' => $application->getTemporaryDir() . '/ZipArchiveConnector/extracted/' . basename($config['archive'])
+            'extractedDir' => $application->getTemporaryDir() . '/ZipArchiveConnector/extracted/' . basename($config['archive']) . '/' . date('Y-m-d H:i:s')
         ), $config);
         
         $this->_init();
