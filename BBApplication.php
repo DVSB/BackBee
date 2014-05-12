@@ -102,16 +102,16 @@ class BBApplication implements IApplication
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
-        
+
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
             'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
             'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
             'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
             'BackBuilder' => $this->getBaseDir(),
-            //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
+                //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
         ));
-        
+
         // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
         AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
         AnnotationReader::addGlobalIgnoredName('Entity');
@@ -132,37 +132,37 @@ class BBApplication implements IApplication
         AnnotationReader::addGlobalIgnoredName('fixtures');
         AnnotationReader::addGlobalIgnoredName('fixture');
         AnnotationReader::addGlobalIgnoredName('column');
-        
-        
+
+
         $this->_initContainer()
-             ->_initAutoloader()
-             ->_initContentWrapper()
-             ->_initEntityManager()
-             ->_initBundles();
+                ->_initAutoloader()
+                ->_initContentWrapper()
+                ->_initEntityManager()
+                ->_initBundles();
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
             return;
         }
 
-        
-        
+
+
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
-        
+
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
-                if(setLocale(LC_ALL, $encoding['locale']) === false)
+                if (setLocale(LC_ALL, $encoding['locale']) === false)
                     Throw new Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
         }
-        
+
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
 
         // Compile container so it resolves every var/abstract service called in services.yml|xml
         $this->_container->compile();
-        
+
         $this->_isinitialized = true;
     }
 
@@ -184,6 +184,32 @@ class BBApplication implements IApplication
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
+
+        $default_cachedir = $this->getBaseDir() . '/cache';
+        $default_cacheclass = md5('__container__' . $this->getContext());
+        $default_cachefile = $default_cacheclass . '.php';
+
+        if (false === $this->_debug &&
+                true === is_readable($default_cachedir . '/' . $default_cachefile)) {
+            $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($default_cachedir)));
+            $loader->load($default_cachefile);
+
+            $this->_container = new $default_cacheclass();
+
+            // Add current BBApplication into container
+            $this->_container->set('bbapp', $this);
+            $this->_container->set('service_container', $this->_container);
+
+            $this->getConfig()
+                    ->setContainer($this->_container)
+                    ->extend($this->_container->getParameter('bbapp.config.dir'));
+
+            $this->_container->setDefinition('site', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
+            $this->_container->setDefinition('routing', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
+            $this->_container->setDefinition('bb_session', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
+
+            return $this;
+        }
 
         $dirToLookingFor = array();
         $dirToLookingFor[] = $this->getBBDir() . '/' . 'Config';
@@ -209,11 +235,17 @@ class BBApplication implements IApplication
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
         $this->_container->set('service_container', $this->_container);
-        
+
 
         $this->_initBBAppParamsIntoContainer();
 
         $this->_initExternalBundleServices();
+
+        if (false === $this->isDebugMode() &&
+                true === is_writable($default_cachedir)) {
+            $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($this->_container);
+            file_put_contents($default_cachedir . '/' . $default_cachefile, $dump->dump(array('class' => $default_cacheclass, 'base_class' => '\BackBuilder\DependencyInjection\ContainerBuilder')));
+        }
 
         return $this;
     }
@@ -289,23 +321,23 @@ class BBApplication implements IApplication
     private function _initAutoloader()
     {
         $this->getAutoloader()
-             ->register()
-             ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
-             ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getRepository(), 'ClassContent', 'Repositories')))
-             ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getRepository(), 'Templates', 'helpers')))
-             ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
-             ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
-             ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
-             ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')));
+                ->register()
+                ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
+                ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getRepository(), 'ClassContent', 'Repositories')))
+                ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getRepository(), 'Templates', 'helpers')))
+                ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
+                ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
+                ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
+                ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
-                 ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
-                 ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getBaseRepository(), 'Templates', 'helpers')))
-                 ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getBaseRepository(), 'Listeners')))
-                 ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getBaseRepository(), 'Controller')))
-                 ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
-                 ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
+                    ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
+                    ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getBaseRepository(), 'Templates', 'helpers')))
+                    ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getBaseRepository(), 'Listeners')))
+                    ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getBaseRepository(), 'Controller')))
+                    ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
+                    ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
         }
 
         $this->getAutoloader()
@@ -438,7 +470,7 @@ class BBApplication implements IApplication
         } catch (\Exception $e) {
             $this->warning(sprintf('%s(): Cannot initialized Doctrine EntityManager', __METHOD__));
         }
-        
+
         return $this;
     }
 
@@ -537,7 +569,7 @@ class BBApplication implements IApplication
 
         if (false === $this->isClientSAPI()) {
             $response = $this->getController()->handle();
-            if($response instanceof Response) {
+            if ($response instanceof Response) {
                 $response->send();
                 die();
             }
@@ -616,7 +648,7 @@ class BBApplication implements IApplication
     {
         return dirname($this->getBBDir());
     }
-    
+
     /**
      * Get vendor dir
      * 
@@ -685,7 +717,7 @@ class BBApplication implements IApplication
      */
     public function getCacheControl()
     {
-        return $this->getContainer()->get('cache-control');
+        return $this->getContainer()->get('cache.control');
     }
 
     /**
@@ -713,7 +745,7 @@ class BBApplication implements IApplication
     {
         return $this->_container;
     }
-    
+
     /**
      * Get validator service
      * 
@@ -721,14 +753,14 @@ class BBApplication implements IApplication
      */
     public function getValidator()
     {
-        if(!$this->getContainer()->get('validator')) {
+        if (!$this->getContainer()->get('validator')) {
             $validator = Validation::createValidatorBuilder()
-                ->enableAnnotationMapping()
-                ->getValidator();
-            
+                    ->enableAnnotationMapping()
+                    ->getValidator();
+
             $this->getContainer()->set('validator', $validator);
         }
-        
+
         return $this->getContainer()->get('validator');
     }
 
@@ -739,9 +771,9 @@ class BBApplication implements IApplication
     {
         if (false === $this->getContainer()->isLoaded('config')) {
             $this->getContainer()
-                 ->get('config')
-                 ->setContainer($this->getContainer())
-                 ->extend($this->getBBConfigDir());
+                    ->get('config')
+                    ->setContainer($this->getContainer())
+                    ->extend($this->getBBConfigDir());
 
             $this->_initContextConfig();
         }
@@ -840,7 +872,7 @@ class BBApplication implements IApplication
             }
 
             //array_walk($this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
-            array_map( array('BackBuilder\Util\File','resolveFilepath') , $this->_classcontentdir);
+            array_map(array('BackBuilder\Util\File', 'resolveFilepath'), $this->_classcontentdir);
         }
 
         return $this->_classcontentdir;

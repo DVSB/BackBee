@@ -70,10 +70,10 @@ class CacheListener implements EventSubscriberInterface
     private static $_page_cache_deletion_done = false;
 
     /**
-     * Is the deletion of cached content is done
+     * Cached contents already deleted
      * @var boolean
      */
-    private static $_content_cache_deletion_done = false;
+    private static $_content_cache_deletion_done = array();
 
     /**
      * Looks for available cached data before rendering a content
@@ -153,22 +153,17 @@ class CacheListener implements EventSubscriberInterface
             return;
         }
 
-        if (true === self::$_content_cache_deletion_done) {
-            return;
-        }
+        $parent_uids = self::$_application->getEntityManager()
+                ->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
+                ->getParentContentUids(array(self::$_object));
 
-        $contents = ScheduledEntities::getScheduledAClassContentUpdates(self::$_application->getEntityManager());
-        if (0 === count($contents)) {
+        $content_uids = array_diff($parent_uids, self::$_content_cache_deletion_done);
+        if (0 === count($content_uids)) {
             return;
-        }
-
-        $content_uids = array();
-        foreach ($contents as $content) {
-            $content_uids[] = $content->getUid();
         }
 
         self::$_cache_content->removeByTag($content_uids);
-        self::$_content_cache_deletion_done = true;
+        self::$_content_cache_deletion_done = array_merge(self::$_content_cache_deletion_done, $content_uids);
         self::$_application->debug(sprintf('Remove cache for `%s(%s)`.', get_class(self::$_object), implode(', ', $content_uids)));
     }
 
@@ -282,12 +277,12 @@ class CacheListener implements EventSubscriberInterface
 
         // Checks if a service cache-control exists
         self::$_application = $event->getDispatcher()->getApplication();
-        if (null === self::$_application || false === self::$_application->getContainer()->has('cache-control')) {
+        if (null === self::$_application || false === self::$_application->getContainer()->has('cache.control')) {
             return false;
         }
 
         // Checks if the service cache-control extends AExtendedCache
-        self::$_cache_content = self::$_application->getContainer()->get('cache-control');
+        self::$_cache_content = self::$_application->getContainer()->get('cache.control');
         if (false === (self::$_cache_content instanceof \BackBuilder\Cache\AExtendedCache)) {
             return false;
         }
@@ -400,6 +395,8 @@ class CacheListener implements EventSubscriberInterface
     {
         return array(
             'classcontent.prerender' => 'onPreRenderContent',
+            'classcontent.postrender' => 'onPostRenderContent',
+            'classcontent.onflush' => 'onFlushContent',
             'nestednode.page.prerender' => 'onPreRenderPage',
             'nestednode.page.postrender' => 'onPostRenderPage',
             'nestednode.page.onflush' => 'onFlushPage'
