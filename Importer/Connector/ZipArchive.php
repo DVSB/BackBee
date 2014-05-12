@@ -30,7 +30,7 @@ use BackBuilder\BBApplication,
  * 
  * Zip Archive connector. 
  * 
- * Unzips archive into a tmp dir for faster 
+ * Unzips archive into a tmp dir for faster processing
  * 
  * @category    BackBuilder
  * @package     BackBuilder\Importer
@@ -77,7 +77,7 @@ class ZipArchive implements IImporterConnector
         }
         
         $this->_config = array_merge_recursive(array(
-            'extractedDir' => $application->getTemporaryDir() . '/ZipArchiveConnector/extracted/' . basename($config['archive'])
+            'extractedDir' => $application->getTemporaryDir() . '/ZipArchiveConnector/extracted/' . basename($config['archive']) . '/' . date('Y-m-d_His') . '/'
         ), $config);
         
         $this->_init();
@@ -117,26 +117,26 @@ class ZipArchive implements IImporterConnector
         if($this->isInitialised) {
             return;
         }
-        
+
         if(false === file_exists($this->getConfig('extractedDir'))) {
             $res = mkdir($this->getConfig('extractedDir'), 0777, true);
 
             if(false === $res) {
-                throw new \Exception('Could not create tmp dir: ' . $destinationDir);
+                throw new \Exception('Could not create tmp dir: ' . $this->getConfig('extractedDir'));
             }
         }
 
-        File::extractZipArchive($this->getConfig('archive'), $this->getConfig('extractedDir'), true);
-
-        $file = $this->getConfig('archive');
+        $archiveFile = $this->getConfig('archive');
                 
         // if remote file, copy to tmp dir
-        if(0 === strpos($file, 'https://') || 0 === strpos($file, 'http://') || 0 === strpos($file, 'ftp://')) {
-            $tempFile = tempnam(sys_get_temp_dir(), basename($file));
-            copy($file, $tempFile);
+        if(0 === strpos($archiveFile, 'https://') || 0 === strpos($archiveFile, 'http://') || 0 === strpos($archiveFile, 'ftp://')) {
+            $tempFile = tempnam(sys_get_temp_dir(), basename($archiveFile));
+            copy($archiveFile, $tempFile);
             
-            $file = $tempFile;
+            $archiveFile = $tempFile;
         }
+        
+        File::extractZipArchive($archiveFile, $this->getConfig('extractedDir'), true);
         
         // delegate to FileSystem connector
         $this->fileSystemConnector = new FileSystem($this->_application, array(
