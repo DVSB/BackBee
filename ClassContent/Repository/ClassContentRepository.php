@@ -176,9 +176,10 @@ class ClassContentRepository extends EntityRepository
 
                     if ($limitToOnline) {
                         $q->andWhere('p._state IN (:states)')
-                                ->andWhere('p._publishing IS NULL OR p._publishing <= CURRENT_TIMESTAMP()')
-                                ->andWhere('p._archiving IS NULL OR p._archiving > CURRENT_TIMESTAMP()')
-                                ->setParameter('states', array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
+                                ->andWhere('p._publishing IS NULL OR p._publishing <= :now')
+                                ->andWhere('p._archiving IS NULL OR p._archiving > :now')
+                                ->setParameter('states', array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN))
+                                ->setParameter('now', date('Y-m-d H:i:00', time()));
                     } else {
                         $q->andWhere('p._state < :statedeleted')
                                 ->setParameter('statedeleted', Page::STATE_DELETED);
