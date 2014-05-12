@@ -246,6 +246,10 @@ class Logger implements LoggerInterface, SQLLogger
             $response->send();
             die();
         } else {
+            if (false === $this->_application->isClientSAPI()) {
+                header("HTTP/1.0 500 Internal Server Error");
+            }
+            
             echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')' . PHP_EOL;
             if (NULL !== $this->_application && $this->_application->debugMode()) {
                 foreach ($exception->getTrace() as $trace) {
@@ -277,7 +281,7 @@ class Logger implements LoggerInterface, SQLLogger
 //            return call_user_func($this->_exceptionHandlers, $exception);
 //        }
 
-        die();
+        exit(-1);
     }
 
     private function getTemplateError($trace)
