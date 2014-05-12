@@ -94,6 +94,10 @@ class IndexationListener implements EventSubscriberInterface
      */
     private static function _updateIdxContentContents(array $contents_saved, array $contents_removed)
     {
+        if (null === self::$_application->getSite()) {
+            return;
+        }
+
         self::$_em->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
                 ->replaceIdxContentContents(array_diff($contents_saved, self::$_content_content_done))
                 ->removeIdxContentContents($contents_removed);
