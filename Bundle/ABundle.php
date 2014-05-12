@@ -332,10 +332,18 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      */
     private function _getRegistryConfig()
     {
-        $registry = $this->getApplication()
-                ->getEntityManager()
-                ->getRepository('BackBuilder\Bundle\Registry')
-                ->findOneBy(array('key' => $this->getId(), 'scope' => 'BUNDLE.CONFIG'));
+        $registry = null;
+
+        try {
+            $registry = $this->getApplication()
+                    ->getEntityManager()
+                    ->getRepository('BackBuilder\Bundle\Registry')
+                    ->findOneBy(array('key' => $this->getId(), 'scope' => 'BUNDLE.CONFIG'));
+        } catch (\Doctrine\DBAL\Exception\TableNotFoundException $e) {
+            if (true === $this->getApplication()->isStarted()) {
+                $this->warning('Enable to load registry table');
+            }
+        }
 
         if (null === $registry) {
             $registry = new Registry();
