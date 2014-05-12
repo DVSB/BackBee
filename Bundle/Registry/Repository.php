@@ -37,6 +37,35 @@ class Repository extends EntityRepository
     private $last_inserted_id;
 
     /**
+     * Saves the registry entry in DB, persist it if need
+     * @param \BackBuilder\Bundle\Registry $registry
+     * @return \BackBuilder\Bundle\Registry
+     */
+    public function save(\BackBuilder\Bundle\Registry $registry)
+    {
+        if (false === $this->getEntityManager()->contains($registry)) {
+            $this->getEntityManager()->persist($registry);
+        }
+        
+        $this->getEntityManager()->flush($registry);
+        
+        return $registry;
+    }
+    
+    /**
+     * Removes the registry entry from DB
+     * @param \BackBuilder\Bundle\Registry $registry
+     * @return \BackBuilder\Bundle\Registry
+     */
+    public function remove(\BackBuilder\Bundle\Registry $registry)
+    {
+        $this->getEntityManager()->remove($registry);
+        $this->getEntityManager()->flush($registry);
+        
+        return $registry;
+    }
+    
+    /**
      * Find the entity by hes id
      *
      * @param $classname
