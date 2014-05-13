@@ -69,7 +69,7 @@
             +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
             +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
             +"<p>Date de création: <strong>${created}</strong></p>"
-            +'<p><button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button><button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button></p>'
+            +'<p><button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button><button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button><button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button></p>'
             +'</li>';
             this._templates.contentItemTemplate = bb.jquery.template(itemTemplate);
             
@@ -475,6 +475,13 @@
                     this.selectModeView("grid");
                     this._populateView(this.data);
                 }
+                
+                if(bb.jquery(e.currentTarget).hasClass("bb5-ico-preview")){
+                  var data = $(item).data();
+                  if($.isPlainObject(data)){
+                      this._showContentPreview(data.content); 
+                  }
+                }
             },
             
             contentClickHandler : function(e){
@@ -536,7 +543,18 @@
         setContext: function(context) {
             return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
-       
+        
+        _showContentPreview: function(content){
+            
+            var ws = bb.webserviceManager.getInstance('ws_local_contentBlock');
+            ws.request("showPreview", {
+               params: {
+                   contentUid : content.uid,
+                   contentType: content.type
+               }
+            });
+        },
+        
         _destroyTree: function() {
             var context = this.getContext();
             if (context.treeview) {

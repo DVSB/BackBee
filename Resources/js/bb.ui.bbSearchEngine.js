@@ -51,7 +51,6 @@
          
         _bindEvents: function(){
             var self = this;
-            bb.jquery(this.element).enableSelection();
             bb.jquery(this.element).find("input,select").bind("click", function(e){
                 $(this).focus();
                 return true;
