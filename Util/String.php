@@ -221,4 +221,16 @@ class String
         return $text;
     }
 
+    /**
+     * 
+     * @param int $bytes
+     * @return string
+     */
+    public static function formatBytes($bytes, $roundPrecision = 2)
+    {
+        $unit = array('b','kb','mb','gb','tb','pb');
+
+        return @round($bytes / pow(1024, ($i = floor(log($bytes, 1024)))), $roundPrecision) . ' ' . $unit[$i];
+    }
+    
 }
