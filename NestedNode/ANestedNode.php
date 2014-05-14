@@ -51,6 +51,8 @@ abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
      * Unique identifier of the node
      * @var string
      * @Id @Column(type="string", name="uid")
+     * 
+     * @Serializer\Type("string")
      */
     protected $_uid;
 
