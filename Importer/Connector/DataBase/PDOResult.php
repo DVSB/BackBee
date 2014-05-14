@@ -19,23 +19,54 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Importer;
+namespace BackBuilder\Importer\Connector\DataBase;
 
-use BackBuilder\BBApplication;
+use PDOStatement;
 
 /**
+ * PDOStatement wrapper
+ * 
+ * Implements Countable interface
+ * 
  * @category    BackBuilder
  * @package     BackBuilder\Importer
+ * @subpackage  Connector
  * @copyright   Lp digital system
- * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
+ * @author      k.golovin
  */
-interface IImporterConnector
+class PDOResult implements \Countable, \IteratorAggregate
 {
-
-    public function __construct(BBApplication $application, array $values);
-
     /**
-     * @return Traversable, Countable|array
+     *
+     * @var PDOStatement
      */
-    public function find($string);
+    protected $statement;
+    
+    /**
+     * 
+     * @param PDOStatement $statement
+     */
+    public function __construct(PDOStatement $statement) 
+    {
+        $this->statement = $statement;
+    }
+    
+    /**
+     * 
+     * @return PDOStatement
+     */
+    public function getIterator() {
+        return $this->statement;
+    }
+    
+    /**
+     * Get result count
+     * 
+     * @return int
+     */
+    public function count()
+    {
+        return $this->statement->rowCount();
+    }
+
 }

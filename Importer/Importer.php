@@ -22,7 +22,8 @@ namespace BackBuilder\Importer;
 
 use BackBuilder\BBApplication,
     BackBuilder\Config\Config,
-    BackBuilder\Util\Buffer;
+    BackBuilder\Util\Buffer,
+    BackBuilder\Importer\Exception\ImporterException;
 
 use Doctrine\DBAL\Driver\PDOStatement;
 
@@ -69,8 +70,13 @@ class Importer
         $starttime = microtime(true);
 
         $this->setConverter($this->initConvertion($config));
-        $statement = $this->getConverter()->getRows($this);
-        $items_count = $statement->rowCount();
+        $rows = $this->getConverter()->getRows($this);
+        
+        if(!is_array($rows) && !($rows instanceof \Countable)) {
+            throw new ImporterException('Result set must be an array or Countable');
+        }
+        
+        $items_count = count($rows);
         $limit = true === isset($config['limit']) ? $config['limit'] : null;
         if (0 === $items_count) {
             Buffer::dump(
@@ -85,8 +91,8 @@ class Importer
             . ' ' . $class . ' was started.' . "\n\n"
         );
 
-        $this->_doImport($statement, $flush_every, $check_existing, $limit);
-        unset($statement);
+        $this->_doImport($rows, $flush_every, $check_existing, $limit);
+        unset($rows);
 
         $this->getConverter()->onImportationFinish();
         unset($this->_converter);
@@ -98,14 +104,26 @@ class Importer
         );
     }
 
-    private function _doImport(PDOStatement $statement, $flush_every, $check_existing, $limit = null)
+    /**
+     * 
+     * @param array|\Traversable $rows
+     * @param int $flush_every
+     * @param bool $check_existing
+     * @param int|null $limit
+     * @throws ImporterException
+     */
+    private function _doImport($rows, $flush_every, $check_existing, $limit = null)
     {
+        if(!is_array($rows) && !($rows instanceof \Traversable)) {
+            throw new ImporterException('Result set must be an array or Traversable');
+        }
+        
         $i = 0;
         $count_null = 0;
         $total_ignored = 0;
         $entities = array();
 
-        while ($row = $statement->fetch()) {
+        foreach ($rows as $row) {
             $entity = $this->getConverter()->convert($row);
 
             if (null !== $entity) {
@@ -161,7 +179,7 @@ class Importer
         }
 
         unset($entities);
-        unset($statement);
+        unset($rows);
     }
 
     /**
