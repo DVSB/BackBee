@@ -45,6 +45,7 @@ class Importer
     private $_ids;
     private $_object_identifier;
     private $_importedItemsCount = 0;
+    private $_failedItemsCount = 0;
 
     /**
      * Class constructor
@@ -102,6 +103,10 @@ class Importer
             "\n" . $this->_importedItemsCount . ' ' . $class . ' imported in ' 
             . (microtime(true) - $starttime) . ' s =====' . "\n\n"
         );
+        
+        Buffer::dump(
+            "\n" . $this->_failedItemsCount . ' ' . $class . ' failed items =====' . "\n\n"
+        , 'bold_red');
     }
 
     /**
@@ -124,8 +129,16 @@ class Importer
         $entities = array();
 
         foreach ($rows as $row) {
-            $entity = $this->getConverter()->convert($row);
-
+            try {
+                $entity = $this->getConverter()->convert($row);
+            } catch(\Exception $e) {
+                unset($row);
+                Buffer::dump(
+                    "===== Exception while processing row: " . $e->getMessage() . "\n"
+                , 'bold_red');
+                $this->_failedItemsCount++;
+                continue;
+            }
             if (null !== $entity) {
                 $entities[] = $entity;
 
