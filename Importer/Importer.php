@@ -317,4 +317,13 @@ class Importer
     {
         return $this->_converter = $converter;
     }
+    
+    /**
+     * 
+     * @return \BackBuilder\Importer\IImporterConnector
+     */
+    public function getConnector()
+    {
+        return $this->_connector;
+    }
 }
