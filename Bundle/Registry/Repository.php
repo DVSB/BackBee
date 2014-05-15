@@ -72,15 +72,28 @@ class Repository extends EntityRepository
      **/
     public function findEntityById($identifier, $id)
     {
-        
         $sql = 'SELECT * FROM registry AS r WHERE (r.type = "' . addslashes($identifier) . '" OR r.scope = "' . addslashes($identifier) . '") AND ((r.key = "identifier" AND r.value = "' . addslashes($id) . '") OR (r.scope = "' . addslashes($id) . '"))';
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
 
         return $this->buildEntity($identifier, $query->getResult());
     }
 
-    public function count($descriminator)
+    /**
+     * Find the entity by hes id
+     *
+     * @param $classname
+     **/
+    public function findEntity($id)
     {
+        return $this->findEntityById($this->getEntityName(), $id);
+    }
+
+    public function count($descriminator = null)
+    {
+        if (is_null($identifier)) {
+            $identifier = $this->getEntityName();
+        }
+
         $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "' . $descriminator . '"';
 
         if (class_exists($descriminator) && (new Builder())->isRegistryEntity(new $descriminator())) {
@@ -92,8 +105,11 @@ class Repository extends EntityRepository
         return $count;
     }
 
-    public function findAllEntities($identifier)
+    public function findAllEntities($identifier = null)
     {
+        if (is_null($identifier)) {
+            $identifier = $this->getEntityName();
+        }
         $sql = 'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = "' . addslashes($identifier) . '" OR r.scope = "' . addslashes($identifier) . '") ORDER BY r.id';
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
 
