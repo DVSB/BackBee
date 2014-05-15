@@ -114,5 +114,13 @@ class DataBase implements IImporterConnector
 
         return $em;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function tearDown() 
+    {
+        
+    }
 
 }

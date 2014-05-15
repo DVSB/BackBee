@@ -35,7 +35,12 @@ interface IImporterConnector
     public function __construct(BBApplication $application, array $values);
 
     /**
-     * @return Traversable, Countable|array
+     * @return array|Traversable|Countable
      */
     public function find($string);
+    
+    /**
+     * Called when connector is stopped
+     */
+    public function tearDown();
 }
