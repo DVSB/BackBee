@@ -86,3 +86,7 @@ kernel.exception:
 kernel.controller:
     listeners:
     - [@rest.listener.validation, onKernelController]
+
+kernel.response:
+    listeners:
+    - [@profiler_toolbar_listener, onKernelResponse]

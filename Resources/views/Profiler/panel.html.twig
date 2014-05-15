@@ -1,0 +1,38 @@
+<div id="bb-profiler-panel">
+
+    {% for name, template in profiler.collectors %}
+        <div class="bb-profiler-block">
+        {{ template.renderblock('toolbar', {
+            'collector': profiler.getCollector(name),
+            'profiler_url': profiler_url,
+            'name': name
+          })
+        }}
+        </div>
+    {% endfor %}
+    
+    <div id="bb-profiler-close"></div>
+</div>
+
+<style>
+    #bb-profiler-panel{
+        height: 30px;
+        border-top: 1px;
+        background-color: #F7F7F7;
+        font: 11px Verdana,Arial,sans-serif;
+        border-top: 1px solid #ccc;
+        bottom: 0;
+        left: 0;
+        margin: 0;
+        position: fixed;
+        right: 0;
+        text-align: left;
+        z-index: 100000;
+    }
+</style>
+
+<script>
+    $('#bb-profiler-close').click(function(){
+        $('#bb-profiler-panel').hide();
+    });
+</script>

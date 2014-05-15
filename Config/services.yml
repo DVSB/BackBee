@@ -154,6 +154,11 @@ services:
             
     annotation_reader.full:
         class: Doctrine\Common\Annotations\AnnotationReader
+        
+    profiler_toolbar_listener:
+        class:      BackBuilder\Profiler\EventListener\ToolbarListener
+        arguments:  [true]
+        
 
         
 #    rest.listener.authentication:
