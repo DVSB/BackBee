@@ -1,0 +1,203 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {# Logo #}
+    {% set icon %}
+        <img width="30" height="30" alt="Environment" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" />
+        
+        <span>
+            {% if collector.applicationname %}
+                {{ collector.applicationname }} {{ collector.applicationversion }}
+            {% else %}
+                {{ collector.backbuilderversion }}
+            {% endif %}
+        </span>
+    {% endset %}
+    {% set text %}
+        {% if collector.applicationname %}
+            <div class="bb-toolbar-item">
+                {{ collector.applicationname }} <b>{{ collector.applicationversion }}</b>
+            </div>
+        {% endif %}
+        <div class="bb-toolbar-item">
+            Symfony <b>{{ collector.symfonyversion }}</b>
+        </div>
+        <div class="bb-toolbar-item">
+            <a href="http://symfony.com/doc/{{ collector.backbuilderversion }}/index.html" rel="help">Symfony Documentation</a>
+        </div>
+    {% endset %}
+    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': false } %}
+
+    {# PHP Information #}
+    {% set icon %}
+        <a href="{{ path('_profiler_phpinfo') }}">
+            <img width="30" height="30" alt="PHP" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" />
+        </a>
+    {% endset %}
+    {% set text %}
+        {% spaceless %}
+            <div class="bb-toolbar-item bb-toolbar-info-php">
+                <b>PHP</b>
+                <span>{{ collector.phpversion }}</span>
+            </div>
+            <div class="bb-toolbar-item bb-toolbar-info-php-ext">
+                <b>PHP Extensions</b>
+                <span class="bb-toolbar-status bb-toolbar-status-{{ collector.hasxdebug ? 'green' : 'red' }}">xdebug</span>
+                <span class="bb-toolbar-status bb-toolbar-status-{{ collector.hasaccelerator ? 'green' : 'red' }}">accel</span>
+            </div>
+            <div class="bb-toolbar-item">
+                <b>PHP SAPI</b>
+                <span>{{ collector.sapiName }}</span>
+            </div>
+        {% endspaceless %}
+    {% endset %}
+    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': false } %}
+
+    {# Environment #}
+    {% set debug_status_class %}bb-toolbar-status bb-toolbar-status-{{ collector.debug ? 'green' : 'red' }}{% endset %}
+    {% set icon %}
+        <img width="30" height="30" alt="Environment" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" />
+        <span class="bb-toolbar-item-additional-detail {{ debug_status_class }}"> </span>
+        <span class="bb-toolbar-item-additional bb-toolbar-status">{{ token }}</span>
+        {% if 'n/a' != collector.appname or 'n/a' != collector.env %}
+            <span class="bb-toolbar-item-additional-detail">
+                <span class="bb-toolbar-info-with-delimiter">{{ collector.appname }}</span>
+                <span>{{ collector.env }}</span>
+            </span>
+        {% endif %}
+    {% endset %}
+    {% set text %}
+        {% spaceless %}
+            {% if 'n/a' != collector.appname %}
+                <div class="bb-toolbar-item">
+                    <b>Name</b>
+                    <span>{{ collector.appname }}</span>
+                </div>
+            {% endif %}
+            {% if 'n/a' != collector.env %}
+                <div class="bb-toolbar-item">
+                    <b>Environment</b>
+                    <span>{{ collector.env }}</span>
+                </div>
+            {% endif %}
+            {% if 'n/a' != collector.debug %}
+                <div class="bb-toolbar-item">
+                    <b>Debug</b>
+                    <span class="{{ debug_status_class }}">{{ collector.debug ? 'en' : 'dis' }}abled</span>
+                </div>
+            {% endif %}
+            <div class="bb-toolbar-item">
+                <b>Token</b>
+                <span>
+                    {% if profiler_url %}
+                        <a href="{{ profiler_url }}">{{ collector.token }}</a>
+                    {% else %}
+                        {{ collector.token }}
+                    {% endif %}
+                </span>
+            </div>
+        {% endspaceless %}
+    {% endset %}
+    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
+{% endblock %}
+
+{% block menu %}
+<span class="label">
+    <span class="icon"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" alt="Configuration"></span>
+    <strong>Config</strong>
+</span>
+{% endblock %}
+
+{% block panel %}
+    <h2>Project Configuration</h2>
+    <table>
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            {% if collector.applicationname %}
+                <th>Application</th>
+                <td>{{ collector.applicationname }} {{ collector.applicationversion }} (on Symfony {{ collector.symfonyversion }})</td>
+            {% else %}
+                <th>Symfony version</th>
+                <td>{{ collector.symfonyversion }}</td>
+            {% endif %}
+        </tr>
+        {% if 'n/a' != collector.appname %}
+            <tr>
+                <th>Application name</th>
+                <td>{{ collector.appname }}</td>
+            </tr>
+        {% endif %}
+        {% if 'n/a' != collector.env %}
+            <tr>
+                <th>Environment</th>
+                <td>{{ collector.env }}</td>
+            </tr>
+        {% endif %}
+        {% if 'n/a' != collector.debug %}
+            <tr>
+                <th>Debug</th>
+                <td>{{ collector.debug ? 'enabled' : 'disabled' }}</td>
+            </tr>
+        {% endif %}
+    </table>
+
+    <h2>PHP configuration</h2>
+    <table>
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <th>PHP version</th>
+            <td>{{ collector.phpversion }}</td>
+        </tr>
+        <tr>
+            <th>Xdebug</th>
+            <td>{{ collector.hasxdebug ? 'enabled' : 'disabled' }}</td>
+        </tr>
+        <tr>
+            <th>PHP acceleration</th>
+            <td>{{ collector.hasaccelerator ? 'enabled' : 'disabled' }}</td>
+        </tr>
+        <tr>
+            <th>XCache</th>
+            <td>{{ collector.hasxcache ? 'enabled' : 'disabled' }}</td>
+        </tr>
+        <tr>
+            <th>APC</th>
+            <td>{{ collector.hasapc ? 'enabled' : 'disabled' }}</td>
+        </tr>
+        <tr>
+            <th>Zend OPcache</th>
+            <td>{{ collector.haszendopcache ? 'enabled' : 'disabled' }}</td>
+        </tr>
+        <tr>
+            <th>EAccelerator</th>
+            <td>{{ collector.haseaccelerator ? 'enabled' : 'disabled' }}</td>
+        </tr>
+        <tr>
+            <th>Full PHP configuration</th>
+            <td><a href="{{ path('_profiler_phpinfo') }}"><code>phpinfo</code></a></td>
+        </tr>
+    </table>
+
+    {% if collector.bundles %}
+        <h2>Active bundles</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Path</th>
+            </tr>
+            {% set bundles = collector.bundles %}
+            {% for name in bundles|keys|sort %}
+            <tr>
+                <th>{{ name }}</th>
+                <td>{{ bundles[name] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endblock %}

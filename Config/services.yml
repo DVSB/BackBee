@@ -43,7 +43,8 @@ parameters:
     
     bbapp.rest.test_controller.class: BackBuilder\Rest\Controller\TestController
     
-    bbapp.profiler.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
+    bbapp.toolbar.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
+    bbapp.profiler.listener.class: Symfony\Component\HttpKernel\EventListener\ProfilerListener
 
 services:
     cache.bootstrap:
@@ -157,10 +158,25 @@ services:
     annotation_reader.full:
         class: Doctrine\Common\Annotations\AnnotationReader
         
-    profiler.toolbar.listener:
+    profiler.listener:
         class:      %bbapp.profiler.listener.class%
-        arguments:  [true]
+        arguments:  [@profiler]
+        tags:
+            - { name: kernel.event_subscriber }
         
+    profiler.toolbar.listener:
+        class:      %bbapp.toolbar.listener.class%
+        arguments:  [true]
+    
+    
+    profiler.storage:
+        class:      Symfony\Component\HttpKernel\Profiler\FileProfilerStorage
+        arguments:  ["file://%bbapp.cache.dir%/_profiler/"]
+        
+    
+    profiler:
+        class:      Symfony\Component\HttpKernel\Profiler\Profiler
+        arguments:  [@profiler.storage, @logging]
 
         
 #    rest.listener.authentication:

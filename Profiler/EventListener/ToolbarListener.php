@@ -21,7 +21,8 @@
 
 namespace BackBuilder\Profiler\EventListener;
 
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent,
     Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -79,7 +80,9 @@ class ToolbarListener
             return;
         }
 
-        $profiler = $event->getKernel()->getApplication()->getContainer()->get('bb_profiler');
+        $profiler = $event->getKernel()->getApplication()->getContainer()->get('profiler');
+        
+        $profile = $profiler->collect($request, $response, null);
         
         $this->injectToolbar($response, $profiler);
     }
@@ -92,12 +95,13 @@ class ToolbarListener
      */
     protected function injectToolbar(Response $response, $profiler)
     {
+        var_dump($profiler);exit;
         $content = $response->getContent();
         $pos = strripos($content, '</body>');
 
         if (false !== $pos) {
             $toolbar = "\n".str_replace("\n", '', $this->twig->render(
-                '@WebProfiler/Profiler/panel.html.twig',
+                'BackBuilder/Resources/Profiler/panel.html.twig',
                 array(
                     'profiler' => $profiler
                 )
