@@ -78,7 +78,10 @@ frontcontroller.request:
   listeners:
     - [@rest.listener.body, onRequest]
 
-
+kernel.request:
+    listeners:
+       - [@profiler.listener, onKernelRequest]
+    
 kernel.exception:
     listeners:
     - [@rest.listener.exception, onKernelException]
@@ -90,3 +93,5 @@ kernel.controller:
 kernel.response:
     listeners:
     - [@profiler.toolbar.listener, onKernelResponse]
+    - [@profiler.listener, onKernelResponse]
+
