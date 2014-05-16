@@ -89,4 +89,4 @@ kernel.controller:
 
 kernel.response:
     listeners:
-    - [@profiler_toolbar_listener, onKernelResponse]
+    - [@profiler.toolbar.listener, onKernelResponse]

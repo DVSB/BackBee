@@ -23,7 +23,8 @@ namespace BackBuilder\Profiler\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
 
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent,
+    Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Profiler Toolbar listener
@@ -40,7 +41,6 @@ class ToolbarListener
     
     public function __construct($enabled = false) 
     {
-        echo 33;exit;
         $this->enabled = $enabled;
     }
     
@@ -56,7 +56,6 @@ class ToolbarListener
     
     public function onKernelResponse(FilterResponseEvent $event)
     {
-        echo 2;exit;
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
             return;
         }
@@ -80,7 +79,7 @@ class ToolbarListener
             return;
         }
 
-        $profiler = $event->getKernel()->getContainer()->get('bb_profiler');
+        $profiler = $event->getKernel()->getApplication()->getContainer()->get('bb_profiler');
         
         $this->injectToolbar($response, $profiler);
     }

@@ -42,6 +42,8 @@ parameters:
     bbapp.rest_api.path: /rest/
     
     bbapp.rest.test_controller.class: BackBuilder\Rest\Controller\TestController
+    
+    bbapp.profiler.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
 
 services:
     cache.bootstrap:
@@ -155,8 +157,8 @@ services:
     annotation_reader.full:
         class: Doctrine\Common\Annotations\AnnotationReader
         
-    profiler_toolbar_listener:
-        class:      BackBuilder\Profiler\EventListener\ToolbarListener
+    profiler.toolbar.listener:
+        class:      %bbapp.profiler.listener.class%
         arguments:  [true]
         
 

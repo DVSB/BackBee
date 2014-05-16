@@ -44,7 +44,8 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\Validator\Validation;
+    Symfony\Component\Validator\Validation,
+    Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
  * The main BackBuilder5 application
@@ -570,6 +571,12 @@ class BBApplication implements IApplication
         if (false === $this->isClientSAPI()) {
             $response = $this->getController()->handle();
             if ($response instanceof Response) {
+                if (null !== $this->_application && null !== $this->_application->getEventDispatcher()) {
+                    $event = new FilterResponseEvent($this, $this->getRequest(), $type, $response);
+                    $this->_application->getEventDispatcher()->dispatch('frontcontroller.response', $event);
+                    $this->_application->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);
+                }
+
                 $response->send();
                 die();
             }
