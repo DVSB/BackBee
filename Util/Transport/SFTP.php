@@ -212,6 +212,8 @@ class SFTP extends ATransport
         }
 
         $remote_file = $this->_getAbsoluteRemotePath($remote_file);
+        @ssh2_sftp_mkdir($this->_sftp_resource, dirname($remote_file), 0777, true);
+        
         if (true === $overwrite || false === @ssh2_sftp_stat($this->_sftp_resource, $remote_file)) {
             if (false === @ssh2_scp_send($this->_ssh_resource, $local_file, $remote_file)) {
                 return $this->_trigger_error(sprintf('Could not send data from file %s to file %s.', $local_file, $remote_file));
