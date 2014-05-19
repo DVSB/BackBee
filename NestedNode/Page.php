@@ -51,7 +51,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
- * @Table(name="page",indexes={@index(name="IDX_STATE", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "state", "publishing", "archiving"}), @index(name="IDX_URL", columns={"site_uid", "url"})})
+ * @Table(name="page",indexes={@index(name="IDX_STATE", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "state", "publishing", "archiving", "modified"}), @index(name="IDX_URL", columns={"site_uid", "url"})})
  * @HasLifecycleCallbacks
  * @fixtures(qty=1)
  */

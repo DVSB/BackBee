@@ -198,7 +198,7 @@ class ClassContentRepository extends EntityRepository
             if (false === empty($parentnode)) {
                 $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $parentnode));
                 if (null !== $nodes) {
-                    $query = 'SELECT c.uid FROM page p LEFT JOIN content c ON c.node_uid=p.uid';
+                    $query = 'SELECT c.uid FROM page p USE INDEX(IDX_SELECT_PAGE) LEFT JOIN content c ON c.node_uid=p.uid';
                     $pageSelection = array();
                     foreach ($nodes as $node) {
                         if (true === $recursive) {
