@@ -45,7 +45,8 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
+    Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ProfilerPass;
 
 /**
  * The main BackBuilder5 application
@@ -210,7 +211,7 @@ class BBApplication implements IApplication
             $this->_container->setDefinition('bb_session', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
 
             return $this;
-        }
+        } 
 
         $dirToLookingFor = array();
         $dirToLookingFor[] = $this->getBBDir() . '/' . 'Config';
@@ -242,6 +243,8 @@ class BBApplication implements IApplication
         $this->_initBBAppParamsIntoContainer();
 
         $this->_initExternalBundleServices();
+        
+        $this->_container->addCompilerPass(new ProfilerPass());
 
         if (false === $this->isDebugMode() &&
                 true === is_writable($default_cachedir)) {
