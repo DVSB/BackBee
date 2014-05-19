@@ -240,8 +240,14 @@ class ClassContentRepository extends EntityRepository
             }
         }
 
-        $query .= ' ' . implode(' ', $join) . ' WHERE ' . implode(' AND ', $where);
-
+        if (0 < count($join)) {
+            $query .= ' '.implode(' ', $join);
+        }
+        
+        if (0 < count($where)) {
+            $query .= ' WHERE '. implode(' AND ', $where);
+        }
+        
         $uids = $this->getEntityManager()
                 ->getConnection()
                 ->executeQuery($query . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
