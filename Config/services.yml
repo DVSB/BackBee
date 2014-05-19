@@ -166,7 +166,7 @@ services:
         
     profiler.toolbar.listener:
         class:      %bbapp.toolbar.listener.class%
-        arguments:  [true]
+        arguments:  [%debug%]
     
     
     profiler.storage:

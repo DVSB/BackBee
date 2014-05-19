@@ -236,6 +236,7 @@ class BBApplication implements IApplication
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
         $this->_container->set('service_container', $this->_container);
+        $this->_container->setParameter('debug', $this->_debug);
 
 
         $this->_initBBAppParamsIntoContainer();
