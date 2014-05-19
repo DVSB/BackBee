@@ -22,7 +22,9 @@
 namespace BackBuilder\Profiler\EventListener;
 
 use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response;
+    Symfony\Component\HttpFoundation\Response,
+    Symfony\Component\HttpKernel\Profiler\Profiler,
+    Symfony\Component\HttpKernel\Profiler\Profile;
 
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent,
     Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -38,7 +40,6 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent,
 class ToolbarListener
 {
     private $enabled = false;
-    
     
     public function __construct($enabled = false) 
     {
@@ -80,20 +81,44 @@ class ToolbarListener
             return;
         }
 
+        
         $profiler = $event->getKernel()->getApplication()->getContainer()->get('profiler');
+        
+        //var_dump($profiler);
+        
+        //exit;
+//        if (!$profile = $profiler->loadProfile($token)) {
+//            return;
+//        }
+//        var_dump($profile);exit;
+        //echo 11;exit;
         $profile = $profiler->collect($request, $response, null);
         $renderer = $event->getKernel()->getApplication()->getRenderer();
         
-        $this->injectToolbar($response, $profile, $renderer);
+//        var_dump($profile->getCollectors());exit;
+        //
+        
+        $templates = $event->getKernel()->getApplication()->getContainer()->getParameter('data_collector.templates');
+
+        $this->injectToolbar($response, $profile, $templates, $renderer);
     }
     
     
+    
+    protected function getTemplates(Profile $profile)
+    {
+        
+    }
+
+
+
+
     /**
      * Injects the web debug toolbar into the given Response.
      *
      * @param Response $response A Response instance
      */
-    protected function injectToolbar(Response $response, $profile, $renderer)
+    protected function injectToolbar(Response $response, $profile, $templates, $renderer)
     {
         $content = $response->getContent();
         $pos = strripos($content, '</body>');
@@ -103,7 +128,8 @@ class ToolbarListener
             $toolbar = "\n".str_replace("\n", '', $renderer->partial(
                 __DIR__ . '../../../../' .  'BackBuilder/Resources/views/Profiler/panel.html.twig',
                 array(
-                    'profile' => $profile
+                    'profile'   => $profile,
+                    'templates' => $templates,
                 )
             ))."\n";
             

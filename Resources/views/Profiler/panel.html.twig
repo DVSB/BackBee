@@ -2,6 +2,7 @@
 
     {% for name, template in profiler.collectors %}
         <div class="bb-profiler-block">
+            {{ name }}
         {{ template.renderblock('toolbar', {
             'collector': profiler.getCollector(name),
             'profiler_url': profiler_url,
@@ -32,12 +33,22 @@
     
     #bb-profiler-close {
         display: block;
-        width: 12px;
-        height: 12px;
+        width: 15px;
+        height: 16px;
         position: absolute;
-        top: 5px;
-        right: 0;
+        top: 7px;
+        right: 5px;
         cursor: pointer;
+        color: #000;
+        text-align: center;
+        line-height: 12px;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+    }
+    #bb-profiler-close:hover {
+        color: #fff;
+        background-color: red;
     }
 </style>
 

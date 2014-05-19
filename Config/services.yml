@@ -48,7 +48,7 @@ parameters:
     
     
     # data collectors
-    bbapp.collector.config.class: Symfony\Component\HttpKernel\DataCollector\ConfigDataCollector
+    bbapp.collector.config.class: BackBuilder\Profiler\DataCollector\ConfigDataCollector
     bbapp.collector.request.class: Symfony\Component\HttpKernel\DataCollector\RequestDataCollector
     bbapp.collector.exception.class: Symfony\Component\HttpKernel\DataCollector\ExceptionDataCollector
     bbapp.collector.events.class: Symfony\Component\HttpKernel\DataCollector\EventDataCollector
@@ -56,6 +56,9 @@ parameters:
     bbapp.collector.time.class: Symfony\Component\HttpKernel\DataCollector\TimeDataCollector
     bbapp.collector.memory.class: Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector
     bbapp.collector.router.class: Symfony\Component\HttpKernel\DataCollector\RouterDataCollector
+    
+    
+    data_collector.templates: []
 
 services:
     cache.bootstrap:
@@ -188,6 +191,8 @@ services:
     profiler:
         class:      Symfony\Component\HttpKernel\Profiler\Profiler
         arguments:  [@profiler.storage, @logging]
+        calls:
+            - [set, [["@data_collector.config"]]]
 
     # data collectors
     data_collector.config:

@@ -45,8 +45,7 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
-    Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ProfilerPass;
+    Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
  * The main BackBuilder5 application
@@ -243,8 +242,6 @@ class BBApplication implements IApplication
         $this->_initBBAppParamsIntoContainer();
 
         $this->_initExternalBundleServices();
-        
-        $this->_container->addCompilerPass(new ProfilerPass());
 
         if (false === $this->isDebugMode() &&
                 true === is_writable($default_cachedir)) {
