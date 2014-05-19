@@ -81,10 +81,10 @@ class ToolbarListener
         }
 
         $profiler = $event->getKernel()->getApplication()->getContainer()->get('profiler');
-        
         $profile = $profiler->collect($request, $response, null);
+        $renderer = $event->getKernel()->getApplication()->getRenderer();
         
-        $this->injectToolbar($response, $profiler);
+        $this->injectToolbar($response, $profile, $renderer);
     }
     
     
@@ -93,17 +93,17 @@ class ToolbarListener
      *
      * @param Response $response A Response instance
      */
-    protected function injectToolbar(Response $response, $profiler)
+    protected function injectToolbar(Response $response, $profile, $renderer)
     {
-        var_dump($profiler);exit;
         $content = $response->getContent();
         $pos = strripos($content, '</body>');
 
+
         if (false !== $pos) {
-            $toolbar = "\n".str_replace("\n", '', $this->twig->render(
-                'BackBuilder/Resources/Profiler/panel.html.twig',
+            $toolbar = "\n".str_replace("\n", '', $renderer->partial(
+                __DIR__ . '../../../../' .  'BackBuilder/Resources/views/Profiler/panel.html.twig',
                 array(
-                    'profiler' => $profiler
+                    'profile' => $profile
                 )
             ))."\n";
             
