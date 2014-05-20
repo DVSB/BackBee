@@ -24,7 +24,9 @@ namespace BackBuilder\Profiler\EventListener;
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpKernel\Profiler\Profiler,
-    Symfony\Component\HttpKernel\Profiler\Profile;
+    Symfony\Component\HttpKernel\Profiler\Profile,
+    Symfony\Component\DependencyInjection\ContainerAwareInterface,
+    Symfony\Component\DependencyInjection\ContainerInterface;
 
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent,
     Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -37,13 +39,20 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent,
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class ToolbarListener
+class ToolbarListener implements ContainerAwareInterface
 {
     private $enabled = false;
+    
+    private $container;
     
     public function __construct($enabled = false) 
     {
         $this->enabled = $enabled;
+    }
+    
+    public function setContainer(ContainerInterface $container = null) 
+    {
+        $this->container = $container;
     }
     
     /**
@@ -95,19 +104,25 @@ class ToolbarListener
         $profile = $profiler->collect($request, $response, null);
         $renderer = $event->getKernel()->getApplication()->getRenderer();
         
-//        var_dump($profile->getCollectors());exit;
+        //var_dump($profile->getCollectors());exit;
         //
-        
-        $templates = $event->getKernel()->getApplication()->getContainer()->getParameter('data_collector.templates');
 
-        $this->injectToolbar($response, $profile, $templates, $renderer);
+        $this->injectToolbar($response, $profile, $renderer);
     }
     
     
     
-    protected function getTemplates(Profile $profile)
+    protected function loadTemplates()
     {
+        $templates = array();
         
+        $templateNames = $this->container->getParameter('data_collector.templates');
+        
+        foreach($templateNames as $name => $file) {
+            $templates[$name] = $this->container->get('renderer')->determineWhichAdapterToUse($file)->loadTemplate($file);
+        }
+        var_dump($templates);EXIT;
+        return $templates;
     }
 
 
@@ -118,7 +133,7 @@ class ToolbarListener
      *
      * @param Response $response A Response instance
      */
-    protected function injectToolbar(Response $response, $profile, $templates, $renderer)
+    protected function injectToolbar(Response $response, $profile, $renderer)
     {
         $content = $response->getContent();
         $pos = strripos($content, '</body>');
@@ -129,7 +144,7 @@ class ToolbarListener
                 __DIR__ . '../../../../' .  'BackBuilder/Resources/views/Profiler/panel.html.twig',
                 array(
                     'profile'   => $profile,
-                    'templates' => $templates,
+                    'templates' => $this->loadTemplates(),
                 )
             ))."\n";
             

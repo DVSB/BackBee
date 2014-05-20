@@ -58,7 +58,8 @@ parameters:
     bbapp.collector.router.class: Symfony\Component\HttpKernel\DataCollector\RouterDataCollector
     
     
-    data_collector.templates: []
+    data_collector.templates: 
+        config: "%bbapp.base.dir%/BackBuilder/Resources/views/Collector/config.html.twig"
 
 services:
     cache.bootstrap:
@@ -181,7 +182,8 @@ services:
     profiler.toolbar.listener:
         class:      %bbapp.toolbar.listener.class%
         arguments:  [%debug%]
-    
+        calls:
+            - [setContainer, [@service_container]]
     
     profiler.storage:
         class:      Symfony\Component\HttpKernel\Profiler\FileProfilerStorage

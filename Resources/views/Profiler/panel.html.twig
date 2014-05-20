@@ -1,16 +1,18 @@
 <div id="bb-profiler-panel">
 
-    {% for name, template in profiler.collectors %}
+    {% for name, template in templates %}
         <div class="bb-profiler-block">
             {{ name }}
+            {{ dump(template) }}
         {{ template.renderblock('toolbar', {
-            'collector': profiler.getCollector(name),
+            'collector': profile.getCollector(name),
             'profiler_url': profiler_url,
             'name': name
           })
         }}
         </div>
     {% endfor %}
+    
     
     <div id="bb-profiler-close">x</div>
 </div>
