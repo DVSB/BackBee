@@ -1,5 +1,3 @@
-{% extends '@WebProfiler/Profiler/layout.html.twig' %}
-
 {% from _self import display_timeline, dump_request_data %}
 
 {% if colors is not defined %}
@@ -27,7 +25,7 @@
             <span>{{ duration }}</span>
         </div>
     {% endset %}
-    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
+    {% include '/Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
 {% endblock %}
 
 {% block menu %}
@@ -69,28 +67,11 @@
 
     <h3>
         {{ profile.parent ? "Request" : "Main Request" }}
-        <small>
-            - {{ collector.events.__section__.duration }} ms
-            {% if profile.parent %}
-                - <a href="{{ path('_profiler', { 'token': profile.parent.token, 'panel': 'time' }) }}">parent</a>
-            {% endif %}
-        </small>
     </h3>
 
     {{ display_timeline('timeline_' ~ token, collector.events, colors) }}
 
-    {% if profile.children|length %}
-        {% for child in profile.children %}
-            {% set events = child.getcollector('time').events %}
-            <h3>
-                Sub-request "<a href="{{ path('_profiler', { 'token': child.token, 'panel': 'time' }) }}">{{ child.getcollector('request').requestattributes.get('_controller') }}</a>"
-                <small> - {{ events.__section__.duration }} ms</small>
-            </h3>
-
-            {{ display_timeline('timeline_' ~ child.token, events, colors) }}
-        {% endfor %}
-    {% endif %}
-
+    
     <script>{% autoescape 'js' %}//<![CDATA[
         /**
          * In-memory key-value cache manager

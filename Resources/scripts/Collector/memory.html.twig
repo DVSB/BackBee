@@ -1,5 +1,3 @@
-{% extends '@WebProfiler/Profiler/layout.html.twig' %}
-
 {% block toolbar %}
     {% set icon %}
         <span>
@@ -13,5 +11,5 @@
             <span>{{ '%.1f'|format(collector.memory / 1024 / 1024) }} / {{ collector.memoryLimit == -1 ? '&infin;' : '%.1f'|format(collector.memoryLimit / 1024 / 1024)|escape }} MB</span>
         </div>
     {% endset %}
-    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': false } %}
+    {% include '/Profiler/toolbar_item.html.twig' with { 'link': false } %}
 {% endblock %}

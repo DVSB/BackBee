@@ -1,4 +1,3 @@
-{% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% from _self import display_listener %}
 
@@ -67,7 +66,7 @@
 {% endblock %}
 
 {% macro display_listener(listener) %}
-    {% if listener.type == "Closure" %}
+    {#{% if listener.type == "Closure" %}
         Closure
     {% elseif listener.type == "Function" %}
         {% set link = listener.file|file_link(listener.line) %}
@@ -75,5 +74,5 @@
     {% elseif listener.type == "Method" %}
         {% set link = listener.file|file_link(listener.line) %}
         {{ listener.class|abbr_class }}::{% if link %}<a href="{{ link }}">{{ listener.method }}</a>{% else %}{{ listener.method }}{% endif %}
-    {% endif %}
+    {% endif %}#}
 {% endmacro %}

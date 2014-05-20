@@ -1,4 +1,3 @@
-{% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% block menu %}
 <span class="label">
@@ -21,7 +20,7 @@
         </p>
     {% else %}
         <div>
-            {{ render(path('_profiler_exception', { 'token': token })) }}
+            {#{{ render(path('_profiler_exception', { 'token': token })) }}#}
         </div>
     {% endif %}
 {% endblock %}

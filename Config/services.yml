@@ -60,6 +60,15 @@ parameters:
     
     data_collector.templates: 
         config: "%bbapp.base.dir%/Resources/scripts/Collector/config.html.twig"
+        request: "%bbapp.base.dir%/Resources/scripts/Collector/request.html.twig"
+        exception: "%bbapp.base.dir%/Resources/scripts/Collector/exception.html.twig"
+        events: "%bbapp.base.dir%/Resources/scripts/Collector/events.html.twig"
+        logger: "%bbapp.base.dir%/Resources/scripts/Collector/logger.html.twig"
+#        time: "%bbapp.base.dir%/Resources/scripts/Collector/time.html.twig"
+        memory: "%bbapp.base.dir%/Resources/scripts/Collector/memory.html.twig"
+        router: "%bbapp.base.dir%/Resources/scripts/Collector/router.html.twig"
+
+
 
 services:
     cache.bootstrap:
@@ -194,8 +203,8 @@ services:
         class:      Symfony\Component\HttpKernel\Profiler\Profiler
         arguments:  [@profiler.storage, @logging]
         calls:
-            - [set, [["@data_collector.config"]]]
-
+            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.router"]]] 
+ #"@data_collector.time", 
     # data collectors
     data_collector.config:
         class: %bbapp.collector.config.class%
@@ -204,46 +213,46 @@ services:
         tags:
             - { name: data_collector, template: "%bbapp.base.dir%/BackBuilder/Resources/views/Collector/config.html.twig", id: "config" }
             
-    #    data_collector.request:
-#        class: %bbapp.collector.request.class%
-#        tags:
-#            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/request.html.twig", id: "request" }
-#            - { name: kernel.event_subscriber }
-#            
-#    data_collector.exception:
-#        class: %bbapp.collector.exception.class%
-#        tags:
-#            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/exception.html.twig", id: "exception" }
-#    
-#    data_collector.events:
-#        class: %bbapp.collector.events.class%
-#        tags:
-#            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/events.html.twig", id: "events" }
-#
-#    data_collector.logger:
-#        class: %bbapp.collector.logger.class%
-#        arguments:  [@?logging]
-#        tags:
-#            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/logger.html.twig", id: "logger" }
-#            - { name: monolog.logger,  channel: profiler }
-#    
-#    data_collector.time:
-#        class: %bbapp.collector.time.class%
-#        arguments:  [@?controller]
-#        tags:
-#            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/time.html.twig", id: "time" }
-#            - { name: monolog.logger,  channel: profiler }
-#
-#    data_collector.memory:
-#        class: %bbapp.collector.memory.class%
-#        tags:
-#            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/memory.html.twig", id: "memory" }
-#            
-#    data_collector.router:
-#        class: %bbapp.collector.router.class%
-#        tags:
-#            - { name: kernel.event_listener, event: kernel.controller,  method: onKernelController }
-#            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/router.html.twig", id: "router" }
+    data_collector.request:
+        class: %bbapp.collector.request.class%
+        tags:
+            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/request.html.twig", id: "request" }
+            - { name: kernel.event_subscriber }
+            
+    data_collector.exception:
+        class: %bbapp.collector.exception.class%
+        tags:
+            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/exception.html.twig", id: "exception" }
+    
+    data_collector.events:
+        class: %bbapp.collector.events.class%
+        tags:
+            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/events.html.twig", id: "events" }
+
+    data_collector.logger:
+        class: %bbapp.collector.logger.class%
+        arguments:  [@?logging]
+        tags:
+            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/logger.html.twig", id: "logger" }
+            - { name: monolog.logger,  channel: profiler }
+    
+    data_collector.time:
+        class: %bbapp.collector.time.class%
+        arguments:  [@?controller]
+        tags:
+            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/time.html.twig", id: "time" }
+            - { name: monolog.logger,  channel: profiler }
+
+    data_collector.memory:
+        class: %bbapp.collector.memory.class%
+        tags:
+            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/memory.html.twig", id: "memory" }
+            
+    data_collector.router:
+        class: %bbapp.collector.router.class%
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller,  method: onKernelController }
+            - { name: data_collector, template: "BackBuilder/Resources/views/Collector/router.html.twig", id: "router" }
 
     # synthetic services
     site:
