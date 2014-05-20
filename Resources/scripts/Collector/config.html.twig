@@ -3,7 +3,6 @@
     {# Logo #}
     {% set icon %}
         <img width="30" height="30" alt="Environment" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" />
-        
         <span>
             {% if collector.applicationname %}
                 {{ collector.applicationname }} {{ collector.applicationversion }}
@@ -12,46 +11,16 @@
             {% endif %}
         </span>
     {% endset %}
-    {% set text %}
-        {% if collector.applicationname %}
-            <div class="bb-toolbar-item">
-                {{ collector.applicationname }} <b>{{ collector.applicationversion }}</b>
-            </div>
-        {% endif %}
-        <div class="bb-toolbar-item">
-            Symfony <b>{{ collector.symfonyversion }}</b>
-        </div>
-        <div class="bb-toolbar-item">
-            <a href="http://symfony.com/doc/{{ collector.backbuilderversion }}/index.html" rel="help">Symfony Documentation</a>
-        </div>
-    {% endset %}
-    {% include 'Profiler/toolbar_item.html.twig' with { 'link': false } %}
+    {% include '/Profiler/toolbar_item.html.twig' with { 'link': false } %}
 
+    
     {# PHP Information #}
     {% set icon %}
-        <a href="#bbDebugTabConfig">
-            <img width="30" height="30" alt="PHP" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" />
-        </a>
+        <img width="30" height="30" alt="PHP" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" />
     {% endset %}
-    {% set text %}
-        {% spaceless %}
-            <div class="bb-toolbar-item bb-toolbar-info-php">
-                <b>PHP</b>
-                <span>{{ collector.phpversion }}</span>
-            </div>
-            <div class="bb-toolbar-item bb-toolbar-info-php-ext">
-                <b>PHP Extensions</b>
-                <span class="bb-toolbar-status bb-toolbar-status-{{ collector.hasxdebug ? 'green' : 'red' }}">xdebug</span>
-                <span class="bb-toolbar-status bb-toolbar-status-{{ collector.hasaccelerator ? 'green' : 'red' }}">accel</span>
-            </div>
-            <div class="bb-toolbar-item">
-                <b>PHP SAPI</b>
-                <span>{{ collector.sapiName }}</span>
-            </div>
-        {% endspaceless %}
-    {% endset %}
-    {% include 'Profiler/toolbar_item.html.twig' with { 'link': false } %}
+    {% include '/Profiler/toolbar_item.html.twig' with { 'link': false } %}
 
+    
     {# Environment #}
     {% set debug_status_class %}bb-toolbar-status bb-toolbar-status-{{ collector.debug ? 'green' : 'red' }}{% endset %}
     {% set icon %}
@@ -65,46 +34,7 @@
             </span>
         {% endif %}
     {% endset %}
-    {% set text %}
-        {% spaceless %}
-            {% if 'n/a' != collector.appname %}
-                <div class="bb-toolbar-item">
-                    <b>Name</b>
-                    <span>{{ collector.appname }}</span>
-                </div>
-            {% endif %}
-            {% if 'n/a' != collector.env %}
-                <div class="bb-toolbar-item">
-                    <b>Environment</b>
-                    <span>{{ collector.env }}</span>
-                </div>
-            {% endif %}
-            {% if 'n/a' != collector.debug %}
-                <div class="bb-toolbar-item">
-                    <b>Debug</b>
-                    <span class="{{ debug_status_class }}">{{ collector.debug ? 'en' : 'dis' }}abled</span>
-                </div>
-            {% endif %}
-            <div class="bb-toolbar-item">
-                <b>Token</b>
-                <span>
-                    {% if profiler_url %}
-                        <a href="{{ profiler_url }}">{{ collector.token }}</a>
-                    {% else %}
-                        {{ collector.token }}
-                    {% endif %}
-                </span>
-            </div>
-        {% endspaceless %}
-    {% endset %}
     {% include 'Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
-{% endblock %}
-
-{% block menu %}
-<span class="label">
-    <span class="icon"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" alt="Configuration"></span>
-    <strong>Config</strong>
-</span>
 {% endblock %}
 
 {% block panel %}
