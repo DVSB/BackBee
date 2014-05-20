@@ -119,9 +119,9 @@ class ToolbarListener implements ContainerAwareInterface
         $templateNames = $this->container->getParameter('data_collector.templates');
         
         foreach($templateNames as $name => $file) {
-            $templates[$name] = $this->container->get('renderer')->determineWhichAdapterToUse($file)->loadTemplate($file);
+            $templates[$name] = $this->container->get('renderer')->getAdapterByExt('twig')->loadTemplate($file);
         }
-        var_dump($templates);EXIT;
+        
         return $templates;
     }
 
@@ -141,7 +141,7 @@ class ToolbarListener implements ContainerAwareInterface
 
         if (false !== $pos) {
             $toolbar = "\n".str_replace("\n", '', $renderer->partial(
-                __DIR__ . '../../../../' .  'BackBuilder/Resources/views/Profiler/panel.html.twig',
+                __DIR__ . '../../../../' .  'BackBuilder/Resources/scripts/Profiler/toolbar.html.twig',
                 array(
                     'profile'   => $profile,
                     'templates' => $this->loadTemplates(),

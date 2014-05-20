@@ -59,7 +59,7 @@ parameters:
     
     
     data_collector.templates: 
-        config: "%bbapp.base.dir%/BackBuilder/Resources/views/Collector/config.html.twig"
+        config: "%bbapp.base.dir%/Resources/scripts/Collector/config.html.twig"
 
 services:
     cache.bootstrap:

@@ -1,6 +1,5 @@
-{% extends '@WebProfiler/Profiler/layout.html.twig' %}
-
 {% block toolbar %}
+    
     {# Logo #}
     {% set icon %}
         <img width="30" height="30" alt="Environment" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" />
@@ -26,11 +25,11 @@
             <a href="http://symfony.com/doc/{{ collector.backbuilderversion }}/index.html" rel="help">Symfony Documentation</a>
         </div>
     {% endset %}
-    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': false } %}
+    {% include 'Profiler/toolbar_item.html.twig' with { 'link': false } %}
 
     {# PHP Information #}
     {% set icon %}
-        <a href="{{ path('_profiler_phpinfo') }}">
+        <a href="#bbDebugTabConfig">
             <img width="30" height="30" alt="PHP" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" />
         </a>
     {% endset %}
@@ -51,7 +50,7 @@
             </div>
         {% endspaceless %}
     {% endset %}
-    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': false } %}
+    {% include 'Profiler/toolbar_item.html.twig' with { 'link': false } %}
 
     {# Environment #}
     {% set debug_status_class %}bb-toolbar-status bb-toolbar-status-{{ collector.debug ? 'green' : 'red' }}{% endset %}
@@ -98,7 +97,7 @@
             </div>
         {% endspaceless %}
     {% endset %}
-    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
+    {% include 'Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
 {% endblock %}
 
 {% block menu %}
@@ -180,7 +179,7 @@
         </tr>
         <tr>
             <th>Full PHP configuration</th>
-            <td><a href="{{ path('_profiler_phpinfo') }}"><code>phpinfo</code></a></td>
+            <td><a href="#phpinfo"><code>phpinfo</code></a></td>
         </tr>
     </table>
 
