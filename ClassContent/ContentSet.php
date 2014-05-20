@@ -49,7 +49,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * Pages owning this contentset
      * @var ArrayCollection
      *
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_contentset")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_contentset", fetch="EXTRA_LAZY")
      */
     protected $_pages;
 

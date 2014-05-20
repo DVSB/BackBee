@@ -66,7 +66,7 @@ class State extends AObjectIdentifiable implements \Serializable
     /**
      * The optional layout to be applied for state.
      * @var \BackBuilder\Site\Layout
-     * @ManyToOne(targetEntity="BackBuilder\Site\Layout")
+     * @ManyToOne(targetEntity="BackBuilder\Site\Layout", fetch="EXTRA_LAZY")
      * @JoinColumn(name="layout", referencedColumnName="uid")
      */
     protected $_layout;

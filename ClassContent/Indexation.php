@@ -38,7 +38,7 @@ class Indexation
      * The indexed content
      * @var string
      * @Id
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_indexation")
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
@@ -54,7 +54,7 @@ class Indexation
     /**
      * The owner content of the indexed field
      * @var AClassContent
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent")
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", fetch="EXTRA_LAZY")
      * @JoinColumn(name="owner_uid", referencedColumnName="uid")
      */
     protected $_owner;
