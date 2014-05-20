@@ -2,7 +2,7 @@
 
     <ul class="nav nav-pills">
     {% for name, template in templates %}
-        <li class="bb-profiler-block" data-toggle="tab">
+        <li class="bb-profiler-block">
             <a href="#{{ name }}Panel">
                 {{ template.renderblock('toolbar', {
                     'collector': profile.getCollector(name),
@@ -97,5 +97,11 @@
     
     $('#bb-profiler-close').click(function(){
         $('#bb-profiler-panel').hide();
+    });
+    
+    $('#bb-profiler-panel .nav a').click(function(){
+        var hash = $(this).attr('href');
+        $('.tab-content .tab-pane').removeClass('active');
+        $(hash).addClass('active');
     });
 </script>
