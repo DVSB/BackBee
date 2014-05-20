@@ -37,13 +37,13 @@ class IdxSiteContent
 
     /**
      * @var string
-     * @Id @Column
+     * @Id @Column(type="string", length=32)
      */
     private $site_uid;
 
     /**
      * @var string
-     * @Id @Column
+     * @Id @Column(type="string", length=32)
      */
     private $content_uid;
 

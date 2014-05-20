@@ -47,6 +47,7 @@ class ClassContentListener
 {
 
     /**
+     * Add discriminator values to class MetaData when a content class is loaded
      * Occur on classcontent.include events
      * @access public
      * @param Event $event
@@ -54,12 +55,15 @@ class ClassContentListener
     public static function onInclude(Event $event)
     {
         $dispatcher = $event->getDispatcher();
+        if (null !== $dispatcher->getApplication()) {
+            $em = $dispatcher->getApplication()->getEntityManager();
+            $discriminatorValue = get_class($event->getTarget());
+            foreach (class_parents($discriminatorValue) as $classname) {
+                $em->getClassMetadata($classname)->addDiscriminatorMapClass($discriminatorValue, $discriminatorValue);
 
-        if (NULL !== $dispatcher->getApplication()) {
-            foreach (class_parents(get_class($event->getTarget())) as $classname) {
-                $dispatcher->getApplication()->getEntityManager()
-                        ->getClassMetadata($classname)
-                        ->addDiscriminatorMapClass(get_class($event->getTarget()), get_class($event->getTarget()));
+                if ('BackBuilder\ClassContent\AClassContent' === $classname) {
+                    break;
+                }
             }
         }
     }
@@ -97,6 +101,13 @@ class ClassContentListener
             if (null === $content->getLabel()) {
                 $content->setLabel($content->getProperty('name'));
                 $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
+            }
+
+            if (null !== $page = $content->getMainNode()) {
+                if (AClassContent::STATE_NORMAL === $content->getState()) {
+                    $page->setModified(new \DateTime());
+                    $uow->computeChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
+                }
             }
 
             //self::HandleContentMainnode($content,$application);
@@ -168,20 +179,20 @@ class ClassContentListener
         if (false === ($content instanceof AClassContent)) {
             throw new BBException('Enable to commit object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBuilder\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
         }
-        
+
         $dispatcher = $event->getDispatcher();
         if (null === $application = $dispatcher->getApplication()) {
             throw new BBException('Enable to commit object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBuilder application has to be initialized'));
         }
-        
+
         if (null === $token = $application->getBBUserToken()) {
             throw new SecurityException('Enable to commit : unauthorized user', SecurityException::UNAUTHORIZED_USER);
         }
-        
+
         $em = $dispatcher->getApplication()->getEntityManager();
         $content = $em->getRepository(ClassUtils::getRealClass($content))->load($content, $token);
         if (null === $revision = $content->getDraft()) {
-            throw new ClassContentException('Enable to get draft', ClassContentException::REVISION_MISSING);            
+            throw new ClassContentException('Enable to get draft', ClassContentException::REVISION_MISSING);
         }
 
         $content->prepareCommitDraft();

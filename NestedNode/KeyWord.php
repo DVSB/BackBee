@@ -50,6 +50,7 @@ class KeyWord extends ANestedNode implements IRenderable
      * 
      * @Serializer\Expose
      * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     protected $_uid;
 
@@ -77,6 +78,7 @@ class KeyWord extends ANestedNode implements IRenderable
      * 
      * @Serializer\Expose
      * @Serializer\SerializedName("keyword")
+     * @Serializer\Type("string")
      */
     protected $_keyWord;
 
