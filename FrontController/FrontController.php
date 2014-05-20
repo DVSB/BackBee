@@ -82,7 +82,16 @@ class FrontController implements HttpKernelInterface {
      * @var \BackBuilder\Routing\RouteCollection
      */
     protected $_routeCollection;
+
+    /**
+     * @var array
+     */
     protected $_actions = array();
+
+    /**
+     * @var boolean
+     */
+    protected $force_url_extension = true;
 
     /**
      * Class constructor
@@ -93,6 +102,11 @@ class FrontController implements HttpKernelInterface {
     public function __construct(BBApplication $application = null) 
     {
         $this->_application = $application;
+
+        $parameters_config = $application->getConfig()->getParametersConfig();
+        if (true === array_key_exists('force_url_extension', $parameters_config)) {
+            $this->force_url_extension = $parameters_config['force_url_extension'];
+        }
 
         //$this->_routeCollection = $application->getRouting();
     }
@@ -328,6 +342,16 @@ class FrontController implements HttpKernelInterface {
         }
 
         $site = $this->_application->getContainer()->get('site');
+
+        preg_match('/(.*)(\.[hxtml]+)/', $uri, $matches);
+        if ('/' !== $uri[strlen($uri) - 1] && 0 === count($matches) && true === $this->force_url_extension) {
+            throw new FrontControllerException(sprintf(
+                'The URL `%s` can not be found.', 
+                $this->_request->getHost() . '/' . $uri), 
+                FrontControllerException::NOT_FOUND
+            );
+        }
+        
         $uri = preg_replace('/(.*)\.[hx]?[t]?m[l]?$/i', '$1', $uri);
         $redirect_page = $this->_application->getRequest()->get('bb5-redirect') ? ('false' !== $this->_application->getRequest()->get('bb5-redirect')) : TRUE;
 
@@ -384,7 +408,7 @@ class FrontController implements HttpKernelInterface {
 
     public function rssAction($uri = null) 
     {
-    	if (NULL === $this->_application)
+        if (NULL === $this->_application)
             throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
 
         if (FALSE === $this->_application->getContainer()->has('site'))
