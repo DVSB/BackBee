@@ -43,7 +43,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\ClassContentRepository")
- * @Table(name="content",indexes={@index(name="IDX_MODIFIED", columns={"modified"}), @index(name="IDX_NODEUID", columns={"node_uid"}), @index(name="IDX_CLASSNAME", columns={"classname"})})
+ * @Table(name="content",indexes={@index(name="IDX_MODIFIED", columns={"modified"}), @index(name="IDX_STATE", columns={"state"}), @index(name="IDX_NODEUID", columns={"node_uid"}), @index(name="IDX_CLASSNAME", columns={"classname"})})
  * @HasLifecycleCallbacks
  * @InheritanceType("SINGLE_TABLE")
  * @DiscriminatorColumn(name="classname", type="string")
@@ -73,7 +73,7 @@ abstract class AClassContent extends AContent
     /**
      * The many to many association between this content and its subcontent
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_parentcontent", cascade={"persist", "detach", "merge", "refresh"})
+     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_parentcontent", cascade={"persist", "detach", "merge", "refresh"}, fetch="EXTRA_LAZY")
      * @JoinTable(name="content_has_subcontent",
      *   joinColumns={@JoinColumn(name="parent_uid", referencedColumnName="uid")},
      *   inverseJoinColumns={@JoinColumn(name="content_uid", referencedColumnName="uid")}
@@ -84,7 +84,7 @@ abstract class AClassContent extends AContent
     /**
      * The main nested node (page)
      * @var \BackBuilder\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page")
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", fetch="EXTRA_LAZY")
      * @JoinColumn(name="node_uid", referencedColumnName="uid")
      */
     protected $_mainnode;
@@ -92,14 +92,14 @@ abstract class AClassContent extends AContent
     /**
      * The many to many association between this content and its parent content
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", mappedBy="_subcontent")
+     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", mappedBy="_subcontent", fetch="EXTRA_LAZY")
      */
     protected $_parentcontent;
 
     /**
      * The revisions of the content
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\ClassContent\Revision", mappedBy="_content", fetch="LAZY")
+     * @OneToMany(targetEntity="BackBuilder\ClassContent\Revision", mappedBy="_content", fetch="EXTRA_LAZY")
      * @OrderBy({"_version" = "DESC"})
      */
     protected $_revisions;
@@ -107,7 +107,7 @@ abstract class AClassContent extends AContent
     /**
      * The indexed values of elements
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\ClassContent\Indexation", mappedBy="_content", cascade={"all"})
+     * @OneToMany(targetEntity="BackBuilder\ClassContent\Indexation", mappedBy="_content", cascade={"all"}, fetch="EXTRA_LAZY")
      */
     protected $_indexation;
 

@@ -187,7 +187,7 @@ class BBApplication implements IApplication
         $this->_container = new ContainerBuilder();
 
         $default_cachedir = $this->getBaseDir() . '/cache';
-        $default_cacheclass = md5('__container__' . $this->getContext());
+        $default_cacheclass = 'bb'.md5('__container__' . $this->getContext());
         $default_cachefile = $default_cacheclass . '.php';
 
         if (false === $this->_debug &&

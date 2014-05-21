@@ -49,7 +49,7 @@ class MediaFolder extends ANestedNode
     /**
      * The root node, cannot be NULL.
      * @var \BackBuilder\NestedNode\MediaFolder
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\MediaFolder", inversedBy="_descendants")
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\MediaFolder", inversedBy="_descendants", fetch="EXTRA_LAZY")
      * @JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
@@ -57,7 +57,7 @@ class MediaFolder extends ANestedNode
     /**
      * The parent node.
      * @var \BackBuilder\NestedNode\MediaFolder
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\MediaFolder", inversedBy="_children", cascade={"persist"})
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\MediaFolder", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
@@ -79,21 +79,21 @@ class MediaFolder extends ANestedNode
     /**
      * Descendants nodes.
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\MediaFolder", mappedBy="_root")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\MediaFolder", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
     /**
      * Direct children nodes.
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\MediaFolder", mappedBy="_parent")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\MediaFolder", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
     /**
      * A collection of medi stored in the folder
      * @var \BackBuilder\NestedNode\Media
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Media", mappedBy="_media_folder")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\Media", mappedBy="_media_folder", fetch="EXTRA_LAZY")
      */
     protected $_medias;
 

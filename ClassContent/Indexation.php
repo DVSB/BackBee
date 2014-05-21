@@ -29,7 +29,7 @@ namespace BackBuilder\ClassContent;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
- * @Table(name="indexation",indexes={@index(name="IDX_OWNER", columns={"owner_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_VALUE", columns={"value"})})
+ * @Table(name="indexation",indexes={@index(name="IDX_OWNER", columns={"owner_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_VALUE", columns={"value"}), @index(name="IDX_SEARCH", columns={"field", "value"})})
  */
 class Indexation
 {
@@ -38,7 +38,7 @@ class Indexation
      * The indexed content
      * @var string
      * @Id
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_indexation")
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
@@ -54,7 +54,7 @@ class Indexation
     /**
      * The owner content of the indexed field
      * @var AClassContent
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent")
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", fetch="EXTRA_LAZY")
      * @JoinColumn(name="owner_uid", referencedColumnName="uid")
      */
     protected $_owner;

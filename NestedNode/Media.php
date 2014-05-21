@@ -46,13 +46,13 @@ class Media
     protected $_id;
 
     /**
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\MediaFolder", inversedBy="_medias", cascade={"persist"})
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\MediaFolder", inversedBy="_medias", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="media_folder_uid", referencedColumnName="uid")
      */
     protected $_media_folder;
 
     /**
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", cascade={"persist"})
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
