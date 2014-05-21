@@ -152,7 +152,7 @@ class ClassContentRepository extends EntityRepository
                 }
 
                 $alias = uniqid('i' . rand());
-                $join[] = 'LEFT JOIN indexation ' . $alias . ' USE INDEX(IDX_SEARCH) ON c.uid  = ' . $alias . '.content_uid';
+                $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
                 $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value ' . $crit[1] . '"' . $crit[0] . '"';
             }
         }
@@ -163,7 +163,7 @@ class ClassContentRepository extends EntityRepository
                 $values = array_filter((array) $values);
                 if (0 < count($values)) {
                     $alias = md5($field);
-                    $join[] = 'LEFT JOIN indexation ' . $alias . ' USE INDEX(IDX_SEARCH) ON c.uid  = ' . $alias . '.content_uid';
+                    $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
                     $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value IN ("' . implode('","', $values) . '")';
                 }
             }
