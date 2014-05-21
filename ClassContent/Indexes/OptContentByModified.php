@@ -30,14 +30,14 @@ namespace BackBuilder\ClassContent\Indexes;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity
- * @Table(name="opt_content_modified",indexes={@index(name="IDX_SEARCH", columns={"classname, node_uid"}), @index(name="IDX_MODIFIED", columns={"modified"})})
+ * @Table(name="opt_content_modified",indexes={@index(name="IDX_CLASSNAME", columns={"classname"}), @index(name="IDX_NODE", columns={"node_uid"}), @index(name="IDX_MODIFIED", columns={"modified"})})
  */
 class OptContentByModified
 {
 
     /**
      * @var string
-     * @Id @Column(type="string", length=32, nullable=false)
+     * @Id @Column(type="string", name="uid", length=32, nullable=false)
      */
     protected $_uid;
 
