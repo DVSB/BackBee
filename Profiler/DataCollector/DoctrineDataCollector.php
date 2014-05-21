@@ -25,6 +25,7 @@ use Doctrine\ORM\Tools\SchemaValidator;
 use Symfony\Bridge\Doctrine\DataCollector\DoctrineDataCollector as BaseCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Yaml\Dumper;
 
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\DBAL\Types\Type;
@@ -168,6 +169,9 @@ class DoctrineDataCollector extends BaseCollector implements ContainerAwareInter
                 $query['explainable'] = false;
             }
         }
+        
+        $dumper = new Dumper();
+        $query['paramsString'] = $dumper->dump($query['params']);
 
         return $query;
     }
