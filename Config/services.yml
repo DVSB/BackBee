@@ -46,6 +46,7 @@ parameters:
     bbapp.toolbar.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
     bbapp.profiler.listener.class: Symfony\Component\HttpKernel\EventListener\ProfilerListener
     
+    bbapp.dbal.logger.profiling.class: BackBuilder\Logging\DebugStackLogger
     
     # data collectors
     bbapp.collector.config.class: BackBuilder\Profiler\DataCollector\ConfigDataCollector
@@ -252,6 +253,10 @@ services:
             - [setContainer, [@service_container]]
         
 
+
+    doctrine.dbal.logger.profiling:
+        class: %bbapp.dbal.logger.profiling.class%
+        arguments:  ["@bbapp"]
 
     # synthetic services
     site:

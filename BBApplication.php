@@ -464,8 +464,17 @@ class BBApplication implements IApplication
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
+        
         try {
-            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogging(), $evm);
+            $logger = $this->getLogging();
+            
+            if($this->isDebugMode()) {
+                // doctrine data collector
+                $this->getContainer()->get('data_collector.doctrine')->addLogger('default', $this->getContainer()->get('doctrine.dbal.logger.profiling'));
+                $logger = $this->getContainer()->get('doctrine.dbal.logger.profiling');
+            }
+            
+            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
             $this->getContainer()->set('em', $em);
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));

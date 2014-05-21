@@ -61,7 +61,7 @@ class DebugStackLogger extends Logger
             $this->queries[++$this->currentQuery] = array('sql' => $sql, 'params' => $params, 'types' => $types, 'executionMS' => 0);
         }
         
-        parent:;startQuery($sql, $params, $types);
+        parent::startQuery($sql, $params, $types);
     }
 
     public function stopQuery()

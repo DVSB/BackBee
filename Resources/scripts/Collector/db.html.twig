@@ -69,24 +69,12 @@
                                 {{ query.sql|raw }}
                             </span>
                             <small>
-                                <strong>Parameters</strong>: {{ query.params }} <br />
                                 {#<strong>Parameters</strong>: {{ query.params|yaml_encode }} <br />#}
                                 [<span id="expandParams-{{ i }}-{{ loop.parent.loop.index }}" onclick="javascript:toggleRunnableQuery(this);" target-data-id="original-query-{{ i }}-{{ loop.parent.loop.index }}" style="cursor: pointer;">Display runnable query</span>]<br/>
                                 <strong>Time</strong>: {{ '%0.2f'|format(query.executionMS * 1000) }} ms
                             </small>
-                            {% if query.explainable %}
-                                {#[<a href="{{ path('_profiler', {'panel': 'db', 'token': token, 'page': 'explain', 'connection': connection, 'query': i}) }}" onclick="return explain(this);" style="text-decoration: none;" title="Explains the query" data-target-id="explain-{{ i }}-{{ loop.parent.loop.index }}" >
-                                    <img alt="+" src="{{ asset('bundles/framework/images/blue_picto_more.gif') }}" style="display: inline; width: 12px; height: 12px;" />
-                                    <img alt="-" src="{{ asset('bundles/framework/images/blue_picto_less.gif') }}" style="display: none; width: 12px; height: 12px;" />
-                                    <span style="vertical-align:top">Explain query</span>
-                                </a>]#}
-                            {% else %}
-                                This query cannot be explained
-                            {% endif %}
+                            
                         </div>
-                        {% if query.explainable %}
-                        <div id="explain-{{ i }}-{{ loop.parent.loop.index }}" class="loading"></div>
-                        {% endif %}
                     </li>
                 {% endfor %}
             </ul>
@@ -150,25 +138,7 @@
     {% endfor %}
 
     <script type="text/javascript">//<![CDATA[
-        function explain(link) {
-            "use strict";
-
-            var imgs = link.children,
-                target = link.getAttribute('data-target-id');
-
-            Sfjs.toggle(target, imgs[0], imgs[1])
-                .load(
-                    target,
-                    link.href,
-                    null,
-                    function(xhr, el) {
-                        el.innerHTML = 'An error occurred while loading the details';
-                        Sfjs.removeClass(el, 'loading');
-                    }
-                );
-
-            return false;
-        }
+        
 
         function expandQuery(link) {
             var sections = link.children,
