@@ -347,9 +347,10 @@ class FrontController implements HttpKernelInterface
 
         preg_match('/(.*)(\.[hxtml]+)/', $uri, $matches);
         if (
-            '_root_' !== $uri 
+            ('_root_' !== $uri 
             && '/' !== $uri[strlen($uri) - 1] 
-            && 0 === count($matches) && true === $this->force_url_extension
+            && 0 === count($matches) && true === $this->force_url_extension)
+            || (0 < count($matches) && $site->getDefaultExtension() !== $matches[2])
         ) {
             throw new FrontControllerException(sprintf(
                     'The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND
