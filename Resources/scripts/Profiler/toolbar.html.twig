@@ -1,6 +1,6 @@
 <div id="bb-profiler-panel">
 
-    <ul class="nav nav-pills">
+    <ul class="nav">
     {% for name, template in templates %}
         <li class="bb-profiler-block">
             <a href="#{{ name }}Panel">
@@ -54,11 +54,15 @@
     }
     
     #bb-profiler-panel ul.nav{
-        height: 30px;
-        background: #fff;
+        height: 32px;
+        width: 100%;
+        background: #eee;
         position: fixed;
     }
     
+    #bb-profiler-panel ul.nav li{
+        float: left;
+    }
     
     #bb-profiler-panel .tab-content{
         background: #fff;
@@ -67,13 +71,17 @@
     
     #bb-profiler-panel .nav a{
         padding: 0;
+        padding: 2px 4px;
+    }
+    
+    #bb-profiler-panel .nav a:hover{
+        background-color: #fff;
     }
     
     #bb-profiler-close {
         display: block;
         width: 15px;
         height: 16px;
-        position: absolute;
         top: 7px;
         right: 5px;
         cursor: pointer;
@@ -83,6 +91,7 @@
         -webkit-border-radius: 3px;
         -moz-border-radius: 3px;
         border-radius: 3px;
+        position: fixed;
     }
     #bb-profiler-close:hover {
         color: #fff;
