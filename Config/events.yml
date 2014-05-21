@@ -89,7 +89,7 @@ kernel.exception:
 kernel.controller:
     listeners:
     - [@rest.listener.validation, onKernelController]
-    - [@data_collector.router, onKernelController]
+#    - [@data_collector.router, onKernelController]
 
 kernel.response:
     listeners:
