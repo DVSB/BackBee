@@ -171,7 +171,14 @@ class DoctrineDataCollector extends BaseCollector implements ContainerAwareInter
         }
         
         $dumper = new Dumper();
-        $query['paramsString'] = $dumper->dump($query['params']);
+        
+        if(count($query['params']) > 0) {
+            $query['paramsString'] = $dumper->dump($query['params']);
+        } else {
+            $query['paramsString'] = null;
+        }
+        
+        $query['sqlInterpolated'] = $this->interpolateQuery($query['sql'], $query['params']);
 
         return $query;
     }
@@ -211,4 +218,41 @@ class DoctrineDataCollector extends BaseCollector implements ContainerAwareInter
 
         return array($var, true);
     }
+    
+    /**
+     * Interpolate sql query tokens
+     * 
+     * @param string $query
+     * @param array $params
+     * @return string
+     */
+    private function interpolateQuery($query, array $params) 
+    {
+        $keys = array();
+        $values = $params;
+
+        # build a regular expression for each parameter
+        foreach ($params as $key => $value) {
+            if (is_string($key)) {
+                $keys[] = '/:'.$key.'/';
+            } else {
+                $keys[] = '/[?]/';
+            }
+
+            if (is_array($value)) {
+                $values[$key] = implode(',', $value);
+            }
+                
+            if (is_null($value)) {
+                $values[$key] = 'NULL';
+            }
+        }
+        // Walk the array to see if we can add single-quotes to strings
+        array_walk($values, create_function('&$v, $k', 'if (!is_numeric($v) && $v!="NULL") $v = "\'".$v."\'";'));
+
+        $query = preg_replace($keys, $values, $query, 1);
+
+        return $query;
+    }
+            
 }
