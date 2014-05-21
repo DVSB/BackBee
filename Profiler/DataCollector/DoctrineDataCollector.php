@@ -35,7 +35,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface,
 
 
 /**
- * Profiler Toolbar listener
+ * Doctrine data collector
  *
  * @category    BackBuilder
  * @package     BackBuilder\Profiler

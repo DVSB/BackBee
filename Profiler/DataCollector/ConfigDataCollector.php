@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\Response;
 use BackBuilder\BBApplication;
 
 /**
- * Profiler Toolbar listener
+ * Config data collector
  *
  * @category    BackBuilder
  * @package     BackBuilder\Profiler

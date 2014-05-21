@@ -56,7 +56,7 @@ parameters:
     bbapp.collector.logger.class: Symfony\Component\HttpKernel\DataCollector\LoggerDataCollector
     bbapp.collector.time.class: Symfony\Component\HttpKernel\DataCollector\TimeDataCollector
     bbapp.collector.memory.class: Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector
-    bbapp.collector.router.class: Symfony\Component\HttpKernel\DataCollector\RouterDataCollector
+    bbapp.collector.routing.class: BackBuilder\Profiler\DataCollector\RoutingDataCollector
     bbapp.collector.doctrine.class: BackBuilder\Profiler\DataCollector\DoctrineDataCollector
     
     
@@ -69,7 +69,7 @@ parameters:
         logger: "%bbapp.base.dir%/Resources/scripts/Collector/logger.html.twig"
 #        time: "%bbapp.base.dir%/Resources/scripts/Collector/time.html.twig"
         memory: "%bbapp.base.dir%/Resources/scripts/Collector/memory.html.twig"
-        router: "%bbapp.base.dir%/Resources/scripts/Collector/router.html.twig"
+        routing: "%bbapp.base.dir%/Resources/scripts/Collector/routing.html.twig"
         db: "%bbapp.base.dir%/Resources/scripts/Collector/db.html.twig"
 
 
@@ -207,7 +207,7 @@ services:
         class:      Symfony\Component\HttpKernel\Profiler\Profiler
         arguments:  [@profiler.storage, @logging]
         calls:
-            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.router", @data_collector.doctrine]]] 
+            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.routing", @data_collector.doctrine]]] 
             #"@data_collector.time", 
             
     # data collectors
@@ -244,8 +244,11 @@ services:
     data_collector.memory:
         class: %bbapp.collector.memory.class%
 
-    data_collector.router:
-        class: %bbapp.collector.router.class%
+    data_collector.routing:
+        class: %bbapp.collector.routing.class%
+        calls:
+            - [setContainer, [@service_container]]
+        
         
     data_collector.doctrine:
         class: %bbapp.collector.doctrine.class%
