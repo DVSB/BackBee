@@ -127,10 +127,10 @@ class ToolbarListener implements ContainerAwareInterface
         $content = $response->getContent();
         $pos = strripos($content, '</body>');
 
-
         if (false !== $pos) {
+            $bb_dir = $renderer->getApplication()->getBBDir();
             $toolbar = "\n".str_replace("\n", '', $renderer->partial(
-                __DIR__ . '../../../../' .  'BackBuilder/Resources/scripts/Profiler/toolbar.html.twig',
+                $bb_dir .  '/Resources/scripts/Profiler/toolbar.html.twig',
                 array(
                     'profile'   => $profile,
                     'templates' => $this->loadTemplates(),
