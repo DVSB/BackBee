@@ -245,6 +245,7 @@ class Page extends AbstractServiceLocal
                     foreach ($children as $child) {
                         $leaf = new \stdClass();
                         $leaf->attr = json_decode($child->serialize());
+                        $leaf->attr->url = $this->getApplication()->getRouting()->getUri($leaf->attr->url, null, $child->getSite());
                         $leaf->data = $child->getTitle();
                         $leaf->state = $child->isLeaf() ? 'leaf' : 'closed';
                         if (false === $child->isLeaf() && null !== $current_uid && null !== $current = $this->_repo->find(strval($current_uid))) {
