@@ -243,13 +243,13 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (0 < count($join)) {
-            $query .= ' '.implode(' ', $join);
+            $query .= ' ' . implode(' ', $join);
         }
-        
+
         if (0 < count($where)) {
-            $query .= ' WHERE '. implode(' AND ', $where);
+            $query .= ' WHERE ' . implode(' AND ', $where);
         }
-        
+
         $uids = $this->getEntityManager()
                 ->getConnection()
                 ->executeQuery(str_replace('JOIN content c', 'JOIN opt_content_modified c', $query) . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
@@ -259,13 +259,25 @@ class ClassContentRepository extends EntityRepository
             $uids = $this->getEntityManager()
                     ->getConnection()
                     ->executeQuery($query . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
-                    ->fetchAll(\PDO::FETCH_COLUMN);            
+                    ->fetchAll(\PDO::FETCH_COLUMN);
         }
-        
+
         $q = $this->createQueryBuilder('c')
                 ->select()
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
+
+        if (true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
+            $q->join('c._mainnode', 'p')
+                    ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        } else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
+            $q->orderBy('c._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        } else {
+            $q->leftJoin('c._indexation', 'isort')
+                    ->andWhere('isort._field = :sort')
+                    ->setParameter('sort', $selector['orderby'][0])
+                    ->orderBy('isort._value', count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        }
 
         $result = $q->getQuery()->getResult();
 
