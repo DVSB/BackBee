@@ -193,6 +193,8 @@ class IndexationListener implements EventSubscriberInterface
         $uow = $em->getUnitOfWork();
 
         if ($uow->isScheduledForInsert($content) || $uow->isScheduledForUpdate($content)) {
+            self::$_em->getRepository('BackBuilder\ClassContent\Indexes\OptContentByModified')
+                    ->replaceOptContentTable($content);
 
             if (is_array($content->getProperty()) && array_key_exists('indexation', $content->getProperty())) {
                 foreach ($content->getProperty('indexation') as $indexedElement) {
@@ -271,13 +273,16 @@ class IndexationListener implements EventSubscriberInterface
                 }
             }
         } elseif ($uow->isScheduledForDelete($content)) {
+            self::$_em->getRepository('BackBuilder\ClassContent\Indexes\OptContentByModified')
+                    ->removeOptContentTable($content);
+
             foreach ($content->getIndexation() as $index) {
                 $em->remove($index);
                 $em->getUnitOfWork()->computeChangeSet($em->getClassMetadata('BackBuilder\ClassContent\Indexation'), $index);
             }
         }
     }
-    
+
     /**
      * Returns an array of event names this subscriber wants to listen to.
      * @return array The event names to listen to
@@ -289,4 +294,5 @@ class IndexationListener implements EventSubscriberInterface
             'nestednode.page.onflush' => 'onFlushPage'
         );
     }
+
 }
