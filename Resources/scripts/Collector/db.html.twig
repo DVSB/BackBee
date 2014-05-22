@@ -69,7 +69,7 @@
                 <em>No queries.</em>
             </p>
         {% else %}
-            <ul class="alt bb-queries" id="queriesPlaceholder-{{ loop.index }}">
+            <ol class="alt bb-queries" id="queriesPlaceholder-{{ loop.index }}">
                 {% for i, query in queries %}
                     <li class="{{ cycle(['odd', 'even'], i) }}" data-extra-info="{{ '%0.2f'|format(query.executionMS * 1000) }}" data-target-id="{{ i }}">
                         <div style="margin-top: 4px" id="queryNo-{{ i }}-{{ loop.parent.loop.index }}">
@@ -92,7 +92,7 @@
                         </div>
                     </li>
                 {% endfor %}
-            </ul>
+            </ol>
         {% endif %}
     {% endfor %}
 
