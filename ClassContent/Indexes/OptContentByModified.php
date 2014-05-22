@@ -29,7 +29,7 @@ namespace BackBuilder\ClassContent\Indexes;
  * @subpackage  Indexes
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity
+ * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
  * @Table(name="opt_content_modified",indexes={@index(name="IDX_CLASSNAME", columns={"classname"}), @index(name="IDX_NODE", columns={"node_uid"}), @index(name="IDX_MODIFIED", columns={"modified"})})
  */
 class OptContentByModified
