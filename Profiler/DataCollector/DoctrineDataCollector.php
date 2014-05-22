@@ -22,10 +22,10 @@
 namespace BackBuilder\Profiler\DataCollector;
 
 use Doctrine\ORM\Tools\SchemaValidator;
-use Symfony\Bridge\Doctrine\DataCollector\DoctrineDataCollector as BaseCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Yaml\Dumper;
+use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\DBAL\Logging\DebugStack;
@@ -43,7 +43,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface,
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class DoctrineDataCollector extends BaseCollector implements ContainerAwareInterface
+class DoctrineDataCollector extends DataCollector implements ContainerAwareInterface
 {
     private $container;
     private $invalidEntityCount;
@@ -114,6 +114,38 @@ class DoctrineDataCollector extends BaseCollector implements ContainerAwareInter
         $this->data['errors'] = $errors;
     }
 
+    public function getManagers()
+    {
+        return $this->data['managers'];
+    }
+
+    public function getConnections()
+    {
+        return $this->data['connections'];
+    }
+
+    public function getQueryCount()
+    {
+        return array_sum(array_map('count', $this->data['queries']));
+    }
+
+    public function getQueries()
+    {
+        return $this->data['queries'];
+    }
+
+    public function getTime()
+    {
+        $time = 0;
+        foreach ($this->data['queries'] as $queries) {
+            foreach ($queries as $query) {
+                $time += $query['executionMS'];
+            }
+        }
+
+        return $time;
+    }
+    
     public function getEntities()
     {
         return $this->data['entities'];
@@ -254,6 +286,15 @@ class DoctrineDataCollector extends BaseCollector implements ContainerAwareInter
         $query = preg_replace($keys, $values, $query, 1);
 
         return $query;
+    }
+    
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function getName()
+    {
+        return 'db';
     }
             
 }
