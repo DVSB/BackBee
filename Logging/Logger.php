@@ -28,6 +28,7 @@ use BackBuilder\BBApplication,
     BackBuilder\FrontController\Exception\FrontControllerException;
 use Symfony\Component\HttpFoundation\Response;
 use Psr\Log\LoggerInterface;
+use Doctrine\DBAL\Logging\DebugStack;
 
 /**
  * @category    BackBuilder
@@ -35,7 +36,7 @@ use Psr\Log\LoggerInterface;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Logger implements LoggerInterface, SQLLogger
+class Logger extends DebugStack  implements LoggerInterface, SQLLogger
 {
 
     const ERROR = 1;

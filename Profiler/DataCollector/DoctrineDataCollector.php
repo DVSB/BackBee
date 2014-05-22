@@ -28,6 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Yaml\Dumper;
 
 use Doctrine\DBAL\Logging\SQLLogger;
+use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Types\Type;
 
 use Symfony\Component\DependencyInjection\ContainerAwareInterface,
@@ -68,7 +69,7 @@ class DoctrineDataCollector extends BaseCollector implements ContainerAwareInter
      * @param string     $name
      * @param DebugStack $logger
      */
-    public function addLogger($name, SQLLogger $logger)
+    public function addLogger($name, DebugStack $logger)
     {
         $this->loggers[$name] = $logger;
     }
