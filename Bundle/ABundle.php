@@ -339,7 +339,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
                     ->getEntityManager()
                     ->getRepository('BackBuilder\Bundle\Registry')
                     ->findOneBy(array('key' => $this->getId(), 'scope' => 'BUNDLE.CONFIG'));
-        } catch (\Doctrine\DBAL\Exception\TableNotFoundException $e) {
+        } catch (\Exception $e) {
             if (true === $this->getApplication()->isStarted()) {
                 $this->warning('Enable to load registry table');
             }
