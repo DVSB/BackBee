@@ -44,7 +44,7 @@ parameters:
     bbapp.rest.test_controller.class: BackBuilder\Rest\Controller\TestController
     
     bbapp.toolbar.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
-    bbapp.profiler.listener.class: Symfony\Component\HttpKernel\EventListener\ProfilerListener
+    bbapp.profiler.listener.class: BackBuilder\Event\Listener\ProfilerListener
     
     bbapp.dbal.logger.profiling.class: BackBuilder\Logging\DebugStackLogger
     
@@ -189,6 +189,8 @@ services:
     profiler.listener:
         class:      %bbapp.profiler.listener.class%
         arguments:  [@profiler]
+        calls:
+            - [setEnabled, [%debug%]]
         tags:
             - { name: kernel.event_subscriber }
         
