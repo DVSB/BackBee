@@ -561,8 +561,9 @@ class BBApplication implements IApplication
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
         if (null !== $this->_bundles) {
-            foreach ($this->_bundles as $bundle)
+            foreach ($this->_bundles as $bundle) {
                 $bundle->start();
+            }
         }
 
         $this->getTheme()->init();
@@ -570,8 +571,7 @@ class BBApplication implements IApplication
         if (false === $this->isClientSAPI()) {
             $response = $this->getController()->handle();
             if ($response instanceof Response) {
-                $response->send();
-                die();
+                $this->getController()->sendResponse($response);
             }
         }
     }
@@ -583,8 +583,9 @@ class BBApplication implements IApplication
     {
         if (true === $this->isStarted()) {
             if (null !== $this->_bundles) {
-                foreach ($this->_bundles as $bundle)
+                foreach ($this->_bundles as $bundle) {
                     $bundle->stop();
+                }
             }
 
             // @todo

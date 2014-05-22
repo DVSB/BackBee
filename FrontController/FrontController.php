@@ -159,6 +159,18 @@ class FrontController implements HttpKernelInterface
         $response->send();
         exit(0);
     }
+    
+    /**
+     * Send response to client
+     * 
+     * Public api method
+     * 
+     * @param \Symfony\Component\HttpFoundation\Response $response
+     */
+    public function sendResponse(Response $response)
+    {
+        $this->_send($response);
+    }
 
     /**
      * Invokes associated action to the current request
