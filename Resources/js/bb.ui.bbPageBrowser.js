@@ -18,7 +18,8 @@
             dialogClass: 'bb5-ui bb5-dialog-wrapper',
             title: "",
             enableNavigation: true,
-            enableMultiSite: false
+            enableMultiSite: false,
+            having_child: false
         },
         _statesWatchable: {
             open: false
@@ -63,7 +64,8 @@
                 selected: null,
                 treeview: null,
                 layouts: null,
-                maxresult: 25
+                maxresult: 25,
+                having_child: myself.options.having_child
             });
 
         },
@@ -260,7 +262,8 @@
                                     'root_uid': n.attr ? n.attr('id').replace('node_', '') : null,
                                     'current_uid': bb.frontApplication.getPageId(),
                                     'fisrtresult': 0,
-                                    'maxresult': context.maxresult
+                                    'maxresult': context.maxresult,
+                                    'having_child':context.having_child
                                 };
                             }
                         }
