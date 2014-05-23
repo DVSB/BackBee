@@ -211,7 +211,9 @@ class BBApplication implements IApplication
 
             return $this;
         } 
-
+        
+        $this->_container->setDefinition('bbapp', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
+        
         $dirToLookingFor = array();
         $dirToLookingFor[] = $this->getBBDir() . '/' . 'Config';
         $dirToLookingFor[] = $this->getBaseRepository() . '/' . 'Config';
@@ -232,24 +234,25 @@ class BBApplication implements IApplication
                 $loader->load('services.xml');
             }
         }
-
+        
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
+        
         $this->_container->set('service_container', $this->_container);
         $this->_container->setParameter('debug', $this->_debug);
 
 
         $this->_initBBAppParamsIntoContainer();
-
+        
         if($this->_debug) {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
                 $this->_container->getParameter('bbapp.logger_debug.class'),
-                array($this->_container->get('bbapp'))
+                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         } else {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
                 $this->_container->getParameter('bbapp.logger.class'),
-                array($this->_container->get('bbapp'))
+                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         }
 

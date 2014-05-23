@@ -262,8 +262,6 @@ services:
         arguments:  ["@bbapp"]
     
     # synthetic services
-    logging:
-        synthetic: true
     bbapp:
         synthetic: true
     site:
