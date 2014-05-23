@@ -47,11 +47,20 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Pages owning this contentset
-     * @var ArrayCollection
+     * @var \Doctrine\Common\Collections\ArrayCollection
      *
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_contentset")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_contentset", fetch="EXTRA_LAZY")
      */
     protected $_pages;
+
+    /**
+     * Returns the owning pages
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function getPages()
+    {
+        return $this->_pages;
+    }
 
     /**
      * Initialized datas on postLoad doctrine event
@@ -62,7 +71,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         $datas = (array) $this->_data;
         foreach ($datas as $data) {
             $type = key($data);
-            
+
             $data = array_pop($data);
             if (true === is_array($data)) {
                 $type = key($data);
@@ -97,9 +106,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         foreach ($this as $subcontent) {
             if (!is_null($subcontent)) {
-                if ($this->getProperty('clonemode') === 'none'
-                        || ($this->key() < count($zones) && $zones[$this->key()]->defaultClassContent === 'inherited')
-                        || (null !== $subcontent->getMainNode() && $subcontent->getMainNode()->getUid() !== $mainnode_uid)
+                if ($this->getProperty('clonemode') === 'none' || ($this->key() < count($zones) && $zones[$this->key()]->defaultClassContent === 'inherited') || (null !== $subcontent->getMainNode() && $subcontent->getMainNode()->getUid() !== $mainnode_uid)
                 ) {
                     $clone->push($subcontent);
                 } else {
@@ -532,8 +539,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         foreach (get_object_vars($serialized) as $property => $value) {
             $property = '_' . $property;
 
-            if (true === in_array($property, array('_created', '_modified'))
-                    || null === $value) {
+            if (true === in_array($property, array('_created', '_modified')) || null === $value) {
                 continue;
             } else if ('_param' === $property) {
                 foreach ($value as $param => $paramvalue) {
@@ -551,4 +557,5 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         return $this;
     }
+
 }

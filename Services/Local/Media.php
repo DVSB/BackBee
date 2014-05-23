@@ -76,10 +76,10 @@ class Media extends AbstractServiceLocal
         if (FALSE === is_dir($this->bbapp->getTemporaryDir()))
             mkdir($this->bbapp->getTemporaryDir(), 0755, TRUE);
         $isFileIsMoved = move_uploaded_file($request->files->get('uploadedmedia')->getRealPath(), $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $uploaded_file->filename);
-        if(!$isFileIsMoved){
-              return "stran";
+        if (!$isFileIsMoved) {
+            return "stran";
         }
-      
+
         return $uploaded_file;
     }
 
@@ -177,6 +177,12 @@ class Media extends AbstractServiceLocal
                             mkdir(dirname($moveto), 0755, TRUE);
 
                         copy($filename, $moveto);
+
+                        if (null !== $this->getApplication()->getEventDispatcher()) {
+                            $event = new \BackBuilder\Event\PostUploadEvent($moveto, $subcontent->path);
+                            $this->getApplication()->getEventDispatcher()->dispatch('file.postupload', $event);
+                        }
+
                         unlink($filename);
 
                         $stat = stat($moveto);

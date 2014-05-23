@@ -46,15 +46,15 @@ class PageRepository extends NestedNodeRepository
     {
         return $q->andWhere('n._state >= ' . Page::STATE_ONLINE)
             ->andWhere('n._state <' . Page::STATE_DELETED)
-            ->andWhere('n._publishing IS NULL OR n._publishing <= CURRENT_TIMESTAMP()')
-            ->andWhere('n._archiving IS NULL OR n._archiving > CURRENT_TIMESTAMP()');
+			->andWhere('n._state <>' . Page::STATE_HIDDEN)
+            ->andWhere('n._publishing IS NULL OR n._publishing <= :now')
+            ->andWhere('n._archiving IS NULL OR n._archiving > :now')
+            ->setParameter('now', date('Y-m-d H:i:00', time()));
     }
 
     public function getOnlinePrevSibling(ANestedNode $node)
     {
-        $q = $this->_getPrevSiblingsQuery($node)
-                ->orderBy('n._leftnode', 'desc')
-                ->setMaxResults(1);
+        $q = $this->_getPrevSiblingsQuery($node)->orderBy('n._leftnode', 'desc')->setMaxResults(1);
         $q = $this->_andOnline($q);
 
         return $q->getQuery()->getOneOrNullResult();
@@ -98,9 +98,10 @@ class PageRepository extends NestedNodeRepository
     {
         $q = $this->_getDescendantsQuery($node, $depth, $includeNode)
                 ->andWhere('n._state = :state')
-                ->andWhere('n._publishing IS NULL OR n._publishing <= CURRENT_TIMESTAMP()')
-                ->andWhere('n._archiving IS NULL OR n._archiving > CURRENT_TIMESTAMP()')
+                ->andWhere('n._publishing IS NULL OR n._publishing <= :now')
+                ->andWhere('n._archiving IS NULL OR n._archiving > :now')
                 ->setParameter('state', $state)
+                ->setParameter('now', date('Y-m-d H:i:00', time()))
                 ->orderBy('n._leftnode', 'asc');
         return $q->getQuery()->getResult();
     }
@@ -151,11 +152,16 @@ class PageRepository extends NestedNodeRepository
         return $q->getQuery()->getOneOrNullResult();
     }
 
-    public function getNotDeletedDescendants(ANestedNode $node, $depth = NULL, $includeNode = FALSE, $order = array(), $paginate = false, $firstresult = 0, $maxresult = 25)
+    public function getNotDeletedDescendants(ANestedNode $node, $depth = NULL, $includeNode = FALSE, $order = array(), $paginate = false, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
         $q = $this->_getDescendantsQuery($node, $depth, $includeNode)
                 ->andWhere('n._state < :deleted')
                 ->setParameter('deleted', Page::STATE_DELETED);
+        
+        if (true === $having_child) {
+            $q->andWhere('n._rightnode > (n._leftnode + 1)');
+        }
+        
         if (is_array($order) && !empty($order)) {
             if (array_key_exists("field", $order) && array_key_exists("sort", $order)) {
                 if (!empty($order["field"]) && !empty($order["sort"])) {

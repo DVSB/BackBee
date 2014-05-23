@@ -97,50 +97,20 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
             $configdir = $this->getResourcesDir();
         }
 
-        // default bundle's config.yml
-        $srcConfigFilename = $this->getResourcesDir() . DIRECTORY_SEPARATOR . 'config.yml';
+        $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
 
-        $dataBundlesDir = $this->_application->getDataDir() . DIRECTORY_SEPARATOR 
-            . 'Bundles' . DIRECTORY_SEPARATOR . $this->getId();
+        // Looking for bundle's config in registry
+        $registry = $this->_getRegistryConfig();
+        if (null !== $serialized = $registry->getValue()) {
+            $registryConfig = @unserialize($serialized);
 
-        // Looking for bundle's config.yml in data repository
-        $filename = $dataBundlesDir . DIRECTORY_SEPARATOR . 'config.yml';
-        if (false === file_exists($filename)) {
-            if (false === file_exists(dirname($filename))) {
-                mkdir(dirname($filename), 0755, true);
-            }
-            if(file_exists($srcConfigFilename))
-            {
-                copy($srcConfigFilename, $filename);
-            }
-        } else {
-            $srcFileStat = stat($srcConfigFilename);
-            $dataFileStat = stat($filename);
-            if ($srcFileStat[9] > $dataFileStat[9]) {
-                // parsing config.yml from bundle and data directory
-                $srcConfig = Yaml::parse($srcConfigFilename);
-                $dataConfig = Yaml::parse($filename);
-
-                // compute entry to add to data config.yml
-                $entryToAdd = Arrays::array_diff_assoc_recursive($srcConfig, $dataConfig);
-                // compute entry to delete from data config.yml
-                $entryToDelete = Arrays::array_diff_assoc_recursive($dataConfig, $srcConfig);
-                
-                if (true === array_key_exists('override_site', $entryToDelete)) {
-                    unset($entryToDelete['override_site']);
+            if (true === is_array($registryConfig)) {
+                foreach ($registryConfig as $section => $value) {
+                    $this->_config->setSection($section, $value, true);
                 }
-
-                // add entry to data config.yml
-                $dataConfig = Arrays::array_merge_assoc_recursive($dataConfig, $entryToAdd);
-
-                // remove entry from data config.yml
-                Arrays::array_remove_assoc_recursive($dataConfig, $entryToDelete);
-
-                $this->doSaveConfig($dataConfig, $dataBundlesDir);
             }
         }
 
-        $this->_config = new Config(dirname($filename), $this->getApplication()->getBootstrapCache());
         $this->_config->setContainer($this->getApplication()->getContainer());
         $allSections = $this->_config->getAllRawSections();
         $this->configDefaultSections = $allSections;
@@ -151,7 +121,6 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         ) {
             $this->manageMultisiteConfig = false;
         }
-
 
         return $this;
     }
@@ -348,7 +317,41 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
             $this->configDefaultSections['override_site'] = $overrideSection;
 
             $this->doSaveConfig($this->configDefaultSections);
+        } else {
+            $registry = $this->_getRegistryConfig();
+            if ($this->getApplication()->getEntityManager()->contains($registry)) {
+                $this->getApplication()->getEntityManager()->remove($registry);
+                $this->getApplication()->getEntityManager()->flush($registry);
+            }
         }
+    }
+
+    /**
+     * Returns the registry entry for bundle'x config storing
+     * @return \BackBuilder\Bundle\Registry
+     */
+    private function _getRegistryConfig()
+    {
+        $registry = null;
+
+        try {
+            $registry = $this->getApplication()
+                    ->getEntityManager()
+                    ->getRepository('BackBuilder\Bundle\Registry')
+                    ->findOneBy(array('key' => $this->getId(), 'scope' => 'BUNDLE.CONFIG'));
+        } catch (\Exception $e) {
+            if (true === $this->getApplication()->isStarted()) {
+                $this->warning('Enable to load registry table');
+            }
+        }
+
+        if (null === $registry) {
+            $registry = new Registry();
+            $registry->setKey($this->getId())
+                    ->setScope('BUNDLE.CONFIG');
+        }
+
+        return $registry;
     }
 
     /**
@@ -356,13 +359,16 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      * 
      * @param  array  $config 
      */
-    private function doSaveConfig(array $config, $configDir = null)
+    private function doSaveConfig(array $config)
     {
-        $configDir = null === $configDir 
-            ? $this->_config->getBaseDir() . DIRECTORY_SEPARATOR 
-            : $configDir . DIRECTORY_SEPARATOR;
-            
-        file_put_contents($configDir . 'config.yml', Yaml::dump($config));
+        $registry = $this->_getRegistryConfig();
+        $registry->setValue(serialize($config));
+
+        if (false === $this->getApplication()->getEntityManager()->contains($registry)) {
+            $this->getApplication()->getEntityManager()->persist($registry);
+        }
+
+        $this->getApplication()->getEntityManager()->flush($registry);
     }
 
     public function getProperty($key = null)
@@ -458,8 +464,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      */
     public function equals(IObjectIdentifiable $identity)
     {
-        return ($this->getType() === $identity->getType()
-                && $this->getIdentifier() === $identity->getIdentifier());
+        return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }
 
 }

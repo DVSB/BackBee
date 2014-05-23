@@ -30,15 +30,11 @@ classcontent.preremove:
 classcontent.prerender:
   listeners:
     - [BackBuilder\Event\Listener\RevisionListener, onPrerenderContent]
-    - [BackBuilder\Event\Listener\CacheListener, onPreRender]
- 
-classcontent.render:
-  listeners:
-    - [BackBuilder\Event\Listener\KeywordListener, onRender]
+    - [BackBuilder\Event\Listener\CacheListener, onPreRenderContent]
 
 classcontent.postrender:
   listeners:
-    - [BackBuilder\Event\Listener\CacheListener, onPostRender]
+    - [BackBuilder\Event\Listener\CacheListener, onPostRenderContent]
 
 element.file.postremove:
   listeners:
@@ -82,11 +78,20 @@ frontcontroller.request:
   listeners:
     - [@rest.listener.body, onRequest]
 
-
+kernel.request:
+  listeners:
+    - [@profiler.listener, onKernelRequest]
+    
 kernel.exception:
-    listeners:
+  listeners:
     - [@rest.listener.exception, onKernelException]
     
 kernel.controller:
-    listeners:
+  listeners:
     - [@rest.listener.validation, onKernelController]
+
+kernel.response:
+  listeners:
+    - [@profiler.toolbar.listener, onKernelResponse]
+    - [@profiler.listener, onKernelResponse]
+

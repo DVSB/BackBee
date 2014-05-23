@@ -31,3 +31,25 @@ To generate an unencoded signature, the following request properties are
 Therefore, the full unenecoded string that will be SHA1-encoded is:
 `http://www.test.com/rest/products/product/1.jsonvaluea1valueb34PATCH1234567890qwertyuiopasdfgh`
 which gives a SHA1 hash of `3533ee49900706750994209e0d92d208de1c86f5`
+
+
+Security
+-------------
+```
+firewalls:
+    rest_api_area:
+        pattern: ^/rest
+        provider: public_key
+        restful:  ~
+
+providers:
+    public_key:
+        entity:
+            class: BackBuilder\Security\User
+
+encoders:
+    BackBuilder\Security\User: 
+        class: BackBuilder\Security\Encoder\RequestSignatureEncoder
+        arguments: []
+```
+

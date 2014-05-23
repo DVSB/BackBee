@@ -40,7 +40,7 @@ abstract class AConverter implements IConverter
 
     /**
      * The current importer running
-     * @var \BackBuilder\Importer
+     * @var \BackBuilder\Importer\Importer
      */
     protected $_importer;
 

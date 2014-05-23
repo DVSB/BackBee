@@ -133,6 +133,7 @@ namespace <namespace>;
  * @Entity(repositoryClass="<repository>")
  * @Table(name="content")
  * @HasLifecycleCallbacks
+ * <docblock>
  */
 class <classname> extends <extends>
 {
@@ -186,6 +187,15 @@ class <classname> extends <extends>
         $defineParam = $this->_extractDatas($this->parameters);
         $defineProps = $this->properties;
 
+        $docBlock = '';
+        foreach($defineDatas as $key => $element) {
+            $type = $element['type'];
+            if('scalar' === $type) {
+                $type = 'string';
+            }
+            $docBlock .= "\n * @property " . $type . ' $' .  $key . ' ' . $element['options']['label'];
+        }
+        
         array_walk($defineDatas, function (&$value, $key) {
                     $value = "->_defineData('" . $key . "', '" . $value['type'] . "', " . var_export($value['options'], TRUE) . ")";
                 });
@@ -196,6 +206,9 @@ class <classname> extends <extends>
                     $value = "->_defineProperty('" . $key . "', " . var_export($value, TRUE) . ")";
                 });
 
+        
+        
+                
         $phpCode = str_replace(array('<namespace>',
             '<classname>',
             '<repository>',
@@ -203,14 +216,16 @@ class <classname> extends <extends>
             '<trait>',
             '<defineDatas>',
             '<defineParam>',
-            '<defineProps>'), array($this->namespace,
+            '<defineProps>',
+            '<docblock>'), array($this->namespace,
             $this->classname,
             $this->repository,
             $this->extends,
             $this->traits,
             (0 < count($defineDatas)) ? '$this' . implode('', $defineDatas) . ';' : '',
             (0 < count($defineParam)) ? '$this' . implode('', $defineParam) . ';' : '',
-            (0 < count($defineProps)) ? '$this' . implode('', $defineProps) . ';' : ''), $this->template);
+            (0 < count($defineProps)) ? '$this' . implode('', $defineProps) . ';' : '',
+            $docBlock), $this->template);
 
         return $phpCode;
 

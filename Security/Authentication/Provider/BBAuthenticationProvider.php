@@ -58,18 +58,27 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     private $_lifetime;
 
     /**
+     * The DB Registry repository to used to store nonce rather than file
+     * @var \BackBuillder\Bundle\Registry\Repository
+     */
+    private $_registryRepository;
+
+    /**
      * Class constructor
      * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
      * @param string $nonceDir
      * @param int $lifetime
+     * @param \BackBuillder\Bundle\Registry\Repository $registryRepository
      */
-    public function __construct(UserProviderInterface $userProvider, $nonceDir, $lifetime = 300)
+    public function __construct(UserProviderInterface $userProvider, $nonceDir, $lifetime = 300, $registryRepository = null)
     {
         $this->_userProvider = $userProvider;
         $this->_nonceDir = $nonceDir;
         $this->_lifetime = $lifetime;
+        $this->_registryRepository = $registryRepository;
 
-        if (false === file_exists($this->_nonceDir)) {
+        if (null === $this->_registryRepository &&
+                false === file_exists($this->_nonceDir)) {
             mkdir($this->_nonceDir, 0700, true);
         }
     }
@@ -85,19 +94,90 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function _checkNonce($digest, $nonce, $created, $secret)
     {
-        if (time() - strtotime($created) > 300)
+        if (time() - strtotime($created) > 300) {
             throw new SecurityException('Request expired', SecurityException::EXPIRED_TOKEN);
+        }
 
-        if (file_exists($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce)
-                && file_get_contents($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce) + $this->_lifetime < time())
-            throw new SecurityException('Prior authentication expired', SecurityException::EXPIRED_AUTH);
-
-        if (md5($nonce . $created . md5($secret)) !== $digest) // To Do : $secret devrait déjà être un md5
+        if (md5($nonce . $created . md5($secret)) !== $digest) {
+            // To Do : $secret devrait déjà être un md5
             throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
+        }
 
-        file_put_contents($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce, time());
+        if ((null !== $value = $this->_readNonceValue($nonce)) && $value + $this->_lifetime < time()) {
+//        if (file_exists($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce) && file_get_contents($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce) + $this->_lifetime < time())
+            throw new SecurityException('Prior authentication expired', SecurityException::EXPIRED_AUTH);
+        }
+
+        $this->_writeNonceValue($nonce);
+//        file_put_contents($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce, time());
 
         return TRUE;
+    }
+
+    /**
+     * Returns the nonce value if found, NULL otherwise
+     * @param type $nonce
+     * @return NULL|int
+     */
+    private function _readNonceValue($nonce)
+    {
+        $value = null;
+
+        if (null === $this->_registryRepository) {
+            if (true === is_readable($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce)) {
+                $value = file_get_contents($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce);
+            }
+        } else {
+            $value = $this->_getRegistry($nonce)
+                    ->getValue();
+        }
+
+        return $value;
+    }
+
+    /**
+     * Updates the nonce value
+     * @param string $nonce
+     */
+    private function _writeNonceValue($nonce)
+    {
+        if (null === $this->_registryRepository) {
+            file_put_contents($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce, time());
+        } else {
+            $registry = $this->_getRegistry($nonce)
+                    ->setValue(time());
+            $this->_registryRepository->save($registry);
+        }
+    }
+
+    /**
+     * Removes the nonce
+     * @param string $nonce
+     */
+    private function _removeNonce($nonce)
+    {
+        if (null === $this->_registryRepository) {
+            @unlink($this->_nonceDir . DIRECTORY_SEPARATOR . $nonce);
+        } else {
+            $registry = $this->_getRegistry($nonce);
+            $this->_registryRepository->remove($registry);
+        }
+    }
+
+    /**
+     * Returns a Registry entry for $nonce
+     * @param string $nonce
+     * @return \BackBuilder\Bundle\Registry
+     */
+    private function _getRegistry($nonce)
+    {
+        if (null === $registry = $this->_registryRepository->findOneBy(array('key' => $nonce, 'scope' => 'SECURITY.NONCE'))) {
+            $registry = new \BackBuilder\Bundle\Registry();
+            $registry->setKey($nonce)
+                    ->setScope('SECURITY.NONCE');
+        }
+
+        return $registry;
     }
 
     /**
@@ -147,10 +227,8 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      */
     public function clearNonce(TokenInterface $token)
     {
-        if (true === $this->supports($token)
-                && null !== $token->getNonce()
-                && true === is_writable($this->_nonceDir . DIRECTORY_SEPARATOR . $token->getNonce())) {
-            @unlink($this->_nonceDir . DIRECTORY_SEPARATOR . $token->getNonce());
+        if (true === $this->supports($token) && null !== $token->getNonce()) {
+            $this->_removeNonce($token->getNonce());
         }
     }
 

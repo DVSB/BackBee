@@ -64,6 +64,16 @@ class pageListener
                 if(null !== $old && null !== $old->getListener()) $old->getListener()->outInState($event);
                 
             }
+            
+            if ($eventArgs->hasChangedField('_state')) {
+                if (!($eventArgs->getOldValue('_state') & \BackBuilder\NestedNode\Page::STATE_ONLINE) &&
+                        $eventArgs->getNewValue('_state') & \BackBuilder\NestedNode\Page::STATE_ONLINE) {
+                    $event->getDispatcher()->triggerEvent('putonline', $page);
+                } elseif ($eventArgs->getOldValue('_state') & \BackBuilder\NestedNode\Page::STATE_ONLINE &&
+                        !($eventArgs->getNewValue('_state') & \BackBuilder\NestedNode\Page::STATE_ONLINE)) {
+                    $event->getDispatcher()->triggerEvent('putoffline', $page);
+                }
+            }
         }
 
     }

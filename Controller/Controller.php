@@ -150,6 +150,8 @@ class Controller
                 $bundle->getBaseDir();
                 $view = $bundle->getBaseDir() . '/Ressources/views/' . $view;
             }
+        } else {
+            $view = $this->getApplication()->getBBDir() . '/Resources/views/' . $view;
         }
 
         try {
@@ -157,7 +159,6 @@ class Controller
             $content = $this->renderer->partial($view, $parameters);
             $response->setContent($content);
         } catch(\Exception $e) {
-            var_dump($e);exit;
             throw $e;
         }
         

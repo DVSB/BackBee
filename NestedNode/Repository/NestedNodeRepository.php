@@ -35,8 +35,6 @@ use Doctrine\ORM\EntityRepository;
  */
 class NestedNodeRepository extends EntityRepository
 {
-    public static $counter = 0;
-    public static $updated_node = 0;
     private function _hasValidHierarchicalDatas($node)
     {
         if ($node->getLeftnode() >= $node->getRightnode())
@@ -60,8 +58,8 @@ class NestedNodeRepository extends EntityRepository
 
     public function updateHierarchicalDatas(ANestedNode $node, $leftnode = 1, $level = 0)
     {
-        $node->setLeftnode($leftnode)
-                ->setLevel($level);
+        $node->setLeftnode($leftnode)->setLevel($level);
+
         if (0 < $node->getChildren()->count()) {
             $children = $this->createQueryBuilder('n')
                     ->andWhere("n._parent = :parent")
@@ -69,6 +67,7 @@ class NestedNodeRepository extends EntityRepository
                     ->orderBy('n._leftnode', 'asc')
                     ->getQuery()
                     ->getResult();
+
             foreach ($children as $child) {
                 $child = $this->updateHierarchicalDatas($child, $leftnode + 1, $level + 1);
                 $leftnode = $child->getRightnode();
@@ -87,20 +86,6 @@ class NestedNodeRepository extends EntityRepository
                 ->execute();
 
         $this->_em->detach($node);
-        self::$updated_node++;
-
-        if (self::$counter === 0) {
-            \BackBuilder\Util\Buffer::dump(
-                'memory usage during update hierarchical data:' 
-                . \BackBuilder\Importer\Importer::convertMemorySize(memory_get_usage()) 
-                . '(updated node count: ' . self::$updated_node . ")\n"
-            );
-            self::$counter++;
-        } elseif (self::$counter === 1000) {
-            self::$counter = 0;
-        } else {
-            self::$counter++;
-        }
 
         return $node;
     }

@@ -28,6 +28,7 @@ use BackBuilder\BBApplication,
     BackBuilder\FrontController\Exception\FrontControllerException;
 use Symfony\Component\HttpFoundation\Response;
 use Psr\Log\LoggerInterface;
+use Doctrine\DBAL\Logging\DebugStack;
 
 /**
  * @category    BackBuilder
@@ -35,7 +36,7 @@ use Psr\Log\LoggerInterface;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Logger implements LoggerInterface, SQLLogger
+class Logger extends DebugStack  implements LoggerInterface, SQLLogger
 {
 
     const ERROR = 1;
@@ -246,6 +247,10 @@ class Logger implements LoggerInterface, SQLLogger
             $response->send();
             die();
         } else {
+            if (false === $this->_application->isClientSAPI()) {
+                header("HTTP/1.0 500 Internal Server Error");
+            }
+            
             echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')' . PHP_EOL;
             if (NULL !== $this->_application && $this->_application->debugMode()) {
                 foreach ($exception->getTrace() as $trace) {
@@ -277,7 +282,7 @@ class Logger implements LoggerInterface, SQLLogger
 //            return call_user_func($this->_exceptionHandlers, $exception);
 //        }
 
-        die();
+        exit(-1);
     }
 
     private function getTemplateError($trace)
@@ -458,4 +463,14 @@ class Logger implements LoggerInterface, SQLLogger
         }
     }
 
+    /**
+     * Get priority name by its code
+     * 
+     * @param int $code
+     * @return string|null
+     */
+    protected function getPriorityName($code)
+    {
+        return isset($this->_priorities[$code]) ? $this->_priorities[$code] : null;
+    }
 }

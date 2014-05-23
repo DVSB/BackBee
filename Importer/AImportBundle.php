@@ -49,6 +49,19 @@ abstract class AImportBundle
             return false;
         }
 
+        $log_filepath = $application->getConfig()->getLoggingConfig();
+        $log_filepath = $log_filepath['logfile'];
+
+        if ('/' !== $log_filepath[0] || false === is_dir(dirname($log_filepath))) {
+            $log_filepath = $application->getBaseDir() . '/log/import.log';
+        } else {
+            $log_filepath = dirname($log_filepath) . '/import.log';
+        }
+
+        $logger = new \BackBuilder\Logging\Appender\File(array(
+            'logfile' => $log_filepath
+        ));
+
         $this->setPhpConf($this->_config->getSection('php_ini'));
         foreach ($this->_relations as $class => $config) {
             $type = true === isset($config['type']) ? $config['type'] : 'import';
@@ -56,8 +69,16 @@ abstract class AImportBundle
                 $this->{$type . ucfirst($class)}($config);
             } catch (SkippedImportException $exc) {
                 echo $exc->getMessage() . "\n";
+            } catch (\Exception $e) {
+                $logger->write(array(
+                    'd' => date('Y/m/d H:i:s'),
+                    'p' => '',
+                    'm' => $e->getMessage(),
+                    'u' => '')
+                );
             }
         }
+
         return true;
     }
 
