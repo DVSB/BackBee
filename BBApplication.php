@@ -30,7 +30,9 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Exception\UnknownContextException,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
-    BackBuilder\Util\File;
+    BackBuilder\Util\File,
+    BackBuilder\Bundle\ABundle;
+
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager,
@@ -543,7 +545,7 @@ class BBApplication implements IApplication
 
     /**
      * @param type $name
-     * @return Bundle\ABundle
+     * @return ABundle
      */
     public function getBundle($name)
     {
@@ -555,6 +557,10 @@ class BBApplication implements IApplication
         return $bundle;
     }
 
+    /**
+     * 
+     * @return ABundle[]
+     */
     public function getBundles()
     {
         return $this->_bundles;
@@ -1156,4 +1162,45 @@ class BBApplication implements IApplication
         return isset($GLOBALS['argv']);
     }
 
+    
+    /**
+     * Finds and registers Commands.
+     *
+     * Override this method if your bundle commands do not follow the conventions:
+     *
+     * * Commands are in the 'Command' sub-directory
+     * * Commands extend Symfony\Component\Console\Command\Command
+     *
+     * @param Application $application An Application instance
+     */
+    public function registerCommands(Application $application)
+    {
+        if (is_dir($dir = $this->getBBDir() . '/Command')) {
+            // TODO
+        }
+        
+        
+        foreach($this->getBundles() as $bundle) {
+            if (!is_dir($dir = $bundle->getBaseDir() . '/Command')) {
+                continue;
+            }
+            
+            $finder = new Finder();
+            $finder->files()->name('*Command.php')->in($dir);
+
+            $prefix = $bundle->getNamespace().'\\Command';
+            foreach ($finder as $file) {
+                $ns = $prefix;
+                if ($relativePath = $file->getRelativePath()) {
+                    $ns .= '\\'.strtr($relativePath, '/', '\\');
+                }
+                $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
+                if ($r->isSubclassOf('Symfony\\Component\\Console\\Command\\Command') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                    $application->add($r->newInstance());
+                }
+            }
+        }
+
+        
+    }
 }
