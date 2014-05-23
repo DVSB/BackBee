@@ -51,6 +51,10 @@ class Config
      */
     const EVENTS_FILE = 'events';
 
+    /**
+     * System extention config file
+     * @var string
+     */
     const EXTENTION = 'yml';
 
     /**
@@ -348,6 +352,11 @@ class Config
         return $this->getSection();
     }
 
+    /**
+     * Set environment context
+     * @param string $env
+     * @return self
+     */
     public function setEnvironment($env)
     {
         $this->_environment = $env;
