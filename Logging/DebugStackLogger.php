@@ -90,11 +90,11 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
     public function log($level, $message, array $context = array())
     {
         parent::log($level, $message, $context);
-        
+
         $this->records[] = array(
             'message' => $message,
             'priority' => $level,
-            'priorityName' => isset($this->_priorities_name[strtoupper($level)]) ? $this->_priorities_name[strtoupper($level)] : $level,
+            'priorityName' => $this->getPriorityName($level) ? $this->getPriorityName($level) : $level,
             'context'      => isset($context['name']) ? $context['name'] : 'default',
         );
     }

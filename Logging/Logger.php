@@ -463,4 +463,14 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
         }
     }
 
+    /**
+     * Get priority name by its code
+     * 
+     * @param int $code
+     * @return string|null
+     */
+    protected function getPriorityName($code)
+    {
+        return isset($this->_priorities[$code]) ? $this->_priorities[$code] : null;
+    }
 }
