@@ -152,11 +152,16 @@ class PageRepository extends NestedNodeRepository
         return $q->getQuery()->getOneOrNullResult();
     }
 
-    public function getNotDeletedDescendants(ANestedNode $node, $depth = NULL, $includeNode = FALSE, $order = array(), $paginate = false, $firstresult = 0, $maxresult = 25)
+    public function getNotDeletedDescendants(ANestedNode $node, $depth = NULL, $includeNode = FALSE, $order = array(), $paginate = false, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
         $q = $this->_getDescendantsQuery($node, $depth, $includeNode)
                 ->andWhere('n._state < :deleted')
                 ->setParameter('deleted', Page::STATE_DELETED);
+        
+        if (true === $having_child) {
+            $q->andWhere('n._rightnode > (n._leftnode + 1)');
+        }
+        
         if (is_array($order) && !empty($order)) {
             if (array_key_exists("field", $order) && array_key_exists("sort", $order)) {
                 if (!empty($order["field"]) && !empty($order["sort"])) {
