@@ -12,6 +12,7 @@ define(["jscore"], function(){
         var _instance = null;
         var _hasError = false; 
         var _try = 0; 
+        var _loadingTracks = {};
         /* module config is used to handle dependencies
          * and others stuffs
          * put in a global config
@@ -40,10 +41,7 @@ define(["jscore"], function(){
         var AbstactManager = new JS.Class({
             
             initDefaultSettings: function(){
-                this._settings = {
-                    "dead":"dyolè",
-                    "test":"sdsd"
-                };
+                this._settings = {};
             },
             
             initialize: function(){
@@ -55,7 +53,7 @@ define(["jscore"], function(){
                 return {};
             },
             
-            getMedator: function(){},
+            getMediator: function(){},
          
           
             enable: function(){
@@ -104,7 +102,6 @@ define(["jscore"], function(){
                         _managers[name] = Manager;
                     }  
                 }catch(e){
-                    console.log("sddsd");
                     console.log(e);
                 }
                 
@@ -117,7 +114,7 @@ define(["jscore"], function(){
             this.getManager = function(name,newInstance){   
                 var self = this;
                 try{
-                    var newInstance = (typeof newInstance =="boolean")? newInstance : false;
+                    newInstance = (typeof newInstance =="boolean")? newInstance : false;
                     if(typeof _managers[name] == "function"){
                         var bbManager = new _managers[name];
                         _managerInstances[name] = bbManager.getPublicApi();
@@ -130,17 +127,21 @@ define(["jscore"], function(){
                         return _managerInstances[name];
                     } 
                     else{
-                        if(_try != 0){
-                            _try = 0;
+                        if(typeof _loadingTracks[name] == "undefined"){
+                           _loadingTracks[name] = 0; 
+                        }
+                        
+                        if(_loadingTracks[name] != 0){
+                            _loadingTracks[name] = 0;
                             throw "getManager: manager ["+name+"] can't be loaded!"; 
                         }
                         var adapterPath = _settings.managerPath+name+".manager.js";
-                        _try++;
+                        _loadingTracks[name] = _loadingTracks[name] + 1;
                         bb.Utils.ScriptLoader.loadScript({
                             scriptname: adapterPath, 
                             async: true, 
                             onError: function(e){
-                                throw "error while loading";
+                                throw "error while loading "+adapterPath;
                             }
                         });
                         return self.getManager(name);

@@ -312,8 +312,8 @@ class ClassContentRepository extends EntityRepository
             if (0 < count($uids)) {
                 // Data protection
                 array_walk($uids, function(&$item) {
-                    $item = addslashes($item);
-                });
+                            $item = addslashes($item);
+                        });
 
                 // Getting classnames for provided uids
                 $classnames = $this->_em
@@ -880,6 +880,88 @@ class ClassContentRepository extends EntityRepository
         }
 
         return $content;
+    }
+
+    /**
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return Collection<Page>
+     */
+    public function findPagesByContent($content)
+    {
+        /* Remoter à la racine pour trouver sur quelle page se trouve le contenu */
+        $rootContents = array();
+        $this->getRootContentParents($content, $rootContents);
+        $qb = $this->_em->createQueryBuilder("p");
+        $qb->select("p")->from("BackBuilder\NestedNode\Page", "p")
+                ->andWhere('p._contentset IN (:contentset)')
+                ->setParameter('contentset', $rootContents);
+        $result = $qb->getQuery()->getResult();
+        return $result;
+    }
+
+    private function getRootContentParents($content, &$rootContainer)
+    {
+        $contentParents = $content->getParentContent();
+        /* if it has no parents --> is a root element */
+        if ($contentParents->isEmpty()) {
+            $rootContainer[] = $content;
+        } else {
+            foreach ($contentParents as $content) {
+                $this->getRootContentParents($content, $rootContainer);
+            }
+        }
+        return $rootContainer;
+    }
+
+    /**
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return 
+     */
+
+    /**
+     * 1. effacer les contenus
+     * 
+     */
+    public function deleteContent(AClassContent $content, $updateParent = true)
+    {
+
+        if (!($content instanceof ContentSet)) {
+            /* 1. Effacer les contenus */
+            $elements = $content->getData();
+            foreach ($elements as $key => $element) {
+                if (is_a($element, 'BackBuilder\Content\AClassContent')) {
+                    $parents = $element->getParentContent();
+                    /* it's the case for non-complex elements */
+                    if ($parents->count() == 1) {
+                        $this->deleteContent($element, false);
+                        $this->_em->remove($element);
+                    } else {
+                        $content->unsetSubContent($element);
+                    }
+                }
+            }
+        } else {
+            /* si c'est un contentset le vider avant de l'effacer */
+            $content->clear();
+            $this->_em->remove($content);
+        }
+        if ($updateParent) {
+            $contentParents = $content->getParentContent();
+            if (!is_null($contentParents) && !$contentParents->isEmpty()) {
+                foreach ($contentParents as $parent) {
+                    $parent->unsetSubContent($content);
+                    /* persist the change on parent */
+                    $this->_em->persist($parent);
+                }
+            }
+            $this->_em->remove($content);
+            $this->_em->flush();
+        }
+    }
+
+    private function deleteSubContents()
+    {
+        
     }
 
 }

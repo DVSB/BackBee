@@ -932,8 +932,8 @@ abstract class AClassContent extends AContent
             if (is_array($value)) {
                 $totalContent = count($value);
                 foreach ($value as $cKey => $cValue) {
-                    $contentType = end(array_keys($cValue));
-                    $contentUid = end(array_values($cValue));
+                    //$contentType = end(array_keys($cValue));
+                    $contentUid = (is_array($cValue)) ? end(array_values($cValue)) : $cValue;
                     if ($subContent->getUid() == $contentUid) {
                         if ($totalContent == 1) {
                             $this->_data[$key] = array();

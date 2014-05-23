@@ -449,5 +449,4 @@ class PageRepository extends NestedNodeRepository
             $this->delete($page);
         }
     }
-
 }

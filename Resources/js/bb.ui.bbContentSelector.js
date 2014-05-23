@@ -69,7 +69,12 @@
             +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
             +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
             +"<p>Date de création: <strong>${created}</strong></p>"
-            +'<p><button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button><button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button><button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button></p>'
+            +'<p>\n\
+                    <button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button>\n\
+                    <button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button>\n\
+                    <button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button>\n\
+                    <button class="bb5-button bb5-ico-del deleteContent">Effacer le contenu</button>\n\
+              </p>'
             +'</li>';
             this._templates.contentItemTemplate = bb.jquery.template(itemTemplate);
             
@@ -167,7 +172,7 @@
                 async : false, 
                 success: function(result) {
                     var context = self.getContext();
-                    select = bb.jquery(self.element).find('.bb5-available-sites').eq(0);
+                    var select = bb.jquery(self.element).find('.bb5-available-sites').eq(0);
 
                     //select change event
                     select.bind('change', function() {
@@ -250,29 +255,29 @@
         
         _initPageTree : function(){
             var self = this;
-//            if(!this.pageTree){
-                var  pageTree = bb.jquery(this.element).find(this.options.pageTreeContaineClass).eq(0);
-                this.pageTree = bb.jquery(pageTree).bbPageBrowser({
-                    popup : false,
-                    editMode : false,
-                    site : self.getContext().site,
-                    // breadcrumb : bb.frontApplication.getBreadcrumbIds(),
-                    enableNavigation : false,
-                    select:function(e,nodeInfos){
-                        /*do nothing on root*/
-                        var context = self.getContext();
-                        context.selectedPageId = nodeInfos.node_id;
-                        self.searchEngine.setSelectedPage(context.selectedPageId);
-                        var criteria = self.searchEngine.getSearchCriteria();
-                        if(context.selected){
-                            criteria.typeField = context.selected;
-                            self._showContent(criteria);
-                        }                      
-                        self.setContext(context);
-                    }
-                });
+            //            if(!this.pageTree){
+            var  pageTree = bb.jquery(this.element).find(this.options.pageTreeContaineClass).eq(0);
+            this.pageTree = bb.jquery(pageTree).bbPageBrowser({
+                popup : false,
+                editMode : false,
+                site : self.getContext().site,
+                // breadcrumb : bb.frontApplication.getBreadcrumbIds(),
+                enableNavigation : false,
+                select:function(e,nodeInfos){
+                    /*do nothing on root*/
+                    var context = self.getContext();
+                    context.selectedPageId = nodeInfos.node_id;
+                    self.searchEngine.setSelectedPage(context.selectedPageId);
+                    var criteria = self.searchEngine.getSearchCriteria();
+                    if(context.selected){
+                        criteria.typeField = context.selected;
+                        self._showContent(criteria);
+                    }                      
+                    self.setContext(context);
+                }
+            });
                 
-//            }
+        //            }
         },
           
         selectModeView :function(viewMode){
@@ -452,7 +457,7 @@
                 var context = this.getContext();
                 var item = bb.jquery(e.currentTarget).parents(this.options.contentItemClass);
                 var itemUid = bb.jquery(item).attr("data-uid");
-                
+                var data = $(item).data();
                 if(bb.jquery(e.currentTarget).hasClass("addClose")){
                     this.selectedContent.set(itemUid,item);
                     this.setContext(context);
@@ -477,10 +482,13 @@
                 }
                 
                 if(bb.jquery(e.currentTarget).hasClass("bb5-ico-preview")){
-                  var data = $(item).data();
-                  if($.isPlainObject(data)){
-                      this._showContentPreview(data.content); 
-                  }
+                    if($.isPlainObject(data)){
+                        this._showContentPreview(data.content); 
+                    }
+                }
+                
+                if(bb.jquery(e.currentTarget).hasClass("bb5-ico-del")){
+                    this._showDeleteDialog(data.content);
                 }
             },
             
@@ -498,6 +506,7 @@
             
             nodeClickHandler :function (e) {
                 var context = this.getContext();
+                e = e || context.lastEvent; //useful if we want to recall  
                 if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
                     /*do nothing for root*/
                     var isRoot = (bb.jquery(context.treeview.jstree('get_selected')).attr('rel').toUpperCase() == "ROOT") ? true : false;
@@ -509,6 +518,8 @@
                     var searchCriteria = this.searchEngine.getSearchCriteria();
                     this._showContent(searchCriteria);
                 }
+                context.lastEvent = e;
+                this.setContext(context);
             },
             
             createHandler : function(e, data) {
@@ -532,10 +543,8 @@
         destroy : function(){
             bb.jquery.Widget.prototype.destroy.call(this);
         }, 
-    
         /* proxies */
         publicApi : {},
-        
         getContext: function() {
             return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         },
@@ -544,14 +553,41 @@
             return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
         
-        _showContentPreview: function(content){
+        _showDeleteDialog: function(content){
+            var self = this;
+            bb.require(["ManagerFactory"], function(ContentManager){
+                try{
+                    if(!self.contentManager){
+                        self.contentManager = ContentManager.getManager("content"); 
+                        self.contentManager.init({
+                            ws: bb.webserviceManager.getInstance("ws_local_classContent"),
+                            onDeleteContent: function(){
+                                self.callbacks.nodeClickHandler.call(self);
+                            }
+                        });  
+                    }
+                    self.contentManager.showDeleteDialog(content);
+                }catch(e){
+                    throw e;
+                }
+            });
             
-            var ws = bb.webserviceManager.getInstance('ws_local_contentBlock');
-            ws.request("showPreview", {
-               params: {
-                   contentUid : content.uid,
-                   contentType: content.type
-               }
+        },
+        
+        
+        
+        _showContentPreview: function(content){
+            var self = this;
+            bb.require(["ManagerFactory"], function(Manager){
+                try{
+                    self.contentPreviewManager = Manager.getManager("contentpreview");
+                    self.contentPreviewManager.init({
+                        ws :bb.webserviceManager.getInstance('ws_local_contentBlock')
+                    });
+                    self.contentPreviewManager.showPreview(content.uid, content.type);
+                }catch(e){
+                    throw e;
+                }
             });
         },
         
@@ -601,14 +637,16 @@
             bb.jquery(this.element).find('.bb5-listContainer').empty();
             //this.element.find(".bb5-windowpane-main").mask(bb.i18n.loading);
             this._mask("show");
+            var limit = $(this.element).find(".maxPerPageSelector").eq(0).val() || 50;
             var pagerParams = {
                 params : criteria,
                 site: context.site,
                 order_sort: '_title',
                 order_dir: 'asc',
-                limit:5,
+                limit: limit,
                 start:0
             };
+            $(this.element).find("")
             var onLoad = function(data){
                 this._populateView(data);
                 this._mask("hide");
@@ -622,7 +660,7 @@
             var myself = this;
             var context = this.getContext();
             var successCallback = (typeof successCallback!= "function")? new Function("console.log('successCallback function must be provided');") : successCallback; 
-            var pagerParams = pagerParams || false;
+            pagerParams = pagerParams || false;
             if(!pagerParams) return false;
             if(context.contentPager){
                 bb.jquery(context.contentPager).bbUtilsPager("updatePostParams",pagerParams);
@@ -644,12 +682,13 @@
                     },
                     callback: successCallback,
                     errorCallback : function(response){
-                        alert("The server sent an error message, please check your request.");
+                        alert("The server has sent an error message, please check your request.");
                         myself._mask("hide");
                     } 
                 });
+                this.setContext(context); 
             }
-            this.setContext(context);   
+             
         }, 
         
         _populateView : function(response){
