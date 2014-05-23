@@ -217,7 +217,7 @@ class Page extends AbstractServiceLocal
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25)
+    public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
         if (null === $site = $this->getEntityManager()->find('\BackBuilder\Site\Site', strval($site_uid))) {
             throw new InvalidArgumentException(sprintf('Site with uid `%s` does not exist', $site_uid));
@@ -231,12 +231,12 @@ class Page extends AbstractServiceLocal
             $leaf->attr = json_decode($page->serialize());
             $leaf->data = $page->getTitle();
             $leaf->state = $page->isLeaf() ? 'leaf' : 'open';
-            $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult);
+            $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult, $having_child);
             $tree[] = $leaf;
         } else {
             try {
                 $this->isGranted('VIEW', $page);
-                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult);
+                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult, $having_child);
                 $tree['numresults'] = $children->count();
                 $tree['firstresult'] = $firstresult;
                 $tree['maxresult'] = $maxresult;

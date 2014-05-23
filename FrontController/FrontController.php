@@ -648,6 +648,11 @@ class FrontController implements HttpKernelInterface
      */
     public function handle(Request $request = null, $type = self::MASTER_REQUEST, $catch = true)
     {
+        // request
+        $event = new GetResponseEvent($this, $this->getRequest(), $type);
+        
+        $this->_application->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
+        
         try {
             $this->_request = $request;
 

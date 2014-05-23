@@ -857,6 +857,7 @@
                         },
                         editMode: false,
                         enableMultiSite: true,
+                        having_child: true,
                         site: bb.frontApplication.getSiteUid(),
                         breadcrumb: bb.frontApplication.getBreadcrumbIds(),
                         select: function(e, data) {

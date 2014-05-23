@@ -56,17 +56,18 @@ final class ChainAnnotationReader implements Reader
     public function getClassAnnotations(\ReflectionClass $class)
     {
         $e = null;
+        $annotations = array();
         
         foreach($this->delegates as $delegateReader) {
             try {
-                return $delegateReader->getClassAnnotations($class);
+                $annot = $delegateReader->getClassAnnotations($class);
+                $annotations = array_merge_recursive($annotations, $annot);
             } catch (AnnotationException $e) {
                 continue;
             }
         }
         
-        // re-throw the last exception
-        throw $e;
+        return $annotations;
     }
 
     /**
@@ -90,16 +91,18 @@ final class ChainAnnotationReader implements Reader
     {
         $e = null;
         
+        $annotations = array();
+        
         foreach($this->delegates as $delegateReader) {
             try {
-                return $delegateReader->getPropertyAnnotations($property);
+                $annot = $delegateReader->getPropertyAnnotations($property);
+                $annotations = array_merge_recursive($annotations, $annot);
             } catch (AnnotationException $e) {
                 continue;
             }
         }
         
-        // re-throw the last exception
-        throw $e;
+        return $annotations;
     }
 
     /**
@@ -122,17 +125,19 @@ final class ChainAnnotationReader implements Reader
     public function getMethodAnnotations(\ReflectionMethod $method)
     {
         $e = null;
+
+        $annotations = array();
         
         foreach($this->delegates as $delegateReader) {
             try {
-                return $delegateReader->getMethodAnnotations($method);
+                $annot = $delegateReader->getMethodAnnotations($method);
+                $annotations = array_merge_recursive($annotations, $annot);
             } catch (AnnotationException $e) {
                 continue;
             }
         }
         
-        // re-throw the last exception
-        throw $e;
+        return $annotations;
     }
 
     /**

@@ -23,7 +23,7 @@
         
         /*avoir l'assurance que les dépendances seront chargées*/
         init: function(userSettings){
-            var userSettings = userSettings || {};
+            userSettings = userSettings || {};
             this._settings = bb.jquery.extend({},this._settings,userSettings);
             this.rteAdapter = null;
             var self = this;

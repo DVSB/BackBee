@@ -194,6 +194,16 @@ class Renderer extends ARenderer
 
         return $this->rendererAdapters->get($adapter);
     }
+    
+    /**
+     * 
+     * @param string $ext
+     * @return IRendererAdapter
+     */
+    public function getAdapterByExt($ext)
+    {
+        return $this->determineWhichAdapterToUse('.' . $ext);
+    }
 
     /**
      * Set the adapter referenced by $adapterKey as defaultAdapter to use in conflict

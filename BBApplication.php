@@ -44,7 +44,8 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\Validator\Validation;
+    Symfony\Component\Validator\Validation,
+    Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
  * The main BackBuilder5 application
@@ -209,8 +210,10 @@ class BBApplication implements IApplication
             $this->_container->setDefinition('bb_session', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
 
             return $this;
-        }
-
+        } 
+        
+        $this->_container->setDefinition('bbapp', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
+        
         $dirToLookingFor = array();
         $dirToLookingFor[] = $this->getBBDir() . '/' . 'Config';
         $dirToLookingFor[] = $this->getBaseRepository() . '/' . 'Config';
@@ -231,13 +234,27 @@ class BBApplication implements IApplication
                 $loader->load('services.xml');
             }
         }
-
+        
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
+        
         $this->_container->set('service_container', $this->_container);
+        $this->_container->setParameter('debug', $this->_debug);
 
 
         $this->_initBBAppParamsIntoContainer();
+        
+        if($this->_debug) {
+            $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
+                $this->_container->getParameter('bbapp.logger_debug.class'),
+                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
+            ));
+        } else {
+            $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
+                $this->_container->getParameter('bbapp.logger.class'),
+                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
+            ));
+        }
 
         $this->_initExternalBundleServices();
 
@@ -462,8 +479,17 @@ class BBApplication implements IApplication
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
+        
         try {
-            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogging(), $evm);
+            $logger = $this->getLogging();
+            
+            if($this->isDebugMode()) {
+                // doctrine data collector
+                $this->getContainer()->get('data_collector.doctrine')->addLogger('default', $this->getContainer()->get('doctrine.dbal.logger.profiling'));
+                $logger = $this->getContainer()->get('doctrine.dbal.logger.profiling');
+            }
+            
+            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
             $this->getContainer()->set('em', $em);
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));

@@ -159,7 +159,6 @@ class Controller
             $content = $this->renderer->partial($view, $parameters);
             $response->setContent($content);
         } catch(\Exception $e) {
-            var_dump($e);exit;
             throw $e;
         }
         
