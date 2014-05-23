@@ -21,14 +21,18 @@
 
 namespace BackBuilder\Logging;
 
+use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder/Logging
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class DebugStackLogger extends Logger
+class DebugStackLogger extends Logger implements DebugLoggerInterface
 {
+    protected $records = array();
+    
     /**
      * Executed SQL queries.
      *
@@ -53,7 +57,10 @@ class DebugStackLogger extends Logger
      */
     public $currentQuery = 0;
     
-    
+    /**
+     * 
+     * @inheritDoc
+     */
     public function startQuery($sql, array $params = null, array $types = null)
     {
         if ($this->enabled) {
@@ -64,6 +71,9 @@ class DebugStackLogger extends Logger
         parent::startQuery($sql, $params, $types);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function stopQuery()
     {
         if ($this->enabled) {
@@ -73,5 +83,37 @@ class DebugStackLogger extends Logger
     }
 
 
+    /**
+     * 
+     * @inheritDoc
+     */
+    public function log($level, $message, array $context = array())
+    {
+        parent::log($level, $message, $context);
+        
+        $this->records[] = array(
+            'message' => $message,
+            'priority' => $level,
+            'priorityName' => isset($this->_priorities_name[strtoupper($level)]) ? $this->_priorities_name[strtoupper($level)] : $level,
+            'context'      => isset($context['name']) ? $context['name'] : 'default',
+        );
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function getLogs()
+    {
+        return $this->records;
+    }
+    
+    /**
+     *
+     * @inheritDoc
+     */
+    public function countErrors() 
+    {
+        
+    }
 
 }

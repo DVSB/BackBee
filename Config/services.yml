@@ -10,6 +10,7 @@ parameters:
     bbapp.cachecontrol.class: BackBuilder\Cache\DAO\Cache
     bbapp.config.class: BackBuilder\Config\Config
     bbapp.logger.class: BackBuilder\Logging\Logger
+    bbapp.logger_debug.class: BackBuilder\Logging\DebugStackLogger
     bbapp.securitycontext.class: BackBuilder\Security\SecurityContext
     bbapp.controller.class: BackBuilder\FrontController\FrontController
     bbapp.renderer.class: BackBuilder\Renderer\Renderer
@@ -86,9 +87,6 @@ services:
         arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap"]
     ed:
         class:      %bbapp.ed.class%
-        arguments:  ["@bbapp"]
-    logging:
-        class:      %bbapp.logger.class%
         arguments:  ["@bbapp"]
     security.context:
         class:      %bbapp.securitycontext.class%
@@ -233,7 +231,7 @@ services:
 
     data_collector.logger:
         class: %bbapp.collector.logger.class%
-        arguments:  [@?logging]
+        arguments:  [@logging]
         tags:
             - { name: monolog.logger,  channel: profiler }
     
@@ -262,8 +260,12 @@ services:
     doctrine.dbal.logger.profiling:
         class: %bbapp.dbal.logger.profiling.class%
         arguments:  ["@bbapp"]
-
+    
     # synthetic services
+    logging:
+        synthetic: true
+    bbapp:
+        synthetic: true
     site:
         synthetic: true
     em:

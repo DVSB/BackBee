@@ -241,6 +241,18 @@ class BBApplication implements IApplication
 
         $this->_initBBAppParamsIntoContainer();
 
+        if($this->_debug) {
+            $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
+                $this->_container->getParameter('bbapp.logger_debug.class'),
+                array($this->_container->get('bbapp'))
+            ));
+        } else {
+            $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
+                $this->_container->getParameter('bbapp.logger.class'),
+                array($this->_container->get('bbapp'))
+            ));
+        }
+
         $this->_initExternalBundleServices();
 
         if (false === $this->isDebugMode() &&
