@@ -267,25 +267,17 @@ class ClassContentRepository extends EntityRepository
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
 
-				
-		$index = 0;
-
-        foreach($selector['orderby'] as $orderby) {
-		
-			if (true === property_exists('BackBuilder\NestedNode\Page', '_' . $orderby[0])) {
-				$q->join('c._mainnode', 'p')
-						->orderBy('p._' . $orderby[0], count($orderby) > 1 ? $orderby[1] : 'desc');
-			} else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $orderby[0])) {
-				$q->orderBy('c._' . $orderby[0], count($orderby) > 1 ? $orderby[1] : 'desc');
-			} else {
-                $q->leftJoin('c._indexation', 'isort'.$index)
-						->andWhere('isort'.$index.'._field = :sort'.$index)
-						->setParameter('sort'.$index, $orderby[0])
-						->addOrderBy('isort'.$index.'._value', count($orderby) > 1 ? $orderby[1] : 'asc');
-						
-				 $index++;
-			}
-		}
+        if (true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
+            $q->join('c._mainnode', 'p')
+                    ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        } else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
+            $q->orderBy('c._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        } else {
+            $q->leftJoin('c._indexation', 'isort')
+                    ->andWhere('isort._field = :sort')
+                    ->setParameter('sort', $selector['orderby'][0])
+                    ->orderBy('isort._value', count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        }
 
         $result = $q->getQuery()->getResult();
 
