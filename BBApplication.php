@@ -86,6 +86,7 @@ class BBApplication implements IApplication
     private $_classcontentdir;
     private $_theme;
     private $_overwrite_config;
+    private $_environment;
 
     public function __call($method, $args)
     {
@@ -99,14 +100,15 @@ class BBApplication implements IApplication
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
      */
-    public function __construct($context = null, $debug = false, $overwrite_config = false)
+    public function __construct($context = null, $environment = 'production', $overwrite_config = false)
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
-        $this->_debug = (Boolean) $debug;
+        $this->_debug = ($environemment == 'dev') ? true : false;
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
+        $this->_environment = $environment;
 
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
@@ -140,17 +142,15 @@ class BBApplication implements IApplication
 
 
         $this->_initContainer()
-                ->_initAutoloader()
-                ->_initContentWrapper()
-                ->_initEntityManager()
-                ->_initBundles();
+             ->_initAutoloader()
+             ->_initContentWrapper()
+             ->_initEntityManager()
+             ->_initBundles();
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
             return;
         }
-
-
 
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
@@ -275,7 +275,10 @@ class BBApplication implements IApplication
     {
         // Retrieving config.yml without calling Config services
         $config = array();
-        $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.yml';
+        $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.' . $this->_environment . '.yml';
+        if (!file_exists($filename)) {
+            $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.yml';
+        }
         if (true === is_readable($filename)) {
             $config = Yaml::parse($filename);
         }
@@ -429,6 +432,7 @@ class BBApplication implements IApplication
                 throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
             }
 
+            $this->getContainer()->get('config')->setEnvironement($this->_environment);
             $this->getContainer()->get('config')->extend($this->getRepository() . '/' . 'Config', $this->_overwrite_config);
         }
         return $this;
@@ -808,6 +812,7 @@ class BBApplication implements IApplication
             $this->getContainer()
                     ->get('config')
                     ->setContainer($this->getContainer())
+                    ->setEnvironment($this->_environment)
                     ->extend($this->getBBConfigDir());
 
             $this->_initContextConfig();
