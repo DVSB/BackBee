@@ -57,7 +57,7 @@ class Console extends ConsoleApplication
 
         parent::__construct('BackBuilder', BBApplication::VERSION . ($application->isDebugMode() ? '/debug' : ''));
 
-        $this->getDefinition()->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $kernel->getEnvironment()));
+        $this->getDefinition()->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $this->_application->getEnvironment()));
         $this->getDefinition()->addOption(new InputOption('--no-debug', null, InputOption::VALUE_NONE, 'Switches off debug mode.'));
     }
 

@@ -104,7 +104,7 @@ class BBApplication implements IApplication
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
-        $this->_debug = ($environemment == 'dev') ? true : false;
+        $this->_debug = ($environment == 'dev') ? true : false;
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
@@ -818,6 +818,16 @@ class BBApplication implements IApplication
             $this->_initContextConfig();
         }
         return $this->getContainer()->get('config');
+    }
+    
+    /**
+     * Get current environment
+     * 
+     * @return string
+     */
+    public function getEnvironment() 
+    {
+        return $this->_environment;
     }
 
     public function getConfigDir()
