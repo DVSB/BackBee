@@ -1206,7 +1206,7 @@ class BBApplication implements IApplication
                     $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
-                if ($r->isSubclassOf('Symfony\\Component\\Console\\Command\\Command') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                     $application->add($r->newInstance());
                 }
             }
@@ -1229,8 +1229,10 @@ class BBApplication implements IApplication
                     $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
-                if ($r->isSubclassOf('Symfony\\Component\\Console\\Command\\Command') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
-                    $application->add($r->newInstance());
+                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                    $instance = $r->newInstance();
+                    $instance->setBundle($bundle);
+                    $application->add($instance);
                 }
             }
         }

@@ -38,6 +38,12 @@ class ACommand extends Command
      * @var ContainerInterface|null
      */
     private $container;
+    
+    /**
+     *
+     * @var \BackBuilder\Bundle\ABundle
+     */
+    protected $bundle;
 
     /**
      * @return ContainerInterface
@@ -58,5 +64,22 @@ class ACommand extends Command
     {
         $this->container = $container;
     }
+
+    /**
+     * 
+     * @param \BackBuilder\Bundle\ABundle $bundle
+     */
+    public function setBundle($bundle)
+    {
+        $this->bundle = $bundle;
+    }
     
+    /**
+     * 
+     * @return \BackBuilder\Bundle\ABundle
+     */
+    public function getBundle()
+    {
+        return $this->bundle;
+    }
 }
