@@ -30,7 +30,9 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Exception\UnknownContextException,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
-    BackBuilder\Util\File;
+    BackBuilder\Util\File,
+    BackBuilder\Bundle\ABundle;
+
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager,
@@ -45,7 +47,10 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
+    Symfony\Component\Console\Application,
+    Symfony\Component\Finder\Finder;
+
 
 /**
  * The main BackBuilder5 application
@@ -82,6 +87,7 @@ class BBApplication implements IApplication
     private $_classcontentdir;
     private $_theme;
     private $_overwrite_config;
+    private $_environment;
 
     public function __call($method, $args)
     {
@@ -95,14 +101,15 @@ class BBApplication implements IApplication
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
      */
-    public function __construct($context = null, $debug = false, $overwrite_config = false)
+    public function __construct($context = null, $environment = 'production', $overwrite_config = false)
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
-        $this->_debug = (Boolean) $debug;
+        $this->_debug = ($environment == 'dev') ? true : false;
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
+        $this->_environment = $environment;
 
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
@@ -136,17 +143,15 @@ class BBApplication implements IApplication
 
 
         $this->_initContainer()
-                ->_initAutoloader()
-                ->_initContentWrapper()
-                ->_initEntityManager()
-                ->_initBundles();
+             ->_initAutoloader()
+             ->_initContentWrapper()
+             ->_initEntityManager()
+             ->_initBundles();
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
             return;
         }
-
-
 
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
@@ -186,7 +191,7 @@ class BBApplication implements IApplication
         // Construct service container
         $this->_container = new ContainerBuilder();
 
-        $default_cachedir = $this->getBaseDir() . '/cache';
+        $default_cachedir = $this->getBaseDir() . '/cache/' . $this->_environment;
         $default_cacheclass = 'bb'.md5('__container__' . $this->getContext());
         $default_cachefile = $default_cacheclass . '.php';
 
@@ -271,7 +276,10 @@ class BBApplication implements IApplication
     {
         // Retrieving config.yml without calling Config services
         $config = array();
-        $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.yml';
+        $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.' . $this->_environment . '.yml';
+        if (!file_exists($filename)) {
+            $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.yml';
+        }
         if (true === is_readable($filename)) {
             $config = Yaml::parse($filename);
         }
@@ -286,7 +294,7 @@ class BBApplication implements IApplication
         $this->_container->setParameter('bbapp.context', $this->getContext());
 
         // define cache dir
-        $cachedir = $this->getBaseDir() . '/' . 'cache';
+        $cachedir = $this->getBaseDir() . '/cache/' . $this->_environment;
         if (true === isset($config['parameters']['cache_dir']) && false === empty($config['parameters']['cache_dir'])) {
             $cachedir = $config['parameters']['cache_dir'];
         }
@@ -425,6 +433,7 @@ class BBApplication implements IApplication
                 throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
             }
 
+            $this->getContainer()->get('config')->setEnvironement($this->_environment);
             $this->getContainer()->get('config')->extend($this->getRepository() . '/' . 'Config', $this->_overwrite_config);
         }
         return $this;
@@ -543,7 +552,7 @@ class BBApplication implements IApplication
 
     /**
      * @param type $name
-     * @return Bundle\ABundle
+     * @return ABundle
      */
     public function getBundle($name)
     {
@@ -555,6 +564,10 @@ class BBApplication implements IApplication
         return $bundle;
     }
 
+    /**
+     * 
+     * @return ABundle[]
+     */
     public function getBundles()
     {
         return $this->_bundles;
@@ -800,11 +813,22 @@ class BBApplication implements IApplication
             $this->getContainer()
                     ->get('config')
                     ->setContainer($this->getContainer())
+                    ->setEnvironment($this->_environment)
                     ->extend($this->getBBConfigDir());
 
             $this->_initContextConfig();
         }
         return $this->getContainer()->get('config');
+    }
+    
+    /**
+     * Get current environment
+     * 
+     * @return string
+     */
+    public function getEnvironment() 
+    {
+        return $this->_environment;
     }
 
     public function getConfigDir()
@@ -1156,4 +1180,63 @@ class BBApplication implements IApplication
         return isset($GLOBALS['argv']);
     }
 
+    
+    /**
+     * Finds and registers Commands.
+     *
+     * Override this method if your bundle commands do not follow the conventions:
+     *
+     * * Commands are in the 'Command' sub-directory
+     * * Commands extend Symfony\Component\Console\Command\Command
+     *
+     * @param Application $application An Application instance
+     */
+    public function registerCommands(Application $application)
+    {
+        if (is_dir($dir = $this->getBBDir() . '/Command')) {
+            $finder = new Finder();
+            
+            $finder->files()->name('*Command.php')->in($dir);
+            
+            $prefix = 'BackBuilder\\Command';
+            
+            foreach ($finder as $file) {
+                $ns = $prefix;
+                if ($relativePath = $file->getRelativePath()) {
+                    $ns .= '\\'.strtr($relativePath, '/', '\\');
+                }
+                $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
+                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                    $application->add($r->newInstance());
+                }
+            }
+        }
+        
+        
+        foreach($this->getBundles() as $bundle) {
+            if (!is_dir($dir = $bundle->getBaseDir() . '/Command')) {
+                continue;
+            }
+            
+            $finder = new Finder();
+            $finder->files()->name('*Command.php')->in($dir);
+
+            $prefix = $bundle->getNamespace() . '\\Command';
+
+            foreach ($finder as $file) {
+                $ns = $prefix;
+                if ($relativePath = $file->getRelativePath()) {
+                    $ns .= '\\'.strtr($relativePath, '/', '\\');
+                }
+                $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
+                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                    $instance = $r->newInstance();
+                    $instance->setBundle($bundle);
+                    $application->add($instance);
+                }
+            }
+        }
+
+        
+    }
 }

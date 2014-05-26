@@ -66,6 +66,12 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      * @var boolean
      */
     private $isConfigFullyInit = false;
+    
+    /**
+     *
+     * @var \ReflectionObject
+     */
+    protected $reflected;
 
     public function __call($method, $args)
     {
@@ -467,4 +473,17 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }
 
+    /**
+     * Get the Bundle namespace.
+     *
+     * @return string
+     */
+    public function getNamespace()
+    {
+        if (null === $this->reflected) {
+            $this->reflected = new \ReflectionObject($this);
+        }
+
+        return $this->reflected->getNamespaceName();
+    }
 }
