@@ -1012,4 +1012,19 @@ class ClassContentRepository extends EntityRepository
             $this->_em->flush();
         }
     }
+    
+    public function getClassnames(array $content_uids)
+    {
+        $content_uids = array_filter($content_uids);
+        if (0 === count($content_uids)) {
+            return array();
+        }
+        
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("'.implode('","', $content_uids).'")';
+        
+        return $this->getEntityManager()
+                ->getConnection()
+                ->executeQuery($sql)
+                ->fetchAll(\PDO::FETCH_COLUMN);
+    }
 }

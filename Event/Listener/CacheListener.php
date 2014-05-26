@@ -351,10 +351,11 @@ class CacheListener implements EventSubscriberInterface
     {
         $cache_id = self::$_object->getUid() . '-' . $renderer->getMode();
 
-        if (true === self::$_application->isStarted() && false === self::$_application->isClientSAPI()) {
+        if (true === self::$_application->isStarted() &&
+                false === self::$_application->isClientSAPI()) {
             $request = self::$_application->getRequest();
             if ('GET' === $request->getMethod()) {
-                $param = self::$_object->getProperty('cache-param');
+                $param = self::_getCacheParam(self::_getDescendantsClassname());
                 if (true === is_array($param) && true === array_key_exists('query', $param)) {
                     $query = (array) $param['query'];
                     foreach ($query as $q) {
@@ -369,6 +370,49 @@ class CacheListener implements EventSubscriberInterface
         return md5('_content_' . $cache_id);
     }
 
+    /**
+     * Returns the classnames of descendants
+     * @return array
+     */
+    private static function _getDescendantsClassname()
+    {
+        $classnames = array(ClassUtils::getRealClass(self::$_object));
+
+        $content_uids = self::$_application->getEntityManager()
+                ->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
+                ->getDescendantsContentUids(self::$_object);
+
+        if (0 === count($content_uids)) {
+            return $classnames;
+        }
+
+        return array_merge($classnames, self::$_application->getEntityManager()
+                        ->getRepository('\BackBuilder\ClassContent\AClassContent')
+                        ->getClassnames($content_uids));
+    }
+
+    /**
+     * Returns the merged cache params
+     * @param array $classnames
+     * @return array
+     */
+    private static function _getCacheParam(array $classnames)
+    {
+        $cache_param = array();
+        foreach ($classnames as $classname) {
+            if (false === class_exists($classname)) {
+                continue;
+            }
+            
+            $o = new $classname();
+            if (null !== $o->getProperty('cache-param')) {
+                $cache_param = array_merge($cache_param, $o->getProperty('cache-param'));
+            }
+        }
+        
+        return $cache_param;
+    }
+    
     /**
      * Return the cache id for the current requested page
      * @return string|FALSE
