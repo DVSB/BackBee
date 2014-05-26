@@ -28,7 +28,6 @@ use BackBuilder\Util\Dir;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Finder\Finder;
 
 /**
  * Clears cache
@@ -48,8 +47,6 @@ class CacheClearCommand extends ACommand
         $this
             ->setName('cache:clear')
             ->setDefinition(array(
-                new InputOption('no-warmup', '', InputOption::VALUE_NONE, 'Do not warm up the cache'),
-                new InputOption('no-optional-warmers', '', InputOption::VALUE_NONE, 'Skip optional cache warmers (faster)'),
             ))
             ->setDescription('Clears application cache')
             ->setHelp(<<<EOF
@@ -57,7 +54,6 @@ The <info>%command.name%</info> command clears the application cache for a given
 and debug mode:
 
 <info>php %command.full_name% --env=dev</info>
-<info>php %command.full_name% --env=prod --no-debug</info>
 EOF
             )
         ;
@@ -68,6 +64,9 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $bbapp = $this->getContainer()->get('bbapp');
+        $output->writeln(sprintf('Clearing the cache for the <info>%s</info> environment with debug <info>%s</info>', $bbapp->getEnvironment(), var_export($bbapp->isDebugMode(), true)));
+        
         $cacheDir = $this->getContainer()->getParameter("bbapp.cache.dir");
         
         $oldCacheDir = $cacheDir . '_old';
