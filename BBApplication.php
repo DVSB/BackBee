@@ -1221,7 +1221,8 @@ class BBApplication implements IApplication
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
 
-            $prefix = $bundle->getNamespace().'\\Command';
+            $prefix = $bundle->getNamespace() . '\\Command';
+
             foreach ($finder as $file) {
                 $ns = $prefix;
                 if ($relativePath = $file->getRelativePath()) {
