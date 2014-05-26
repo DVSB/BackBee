@@ -48,7 +48,8 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
     Symfony\Component\HttpKernel\Event\FilterResponseEvent,
-    Symfony\Component\Console\Application;
+    Symfony\Component\Console\Application,
+    Symfony\Component\Finder\Finder;
 
 
 /**
@@ -190,7 +191,7 @@ class BBApplication implements IApplication
         // Construct service container
         $this->_container = new ContainerBuilder();
 
-        $default_cachedir = $this->getBaseDir() . '/cache';
+        $default_cachedir = $this->getBaseDir() . '/cache/' . $this->_environment;
         $default_cacheclass = 'bb'.md5('__container__' . $this->getContext());
         $default_cachefile = $default_cacheclass . '.php';
 
@@ -293,7 +294,7 @@ class BBApplication implements IApplication
         $this->_container->setParameter('bbapp.context', $this->getContext());
 
         // define cache dir
-        $cachedir = $this->getBaseDir() . '/' . 'cache';
+        $cachedir = $this->getBaseDir() . '/cache/' . $this->_environment;
         if (true === isset($config['parameters']['cache_dir']) && false === empty($config['parameters']['cache_dir'])) {
             $cachedir = $config['parameters']['cache_dir'];
         }
@@ -1193,7 +1194,22 @@ class BBApplication implements IApplication
     public function registerCommands(Application $application)
     {
         if (is_dir($dir = $this->getBBDir() . '/Command')) {
-            // TODO
+            $finder = new Finder();
+            
+            $finder->files()->name('*Command.php')->in($dir);
+            
+            $prefix = 'BackBuilder\\Command';
+            
+            foreach ($finder as $file) {
+                $ns = $prefix;
+                if ($relativePath = $file->getRelativePath()) {
+                    $ns .= '\\'.strtr($relativePath, '/', '\\');
+                }
+                $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
+                if ($r->isSubclassOf('Symfony\\Component\\Console\\Command\\Command') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                    $application->add($r->newInstance());
+                }
+            }
         }
         
         
