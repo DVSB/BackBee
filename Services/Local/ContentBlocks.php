@@ -307,12 +307,11 @@ class ContentBlocks extends AbstractServiceLocal
 
         $catName = (isset($params['typeField'])) ? $params['typeField'] : $params['catName'];
         $result = array("numResults" => 0, "rows" => array());
+        $contentsList = array();
         if (!$catName) {
             return $result;
         }
-        
         $em = $this->bbapp->getEntityManager();
-        $contentsList = array();
         $limitInfos = array("start" => (int) $start, "limit" => (int) $limit);
         $orderInfos = array("column" => $order_sort, "dir" => $order_dir);
         $isCat = (strpos($catName, "contentType") === FALSE) ? true : false; //contentType_ || categorie
@@ -358,10 +357,9 @@ class ContentBlocks extends AbstractServiceLocal
                             $contentInfos->ico = $this->getApplication()->getRenderer()->getUri('images/' . substr($image->image->path, 0, strrpos($image->image->path, '.')) . '/' . $image->image->originalname);
                         }
                     }
-
                     $contentsList[] = $contentInfos;
                 } catch (\Exception $e) {
-                    /** decrément total en cas d'erreur* */
+                    /** décrémente total en cas d'erreur * */
                     $result["numResults"] = (int) $result["numResults"] - 1;
                     continue;
                 }
@@ -487,6 +485,21 @@ class ContentBlocks extends AbstractServiceLocal
         $result = new \StdClass();
         $result->ok = true;
         return $result;
+    }
+
+    /**
+     * @exposed(secured=true)
+     */
+    public function showPreview($contentUid, $contentType)
+    {
+        $contentTypeClass = self::CONTENT_PATH . $contentType;
+        $em = $this->bbapp->getEntityManager();
+        if (null === $content = $this->em->find($contentTypeClass, $contentUid)) {
+            throw new \Exception("Content can't be null");
+        }
+        $renderer = $this->bbapp->getRenderer();
+        $contentRender = $renderer->render($content, null);
+        return $contentRender;
     }
 
     /**

@@ -238,6 +238,45 @@ class IndexationRepository extends EntityRepository
     }
 
     /**
+     * Returns an array of content uids owned by provided contents
+     * @param mixed $contents
+     * @return array
+     */
+    public function getDescendantsContentUids($contents)
+    {
+        if (false === is_array($contents)) {
+            $contents = array($contents);
+        }
+
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
+
+        $q = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('c.' . $meta->getColumnName('subcontent_uid'))
+                ->from($meta->getTableName(), 'c');
+
+        $index = 0;
+        $atleastone = false;
+        foreach ($contents as $content) {
+            if (false === ($content instanceof AClassContent)) {
+                continue;
+            }
+
+            if (true === $content->isElementContent()) {
+                continue;
+            }
+
+            $q->orWhere('c.' . $meta->getColumnName('content_uid') . ' = :uid' . $index)
+                    ->setParameter('uid' . $index, $content->getUid());
+
+            $index++;
+            $atleastone = true;
+        }
+
+        return (true === $atleastone) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
+    }
+
+    /**
      * Removes a set of Site-Content indexes
      * @param string $site_uid
      * @param array $content_uids
