@@ -47,7 +47,9 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
+    Symfony\Component\Console\Application;
+
 
 /**
  * The main BackBuilder5 application
