@@ -31,6 +31,9 @@ use BackBuilder\BBApplication,
 use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Yaml\Yaml;
 
+use Doctrine\ORM\Tools\SchemaTool,
+    Doctrine\ORM\EntityManager;
+
 /**
  * Abstract class for bundle in BackBuilder5 application
  *
@@ -161,6 +164,90 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
         return $em;
     }
+    
+    /**
+     * 
+     * @return \Doctrine\ORM\EntityManager
+     */
+    public function getBundleEntityManager()
+    {
+        $doctrineConfig = $this->getConfig()->getDoctrineConfig();
+        
+        if(null === $doctrineConfig) {
+            $doctrineConfig = $this->getApplication()->getConfig()->getDoctrineConfig();
+        }
+        
+        if (false === array_key_exists('proxy_ns', $doctrineConfig['dbal'])) {
+            $doctrineConfig['dbal']['proxy_ns'] = 'Proxies';
+        }
+
+        if (false === array_key_exists('proxy_dir', $doctrineConfig['dbal'])) {
+            $doctrineConfig['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir() . '/Proxies';
+        }
+        
+        $em = $this->_initEntityManager($doctrineConfig);
+        
+        // set the path to include only this bundle's entities
+        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array($this->getBaseDir() . '/Entity'));
+        
+        return $em;
+    }
+    
+    
+    public function install()
+    {
+        // create DB tables
+        $em = $this->getBundleEntityManager();
+        
+        $schema = new SchemaTool($em);
+        
+        $metadata = $em->getMetadataFactory()->getAllMetadata();
+        $schema->createSchema($metadata, true);
+        
+        $em->getConnection()->commit();
+    }
+    
+    public function update()
+    {
+        // update DB tables
+        $em = $this->getBundleEntityManager();
+        
+        $schema = new SchemaTool($em);
+        
+        $metadata = $em->getMetadataFactory()->getAllMetadata();
+        $schema->updateSchema($metadata, false);
+    }
+    
+    /**
+     * Get update queries
+     * @param EntityManager $em
+     * @return String[]
+     */
+    public function getUpdateQueries(EntityManager $em)
+    {
+        $schema = new SchemaTool($em);
+        
+        $metadatas = $schema->getMetadataFactory()->getAllMetadata();
+        $sqls = $schema->getUpdateSchemaSql($metadatas, false);
+        
+        return $sqls;
+    }
+    
+    /**
+     * Get create queries
+     * @param EntityManager $em
+     * @return String[]
+     */
+    public function getCreateQueries(EntityManager $em)
+    {
+        $schema = new SchemaTool($em);
+        
+        $metadatas = $em->getMetadataFactory()->getAllMetadata();
+        $sqls = $schema->getUpdateSchemaSql($metadatas, true);
+        
+        return $sqls;
+    }
+
 
     private function completeConfigInit()
     {
