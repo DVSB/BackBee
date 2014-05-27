@@ -55,10 +55,12 @@
                             var title = "<li class='page-title'>"+page.title+"</li>";
                             $(html).find(".contents").append($(title));
                         });   
+                       var deleteText = $("<p>If you delete this content, it will be erased from all the pages of this list.<br><br></p>").clone();  
+                       html.append(deleteText);
                     }else{
                         $(html).empty().html($(orphanContent));
                     }               
-                    var deleteText = $("<p>If you delete this content, it will be erased from all the pages of this list.<br><br><strong>Do you really want to delete it ?</strong></p>").clone();
+                    var deleteText = $("<p><strong>Do you really want to delete it ?</strong></p>").clone();
                     $(html).append(deleteText);
                     self._addButtons();
                     self.contentDialog.setContent($(html));
@@ -81,9 +83,10 @@
             var self = this;
             if(this.hasButton) return;
             this.contentDialog.addButton({
-                text: "Oui",
+                text: "Yes",
                 click: function(e){
-                    self.contentDialog.setContent("<p>Please wait while deleting the content...</p>")
+                    self.contentDialog.setContent("<p>Please wait while deleting the content...</p>");
+                    /*disable content here*/
                     self.ws.request("deleteContent",{
                         params:{
                             contentUid: self.content.uid,
@@ -95,7 +98,7 @@
                 }
             });
             this.contentDialog.addButton({
-                text: "Non",
+                text: "No",
                 click: function(){
                     self.contentDialog.close();
                 }
@@ -106,7 +109,6 @@
         
         showDeleteDialog : function(content){
             this.content = content;
-            this.contentDialog.setContent("<p>Le contenu se trouve sur la page</p>");
             this.contentDialog.open();
         },
 
@@ -116,8 +118,6 @@
                 showDeleteDialog: $.proxy(self.showDeleteDialog,self)
             }  
         }
-    
-    
     });
     
 })(bb.jquery)
