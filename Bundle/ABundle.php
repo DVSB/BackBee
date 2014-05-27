@@ -202,14 +202,12 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     public function install()
     {
         // create DB tables
-        $em = $this->getBundleEntityManager();
+        $bundleEm = $this->getBundleEntityManager();
+        $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
         
-        $schema = new SchemaTool($em);
         
-        $metadata = $em->getMetadataFactory()->getAllMetadata();
-        $schema->createSchema($metadata, true);
-        
-        $em->getConnection()->commit();
+        $schema = new SchemaTool($this->getEntityManager());
+        $schema->createSchema($metadata);
     }
     
     /**
@@ -218,12 +216,12 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     public function update()
     {
         // update DB tables
-        $em = $this->getBundleEntityManager();
+        $bundleEm = $this->getBundleEntityManager();
+        $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
         
-        $schema = new SchemaTool($em);
+        $schema = new SchemaTool($this->getEntityManager());
+        $schema->updateSchema($metadata, true);
         
-        $metadata = $em->getMetadataFactory()->getAllMetadata();
-        $schema->updateSchema($metadata, false);
     }
     
     /**
@@ -235,8 +233,8 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     {
         $schema = new SchemaTool($em);
         
-        $metadatas = $schema->getMetadataFactory()->getAllMetadata();
-        $sqls = $schema->getUpdateSchemaSql($metadatas, false);
+        $metadatas = $em->getMetadataFactory()->getAllMetadata();
+        $sqls = $schema->getUpdateSchemaSql($metadatas, true);
         
         return $sqls;
     }
@@ -251,7 +249,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $schema = new SchemaTool($em);
         
         $metadatas = $em->getMetadataFactory()->getAllMetadata();
-        $sqls = $schema->getUpdateSchemaSql($metadatas, true);
+        $sqls = $schema->getCreateSchemaSql($metadatas);
         
         return $sqls;
     }
