@@ -125,18 +125,8 @@ bb.frontApplication = (function($,gExport){
                 bb.storedsitepadding = 1*bb.jquery(_settings.siteWrapperId).css('padding-top').replace('px', '');
                 bb.jquery(_settings.toolbarId).show();
                 bb.jquery(_settings.siteWrapperId).css('padding-top', (3 + bb.storedsitepadding + 1*bb.jquery(_settings.toolbarId).css('height').replace('px', '')) + 'px');
-				
-                bb.jquery.each(bb.jquery('*'), function(index, element) {
-                    if ('fixed' == bb.jquery(element).css('position')) {
-                        var top = bb.jquery(element).css('top');
-                        if ('auto' != top && element.id != 'bb5-toolbar-wrapper') {
-                            bb.fixedelements[bb.fixedelements.length] = element;
-                            bb.jquery(element).css('top', (1*top.replace('px', '') + 3 + 1*bb.jquery(_settings.toolbarId).css('height').replace('px', '')) + 'px');
-                        }
-                    }
-                });
-                
                 bb.jquery(_settings.userInfo).prepend(_settings.commonname ? _settings.commonname : _settings.username);
+
                 /*fix toolbars*/
                 bb.jquery("#bb5-toolbar-wrapper").css("top","0px");
                 window.scrollTo(0,212);
