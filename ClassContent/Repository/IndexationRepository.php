@@ -70,6 +70,7 @@ class IndexationRepository extends EntityRepository
      */
     public function replaceOptContentTable(AClassContent $content)
     {
+        return $this;
         if (null === $content->getMainNode()) {
             return $this;
         }
