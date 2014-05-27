@@ -81,13 +81,12 @@ EOF
         $output->writeln('Installing bundle: ' . $bundle->getId() . '');
         
         
-        $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
-        
         if($force) {
             $output->writeln('<info>Running install</info>');
             $bundle->install();
         } 
         
+        $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
         $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
     }
     
