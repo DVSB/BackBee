@@ -166,6 +166,9 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     }
     
     /**
+     * Get entity manager for this bundle
+     * 
+     * This manager includes only this bundle's entities
      * 
      * @return \Doctrine\ORM\EntityManager
      */
@@ -193,7 +196,9 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         return $em;
     }
     
-    
+    /**
+     * Install this bundle
+     */
     public function install()
     {
         // create DB tables
@@ -207,6 +212,9 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $em->getConnection()->commit();
     }
     
+    /**
+     * Update this bundle
+     */
     public function update()
     {
         // update DB tables

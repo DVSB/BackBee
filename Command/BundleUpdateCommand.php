@@ -38,7 +38,7 @@ use Doctrine\ORM\Tools\SchemaTool;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BundleInstallCommand extends ACommand
+class BundleUpdateCommand extends ACommand
 {
     /**
      * {@inheritdoc}
@@ -46,14 +46,14 @@ class BundleInstallCommand extends ACommand
     protected function configure()
     {
         $this
-            ->setName('bundle:install')
+            ->setName('bundle:update')
             ->addArgument('name', InputArgument::REQUIRED, 'A bundle name')
-            ->addOption('force', null, InputOption::VALUE_NONE, 'The install SQL will be executed against the DB')
-            ->setDescription('Installs a bundle')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
+            ->setDescription('Updates a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> installs a bundle: 
+The <info>%command.name%</info> updates a bundle: 
 
-   <info>php bundle:install MyBundle</info>
+   <info>php bundle:update MyBundle</info>
 EOF
             )
         ;
@@ -78,13 +78,13 @@ EOF
         
         /* @var $bundle \BackBuilder\Bundle\ABundle */
         
-        $output->writeln('Installing bundle: ' . $bundle->getId() . '');
+        $output->writeln('Updating bundle: ' . $bundle->getId() . '');
         
         
         $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
         
         if($force) {
-            $output->writeln('<info>Running install</info>');
+            $output->writeln('<info>Running update</info>');
             $bundle->install();
         } 
         
