@@ -105,11 +105,11 @@ class BBApplication implements IApplication
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
-        $this->_debug = ($environment == 'dev') ? true : false;
+        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
-        $this->_environment = $environment;
+        $this->_environment = ((is_string($environment)) ? $environment : ($environment === false ? 'production' : ''));
 
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
@@ -191,12 +191,16 @@ class BBApplication implements IApplication
         // Construct service container
         $this->_container = new ContainerBuilder();
 
-        $default_cachedir = $this->getBaseDir() . '/cache/' . $this->_environment;
-        $default_cacheclass = 'bb'.md5('__container__' . $this->getContext());
+        if (false === $default_cachedir = getenv('BB_CACHEDIR')) {
+            $default_cachedir = $this->getBaseDir() . '/cache/';
+        }
+
+        $default_cacheclass = 'bb' . md5('__container__' . $this->getContext() . $this->_environment);
         $default_cachefile = $default_cacheclass . '.php';
 
         if (false === $this->_debug &&
                 true === is_readable($default_cachedir . '/' . $default_cachefile)) {
+
             $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($default_cachedir)));
             $loader->load($default_cachefile);
 
@@ -208,6 +212,7 @@ class BBApplication implements IApplication
 
             $this->getConfig()
                     ->setContainer($this->_container)
+                    ->setEnvironment($this->_environment)
                     ->extend($this->_container->getParameter('bbapp.config.dir'));
 
             $this->_container->setDefinition('site', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
@@ -215,8 +220,8 @@ class BBApplication implements IApplication
             $this->_container->setDefinition('bb_session', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
 
             return $this;
-        } 
-        
+        }
+
         $this->_container->setDefinition('bbapp', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
         
         $dirToLookingFor = array();
@@ -245,7 +250,7 @@ class BBApplication implements IApplication
         
         $this->_container->set('service_container', $this->_container);
         $this->_container->setParameter('debug', $this->_debug);
-
+        $this->_container->setParameter('environment', $this->_environment);
 
         $this->_initBBAppParamsIntoContainer();
         
@@ -277,6 +282,7 @@ class BBApplication implements IApplication
         // Retrieving config.yml without calling Config services
         $config = array();
         $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.' . $this->_environment . '.yml';
+
         if (!file_exists($filename)) {
             $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.yml';
         }
