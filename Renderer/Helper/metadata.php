@@ -65,7 +65,7 @@ class metadata extends AHelper
                     
                     $result .= $attribute . '="' . html_entity_decode($value, ENT_COMPAT, 'UTF-8') . '" ';
                 }
-                $result .= '/>';
+                $result .= '/>'.PHP_EOL;
             }
         }
 

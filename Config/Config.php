@@ -225,7 +225,7 @@ class Config
      */
     private function _getCacheId($basedir)
     {
-        return md5('config-' . $basedir);
+        return md5('config-' . $basedir . $this->_environment);
     }
 
     /**
