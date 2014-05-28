@@ -214,7 +214,7 @@ class BBApplication implements IApplication {
                 $this->_repository = null;
                 $this->_base_repository = null;
             }
-            
+
             $this->getConfig()
                     ->setContainer($this->_container)
                     ->setEnvironment($this->_environment)
@@ -254,10 +254,11 @@ class BBApplication implements IApplication {
         $this->_container->set('bbapp', $this);
 
         $this->_container->set('service_container', $this->_container);
-        $this->_container->setParameter('debug', $this->_debug);
         $this->_container->setParameter('environment', $this->_environment);
 
         $this->_initBBAppParamsIntoContainer();
+
+        $this->_container->setParameter('debug', $this->isDebugMode());
 
         if ($this->_debug) {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
@@ -285,11 +286,11 @@ class BBApplication implements IApplication {
     private function _initBBAppParamsIntoContainer() {
         // Retrieving config.yml without calling Config services
         $config = array();
-        $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.' . $this->_environment . '.yml';
-
+        $filename = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $this->_environment . DIRECTORY_SEPARATOR . 'config.yml';
         if (!file_exists($filename)) {
-            $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.yml';
+            $filename = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'config.yml';
         }
+
         if (true === is_readable($filename)) {
             $config = Yaml::parse($filename);
         }
@@ -318,6 +319,11 @@ class BBApplication implements IApplication {
             $cachedir = $config['parameters']['cache_dir'];
         }
         $this->_container->setParameter('bbapp.cache.dir', $cachedir);
+
+        if (array_key_exists('cache_auto_generate', $config['parameters'])) {
+            $this->_container->setParameter('bbapp.cache.autogenerate', $config['parameters']['cache_auto_generate']);
+        }
+
 
         // define config dir
         $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
@@ -489,7 +495,7 @@ class BBApplication implements IApplication {
         }
 
         if (true === array_key_exists('orm', $doctrine_config)) {
-            $doctrine_condif['dbal']['orm'] = $doctrine_config['orm'];
+            $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
         // Init ORM event

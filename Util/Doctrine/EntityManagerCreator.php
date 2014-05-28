@@ -109,6 +109,10 @@ class EntityManagerCreator
             $config->setProxyNamespace($options['proxy_ns']);
         }
 
+        if (true === array_key_exists('auto_generate_proxies', $options)) {
+            $config->setAutoGenerateProxyClasses($options['auto_generate_proxies']);
+        }
+
         if ($logger instanceof SQLLogger) {
             $config->setSQLLogger($logger);
         }

@@ -442,7 +442,8 @@ class Config
             $this->_saveToCache($basedir);
         }
 
-        if (false === strpos($this->_environment, $basedir) && 
+        if (!empty($this->_environment) &&
+            false === strpos($this->_environment, $basedir) &&
             file_exists($basedir . DIRECTORY_SEPARATOR . $this->_environment)) {
 
             $this->extend($basedir . DIRECTORY_SEPARATOR . $this->_environment, $overwrite);

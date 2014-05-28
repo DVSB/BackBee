@@ -39,7 +39,7 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  */
 class ProfilerListener extends BaseProfilerListener
 {
-    protected $enabled = true;
+    protected $enabled = false;
 
     /**
      * 

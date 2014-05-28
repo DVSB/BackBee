@@ -329,6 +329,7 @@ class File
 
         $files = array();
         $parse_url = parse_url($basedir);
+
         if (false !== $parse_url && isset($parse_url['scheme'])) {
             $directory = new \DirectoryIterator($basedir);
             $regex = new \RegexIterator($directory, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::ALL_MATCHES);
@@ -345,7 +346,6 @@ class File
             $pattern = $basedir . DIRECTORY_SEPARATOR . '*.' . $pattern;
             $files = glob($pattern);
         }
-
         return $files;
     }
     

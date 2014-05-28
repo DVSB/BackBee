@@ -51,7 +51,8 @@ class Cache extends ACache
      * @var array
      */
     protected $_instance_options = array(
-        'cachedir' => null
+        'cachedir' => null,
+        'cacheautogenerate' => true
     );
 
     /**
@@ -78,6 +79,7 @@ class Cache extends ACache
      */
     protected function setInstanceOptions(array $options = array())
     {
+
         parent::setInstanceOptions($options);
 
         $this->_cachedir = $this->_instance_options['cachedir'];
@@ -91,7 +93,7 @@ class Cache extends ACache
             throw new CacheException(sprintf('Unable to create the cache directory `%s`.', $this->_cachedir));
         }
 
-        if (false === is_writable($this->_cachedir)) {
+        if (true === $this->_instance_options['cacheautogenerate'] && false === is_writable($this->_cachedir)) {
             throw new CacheException(sprintf('Unable to write in the cache directory `%s`.', $this->_cachedir));
         }
 
