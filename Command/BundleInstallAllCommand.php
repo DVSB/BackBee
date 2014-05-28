@@ -38,7 +38,7 @@ use Doctrine\ORM\Tools\SchemaTool;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BundleUpdateAllCommand extends ACommand
+class BundleInstallAllCommand extends ACommand
 {
     /**
      * {@inheritdoc}
@@ -46,13 +46,13 @@ class BundleUpdateAllCommand extends ACommand
     protected function configure()
     {
         $this
-            ->setName('bundle:update_all')
-            ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
-            ->setDescription('Updates a bundle')
+            ->setName('bundle:install_all')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'The install SQL will be executed against the DB')
+            ->setDescription('Installs a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> updates all bundles: 
+The <info>%command.name%</info> installs all bundles: 
 
-   <info>php bundle:update_all </info>
+   <info>php bundle:install_all MyBundle</info>
 EOF
             )
         ;
@@ -63,23 +63,22 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        
         $force = $input->getOption('force');
         
         $bbapp = $this->getContainer()->get('bbapp');
-
+        
         foreach($bbapp->getBundles() as $bundle) {
-            $output->writeln('Updating bundle: ' . $bundle->getId() . '');
+            $output->writeln('Installing bundle: ' . $bundle->getId() . '');
 
-            $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
+            $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
 
             if($force) {
-                $output->writeln('<info>Running update</info>');
-
-                $bundle->update();
+                $output->writeln('<info>Running install</info>');
+                $bundle->install();
             } 
 
             $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
-
         }
     }
     
