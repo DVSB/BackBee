@@ -87,7 +87,7 @@ class Cache extends ACache
         }
 
         if (false === is_dir($this->_cachedir)
-                && false === @mkdir($this->_cachedir, 0700, true)) {
+                && false === mkdir($this->_cachedir, 0755, true)) {
             throw new CacheException(sprintf('Unable to create the cache directory `%s`.', $this->_cachedir));
         }
 

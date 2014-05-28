@@ -180,8 +180,14 @@ class BBApplication implements IApplication
         $this->stop();
     }
 
-    private function _initContainer()
+    public function forceReloadConfig()
     {
+        $this->_initContainer(true);
+    }
+
+    private function _initContainer($forceReload = false)
+    {
+        $forceReload = true;
         // Construct service container
         $this->_container = new ContainerBuilder();
 
@@ -189,7 +195,8 @@ class BBApplication implements IApplication
         $default_cacheclass = 'bb'.md5('__container__' . $this->getContext());
         $default_cachefile = $default_cacheclass . '.php';
 
-        if (false === $this->_debug &&
+        if (false === $forceReload &&
+                false === $this->_debug &&
                 true === is_readable($default_cachedir . '/' . $default_cachefile)) {
             $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($default_cachedir)));
             $loader->load($default_cachefile);
