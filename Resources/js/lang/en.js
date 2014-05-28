@@ -156,7 +156,9 @@
             after: 'After',
             all: 'All',
             date_format: 'dd/mm/yyyy',
-            datetime_format: 'dd/mm/yyyy hh:mm'
+            datetime_format: 'dd/mm/yyyy hh:mm',
+            search: 'Search',
+            having_child: 'Sections only'
         },
         contents: {
             desc: 'Description:',
