@@ -483,8 +483,6 @@ class FrontController implements HttpKernelInterface
         } elseif (preg_match('/([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})\/.*\.([^\.]+)/', $filename, $matches)) {
             $filename = $matches[1] . $matches[2] . $matches[3] . $matches[4] . $matches[5] . $matches[6] . $matches[7] . $matches[8] . '.' . $matches[9];
             File::resolveMediapath($filename, null, array('include_path' => $includePath));
-        } else {
-            File::resolveMediapath($filename, null, array('include_path' => $includePath));
         }
 
         File::resolveFilepath($filename, null, array('include_path' => $includePath));
