@@ -321,7 +321,7 @@ class BBApplication implements IApplication {
         }
         $this->_container->setParameter('bbapp.cache.dir', $cachedir);
 
-        if (array_key_exists('cache_auto_generate', $config['parameters'])) {
+        if (isset($config['parameters']) && array_key_exists('cache_auto_generate', $config['parameters'])) {
             $this->_container->setParameter('bbapp.cache.autogenerate', $config['parameters']['cache_auto_generate']);
         }
 
