@@ -71,14 +71,16 @@ EOF
         $bbapp = $this->getContainer()->get('bbapp');
         
         $bundle = $bbapp->getBundle($name);
+        /* @var $bundle \BackBuilder\Bundle\ABundle */
         
         if(null === $bundle) {
             throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
         }
         
-        /* @var $bundle \BackBuilder\Bundle\ABundle */
         
         $output->writeln('Updating bundle: ' . $bundle->getId() . '');
+        
+        $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
         
         if($force) {
             $output->writeln('<info>Running update</info>');
@@ -86,7 +88,6 @@ EOF
             $bundle->update();
         } 
         
-        $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
         $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
     }
     
