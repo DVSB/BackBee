@@ -313,6 +313,41 @@ class File
 
         return $files;
     }
+
+    /**
+     * Looks recursively in $basedir for files with $extension
+     * @param string $basedir
+     * @param string $extension
+     * @return array
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
+     */
+    public static function getFilesByExtension($basedir, $extension)
+    {
+        if (false === is_readable($basedir)) {
+            throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
+        }
+
+        $files = array();
+        $parse_url = parse_url($basedir);
+        if (false !== $parse_url && isset($parse_url['scheme'])) {
+            $directory = new \DirectoryIterator($basedir);
+            $regex = new \RegexIterator($directory, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::ALL_MATCHES);
+
+            foreach ($regex as $file) {
+                $files[] = $file[0];
+            }
+        } else {
+            $pattern = '';
+            foreach (str_split($extension) as $letter) {
+                $pattern .= '[' . strtolower($letter) . strtoupper($letter) . ']';
+            }
+
+            $pattern = $basedir . DIRECTORY_SEPARATOR . '*.' . $pattern;
+            $files = glob($pattern);
+        }
+
+        return $files;
+    }
     
     /**
      * Extracts a zip archive into a specified directory
