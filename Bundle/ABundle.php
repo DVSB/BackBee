@@ -31,6 +31,9 @@ use BackBuilder\BBApplication,
 use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Yaml\Yaml;
 
+use Doctrine\ORM\Tools\SchemaTool,
+    Doctrine\ORM\EntityManager;
+
 /**
  * Abstract class for bundle in BackBuilder5 application
  *
@@ -66,6 +69,12 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      * @var boolean
      */
     private $isConfigFullyInit = false;
+    
+    /**
+     *
+     * @var \ReflectionObject
+     */
+    protected $reflected;
 
     public function __call($method, $args)
     {
@@ -155,6 +164,96 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
         return $em;
     }
+    
+    /**
+     * Get entity manager for this bundle
+     * 
+     * This manager includes only this bundle's entities
+     * 
+     * @return \Doctrine\ORM\EntityManager
+     */
+    public function getBundleEntityManager()
+    {
+        $doctrineConfig = $this->getConfig()->getDoctrineConfig();
+        
+        if(null === $doctrineConfig) {
+            $doctrineConfig = $this->getApplication()->getConfig()->getDoctrineConfig();
+        }
+        
+        if (false === array_key_exists('proxy_ns', $doctrineConfig['dbal'])) {
+            $doctrineConfig['dbal']['proxy_ns'] = 'Proxies';
+        }
+
+        if (false === array_key_exists('proxy_dir', $doctrineConfig['dbal'])) {
+            $doctrineConfig['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir() . '/Proxies';
+        }
+        
+        $em = $this->_initEntityManager($doctrineConfig);
+        
+        // set the path to include only this bundle's entities
+        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array($this->getBaseDir() . '/Entity'));
+        
+        return $em;
+    }
+    
+    /**
+     * Install this bundle
+     */
+    public function install()
+    {
+        // create DB tables
+        $bundleEm = $this->getBundleEntityManager();
+        $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
+        
+        
+        $schema = new SchemaTool($this->getEntityManager());
+        $schema->createSchema($metadata);
+    }
+    
+    /**
+     * Update this bundle
+     */
+    public function update()
+    {
+        // update DB tables
+        $bundleEm = $this->getBundleEntityManager();
+        $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
+        
+        $schema = new SchemaTool($this->getEntityManager());
+        $schema->updateSchema($metadata, true);
+        
+    }
+    
+    /**
+     * Get update queries
+     * @param EntityManager $em
+     * @return String[]
+     */
+    public function getUpdateQueries(EntityManager $em)
+    {
+        $schema = new SchemaTool($em);
+        
+        $metadatas = $em->getMetadataFactory()->getAllMetadata();
+        $sqls = $schema->getUpdateSchemaSql($metadatas, true);
+        
+        return $sqls;
+    }
+    
+    /**
+     * Get create queries
+     * @param EntityManager $em
+     * @return String[]
+     */
+    public function getCreateQueries(EntityManager $em)
+    {
+        $schema = new SchemaTool($em);
+        
+        $metadatas = $em->getMetadataFactory()->getAllMetadata();
+        $sqls = $schema->getCreateSchemaSql($metadatas);
+        
+        return $sqls;
+    }
+
 
     private function completeConfigInit()
     {
@@ -339,7 +438,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
                     ->getEntityManager()
                     ->getRepository('BackBuilder\Bundle\Registry')
                     ->findOneBy(array('key' => $this->getId(), 'scope' => 'BUNDLE.CONFIG'));
-        } catch (\Doctrine\DBAL\Exception\TableNotFoundException $e) {
+        } catch (\Exception $e) {
             if (true === $this->getApplication()->isStarted()) {
                 $this->warning('Enable to load registry table');
             }
@@ -467,4 +566,17 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }
 
+    /**
+     * Get the Bundle namespace.
+     *
+     * @return string
+     */
+    public function getNamespace()
+    {
+        if (null === $this->reflected) {
+            $this->reflected = new \ReflectionObject($this);
+        }
+
+        return $this->reflected->getNamespaceName();
+    }
 }

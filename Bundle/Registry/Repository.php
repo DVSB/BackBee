@@ -64,6 +64,33 @@ class Repository extends EntityRepository
         
         return $registry;
     }
+
+    /**
+     * Removes the registry entry from DB
+     * @param \BackBuilder\Bundle\Registry $registry
+     * @return \BackBuilder\Bundle\Registry
+     */
+    public function removeEntity($entity)
+    {
+        $registries = $this->findRegistriesEntityById(get_class($entity), $entity->getObjectIdentifier());
+        
+        foreach ($registries as $registry) {
+            $this->remove($registry);
+        }
+    }
+
+    /**
+     * Find the entity by hes id
+     *
+     * @param $classname
+     **/
+    public function findRegistriesEntityById($identifier, $id)
+    {
+        $sql = 'SELECT * FROM registry AS r WHERE (r.type = "' . addslashes($identifier) . '" OR r.scope = "' . addslashes($identifier) . '") AND ((r.key = "identifier" AND r.value = "' . addslashes($id) . '") OR (r.scope = "' . addslashes($id) . '"))';
+        $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
+
+        return $query->getResult();
+    }
     
     /**
      * Find the entity by hes id
@@ -72,10 +99,7 @@ class Repository extends EntityRepository
      **/
     public function findEntityById($identifier, $id)
     {
-        $sql = 'SELECT * FROM registry AS r WHERE (r.type = "' . addslashes($identifier) . '" OR r.scope = "' . addslashes($identifier) . '") AND ((r.key = "identifier" AND r.value = "' . addslashes($id) . '") OR (r.scope = "' . addslashes($id) . '"))';
-        $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
-
-        return $this->buildEntity($identifier, $query->getResult());
+        return $this->buildEntity($identifier, $this->findRegistriesEntityById($identifier, $id));
     }
 
     /**

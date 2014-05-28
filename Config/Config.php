@@ -43,13 +43,19 @@ class Config
      * Default config file to look for
      * @var string
      */
-    const CONFIG_FILE = 'config.yml';
+    const CONFIG_FILE = 'config';
     
     /**
      * System events config file to look for
      * @var string
      */
-    const EVENTS_FILE = 'events.yml';
+    const EVENTS_FILE = 'events';
+
+    /**
+     * System extention config file
+     * @var string
+     */
+    const EXTENTION = 'yml';
 
     /**
      * The base directory to looking for configuration files
@@ -80,6 +86,8 @@ class Config
      * @var \BackBuilder\DependencyInjection\ContainerBuilder
      */
     private $_container;
+
+    private $_environment = 'production';
 
     /**
      * Magic function to get configuration section
@@ -128,7 +136,7 @@ class Config
      */
     private function _loadSystemConfig() 
     {
-        $this->_loadFromFile(__DIR__ . '/' . self::EVENTS_FILE);
+        $this->_loadFromFile(__DIR__ . '/' . self::EVENTS_FILE . '.' . self::EXTENTION);
     }
 
     /**
@@ -217,7 +225,7 @@ class Config
      */
     private function _getCacheId($basedir)
     {
-        return md5('config-' . $basedir);
+        return md5('config-' . $basedir . $this->_environment);
     }
 
     /**
@@ -229,14 +237,31 @@ class Config
      */
     private function _getYmlFiles($basedir)
     {
-        $yml_files = \BackBuilder\Util\File::getFilesRecursivelyByExtension($basedir, 'yml');
-        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;
+        $yml_files = \BackBuilder\Util\File::getFilesRecursivelyByExtension($basedir, self::EXTENTION);
+
+        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION;
+        if (false === file_exists($default_file)) {
+            $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE . '.' . self::EXTENTION;
+        }
+
         if (true === file_exists($default_file) && 1 < count($yml_files)) {
             // Ensure that config.yml is the first one
             $yml_files = array_diff($yml_files, array($default_file));
             array_unshift($yml_files, $default_file);
         }
 
+        $already_loaded = array();
+        foreach ($yml_files as $key => $file_name) {
+            $name = basename($file_name);
+            $exploded_name = explode('.', $name);
+            if ($exploded_name[1] === $this->_environment) {
+                $already_loaded[] = $exploded_name[0] . '.' . self::EXTENTION;
+            }
+            if (($exploded_name[1] !== $this->_environment && $exploded_name[1] !== self::EXTENTION) ||
+                in_array($name, $already_loaded)) {
+                unset($yml_files[$key]);
+            }
+        }
         return $yml_files;
     }
 
@@ -262,12 +287,16 @@ class Config
         try {
             $yamlDatas = Yaml::parse($filename);
             if (is_array($yamlDatas)) {
-                if (self::CONFIG_FILE === basename($filename)) {
+
+                if (self::CONFIG_FILE . '.' . self::EXTENTION === basename($filename) || 
+                    self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION === basename($filename)) {
+
                     foreach ($yamlDatas as $component => $config) {
                         $this->setSection($component, $config, $overwrite);
                     }
                 } else {
-                    $this->setSection(substr(basename($filename), 0, -4), $yamlDatas, $overwrite);
+                    $filename = explode('.', basename($filename));
+                    $this->setSection($filename[0], $yamlDatas, $overwrite);
                 }
             }
         } catch (ParseException $e) {
@@ -321,6 +350,17 @@ class Config
     public function getAllSections()
     {
         return $this->getSection();
+    }
+
+    /**
+     * Set environment context
+     * @param string $env
+     * @return self
+     */
+    public function setEnvironment($env)
+    {
+        $this->_environment = $env;
+        return $this;
     }
 
     /**

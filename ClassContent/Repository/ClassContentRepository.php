@@ -152,7 +152,7 @@ class ClassContentRepository extends EntityRepository
                 }
 
                 $alias = uniqid('i' . rand());
-                $join[] = 'LEFT JOIN indexation ' . $alias . ' USE INDEX(IDX_SEARCH) ON c.uid  = ' . $alias . '.content_uid';
+                $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
                 $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value ' . $crit[1] . '"' . $crit[0] . '"';
             }
         }
@@ -163,7 +163,7 @@ class ClassContentRepository extends EntityRepository
                 $values = array_filter((array) $values);
                 if (0 < count($values)) {
                     $alias = md5($field);
-                    $join[] = 'LEFT JOIN indexation ' . $alias . ' USE INDEX(IDX_SEARCH) ON c.uid  = ' . $alias . '.content_uid';
+                    $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
                     $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value IN ("' . implode('","', $values) . '")';
                 }
             }
@@ -243,22 +243,41 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (0 < count($join)) {
-            $query .= ' '.implode(' ', $join);
+            $query .= ' ' . implode(' ', $join);
         }
-        
+
         if (0 < count($where)) {
-            $query .= ' WHERE '. implode(' AND ', $where);
+            $query .= ' WHERE ' . implode(' AND ', $where);
         }
-        
+
         $uids = $this->getEntityManager()
                 ->getConnection()
-                ->executeQuery($query . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
+                ->executeQuery(str_replace('JOIN content c', 'JOIN opt_content_modified c', $query) . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
                 ->fetchAll(\PDO::FETCH_COLUMN);
+
+        if (count($uids) < $limit) {
+            $uids = $this->getEntityManager()
+                    ->getConnection()
+                    ->executeQuery($query . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
+                    ->fetchAll(\PDO::FETCH_COLUMN);
+        }
 
         $q = $this->createQueryBuilder('c')
                 ->select()
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
+
+        if (true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
+            $q->join('c._mainnode', 'p')
+                    ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        } else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
+            $q->orderBy('c._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        } else {
+            $q->leftJoin('c._indexation', 'isort')
+                    ->andWhere('isort._field = :sort')
+                    ->setParameter('sort', $selector['orderby'][0])
+                    ->orderBy('isort._value', count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        }
 
         $result = $q->getQuery()->getResult();
 
@@ -341,8 +360,8 @@ class ClassContentRepository extends EntityRepository
             if (0 < count($uids)) {
                 // Data protection
                 array_walk($uids, function(&$item) {
-                    $item = addslashes($item);
-                });
+                            $item = addslashes($item);
+                        });
 
                 // Getting classnames for provided uids
                 $classnames = $this->_em
@@ -924,4 +943,88 @@ class ClassContentRepository extends EntityRepository
                         ->fetchAll(\PDO::FETCH_COLUMN);
     }
 
+    /**
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return Collection<Page>
+     */
+    public function findPagesByContent($content)
+    {
+        /* Remoter � la racine pour trouver sur quelle page se trouve le contenu */
+        $rootContents = array();
+        $this->getRootContentParents($content, $rootContents);
+        $qb = $this->_em->createQueryBuilder("p");
+        $qb->select("p")->from("BackBuilder\NestedNode\Page", "p")
+                ->andWhere('p._contentset IN (:contentset)')
+                ->setParameter('contentset', $rootContents);
+        $result = $qb->getQuery()->getResult();
+        return $result;
+    }
+
+    private function getRootContentParents($content, &$rootContainer)
+    {
+        $contentParents = $content->getParentContent();
+        /* if it has no parents --> is a root element */
+        if ($contentParents->isEmpty()) {
+            $rootContainer[] = $content;
+        } else {
+            foreach ($contentParents as $content) {
+                $this->getRootContentParents($content, $rootContainer);
+            }
+        }
+        return $rootContainer;
+    }
+
+    /**
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return 
+     */
+    public function deleteContent(AClassContent $content, $updateParent = true)
+    {
+
+        if (!($content instanceof ContentSet)) {
+            $elements = $content->getData();
+            foreach ($elements as $key => $element) {
+                if (is_a($element, 'BackBuilder\Content\AClassContent')) {
+                    $parents = $element->getParentContent();
+                    /* it's the case for non-complex elements */
+                    if ($parents->count() == 1) {
+                        $this->deleteContent($element, false);
+                        $this->_em->remove($element);
+                    } else {
+                        $content->unsetSubContent($element);//persist?
+                    }
+                }
+            }
+        } else {
+            $content->clear();
+            $this->_em->remove($content);
+        }
+        if ($updateParent) {
+            $contentParents = $content->getParentContent();
+            if (!is_null($contentParents) && !$contentParents->isEmpty()) {
+                foreach ($contentParents as $parent) {
+                    $parent->unsetSubContent($content);
+                    /* persist the change on parent */
+                    $this->_em->persist($parent);
+                }
+            }
+            $this->_em->remove($content);
+            $this->_em->flush();
+        }
+    }
+    
+    public function getClassnames(array $content_uids)
+    {
+        $content_uids = array_filter($content_uids);
+        if (0 === count($content_uids)) {
+            return array();
+        }
+        
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("'.implode('","', $content_uids).'")';
+        
+        return $this->getEntityManager()
+                ->getConnection()
+                ->executeQuery($sql)
+                ->fetchAll(\PDO::FETCH_COLUMN);
+    }
 }

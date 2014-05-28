@@ -106,7 +106,12 @@ class ClassContentListener
             if (null !== $page = $content->getMainNode()) {
                 if (AClassContent::STATE_NORMAL === $content->getState()) {
                     $page->setModified(new \DateTime());
-                    $uow->computeChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
+                    $method = 'computeChangeSet';
+                    if (true === $uow->isEntityScheduled($page)) {
+                        $method = 'recomputeSingleEntityChangeSet';
+                    }
+
+                    $uow->$method($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
                 }
             }
 

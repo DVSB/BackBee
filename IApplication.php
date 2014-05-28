@@ -22,6 +22,7 @@
 namespace BackBuilder;
 
 use BackBuilder\Site\Site;
+use Symfony\Component\Console\Application;
 
 /**
  * BackBuilder5 application interface
@@ -84,4 +85,8 @@ interface IApplication
      */
     public function getContainer();
 
+    /**
+     * 
+     */
+    public function registerCommands(Application $application);
 }

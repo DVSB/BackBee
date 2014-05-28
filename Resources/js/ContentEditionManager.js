@@ -110,7 +110,7 @@ var ContentEditionManager = (function($){
         /*Afficher l*/
         showContentParams: function(bbContent){
             if('infos' in bbContent){
-                var bbContent = $bb(bbContent.infos.contentEl);
+                bbContent = $bb(bbContent.infos.contentEl);
             }
             _selectContent(bbContent.contentEl);
             var contentParams = bbContent.getContentParams();

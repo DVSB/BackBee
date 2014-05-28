@@ -159,6 +159,18 @@ class FrontController implements HttpKernelInterface
         $response->send();
         exit(0);
     }
+    
+    /**
+     * Send response to client
+     * 
+     * Public api method
+     * 
+     * @param \Symfony\Component\HttpFoundation\Response $response
+     */
+    public function sendResponse(Response $response)
+    {
+        $this->_send($response);
+    }
 
     /**
      * Invokes associated action to the current request
@@ -347,9 +359,10 @@ class FrontController implements HttpKernelInterface
 
         preg_match('/(.*)(\.[hxtml]+)/', $uri, $matches);
         if (
-            '_root_' !== $uri 
+            ('_root_' !== $uri 
             && '/' !== $uri[strlen($uri) - 1] 
-            && 0 === count($matches) && true === $this->force_url_extension
+            && 0 === count($matches) && true === $this->force_url_extension)
+            || (0 < count($matches) && $site->getDefaultExtension() !== $matches[2])
         ) {
             throw new FrontControllerException(sprintf(
                     'The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND
@@ -635,6 +648,11 @@ class FrontController implements HttpKernelInterface
      */
     public function handle(Request $request = null, $type = self::MASTER_REQUEST, $catch = true)
     {
+        // request
+        $event = new GetResponseEvent($this, $this->getRequest(), $type);
+        
+        $this->_application->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
+        
         try {
             $this->_request = $request;
 
