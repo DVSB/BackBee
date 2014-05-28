@@ -154,7 +154,8 @@
             all: 'Tous',
             date_format: 'jj/mm/aaaa',
             datetime_format: 'jj/mm/aaaa hh:mm',
-            search: 'Rechercher'
+            search: 'Rechercher',
+            having_child: 'Rubriques uniquement'
         },
         contents: {
             desc: 'Descriptif :',

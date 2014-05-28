@@ -189,21 +189,21 @@ class BBApplication implements IApplication {
         // Construct service container
         $this->_container = new ContainerBuilder();
 
-        if (false === $default_cachedir = getenv('BB_CACHEDIR')) {
-            $default_cachedir = $this->getBaseDir() . '/cache/';
+        if (false === $containerdir = getenv('BB_CONTAINERDIR')) {
+            $containerdir = $this->getBaseDir() . '/container/';
         }
 
-        $default_cacheclass = 'bb' . md5('__container__' . $this->getContext() . $this->_environment);
-        $default_cachefile = $default_cacheclass . '.php';
+        $containerclass = 'bb' . md5('__container__' . $this->getContext() . $this->_environment);
+        $containerfile = $containerclass . '.php';
 
         if (false === $forceReload &&
-                false === $this->_debug &&
-                true === is_readable($default_cachedir . '/' . $default_cachefile)) {
+            false === $this->_debug &&
+            true === is_readable($containerdir . '/' . $containerfile)) {
 
-            $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($default_cachedir)));
-            $loader->load($default_cachefile);
+            $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($containerdir)));
+            $loader->load($containerfile);
 
-            $this->_container = new $default_cacheclass();
+            $this->_container = new $containerclass();
 
             // Add current BBApplication into container
             $this->_container->set('bbapp', $this);
@@ -270,13 +270,15 @@ class BBApplication implements IApplication {
                 array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         }
-
         $this->_initExternalBundleServices();
-
-        if (false === $this->isDebugMode() &&
-                true === is_writable($default_cachedir)) {
-            $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($this->_container);
-            file_put_contents($default_cachedir . '/' . $default_cachefile, $dump->dump(array('class' => $default_cacheclass, 'base_class' => '\BackBuilder\DependencyInjection\ContainerBuilder')));
+        if (false === $this->isDebugMode()) {
+            if (false === file_exists($containerdir)) {
+                @mkdir($containerdir, 0755);
+            }
+            if (true === is_writable($containerdir)) {
+                $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($this->_container);
+                file_put_contents($containerdir . '/' . $containerfile, $dump->dump(array('class' => $containerclass, 'base_class' => '\BackBuilder\DependencyInjection\ContainerBuilder')));
+            }
         }
 
         return $this;

@@ -38,7 +38,7 @@ use Doctrine\ORM\Tools\SchemaTool;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BundleUpdateCommand extends ACommand
+class BundleUpdateAllCommand extends ACommand
 {
     /**
      * {@inheritdoc}
@@ -46,14 +46,13 @@ class BundleUpdateCommand extends ACommand
     protected function configure()
     {
         $this
-            ->setName('bundle:update')
-            ->addArgument('name', InputArgument::REQUIRED, 'A bundle name')
+            ->setName('bundle:update_all')
             ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
             ->setDescription('Updates a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> updates a bundle: 
+The <info>%command.name%</info> updates all bundles: 
 
-   <info>php bundle:update MyBundle</info>
+   <info>php bundle:update_all </info>
 EOF
             )
         ;
@@ -64,31 +63,24 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $name = strtr($input->getArgument('name'), '/', '\\');
-        
         $force = $input->getOption('force');
         
         $bbapp = $this->getContainer()->get('bbapp');
-        
-        $bundle = $bbapp->getBundle($name);
-        /* @var $bundle \BackBuilder\Bundle\ABundle */
-        
-        if(null === $bundle) {
-            throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
+
+        foreach($bbapp->getBundles() as $bundle) {
+            $output->writeln('Updating bundle: ' . $bundle->getId() . '');
+
+            $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
+
+            if($force) {
+                $output->writeln('<info>Running update</info>');
+
+                $bundle->update();
+            } 
+
+            $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
+
         }
-        
-        
-        $output->writeln('Updating bundle: ' . $bundle->getId() . '');
-        
-        $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
-        
-        if($force) {
-            $output->writeln('<info>Running update</info>');
-            
-            $bundle->update();
-        } 
-        
-        $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
     }
     
 }
