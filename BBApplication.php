@@ -100,7 +100,7 @@ class BBApplication implements IApplication {
     public function __construct($context = null, $environment = 'production', $overwrite_config = false) {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
-        $this->_debug = false;//(($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
+        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
