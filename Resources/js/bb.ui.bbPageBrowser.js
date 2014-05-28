@@ -109,6 +109,19 @@
                                 return false;
                             });
                         }
+                        
+                        var havingChildren = bb.jquery("<div><input type='checkbox' class='bb5-having-child' />&nbsp;"+bb.i18n.__('toolbar.selector.having_child')+"</div>");
+                        bb.jquery(event.target).prepend(havingChildren);
+                        bb.jquery(event.target).find('input.bb5-having-child')
+                                .attr('checked', context.having_child)
+                                .off('change')
+                                .on('change', function(e) {
+                                    context = myself.getContext();
+                                    context.having_child = bb.jquery(e.target).is(':checked');
+                                    myself.setContext(context);
+                                    myself._initTree(context.site);
+                                });
+                        
                         if (myself.options.enableMultiSite) {
                             var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
                             bb.jquery(event.target).prepend(sitesMenu);
@@ -145,7 +158,6 @@
                                 }
                             });
                         }
-
                     }
 
                 });
