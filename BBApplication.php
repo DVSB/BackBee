@@ -32,7 +32,6 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File,
     BackBuilder\Bundle\ABundle;
-
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager,
@@ -51,7 +50,6 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Console\Application,
     Symfony\Component\Finder\Finder;
 
-
 /**
  * The main BackBuilder5 application
  *
@@ -60,8 +58,7 @@ use Symfony\Component\Config\FileLocator,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class BBApplication implements IApplication
-{
+class BBApplication implements IApplication {
 
     const VERSION = '0.8.0';
 
@@ -89,8 +86,7 @@ class BBApplication implements IApplication
     private $_overwrite_config;
     private $_environment;
 
-    public function __call($method, $args)
-    {
+    public function __call($method, $args) {
         if ($this->getContainer()->has('logging')) {
             call_user_func_array(array($this->getContainer()->get('logging'), $method), $args);
         }
@@ -101,8 +97,7 @@ class BBApplication implements IApplication
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
      */
-    public function __construct($context = null, $environment = 'production', $overwrite_config = false)
-    {
+    public function __construct($context = null, $environment = 'production', $overwrite_config = false) {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
         $this->_debug = false;//(($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
@@ -143,10 +138,10 @@ class BBApplication implements IApplication
 
 
         $this->_initContainer()
-             ->_initAutoloader()
-             ->_initContentWrapper()
-             ->_initEntityManager()
-             ->_initBundles();
+                ->_initAutoloader()
+                ->_initContentWrapper()
+                ->_initEntityManager()
+                ->_initBundles();
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
@@ -172,8 +167,7 @@ class BBApplication implements IApplication
         $this->_isinitialized = true;
     }
 
-    public function runImport()
-    {
+    public function runImport() {
         if (null !== $bundles = $this->getConfig()->getSection('importbundles')) {
             foreach ($bundles as $classname) {
                 new $classname($this);
@@ -181,12 +175,16 @@ class BBApplication implements IApplication
         }
     }
 
-    public function __destruct()
-    {
+    public function __destruct() {
         $this->stop();
     }
 
-    private function _initContainer()
+    public function forceReloadConfig()
+    {
+        $this->_initContainer(true);
+    }
+
+    private function _initContainer($forceReload = false)
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
@@ -198,8 +196,9 @@ class BBApplication implements IApplication
         $containerclass = 'bb' . md5('__container__' . $this->getContext() . $this->_environment);
         $containerfile = $containerclass . '.php';
 
-        if (false === $this->_debug &&
-                true === is_readable($containerdir . '/' . $containerfile)) {
+        if (false === $forceReload &&
+            false === $this->_debug &&
+            true === is_readable($containerdir . '/' . $containerfile)) {
 
             $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($containerdir)));
             $loader->load($containerfile);
@@ -210,6 +209,12 @@ class BBApplication implements IApplication
             $this->_container->set('bbapp', $this);
             $this->_container->set('service_container', $this->_container);
 
+            if (true === $this->_container->hasParameter('bbapp.base.dir')) {
+                $this->_bbdir = $this->_container->getParameter('bbapp.base.dir');
+                $this->_repository = null;
+                $this->_base_repository = null;
+            }
+            
             $this->getConfig()
                     ->setContainer($this->_container)
                     ->setEnvironment($this->_environment)
@@ -223,7 +228,7 @@ class BBApplication implements IApplication
         }
 
         $this->_container->setDefinition('bbapp', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
-        
+
         $dirToLookingFor = array();
         $dirToLookingFor[] = $this->getBBDir() . '/' . 'Config';
         $dirToLookingFor[] = $this->getBaseRepository() . '/' . 'Config';
@@ -244,25 +249,23 @@ class BBApplication implements IApplication
                 $loader->load('services.xml');
             }
         }
-        
+
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
-        
+
         $this->_container->set('service_container', $this->_container);
         $this->_container->setParameter('debug', $this->_debug);
         $this->_container->setParameter('environment', $this->_environment);
 
         $this->_initBBAppParamsIntoContainer();
-        
-        if($this->_debug) {
+
+        if ($this->_debug) {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
-                $this->_container->getParameter('bbapp.logger_debug.class'),
-                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
+                    $this->_container->getParameter('bbapp.logger_debug.class'), array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         } else {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
-                $this->_container->getParameter('bbapp.logger.class'),
-                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
+                    $this->_container->getParameter('bbapp.logger.class'), array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         }
         $this->_initExternalBundleServices();
@@ -279,8 +282,7 @@ class BBApplication implements IApplication
         return $this;
     }
 
-    private function _initBBAppParamsIntoContainer()
-    {
+    private function _initBBAppParamsIntoContainer() {
         // Retrieving config.yml without calling Config services
         $config = array();
         $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.' . $this->_environment . '.yml';
@@ -301,13 +303,20 @@ class BBApplication implements IApplication
         // define context
         $this->_container->setParameter('bbapp.context', $this->getContext());
 
+        // define bb base dir
+        if (true === isset($config['parameters']['base_dir']) && false === empty($config['parameters']['base_dir'])) {
+            $this->_bbdir = $config['parameters']['base_dir'];
+            $this->_repository = null;
+            $this->_base_repository = null;
+        }
+
+        $this->_container->setParameter('bbapp.base.dir', $this->getBBDir());
+
         // define cache dir
         $cachedir = $this->getBaseDir() . '/cache/' . $this->_environment;
         if (true === isset($config['parameters']['cache_dir']) && false === empty($config['parameters']['cache_dir'])) {
             $cachedir = $config['parameters']['cache_dir'];
         }
-
-        $this->_container->setParameter('bbapp.base.dir', $this->getBBDir());
         $this->_container->setParameter('bbapp.cache.dir', $cachedir);
 
         // define config dir
@@ -326,8 +335,7 @@ class BBApplication implements IApplication
         //$this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
     }
 
-    private function _initExternalBundleServices()
-    {
+    private function _initExternalBundleServices() {
         // Load external bundle services (Symfony2 Bundle)
         $externalServices = $this->getConfig()->getSection('external_bundles');
         if (null !== $externalServices && 0 < count($externalServices)) {
@@ -351,8 +359,7 @@ class BBApplication implements IApplication
     /**
      * @return \BackBuilder\BBApplication
      */
-    private function _initAutoloader()
-    {
+    private function _initAutoloader() {
         $this->getAutoloader()
                 ->register()
                 ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
@@ -385,8 +392,7 @@ class BBApplication implements IApplication
      * @param boolean $force_reload Force to reload the theme if true
      * @return \BackBuilder\Theme\Theme
      */
-    public function getTheme($force_reload = false)
-    {
+    public function getTheme($force_reload = false) {
         if (false === is_object($this->_theme) || true === $force_reload) {
             $this->_theme = new Theme($this);
         }
@@ -396,8 +402,7 @@ class BBApplication implements IApplication
     /**
      * @return \Swift_Mailer
      */
-    public function getMailer()
-    {
+    public function getMailer() {
         if (false === $this->getContainer()->has('mailer') || is_null($this->getContainer()->get('mailer'))) {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
                 $smtp = (is_array($mailer_config['smtp'])) ? reset($mailer_config['smtp']) : $mailer_config['smtp'];
@@ -421,8 +426,7 @@ class BBApplication implements IApplication
     /**
      * @return boolean
      */
-    public function isDebugMode()
-    {
+    public function isDebugMode() {
         if ($this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
@@ -434,8 +438,7 @@ class BBApplication implements IApplication
      * @return \BackBuilder\BBApplication
      * @throws \BackBuilder\Exception\UnknownContextException Thrown if unknown context provided
      */
-    private function _initContextConfig()
-    {
+    private function _initContextConfig() {
         if (true === $this->hasContext()) {
             if (false === is_dir($this->getBaseRepository() . '/' . $this->_context)) {
                 throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
@@ -451,8 +454,7 @@ class BBApplication implements IApplication
      * @return \BackBuilder\BBApplication
      * @throws BBException
      */
-    private function _initContentWrapper()
-    {
+    private function _initContentWrapper() {
         if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig()) {
             throw new BBException('None class content wrapper found');
         }
@@ -469,8 +471,7 @@ class BBApplication implements IApplication
      * @return \BackBuilder\BBApplication
      * @throws BBException
      */
-    private function _initEntityManager()
-    {
+    private function _initEntityManager() {
         if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
             throw new BBException('None database configuration found');
         }
@@ -496,16 +497,16 @@ class BBApplication implements IApplication
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
-        
+
         try {
             $logger = $this->getLogging();
-            
-            if($this->isDebugMode()) {
+
+            if ($this->isDebugMode()) {
                 // doctrine data collector
                 $this->getContainer()->get('data_collector.doctrine')->addLogger('default', $this->getContainer()->get('doctrine.dbal.logger.profiling'));
                 $logger = $this->getContainer()->get('doctrine.dbal.logger.profiling');
             }
-            
+
             $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
             $this->getContainer()->set('em', $em);
 
@@ -517,8 +518,7 @@ class BBApplication implements IApplication
         return $this;
     }
 
-    private function _initBundles()
-    {
+    private function _initBundles() {
         if (null === $this->_bundles)
             $this->_bundles = array();
 
@@ -542,8 +542,7 @@ class BBApplication implements IApplication
     /**
      * Load every service definition defined in bundle
      */
-    private function initBundlesServices()
-    {
+    private function initBundlesServices() {
         foreach ($this->_bundles as $b) {
             $xml = $b->getResourcesDir() . '/' . 'services.xml';
             if (true === is_file($xml)) {
@@ -562,8 +561,7 @@ class BBApplication implements IApplication
      * @param type $name
      * @return ABundle
      */
-    public function getBundle($name)
-    {
+    public function getBundle($name) {
         $bundle = null;
         if ($this->getContainer()->has('bundle.' . $name)) {
             $bundle = $this->getContainer()->get('bundle.' . $name);
@@ -576,8 +574,7 @@ class BBApplication implements IApplication
      * 
      * @return ABundle[]
      */
-    public function getBundles()
-    {
+    public function getBundles() {
         return $this->_bundles;
     }
 
@@ -586,16 +583,14 @@ class BBApplication implements IApplication
      * @uses isDebugMode()
      * @return boolean
      */
-    public function debugMode()
-    {
+    public function debugMode() {
         return $this->_debug;
     }
 
     /**
      * @param \BackBuilder\Site\Site $site
      */
-    public function start(Site $site = null)
-    {
+    public function start(Site $site = null) {
         if (null === $site) {
             $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array());
         }
@@ -626,8 +621,7 @@ class BBApplication implements IApplication
     /**
      * Stop the current BBApplication instance
      */
-    public function stop()
-    {
+    public function stop() {
         if (true === $this->isStarted()) {
             if (null !== $this->_bundles) {
                 foreach ($this->_bundles as $bundle) {
@@ -645,24 +639,21 @@ class BBApplication implements IApplication
     /**
      * @return BackBuilder\FrontController\FrontController
      */
-    public function getController()
-    {
+    public function getController() {
         return $this->getContainer()->get('controller');
     }
 
     /**
      * @return BackBuilder\Routing\RouteCollection
      */
-    public function getRouting()
-    {
+    public function getRouting() {
         return $this->getContainer()->get('routing');
     }
 
     /**
      * @return AutoLoader
      */
-    public function getAutoloader()
-    {
+    public function getAutoloader() {
         if (null === $this->_autoloader) {
             $this->_autoloader = new AutoLoader($this);
         }
@@ -670,8 +661,7 @@ class BBApplication implements IApplication
         return $this->_autoloader;
     }
 
-    public function getBBDir()
-    {
+    public function getBBDir() {
         if (null === $this->_bbdir) {
             $r = new \ReflectionObject($this);
             $this->_bbdir = dirname($r->getFileName());
@@ -684,16 +674,14 @@ class BBApplication implements IApplication
      * Returns path to Data directory
      * @return string absolute path to Data directory
      */
-    public function getDataDir()
-    {
+    public function getDataDir() {
         return $this->_container->getParameter('bbapp.data.dir');
     }
 
     /**
      * @return string
      */
-    public function getBaseDir()
-    {
+    public function getBaseDir() {
         return dirname($this->getBBDir());
     }
 
@@ -702,8 +690,7 @@ class BBApplication implements IApplication
      * 
      * @return string
      */
-    public function getVendorDir()
-    {
+    public function getVendorDir() {
         return $this->getBaseDir() . '/vendor';
     }
 
@@ -711,8 +698,7 @@ class BBApplication implements IApplication
      * Returns TRUE if a starting context is defined, FALSE otherwise
      * @return boolean
      */
-    public function hasContext()
-    {
+    public function hasContext() {
         return (null !== $this->_context && 'default' != $this->_context);
     }
 
@@ -720,16 +706,14 @@ class BBApplication implements IApplication
      * Returns the starting context
      * @return string|NULL
      */
-    public function getContext()
-    {
+    public function getContext() {
         return $this->_context;
     }
 
     /**
      * @return BackBuilder\Security\Token\BBUserToken|null
      */
-    public function getBBUserToken()
-    {
+    public function getBBUserToken() {
         $token = $this->getSecurityContext()->getToken();
         if ((null === $token || !($token instanceof BackBuilder\Security\Token\BBUserToken))) {
             if (is_null($this->getContainer()->get('bb_session'))) {
@@ -752,8 +736,7 @@ class BBApplication implements IApplication
      * Get cache provider from config
      * @return string Cache provider config name or \BackBuilder\Cache\DAO\Cache if not found
      */
-    public function getCacheProvider()
-    {
+    public function getCacheProvider() {
         $conf = $this->getConfig()->getCacheConfig();
         $defaultClass = '\BackBuilder\Cache\DAO\Cache';
         $parentClass = '\BackBuilder\Cache\AExtendedCache';
@@ -763,8 +746,7 @@ class BBApplication implements IApplication
     /**
      * @return \BackBuilder\Cache\DAO\Cache
      */
-    public function getCacheControl()
-    {
+    public function getCacheControl() {
         return $this->getContainer()->get('cache.control');
     }
 
@@ -772,13 +754,11 @@ class BBApplication implements IApplication
      *
      * @return \BackBuilder\Cache\ACache
      */
-    public function getBootstrapCache()
-    {
+    public function getBootstrapCache() {
         return $this->getContainer()->get('cache.bootstrap');
     }
 
-    public function getCacheDir()
-    {
+    public function getCacheDir() {
         if (null === $this->_cachedir) {
             $this->_cachedir = $this->getContainer()->getParameter('bbapp.cache.dir');
         }
@@ -789,8 +769,7 @@ class BBApplication implements IApplication
     /**
      * @return ContainerBuilder
      */
-    public function getContainer()
-    {
+    public function getContainer() {
         return $this->_container;
     }
 
@@ -799,8 +778,7 @@ class BBApplication implements IApplication
      * 
      * @return \Symfony\Component\Validator\ValidatorInterface
      */
-    public function getValidator()
-    {
+    public function getValidator() {
         if (!$this->getContainer()->get('validator')) {
             $validator = Validation::createValidatorBuilder()
                     ->enableAnnotationMapping()
@@ -815,8 +793,7 @@ class BBApplication implements IApplication
     /**
      * @return Config
      */
-    public function getConfig()
-    {
+    public function getConfig() {
         if (false === $this->getContainer()->isLoaded('config')) {
             $this->getContainer()
                     ->get('config')
@@ -828,32 +805,28 @@ class BBApplication implements IApplication
         }
         return $this->getContainer()->get('config');
     }
-    
+
     /**
      * Get current environment
      * 
      * @return string
      */
-    public function getEnvironment() 
-    {
+    public function getEnvironment() {
         return $this->_environment;
     }
 
-    public function getConfigDir()
-    {
+    public function getConfigDir() {
         return $this->getRepository() . '/' . 'Config';
     }
 
-    public function getBBConfigDir()
-    {
+    public function getBBConfigDir() {
         return $this->getBaseRepository() . '/' . 'Config';
     }
 
     /**
      * @return EntityManager
      */
-    public function getEntityManager()
-    {
+    public function getEntityManager() {
         if (!$this->getContainer()->has('em')) {
             $this->_initEntityManager();
         }
@@ -864,21 +837,18 @@ class BBApplication implements IApplication
     /**
      * @return Dispatcher
      */
-    public function getEventDispatcher()
-    {
+    public function getEventDispatcher() {
         return $this->getContainer()->get('ed');
     }
 
     /**
      * @return Logger
      */
-    public function getLogging()
-    {
+    public function getLogging() {
         return $this->getContainer()->get('logging');
     }
 
-    public function getMediaDir()
-    {
+    public function getMediaDir() {
         if (null === $this->_mediadir) {
             $this->_mediadir = implode('/', array($this->getRepository(), 'Data', 'Media'));
         }
@@ -889,13 +859,11 @@ class BBApplication implements IApplication
     /**
      * @return Renderer\ARenderer
      */
-    public function getRenderer()
-    {
+    public function getRenderer() {
         return $this->getContainer()->get('renderer');
     }
 
-    public function getRepository()
-    {
+    public function getRepository() {
         if (null === $this->_repository) {
             $this->_repository = $this->getBaseRepository();
             if (true === $this->hasContext()) {
@@ -906,8 +874,7 @@ class BBApplication implements IApplication
         return $this->_repository;
     }
 
-    public function getBaseRepository()
-    {
+    public function getBaseRepository() {
         if (NULL === $this->_base_repository) {
             $this->_base_repository = $this->getBaseDir() . '/' . 'repository';
         }
@@ -918,8 +885,7 @@ class BBApplication implements IApplication
      * Return the classcontent repositories path for this instance
      * @return array
      */
-    public function getClassContentDir()
-    {
+    public function getClassContentDir() {
         if (null === $this->_classcontentdir) {
             $this->_classcontentdir = array();
 
@@ -942,8 +908,7 @@ class BBApplication implements IApplication
      * @param string $dir
      * @return \BackBuilder\BBApplication
      */
-    public function pushClassContentDir($dir)
-    {
+    public function pushClassContentDir($dir) {
         File::resolveFilepath($dir);
 
         $classcontentdir = $this->getClassContentDir();
@@ -959,8 +924,7 @@ class BBApplication implements IApplication
      * @param type $dir
      * @return \BackBuilder\BBApplication
      */
-    public function unshiftClassContentDir($dir)
-    {
+    public function unshiftClassContentDir($dir) {
         File::resolveFilepath($dir);
 
         $classcontentdir = $this->getClassContentDir();
@@ -975,8 +939,7 @@ class BBApplication implements IApplication
      * Return the resource directories, if undefined, initialized with common resources
      * @return array The resource directories
      */
-    public function getResourceDir()
-    {
+    public function getResourceDir() {
         if (null === $this->_resourcedir) {
             $this->_resourcedir = array();
 
@@ -1003,8 +966,7 @@ class BBApplication implements IApplication
      * @param string $dir
      * @return \BackBuilder\BBApplication
      */
-    public function pushResourceDir($dir)
-    {
+    public function pushResourceDir($dir) {
         File::resolveFilepath($dir);
 
         $resourcedir = $this->getResourceDir();
@@ -1020,8 +982,7 @@ class BBApplication implements IApplication
      * @param type $dir
      * @return \BackBuilder\BBApplication
      */
-    public function unshiftResourceDir($dir)
-    {
+    public function unshiftResourceDir($dir) {
         File::resolveFilepath($dir);
 
         $resourcedir = $this->getResourceDir();
@@ -1038,8 +999,7 @@ class BBApplication implements IApplication
      * @return \BackBuilder\BBApplication The current BBApplication
      * @throws BBException Occur on invalid path or invalid resource directories
      */
-    public function addResourceDir($dir)
-    {
+    public function addResourceDir($dir) {
         if (null === $this->_resourcedir) {
             $this->_resourcedir = array();
         }
@@ -1062,8 +1022,7 @@ class BBApplication implements IApplication
      * @return string the file path of the current resource dir
      * @throws BBException Occur when none resource dir is defined
      */
-    public function getCurrentResourceDir()
-    {
+    public function getCurrentResourceDir() {
         $dir = $this->getResourceDir();
 
         if (0 == count($dir)) {
@@ -1077,8 +1036,7 @@ class BBApplication implements IApplication
      * @return \Symfony\Component\HttpFoundation\Request
      * @throws BBException
      */
-    public function getRequest()
-    {
+    public function getRequest() {
         if (false === $this->isStarted())
             throw new BBException('The BackBuilder application has to be started before to access request');
 
@@ -1088,32 +1046,28 @@ class BBApplication implements IApplication
     /**
      * @return BackBuilder\Services\Rpc\JsonRPCServer
      */
-    public function getRpcServer()
-    {
+    public function getRpcServer() {
         return $this->getContainer()->get('rpcserver');
     }
 
     /**
      * @return BackBuilder\Services\Upload\UploadServer
      */
-    public function getUploadServer()
-    {
+    public function getUploadServer() {
         return $this->getContainer()->get('uploadserver');
     }
 
     /**
      * @return BackBuilder\Rewriting\UrlGenerator
      */
-    public function getUrlGenerator()
-    {
+    public function getUrlGenerator() {
         return $this->getContainer()->get('rewriting.urlgenerator');
     }
 
     /**
      * @return \Symfony\Component\HttpFoundation\Session\SessionInterface|null The session
      */
-    public function getSession()
-    {
+    public function getSession() {
         if (null === $this->getRequest()->getSession()) {
             $session = new Session();
             $session->start();
@@ -1125,16 +1079,14 @@ class BBApplication implements IApplication
     /**
      * @return BackBuilder\Security\SecurityContext
      */
-    public function getSecurityContext()
-    {
+    public function getSecurityContext() {
         return $this->getContainer()->get('security.context');
     }
 
     /**
      * @return Site
      */
-    public function getSite()
-    {
+    public function getSite() {
         $site = null;
         if (true === $this->getContainer()->has('site')) {
             $site = $this->getContainer()->get('site');
@@ -1146,8 +1098,7 @@ class BBApplication implements IApplication
     /**
      * @return string
      */
-    public function getStorageDir()
-    {
+    public function getStorageDir() {
         if (null === $this->_storagedir) {
             $this->_storagedir = $this->_container->getParameter('bbapp.data.dir') . '/' . 'Storage';
         }
@@ -1158,8 +1109,7 @@ class BBApplication implements IApplication
     /**
      * @return string
      */
-    public function getTemporaryDir()
-    {
+    public function getTemporaryDir() {
         if (null === $this->_tmpdir) {
             $this->_tmpdir = $this->_container->getParameter('bbapp.data.dir') . '/' . 'Tmp';
         }
@@ -1170,25 +1120,21 @@ class BBApplication implements IApplication
     /**
      * @return boolean
      */
-    public function isReady()
-    {
+    public function isReady() {
         return ($this->_isinitialized && null !== $this->_container);
     }
 
     /**
      * @return boolean
      */
-    public function isStarted()
-    {
+    public function isStarted() {
         return (true === $this->_isstarted);
     }
 
-    public function isClientSAPI()
-    {
+    public function isClientSAPI() {
         return isset($GLOBALS['argv']);
     }
 
-    
     /**
      * Finds and registers Commands.
      *
@@ -1199,33 +1145,32 @@ class BBApplication implements IApplication
      *
      * @param Application $application An Application instance
      */
-    public function registerCommands(Application $application)
-    {
+    public function registerCommands(Application $application) {
         if (is_dir($dir = $this->getBBDir() . '/Command')) {
             $finder = new Finder();
-            
+
             $finder->files()->name('*Command.php')->in($dir);
-            
+
             $prefix = 'BackBuilder\\Command';
-            
+
             foreach ($finder as $file) {
                 $ns = $prefix;
                 if ($relativePath = $file->getRelativePath()) {
-                    $ns .= '\\'.strtr($relativePath, '/', '\\');
+                    $ns .= '\\' . strtr($relativePath, '/', '\\');
                 }
-                $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
+                $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
                 if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                     $application->add($r->newInstance());
                 }
             }
         }
-        
-        
-        foreach($this->getBundles() as $bundle) {
+
+
+        foreach ($this->getBundles() as $bundle) {
             if (!is_dir($dir = $bundle->getBaseDir() . '/Command')) {
                 continue;
             }
-            
+
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
 
@@ -1234,9 +1179,9 @@ class BBApplication implements IApplication
             foreach ($finder as $file) {
                 $ns = $prefix;
                 if ($relativePath = $file->getRelativePath()) {
-                    $ns .= '\\'.strtr($relativePath, '/', '\\');
+                    $ns .= '\\' . strtr($relativePath, '/', '\\');
                 }
-                $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
+                $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
                 if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
@@ -1244,7 +1189,6 @@ class BBApplication implements IApplication
                 }
             }
         }
-
-        
     }
+
 }

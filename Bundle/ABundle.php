@@ -191,7 +191,12 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $em = $this->_initEntityManager($doctrineConfig);
         
         // set the path to include only this bundle's entities
+        if(false === file_exists($this->getBaseDir() . '/Entity')) {
+            // Entity dir doesn't exist
+            mkdir($this->getBaseDir() . '/Entity');
+        }
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array($this->getBaseDir() . '/Entity'));
+        
         
         return $em;
     }
@@ -203,9 +208,8 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     {
         // create DB tables
         $bundleEm = $this->getBundleEntityManager();
+        
         $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
-        
-        
         $schema = new SchemaTool($this->getEntityManager());
         $schema->createSchema($metadata);
     }
@@ -217,11 +221,10 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     {
         // update DB tables
         $bundleEm = $this->getBundleEntityManager();
-        $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
         
+        $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($this->getEntityManager());
         $schema->updateSchema($metadata, true);
-        
     }
     
     /**

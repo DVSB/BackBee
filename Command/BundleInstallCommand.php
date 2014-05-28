@@ -71,22 +71,22 @@ EOF
         $bbapp = $this->getContainer()->get('bbapp');
         
         $bundle = $bbapp->getBundle($name);
+        /* @var $bundle \BackBuilder\Bundle\ABundle */
         
         if(null === $bundle) {
             throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
         }
         
-        /* @var $bundle \BackBuilder\Bundle\ABundle */
         
         $output->writeln('Installing bundle: ' . $bundle->getId() . '');
         
+        $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
         
         if($force) {
             $output->writeln('<info>Running install</info>');
             $bundle->install();
         } 
         
-        $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
         $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
     }
     
