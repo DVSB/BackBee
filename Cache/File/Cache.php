@@ -88,7 +88,7 @@ class Cache extends ACache
             $this->_cachedir .= DIRECTORY_SEPARATOR . String::toPath($this->getContext());
         }
 
-        if (false === is_dir($this->_cachedir)
+        if (true === $this->_instance_options['cacheautogenerate'] && false === is_dir($this->_cachedir)
                 && false === @mkdir($this->_cachedir, 0755, true)) {
             throw new CacheException(sprintf('Unable to create the cache directory `%s`.', $this->_cachedir));
         }
