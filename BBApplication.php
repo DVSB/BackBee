@@ -225,10 +225,11 @@ class BBApplication implements IApplication {
             $this->_container->setDefinition('bb_session', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
 
             return $this;
+
         }
 
         $this->_container->setDefinition('bbapp', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
-
+        
         $dirToLookingFor = array();
         $dirToLookingFor[] = $this->getBBDir() . '/' . 'Config';
         $dirToLookingFor[] = $this->getBaseRepository() . '/' . 'Config';
@@ -249,24 +250,24 @@ class BBApplication implements IApplication {
                 $loader->load('services.xml');
             }
         }
-
+        
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
-
         $this->_container->set('service_container', $this->_container);
         $this->_container->setParameter('environment', $this->_environment);
 
         $this->_initBBAppParamsIntoContainer();
 
         $this->_container->setParameter('debug', $this->isDebugMode());
-
-        if ($this->_debug) {
+        if($this->_debug) {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
-                    $this->_container->getParameter('bbapp.logger_debug.class'), array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
+                $this->_container->getParameter('bbapp.logger_debug.class'),
+                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         } else {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
-                    $this->_container->getParameter('bbapp.logger.class'), array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
+                $this->_container->getParameter('bbapp.logger.class'),
+                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         }
         $this->_initExternalBundleServices();
@@ -320,7 +321,7 @@ class BBApplication implements IApplication {
         }
         $this->_container->setParameter('bbapp.cache.dir', $cachedir);
 
-        if (array_key_exists('cache_auto_generate', $config['parameters'])) {
+        if (isset($config['parameters']) && array_key_exists('cache_auto_generate', $config['parameters'])) {
             $this->_container->setParameter('bbapp.cache.autogenerate', $config['parameters']['cache_auto_generate']);
         }
 
