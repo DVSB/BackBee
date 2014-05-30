@@ -110,7 +110,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
         // Looking for bundle's config in registry
         $registry = $this->_getRegistryConfig();
-        if (null !== $serialized = $registry->getValue()) {
+        if (null != $registry && null !== $serialized = $registry->getValue()) {
             $registryConfig = @unserialize($serialized);
 
             if (true === is_array($registryConfig)) {
@@ -436,21 +436,25 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     {
         $registry = null;
 
-        try {
-            $registry = $this->getApplication()
-                    ->getEntityManager()
-                    ->getRepository('BackBuilder\Bundle\Registry')
-                    ->findOneBy(array('key' => $this->getId(), 'scope' => 'BUNDLE.CONFIG'));
-        } catch (\Exception $e) {
-            if (true === $this->getApplication()->isStarted()) {
-                $this->warning('Enable to load registry table');
+        if(null !== $this->getApplication()
+                ->getEntityManager())
+        {
+            try {
+                $registry = $this->getApplication()
+                        ->getEntityManager()
+                        ->getRepository('BackBuilder\Bundle\Registry')
+                        ->findOneBy(array('key' => $this->getId(), 'scope' => 'BUNDLE.CONFIG'));
+            } catch (\Exception $e) {
+                if (true === $this->getApplication()->isStarted()) {
+                    $this->warning('Enable to load registry table');
+                }
             }
-        }
 
-        if (null === $registry) {
-            $registry = new Registry();
-            $registry->setKey($this->getId())
-                    ->setScope('BUNDLE.CONFIG');
+            if (null === $registry) {
+                $registry = new Registry();
+                $registry->setKey($this->getId())
+                        ->setScope('BUNDLE.CONFIG');
+            }
         }
 
         return $registry;
