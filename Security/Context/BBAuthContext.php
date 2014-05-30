@@ -29,11 +29,13 @@ class BBAuthContext extends AbstractContext implements ContextInterface
         $listeners = array();
         if (array_key_exists('bb_auth', $config)) {
             $config = array_merge(array('nonce_dir' => 'security/nonces', 'lifetime' => 1200, 'use_registry' => false), $config['bb_auth']);
-            $bb_provider = new BBAuthenticationProvider($this->getDefaultProvider($config), $this->getNonceDir($config), $config['lifetime'], (true === $config['use_registry']) ? $this->_getRegistryRepository() : null);
-            $this->_context->addAuthProvider($bb_provider, 'bb_auth');
-            $this->_context->getAuthenticationManager()->addProvider($bb_provider);
-            $listeners[] = new BBAuthenticationListener($this->_context, $this->_context->getAuthenticationManager(), $this->_context->getLogger());
-            $this->loadLogoutListener($bb_provider);
+            if(false !== ($default_provider = $this->getDefaultProvider($config))) {
+                $bb_provider = new BBAuthenticationProvider($default_provider, $this->getNonceDir($config), $config['lifetime'], (true === $config['use_registry']) ? $this->_getRegistryRepository() : null);
+                $this->_context->addAuthProvider($bb_provider, 'bb_auth');
+                $this->_context->getAuthenticationManager()->addProvider($bb_provider);
+                $listeners[] = new BBAuthenticationListener($this->_context, $this->_context->getAuthenticationManager(), $this->_context->getLogger());
+                $this->loadLogoutListener($bb_provider);
+            }
         }
         return $listeners;
     }
@@ -60,10 +62,17 @@ class BBAuthContext extends AbstractContext implements ContextInterface
      */
     private function _getRegistryRepository()
     {
-        return $this->_context
-                        ->getApplication()
-                        ->getEntityManager()
-                        ->getRepository('BackBuilder\Bundle\Registry');
+        if(null !== $this->_context
+                ->getApplication()
+                ->getEntityManager())
+        {
+            return $this->_context
+                            ->getApplication()
+                            ->getEntityManager()
+                            ->getRepository('BackBuilder\Bundle\Registry');
+        }else{
+            return null;
+        }
     }
 
 }

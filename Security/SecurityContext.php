@@ -278,15 +278,18 @@ class SecurityContext extends sfSecurityContext
 
             if (array_key_exists('entity', $provider)) {
                 $manager = $this->_application->getEntityManager();
-                if (array_key_exists('manager_name', $provider['entity'])) {
-                    $manager = $provider['entity']['manager_name']->getEntityManager();
-                }
-                
-                if (array_key_exists('class', $provider['entity']) && array_key_exists('provider', $provider['entity'])) {
-                    $providerClass = $provider['entity']['provider'];
-                    $this->_userproviders[$name] = new $providerClass($manager->getRepository($provider['entity']['class']));
-                } elseif (array_key_exists('class', $provider['entity'])) {
-                    $this->_userproviders[$name] = $manager->getRepository($provider['entity']['class']);
+                if(null !== $manager)
+                {
+                    if (array_key_exists('manager_name', $provider['entity'])) {
+                        $manager = $provider['entity']['manager_name']->getEntityManager();
+                    }
+
+                    if (array_key_exists('class', $provider['entity']) && array_key_exists('provider', $provider['entity'])) {
+                        $providerClass = $provider['entity']['provider'];
+                        $this->_userproviders[$name] = new $providerClass($manager->getRepository($provider['entity']['class']));
+                    } elseif (array_key_exists('class', $provider['entity'])) {
+                        $this->_userproviders[$name] = $manager->getRepository($provider['entity']['class']);
+                    }
                 }
             }
 
