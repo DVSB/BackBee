@@ -331,12 +331,17 @@ class File
         $parse_url = parse_url($basedir);
 
         if (false !== $parse_url && isset($parse_url['scheme'])) {
-            $directory = new \DirectoryIterator($basedir);
-            $regex = new \RegexIterator($directory, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::ALL_MATCHES);
-
-            foreach ($regex as $file) {
-                $files[] = $file[0];
+            foreach(Dir::getContent($basedir) as $file) {
+                if (false === is_dir($file) && $extension === substr($file, -1*strlen($extension))) {
+                    $files[] = $basedir.'/'.$file;
+                }
             }
+// @TODO to be refactor
+//            $directory = new \DirectoryIterator($basedir);
+//            $regex = new \RegexIterator($directory, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::GET_MATCH);
+//            foreach ($regex as $file) {
+//                $files[] = $file[0];
+//            }
         } else {
             $pattern = '';
             foreach (str_split($extension) as $letter) {
@@ -346,6 +351,7 @@ class File
             $pattern = $basedir . DIRECTORY_SEPARATOR . '*.' . $pattern;
             $files = glob($pattern);
         }
+        
         return $files;
     }
     
