@@ -96,8 +96,9 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $this->_id = basename($this->_basedir);
 
         $this->_logger = $logger;
-        if (NULL === $this->_logger)
+        if (NULL === $this->_logger) {
             $this->_logger = $this->_application->getLogging();
+        }
     }
 
     private function _initConfig($configdir = null)
@@ -107,6 +108,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         }
 
         $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
+        $this->_config->setEnvironment($this->_application->getEnvironment());
 
         // Looking for bundle's config in registry
         $registry = $this->_getRegistryConfig();
