@@ -77,7 +77,8 @@ class ZipArchive implements IImporterConnector
         }
         
         $this->_config = array_merge_recursive(array(
-            'extractedDir' => $application->getTemporaryDir() . '/ZipArchiveConnector/extracted/' . basename($config['archive']) . '/' . date('Y-m-d_His') . '/'
+            'extractedDir' => $application->getTemporaryDir() . '/ZipArchiveConnector/extracted/' . basename($config['archive']) . '/' . date('Y-m-d_His') . '/',
+            'deleteExtracted' => true
         ), $config);
         
         $this->_init();
@@ -137,10 +138,10 @@ class ZipArchive implements IImporterConnector
         }
         
         File::extractZipArchive($archiveFile, $this->getConfig('extractedDir'), true);
-        
+
         // delegate to FileSystem connector
         $this->fileSystemConnector = new FileSystem($this->_application, array(
-            'baseDir' => $this->getConfig('extractedDir')
+            'basedir' => $this->getConfig('extractedDir')
         ));
         
         $this->isInitialised = true;
@@ -158,12 +159,15 @@ class ZipArchive implements IImporterConnector
     }
     
     /**
-     * 
+     * {@inheritDoc}
      */
-    public function cleanUp()
+    public function tearDown()
     {
         $this->isInitialised = false;
-        Dir::delete($this->getConfig('extractedDir'));
+        
+        if($this->getConfig('deleteExtracted')) {
+            Dir::delete($this->getConfig('extractedDir'));
+        }
     }
 
 }

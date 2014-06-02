@@ -23,8 +23,10 @@ class RestfulContext extends AbstractContext implements ContextInterface
     {
         $listeners = array();
         if (array_key_exists('restful', $config)) {
-            $this->_context->getAuthenticationManager()->addProvider(new PublicKeyAuthenticationProvider($this->getDefaultProvider($config), $this->_context->getEncoderFactory()));
-            $listeners[] = new PublicKeyAuthenticationListener($this->_context, $this->_context->getAuthenticationManager(), $this->_context->getLogger());
+            if(false !== ($default_provider = $this->getDefaultProvider($config))) {
+                $this->_context->getAuthenticationManager()->addProvider(new PublicKeyAuthenticationProvider($default_provider, $this->_context->getEncoderFactory()));
+                $listeners[] = new PublicKeyAuthenticationListener($this->_context, $this->_context->getAuthenticationManager(), $this->_context->getLogger());
+            }
         }
         return $listeners;
     }

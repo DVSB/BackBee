@@ -251,12 +251,9 @@ class Config
      */
     private function _getYmlFiles($basedir)
     {
-        $yml_files = \BackBuilder\Util\File::getFilesRecursivelyByExtension($basedir, self::EXTENTION);
+        $yml_files = \BackBuilder\Util\File::getFilesByExtension($basedir, self::EXTENTION);
 
-        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION;
-        if (false === file_exists($default_file)) {
-            $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE . '.' . self::EXTENTION;
-        }
+        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE . '.' . self::EXTENTION;
 
         if (true === file_exists($default_file) && 1 < count($yml_files)) {
             // Ensure that config.yml is the first one
@@ -264,18 +261,6 @@ class Config
             array_unshift($yml_files, $default_file);
         }
 
-        $already_loaded = array();
-        foreach ($yml_files as $key => $file_name) {
-            $name = basename($file_name);
-            $exploded_name = explode('.', $name);
-            if ($exploded_name[1] === $this->_environment) {
-                $already_loaded[] = $exploded_name[0] . '.' . self::EXTENTION;
-            }
-            if (($exploded_name[1] !== $this->_environment && $exploded_name[1] !== self::EXTENTION) ||
-                in_array($name, $already_loaded)) {
-                unset($yml_files[$key]);
-            }
-        }
         return $yml_files;
     }
 
@@ -294,14 +279,14 @@ class Config
     /**
      * Try to parse a yaml config file
      * @param string $filename
-     * @throws \BackBuilder\Config\Exception\InvalidConfigException Occurs when the file can't be parse
+     * @throws \BackBuilder\Config\Exception\InvalidConfigException Occurs when the file can't be parsed
      */
     private function _loadFromFile($filename, $overwrite = false)
     {
         try {
             $yamlDatas = Yaml::parse($filename);
-            if (is_array($yamlDatas)) {
 
+            if (is_array($yamlDatas)) {
                 if('dev' === $this->_environment) {
                     $this->_debugData[$filename] = $yamlDatas;
                 }
@@ -313,8 +298,7 @@ class Config
                         $this->setSection($component, $config, $overwrite);
                     }
                 } else {
-                    $filename = explode('.', basename($filename));
-                    $this->setSection($filename[0], $yamlDatas, $overwrite);
+                    $this->setSection(basename($filename, '.' . self::EXTENTION), $yamlDatas, $overwrite);
                 }
             }
         } catch (ParseException $e) {
@@ -475,6 +459,13 @@ class Config
         if (false === $this->_loadFromCache($basedir)) {
             $this->_loadFromBaseDir($basedir, $overwrite);
             $this->_saveToCache($basedir);
+        }
+
+        if (!empty($this->_environment) &&
+            false === strpos($this->_environment, $basedir) &&
+            file_exists($basedir . DIRECTORY_SEPARATOR . $this->_environment)) {
+
+            $this->extend($basedir . DIRECTORY_SEPARATOR . $this->_environment, $overwrite);
         }
         
         return $this;

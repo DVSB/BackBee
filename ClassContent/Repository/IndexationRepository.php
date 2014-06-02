@@ -70,7 +70,6 @@ class IndexationRepository extends EntityRepository
      */
     public function replaceOptContentTable(AClassContent $content)
     {
-        return $this;
         if (null === $content->getMainNode()) {
             return $this;
         }
@@ -101,7 +100,16 @@ class IndexationRepository extends EntityRepository
             'created' => $content->getCreated()->getTimestamp()
         );
 
-        return $this->_executeQuery($query, $params);
+        $types = array(
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_INT_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_INT_ARRAY
+        );
+
+        return $this->_executeQuery($query, $params, $types);
     }
 
     /**

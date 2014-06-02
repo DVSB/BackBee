@@ -62,10 +62,10 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
         $_routes = $collection->all();
 
         $routes = array();
-        $ressources = array();
+        $resources = array();
 
         foreach ($_ressources as $ressource) {
-            $ressources[] = array(
+            $resources[] = array(
                 'type' => get_class($ressource),
                 'path' => $ressource->__toString()
             );
@@ -95,7 +95,28 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
         ksort($routes);
         $this->data['matchRoute'] = $request->attributes->get('_route');
         $this->data['routes'] = $routes;
-        $this->data['ressources'] = $ressources;
+        $this->data['resources'] = $resources;
+        
+        
+        // get route sources
+        foreach($this->container->get('bbapp')->getConfig()->getDebugData() as $configFile => $configData) {
+            if('route.yml' == basename($configFile)) {
+                $this->data['resources'][$configFile] = $configData;
+            } elseif(array_key_exists('route', $configData)) {
+                $this->data['resources'][$configFile] = $configData['route'];
+            }
+        }
+
+        foreach($this->container->get('bbapp')->getBundles() as $bundle) {
+            foreach($bundle->getConfig()->getDebugData() as $configFile => $configData) {
+            if('route.yml' == basename($configFile)) {
+                $this->data['resources'][$configFile] = $configData;
+            } elseif(array_key_exists('route', $configData)) {
+                $this->data['resources'][$configFile] = $configData['route'];
+            }
+        }
+        }
+        var_dump($this->data['resources']);exit;
     }
 
     /**
@@ -119,13 +140,13 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     }
 
     /**
-     * Returns the Ressources Information
+     * Returns the Resources Information
      *
-     * @return array Ressources Information
+     * @return array Resources Information
      */
-    public function getRessources()
+    public function getResources()
     {
-        return $this->data['ressources'];
+        return $this->data['resources'];
     }
 
     /**
@@ -135,7 +156,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
      */
     public function getRessourceCount()
     {
-        return count($this->data['ressources']);
+        return count($this->data['resources']);
     }
 
     /**

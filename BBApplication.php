@@ -188,21 +188,21 @@ class BBApplication implements IApplication {
         // Construct service container
         $this->_container = new ContainerBuilder();
 
-        if (false === $default_cachedir = getenv('BB_CACHEDIR')) {
-            $default_cachedir = $this->getBaseDir() . '/cache/';
+        if (false === $containerdir = getenv('BB_CONTAINERDIR')) {
+            $containerdir = $this->getBaseDir() . '/container/';
         }
 
-        $default_cacheclass = 'bb' . md5('__container__' . $this->getContext() . $this->_environment);
-        $default_cachefile = $default_cacheclass . '.php';
+        $containerclass = 'bb' . md5('__container__' . $this->getContext() . $this->_environment);
+        $containerfile = $containerclass . '.php';
 
         if (false === $forceReload &&
-                false === $this->_debug &&
-                true === is_readable($default_cachedir . '/' . $default_cachefile)) {
+            false === $this->_debug &&
+            true === is_readable($containerdir . '/' . $containerfile)) {
 
-            $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($default_cachedir)));
-            $loader->load($default_cachefile);
+            $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($containerdir)));
+            $loader->load($containerfile);
 
-            $this->_container = new $default_cacheclass();
+            $this->_container = new $containerclass();
 
             // Add current BBApplication into container
             $this->_container->set('bbapp', $this);
@@ -213,7 +213,7 @@ class BBApplication implements IApplication {
                 $this->_repository = null;
                 $this->_base_repository = null;
             }
-            
+
             $this->getConfig()
                     ->setContainer($this->_container)
                     ->setEnvironment($this->_environment)
@@ -224,10 +224,11 @@ class BBApplication implements IApplication {
             $this->_container->setDefinition('bb_session', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
 
             return $this;
+
         }
 
         $this->_container->setDefinition('bbapp', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
-
+        
         $dirToLookingFor = array();
         $dirToLookingFor[] = $this->getBBDir() . '/' . 'Config';
         $dirToLookingFor[] = $this->getBaseRepository() . '/' . 'Config';
@@ -248,32 +249,35 @@ class BBApplication implements IApplication {
                 $loader->load('services.xml');
             }
         }
-
+        
         // Add current BBApplication into container
         $this->_container->set('bbapp', $this);
-
         $this->_container->set('service_container', $this->_container);
-        $this->_container->setParameter('debug', $this->_debug);
         $this->_container->setParameter('environment', $this->_environment);
 
         $this->_initBBAppParamsIntoContainer();
 
-        if ($this->_debug) {
+        $this->_container->setParameter('debug', $this->isDebugMode());
+        if($this->_debug) {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
-                    $this->_container->getParameter('bbapp.logger_debug.class'), array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
+                $this->_container->getParameter('bbapp.logger_debug.class'),
+                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         } else {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
-                    $this->_container->getParameter('bbapp.logger.class'), array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
+                $this->_container->getParameter('bbapp.logger.class'),
+                array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
             ));
         }
-
         $this->_initExternalBundleServices();
-
-        if (false === $this->isDebugMode() &&
-                true === is_writable($default_cachedir)) {
-            $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($this->_container);
-            file_put_contents($default_cachedir . '/' . $default_cachefile, $dump->dump(array('class' => $default_cacheclass, 'base_class' => '\BackBuilder\DependencyInjection\ContainerBuilder')));
+        if (false === $this->isDebugMode()) {
+            if (false === file_exists($containerdir)) {
+                @mkdir($containerdir, 0755);
+            }
+            if (true === is_writable($containerdir)) {
+                $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($this->_container);
+                file_put_contents($containerdir . '/' . $containerfile, $dump->dump(array('class' => $containerclass, 'base_class' => '\BackBuilder\DependencyInjection\ContainerBuilder')));
+            }
         }
 
         return $this;
@@ -282,11 +286,11 @@ class BBApplication implements IApplication {
     private function _initBBAppParamsIntoContainer() {
         // Retrieving config.yml without calling Config services
         $config = array();
-        $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.' . $this->_environment . '.yml';
-
+        $filename = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $this->_environment . DIRECTORY_SEPARATOR . 'config.yml';
         if (!file_exists($filename)) {
-            $filename = $this->getRepository() . '/' . 'Config' . '/' . 'config.yml';
+            $filename = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'config.yml';
         }
+
         if (true === is_readable($filename)) {
             $config = Yaml::parse($filename);
         }
@@ -315,6 +319,11 @@ class BBApplication implements IApplication {
             $cachedir = $config['parameters']['cache_dir'];
         }
         $this->_container->setParameter('bbapp.cache.dir', $cachedir);
+
+        if (isset($config['parameters']) && array_key_exists('cache_auto_generate', $config['parameters'])) {
+            $this->_container->setParameter('bbapp.cache.autogenerate', $config['parameters']['cache_auto_generate']);
+        }
+
 
         // define config dir
         $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
@@ -486,7 +495,7 @@ class BBApplication implements IApplication {
         }
 
         if (true === array_key_exists('orm', $doctrine_config)) {
-            $doctrine_condif['dbal']['orm'] = $doctrine_config['orm'];
+            $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
         // Init ORM event
