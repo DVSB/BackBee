@@ -55,7 +55,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Site\Repository\LayoutRepository")
- * @Table(name="layout")
+ * @Table(name="layout",indexes={@index(name="IDX_SITE", columns={"site_uid"})})
  * @HasLifecycleCallbacks
  */
 class Layout extends AObjectIdentifiable implements IJson
@@ -113,7 +113,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Optional owner site.
      * @var \BackBuilder\Site\Site
-     * @ManyToOne(targetEntity="BackBuilder\Site\Site", inversedBy="_layouts")
+     * @ManyToOne(targetEntity="BackBuilder\Site\Site", inversedBy="_layouts", fetch="EXTRA_LAZY")
      * @JoinColumn(name="site_uid", referencedColumnName="uid")
      */
     protected $_site;
@@ -121,7 +121,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Store pages using this layout.
      * var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_layout")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
 

@@ -59,6 +59,12 @@ class fileRepository extends ClassContentRepository
     protected $_mediadir;
 
     /**
+     * The current application
+     * @var \BackBuilder\BBApplication
+     */
+    private $_application;
+
+    /**
      * Move an temporary uploaded file to either media library or storage directory
      * @param \BackBuilder\ClassContent\Element\file $file
      * @return boolean
@@ -73,11 +79,11 @@ class fileRepository extends ClassContentRepository
 
         try {
             File::move($filename, $currentname);
+            $file->path = Media::getPathFromContent($file);
+            $this->_dispatchPostUploadEvent($currentname, $file->path);
         } catch (\BackBuilder\Exception\BBException $e) {
             return false;
         }
-
-        $file->path = Media::getPathFromContent($file);
 
         return true;
     }
@@ -114,6 +120,7 @@ class fileRepository extends ClassContentRepository
 
         try {
             File::move($newfilename, $moveto);
+            $this->_dispatchPostUploadEvent($moveto, $file->path);
         } catch (\BackBuilder\Exception\BBException $e) {
             return false;
         }
@@ -162,9 +169,7 @@ class fileRepository extends ClassContentRepository
 
         if (true === property_exists($value, 'value')) {
             $image_obj = json_decode($value->value);
-            if (true === is_object($image_obj)
-                    && true === property_exists($image_obj, 'filename')
-                    && true === property_exists($image_obj, 'originalname')) {
+            if (true === is_object($image_obj) && true === property_exists($image_obj, 'filename') && true === property_exists($image_obj, 'originalname')) {
                 $this->updateFile($content, $image_obj->filename, $image_obj->originalname);
             }
         }
@@ -180,6 +185,8 @@ class fileRepository extends ClassContentRepository
     public function setDirectories(BBApplication $application = null)
     {
         if (null !== $application) {
+            $this->_application = $application;
+
             $this->setTemporaryDir($application->getTemporaryDir())
                     ->setStorageDir($application->getStorageDir())
                     ->setMediaDir($application->getMediaDir());
@@ -219,6 +226,20 @@ class fileRepository extends ClassContentRepository
     {
         $this->_mediadir = $media_dir;
         return $this;
+    }
+
+    /**
+     * Dispatch postupload event
+     * @param string $sourcefile
+     * @param string $targetfile
+     */
+    private function _dispatchPostUploadEvent($sourcefile, $targetfile)
+    {
+        if (null !== $this->_application &&
+                null !== $this->_application->getEventDispatcher()) {
+            $event = new \BackBuilder\Event\PostUploadEvent($sourcefile, $targetfile);
+            $this->_application->getEventDispatcher()->dispatch('file.postupload', $event);
+        }
     }
 
 }

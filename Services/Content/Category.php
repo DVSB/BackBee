@@ -399,7 +399,9 @@ class Category
     {
         $stdClass = new \stdClass();
         $stdClass->name = $this->getname();
-        $stdClass->uid = uniqid();
+        $stdClass->uid = uniqid('', TRUE);
+
+
         $stdClass->selected = $this->getSelected();
         $stdClass->label = $this->getLabel();
         return $stdClass;

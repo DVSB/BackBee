@@ -44,7 +44,19 @@ class Config
      * Default config file to look for
      * @var string
      */
-    const CONFIG_FILE = 'config.yml';
+    const CONFIG_FILE = 'config';
+    
+    /**
+     * System events config file to look for
+     * @var string
+     */
+    const EVENTS_FILE = 'events';
+
+    /**
+     * System extention config file
+     * @var string
+     */
+    const EXTENTION = 'yml';
 
     /**
      * The base directory to looking for configuration files
@@ -75,6 +87,8 @@ class Config
      * @var \BackBuilder\DependencyInjection\Container
      */
     private $_container;
+
+    private $_environment = 'production';
 
     /**
      * Magic function to get configuration section
@@ -115,8 +129,15 @@ class Config
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
-        $this->setContainer($container)
-                ->extend();
+        $this->setContainer($container)->extend();
+    }
+    
+    /**
+     * Load system configs
+     */
+    private function _loadSystemConfig() 
+    {
+        $this->_loadFromFile(__DIR__ . '/' . self::EVENTS_FILE . '.' . self::EXTENTION);
     }
 
     /**
@@ -182,6 +203,7 @@ class Config
     private function _getCacheExpire($basedir)
     {
         $expire = 0;
+
         foreach ($this->_getYmlFiles($basedir) as $file) {
             $stat = @stat($file);
             if ($expire < $stat['mtime']) {
@@ -204,7 +226,7 @@ class Config
      */
     private function _getCacheId($basedir)
     {
-        return md5('config-' . $basedir);
+        return md5('config-' . $basedir . $this->_environment);
     }
 
     /**
@@ -216,8 +238,10 @@ class Config
      */
     private function _getYmlFiles($basedir)
     {
-        $yml_files = \BackBuilder\Util\File::getFilesRecursivelyByExtension($basedir, 'yml');
-        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;
+        $yml_files = \BackBuilder\Util\File::getFilesByExtension($basedir, self::EXTENTION);
+
+        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE . '.' . self::EXTENTION;
+
         if (true === file_exists($default_file) && 1 < count($yml_files)) {
             // Ensure that config.yml is the first one
             $yml_files = array_diff($yml_files, array($default_file));
@@ -249,12 +273,14 @@ class Config
         try {
             $yamlDatas = Yaml::parse($filename);
             if (is_array($yamlDatas)) {
-                if (self::CONFIG_FILE === basename($filename)) {
+
+                if (self::CONFIG_FILE . '.' . self::EXTENTION === basename($filename)) {
+
                     foreach ($yamlDatas as $component => $config) {
                         $this->setSection($component, $config, $overwrite);
                     }
                 } else {
-                    $this->setSection(substr(basename($filename), 0, -4), $yamlDatas, $overwrite);
+                    $this->setSection(basename($filename, '.' . self::EXTENTION), $yamlDatas, $overwrite);
                 }
             }
         } catch (ParseException $e) {
@@ -308,6 +334,17 @@ class Config
     public function getAllSections()
     {
         return $this->getSection();
+    }
+
+    /**
+     * Set environment context
+     * @param string $env
+     * @return self
+     */
+    public function setEnvironment($env)
+    {
+        $this->_environment = $env;
+        return $this;
     }
 
     /**
@@ -405,6 +442,15 @@ class Config
             $this->_loadFromBaseDir($basedir, $overwrite);
             $this->_saveToCache($basedir);
         }
+
+        if (!empty($this->_environment) &&
+            false === strpos($this->_environment, $basedir) &&
+            file_exists($basedir . DIRECTORY_SEPARATOR . $this->_environment)) {
+
+            $this->extend($basedir . DIRECTORY_SEPARATOR . $this->_environment, $overwrite);
+        }
+        
+        return $this;
     }
 
     /**
@@ -415,5 +461,4 @@ class Config
     {
         return $this->_basedir;
     }
-
 }

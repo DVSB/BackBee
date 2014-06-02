@@ -39,7 +39,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Site\Repository\SiteRepository")
- * @Table(name="site", indexes={@Index(name="url", columns={"server_name"})})
+ * @Table(name="site", indexes={@Index(name="IDX_SERVERNAME", columns={"server_name"})})
  * @fixtures(qty=1)
  */
 class Site extends AObjectIdentifiable implements IJson
@@ -93,14 +93,14 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * The collection of layouts available for this site.
-     * @OneToMany(targetEntity="BackBuilder\Site\Layout", mappedBy="_site")
+     * @OneToMany(targetEntity="BackBuilder\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
      * @OrderBy({"_label" = "ASC"})
      */
     protected $_layouts;
 
     /**
      * The default metadatas associated tto the pages of this website.
-     * @ManyToMany(targetEntity="BackBuilder\Site\Metadata\Metadata", cascade={"all"})
+     * @ManyToMany(targetEntity="BackBuilder\Site\Metadata\Metadata", cascade={"all"}, fetch="EXTRA_LAZY")
      * @JoinTable(name="metadata_site",
      *      joinColumns={@JoinColumn(name="site_uid", referencedColumnName="uid")},
      *      inverseJoinColumns={@JoinColumn(name="metadata_uid", referencedColumnName="uid")}

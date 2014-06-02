@@ -13,6 +13,9 @@ use BackBuilder\BBApplication,
  */
 abstract class AImportBundle
 {
+    /**
+     * @var string
+     */
     protected $_dir;
     /**
      * @var Config
@@ -27,15 +30,37 @@ abstract class AImportBundle
      */
     protected $_application;
 
+    /**
+     * AImportBundle's constructor
+     * 
+     * @param BBApplication $application 
+     */
     public function __construct(BBApplication $application)
     {
         $this->_application = $application;
         $this->_config = new Config($this->_dir);
+        foreach ($this->_application->getConfig()->getSection('doctrine') as $key => $db_config) {
+            $this->_config->setSection($key, $db_config, true);
+        }
+
         $this->_relations = $this->_config->getSection('relations');
 
         if (0 == count($this->_relations)) {
             return false;
         }
+
+        $log_filepath = $application->getConfig()->getLoggingConfig();
+        $log_filepath = $log_filepath['logfile'];
+
+        if ('/' !== $log_filepath[0] || false === is_dir(dirname($log_filepath))) {
+            $log_filepath = $application->getBaseDir() . '/log/import.log';
+        } else {
+            $log_filepath = dirname($log_filepath) . '/import.log';
+        }
+
+        $logger = new \BackBuilder\Logging\Appender\File(array(
+            'logfile' => $log_filepath
+        ));
 
         $this->setPhpConf($this->_config->getSection('php_ini'));
         foreach ($this->_relations as $class => $config) {
@@ -44,8 +69,16 @@ abstract class AImportBundle
                 $this->{$type . ucfirst($class)}($config);
             } catch (SkippedImportException $exc) {
                 echo $exc->getMessage() . "\n";
+            } catch (\Exception $e) {
+                $logger->write(array(
+                    'd' => date('Y/m/d H:i:s'),
+                    'p' => '',
+                    'm' => $e->getMessage(),
+                    'u' => '')
+                );
             }
         }
+
         return true;
     }
 
@@ -60,7 +93,7 @@ abstract class AImportBundle
         $key = (0 === strpos($name, 'import')) ? strtolower(str_replace('import', '', $name)) : '';
         if ($key !== '') {
             $connectorName = '\BackBuilder\Importer\Connector\\' . $config['connector'];
-
+            
             $connector = new $connectorName($this->_application, $this->_config->getSection($config['config']));
             $importer = new Importer($this->_application, $connector, $this->_config);
             $flushEvery = array_key_exists('flush_every', $config) ? (int)$config['flush_every'] : 1000;

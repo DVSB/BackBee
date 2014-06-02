@@ -67,5 +67,15 @@ class FrontControllerException extends BBException
     {
         return $this->_request;
     }
+    
+    /**
+     * Get the HTTP status code
+     * 
+     * @return int
+     */
+    public function getStatusCode()
+    {
+        return 6000 - $this->_code;
+    }
 
 }

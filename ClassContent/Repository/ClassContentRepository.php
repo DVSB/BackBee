@@ -45,20 +45,36 @@ class ClassContentRepository extends EntityRepository
 {
 
     /**
+     * SQL query to select AClassContent
+     * @var \Doctrine\DBAL\Query\QueryBuilder
+     */
+    private $_query_selection;
+
+    /**
      * Get all content uids owning the provided content
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param string content uid
      * @return array
      */
-    public function getParentContentUid(AClassContent $content)
+    public function getParentContentUidByUid($content_uid)
     {
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
                 ->select('c.parent_uid')
                 ->from('content_has_subcontent', 'c')
                 ->andWhere('c.content_uid = :uid')
-                ->setParameter('uid', $content->getUid());
+                ->setParameter('uid', $content_uid);
 
         return $q->execute()->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * Get all content uids owning the provided content
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return array
+     */
+    public function getParentContentUid(AClassContent $content)
+    {
+        return $this->getParentContentUidByUid($content->getUid());
     }
 
     /**
@@ -112,134 +128,174 @@ class ClassContentRepository extends EntityRepository
      */
     public function getSelection($selector, $multipage = false, $recursive = true, $start = 0, $limit = null, $limitToOnline = true, $excludedFromSelection = false, $classnameArr = array(), $delta = 0)
     {
+        $query = 'SELECT c.uid FROM content c';
+        $join = array();
+        $where = array();
+        $orderby = array();
+        $limit = $limit ? $limit : (array_key_exists('limit', $selector) ? $selector['limit'] : 10);
+        $offset = $start + $delta;
 
-        $q = $this->createQueryBuilder('c')->setParameters(array());
-        $q->distinct();
-        if ($excludedFromSelection) {
-            $q->leftJoin('c._indexation', 'iselect', 'WITH', 'iselect._field = \'excluded-from-selection\'')
-                    ->andWhere('iselect._value IS NULL');
+        if (true === is_array($classnameArr) && 0 < count($classnameArr)) {
+            foreach ($classnameArr as $classname) {
+                // ensure Doctrine already known these classname
+                class_exists($classname);
+            }
+            $where[] = str_replace('\\', '\\\\', 'c.classname IN ("' . implode('","', $classnameArr) . '")');
         }
 
-        if (array_key_exists('criteria', $selector)) {
+        if (true === array_key_exists('criteria', $selector)) {
             $criteria = (array) $selector['criteria'];
             foreach ($criteria as $field => $crit) {
                 $crit = (array) $crit;
-                if (1 == count($crit))
+                if (1 == count($crit)) {
                     $crit[1] = '=';
-
-                $alias = uniqid('i');
-                $q->leftJoin('c._indexation', $alias)
-                        ->andWhere($alias . '._field = :field' . $alias)
-                        ->andWhere($alias . '._value ' . $crit[1] . ' :value' . $alias)
-                        ->setParameter('field' . $alias, $field)
-                        ->setParameter('value' . $alias, $crit[0]);
-            }
-        }
-        $nodes = NULL;
-        if (array_key_exists('parentnode', $selector)) {
-            $q->leftJoin('c._mainnode', 'p');
-            if (1 == count($selector['parentnode'])) {
-                $nodes = array($this->_em->find('BackBuilder\NestedNode\Page', $selector['parentnode'][0]));
-            } else {
-                if (is_array($selector['parentnode']) && count($selector['parentnode'])) {
-                    $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $selector['parentnode']));
-                }
-            }
-            if (null != $nodes) {
-
-                foreach ($nodes as $node) {
-                    if ($recursive) {
-                        $q->andWhere('p._root = :root_' . $node->getUid())
-                                ->andWhere('p._leftnode >= :leftnode_' . $node->getUid())
-                                ->andWhere('p._rightnode <= :rightnode_' . $node->getUid())
-                                ->setParameter('root_' . $node->getUid(), $node->getRoot())
-                                ->setParameter('leftnode_' . $node->getUid(), $node->getLeftnode())
-                                ->setParameter('rightnode_' . $node->getUid(), $node->getRightnode());
-                    } else {
-                        $q->andWhere('p._parent = :parent_' . $node->getUid())
-                                ->setParameter('parent_' . $node->getUid(), $node);
-                    }
                 }
 
-                if ($limitToOnline) {
-                    $q->andWhere('p._state IN (:states)')
-                            ->andWhere('p._publishing IS NULL OR p._publishing <= CURRENT_TIMESTAMP()')
-                            ->andWhere('p._archiving IS NULL OR p._archiving > CURRENT_TIMESTAMP()')
-                            ->setParameter('states', array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
-                } else {
-                    $q->andWhere('p._state < :statedeleted')
-                            ->setParameter('statedeleted', Page::STATE_DELETED);
-                }
+                $alias = uniqid('i' . rand());
+                $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
+                $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value ' . $crit[1] . '"' . $crit[0] . '"';
             }
         }
 
-//        /* get online only content */
-//        if ($limitToOnline) {
-//            $q->andWhere('p._state IN (:states)')
-//                    ->setParameter('states', array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
-//        } else {
-//            $q->andWhere('p._state < :statedeleted')
-//                    ->setParameter('statedeleted', Page::STATE_DELETED);
-//        }
-
-
-        /* filter by classcontents */
-        if (!array_key_exists('orderby', $selector)) {
-            $selector['orderby'] = array('created', 'desc');
-        } else {
-            $selector['orderby'] = (array) $selector['orderby'];
-        }
-        /* handle keywords here */
-        if (array_key_exists("keywordsselector", $selector)) {
-            $keywordInfos = $selector["keywordsselector"];
-            if (is_array($keywordInfos)) {
-                if (array_key_exists("selected", $keywordInfos)) {
-                    $selectedKeywords = $keywordInfos["selected"];
-                    if (is_array($selectedKeywords) && !empty($selectedKeywords)) {
-                        $contentIds = $this->_em->getRepository("BackBuilder\NestedNode\KeyWord")->getContentsIdByKeyWords($selectedKeywords);
-                        if (is_array($contentIds) && !empty($contentIds)) {
-                            $q->andWhere("c._uid in(:kwContent)")->setParameter("kwContent", $contentIds);
-                        } else {
-                            return array();
-                        }
-                    }
-                }
-            }
-        }
-
-        /* handle indexed values here */
         if (true === array_key_exists('indexedcriteria', $selector) &&
                 true === is_array($selector['indexedcriteria'])) {
             foreach ($selector['indexedcriteria'] as $field => $values) {
                 $values = array_filter((array) $values);
                 if (0 < count($values)) {
                     $alias = md5($field);
-                    $q->leftJoin('c._indexation', $alias)
-                            ->andWhere($alias . '._field = :f' . $alias)
-                            ->andWhere($alias . '._value IN (:v' . $alias . ')')
-                            ->setParameter('f' . $alias, $field)
-                            ->setParameter('v' . $alias, $values);
+                    $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
+                    $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value IN ("' . implode('","', $values) . '")';
                 }
             }
         }
 
-        if (is_array($classnameArr) && count($classnameArr)) {
-            $q->andWhere($this->addInstanceFilters($q->getQuery(), "c", $classnameArr));
+        if (true === array_key_exists("keywordsselector", $selector)) {
+            $keywordInfos = $selector["keywordsselector"];
+            if (true === is_array($keywordInfos)) {
+                if (true === array_key_exists("selected", $keywordInfos)) {
+                    $selectedKeywords = $keywordInfos["selected"];
+                    if (true === is_array($selectedKeywords)) {
+                        $selectedKeywords = array_filter($selectedKeywords);
+                        if (false === empty($selectedKeywords)) {
+                            $contentIds = $this->_em->getRepository("BackBuilder\NestedNode\KeyWord")->getContentsIdByKeyWords($selectedKeywords, false);
+                            if (true === is_array($contentIds) && false === empty($contentIds)) {
+                                $where[] = 'c.uid IN ("' . implode('","', $contentIds) . '")';
+                            } else {
+                                return array();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        if (property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
-            $q->orderBy('c._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'asc');
-        } else if (property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
-            $q->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'asc');
+        if (false === array_key_exists('orderby', $selector)) {
+            $selector['orderby'] = array('created', 'desc');
+        } else {
+            $selector['orderby'] = (array) $selector['orderby'];
+        }
+
+        if (array_key_exists('parentnode', $selector) && true === is_array($selector['parentnode'])) {
+            $parentnode = array_filter($selector['parentnode']);
+            if (false === empty($parentnode)) {
+                $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $parentnode));
+                if (null !== $nodes) {
+                    $query = 'SELECT c.uid FROM page p USE INDEX(IDX_SELECT_PAGE) LEFT JOIN content c ON c.node_uid=p.uid';
+                    $pageSelection = array();
+                    foreach ($nodes as $node) {
+                        if (true === $recursive) {
+                            $pageSelection[] = '(p.root_uid="' . $node->getRoot()->getUid() . '" AND p.leftnode BETWEEN ' . $node->getLeftnode() . ' AND ' . $node->getRightnode() . ')';
+                        } else {
+                            $pageSelection[] = '(p.parent_uid="' . $node->getUid() . '")';
+                        }
+                    }
+                    $where[] = '(' . implode(' OR ', $pageSelection) . ')';
+
+                    if (true === $limitToOnline) {
+                        $where[] = 'p.state IN (1, 3)';
+                        $where[] = '(p.publishing IS NULL OR p.publishing <= "' . date('Y-m-d H:i:00', time()) . '")';
+                        $where[] = '(p.archiving IS NULL OR p.archiving >"' . date('Y-m-d H:i:00', time()) . '")';
+                    } else {
+                        $where[] = 'p.state < 4';
+                    }
+
+                    if (true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
+                        $orderby[] = 'p.' . $selector['orderby'][0] . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                    } else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
+                        $orderby[] = 'c.' . $selector['orderby'][0] . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                    } else {
+                        $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
+                        $where[] = 'isort.field = "' . $selector['orderby'][0] . '"';
+                        $orderby[] = 'isort._value' . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                    }
+                }
+            }
+        }
+
+        if (0 === count($orderby)) {
+            if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
+                $orderby[] = 'c.' . $selector['orderby'][0] . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+            } else {
+                $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
+                $where[] = 'isort.field = "' . $selector['orderby'][0] . '"';
+                $orderby[] = 'isort._value' . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+            }
+        }
+
+        if (0 < count($join)) {
+            $query .= ' ' . implode(' ', $join);
+        }
+
+        if (0 < count($where)) {
+            $query .= ' WHERE ' . implode(' AND ', $where);
+        }
+
+        $uids = $this->getEntityManager()
+                ->getConnection()
+                ->executeQuery(str_replace('JOIN content c', 'JOIN opt_content_modified c', $query) . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
+                ->fetchAll(\PDO::FETCH_COLUMN);
+
+        if (count($uids) < $limit) {
+            $uids = $this->getEntityManager()
+                    ->getConnection()
+                    ->executeQuery($query . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
+                    ->fetchAll(\PDO::FETCH_COLUMN);
+        }
+
+        $q = $this->createQueryBuilder('c')
+                ->select()
+                ->where('c._uid IN (:uids)')
+                ->setParameter('uids', $uids);
+
+        if (true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
+            $q->join('c._mainnode', 'p')
+                    ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        } else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
+            $q->orderBy('c._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
         } else {
             $q->leftJoin('c._indexation', 'isort')
                     ->andWhere('isort._field = :sort')
                     ->setParameter('sort', $selector['orderby'][0])
-                    ->orderBy('isort._value', count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'asc');
+                    ->orderBy('isort._value', count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
         }
-        $q->setFirstResult($start + $delta)->setMaxResults($limit ? $limit : (array_key_exists('limit', $selector) ? $selector['limit'] : 10) );
 
-        return $multipage ? new Paginator($q) : $q->getQuery()->getResult();
+        $result = $q->getQuery()->getResult();
+
+        if (true === $multipage) {
+            $count = str_replace('SELECT c.uid', 'SELECT COUNT(c.uid)', $query);
+            $num_results = $this->getEntityManager()->getConnection()->executeQuery($count)->fetch(\PDO::FETCH_COLUMN);
+
+            $q->setFirstResult($offset)
+                    ->setMaxResults($limit);
+
+            $paginator = new \BackBuilder\Util\Doctrine\SettablePaginator($q);
+            $paginator->setCount($num_results)
+                    ->setResult($result);
+
+            return $paginator;
+        }
+
+        return $result;
     }
 
     /**
@@ -304,8 +360,8 @@ class ClassContentRepository extends EntityRepository
             if (0 < count($uids)) {
                 // Data protection
                 array_walk($uids, function(&$item) {
-                    $item = addslashes($item);
-                });
+                            $item = addslashes($item);
+                        });
 
                 // Getting classnames for provided uids
                 $classnames = $this->_em
@@ -446,6 +502,16 @@ class ClassContentRepository extends EntityRepository
             /* as content has no relation with page we are user a native Query */
 
             if ($selectedNode && !$selectedNode->isRoot()) {
+
+                $qb->leftJoin('c._mainnode', 'p')
+                        ->andWhere('p._root = :selectedPageRoot')
+                        ->andWhere('p._leftnode >= :selectedPageLeftnode')
+                        ->andWhere('p._rightnode <= :selectedPageRightnode')
+                        ->setParameters(array(
+                            "selectedPageRoot" => $selectedNode->getRoot(),
+                            "selectedPageLeftnode" => $selectedNode->getLeftnode(),
+                            "selectedPageRightnode" => $selectedNode->getRightnode()));
+
                 /* $qbSN = $this->createQueryBuilder('ct');
                   $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
                   // ->leftJoin("BackBuilder\NestedNode\Page", "p", "WITH", "p._contentset = sc")
@@ -458,18 +524,21 @@ class ClassContentRepository extends EntityRepository
                   "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery(); */
 
                 /* handle online content */
-                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
-                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
-                if (empty($subContents)) {
-                    return array();
-                } // should never happened
-                $newQuery = $this->_em->createQueryBuilder("q");
-                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
-                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
-                                ->where("cs._uid IN (:scl)")
-                                ->setParameter("scl", $subContents)->getQuery()->getResult(); // $subContentsQuery->getResult()
-                /* filtre  parmi ces contents */
-                $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+//                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
+//                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
+//                if (empty($subContents)) {
+//                    return array();
+//                } // should never happened
+//                $newQuery = $this->_em->createQueryBuilder("q");
+//                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
+//                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
+//                                ->where("cs._uid IN (:scl)")
+//                                ->setParameter("scl", $subContents)->getQuery()->getResult(); // $subContentsQuery->getResult()
+//                
+//                if (0 < count($contents)) {
+//                    /* filtre  parmi ces contents */
+//                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+//                }
             }
         }
 
@@ -566,7 +635,7 @@ class ClassContentRepository extends EntityRepository
             if (count($criterion) != 3)
                 continue;
             $criterion = (object) $criterion;
-            $alias = uniqid("i");
+            $alias = uniqid("i" . rand());
             $qb->leftJoin("c._indexation", $alias)
                     ->andWhere($alias . "._field = :field" . $alias)
                     ->andWhere($alias . "._value " . $criterion->op . " :value" . $alias)
@@ -615,8 +684,18 @@ class ClassContentRepository extends EntityRepository
         $qb->select($qb->expr()->count('c'))->from("BackBuilder\ClassContent\AClassContent", "c");
 
         if (array_key_exists("selectedpageField", $cond) && !is_null($cond["selectedpageField"]) && !empty($cond["selectedpageField"])) {
-            $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
+            $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->find($cond['selectedpageField']);
             if ($selectedNode && !$selectedNode->isRoot()) {
+
+                $qb->leftJoin('c._mainnode', 'p')
+                        ->andWhere('p._root = :selectedPageRoot')
+                        ->andWhere('p._leftnode >= :selectedPageLeftnode')
+                        ->andWhere('p._rightnode <= :selectedPageRightnode')
+                        ->setParameters(array(
+                            "selectedPageRoot" => $selectedNode->getRoot(),
+                            "selectedPageLeftnode" => $selectedNode->getLeftnode(),
+                            "selectedPageRightnode" => $selectedNode->getRightnode()));
+
                 /* $qbSN = $this->createQueryBuilder('ct');
                   $subContentsQuery = $qbSN->leftJoin("ct._parentcontent", "sc")
                   //->leftJoin("\BackBuilder\NestedNode\Page", "p", "WITH", "sc = p._contentset")
@@ -627,19 +706,20 @@ class ClassContentRepository extends EntityRepository
                   ->setParameters(array("selectedPageRoot" => $selectedNode->getRoot(),
                   "selectedPageLeftnode" => $selectedNode->getLeftnode(),
                   "selectedPageRightnode" => $selectedNode->getRightnode()))->getQuery(); */
-                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
-                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
-                if (empty($subContents)) {
-                    return array();
-                } // should never happened
-                $newQuery = $this->_em->createQueryBuilder("q");
-                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
-                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
-                                ->where("cs._uid IN (:scl)")
-                                ->setParameter("scl", $subContents)->getQuery()->getResult();
-
-                /* filtre  parmi ces contents */
-                $qb->where("c in (:sc) ")->setParameter("sc", $contents);
+//                $limitToOnline = ( array_key_exists("limitToOnline", $cond) && is_bool($cond["limitToOnline"]) ) ? $cond["limitToOnline"] : true;
+//                $subContents = $this->getPageMainContentSets($selectedNode, $limitToOnline);
+//                if (empty($subContents)) {
+//                    return array();
+//                } // should never happened
+//                $newQuery = $this->_em->createQueryBuilder("q");
+//                $newQuery->select("selectedContent")->from("BackBuilder\ClassContent\AClassContent", "selectedContent");
+//                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
+//                                ->where("cs._uid IN (:scl)")
+//                                ->setParameter("scl", $subContents)->getQuery()->getResult();
+//
+//                if (0 < count($contents)) {
+//                    /* filtre  parmi ces contents */
+//                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
             }
         }
 
@@ -850,4 +930,101 @@ class ClassContentRepository extends EntityRepository
         return $content;
     }
 
+    /**
+     * Returns the unordered children uids for $content
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return array
+     */
+    public function getUnorderedChildrenUids(AClassContent $content)
+    {
+        return $this->getEntityManager()
+                        ->getConnection()
+                        ->executeQuery('SELECT content_uid FROM content_has_subcontent WHERE parent_uid=?', array($content->getUid()))
+                        ->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return Collection<Page>
+     */
+    public function findPagesByContent($content)
+    {
+        /* Remoter � la racine pour trouver sur quelle page se trouve le contenu */
+        $rootContents = array();
+        $this->getRootContentParents($content, $rootContents);
+        $qb = $this->_em->createQueryBuilder("p");
+        $qb->select("p")->from("BackBuilder\NestedNode\Page", "p")
+                ->andWhere('p._contentset IN (:contentset)')
+                ->setParameter('contentset', $rootContents);
+        $result = $qb->getQuery()->getResult();
+        return $result;
+    }
+
+    private function getRootContentParents($content, &$rootContainer)
+    {
+        $contentParents = $content->getParentContent();
+        /* if it has no parents --> is a root element */
+        if ($contentParents->isEmpty()) {
+            $rootContainer[] = $content;
+        } else {
+            foreach ($contentParents as $content) {
+                $this->getRootContentParents($content, $rootContainer);
+            }
+        }
+        return $rootContainer;
+    }
+
+    /**
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return 
+     */
+    public function deleteContent(AClassContent $content, $updateParent = true)
+    {
+
+        if (!($content instanceof ContentSet)) {
+            $elements = $content->getData();
+            foreach ($elements as $key => $element) {
+                if (is_a($element, 'BackBuilder\Content\AClassContent')) {
+                    $parents = $element->getParentContent();
+                    /* it's the case for non-complex elements */
+                    if ($parents->count() == 1) {
+                        $this->deleteContent($element, false);
+                        $this->_em->remove($element);
+                    } else {
+                        $content->unsetSubContent($element);//persist?
+                    }
+                }
+            }
+        } else {
+            $content->clear();
+            $this->_em->remove($content);
+        }
+        if ($updateParent) {
+            $contentParents = $content->getParentContent();
+            if (!is_null($contentParents) && !$contentParents->isEmpty()) {
+                foreach ($contentParents as $parent) {
+                    $parent->unsetSubContent($content);
+                    /* persist the change on parent */
+                    $this->_em->persist($parent);
+                }
+            }
+            $this->_em->remove($content);
+            $this->_em->flush();
+        }
+    }
+    
+    public function getClassnames(array $content_uids)
+    {
+        $content_uids = array_filter($content_uids);
+        if (0 === count($content_uids)) {
+            return array();
+        }
+        
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("'.implode('","', $content_uids).'")';
+        
+        return $this->getEntityManager()
+                ->getConnection()
+                ->executeQuery($sql)
+                ->fetchAll(\PDO::FETCH_COLUMN);
+    }
 }

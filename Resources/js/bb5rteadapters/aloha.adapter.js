@@ -66,7 +66,7 @@ bb.RteManager.registerAdapter("aloha",{
         /*handle plugins conf here*/
         var availablePlugins = this._getAvailablePlugins(rteConfig);
         bb.jquery.extend(true,Aloha.settings,rteConfig.settings);
-        loadScript(bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor/aloha/lib/aloha-full.js", function(){
+        loadScript(bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor-0.25.3/aloha/lib/aloha-full.js", function(){
             Aloha.ready(function(){
                 self.trigger("onReady");
                 /*show toolbar*/
@@ -122,7 +122,11 @@ bb.RteManager.registerAdapter("aloha",{
         this.mode = "inline"; 
         this.mainNode = node;
         /*find all rte enabled contents*/
-        var self = this;        
+        var self = this;
+        
+        /*load Content params via the mainnode. this should not be needed.*/
+       
+        //var editables = this.loadNodesRteParams(bb.jquery(this.mainNode).attr("data-type"));//sync call
         var editables = node.getSubContents(); 
         var fieldPrefix = this._settings.fieldPrefix;
         if(!fieldPrefix || typeof fieldPrefix!="string") throw "aloha.adapter fieldPrefix must be a string";
@@ -130,17 +134,9 @@ bb.RteManager.registerAdapter("aloha",{
         if(bb.jquery.isArray(editables)){
             bb.jquery.each(editables, function(i,contentEl){
                 var editableNode = bb.jquery(contentEl).get(0);
-                if(Aloha.isEditable(editableNode)) return true;    
+                if(Aloha.isEditable(editableNode)) return true;           
                 var elementname = (typeof $bb(contentEl).get("element") == "string") ? $bb(contentEl).get("element") : false;
                 var rteConf = ($bb(contentEl).get("rteconf")!=-1) ? $bb(contentEl).get("rteconf") : false;
-                if(!rteConf){
-                    var elementConf = self.loadNodesRteParams(node.get("type"));
-                    if(bb.jquery.isPlainObject(elementConf)){
-                        rteConf = elementConf[elementname];
-                        var confLabel = ( rteConf ) ? rteConf: "disabled";
-                        $(contentEl).attr("data-rteconf",confLabel);
-                    }   
-                }
                 if( !elementname || !rteConf ) return true;
                 var editableConf = (("customconf" in self.rteConfig) && self.rteConfig.customconf) ? self.rteConfig.customconf[rteConf]: false;
                 if(!bb.jquery.isPlainObject(editableConf)) return true;

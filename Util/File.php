@@ -314,4 +314,85 @@ class File
         return $files;
     }
 
+    /**
+     * Looks recursively in $basedir for files with $extension
+     * @param string $basedir
+     * @param string $extension
+     * @return array
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
+     */
+    public static function getFilesByExtension($basedir, $extension)
+    {
+        if (false === is_readable($basedir)) {
+            throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
+        }
+
+        $files = array();
+        $parse_url = parse_url($basedir);
+
+        if (false !== $parse_url && isset($parse_url['scheme'])) {
+            foreach(Dir::getContent($basedir) as $file) {
+                if (false === is_dir($file) && $extension === substr($file, -1*strlen($extension))) {
+                    $files[] = $basedir.'/'.$file;
+                }
+            }
+// @TODO to be refactor
+//            $directory = new \DirectoryIterator($basedir);
+//            $regex = new \RegexIterator($directory, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::GET_MATCH);
+//            foreach ($regex as $file) {
+//                $files[] = $file[0];
+//            }
+        } else {
+            $pattern = '';
+            foreach (str_split($extension) as $letter) {
+                $pattern .= '[' . strtolower($letter) . strtoupper($letter) . ']';
+            }
+
+            $pattern = $basedir . DIRECTORY_SEPARATOR . '*.' . $pattern;
+            $files = glob($pattern);
+        }
+        
+        return $files;
+    }
+    
+    /**
+     * Extracts a zip archive into a specified directory
+     * 
+     * @param $file - zip archive file
+     * @param type $destinationDir - where the files will be extracted to
+     * @param bool $createDir - should destination dir be created if it doesn't exist
+     * @throws \Exception
+     */
+    public static function extractZipArchive($file, $destinationDir, $createDir = false)
+    {
+        if(!file_exists($destinationDir)) {
+            if(false == $createDir) {
+                throw new \Exception('Destination directory does not exist: ' . $destinationDir);
+            }
+            
+            $res = mkdir($destinationDir, 0777, true);
+            if(false === $res) {
+                throw new \Exception('Destination directory cannot be created: ' . $destinationDir);
+            }
+            
+            if(!is_readable($destinationDir)) {
+                throw new \Exception('Destination directory is not readable: ' . $destinationDir);
+            }
+        } elseif(!is_dir($destinationDir)) {
+            throw new \Exception('Destination directory cannot be created as a file with that name already exists: ' . $destinationDir);
+        }
+        
+        $archive = new \ZipArchive();
+        
+        if(false === $archive->open($file)) {
+            throw new \Exception('Could not open archive: ' . $archive);
+        }
+        
+        if(false === $archive->extractTo($destinationDir) ) {
+            throw new \Exception('Could not extract archive: ' . $archive);
+        }
+        
+        $archive->close();
+    }
+
 }

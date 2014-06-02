@@ -1,3 +1,4 @@
+//@ sourceURL=ressources/js/bb.ui.bbPageBrowser.js
 /*
  *Arborescence
  *
@@ -16,7 +17,9 @@
             editMode: false,
             dialogClass: 'bb5-ui bb5-dialog-wrapper',
             title: "",
-            enableNavigation: true
+            enableNavigation: true,
+            enableMultiSite: false,
+            having_child: false
         },
         _statesWatchable: {
             open: false
@@ -61,7 +64,8 @@
                 selected: null,
                 treeview: null,
                 layouts: null,
-                maxresult: 25
+                maxresult: 25,
+                having_child: myself.options.having_child
             });
 
         },
@@ -105,7 +109,55 @@
                                 return false;
                             });
                         }
+                        
+                        var havingChildren = bb.jquery("<div><input type='checkbox' class='bb5-having-child' />&nbsp;"+bb.i18n.__('toolbar.selector.having_child')+"</div>");
+                        bb.jquery(event.target).prepend(havingChildren);
+                        bb.jquery(event.target).find('input.bb5-having-child')
+                                .attr('checked', context.having_child)
+                                .off('change')
+                                .on('change', function(e) {
+                                    context = myself.getContext();
+                                    context.having_child = bb.jquery(e.target).is(':checked');
+                                    myself.setContext(context);
+                                    myself._initTree(context.site);
+                                });
+                        
+                        if (myself.options.enableMultiSite) {
+                            var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
+                            bb.jquery(event.target).prepend(sitesMenu);
+                            bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {    
+                                useCache:true,
+                                cacheTags:["userSession"],
+                                async : false, 
+                                success: function(result) {
+                                    context = myself.getContext();
+                                    select = bb.jquery(myself.element).find('.bb5-available-sites').eq(0);
 
+                                    //select change event
+                                    select.bind('change', function() {
+                                        myself._initTree(bb.jquery(this).val());
+                                    });
+
+                                    //select sites populating
+                                    select.empty();
+                                    bb.jquery.each(result.result, function(index, site) {
+                                        var option = bb.jquery("<option></option>").clone();
+                                        bb.jquery(option).attr("value",index).text(site);
+                                        select.append(option);         
+                                    });
+
+                                    //select current site if configured
+                                    if (null != context.site_uid) {
+                                        select.val(context.site_uid);
+                                    }
+
+                                    select.trigger("change");
+
+                                    myself._unmask();
+                                    myself._trigger('ready');
+                                }
+                            });
+                        }
                     }
 
                 });
@@ -222,7 +274,8 @@
                                     'root_uid': n.attr ? n.attr('id').replace('node_', '') : null,
                                     'current_uid': bb.frontApplication.getPageId(),
                                     'fisrtresult': 0,
-                                    'maxresult': context.maxresult
+                                    'maxresult': context.maxresult,
+                                    'having_child':context.having_child
                                 };
                             }
                         }

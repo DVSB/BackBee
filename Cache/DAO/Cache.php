@@ -77,6 +77,8 @@ class Cache extends AExtendedCache
      * @var array
      */
     protected $_instance_options = array(
+        'min_cache_lifetime' => null,
+        'max_cache_lifetime' => null,
         'em' => null,
         'dbal' => array()
     );
@@ -134,9 +136,7 @@ class Cache extends AExtendedCache
         }
 
         $last_timestamp = $this->test($id);
-        if (true === $bypassCheck
-                || 0 === $last_timestamp
-                || $expire->getTimestamp() <= $last_timestamp) {
+        if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
             return $this->_getCacheEntity($id)->getData();
         }
 
@@ -176,9 +176,9 @@ class Cache extends AExtendedCache
         try {
             $params = array(
                 'uid' => $this->_getContextualId($id),
-                'tag' => $tag,
+                'tag' => $this->_getContextualId($tag),
                 'data' => $data,
-                'expire' => $this->_getExpireDateTime($lifetime),
+                'expire' => $this->getExpireTime($lifetime),
                 'created' => new \DateTime()
             );
 
@@ -281,7 +281,7 @@ class Cache extends AExtendedCache
             return false;
         }
 
-        $expire = $this->_getExpireDateTime($lifetime);
+        $expire = $this->getExpireTime($lifetime);
 
         try {
             $this->_repository
@@ -301,6 +301,47 @@ class Cache extends AExtendedCache
         }
 
         return true;
+    }
+
+    /**
+     * Returns the minimum expire date time for all cache records 
+     * associated to one of the provided tags
+     * @param  string|array $tag
+     * @param int $lifetime Optional, the specific lifetime for this record 
+     *                      (by default 0, infinite lifetime)
+     * @return int
+     */
+    public function getMinExpireByTag($tag, $lifetime = 0)
+    {
+        $tags = (array) $tag;
+
+        if (0 == count($tags)) {
+            return $lifetime;
+        }
+        
+        $now = new \DateTime();
+        $expire = $this->getExpireTime($lifetime);
+
+        try {
+            $min = $this->_repository
+                    ->createQueryBuilder('c')
+                    ->select('MIN(c._expire)')
+                    ->where('c._tag IN (:tags)')
+                    ->andWhere('c._expire IS NOT NULL')
+                    ->setParameters(array(
+                        'tags' => $this->_getContextualTags($tags)))
+                    ->getQuery()
+                    ->execute(null, \Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
+
+            if (null !== $min) {
+                $min = new \DateTime($min);
+                $lifetime = (null === $min) ? $lifetime : (null === $expire ? $min->getTimestamp() : min(array($expire->getTimestamp(), $min->getTimestamp()))) - $now->getTimestamp();
+            }
+        } catch (\Exception $e) {
+            $this->log('warning', sprintf('Enable to get expire time for tags (%s) : %s', implode(',', $tags), $e->getMessage()));
+        }
+
+        return $lifetime;
     }
 
     /**
@@ -382,26 +423,16 @@ class Cache extends AExtendedCache
     }
 
     /**
-     * Returns the expiration date time
+     * Returns the expiration timestamp
      * @param int $lifetime
-     * @return \DateTime
+     * @return int
      * @codeCoverageIgnore
      */
-    private function _getExpireDateTime($lifetime = null)
+    protected function getExpireTime($lifetime = null)
     {
-        $expire = null;
+        $expire = parent::getExpireTime($lifetime);
 
-        if (null !== $lifetime && 0 !== $lifetime) {
-            $expire = new \DateTime ();
-
-            if (0 < $lifetime) {
-                $expire->add(new \DateInterval('PT' . $lifetime . 'S'));
-            } else {
-                $expire->sub(new \DateInterval('PT' . (-1 * $lifetime) . 'S'));
-            }
-        }
-
-        return $expire;
+        return (0 === $expire) ? null : date_timestamp_set(new \DateTime(), $expire);
     }
 
     /**

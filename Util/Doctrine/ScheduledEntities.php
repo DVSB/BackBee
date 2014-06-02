@@ -22,6 +22,7 @@
 namespace BackBuilder\Util\Doctrine;
 
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Utility class to deal with managed Doctrine entities
@@ -34,6 +35,81 @@ use Doctrine\ORM\EntityManager;
  */
 class ScheduledEntities
 {
+
+    /**
+     * Returns an array of scheduled entities by classname for insertions
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param string|array Classnames
+     * @return array
+     */
+    public static function getScheduledEntityInsertionsByClassname(EntityManager $em, $classnames)
+    {
+        $entities = array();
+        $classnames = (array) $classnames;
+
+        foreach ($em->getUnitOfWork()->getScheduledEntityInsertions() as $entity) {
+            if (true === in_array(ClassUtils::getRealClass($entity), $classnames)) {
+                $entities[] = $entity;
+            }
+        }
+
+        return $entities;
+    }
+
+    /**
+     * Returns an array of scheduled entities by classname for updates
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param string|array Classnames
+     * @return array
+     */
+    public static function getScheduledEntityUpdatesByClassname(EntityManager $em, $classnames)
+    {
+        $entities = array();
+        $classnames = (array) $classnames;
+
+        foreach ($em->getUnitOfWork()->getScheduledEntityUpdates() as $entity) {
+            if (true === in_array(ClassUtils::getRealClass($entity), $classnames)) {
+                $entities[] = $entity;
+            }
+        }
+
+        return $entities;
+    }
+
+    /**
+     * Returns an array of scheduled entities by classname for deletions
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param string|array Classnames
+     * @return array
+     */
+    public static function getScheduledEntityDeletionsByClassname(EntityManager $em, $classnames)
+    {
+        $entities = array();
+        $classnames = (array) $classnames;
+
+        foreach ($em->getUnitOfWork()->getScheduledEntityDeletions() as $entity) {
+            if (true === in_array(ClassUtils::getRealClass($entity), $classnames)) {
+                $entities[] = $entity;
+            }
+        }
+
+        return $entities;
+    }
+
+    /**
+     * Returns an array of scheduled entities by classname for insertions, updates or deletions
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param string|array Classnames
+     * @return array
+     */
+    public static function getScheduledEntityByClassname(EntityManager $em, $classnames)
+    {
+        return array_merge(
+                self::getScheduledEntityInsertionsByClassname($em, $classnames), 
+                self::getScheduledEntityUpdatesByClassname($em, $classnames), 
+                self::getScheduledEntityDeletionsByClassname($em, $classnames)
+        );
+    }
 
     /**
      * Returns an array of AClassContent scheduled for insertions

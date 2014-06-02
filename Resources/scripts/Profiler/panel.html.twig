@@ -1,0 +1,61 @@
+<div id="bb-profiler-panel">
+
+    {% for name, template in templates %}
+        <div class="bb-profiler-block">
+            {{ name }}
+            {{ dump(template) }}
+        {{ template.renderblock('toolbar', {
+            'collector': profile.getCollector(name),
+            'profiler_url': profiler_url,
+            'name': name
+          })
+        }}
+        </div>
+    {% endfor %}
+    
+    
+    <div id="bb-profiler-close">x</div>
+</div>
+
+<style>
+    #bb-profiler-panel{
+        height: 30px;
+        border-top: 1px;
+        background-color: #F7F7F7;
+        font: 11px Verdana,Arial,sans-serif;
+        border-top: 1px solid #ccc;
+        bottom: 0;
+        left: 0;
+        margin: 0;
+        position: fixed;
+        right: 0;
+        text-align: left;
+        z-index: 100000;
+    }
+    
+    #bb-profiler-close {
+        display: block;
+        width: 15px;
+        height: 16px;
+        position: absolute;
+        top: 7px;
+        right: 5px;
+        cursor: pointer;
+        color: #000;
+        text-align: center;
+        line-height: 12px;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+    }
+    #bb-profiler-close:hover {
+        color: #fff;
+        background-color: red;
+    }
+</style>
+
+<script>
+    $('#bb-profiler-close').click(function(){
+        $('#bb-profiler-panel').hide();
+    });
+</script>

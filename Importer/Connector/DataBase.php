@@ -23,7 +23,9 @@ namespace BackBuilder\Importer\Connector;
 
 use BackBuilder\BBApplication,
     BackBuilder\Exception\BBException,
-    BackBuilder\Importer\IImporterConnector;
+    BackBuilder\Importer\IImporterConnector,
+    BackBuilder\Importer\Connector\DataBase\PDOResult;
+
 use Doctrine\ORM\EntityManager,
     Doctrine\ORM\Configuration;
 
@@ -65,13 +67,13 @@ class DataBase implements IImporterConnector
      * Single interface to find
      *
      * @param string $string
-     * @return array
+     * @return PDOResult
      */
     public function find($string)
     {
-        $statement = $this->_connector->getConnection()->executeQuery($string);
-
-        return $statement;
+        $statement = $this->_connector->getConnection()->query($string);
+        
+        return new PDOResult($statement);
     }
 
     /**
@@ -112,6 +114,14 @@ class DataBase implements IImporterConnector
         }
 
         return $em;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function tearDown() 
+    {
+        
     }
 
 }

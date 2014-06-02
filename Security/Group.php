@@ -29,7 +29,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity()
- * @Table(name="groups")
+ * @Table(name="groups", uniqueConstraints={@UniqueConstraint(name="UNI_IDENTIFIER",columns={"identifier"})})
  */
 class Group
 {
@@ -58,7 +58,7 @@ class Group
 
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBuilder\Security\User", inversedBy="_groups")
+     * @ManyToMany(targetEntity="BackBuilder\Security\User", inversedBy="_groups", fetch="EXTRA_LAZY")
      * @JoinTable(
      *      name="user_group",
      *      joinColumns={@JoinColumn(name="group_id", referencedColumnName="id")},
@@ -70,7 +70,7 @@ class Group
     /**
      * Optional site.
      * @var \BackBuilder\Site\Site
-     * @ManyToOne(targetEntity="BackBuilder\Site\Site")
+     * @ManyToOne(targetEntity="BackBuilder\Site\Site", fetch="EXTRA_LAZY")
      * @JoinColumn(name="site_uid", referencedColumnName="uid")
      */
     protected $_site;
