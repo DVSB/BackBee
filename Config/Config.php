@@ -88,6 +88,15 @@ class Config
     private $_container;
 
     private $_environment = 'production';
+    
+    /**
+     * Debug info
+     * 
+     * Only populated in dev environment
+     * 
+     * @var array
+     */
+    protected $_debugData = array();
 
     /**
      * Magic function to get configuration section
@@ -131,13 +140,6 @@ class Config
         $this->setContainer($container)->extend();
     }
     
-    /**
-     * Load system configs
-     */
-    private function _loadSystemConfig() 
-    {
-        $this->_loadFromFile(__DIR__ . '/' . self::EVENTS_FILE . '.' . self::EXTENTION);
-    }
 
     /**
      * Set the service container to be able to parse parameter and service in config
@@ -150,6 +152,18 @@ class Config
         $this->_container = $container;
         $this->_parameters = array();
         return $this;
+    }
+    
+    /**
+     * Get debug info 
+     * 
+     * Populated only in dev env
+     * 
+     * @return array
+     */
+    public function getDebugData()
+    {
+        return $this->_debugData;
     }
 
     /**
@@ -167,7 +181,7 @@ class Config
         if (false === $cached_parameters) {
             return false;
         }
-
+        
         $parameters = @\unserialize($cached_parameters);
         if (false === is_array($parameters)) {
             return false;
@@ -288,6 +302,10 @@ class Config
             $yamlDatas = Yaml::parse($filename);
             if (is_array($yamlDatas)) {
 
+                if('dev' === $this->_environment) {
+                    $this->_debugData[$filename] = $yamlDatas;
+                }
+                
                 if (self::CONFIG_FILE . '.' . self::EXTENTION === basename($filename) || 
                     self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION === basename($filename)) {
 
