@@ -24,7 +24,8 @@ namespace BackBuilder\Importer\Connector;
 use BackBuilder\BBApplication,
     BackBuilder\Exception\BBException,
     BackBuilder\Importer\IImporterConnector,
-    BackBuilder\Importer\DataBase\PDOResult;
+    BackBuilder\Importer\Connector\DataBase\PDOResult;
+
 use Doctrine\ORM\EntityManager,
     Doctrine\ORM\Configuration;
 

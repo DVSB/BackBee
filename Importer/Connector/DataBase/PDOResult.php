@@ -55,10 +55,19 @@ class PDOResult implements \Countable, \IteratorAggregate
      * 
      * @return PDOStatement
      */
-    public function getIterator() {
+    public function getIterator()
+    {
         return $this->statement;
     }
-    
+
+    /**
+     * @return PDOStatement
+     */
+    public function getStatement()
+    {
+        return $this->statement;
+    }
+
     /**
      * Get result count
      * 
