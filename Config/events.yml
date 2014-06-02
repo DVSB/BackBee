@@ -78,11 +78,20 @@ frontcontroller.request:
   listeners:
     - [@rest.listener.body, onRequest]
 
-
+kernel.request:
+  listeners:
+    - [@profiler.listener, onKernelRequest]
+    
 kernel.exception:
-    listeners:
+  listeners:
     - [@rest.listener.exception, onKernelException]
     
 kernel.controller:
-    listeners:
+  listeners:
     - [@rest.listener.validation, onKernelController]
+
+kernel.response:
+  listeners:
+    - [@profiler.toolbar.listener, onKernelResponse]
+    - [@profiler.listener, onKernelResponse]
+

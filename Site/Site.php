@@ -93,14 +93,14 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * The collection of layouts available for this site.
-     * @OneToMany(targetEntity="BackBuilder\Site\Layout", mappedBy="_site")
+     * @OneToMany(targetEntity="BackBuilder\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
      * @OrderBy({"_label" = "ASC"})
      */
     protected $_layouts;
 
     /**
      * The default metadatas associated tto the pages of this website.
-     * @ManyToMany(targetEntity="BackBuilder\Site\Metadata\Metadata", cascade={"all"})
+     * @ManyToMany(targetEntity="BackBuilder\Site\Metadata\Metadata", cascade={"all"}, fetch="EXTRA_LAZY")
      * @JoinTable(name="metadata_site",
      *      joinColumns={@JoinColumn(name="site_uid", referencedColumnName="uid")},
      *      inverseJoinColumns={@JoinColumn(name="metadata_uid", referencedColumnName="uid")}

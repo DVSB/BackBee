@@ -282,7 +282,6 @@ class ClassContent extends AbstractServiceLocal
 
     public function getContentsByCategory($name = "tous")
     {
-
         $contents = array();
         if ($name == "tous") {
             $categoryList = Category::getCategories($this->getApplication()->getClassContentDir());
@@ -414,6 +413,47 @@ class ClassContent extends AbstractServiceLocal
     /**
      * @exposed(secured=true)
      */
+    public function showContentsPage($contentUid, $contentType)
+    {
+        $em = $this->getApplication()->getEntityManager();
+        $content = $em->find("BackBuilder\\ClassContent\\" . $contentType, $contentUid);
+        if ($content == NULL) {
+            throw new \Exception("content can't be NULL");
+        }
+        $pages = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findPagesByContent($content);
+        $results = new \stdClass();
+        $results->pages = array();
+        if (is_array($pages) && !empty($pages)) {
+            foreach ($pages as $page) {
+                $pageObject = new \stdClass();
+                $pageObject->title = $page->getTitle();
+                $pageObject->uid = $page->getUid(); 
+                $results->pages[] = $pageObject;
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * @exposed(secured=true)
+     */
+    public function deleteContent($contentUid, $contentType)
+    {
+        try {
+            $em = $this->getApplication()->getEntityManager();
+            $content = $em->find("BackBuilder\\ClassContent\\" . $contentType, $contentUid);
+            if ($content == NULL) {
+                throw new \Exception("content can't be NULL");
+            }
+            $em->getRepository("BackBuilder\ClassContent\AClassContent")->deleteContent($content);
+        } catch (\Exception $e) {
+            throw new \Exception("Content can't be deleted");
+        }
+    }
+
+    /**
+     * @exposed(secured=true)
+     */
     public function getPageLinkedZones($pageId = null)
     {
         $result = array("mainZones" => null, "linkedZones" => array());
@@ -436,7 +476,7 @@ class ClassContent extends AbstractServiceLocal
 
     /**
      * @exposed(secured=true)
-     * For every fields in a content, return if the content is editable
+     * For every fields in a content, say if the content is editable
      */
     public function getContentsRteParams($contentType = null, $rte = null)
     {

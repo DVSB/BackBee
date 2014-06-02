@@ -157,4 +157,14 @@ class Twig extends ARendererAdapter
         return $render;
     }
 
+    /**
+     * 
+     * @param string $filename
+     * @return \Twig_TemplateInterface
+     */
+    public function loadTemplate($filename)
+    {
+        return $this->twig->loadTemplate($filename);
+    }
+
 }

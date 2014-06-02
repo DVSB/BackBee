@@ -92,7 +92,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * The attached revisionned content
      * @var \BackBuilder\ClassContent\AClassContent
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_revisions", fetch="LAZY")
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     private $_content;

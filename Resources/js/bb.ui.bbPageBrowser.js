@@ -18,7 +18,8 @@
             dialogClass: 'bb5-ui bb5-dialog-wrapper',
             title: "",
             enableNavigation: true,
-            enableMultiSite: false
+            enableMultiSite: false,
+            having_child: false
         },
         _statesWatchable: {
             open: false
@@ -63,7 +64,8 @@
                 selected: null,
                 treeview: null,
                 layouts: null,
-                maxresult: 25
+                maxresult: 25,
+                having_child: myself.options.having_child
             });
 
         },
@@ -107,6 +109,19 @@
                                 return false;
                             });
                         }
+                        
+                        var havingChildren = bb.jquery("<div><input type='checkbox' class='bb5-having-child' />&nbsp;"+bb.i18n.__('toolbar.selector.having_child')+"</div>");
+                        bb.jquery(event.target).prepend(havingChildren);
+                        bb.jquery(event.target).find('input.bb5-having-child')
+                                .attr('checked', context.having_child)
+                                .off('change')
+                                .on('change', function(e) {
+                                    context = myself.getContext();
+                                    context.having_child = bb.jquery(e.target).is(':checked');
+                                    myself.setContext(context);
+                                    myself._initTree(context.site);
+                                });
+                        
                         if (myself.options.enableMultiSite) {
                             var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
                             bb.jquery(event.target).prepend(sitesMenu);
@@ -143,7 +158,6 @@
                                 }
                             });
                         }
-
                     }
 
                 });
@@ -260,7 +274,8 @@
                                     'root_uid': n.attr ? n.attr('id').replace('node_', '') : null,
                                     'current_uid': bb.frontApplication.getPageId(),
                                     'fisrtresult': 0,
-                                    'maxresult': context.maxresult
+                                    'maxresult': context.maxresult,
+                                    'having_child':context.having_child
                                 };
                             }
                         }

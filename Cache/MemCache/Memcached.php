@@ -161,7 +161,7 @@ class Memcached extends AExtendedCache
             $this->setOption($option, $value);
         }
 
-        if(null !== $this->_instance_options['compression']){
+        if (null !== $this->_instance_options['compression']) {
             $this->setOption(\Memcached::OPT_COMPRESSION, $this->_instance_options['compression']);
         }
 
@@ -354,7 +354,7 @@ class Memcached extends AExtendedCache
     {
         $expire = $this->getExpireTime($lifetime);
 
-        if (false === $this->_memcached->set($id, $data, $expire)) {
+        if (false === $this->_memcached->set($id, array($data, $expire), $expire)) {
             return $this->_onError('save');
         }
 
@@ -453,7 +453,7 @@ class Memcached extends AExtendedCache
 
         return true;
     }
-    
+
     /**
      * Returns the minimum expire date time for all cache records 
      * associated to one of the provided tags
@@ -469,10 +469,10 @@ class Memcached extends AExtendedCache
         if (0 == count($tags)) {
             return $lifetime;
         }
-        
+
         $now = $this->getExpireTime();
         $expire = $this->getExpireTime($lifetime);
-        
+
         foreach ($tags as $tag) {
             if (false !== $tagged = $this->load(self::TAGS_PREFIX . $tag)) {
                 $update_tagged = array();
@@ -483,10 +483,10 @@ class Memcached extends AExtendedCache
                 }
             }
         }
-        
+
         return $lifetime;
     }
-    
+
     /**
      * Returns TRUE if the server is already added to Memcached, FALSE otherwise
      * @param string $host

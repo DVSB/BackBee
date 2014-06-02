@@ -88,12 +88,12 @@ class User implements UserInterface
 
     /**
      * @var BackBuilder\NestedNode\PageRevision
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_user")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_user", fetch="EXTRA_LAZY")
      */
     protected $_revisions;
 
     /**
-     * @ManyToMany(targetEntity="BackBuilder\Security\Group", mappedBy="_users")
+     * @ManyToMany(targetEntity="BackBuilder\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
      */
     protected $_groups;
     

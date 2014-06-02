@@ -126,6 +126,11 @@ abstract class ARenderer implements IRenderer
 
     public function __call($method, $argv)
     {
+        // FIXME
+        if ('getRenderer' === $method) {
+            return $this;
+        }
+
         $helper = $this->getHelper($method);
         if (null === $helper) {
             $helper = $this->createHelper($method, $argv);
