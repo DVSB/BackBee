@@ -90,6 +90,13 @@ class Config
     private $_environment = 'production';
     
     /**
+     * Is debug mode enabled
+     * 
+     * @var boolean
+     */
+    private $_debug = false;
+    
+    /**
      * Debug info
      * 
      * Only populated in dev environment
@@ -173,6 +180,10 @@ class Config
      */
     private function _loadFromCache($basedir)
     {
+        if(true === $this->_debug) {
+            return false;
+        }
+
         if (null === $this->_cache) {
             return false;
         }
@@ -201,6 +212,10 @@ class Config
      */
     private function _saveToCache($basedir)
     {
+        if(true === $this->_debug) {
+            return false;
+        }
+        
         if (null !== $this->_cache) {
             return $this->_cache->save($this->_getCacheId($basedir), serialize($this->_raw_parameters));
         }
@@ -287,7 +302,7 @@ class Config
             $yamlDatas = Yaml::parse($filename);
 
             if (is_array($yamlDatas)) {
-                if('dev' === $this->_environment) {
+                if(true === $this->_debug) {
                     $this->_debugData[$filename] = $yamlDatas;
                 }
                 
@@ -362,6 +377,17 @@ class Config
     public function setEnvironment($env)
     {
         $this->_environment = $env;
+        return $this;
+    }
+    
+    /**
+     * Set debug mode
+     * @param boolean $debug
+     * @return self
+     */
+    public function setDebug($debug)
+    {
+        $this->_debug = $debug;
         return $this;
     }
 

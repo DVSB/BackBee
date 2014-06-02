@@ -87,6 +87,8 @@ services:
     config:
         class:      %bbapp.config.class%
         arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap"]
+        calls:
+            - [setDebug, [%debug%]]
     ed:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp"]

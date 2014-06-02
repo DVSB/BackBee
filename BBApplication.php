@@ -187,7 +187,8 @@ class BBApplication implements IApplication {
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
-
+        $this->_container->setParameter("debug", $this->debugMode());
+        
         if (false === $containerdir = getenv('BB_CONTAINERDIR')) {
             $containerdir = $this->getBaseDir() . '/container/';
         }

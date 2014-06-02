@@ -108,7 +108,10 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         }
 
         $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
-        $this->_config->setEnvironment($this->_application->getEnvironment());
+        $this->_config
+                ->setEnvironment($this->_application->getEnvironment())
+                ->setDebug($this->_application->debugMode())
+        ;
 
         // Looking for bundle's config in registry
         $registry = $this->_getRegistryConfig();
