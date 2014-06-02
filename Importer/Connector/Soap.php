@@ -80,4 +80,12 @@ class Soap implements IImporterConnector
         }
         return $result;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function tearDown() 
+    {
+        
+    }
 }
