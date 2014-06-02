@@ -379,6 +379,11 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         return $this->_request;
     }
 
+    /**
+     * 
+     * @param string|null $configdir
+     * @return Config
+     */
     public function getConfig($configdir = null)
     {
         if (null === $this->_config) {

@@ -78,4 +78,11 @@ class FileSystem implements IImporterConnector
         return $values;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function tearDown() 
+    {
+        
+    }
 }

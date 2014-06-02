@@ -33,7 +33,7 @@ interface IConverter
     /**
      * Returns the values
      *
-     * @return array
+     * @return array|Traversable|Countable
      */
     public function getRows(Importer $importer);
 
