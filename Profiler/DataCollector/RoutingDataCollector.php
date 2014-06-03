@@ -58,18 +58,10 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
         $collection = $this->container->get('routing');
-        $_ressources = $collection->getResources();
+        
         $_routes = $collection->all();
 
         $routes = array();
-        $resources = array();
-
-        foreach ($_ressources as $ressource) {
-            $resources[] = array(
-                'type' => get_class($ressource),
-                'path' => $ressource->__toString()
-            );
-        }
 
         foreach ($_routes as $routeName => $route) {
             $defaults = $route->getDefaults();
@@ -83,7 +75,6 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
                 $controller = '@' . $controller . ' - ' . $controllerDefinition->getClass();
             }
             
-            
             $routes[$routeName] = array(
                 'name' => $routeName,
                 'pattern' => $route->getPattern(),
@@ -95,7 +86,9 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
         ksort($routes);
         $this->data['matchRoute'] = $request->attributes->get('_route');
         $this->data['routes'] = $routes;
-        $this->data['resources'] = $resources;
+        
+        
+        $this->data['resources'] = array();
         
         
         // get BB route sources
