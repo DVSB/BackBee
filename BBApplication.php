@@ -729,7 +729,7 @@ class BBApplication implements IApplication {
                 if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
                     $token = unserialize($token);
 
-                    if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken')) {
+                    if (!($token instanceof \BackBuilder\Security\Token\BBUserToken)) {
                         $token = null;
                     }
                 }
