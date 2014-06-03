@@ -58,18 +58,10 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
         $collection = $this->container->get('routing');
-        $_ressources = $collection->getResources();
+        
         $_routes = $collection->all();
 
         $routes = array();
-        $resources = array();
-
-        foreach ($_ressources as $ressource) {
-            $resources[] = array(
-                'type' => get_class($ressource),
-                'path' => $ressource->__toString()
-            );
-        }
 
         foreach ($_routes as $routeName => $route) {
             $defaults = $route->getDefaults();
@@ -79,10 +71,9 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
 
             if($this->container->hasDefinition($controller)) {
                 $controllerDefinition = $this->container->findDefinition($controller);
-                /** @var \Symfony\Component\DependencyInjection\Definition $controllerDefinition **/
+                /*  @var $controllerDefinition \Symfony\Component\DependencyInjection\Definition */
                 $controller = '@' . $controller . ' - ' . $controllerDefinition->getClass();
             }
-            
             
             $routes[$routeName] = array(
                 'name' => $routeName,
@@ -95,10 +86,12 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
         ksort($routes);
         $this->data['matchRoute'] = $request->attributes->get('_route');
         $this->data['routes'] = $routes;
-        $this->data['resources'] = $resources;
         
         
-        // get route sources
+        $this->data['resources'] = array();
+        
+        
+        // get BB route sources
         foreach($this->container->get('bbapp')->getConfig()->getDebugData() as $configFile => $configData) {
             if('route.yml' == basename($configFile)) {
                 $this->data['resources'][$configFile] = $configData;
@@ -107,16 +100,16 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
             }
         }
 
+        // get bundle route sources
         foreach($this->container->get('bbapp')->getBundles() as $bundle) {
             foreach($bundle->getConfig()->getDebugData() as $configFile => $configData) {
-            if('route.yml' == basename($configFile)) {
-                $this->data['resources'][$configFile] = $configData;
-            } elseif(array_key_exists('route', $configData)) {
-                $this->data['resources'][$configFile] = $configData['route'];
+                if('route.yml' == basename($configFile)) {
+                    $this->data['resources'][$configFile] = $configData;
+                } elseif(array_key_exists('route', $configData)) {
+                    $this->data['resources'][$configFile] = $configData['route'];
+                }
             }
         }
-        }
-        var_dump($this->data['resources']);exit;
     }
 
     /**
@@ -154,7 +147,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
      *
      * @return integer Amount of Ressources
      */
-    public function getRessourceCount()
+    public function getResourceCount()
     {
         return count($this->data['resources']);
     }
