@@ -107,7 +107,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
             $configdir = $this->getResourcesDir();
         }
 
-        $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
+        $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache(), null, $this->getApplication()->debugMode());
         $this->_config
                 ->setEnvironment($this->_application->getEnvironment())
                 ->setDebug($this->_application->debugMode())
