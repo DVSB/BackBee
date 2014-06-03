@@ -79,7 +79,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
 
             if($this->container->hasDefinition($controller)) {
                 $controllerDefinition = $this->container->findDefinition($controller);
-                /** @var \Symfony\Component\DependencyInjection\Definition $controllerDefinition **/
+                /*  @var $controllerDefinition \Symfony\Component\DependencyInjection\Definition */
                 $controller = '@' . $controller . ' - ' . $controllerDefinition->getClass();
             }
             
@@ -98,7 +98,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
         $this->data['resources'] = $resources;
         
         
-        // get route sources
+        // get BB route sources
         foreach($this->container->get('bbapp')->getConfig()->getDebugData() as $configFile => $configData) {
             if('route.yml' == basename($configFile)) {
                 $this->data['resources'][$configFile] = $configData;
@@ -107,16 +107,16 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
             }
         }
 
+        // get bundle route sources
         foreach($this->container->get('bbapp')->getBundles() as $bundle) {
             foreach($bundle->getConfig()->getDebugData() as $configFile => $configData) {
-            if('route.yml' == basename($configFile)) {
-                $this->data['resources'][$configFile] = $configData;
-            } elseif(array_key_exists('route', $configData)) {
-                $this->data['resources'][$configFile] = $configData['route'];
+                if('route.yml' == basename($configFile)) {
+                    $this->data['resources'][$configFile] = $configData;
+                } elseif(array_key_exists('route', $configData)) {
+                    $this->data['resources'][$configFile] = $configData['route'];
+                }
             }
         }
-        }
-        var_dump($this->data['resources']);exit;
     }
 
     /**
@@ -154,7 +154,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
      *
      * @return integer Amount of Ressources
      */
-    public function getRessourceCount()
+    public function getResourceCount()
     {
         return count($this->data['resources']);
     }

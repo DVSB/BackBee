@@ -139,11 +139,12 @@ class Config
      * @param \BackBuilder\Cache\ACache $cache Optional cache system
      * @param \BackBuilder\DependencyInjection\ContainerBuilder $container
      */
-    public function __construct($basedir, ACache $cache = null, ContainerBuilder $container = null)
+    public function __construct($basedir, ACache $cache = null, ContainerBuilder $container = null, $debug = false)
     {
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
+        $this->_debug = $debug;
         $this->setContainer($container)->extend();
     }
     
