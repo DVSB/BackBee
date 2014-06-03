@@ -722,7 +722,7 @@ class BBApplication implements IApplication {
      */
     public function getBBUserToken() {
         $token = $this->getSecurityContext()->getToken();
-        if ((null === $token || !($token instanceof BackBuilder\Security\Token\BBUserToken))) {
+        if ((null === $token || !($token instanceof \BackBuilder\Security\Token\BBUserToken))) {
             if (is_null($this->getContainer()->get('bb_session'))) {
                 $token = null;
             } else {
