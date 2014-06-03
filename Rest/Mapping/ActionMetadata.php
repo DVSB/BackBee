@@ -33,7 +33,7 @@ use Metadata\MethodMetadata;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class ActionMetadata extends MethodMetadata implements \Serializable
+class ActionMetadata extends MethodMetadata
 {
     public $class;
     public $name;
