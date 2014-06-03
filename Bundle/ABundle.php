@@ -42,7 +42,7 @@ use Doctrine\ORM\Tools\SchemaTool,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class ABundle implements IObjectIdentifiable, \Serializable
+abstract class ABundle implements IObjectIdentifiable
 {
 
     private $_id;
