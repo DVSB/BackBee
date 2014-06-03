@@ -46,7 +46,6 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
     Symfony\Component\Console\Application,
     Symfony\Component\Finder\Finder;
 
@@ -188,7 +187,8 @@ class BBApplication implements IApplication {
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
-
+        $this->_container->setParameter("debug", $this->debugMode());
+        
         if (false === $containerdir = getenv('BB_CONTAINERDIR')) {
             $containerdir = $this->getBaseDir() . '/container/';
         }

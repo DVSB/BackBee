@@ -88,6 +88,22 @@ class Config
     private $_container;
 
     private $_environment = 'production';
+    
+    /**
+     * Is debug mode enabled
+     * 
+     * @var boolean
+     */
+    private $_debug = false;
+    
+    /**
+     * Debug info
+     * 
+     * Only populated in dev environment
+     * 
+     * @var array
+     */
+    protected $_debugData = array();
 
     /**
      * Magic function to get configuration section
@@ -131,13 +147,6 @@ class Config
         $this->setContainer($container)->extend();
     }
     
-    /**
-     * Load system configs
-     */
-    private function _loadSystemConfig() 
-    {
-        $this->_loadFromFile(__DIR__ . '/' . self::EVENTS_FILE . '.' . self::EXTENTION);
-    }
 
     /**
      * Set the service container to be able to parse parameter and service in config
@@ -151,6 +160,18 @@ class Config
         $this->_parameters = array();
         return $this;
     }
+    
+    /**
+     * Get debug info 
+     * 
+     * Populated only in dev env
+     * 
+     * @return array
+     */
+    public function getDebugData()
+    {
+        return $this->_debugData;
+    }
 
     /**
      * If a cache system is defined, try to load a cache for the current basedir
@@ -159,6 +180,10 @@ class Config
      */
     private function _loadFromCache($basedir)
     {
+        if(true === $this->_debug) {
+            return false;
+        }
+
         if (null === $this->_cache) {
             return false;
         }
@@ -167,7 +192,7 @@ class Config
         if (false === $cached_parameters) {
             return false;
         }
-
+        
         $parameters = @\unserialize($cached_parameters);
         if (false === is_array($parameters)) {
             return false;
@@ -187,6 +212,10 @@ class Config
      */
     private function _saveToCache($basedir)
     {
+        if(true === $this->_debug) {
+            return false;
+        }
+        
         if (null !== $this->_cache) {
             return $this->_cache->save($this->_getCacheId($basedir), serialize($this->_raw_parameters));
         }
@@ -265,15 +294,20 @@ class Config
     /**
      * Try to parse a yaml config file
      * @param string $filename
-     * @throws \BackBuilder\Config\Exception\InvalidConfigException Occurs when the file can't be parse
+     * @throws \BackBuilder\Config\Exception\InvalidConfigException Occurs when the file can't be parsed
      */
     private function _loadFromFile($filename, $overwrite = false)
     {
         try {
             $yamlDatas = Yaml::parse($filename);
-            if (is_array($yamlDatas)) {
 
-                if (self::CONFIG_FILE . '.' . self::EXTENTION === basename($filename)) {
+            if (is_array($yamlDatas)) {
+                if(true === $this->_debug) {
+                    $this->_debugData[$filename] = $yamlDatas;
+                }
+                
+                if (self::CONFIG_FILE . '.' . self::EXTENTION === basename($filename) || 
+                    self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION === basename($filename)) {
 
                     foreach ($yamlDatas as $component => $config) {
                         $this->setSection($component, $config, $overwrite);
@@ -343,6 +377,17 @@ class Config
     public function setEnvironment($env)
     {
         $this->_environment = $env;
+        return $this;
+    }
+    
+    /**
+     * Set debug mode
+     * @param boolean $debug
+     * @return self
+     */
+    public function setDebug($debug)
+    {
+        $this->_debug = $debug;
         return $this;
     }
 

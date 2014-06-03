@@ -48,6 +48,25 @@
             {% endfor %}
         </table>
     {% endif %}
+    
+    
+    
+    {% if not collector.resourcecount %}
+        <em>No source.</em>
+    {% else %}
+        <table>
+            {% for i, resource in collector.resources %}
+                <tr class="{{ i is odd ? 'odd' : 'even' }}">
+                    <th>
+                        {{ resource.type }}
+                    </th>
+                    <td>
+                        <code>{{ resource.path }}</code>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
 
 
 {% endblock %}
