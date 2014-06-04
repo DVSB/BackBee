@@ -95,7 +95,8 @@ class BBApplication implements IApplication {
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
      */
-    public function __construct($context = null, $environment = 'production', $overwrite_config = false) {
+    public function __construct($context = null, $environment = 'production', $overwrite_config = false)
+    {
         $this->_starttime = time();
         $this->_context = (null === $context) ? 'default' : $context;
         $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
@@ -173,7 +174,8 @@ class BBApplication implements IApplication {
         }
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->stop();
     }
 
@@ -186,7 +188,6 @@ class BBApplication implements IApplication {
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
-        $this->_container->setParameter("debug", $this->isDebugMode());
         
         if (false === $containerdir = getenv('BB_CONTAINERDIR')) {
             $containerdir = $this->getBaseDir() . '/container/';
@@ -257,7 +258,8 @@ class BBApplication implements IApplication {
 
         $this->_initBBAppParamsIntoContainer();
 
-        $this->_container->setParameter('debug', $this->isDebugMode());
+        // $this->_container->setParameter('debug', $this->isDebugMode());
+
         if($this->_debug) {
             $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
                 $this->_container->getParameter('bbapp.logger_debug.class'),
@@ -283,7 +285,7 @@ class BBApplication implements IApplication {
         return $this;
     }
 
-    private function _initBBAppParamsIntoContainer() 
+    private function _initBBAppParamsIntoContainer()
     {
         // Retrieving config.yml without calling Config services
         $config = array();
@@ -304,6 +306,7 @@ class BBApplication implements IApplication {
         // Set every bbapp parameters
         // define context
         $this->_container->setParameter('bbapp.context', $this->getContext());
+        $this->_container->setParameter('debug', $config['parameters']['debug']);
 
         // define bb base dir
         if (true === isset($config['parameters']['base_dir']) && false === empty($config['parameters']['base_dir'])) {
@@ -438,8 +441,8 @@ class BBApplication implements IApplication {
      * @return boolean
      */
     public function isDebugMode() 
-    {
-        if ($this->_isinitialized && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
+    {        
+        if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
 
