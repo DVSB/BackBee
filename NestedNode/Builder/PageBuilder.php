@@ -225,7 +225,7 @@ class PageBuilder
      */
     public function setUrl($url)
     {
-        $this->url = $url;
+        $this->url = preg_replace('/\/+/', '/', $url);
 
         return $this;
     }
