@@ -356,7 +356,12 @@ class BBApplication implements IApplication
         // Set every bbapp parameters
         // define context
         $this->_container->setParameter('bbapp.context', $this->getContext());
-        $this->_container->setParameter('debug', $config['parameters']['debug']);
+        $debug = $this->_debug;
+        if (array_key_exists('parameters', $config) && array_key_exists('debug', $config['parameters'])) {
+            $debug = $config['parameters']['debug'];
+        }
+
+        $this->_container->setParameter('debug', $debug);
 
         // define bb base dir
         if (true === isset($config['parameters']['base_dir']) && false === empty($config['parameters']['base_dir'])) {
