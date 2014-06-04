@@ -86,7 +86,8 @@ services:
         arguments:  [{em: "@em"}, "%bbapp.context%", "@logging"]
     config:
         class:      %bbapp.config.class%
-        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap"]
+        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, %debug%]
+
     ed:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp"]

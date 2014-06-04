@@ -46,7 +46,6 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
     Symfony\Component\Console\Application,
     Symfony\Component\Finder\Finder;
 
@@ -188,7 +187,8 @@ class BBApplication implements IApplication {
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
-
+        $this->_container->setParameter("debug", $this->isDebugMode());
+        
         if (false === $containerdir = getenv('BB_CONTAINERDIR')) {
             $containerdir = $this->getBaseDir() . '/container/';
         }
@@ -434,9 +434,11 @@ class BBApplication implements IApplication {
      * @return boolean
      */
     public function isDebugMode() {
-        if ($this->getConfig()->sectionHasKey('parameters', 'debug')) {
+        
+        if ($this->_isinitialized && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
+        
         return (bool) $this->_debug;
     }
 
@@ -722,14 +724,14 @@ class BBApplication implements IApplication {
      */
     public function getBBUserToken() {
         $token = $this->getSecurityContext()->getToken();
-        if ((null === $token || !($token instanceof BackBuilder\Security\Token\BBUserToken))) {
+        if ((null === $token || !($token instanceof \BackBuilder\Security\Token\BBUserToken))) {
             if (is_null($this->getContainer()->get('bb_session'))) {
                 $token = null;
             } else {
                 if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
                     $token = unserialize($token);
 
-                    if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken')) {
+                    if (!($token instanceof \BackBuilder\Security\Token\BBUserToken)) {
                         $token = null;
                     }
                 }
