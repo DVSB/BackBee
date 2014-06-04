@@ -39,7 +39,7 @@ use BackBuilder\Site\Layout,
  * @Entity(repositoryClass="BackBuilder\Workflow\Repository\StateRepository")
  * @Table(name="workflow")
  */
-class State extends AObjectIdentifiable implements \Serializable
+class State extends AObjectIdentifiable
 {
 
     /**
