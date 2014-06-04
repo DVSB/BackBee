@@ -288,8 +288,10 @@ BB4.ToolsbarManager.register('statustb',{
                             }
                         }
                     },
-                    width: 500,
-                    maxHeigh : 200
+					
+                    width: 520,
+					height: 600,
+                    maxHeigh : 600
                 });
                 this._metadataDialog.setContent(this._getMetadataForm());
             }

@@ -325,7 +325,9 @@ var ContentEditionManager = (function($){
                     }
                 }
             },
-            maxHeigh : 200
+                    
+            height: 400,
+            maxHeight : 400
         });
 
 
