@@ -22,7 +22,7 @@
 namespace BackBuilder;
 
 use BackBuilder\Site\Site;
-use Symfony\Component\Console\Application;
+use BackBuilder\Console\Console;
 
 /**
  * BackBuilder5 application interface
@@ -88,5 +88,5 @@ interface IApplication
     /**
      * 
      */
-    public function registerCommands(Application $application);
+    public function registerCommands(Console $console);
 }

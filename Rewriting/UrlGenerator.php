@@ -229,13 +229,26 @@ class UrlGenerator implements IUrlGenerator
     private function _checkUnicity(Page $page, &$url)
     {
         $baseurl = $url;
-        $pageRepository = $this->_application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
+        $page_repository = $this->_application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
 
         $count = 1;
-        $existings = $pageRepository->findBy(array('_url' => $url, '_root' => $page->getRoot()));
+        $existings = array();
+        if (1 === preg_match('#(.*)\/$#', $baseurl, $matches)) {
+            $baseurl = $matches[1] . '-%d/';
+            $existings = $page_repository->createQueryBuilder('p')
+                ->where('p._root = :root')
+                ->setParameter('root', $page->getRoot())
+                ->andWhere('p._url LIKE :url')
+                ->setParameter('url', $matches[1] . '%/')
+                ->getQuery()
+            ->getResult();
+        } else {
+            $existings = $page_repository->findBy(array('_url' => $url, '_root' => $page->getRoot()));
+        }
+
         foreach ($existings as $existing) {
             if (!$existing->isDeleted() && $existing->getUid() != $page->getUid()) {
-                $url = $baseurl . '-' . ($count++);
+                $url = sprintf($baseurl, $count++);
             }
         }
     }
