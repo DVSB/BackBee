@@ -56,9 +56,13 @@ use Symfony\Component\Config\FileLocator,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class BBApplication implements IApplication {
+class BBApplication implements IApplication
+{
 
     const VERSION = '0.8.0';
+
+    const DEFAULT_CONTEXT = 'default';
+    const DEFAULT_ENVIRONMENT = '';
 
     /**
      * @var Symfony\Component\DependencyInjection\ContainerBuilder
@@ -98,12 +102,16 @@ class BBApplication implements IApplication {
     public function __construct($context = null, $environment = 'production', $overwrite_config = false)
     {
         $this->_starttime = time();
-        $this->_context = (null === $context) ? 'default' : $context;
+        $this->_context = (null === $context) ? self::DEFAULT_CONTEXT : $context;
         $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
-        $this->_environment = ((is_string($environment)) ? $environment : ($environment === false ? 'production' : ''));
+
+        $this->_environment = ((is_string($environment)) 
+            ? $environment 
+            : ($environment === false ? 'production' : self::DEFAULT_ENVIRONMENT))
+        ;
 
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
@@ -285,18 +293,60 @@ class BBApplication implements IApplication {
         return $this;
     }
 
-    private function _initBBAppParamsIntoContainer()
+    private function _getRawConfig()
     {
-        // Retrieving config.yml without calling Config services
         $config = array();
-        $filename = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $this->_environment . DIRECTORY_SEPARATOR . 'config.yml';
-        if (!file_exists($filename)) {
-            $filename = $this->getRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'config.yml';
+        $file_exists = false;
+        $filepath = null;
+
+        if (self::DEFAULT_CONTEXT !== $this->_context) {
+            if (self::DEFAULT_ENVIRONMENT !== $this->_environment) {
+                $filepath = $this->getRepository() 
+                    . DIRECTORY_SEPARATOR . 'Config' 
+                    . DIRECTORY_SEPARATOR . $this->_environment 
+                    . DIRECTORY_SEPARATOR . 'config.yml'
+                ;
+            }
+
+            if (false === $file_exists = file_exists($filepath)) {
+                $filepath = $this->getRepository() 
+                    . DIRECTORY_SEPARATOR . 'Config'
+                    . DIRECTORY_SEPARATOR . 'config.yml'
+                ;
+            }
         }
 
-        if (true === is_readable($filename)) {
-            $config = Yaml::parse($filename);
+        if ((false === $file_exists = file_exists($filepath)) && self::DEFAULT_ENVIRONMENT !== $this->_environment) {
+            $filepath = $this->getBaseRepository() 
+                . DIRECTORY_SEPARATOR . 'Config'
+                . DIRECTORY_SEPARATOR . $this->_environment 
+                . DIRECTORY_SEPARATOR . 'config.yml'
+            ;
         }
+
+        if (false === $file_exists = file_exists($filepath)) {
+            $filepath = $this->getBaseRepository() 
+                . DIRECTORY_SEPARATOR . 'Config'
+                . DIRECTORY_SEPARATOR . 'config.yml'
+            ;
+        }
+
+        if (false === $file_exists = file_exists($filepath)) {
+            throw new \Exception('Unable to find a config.yml!');
+        }
+
+        if (true === is_readable($filepath)) {
+            $config = Yaml::parse($filepath);
+        } else {
+            throw new \Exception("config.yml is not readable! ($filepath)");
+        }
+
+        return $config;
+    }
+
+    private function _initBBAppParamsIntoContainer()
+    {
+        $config = $this->_getRawConfig();
 
         // Set timezone
         if (true === isset($config['date']) && true === isset($config['date']['timezone'])) {
