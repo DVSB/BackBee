@@ -187,7 +187,7 @@ class BBApplication implements IApplication {
     {
         // Construct service container
         $this->_container = new ContainerBuilder();
-        $this->_container->setParameter("debug", $this->debugMode());
+        $this->_container->setParameter("debug", $this->isDebugMode());
         
         if (false === $containerdir = getenv('BB_CONTAINERDIR')) {
             $containerdir = $this->getBaseDir() . '/container/';
@@ -434,9 +434,11 @@ class BBApplication implements IApplication {
      * @return boolean
      */
     public function isDebugMode() {
-        if ($this->getConfig()->sectionHasKey('parameters', 'debug')) {
+        
+        if ($this->_isinitialized && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
+        
         return (bool) $this->_debug;
     }
 
