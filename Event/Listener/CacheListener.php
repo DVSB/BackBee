@@ -100,7 +100,7 @@ class CacheListener implements EventSubscriberInterface
 
         $renderer->setRender($data);
         $event->getDispatcher()->dispatch('cache.postrender', new Event(self::$_object, array($renderer, $data)));
-        self::$_application->debug(sprintf('Found cache for rendering `%s(%s)` with mode `%s`.', get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
+        self::$_application->debug(sprintf('Found cache (id: %s) for rendering `%s(%s)` with mode `%s`.', $cache_id, get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
     }
 
     /**
@@ -139,7 +139,7 @@ class CacheListener implements EventSubscriberInterface
 
         $render = array_shift($args);
         self::$_cache_content->save($cache_id, $render, $lifetime, self::$_object->getUid());
-        self::$_application->debug(sprintf('Save cache for rendering `%s(%s)` with mode `%s`.', get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
+        self::$_application->debug(sprintf('Save cache (id: %s, lifetime: %d) for rendering `%s(%s)` with mode `%s`.', $cache_id, $lifetime, get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
     }
 
     /**
@@ -165,6 +165,15 @@ class CacheListener implements EventSubscriberInterface
         self::$_cache_content->removeByTag($content_uids);
         self::$_content_cache_deletion_done = array_merge(self::$_content_cache_deletion_done, $content_uids);
         self::$_application->debug(sprintf('Remove cache for `%s(%s)`.', get_class(self::$_object), implode(', ', $content_uids)));
+
+        $cache_page = self::$_application->getContainer()->get('cache.page');
+        if (true === ($cache_page instanceof \BackBuilder\Cache\AExtendedCache)) {
+            $node_uids = self::$_application->getEntityManager()
+                    ->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
+                    ->getNodeUids($content_uids);
+            $cache_page->removeByTag($node_uids);
+            self::$_application->debug(sprintf('Remove cache for page %s.', implode(', ', $node_uids)));
+        }
     }
 
     /**
@@ -192,7 +201,7 @@ class CacheListener implements EventSubscriberInterface
 
         $renderer->setRender($data);
         $event->getDispatcher()->dispatch('cache.postrender', new Event(self::$_object, array($renderer, $data)));
-        self::$_application->debug(sprintf('Found cache for rendering `%s(%s)` with mode `%s`.', get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
+        self::$_application->debug(sprintf('Found cache (id: %s) for rendering `%s(%s)` with mode `%s`.', $cache_id, get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
     }
 
     /**
@@ -218,10 +227,16 @@ class CacheListener implements EventSubscriberInterface
             return;
         }
 
-        $lifetime = 0; // @todo: compute lifetime
+        $column_uids = array();
+        foreach (self::$_object->getContentSet() as $column) {
+            if ($column instanceof AClassContent) {
+                $column_uids[] = $column->getUid();
+            }
+        }
+        $lifetime = self::$_cache_page->getMinExpireByTag($column_uids);
         $render = array_shift($args);
         self::$_cache_page->save($cache_id, $render, $lifetime, self::$_object->getUid());
-        self::$_application->debug(sprintf('Save cache for rendering `%s(%s)` with mode `%s`.', get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
+        self::$_application->debug(sprintf('Save cache (id: %s, lifetime: %d) for rendering `%s(%s)` with mode `%s`.', $cache_id, $lifetime, get_class(self::$_object), self::$_object->getUid(), $renderer->getMode()));
     }
 
     /**
@@ -403,16 +418,16 @@ class CacheListener implements EventSubscriberInterface
             if (false === class_exists($classname)) {
                 continue;
             }
-            
+
             $o = new $classname();
             if (null !== $o->getProperty('cache-param')) {
                 $cache_param = array_merge($cache_param, $o->getProperty('cache-param'));
             }
         }
-        
+
         return $cache_param;
     }
-    
+
     /**
      * Return the cache id for the current requested page
      * @return string|FALSE
