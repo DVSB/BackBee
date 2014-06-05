@@ -92,8 +92,6 @@ class Console extends ConsoleApplication
 
     protected function registerCommands()
     {
-        $this->getApplication()->start();
-
         $this->getApplication()->registerCommands($this);
     }
 }

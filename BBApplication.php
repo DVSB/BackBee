@@ -26,12 +26,12 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Config\Config,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
-    BackBuilder\Exception\DatabaseConnectionException,
     BackBuilder\Exception\UnknownContextException,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File,
-    BackBuilder\Bundle\ABundle;
+    BackBuilder\Bundle\ABundle,
+    BackBuilder\Console\Console;
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
     Doctrine\ORM\EntityManager,
@@ -46,7 +46,6 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
-    Symfony\Component\Console\Application,
     Symfony\Component\Finder\Finder;
 
 /**
@@ -401,7 +400,8 @@ class BBApplication implements IApplication
         //$this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
     }
 
-    private function _initExternalBundleServices() {
+    private function _initExternalBundleServices() 
+    {
         // Load external bundle services (Symfony2 Bundle)
         $externalServices = $this->getConfig()->getSection('external_bundles');
         if (null !== $externalServices && 0 < count($externalServices)) {
@@ -425,7 +425,8 @@ class BBApplication implements IApplication
     /**
      * @return \BackBuilder\BBApplication
      */
-    private function _initAutoloader() {
+    private function _initAutoloader() 
+    {
         $this->getAutoloader()
                 ->register()
                 ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
@@ -458,7 +459,8 @@ class BBApplication implements IApplication
      * @param boolean $force_reload Force to reload the theme if true
      * @return \BackBuilder\Theme\Theme
      */
-    public function getTheme($force_reload = false) {
+    public function getTheme($force_reload = false) 
+    {
         if (false === is_object($this->_theme) || true === $force_reload) {
             $this->_theme = new Theme($this);
         }
@@ -468,7 +470,8 @@ class BBApplication implements IApplication
     /**
      * @return \Swift_Mailer
      */
-    public function getMailer() {
+    public function getMailer() 
+    {
         if (false === $this->getContainer()->has('mailer') || is_null($this->getContainer()->get('mailer'))) {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
                 $smtp = (is_array($mailer_config['smtp'])) ? reset($mailer_config['smtp']) : $mailer_config['smtp'];
@@ -492,12 +495,17 @@ class BBApplication implements IApplication
     /**
      * @return boolean
      */
+<<<<<<< HEAD
     public function isDebugMode() {
         
+=======
+    public function isDebugMode() 
+    {        
+>>>>>>> 8f02c2e5ff5345e2be4a3603525f37b33b647762
         if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
-        
+
         return (bool) $this->_debug;
     }
 
@@ -506,7 +514,8 @@ class BBApplication implements IApplication
      * @return \BackBuilder\BBApplication
      * @throws \BackBuilder\Exception\UnknownContextException Thrown if unknown context provided
      */
-    private function _initContextConfig() {
+    private function _initContextConfig() 
+    {
         if (true === $this->hasContext()) {
             if (false === is_dir($this->getBaseRepository() . '/' . $this->_context)) {
                 throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
@@ -522,7 +531,8 @@ class BBApplication implements IApplication
      * @return \BackBuilder\BBApplication
      * @throws BBException
      */
-    private function _initContentWrapper() {
+    private function _initContentWrapper() 
+    {
         if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig()) {
             throw new BBException('None class content wrapper found');
         }
@@ -539,7 +549,8 @@ class BBApplication implements IApplication
      * @return \BackBuilder\BBApplication
      * @throws BBException
      */
-    private function _initEntityManager() {
+    private function _initEntityManager() 
+    {
         if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
             throw new BBException('None database configuration found');
         }
@@ -580,13 +591,14 @@ class BBApplication implements IApplication
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
         } catch (\Exception $e) {
-            $this->warning(sprintf('%s(): Cannot initialized Doctrine EntityManager', __METHOD__));
+            $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
         }
 
         return $this;
     }
 
-    private function _initBundles() {
+    private function _initBundles() 
+    {
         if (null === $this->_bundles)
             $this->_bundles = array();
 
@@ -610,7 +622,8 @@ class BBApplication implements IApplication
     /**
      * Load every service definition defined in bundle
      */
-    private function initBundlesServices() {
+    private function initBundlesServices() 
+    {
         foreach ($this->_bundles as $b) {
             $xml = $b->getResourcesDir() . '/' . 'services.xml';
             if (true === is_file($xml)) {
@@ -658,7 +671,8 @@ class BBApplication implements IApplication
     /**
      * @param \BackBuilder\Site\Site $site
      */
-    public function start(Site $site = null) {
+    public function start(Site $site = null) 
+    {
         if (null === $site) {
             $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array());
         }
@@ -1211,28 +1225,25 @@ class BBApplication implements IApplication
      * * Commands are in the 'Command' sub-directory
      * * Commands extend Symfony\Component\Console\Command\Command
      *
-     * @param Application $application An Application instance
+     * @param BackBuilder\Console\Console $console An Application instance
      */
-    public function registerCommands(Application $application) {
+    public function registerCommands(Console $console)
+    {
         if (is_dir($dir = $this->getBBDir() . '/Command')) {
             $finder = new Finder();
-
             $finder->files()->name('*Command.php')->in($dir);
-
-            $prefix = 'BackBuilder\\Command';
+            $ns = 'BackBuilder\\Command';
 
             foreach ($finder as $file) {
-                $ns = $prefix;
                 if ($relativePath = $file->getRelativePath()) {
                     $ns .= '\\' . strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
                 if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
-                    $application->add($r->newInstance());
+                    $console->add($r->newInstance());
                 }
             }
         }
-
 
         foreach ($this->getBundles() as $bundle) {
             if (!is_dir($dir = $bundle->getBaseDir() . '/Command')) {
@@ -1241,11 +1252,9 @@ class BBApplication implements IApplication
 
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
-
-            $prefix = $bundle->getNamespace() . '\\Command';
+            $ns = $bundle->getNamespace() . '\\Command';
 
             foreach ($finder as $file) {
-                $ns = $prefix;
                 if ($relativePath = $file->getRelativePath()) {
                     $ns .= '\\' . strtr($relativePath, '/', '\\');
                 }
@@ -1253,10 +1262,12 @@ class BBApplication implements IApplication
                 if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
-                    $application->add($instance);
+                    $console->add($instance);
                 }
             }
+            
         }
     }
+    
 
 }
