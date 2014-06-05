@@ -2,7 +2,7 @@
 /* Prevent aloha from editing some preserved markup */
 define(["aloha","aloha/plugin",'aloha/pluginmanager','ui/ui','ui/button','aloha/jquery'], function(Aloha,Plugin,PluginManager,Ui,Button,jQuery){
     'use strict';
-    /* the $ is from bb jquery
+    /* the bb.jquery is from bb jquery
      * we can't use aloha/jquery as it doesn't have bb.ui plugins
      * */
     return Plugin.create("linkbb",{
@@ -47,7 +47,7 @@ define(["aloha","aloha/plugin",'aloha/pluginmanager','ui/ui','ui/button','aloha/
                     var newContent = editable.editable.getContents();
                     var icoMarkup = "<i></i>"; 
                     newContent = newContent.replace(icoMarkup,"");
-                    $(editable.editable.obj).html(icoMarkup+newContent);
+                    bb.jquery(editable.editable.obj).html(icoMarkup+newContent);
                     editableObj.html(icoMarkup+newContent);
                 }
             });
@@ -60,8 +60,8 @@ define(["aloha","aloha/plugin",'aloha/pluginmanager','ui/ui','ui/button','aloha/
             this.linkPlugin.hrefField.focus();
             var link = this.linkPlugin.hrefField.getTargetObject();
             if(link){
-                $(link).attr("href",item.value);
-                $(link).attr("title",item.title);
+                bb.jquery(link).attr("href",item.value);
+                bb.jquery(link).attr("title",item.title);
             }
             this.linkPlugin.hrefChange();
             this.linkPlugin.hrefField.foreground();
@@ -82,7 +82,7 @@ define(["aloha","aloha/plugin",'aloha/pluginmanager','ui/ui','ui/button','aloha/
             
             if (!this.linkSelector) {
                 var selectorLink = bb.i18n.__('toolbar.editing.linkselectorLabel');
-                var linkSelectorContainer = $("<div id='bb5-bblink-linksselector' class='bb5-selector-wrapper'></div>").clone();
+                var linkSelectorContainer = bb.jquery("<div id='bb5-bblink-linksselector' class='bb5-selector-wrapper'></div>").clone();
                 this.linkSelector = bb.jquery(linkSelectorContainer).bbSelector({
                     popup: true,
                     pageSelector: true,
@@ -101,9 +101,9 @@ define(["aloha","aloha/plugin",'aloha/pluginmanager','ui/ui','ui/button','aloha/
                         self.linkSelectorIsVisible = false;
                     },
                     beforeWidgetInit:function(){
-                        var bbSelector = $(this.element).data('bbSelector');
+                        var bbSelector = this;
                         bbSelector.onWidgetInit(bbSelector._panel.INTERNAL_LINK, function () { 
-                            var bbPageSelector = $(this).data('bbPageSelector') || false;
+                            var bbPageSelector = bb.jquery(this).data('bbPageSelector') || false;
                             if(bbPageSelector){
                                 bbPageSelector.setCallback(function(params) {
                                     self._selectLink(params);
@@ -114,7 +114,7 @@ define(["aloha","aloha/plugin",'aloha/pluginmanager','ui/ui','ui/button','aloha/
                         });
                         
                         bbSelector.onWidgetInit(bbSelector._panel.EXTERNAL_LINK, function () {
-                            var bbLinkSelector = $(this).data('bbLinkSelector');
+                            var bbLinkSelector = bb.jquery(this).data('bbLinkSelector');
                             bbLinkSelector.setCallback(function (params) {
                                 var linkPattern = /^([\w]+:\/\/)/gi;
                                 params.value = (linkPattern.test(params.value)) ? params.value : "http://"+params.value;
@@ -134,7 +134,7 @@ define(["aloha","aloha/plugin",'aloha/pluginmanager','ui/ui','ui/button','aloha/
                 tooltip: "Show choose a link",
                 icon: 'aloha-icon-tree',
                 scope: 'Aloha.link',
-                click: $.proxy(this._showBbLinkBrowser,this)
+                click: bb.jquery.proxy(this._showBbLinkBrowser,this)
             }); 
         }
        

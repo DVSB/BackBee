@@ -64,6 +64,12 @@ class Memcached extends AExtendedCache
     const TAGS_PREFIX = '__tag__';
 
     /**
+     * Expire hash prefix
+     * @var string
+     */
+    const EXPIRE_PREFIX = '__expire__';
+
+    /**
      * Memcached adapter options
      * @var array
      */
@@ -302,22 +308,24 @@ class Memcached extends AExtendedCache
      * @param \DateTime $expire Optionnal, the expiration time (now by default)
      * @return string|FALSE
      */
-    public function load($id, $bypassCheck = false, \DateTime $expire = null)
+    public function load($id, $bypassCheck = true, \DateTime $expire = null)
     {
         if (null === $expire) {
             $expire = new \DateTime();
         }
 
-        $last_timestamp = $this->test($id);
+        $last_timestamp = 0;
+        if (false === $bypassCheck) {
+            $last_timestamp = $this->test($id);
+        }
+
         if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
 
             if (false === $tmp = $this->_memcached->get($id)) {
                 return $this->_onError('load');
             }
 
-            if (true === is_array($tmp)) {
-                return $tmp[0];
-            }
+            return $tmp;
         }
 
         return false;
@@ -330,15 +338,11 @@ class Memcached extends AExtendedCache
      */
     public function test($id)
     {
-        if (false === $tmp = $this->_memcached->get($id)) {
+        if (false === $tmp = $this->_memcached->get(self::EXPIRE_PREFIX . $id)) {
             return false;
         }
 
-        if (2 === count($tmp)) {
-            return (int) $tmp[1];
-        }
-
-        return false;
+        return (int) $tmp;
     }
 
     /**
@@ -354,7 +358,8 @@ class Memcached extends AExtendedCache
     {
         $expire = $this->getExpireTime($lifetime);
 
-        if (false === $this->_memcached->set($id, array($data, $expire), $expire)) {
+        if (false === $this->_memcached->set($id, $data, $expire) ||
+                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, $expire, $expire)) {
             return $this->_onError('save');
         }
 
@@ -379,7 +384,8 @@ class Memcached extends AExtendedCache
      */
     public function remove($id)
     {
-        if (false === $this->_memcached->delete($id)) {
+        if (false === $this->_memcached->delete($id) ||
+                false === $this->_memcached->delete(self::EXPIRE_PREFIX . $id)) {
             return $this->_onError('remove');
         }
 
