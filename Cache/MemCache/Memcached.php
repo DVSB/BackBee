@@ -356,10 +356,13 @@ class Memcached extends AExtendedCache
      */
     public function save($id, $data, $lifetime = null, $tag = null)
     {
-        $expire = $this->getExpireTime($lifetime);
+        if (null === $lifetime) {
+            $lifetime = 0;
+        }
 
-        if (false === $this->_memcached->set($id, $data, $expire) ||
-                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, $expire, $expire)) {
+        $lifetime = $this->getControledLifetime($lifetime);
+        if (false === $this->_memcached->set($id, $data, $lifetime) ||
+                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, $lifetime, $lifetime)) {
             return $this->_onError('save');
         }
 
@@ -476,15 +479,15 @@ class Memcached extends AExtendedCache
             return $lifetime;
         }
 
-        $now = $this->getExpireTime();
-        $expire = $this->getExpireTime($lifetime);
-
         foreach ($tags as $tag) {
             if (false !== $tagged = $this->load(self::TAGS_PREFIX . $tag)) {
-                $update_tagged = array();
                 foreach ($tagged as $id) {
                     if (false !== $last_timestamp = $this->test($id)) {
-                        $lifetime = min(array($last_timestamp, $lifetime)) - $now;
+                        if (0 === $lifetime) {
+                            $lifetime = $last_timestamp;
+                        } elseif (0 !== $last_timestamp) {
+                            $lifetime = min(array($last_timestamp, $lifetime));
+                        }
                     }
                 }
             }
@@ -521,7 +524,7 @@ class Memcached extends AExtendedCache
      */
     private function _onError($method)
     {
-        $this->log('warning', sprintf('Error occured on Memcached::%s(): [%s] %s.', $method, $this->getResultCode(), $this->getResultMessage()));
+        $this->log('notice', sprintf('Error occured on Memcached::%s(): [%s] %s.', $method, $this->getResultCode(), $this->getResultMessage()));
         return false;
     }
 
