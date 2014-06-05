@@ -89,15 +89,15 @@ class IndexationRepository extends EntityRepository
                 $meta->getColumnName('_node_uid') . ', ' .
                 $meta->getColumnName('_modified') . ', ' .
                 $meta->getColumnName('_created') . ')' .
-                ' VALUES (:uid, :label, :classname, :node_uid, modified, :created)';
+                ' VALUES (:uid, :label, :classname, :node_uid, :modified, :created)';
 
         $params = array(
             'uid' => $content->getUid(),
             'label' => $content->getLabel(),
             'classname' => \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content),
             'node_uid' => $content->getMainNode()->getUid(),
-            'modified' => $content->getModified()->getTimestamp(),
-            'created' => $content->getCreated()->getTimestamp()
+            'modified' => date('Y-m-d H:i:s', $content->getModified()->getTimestamp()),
+            'created' => date('Y-m-d H:i:s', $content->getCreated()->getTimestamp())
         );
 
         $types = array(
@@ -105,8 +105,8 @@ class IndexationRepository extends EntityRepository
             \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
             \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
             \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
-            \Doctrine\DBAL\Connection::PARAM_INT_ARRAY,
-            \Doctrine\DBAL\Connection::PARAM_INT_ARRAY
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
         );
 
         return $this->_executeQuery($query, $params, $types);
