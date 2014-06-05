@@ -34,7 +34,7 @@ use SplFileObject;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class CsvReader implements \Countable, \Traversable, \SeekableIterator
+class CsvReader implements \Countable, \SeekableIterator
 {
     
     /**
@@ -114,6 +114,16 @@ class CsvReader implements \Countable, \Traversable, \SeekableIterator
     }
     
     /**
+     * Get headers
+     * 
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+    
+    /**
      * 
      * @param int $headersRowPosition
      */
@@ -122,7 +132,7 @@ class CsvReader implements \Countable, \Traversable, \SeekableIterator
         $this->headersRowPosition = $headersRowPosition;
         
         // set headers
-        $this->file->seek($rowNumber);
+        $this->file->seek($headersRowPosition);
         $headers = $this->file->current();
         
         $this->setHeaders($headers);
@@ -167,7 +177,7 @@ class CsvReader implements \Countable, \Traversable, \SeekableIterator
                 $row = array_slice($row, 0, $this->headersCount);
             }
             
-            $row = array_combine(array_keys($this->columnHeaders), $row);
+            $row = array_combine($this->headers, $row);
         }
         
         return $row;
