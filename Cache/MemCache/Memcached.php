@@ -324,7 +324,7 @@ class Memcached extends AExtendedCache
             if (false === $tmp = $this->_memcached->get($id)) {
                 return $this->_onError('load');
             }
-var_dump($id);
+
             return $tmp;
         }
 
