@@ -51,6 +51,7 @@ use Symfony\Component\HttpFoundation\Request,
  */
 class FrontController implements HttpKernelInterface
 {
+    const DEFAULT_URL_EXTENSION = 'html';
 
     /**
      * Iternal services map for Backbuilder
@@ -94,6 +95,8 @@ class FrontController implements HttpKernelInterface
      */
     protected $force_url_extension = true;
 
+    protected $url_extension;
+
     /**
      * Class constructor
      *
@@ -112,6 +115,7 @@ class FrontController implements HttpKernelInterface
             }
         }
 
+        $this->url_extension = self::DEFAULT_URL_EXTENSION;
         //$this->_routeCollection = $application->getRouting();
     }
 
@@ -357,7 +361,7 @@ class FrontController implements HttpKernelInterface
 
         $site = $this->_application->getContainer()->get('site');
 
-        preg_match('/(.*)(\.[hxtml]+)/', $uri, $matches);
+        preg_match('/(.*)(\.[' . $this->url_extension . ']+)/', $uri, $matches);
         if (
             ('_root_' !== $uri 
             && '/' !== $uri[strlen($uri) - 1] 
@@ -369,7 +373,7 @@ class FrontController implements HttpKernelInterface
             );
         }
 
-        $uri = preg_replace('/(.*)\.[hx]?[t]?m[l]?$/i', '$1', $uri);
+        $uri = preg_replace('/(.*)\.' . $this->url_extension . '?$/i', '$1', $uri);
         $redirect_page = $this->_application->getRequest()->get('bb5-redirect') ? ('false' !== $this->_application->getRequest()->get('bb5-redirect')) : TRUE;
 
         if ('_root_' == $uri) {
@@ -858,4 +862,17 @@ class FrontController implements HttpKernelInterface
         }
     }
 
+    /**
+     * [isUrlExtensionRequired description]
+     * @return boolean true if url extension required, else false
+     */
+    public function isUrlExtensionRequired()
+    {
+        return $this->force_url_extension;
+    }
+
+    public function getUrlExtension()
+    {
+        return $this->url_extension;
+    }
 }
