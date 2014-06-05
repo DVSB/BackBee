@@ -495,13 +495,8 @@ class BBApplication implements IApplication
     /**
      * @return boolean
      */
-<<<<<<< HEAD
-    public function isDebugMode() {
-        
-=======
     public function isDebugMode() 
     {        
->>>>>>> 8f02c2e5ff5345e2be4a3603525f37b33b647762
         if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
