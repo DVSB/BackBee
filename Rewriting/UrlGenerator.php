@@ -181,7 +181,7 @@ class UrlGenerator implements IUrlGenerator
     {
         $replacement = array(
             '$parent' => ($page->isRoot()) ? '' : $page->getParent()->getUrl(),
-            '$title' => String::urlize($page->getTitle()),
+            '$title' => String::urlize($page->getTitle(), array('lengthlimit' => 30)),
             '$datetime' => $page->getCreated()->format('ymdHis'),
             '$date' => $page->getCreated()->format('ymd'),
             '$time' => $page->getCreated()->format('His'),

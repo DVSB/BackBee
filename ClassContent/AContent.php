@@ -35,7 +35,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @MappedSuperclass
  */
-abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializable
+abstract class AContent implements IObjectIdentifiable, IRenderable
 {
 
     /**

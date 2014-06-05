@@ -76,6 +76,24 @@ abstract class ATransport
     protected $_startingpath;
 
     /**
+     * The SSH public key
+     * @var publickey
+     */
+    protected $_ssh_key_pub;
+
+    /**
+     * The SSH private key
+     * @var privatekey
+     */
+    protected $_ssh_key_priv;
+
+    /**
+     * The SSH resource
+     * @var passkey
+     */
+    protected $_ssh_key_pass;
+
+    /**
      * Class constructor, config might overwrite following options:
      * * protocol
      * * host
@@ -99,7 +117,6 @@ abstract class ATransport
                 }
             }
         }
-
         $this->_startingpath = $this->_remotepath;
     }
 
