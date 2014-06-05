@@ -50,7 +50,7 @@ class RewritingListener
             return;
 
         $page = $content->getMainNode();
-        if (NULL === $page)
+        if (null === $page)
             return;
 
         $newEvent = new Event($page, $content);
@@ -70,7 +70,7 @@ class RewritingListener
 
         $maincontent = $event->getEventArgs();
         if (!($maincontent instanceof AClassContent))
-            $maincontent = NULL;
+            $maincontent = null;
 
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
@@ -89,26 +89,35 @@ class RewritingListener
      * @param \BackBuilder\NestedNode\Page $page
      * @param \BackBuilder\ClassContent\AClassContent $maincontent
      */
-    private static function _updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = NULL)
+    private static function _updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = null)
     {
-        $urlGenerator = $application->getUrlGenerator();
-        if (!($urlGenerator instanceof IUrlGenerator))
+        $url_generator = $application->getUrlGenerator();
+        if (!($url_generator instanceof IUrlGenerator)) {
             return;
-
-        $em = $application->getEntityManager();
-        if (NULL === $maincontent && 0 < count($urlGenerator->getDescriminators())) {
-            $maincontent = $em->getRepository('BackBuilder\ClassContent\AClassContent')->getLastByMainnode($page, $urlGenerator->getDescriminators());
         }
 
-        $newUrl = $urlGenerator->generate($page, $maincontent);
-        if ($page->getUrl() != $newUrl) {
-            $page->setUrl($newUrl);
+        $em = $application->getEntityManager();
+        if (null === $maincontent && 0 < count($url_generator->getDescriminators())) {
+            $maincontent = $em->getRepository('BackBuilder\ClassContent\AClassContent')
+                ->getLastByMainnode($page, $url_generator->getDescriminators())
+            ;
+        }
 
-            $uow = $em->getUnitOfWork();
-            if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page))
+        $uow = $em->getUnitOfWork();
+        $change_set = $uow->getEntityChangeSet($page);
+        if (true === array_key_exists('_state', $change_set)) {
+            $page->setOldState($change_set['_state'][0]);
+        }
+
+        $new_url = $url_generator->generate($page, $maincontent);
+        if ($new_url !== $page->getUrl()) {
+            $page->setUrl($new_url);
+
+            if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {
                 $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
-            elseif (!$uow->isScheduledForDelete($page))
+            } elseif (!$uow->isScheduledForDelete($page)) {
                 $uow->computeChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
+            }
 
             return true;
         }
