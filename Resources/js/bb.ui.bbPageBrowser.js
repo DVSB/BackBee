@@ -22,6 +22,10 @@
             having_child: false
         },
         _statesWatchable: {
+			width: 238,
+			height: 210,
+			left: 43,
+			top: 85,
             open: false
         },
         i18n: {
@@ -83,9 +87,11 @@
             if (this.options.popup) {
                 bb.jquery(this.element).dialog({
                     dialogClass: 'bb5-ui bb5-dialog-wrapper bb5-dialog-treeviewer',
-                    width: this.options.popup.width,
-                    minWidth: 200,
-                    minHeight: 147,
+					position: [myself.getStateLeft(), myself.getStateTop()],
+                    width: myself.getStateWidth(),
+                    height: myself.getStateHeight(),
+					minWidth: 238,
+                    minHeight: 210,
                     autoOpen: myself.getStateOpen(),
                     closeOnEscape: false,
                     zIndex: 500001,
@@ -168,6 +174,9 @@
                     var position = [(Math.floor(ui.position.left) - bb.jquery(window).scrollLeft()), (Math.floor(ui.position.top) - bb.jquery(window).scrollTop())];
                     bb.jquery(event.target).parent().css('position', 'fixed');
                     bb.jquery(myself.element).dialog('option', 'position', position);
+					
+					myself.setStateWidth(ui.size.width);
+					myself.setStateHeight(ui.size.height);
                 });
 
                 /*fix dialog position*/
@@ -186,10 +195,14 @@
                         var position = bb.jquery(myself.element).dialog('option', 'position');
                         position[1] = top;
                         bb.jquery(myself.element).dialog('option', 'position', position);
+						myself.setStateTop(top);
                     }
                 });
 
                 bb.jquery(this.element).bind("dialogdragstop", function(event, ui) {
+					myself.setStateTop(ui.position.top);
+					myself.setStateLeft(ui.position.left);
+					
                     var top = parseInt(bb.jquery(this).parent(".bb5-dialog-wrapper").css("top"));
                     /*move up*/
                     if (top < 0) {
@@ -197,6 +210,7 @@
                         var position = bb.jquery(myself.element).dialog('option', 'position');
                         position[1] = top;
                         bb.jquery(myself.element).dialog('option', 'position', position);
+						myself.setStateTop(top);
                         return;
                     }
                     /*move down*/
@@ -219,11 +233,6 @@
                 bb.jquery(document).ajaxComplete(function() {
                     myself._unmask();
                 });
-                if (this.options.popup.height)
-                    bb.jquery(this.element).dialog('option', 'height', this.options.popup.height);
-
-                if (this.options.popup.position)
-                    bb.jquery(this.element).dialog('option', 'position', this.options.popup.position);
             } else {
                 bb.jquery(this.element).show();
             }
