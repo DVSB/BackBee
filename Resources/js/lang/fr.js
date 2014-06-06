@@ -4,6 +4,7 @@
     loading: 'Chargement...',
     toolbar: {
         save: 'Enregistrer',
+		validate: 'Valider',
         refresh: 'Rafraîchir',
         cancel: 'Annuler',
         blocks: 'Blocs',
