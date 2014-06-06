@@ -269,7 +269,7 @@ class Renderer extends ARenderer
             ($renderer->getClassContainer() instanceof AClassContent) && 
             null === $renderer->getCurrentElement()
         ) {
-            $renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
+            //$renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
         }
 
         if (null === $renderer->__render) {
