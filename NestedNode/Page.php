@@ -280,6 +280,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public $cloning_datas;
 
     /**
+     * old state of current object (equals to null if it's not updated);
+     * this property is not persisted
+     * @var integer
+     */
+    public $old_state;
+
+    /**
      * Class constructor
      * @param string $uid The unique identifier of the page
      * @param array $options Initial options for the page:
@@ -304,6 +311,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         $this->_state = self::STATE_HIDDEN;
         $this->_type = self::TYPE_DYNAMIC;
         $this->_target = self::DEFAULT_TARGET;
+        $this->old_state = null;
     }
 
     /**
@@ -1143,4 +1151,21 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         return array_reverse($breadcrumb_uids);
     }
 
+    /**
+     * old_state property getter
+     * @return null|integer
+     */
+    public function getOldState()
+    {
+        return $this->old_state;
+    }
+
+    /**
+     * old_state property setter
+     * @return null|integer
+     */
+    public function setOldState($v)
+    {
+        $this->old_state = $v;
+    }
 }
