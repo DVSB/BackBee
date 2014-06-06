@@ -99,8 +99,8 @@ class MetaDataListener
             return;
         }
 
-        if (null === $metadata_config = $application->getTheme()->getConfig()->getSection('metadata')) {
-            $metadata_config = $application->getConfig()->getSection('metadata');
+        if (null === $metadata_config = $application->getConfig()->getSection('metadata')) {
+            return;
         }
         
         if (null === $metadata = $page->getMetaData()) {
@@ -108,7 +108,6 @@ class MetaDataListener
         } else {
             $metadata->update($metadata_config, $page);
         }
-        
         $page->setMetaData($metadata->compute($page));
 
         if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {

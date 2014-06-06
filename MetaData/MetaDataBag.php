@@ -78,7 +78,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
     public function update(array $definitions = null, Page $page = null)
     {
         $content = (null === $page) ? null : $page->getContentSet();
-        
+
         if (null !== $definitions) {
             foreach ($definitions as $name => $definition) {
                 if (false === is_array($definition)) {
@@ -93,6 +93,18 @@ class MetaDataBag implements \IteratorAggregate, \Countable
                 foreach ($definition as $attrname => $attrvalue) {
                     if (false === is_array($attrvalue)) {
                         $metadata->setAttribute($attrname, $attrvalue, $content);
+                        continue;
+                    }
+
+                    if (true === $metadata->hasAttribute($attrname)) {
+                        if (null !== $page && true === array_key_exists('layout', $attrvalue)) {
+                            $layout_uid = $page->getLayout()->getUid();
+                            if (true === array_key_exists($layout_uid, $attrvalue['layout'])) {
+                                $scheme = (is_array($attrvalue['layout'][$layout_uid])) ? reset($attrvalue['layout'][$layout_uid]) : $attrvalue['layout'][$layout_uid];
+                                $metadata->updateAttributeScheme($attrname, $scheme, $content);
+                            }
+                        }
+
                         continue;
                     }
 
