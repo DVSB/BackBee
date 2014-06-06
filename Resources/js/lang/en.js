@@ -4,7 +4,7 @@
     loading: 'Loading...',
     toolbar: {
         save: 'Save',
-		validate: 'Validate',
+	validate: 'Validate',
         refresh: 'Refresh',
         cancel: 'Cancel',
         blocks: 'Boxes',

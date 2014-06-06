@@ -22,10 +22,10 @@
             having_child: false
         },
         _statesWatchable: {
-			width: 238,
-			height: 210,
-			left: 43,
-			top: 85,
+            width: 238,
+            height: 210,
+            left: 43,
+            top: 85,
             open: false
         },
         i18n: {
@@ -87,10 +87,10 @@
             if (this.options.popup) {
                 bb.jquery(this.element).dialog({
                     dialogClass: 'bb5-ui bb5-dialog-wrapper bb5-dialog-treeviewer',
-					position: [myself.getStateLeft(), myself.getStateTop()],
+                    position: [myself.getStateLeft(), myself.getStateTop()],
                     width: myself.getStateWidth(),
                     height: myself.getStateHeight(),
-					minWidth: 238,
+                    minWidth: 238,
                     minHeight: 210,
                     autoOpen: myself.getStateOpen(),
                     closeOnEscape: false,
@@ -115,8 +115,8 @@
                                 return false;
                             });
                         }
-                        
-                        var havingChildren = bb.jquery("<div><input type='checkbox' class='bb5-having-child' />&nbsp;"+bb.i18n.__('toolbar.selector.having_child')+"</div>");
+
+                        var havingChildren = bb.jquery("<div><input type='checkbox' class='bb5-having-child' />&nbsp;" + bb.i18n.__('toolbar.selector.having_child') + "</div>");
                         bb.jquery(event.target).prepend(havingChildren);
                         bb.jquery(event.target).find('input.bb5-having-child')
                                 .attr('checked', context.having_child)
@@ -127,14 +127,14 @@
                                     myself.setContext(context);
                                     myself._initTree(context.site);
                                 });
-                        
+
                         if (myself.options.enableMultiSite) {
                             var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
                             bb.jquery(event.target).prepend(sitesMenu);
-                            bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {    
-                                useCache:true,
-                                cacheTags:["userSession"],
-                                async : false, 
+                            bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {
+                                useCache: true,
+                                cacheTags: ["userSession"],
+                                async: false,
                                 success: function(result) {
                                     context = myself.getContext();
                                     select = bb.jquery(myself.element).find('.bb5-available-sites').eq(0);
@@ -148,8 +148,8 @@
                                     select.empty();
                                     bb.jquery.each(result.result, function(index, site) {
                                         var option = bb.jquery("<option></option>").clone();
-                                        bb.jquery(option).attr("value",index).text(site);
-                                        select.append(option);         
+                                        bb.jquery(option).attr("value", index).text(site);
+                                        select.append(option);
                                     });
 
                                     //select current site if configured
@@ -174,9 +174,9 @@
                     var position = [(Math.floor(ui.position.left) - bb.jquery(window).scrollLeft()), (Math.floor(ui.position.top) - bb.jquery(window).scrollTop())];
                     bb.jquery(event.target).parent().css('position', 'fixed');
                     bb.jquery(myself.element).dialog('option', 'position', position);
-					
-					myself.setStateWidth(ui.size.width);
-					myself.setStateHeight(ui.size.height);
+
+                    myself.setStateWidth(ui.size.width);
+                    myself.setStateHeight(ui.size.height);
                 });
 
                 /*fix dialog position*/
@@ -195,14 +195,14 @@
                         var position = bb.jquery(myself.element).dialog('option', 'position');
                         position[1] = top;
                         bb.jquery(myself.element).dialog('option', 'position', position);
-						myself.setStateTop(top);
+                        myself.setStateTop(top);
                     }
                 });
 
                 bb.jquery(this.element).bind("dialogdragstop", function(event, ui) {
-					myself.setStateTop(ui.position.top);
-					myself.setStateLeft(ui.position.left);
-					
+                    myself.setStateTop(ui.position.top);
+                    myself.setStateLeft(ui.position.left);
+
                     var top = parseInt(bb.jquery(this).parent(".bb5-dialog-wrapper").css("top"));
                     /*move up*/
                     if (top < 0) {
@@ -210,7 +210,7 @@
                         var position = bb.jquery(myself.element).dialog('option', 'position');
                         position[1] = top;
                         bb.jquery(myself.element).dialog('option', 'position', position);
-						myself.setStateTop(top);
+                        myself.setStateTop(top);
                         return;
                     }
                     /*move down*/
@@ -284,7 +284,7 @@
                                     'current_uid': bb.frontApplication.getPageId(),
                                     'fisrtresult': 0,
                                     'maxresult': context.maxresult,
-                                    'having_child':context.having_child
+                                    'having_child': context.having_child
                                 };
                             }
                         }
