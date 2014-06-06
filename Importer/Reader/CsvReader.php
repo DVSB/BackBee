@@ -73,6 +73,24 @@ class CsvReader implements \Countable, \SeekableIterator
     protected $headersRowPosition;
     
     /**
+     * Mappings for special values. 
+     * 
+     * Eg: array('NULL' => null, 'false' => false, , 'TRUE' => true)
+     * 
+     * @var array
+     */
+    protected $valueMappings = array();
+    
+    /**
+     * True $valueMappings contains any data
+     * 
+     * Cache value for performance
+     * 
+     * @var boolean
+     */
+    protected $hasValueMappings = false;
+    
+    /**
      * 
      * @param string $file
      * @param string $delimiter
@@ -177,6 +195,17 @@ class CsvReader implements \Countable, \SeekableIterator
                 $row = array_slice($row, 0, $this->headersCount);
             }
             
+            // value mappings
+            if($this->hasValueMappings) {
+                $mappings = $this->valueMappings;
+                $row = array_map(function($value) use($mappings) {
+                    if(\array_key_exists($value, $mappings)) {
+                        return $mappings[$value];
+                    }
+                    return $value;
+                }, $row);
+            }
+            
             $row = array_combine($this->headers, $row);
         }
         
@@ -221,8 +250,22 @@ class CsvReader implements \Countable, \SeekableIterator
         return $this->file->key();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function seek($pointer)
     {
         $this->file->seek($pointer);
+    }
+    
+    /**
+     * 
+     * @param array $valueMappings Eg: array('NULL' => null, 'false' => false, , 'TRUE' => true)
+     */
+    public function setValueMappings(array $valueMappings)
+    {
+        // break down to usable values for performance
+        $this->valueMappings = $valueMappings;
+        $this->hasValueMappings = count($this->valueMappings) > 0;
     }
 }
