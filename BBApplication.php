@@ -567,6 +567,10 @@ class BBApplication implements IApplication
             $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
+        if (true === array_key_exists('metadata_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['metadata_cache']['cachetype'] = $doctrine_config['dbal']['metadata_type'];
+        }
+
         // Init ORM event
         $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
