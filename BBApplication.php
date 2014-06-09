@@ -243,6 +243,13 @@ class BBApplication implements IApplication
         $dirToLookingFor[] = $this->getBaseRepository() . '/' . 'Config';
         $dirToLookingFor[] = $this->getRepository() . '/' . 'Config';
 
+        if (self::DEFAULT_ENVIRONMENT !== $this->_environment) {
+            $dirToLookingFor[] = $this->getRepository()
+                . DIRECTORY_SEPARATOR . 'Config'
+                . DIRECTORY_SEPARATOR . $this->_environment
+            ;
+        }
+        
         foreach ($dirToLookingFor as $dir) {
             $fileService = $dir . '/' . 'services.';
 

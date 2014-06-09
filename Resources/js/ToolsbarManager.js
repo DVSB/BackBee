@@ -26,7 +26,11 @@ bb.ToolsbarManager = (function($, gExport) {
         userinfosId: "bb5-topmost-login",
         contentActions: {
             commit: '#bb5-shortcuts .bb5-ico-commit',
+<<<<<<< HEAD
             validate: '#bb5-shortcuts .bb5-ico-validate',
+=======
+			validate: '#bb5-shortcuts .bb5-ico-validate',
+>>>>>>> 72581c34ecf9faa6aade424566e5284ecfa30fd4
             update: '#bb5-shortcuts .bb5-ico-refresh',
             revert: '#bb5-shortcuts .bb5-ico-cancel'
         }
@@ -183,6 +187,7 @@ bb.ToolsbarManager = (function($, gExport) {
         bb.jquery(_settings.contentActions.commit).bind('click', function(e) {
             bb.ContentWrapper.persist(false); //make persist a synchrone request
             bb.StatusManager.getInstance().commit();
+<<<<<<< HEAD
             bb.StatusManager.getInstance().update();
         });
         bb.jquery(_settings.contentActions.validate).bind('click', function(e) {
@@ -191,6 +196,16 @@ bb.ToolsbarManager = (function($, gExport) {
         bb.jquery(_settings.contentActions.update).bind('click', function(e) {
             bb.StatusManager.getInstance().update();
         });
+=======
+			bb.StatusManager.getInstance().update();			
+        } );
+        bb.jquery(_settings.contentActions.validate).bind('click', function(e) { 
+            bb.ContentWrapper.persist(false); //make persist a synchrone request
+        } );
+        bb.jquery(_settings.contentActions.update).bind('click', function(e) {
+            bb.StatusManager.getInstance().update();
+        } );
+>>>>>>> 72581c34ecf9faa6aade424566e5284ecfa30fd4
 
         bb.jquery(_settings.contentActions.revert).bind('click', function(e) {
             bb.StatusManager.getInstance().revert();

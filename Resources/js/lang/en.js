@@ -4,7 +4,11 @@
     loading: 'Loading...',
     toolbar: {
         save: 'Save',
+<<<<<<< HEAD
 	validate: 'Validate',
+=======
+		validate: 'Validate',
+>>>>>>> 72581c34ecf9faa6aade424566e5284ecfa30fd4
         refresh: 'Refresh',
         cancel: 'Cancel',
         blocks: 'Boxes',

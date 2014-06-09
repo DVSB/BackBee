@@ -24,7 +24,10 @@ namespace BackBuilder\Site;
 use BackBuilder\Site\Metadata\Metadata,
     BackBuilder\Security\Acl\Domain\AObjectIdentifiable,
     BackBuilder\Services\Local\IJson;
+
 use Doctrine\Common\Collections\ArrayCollection;
+
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * A BackBuilder website entity
@@ -41,6 +44,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @Entity(repositoryClass="BackBuilder\Site\Repository\SiteRepository")
  * @Table(name="site", indexes={@Index(name="IDX_SERVERNAME", columns={"server_name"})})
  * @fixtures(qty=1)
+ *
+ * @Serializer\ExclusionPolicy("all")
  */
 class Site extends AObjectIdentifiable implements IJson
 {
@@ -50,6 +55,10 @@ class Site extends AObjectIdentifiable implements IJson
      * @var string
      * @Id @Column(type="string", name="uid")
      * @fixture(type="md5")
+     *
+     * @Serializer\Expose
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     protected $_uid;
 
@@ -82,6 +91,10 @@ class Site extends AObjectIdentifiable implements IJson
      * @var string
      * @Column(type="string", name="server_name", nullable=true)
      * @fixture(type="domainWord")
+     *
+     * @Serializer\Expose
+     * @Serializer\SerializedName("server_name")
+     * @Serializer\Type("string")
      */
     protected $_server_name;
 
@@ -94,7 +107,6 @@ class Site extends AObjectIdentifiable implements IJson
     /**
      * The collection of layouts available for this site.
      * @OneToMany(targetEntity="BackBuilder\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
-     * @OrderBy({"_label" = "ASC"})
      */
     protected $_layouts;
 
