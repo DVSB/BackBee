@@ -171,7 +171,7 @@ class KeyWordRepository extends NestedNodeRepository
         $object = null;
         $result = $this->_em->getConnection()->executeQuery(sprintf(
             'SELECT uid FROM keyword WHERE hex(lower(keyword)) = hex(lower("%s"))',
-            preg_replace('#[/\"]#', '', trim(iconv('UTF-8','ASCII//TRANSLIT', $keyword)))
+            preg_replace('#[/\"]#', '', trim($keyword))
         ))->fetchAll();
 
         if (0 < count($result)) {
