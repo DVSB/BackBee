@@ -211,20 +211,36 @@ abstract class ACache
     }
 
     /**
+     * Control the lifetime against min and max lifetime if provided
+     * @param int $lifetime
+     * @return int
+     */
+    protected function getControledLifetime($lifetime)
+    {
+        if (true === array_key_exists('min_cache_lifetime', $this->_instance_options) &&
+                null !== $this->_instance_options['min_cache_lifetime'] &&
+                $this->_instance_options['min_cache_lifetime'] > $lifetime) {
+            $lifetime = $this->_instance_options['min_cache_lifetime'];
+        } elseif (true === array_key_exists('max_cache_lifetime', $this->_instance_options) &&
+                null !== $this->_instance_options['max_cache_lifetime'] &&
+                $this->_instance_options['max_cache_lifetime'] < $lifetime) {
+            $lifetime = $this->_instance_options['max_cache_lifetime'];
+        }
+
+        return $lifetime;
+    }
+
+    /**
      * Control the expiration time against min and max lifetime if provided
      * @param int $expire
      * @return int
      */
     private function _getControledExpireTime($expire)
     {
-        if (true === array_key_exists('min_cache_lifetime', $this->_instance_options) &&
-                null !== $this->_instance_options['min_cache_lifetime'] &&
-                time() + $this->_instance_options['min_cache_lifetime'] > $expire) {
-            $expire = time() + $this->_instance_options['min_cache_lifetime'];
-        } elseif (true === array_key_exists('max_cache_lifetime', $this->_instance_options) &&
-                null !== $this->_instance_options['max_cache_lifetime'] &&
-                time() + $this->_instance_options['max_cache_lifetime'] < $expire) {
-            $expire = time() + $this->_instance_options['max_cache_lifetime'];
+        $lifetime = $this->getControledLifetime($expire - time());
+
+        if (0 < $lifetime) {
+            return time() + $lifetime;
         }
 
         return $expire;

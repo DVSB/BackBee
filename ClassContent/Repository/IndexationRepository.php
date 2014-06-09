@@ -286,6 +286,33 @@ class IndexationRepository extends EntityRepository
     }
 
     /**
+     * Returns every main node attach to the provided content uids
+     * @param array $content_uids
+     * @return array
+     */
+    public function getNodeUids(array $content_uids)
+    {
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\AClassContent');
+
+        $q = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('c.node_uid')
+                ->from($meta->getTableName(), 'c');
+
+        $index = 0;
+        $atleastone = false;
+        foreach ($content_uids as $uid) {
+            $q->orWhere('c.' . $meta->getColumnName('_uid') . ' = :uid' . $index)
+                    ->setParameter('uid' . $index, $uid);
+
+            $index++;
+            $atleastone = true;
+        }
+
+        return (true === $atleastone) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
+    }
+
+    /**
      * Removes a set of Site-Content indexes
      * @param string $site_uid
      * @param array $content_uids

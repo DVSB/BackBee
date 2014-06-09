@@ -73,9 +73,10 @@ class Twig extends ARendererAdapter
         
         $bbapp = $this->renderer->getApplication();
         $isDebugMode = null !== $bbapp ? $bbapp->isDebugMode() : false;
-        
+
         $this->twig = new Twig_Environment($this->loader, array(
-            'debug' => $isDebugMode
+            'debug' => $isDebugMode,
+            'cache' => $bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig',
         ));
 
         if (true === $isDebugMode) {
