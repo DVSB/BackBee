@@ -131,6 +131,23 @@ class EntityManagerCreator
 
         }
 
+        if (true === array_key_exists('query_cache', $options)) {
+            if($options['query_cache']['cachetype'] == 'memcache'){
+
+                $memcached = new \Memcached();
+
+                foreach($options['query_cache']['servers'] AS $server){
+                    $memcached->addServer($server['host'], $server['port']);
+                }
+                $memcacheDriver = new MemcachedCache();
+                $memcacheDriver->setMemcached($memcached);
+
+                $config->setQueryCacheImpl($memcacheDriver);
+
+            }
+
+        }
+
         if ($logger instanceof SQLLogger) {
             $config->setSQLLogger($logger);
         }
