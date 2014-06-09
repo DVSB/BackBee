@@ -32,7 +32,7 @@ class KeywordBuilder
         if (null === $keyword_object = $this->em->getRepository('BackBuilder\NestedNode\KeyWord')->exists($keyword)) {
             $keyword_object = new \BackBuilder\NestedNode\KeyWord();
             $keyword_object->setRoot($this->em->find('BackBuilder\NestedNode\KeyWord', md5('root')));
-            $keyword_object->setKeyWord(preg_replace('#[/\"]#', '', trim(iconv('UTF-8','ASCII//TRANSLIT', $keyword))));
+            $keyword_object->setKeyWord(preg_replace('#[/\"]#', '', trim($keyword)));
             
             if (true === $do_persist) {
                 $this->em->persist($keyword_object);
