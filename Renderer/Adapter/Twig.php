@@ -74,13 +74,14 @@ class Twig extends ARendererAdapter
         $bbapp = $this->renderer->getApplication();
         $isDebugMode = null !== $bbapp ? $bbapp->isDebugMode() : false;
 
-        $this->twig = new Twig_Environment($this->loader, array(
-            'debug' => $isDebugMode,
-            'cache' => $bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig',
-        ));
+        $this->twig = new Twig_Environment($this->loader);
 
-        if (true === $isDebugMode) {
+        if(true === $isDebugMode) {
+            $this->twig->enableDebug();
             $this->twig->addExtension(new Twig_Extension_Debug());
+        }else{
+            $this->twig->enableAutoReload();
+            $this->twig->setCache($bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig');
         }
 
         foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $id => $datas) {
