@@ -40,12 +40,12 @@
         },
         
         i18n: {
-            contents: 'Ã©lÃ©ment(s)',
+            contents: 'élément(s)',
             all: "Tous",
             state_offline :"Hors ligne",
             state_online : "En ligne",
-            state_hidden : "CachÃ©",
-            state_deleted :"EffacÃ©"
+            state_hidden : "Caché", 
+            state_deleted :"Effacé"
         },
     
         _templates :{
@@ -72,7 +72,7 @@
             +'<p>\n\
                     <button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button>\n\
                     <button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button>\n\
-                    <button class="bb5-button bb5-ico-save addToList">Ajouter Ã  ma sÃ©lection</button>\n\
+                    <button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button>\n\
                     <button class="bb5-button bb5-ico-del deleteContent">Effacer le contenu</button>\n\
               </p>'
             +'</li>';
@@ -164,7 +164,7 @@
             this._initSelectContentTabs();
             bb.jquery(this.element).disableSelection();
             
-            var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>SÃ©lectionner un site ...</option></select>").clone();
+            var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
             bb.jquery(self.element).find('.bb5-windowpane-tree-inner').prepend(sitesMenu);
             bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {    
                 useCache:true,
@@ -750,7 +750,7 @@
                 plugins.push('contextmenu');
             } 
             
-            /*CrÃ©ation de l'arbre*/
+            /*Création de l'arbre*/
             context.treeview = bb.jquery(myself.element).find('.bb5-windowpane-treewrapper-inner').jstree({   
                 plugins : plugins,
                 rpc_data : { 

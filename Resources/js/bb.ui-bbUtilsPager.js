@@ -24,7 +24,7 @@
             background_hover_color: 'none', 
             images: true,
 
-            // Options d'Ã©tat (il n'est pas recommandÃ© de les dÃ©finir Ã  la crÃ©ation du widget)
+            // Options d'état (il n'est pas recommandé de les définir à la création du widget)
             numResults: 0,
             numPages: 0,
             oldNumPage: 0,
