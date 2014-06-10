@@ -171,14 +171,14 @@ class Cache extends AExtendedCache
      * @param string $tag Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
-    public function save($id, $data, $lifetime = null, $tag = null)
+    public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false)
     {
         try {
             $params = array(
                 'uid' => $this->_getContextualId($id),
                 'tag' => $this->_getContextualId($tag),
                 'data' => $data,
-                'expire' => $this->getExpireTime($lifetime),
+                'expire' => $this->getExpireTime($lifetime, $bypass_control),
                 'created' => new \DateTime()
             );
 
@@ -273,7 +273,7 @@ class Cache extends AExtendedCache
      *                      (by default null, infinite lifetime)
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
-    public function updateExpireByTag($tag, $lifetime = null)
+    public function updateExpireByTag($tag, $lifetime = null, $bypass_control = false)
     {
         $tags = (array) $tag;
 
@@ -281,7 +281,7 @@ class Cache extends AExtendedCache
             return false;
         }
 
-        $expire = $this->getExpireTime($lifetime);
+        $expire = $this->getExpireTime($lifetime, $bypass_control);
 
         try {
             $this->_repository
@@ -428,9 +428,9 @@ class Cache extends AExtendedCache
      * @return int
      * @codeCoverageIgnore
      */
-    protected function getExpireTime($lifetime = null)
+    protected function getExpireTime($lifetime = null, $bypass_control = false)
     {
-        $expire = parent::getExpireTime($lifetime);
+        $expire = parent::getExpireTime($lifetime, $bypass_control);
 
         return (0 === $expire) ? null : date_timestamp_set(new \DateTime(), $expire);
     }
