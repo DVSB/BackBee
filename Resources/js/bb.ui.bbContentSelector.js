@@ -44,7 +44,7 @@
             all: "Tous",
             state_offline :"Hors ligne",
             state_online : "En ligne",
-            state_hidden : "Caché",
+            state_hidden : "Caché", 
             state_deleted :"Effacé"
         },
     
@@ -68,7 +68,7 @@
             var itemTemplate = '<li data-uid="${uid}" class="bb5-content-item">'
             +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
             +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
-            +"<p>Date de création: <strong>${created}</strong></p>"
+            +"<p>Date de crÃ©ation: <strong>${created}</strong></p>"
             +'<p>\n\
                     <button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button>\n\
                     <button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button>\n\
@@ -173,7 +173,14 @@
                 success: function(result) {
                     var context = self.getContext();
                     var select = bb.jquery(self.element).find('.bb5-available-sites').eq(0);
-
+                    
+                    //click focus (FIREFOX bug)
+                    if ($.browser.mozilla) {
+                        select.unbind('click').click(function() {
+                            select.focus();
+                        });
+                    }
+                
                     //select change event
                     select.bind('change', function() {
                         if (bb.jquery(this).val()) {
