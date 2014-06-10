@@ -81,14 +81,41 @@ class Twig extends ARendererAdapter
             $this->twig->addExtension(new Twig_Extension_Debug());
         }else{
             $this->twig->enableAutoReload();
-            $this->twig->setCache($bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig');
+
+            if( null !== $bbapp) {
+                $cacheDir = $bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig';
+                $this->setTwigCache($cacheDir);
+            }
         }
 
-        foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $id => $datas) {
-            $this->twig->addExtension($bbapp->getContainer()->get($id));
+        if( null !== $bbapp) {
+            foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $id => $datas) {
+                $this->twig->addExtension($bbapp->getContainer()->get($id));
+            }
         }
     }
 
+    private function setTwigCache($cacheDir)
+    {
+        if(false === is_dir($cacheDir) &&
+            (false === is_writable(dirname($cacheDir)) ||
+                false === @mkdir($cacheDir))
+        ) {
+            throw new RendererException(
+                sprintf('Unable to create twig cache "%s"', $cacheDir),
+                RendererException::RENDERING_ERROR
+            );
+        }
+
+        if(false === is_writable($cacheDir)) {
+            throw new RendererException(
+                sprintf('Twig cache "%s" is not writable', $cacheDir),
+                RendererException::RENDERING_ERROR
+            );
+        }
+
+        $this->twig->setCache($cacheDir);
+    }
     /**
      * @see BackBuilder\Renderer\IRendererAdapter::getManagedFileExtensions()
      */
