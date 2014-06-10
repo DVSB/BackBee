@@ -161,12 +161,35 @@ class MetaData implements \IteratorAggregate, \Countable
             if (null !== $content && $originalValue === $value) {
                 $this->computeAttributes($content);
             } else {
-                $this->_attributes[$attribute] = $originalValue;                
+                $this->_attributes[$attribute] = $originalValue;
             }
-        }
-        else {
+        } else {
             $this->_attributes[$attribute] = $value;
             $this->_isComputed[$attribute] = false;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Updates the scheme of the attribute
+     * @param string $attribute
+     * @param string $scheme
+     * @param \BackBuilder\ClassContent\AClassContent $content Optional, if the attribute is computed
+     *                                                         the content on which apply the scheme
+     * @return \BackBuilder\MetaData\MetaData
+     */
+    public function updateAttributeScheme($attribute, $scheme, AClassContent $content = null)
+    {
+        $functions = explode('||', $scheme);
+        $value = array_shift($functions);
+        if (0 < preg_match('/(\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $value)) {
+            $this->_scheme[$attribute] = $scheme;
+            if (null !== $content &&
+                    true === isset($this->_isComputed[$attribute]) &&
+                    true === $this->_isComputed[$attribute]) {
+                $this->computeAttributes($content);
+            }
         }
 
         return $this;
@@ -180,15 +203,14 @@ class MetaData implements \IteratorAggregate, \Countable
     public function computeAttributes(AClassContent $content, Page $page = null)
     {
         foreach ($this->_attributes as $attribute => $value) {
-            if (true === $this->_isComputed[$attribute]
-                    && true === array_key_exists($attribute, $this->_scheme)) {
+            if (true === $this->_isComputed[$attribute] && true === array_key_exists($attribute, $this->_scheme)) {
                 try {
                     $functions = explode('||', $value);
                     $matches = array();
                     if (false !== preg_match_all('/(\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $this->_scheme[$attribute], $matches, PREG_PATTERN_ORDER)) {
                         $this->_attributes[$attribute] = $this->_scheme[$attribute];
                         $initial_content = $content;
-                        for($i=0; $i<count($matches[0]); $i++) {
+                        for ($i = 0; $i < count($matches[0]); $i++) {
                             $content = $initial_content;
                             foreach (explode('->', $matches[0][$i]) as $scheme) {
                                 $draft = null;
@@ -227,13 +249,13 @@ class MetaData implements \IteratorAggregate, \Countable
 
                                 $content = $newcontent;
                             }
-                        
+
                             if ($content instanceof AClassContent && $content->isElementContent()) {
                                 if (null !== $draft = $content->getDraft()) {
                                     $content->releaseDraft();
                                 }
 
-                                $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$content)));
+                                $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags('' . $content)));
                                 $this->_attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->_attributes[$attribute]);
 
                                 if (null !== $draft) {
@@ -241,20 +263,20 @@ class MetaData implements \IteratorAggregate, \Countable
                                 }
                             } elseif (true === is_array($content)) {
                                 $v = array();
-                                foreach($content as $c) {
+                                foreach ($content as $c) {
                                     if ($c instanceof \BackBuilder\ClassContent\Element\keyword) {
-
+                                        
                                     }
-                                    $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$c)));
+                                    $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags('' . $c)));
                                 }
-                                $this->_attributes[$attribute] = str_replace($matches[0][$i], join(',', $v), $this->_attributes[$attribute]);                                
+                                $this->_attributes[$attribute] = str_replace($matches[0][$i], join(',', $v), $this->_attributes[$attribute]);
                             } else {
                                 $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags($content)));
-                                $this->_attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->_attributes[$attribute]);                                
+                                $this->_attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->_attributes[$attribute]);
                             }
-                        }                            
+                        }
                     }
-                    
+
                     array_shift($functions);
                     if (0 < count($functions)) {
                         foreach ($functions as $fct) {

@@ -166,6 +166,10 @@ class CacheListener implements EventSubscriberInterface
         self::$_content_cache_deletion_done = array_merge(self::$_content_cache_deletion_done, $content_uids);
         self::$_application->debug(sprintf('Remove cache for `%s(%s)`.', get_class(self::$_object), implode(', ', $content_uids)));
 
+        if (false === self::$_application->getContainer()->has('cache.page')) {
+            return;
+        }
+        
         $cache_page = self::$_application->getContainer()->get('cache.page');
         if (true === ($cache_page instanceof \BackBuilder\Cache\AExtendedCache)) {
             $node_uids = self::$_application->getEntityManager()
