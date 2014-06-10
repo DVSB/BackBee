@@ -40,12 +40,12 @@
         },
         
         i18n: {
-            contents: 'élément(s)',
+            contents: 'Ã©lÃ©ment(s)',
             all: "Tous",
             state_offline :"Hors ligne",
             state_online : "En ligne",
-            state_hidden : "Caché",
-            state_deleted :"Effacé"
+            state_hidden : "CachÃ©",
+            state_deleted :"EffacÃ©"
         },
     
         _templates :{
@@ -68,11 +68,11 @@
             var itemTemplate = '<li data-uid="${uid}" class="bb5-content-item">'
             +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
             +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
-            +"<p>Date de création: <strong>${created}</strong></p>"
+            +"<p>Date de crÃ©ation: <strong>${created}</strong></p>"
             +'<p>\n\
                     <button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button>\n\
                     <button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button>\n\
-                    <button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button>\n\
+                    <button class="bb5-button bb5-ico-save addToList">Ajouter Ã  ma sÃ©lection</button>\n\
                     <button class="bb5-button bb5-ico-del deleteContent">Effacer le contenu</button>\n\
               </p>'
             +'</li>';
@@ -164,7 +164,7 @@
             this._initSelectContentTabs();
             bb.jquery(this.element).disableSelection();
             
-            var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
+            var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>SÃ©lectionner un site ...</option></select>").clone();
             bb.jquery(self.element).find('.bb5-windowpane-tree-inner').prepend(sitesMenu);
             bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {    
                 useCache:true,
@@ -173,7 +173,14 @@
                 success: function(result) {
                     var context = self.getContext();
                     var select = bb.jquery(self.element).find('.bb5-available-sites').eq(0);
-
+                    
+                    //click focus (FIREFOX bug)
+                    if ($.browser.mozilla) {
+                        select.unbind('click').click(function() {
+                            select.focus();
+                        });
+                    }
+                
                     //select change event
                     select.bind('change', function() {
                         if (bb.jquery(this).val()) {
@@ -743,7 +750,7 @@
                 plugins.push('contextmenu');
             } 
             
-            /*Création de l'arbre*/
+            /*CrÃ©ation de l'arbre*/
             context.treeview = bb.jquery(myself.element).find('.bb5-windowpane-treewrapper-inner').jstree({   
                 plugins : plugins,
                 rpc_data : { 

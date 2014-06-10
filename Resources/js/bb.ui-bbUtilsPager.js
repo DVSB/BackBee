@@ -24,7 +24,7 @@
             background_hover_color: 'none', 
             images: true,
 
-            // Options d'état (il n'est pas recommandé de les définir à la création du widget)
+            // Options d'Ã©tat (il n'est pas recommandÃ© de les dÃ©finir Ã  la crÃ©ation du widget)
             numResults: 0,
             numPages: 0,
             oldNumPage: 0,
@@ -98,6 +98,14 @@
                 bb.jquery(this.options.selectPerPageCtnClass).remove();
                 bb.jquery(this.element).find(this.options.maxItemSelectorCtnClass).eq(0).append(this.tplMaxPerPageSelector);                
                 bb.jquery(this.element).find("select").val(this.options.maxPerPage);
+                
+                //click focus (FIREFOX bug)
+                if ($.browser.mozilla) {
+                    bb.jquery(this.element).find("select").unbind("click").click(function(){
+                        bb.jquery(self.element).find("select").focus();
+                    });
+                }
+            
                 bb.jquery(this.element).find("select").unbind("change").change(function(){
                     self.options.maxPerPage = bb.jquery(this).val();
                     bb.jquery(this.element).data('bbUtilsPager.maxPerPage', self.options.maxPerPage);
