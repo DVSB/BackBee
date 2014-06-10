@@ -251,8 +251,8 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
                 header("HTTP/1.0 500 Internal Server Error");
             }
             
-            echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')' . PHP_EOL;
-            if (NULL !== $this->_application && $this->_application->debugMode()) {
+            if (NULL !== $this->_application && $this->_application->isDebugMode()) {
+                echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')' . PHP_EOL;
                 foreach ($exception->getTrace() as $trace) {
                     echo 'Trace: line ' .
                     (array_key_exists('line', $trace) ? $trace['line'] : '-') . ': ' .
