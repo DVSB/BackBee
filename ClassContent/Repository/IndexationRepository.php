@@ -217,13 +217,18 @@ class IndexationRepository extends EntityRepository
      * @return array
      */
     public function getParentContentUids(array $contents)
-    {
+    {        
         $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
 
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
                 ->select('c.' . $meta->getColumnName('content_uid'))
                 ->from($meta->getTableName(), 'c');
+        
+        $p = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('j.parent_uid')
+                ->from('content_has_subcontent', 'j');
 
         $index = 0;
         $atleastone = false;
@@ -238,12 +243,15 @@ class IndexationRepository extends EntityRepository
 
             $q->orWhere('c.' . $meta->getColumnName('subcontent_uid') . ' = :uid' . $index)
                     ->setParameter('uid' . $index, $content->getUid());
+            
+            $p->orWhere('j.content_uid = :uid' . $index)
+                    ->setParameter('uid' . $index, $content->getUid());
 
             $index++;
             $atleastone = true;
         }
 
-        return (true === $atleastone) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
+        return (true === $atleastone) ? array_unique(array_merge($q->execute()->fetchAll(\PDO::FETCH_COLUMN), $p->execute()->fetchAll(\PDO::FETCH_COLUMN))) : array();
     }
 
     /**
