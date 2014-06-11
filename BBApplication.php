@@ -147,9 +147,14 @@ class BBApplication implements IApplication
 
         $this->_initContainer()
                 ->_initAutoloader()
-                ->_initContentWrapper()
-                ->_initEntityManager()
-                ->_initBundles();
+                ->_initContentWrapper();
+
+        try {
+            $this->_initEntityManager();
+        } catch (\Exception $excep) {
+            $this->getLogging()->info('BackBee starting without EntityManager');
+        }
+        $this->_initBundles();
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
@@ -910,7 +915,7 @@ class BBApplication implements IApplication
      * @return EntityManager
      */
     public function getEntityManager() {
-        if (!$this->getContainer()->has('em')) {
+        if ($this->getContainer()->get('em') === null) {
             $this->_initEntityManager();
         }
 
