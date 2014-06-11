@@ -155,7 +155,7 @@ class CacheListener implements EventSubscriberInterface
 
         $parent_uids = self::$_application->getEntityManager()
                 ->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
-                ->getParentContentUids(array_merge(array(self::$_object)));
+                ->getParentContentUids(array(self::$_object));
 
         $content_uids = array_diff($parent_uids, self::$_content_cache_deletion_done);
         if (0 === count($content_uids)) {
