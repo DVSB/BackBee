@@ -25,17 +25,14 @@ use BackBuilder\BBApplication;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Profiler\ProfilerStorageInterface;
 
-class Profiler extends \Symfony\Component\HttpKernel\Profiler\Profiler{
+class FileProfilerStorage extends \Symfony\Component\HttpKernel\Profiler\FileProfilerStorage{
 
     /**
      * @param BBApplication $bbapp
      */
-    public function __construct($bbapp, ProfilerStorageInterface $storage, LoggerInterface $logger = null){
-        var_dump($bbapp->isDebugMode());
-        die();
-
-            if(true === $bbapp->isDebugMode()){
-                parent::__construct($storage, $logger);
+    public function __construct($bbapp, $dsn){
+        if(true === $bbapp->isDebugMode()){
+                parent::__construct($dsn);
             }
         }
 
