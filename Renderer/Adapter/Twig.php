@@ -79,13 +79,10 @@ class Twig extends ARendererAdapter
         if(true === $isDebugMode) {
             $this->twig->enableDebug();
             $this->twig->addExtension(new Twig_Extension_Debug());
-        }else{
+        }elseif( null !== $bbapp && false === $bbapp->isClientSAPI()) {
             $this->twig->enableAutoReload();
-
-            if( null !== $bbapp) {
-                $cacheDir = $bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig';
-                $this->setTwigCache($cacheDir);
-            }
+            $cacheDir = $bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig';
+            $this->setTwigCache($cacheDir);
         }
 
         if( null !== $bbapp) {
@@ -95,7 +92,7 @@ class Twig extends ARendererAdapter
         }
     }
 
-    private function setTwigCache($cacheDir)
+    public function setTwigCache($cacheDir)
     {
         if(false === is_dir($cacheDir) &&
             (false === is_writable(dirname($cacheDir)) ||
