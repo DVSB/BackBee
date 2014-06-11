@@ -205,8 +205,8 @@ services:
             - [setContainer, [@service_container]]
 
     profiler.storage:
-        class:      Symfony\Component\HttpKernel\Profiler\FileProfilerStorage
-        arguments:  ["file:%bbapp.cache.dir%/_profiler/"]
+        class:      BackBuilder\Profiler\FileProfilerStorage
+        arguments:  [@bbapp, "file:%bbapp.cache.dir%/_profiler/"]
 
 
     profiler:

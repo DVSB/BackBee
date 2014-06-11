@@ -104,7 +104,7 @@ class BBApplication implements IApplication
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? self::DEFAULT_CONTEXT : $context;
-        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
+        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : false));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
@@ -572,11 +572,11 @@ class BBApplication implements IApplication
             $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
-        if (true === array_key_exists('metadata_type', $doctrine_config['dbal'])) {
+        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('metadata_type', $doctrine_config['dbal'])) {
             $doctrine_config['dbal']['metadata_cache']['cachetype'] = $doctrine_config['dbal']['metadata_type'];
         }
 
-        if (true === array_key_exists('query_type', $doctrine_config['dbal'])) {
+        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('query_type', $doctrine_config['dbal'])) {
             $doctrine_config['dbal']['query_cache']['cachetype'] = $doctrine_config['dbal']['query_type'];
         }
 
