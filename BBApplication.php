@@ -152,7 +152,7 @@ class BBApplication implements IApplication
         try {
             $this->_initEntityManager();
         } catch (\Exception $excep) {
-            $this->getLogging()->info('BackBee starting without EntityManager');
+            $this->getLogging()->notice('BackBee starting without EntityManager');
         }
         $this->_initBundles();
 
@@ -572,6 +572,14 @@ class BBApplication implements IApplication
             $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
+        if (true === array_key_exists('metadata_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['metadata_cache']['cachetype'] = $doctrine_config['dbal']['metadata_type'];
+        }
+
+        if (true === array_key_exists('query_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['query_cache']['cachetype'] = $doctrine_config['dbal']['query_type'];
+        }
+
         // Init ORM event
         $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
@@ -907,11 +915,15 @@ class BBApplication implements IApplication
      * @return EntityManager
      */
     public function getEntityManager() {
-        if ($this->getContainer()->get('em') === null) {
-            $this->_initEntityManager();
-        }
+        try{
+            if ($this->getContainer()->get('em') === null) {
+                $this->_initEntityManager();
+            }
 
-        return $this->getContainer()->get('em');
+            return $this->getContainer()->get('em');
+        }catch(\Exception $e){
+            $this->getLogging()->notice('BackBee starting without EntityManager');
+        }
     }
 
     /**
