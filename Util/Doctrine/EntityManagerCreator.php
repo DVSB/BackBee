@@ -22,6 +22,7 @@
 namespace BackBuilder\Util\Doctrine;
 
 use BackBuilder\Exception\InvalidArgumentException;
+use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\ORM\Configuration,
     Doctrine\DBAL\Connection,
@@ -115,10 +116,9 @@ class EntityManagerCreator
         }
 
         if (true === array_key_exists('metadata_cache', $options)) {
-            if($options['metadata_cache']['cachetype'] == 'memcache'){
 
+            if($options['metadata_cache']['cachetype'] == 'memcached'){
                 $memcached = new \Memcached();
-
                 foreach($options['metadata_cache']['servers'] AS $server){
                     $memcached->addServer($server['host'], $server['port']);
                 }
@@ -126,6 +126,19 @@ class EntityManagerCreator
                 $memcacheDriver->setMemcached($memcached);
 
                 $config->setMetadataCacheImpl($memcacheDriver);
+
+            }elseif($options['metadata_cache']['cachetype'] == 'memcache'){
+                $memcache = new \Memcache();
+                foreach($options['metadata_cache']['servers'] AS $server){
+                    $memcache->addServer($server['host'], $server['port']);
+                }
+                $memcacheDriver = new MemcacheCache();
+                $memcacheDriver->setMemcache($memcache);
+
+                $config->setMetadataCacheImpl($memcacheDriver);
+            }
+
+            if (null !== $memcache){
 
             }
 
