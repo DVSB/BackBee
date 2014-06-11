@@ -417,15 +417,17 @@ class CacheListener implements EventSubscriberInterface
      */
     private static function _getCacheParam(array $classnames)
     {
-        $cache_param = array();
+        $cache_param = array('query' => array());
         foreach ($classnames as $classname) {
             if (false === class_exists($classname)) {
                 continue;
             }
 
             $o = new $classname();
-            if (null !== $o->getProperty('cache-param')) {
-                $cache_param = array_merge($cache_param, $o->getProperty('cache-param'));
+            if (null !== $op = $o->getProperty('cache-param')) {
+                if (isset($op['query'])) {
+                    $cache_param['query'] = array_merge($cache_param['query'], $op['query']);
+                }
             }
         }
 
