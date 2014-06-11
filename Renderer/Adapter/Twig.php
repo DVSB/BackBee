@@ -74,20 +74,45 @@ class Twig extends ARendererAdapter
         $bbapp = $this->renderer->getApplication();
         $isDebugMode = null !== $bbapp ? $bbapp->isDebugMode() : false;
 
-        $this->twig = new Twig_Environment($this->loader, array(
-            'debug' => $isDebugMode,
-            'cache' => $bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig',
-        ));
+        $this->twig = new Twig_Environment($this->loader);
 
-        if (true === $isDebugMode) {
+        if(true === $isDebugMode) {
+            $this->twig->enableDebug();
             $this->twig->addExtension(new Twig_Extension_Debug());
+        }elseif( null !== $bbapp && false === $bbapp->isClientSAPI()) {
+            $this->twig->enableAutoReload();
+            $cacheDir = $bbapp->getCacheDir() . DIRECTORY_SEPARATOR . 'twig';
+            $this->setTwigCache($cacheDir);
         }
 
-        foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $id => $datas) {
-            $this->twig->addExtension($bbapp->getContainer()->get($id));
+        if( null !== $bbapp) {
+            foreach ($bbapp->getContainer()->findTaggedServiceIds('twig.extension') as $id => $datas) {
+                $this->twig->addExtension($bbapp->getContainer()->get($id));
+            }
         }
     }
 
+    public function setTwigCache($cacheDir)
+    {
+        if(false === is_dir($cacheDir) &&
+            (false === is_writable(dirname($cacheDir)) ||
+                false === @mkdir($cacheDir))
+        ) {
+            throw new RendererException(
+                sprintf('Unable to create twig cache "%s"', $cacheDir),
+                RendererException::RENDERING_ERROR
+            );
+        }
+
+        if(false === is_writable($cacheDir)) {
+            throw new RendererException(
+                sprintf('Twig cache "%s" is not writable', $cacheDir),
+                RendererException::RENDERING_ERROR
+            );
+        }
+
+        $this->twig->setCache($cacheDir);
+    }
     /**
      * @see BackBuilder\Renderer\IRendererAdapter::getManagedFileExtensions()
      */
