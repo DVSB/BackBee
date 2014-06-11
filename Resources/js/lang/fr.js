@@ -4,11 +4,7 @@
     loading: 'Chargement...',
     toolbar: {
         save: 'Enregistrer',
-<<<<<<< HEAD
         validate: 'Valider',
-=======
-		validate: 'Valider',
->>>>>>> 72581c34ecf9faa6aade424566e5284ecfa30fd4
         refresh: 'Rafraîchir',
         cancel: 'Annuler',
         blocks: 'Blocs',
