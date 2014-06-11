@@ -54,7 +54,7 @@ class SiteRepository extends EntityRepository
     {
         $site_label = null;
         foreach ($sites_config as $key => $data) {
-            if ($server_name === isset($data['domain'])) {
+            if ($server_name === $data['domain']) {
                 $site_label = $key;
                 break;
             }
