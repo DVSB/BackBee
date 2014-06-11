@@ -354,13 +354,16 @@ class Memcached extends AExtendedCache
      * @param string $tag Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
-    public function save($id, $data, $lifetime = null, $tag = null)
+    public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false)
     {
         if (null === $lifetime) {
             $lifetime = 0;
         }
 
-        $lifetime = $this->getControledLifetime($lifetime);
+        if (false === $bypass_control) {
+            $lifetime = $this->getControledLifetime($lifetime);
+        }
+
         if (false === $this->_memcached->set($id, $data, $lifetime) ||
                 false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, $lifetime, $lifetime)) {
             return $this->_onError('save');
