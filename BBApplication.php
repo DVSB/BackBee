@@ -152,7 +152,7 @@ class BBApplication implements IApplication
         try {
             $this->_initEntityManager();
         } catch (\Exception $excep) {
-            $this->getLogging()->info('BackBee starting without EntityManager');
+            $this->getLogging()->notice('BackBee starting without EntityManager');
         }
         $this->_initBundles();
 
@@ -915,11 +915,15 @@ class BBApplication implements IApplication
      * @return EntityManager
      */
     public function getEntityManager() {
-        if ($this->getContainer()->get('em') === null) {
-            $this->_initEntityManager();
-        }
+        try{
+            if ($this->getContainer()->get('em') === null) {
+                $this->_initEntityManager();
+            }
 
-        return $this->getContainer()->get('em');
+            return $this->getContainer()->get('em');
+        }catch(\Exception $e){
+            $this->getLogging()->notice('BackBee starting without EntityManager');
+        }
     }
 
     /**
