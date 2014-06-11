@@ -147,7 +147,7 @@ class UrlGenerator implements IUrlGenerator
         if (
             null !== $page->getUrl() 
             && $this->_preserveOnline 
-            && (null !== $page->getOldState() && ($page->getOldState() & Page::STATE_ONLINE))
+            && (null === $page->getOldState() || ($page->getOldState() & Page::STATE_ONLINE))
             && $page->getState() & Page::STATE_ONLINE
         ) {
             return $page->getUrl();
