@@ -22,6 +22,7 @@
 namespace BackBuilder\Util\Doctrine;
 
 use BackBuilder\Exception\InvalidArgumentException;
+use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\ORM\Configuration,
     Doctrine\DBAL\Connection,
     Doctrine\ORM\EntityManager,
@@ -111,6 +112,40 @@ class EntityManagerCreator
 
         if (true === array_key_exists('auto_generate_proxies', $options)) {
             $config->setAutoGenerateProxyClasses($options['auto_generate_proxies']);
+        }
+
+        if (true === array_key_exists('metadata_cache', $options)) {
+            if($options['metadata_cache']['cachetype'] == 'memcache'){
+
+                $memcached = new \Memcached();
+
+                foreach($options['metadata_cache']['servers'] AS $server){
+                    $memcached->addServer($server['host'], $server['port']);
+                }
+                $memcacheDriver = new MemcachedCache();
+                $memcacheDriver->setMemcached($memcached);
+
+                $config->setMetadataCacheImpl($memcacheDriver);
+
+            }
+
+        }
+
+        if (true === array_key_exists('query_cache', $options)) {
+            if($options['query_cache']['cachetype'] == 'memcache'){
+
+                $memcached = new \Memcached();
+
+                foreach($options['query_cache']['servers'] AS $server){
+                    $memcached->addServer($server['host'], $server['port']);
+                }
+                $memcacheDriver = new MemcachedCache();
+                $memcacheDriver->setMemcached($memcached);
+
+                $config->setQueryCacheImpl($memcacheDriver);
+
+            }
+
         }
 
         if ($logger instanceof SQLLogger) {

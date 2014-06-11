@@ -104,7 +104,7 @@ class BBApplication implements IApplication
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? self::DEFAULT_CONTEXT : $context;
-        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
+        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : false));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
@@ -147,9 +147,14 @@ class BBApplication implements IApplication
 
         $this->_initContainer()
                 ->_initAutoloader()
-                ->_initContentWrapper()
-                ->_initEntityManager()
-                ->_initBundles();
+                ->_initContentWrapper();
+
+        try {
+            $this->_initEntityManager();
+        } catch (\Exception $excep) {
+            $this->getLogging()->notice('BackBee starting without EntityManager');
+        }
+        $this->_initBundles();
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
@@ -567,6 +572,14 @@ class BBApplication implements IApplication
             $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
+        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('metadata_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['metadata_cache']['cachetype'] = $doctrine_config['dbal']['metadata_type'];
+        }
+
+        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('query_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['query_cache']['cachetype'] = $doctrine_config['dbal']['query_type'];
+        }
+
         // Init ORM event
         $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
@@ -902,11 +915,15 @@ class BBApplication implements IApplication
      * @return EntityManager
      */
     public function getEntityManager() {
-        if (!$this->getContainer()->has('em')) {
-            $this->_initEntityManager();
-        }
+        try{
+            if ($this->getContainer()->get('em') === null) {
+                $this->_initEntityManager();
+            }
 
-        return $this->getContainer()->get('em');
+            return $this->getContainer()->get('em');
+        }catch(\Exception $e){
+            $this->getLogging()->notice('BackBee starting without EntityManager');
+        }
     }
 
     /**
