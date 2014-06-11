@@ -21,13 +21,13 @@
 
 namespace BackBuilder\Cache\MemCache;
 
-use BackBuilder\Cache\AExtendedCache,
-    BackBuilder\Cache\Exception\CacheException;
+use BackBuilder\Cache\AExtendedCache;
+use BackBuilder\Cache\Exception\CacheException;
 use Psr\Log\LoggerInterface;
 
 /**
  * Memcache cache adapter
- * 
+ *
  * It supports tag and expire features
  *
  * @category    BackBuilder
@@ -84,9 +84,11 @@ class Memcache extends AExtendedCache
 
     /**
      * The Memcache object
-     * @var \Memcache 
+     * @var \Memcache
      */
     private $_Memcache;
+
+    private $compression = 0;
 
     private $serverList = array();
     /**
@@ -148,11 +150,8 @@ class Memcache extends AExtendedCache
     protected function setInstanceOptions(array $options = array())
     {
         parent::setInstanceOptions($options);
-
         if (true === $this->_instance_options['compression']) {
             $this->compression = MEMCACHE_COMPRESSED;
-        }else{
-            $this->compression = 0;
         }
 
         if (false === is_array($this->_instance_options['servers'])) {
@@ -166,9 +165,9 @@ class Memcache extends AExtendedCache
 
     /**
      * Adds a server to the server pool
-     * @param string $host  The hostname of the memcache server
-     * @param int $port     The port on which memcache is running, 11211 by default
-     * @param int $weight   The weight of the server
+     * @param string $host The hostname of the memcache server
+     * @param int $port The port on which memcache is running, 11211 by default
+     * @param int $weight The weight of the server
      * @return boolean      TRUE on success or FALSE on failure.
      * @link http://php.net/manual/en/Memcache.addserver.php
      */
@@ -203,9 +202,14 @@ class Memcache extends AExtendedCache
 
             $server = array_merge($this->_default_server, $server);
             $result = $result && $this->addServer($server['host'], $server['port'], true, $server['weight']);
+
             $this->setServerList($server);
         }
 
+        // DISABLE AUTOMATIC COMPRESSION
+        $this->_Memcache->setCompressThreshold(99999999, 0.2);
+
+        // FIX Memcache redundancy
         ini_set("memcache.redundancy", count($this->getServerList()));
 
         return $result;
@@ -247,7 +251,7 @@ class Memcache extends AExtendedCache
 
         if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
 
-            if (false === $tmp = $this->_Memcache->get($id, $this->compression)) {
+            if (false === $tmp = $this->_Memcache->get($id)) {
                 return $this->_onError('load');
             }
 
@@ -264,18 +268,18 @@ class Memcache extends AExtendedCache
      */
     public function test($id)
     {
-        if (false === $tmp = $this->_Memcache->get(self::EXPIRE_PREFIX . $id, $this->compression)) {
+        if (false === $tmp = $this->_Memcache->get(self::EXPIRE_PREFIX . $id)) {
             return false;
         }
 
-        return (int) $tmp;
+        return (int)$tmp;
     }
 
     /**
      * Saves some string datas into a cache record
      * @param string $id Cache id
      * @param string $data Datas to cache
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default null, infinite lifetime)
      * @param string $tag Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
@@ -291,7 +295,8 @@ class Memcache extends AExtendedCache
         }
 
         if (false === $this->_Memcache->set($id, $data, $this->compression, $lifetime) ||
-                false === $this->_Memcache->set(self::EXPIRE_PREFIX . $id, $lifetime, $this->compression, $lifetime)) {
+            false === $this->_Memcache->set(self::EXPIRE_PREFIX . $id, $lifetime, $this->compression, $lifetime)
+        ) {
             return $this->_onError('save');
         }
 
@@ -317,7 +322,8 @@ class Memcache extends AExtendedCache
     public function remove($id)
     {
         if (false === $this->_Memcache->delete($id) ||
-                false === $this->_Memcache->delete(self::EXPIRE_PREFIX . $id)) {
+            false === $this->_Memcache->delete(self::EXPIRE_PREFIX . $id)
+        ) {
             return $this->_onError('remove');
         }
 
@@ -344,7 +350,7 @@ class Memcache extends AExtendedCache
      */
     public function removeByTag($tag)
     {
-        $tags = (array) $tag;
+        $tags = (array)$tag;
         if (0 === count($tags)) {
             return false;
         }
@@ -362,16 +368,16 @@ class Memcache extends AExtendedCache
     }
 
     /**
-     * Updates the expire date time for all cache records 
+     * Updates the expire date time for all cache records
      * associated to one of the provided tags
      * @param  string|array $tag
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default null, infinite lifetime)
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function updateExpireByTag($tag, $lifetime = null)
     {
-        $tags = (array) $tag;
+        $tags = (array)$tag;
         if (0 == count($tags)) {
             return false;
         }
@@ -393,16 +399,16 @@ class Memcache extends AExtendedCache
     }
 
     /**
-     * Returns the minimum expire date time for all cache records 
+     * Returns the minimum expire date time for all cache records
      * associated to one of the provided tags
      * @param  string|array $tag
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default 0, infinite lifetime)
      * @return int
      */
     public function getMinExpireByTag($tag, $lifetime = 0)
     {
-        $tags = (array) $tag;
+        $tags = (array)$tag;
 
         if (0 == count($tags)) {
             return $lifetime;
