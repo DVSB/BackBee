@@ -383,6 +383,24 @@ class CacheListener implements EventSubscriberInterface
                         }
                     }
                 }
+
+                if (true === is_array($param) && 
+                        true === array_key_exists('node', $param) &&
+                        null !== $renderer->getCurrentPage()) {
+                    switch ($param['node']) {
+                        case 'self':
+                            $cache_id .= '-' . $renderer->getCurrentPage()->getUid();
+                            break;
+                        case 'parent':
+                            if (null !== $renderer->getCurrentPage()->getParent()) {
+                            $cache_id .= '-' . $renderer->getCurrentPage()->getParent()->getUid();
+                            }
+                            break;
+                        case 'root':
+                            $cache_id .= '-' . $renderer->getCurrentRoot()->getUid();
+                            break;
+                    }
+                }
             }
         }
 
@@ -427,6 +445,9 @@ class CacheListener implements EventSubscriberInterface
             if (null !== $op = $o->getProperty('cache-param')) {
                 if (isset($op['query'])) {
                     $cache_param['query'] = array_merge($cache_param['query'], $op['query']);
+                }
+                if (isset($op['node'])) {
+                    $cache_param['node'] = $op['node'];
                 }
             }
         }
