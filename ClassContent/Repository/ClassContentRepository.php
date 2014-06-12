@@ -199,7 +199,7 @@ class ClassContentRepository extends EntityRepository
             $parentnode = array_filter($selector['parentnode']);
             if (false === empty($parentnode)) {
                 $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $parentnode));
-                if (null !== $nodes) {
+                if (count($nodes) != 0) {
                     $query = 'SELECT c.uid FROM page p USE INDEX(IDX_SELECT_PAGE) LEFT JOIN content c ON c.node_uid=p.uid';
                     $pageSelection = array();
                     foreach ($nodes as $node) {
@@ -209,7 +209,10 @@ class ClassContentRepository extends EntityRepository
                             $pageSelection[] = '(p.parent_uid="' . $node->getUid() . '")';
                         }
                     }
-                    $where[] = '(' . implode(' OR ', $pageSelection) . ')';
+
+                    if(count($pageSelection) != 0){
+                        $where[] = '(' . implode(' OR ', $pageSelection) . ')';
+                    }
 
                     if (true === $limitToOnline) {
                         $where[] = 'p.state IN (1, 3)';
