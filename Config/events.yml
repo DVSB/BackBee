@@ -51,6 +51,7 @@ nestednode.page.postrender:
 nestednode.page.onflush:
   listeners:
     - [BackBuilder\Event\Listener\MetaDataListener, onFlushPage]
+    - [BackBuilder\Event\Listener\IndexationListener, onFlushPage]
     - [BackBuilder\Event\Listener\RewritingListener, onFlushPage]
     - [BackBuilder\Event\Listener\CacheListener, onFlushPage]
 
@@ -81,11 +82,11 @@ frontcontroller.request:
 kernel.request:
   listeners:
     - [@profiler.listener, onKernelRequest]
-    
+
 kernel.exception:
   listeners:
     - [@rest.listener.exception, onKernelException]
-    
+
 kernel.controller:
   listeners:
     - [@rest.listener.validation, onKernelController]
@@ -94,4 +95,3 @@ kernel.response:
   listeners:
     - [@profiler.toolbar.listener, onKernelResponse]
     - [@profiler.listener, onKernelResponse]
-

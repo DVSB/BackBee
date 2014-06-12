@@ -107,7 +107,29 @@ abstract class ABundle implements IObjectIdentifiable
             $configdir = $this->getResourcesDir();
         }
 
-        $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache(), null, $this->getApplication()->debugMode());
+        $this->_config = new Config(
+            $configdir,
+            $this->getApplication()->getBootstrapCache(),
+            null,
+            $this->getApplication()->isDebugMode()
+        );
+
+        // OVERRIDE Config within environment
+        $application = $this->getApplication();
+        if ($application::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
+            $dir = $application->getConfigDir() .
+                DIRECTORY_SEPARATOR .
+                $application->getEnvironment() .
+                DIRECTORY_SEPARATOR .
+                'bundle' .
+                DIRECTORY_SEPARATOR .
+                $this->_id;
+            if(true === is_dir($dir)) {
+                $this->_config->extend($dir, true);
+
+            }
+        }
+
         $this->_config
                 ->setEnvironment($this->_application->getEnvironment())
                 ->setDebug($this->_application->isDebugMode())

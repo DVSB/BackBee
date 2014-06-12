@@ -43,4 +43,30 @@ class SiteRepository extends EntityRepository
         return $theme;
     }
 
+    /**
+     * Returns site entity according to custom server_name if it exists in sites_config
+     * 
+     * @param  string $server_name  
+     * @param  array  $sites_config 
+     * @return null|BackBuilder\Site\Site               
+     */
+    public function findByCustomServerName($server_name, array $sites_config)
+    {
+        $site_label = null;
+        foreach ($sites_config as $key => $data) {
+            if ($server_name === $data['domain']) {
+                $site_label = $key;
+                break;
+            }
+        } 
+
+        $site = null;
+        if (null !== $site_label) {
+            $site = $this->findOneBy(array(
+                '_label' => $site_label
+            ));
+        }
+        
+        return $site;
+    }
 }

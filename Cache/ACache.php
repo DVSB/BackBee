@@ -191,7 +191,7 @@ abstract class ACache
      * @return int
      * @codeCoverageIgnore
      */
-    protected function getExpireTime($lifetime = null)
+    protected function getExpireTime($lifetime = null, $bypass_control = false)
     {
         $expire = 0;
 
@@ -205,6 +205,10 @@ abstract class ACache
             }
 
             $expire = $now->getTimestamp();
+        }
+
+        if (true === $bypass_control) {
+            return $expire;
         }
 
         return $this->_getControledExpireTime($expire);

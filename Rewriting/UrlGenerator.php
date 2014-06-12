@@ -147,7 +147,7 @@ class UrlGenerator implements IUrlGenerator
         if (
             null !== $page->getUrl() 
             && $this->_preserveOnline 
-            && (null !== $page->getOldState() && ($page->getOldState() & Page::STATE_ONLINE))
+            && (null === $page->getOldState() || ($page->getOldState() & Page::STATE_ONLINE))
             && $page->getState() & Page::STATE_ONLINE
         ) {
             return $page->getUrl();
@@ -162,6 +162,10 @@ class UrlGenerator implements IUrlGenerator
             if (true === array_key_exists($shortClassname, $this->_schemes['_content_'])) {
                 return $this->_generate($this->_schemes['_content_'][$shortClassname], $page, $content);
             }
+        }
+
+        if (null !== $page->getUrl()) {
+            return $page->getUrl();
         }
 
         if (true == array_key_exists('_default_', $this->_schemes)) {

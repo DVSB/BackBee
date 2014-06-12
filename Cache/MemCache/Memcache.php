@@ -21,13 +21,13 @@
 
 namespace BackBuilder\Cache\MemCache;
 
-use BackBuilder\Cache\AExtendedCache,
-    BackBuilder\Cache\Exception\CacheException;
+use BackBuilder\Cache\AExtendedCache;
+use BackBuilder\Cache\Exception\CacheException;
 use Psr\Log\LoggerInterface;
 
 /**
- * MemCached cache adapter
- * 
+ * Memcache cache adapter
+ *
  * It supports tag and expire features
  *
  * @category    BackBuilder
@@ -36,17 +36,17 @@ use Psr\Log\LoggerInterface;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Memcached extends AExtendedCache
+class Memcache extends AExtendedCache
 {
 
     /**
-     * Default memcached host
+     * Default Memcache host
      * @var string
      */
     const DEFAULT_HOST = '127.0.0.1';
 
     /**
-     * Default memcached server port
+     * Default Memcache server port
      * @var int
      */
     const DEFAULT_PORT = 11211;
@@ -70,26 +70,29 @@ class Memcached extends AExtendedCache
     const EXPIRE_PREFIX = '__expire__';
 
     /**
-     * Memcached adapter options
+     * Memcache adapter options
      * @var array
      */
     protected $_instance_options = array(
         'min_cache_lifetime' => null,
         'max_cache_lifetime' => null,
         'persistent_id' => null,
-        'compression' => null,
+        'compression' => false,
         'servers' => array(),
         'options' => array()
     );
 
     /**
-     * The Memcached object
-     * @var \Memcached 
+     * The Memcache object
+     * @var \Memcache
      */
-    private $_memcached;
+    private $_Memcache;
 
+    private $compression = 0;
+
+    private $serverList = array();
     /**
-     * The default memcached server connection information
+     * The default Memcache server connection information
      * @var array
      */
     private $_default_server = array(
@@ -99,10 +102,10 @@ class Memcached extends AExtendedCache
     );
 
     /**
-     * Override some default Memcached instance options
+     * Override some default Memcache instance options
      * @var array
      */
-    private $_memcached_options = array(
+    private $_Memcache_options = array(
         2 => 1, // OPT_HASH = HASH_MD5
         9 => 1, // OPT_DISTRIBUTION = DISTRIBUTION_CONSISTENT
         16 => true // OPT_LIBKETAMA_COMPATIBLE = true
@@ -112,67 +115,47 @@ class Memcached extends AExtendedCache
      * Class constructor
      * @param array $options Initial options for the cache adapter:
      *                         - persistent_id string Optional persistent key
-     *                         - servers array The memcached servers to add
-     *                         - options array The memcached options to set
+     *                         - servers array The Memcache servers to add
+     *                         - options array The Memcache options to set
      * @param string $context An optional cache context use as prefix key
      * @param \Psr\Log\LoggerInterface $logger An optional logger
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if Memcached extension is not available.
+     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if Memcache extension is not available.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
-        if (false === extension_loaded('memcached')) {
-            throw new CacheException('Memcached extension is not loaded');
+        if (false === extension_loaded('Memcache')) {
+            throw new CacheException('Memcache extension is not loaded');
         }
 
-        if (true === array_key_exists('persistent_id', $options)) {
-            $this->_memcached = new \Memcached($options['persistent_id']);
-        } else {
-            $this->_memcached = new \Memcached();
-        }
+        $this->_Memcache = new \Memcache();
 
         parent::__construct($options, $context, $logger);
     }
 
     /**
-     * Closes all the memcached server connections if not persistent
+     * Closes all the Memcache server connections if not persistent
      * @codeCoverageIgnore
      */
     public function __destruct()
     {
-        if (null !== $this->_instance_options['persistent_id']) {
-            $this->_memcached->quit();
-        }
+        $this->_Memcache->close();
     }
 
     /**
      * Sets the memcache adapter instance options
      * @param array $options
-     * @return \BackBuilder\Cache\MemCache\Memcached
+     * @return \BackBuilder\Cache\MemCache\Memcache
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */
     protected function setInstanceOptions(array $options = array())
     {
         parent::setInstanceOptions($options);
-
-        if (null !== $this->getContext()) {
-            $this->setOption(\Memcached::OPT_PREFIX_KEY, md5($this->getContext()));
-        }
-
-        if (false === is_array($this->_instance_options['options'])) {
-            throw new CacheException('Memcached adapter: memcached options is not an array.');
-        }
-
-        $this->_instance_options['options'] = array_merge($this->_memcached_options, $this->_instance_options['options']);
-        foreach ($this->_instance_options['options'] as $option => $value) {
-            $this->setOption($option, $value);
-        }
-
-        if (null !== $this->_instance_options['compression']) {
-            $this->setOption(\Memcached::OPT_COMPRESSION, $this->_instance_options['compression']);
+        if (true === $this->_instance_options['compression']) {
+            $this->compression = MEMCACHE_COMPRESSED;
         }
 
         if (false === is_array($this->_instance_options['servers'])) {
-            throw new CacheException('Memcached adapter: memcached servers is not an array.');
+            throw new CacheException('Memcache adapter: Memcache servers is not an array.');
         }
 
         $this->addServers($this->_instance_options['servers']);
@@ -182,11 +165,11 @@ class Memcached extends AExtendedCache
 
     /**
      * Adds a server to the server pool
-     * @param string $host  The hostname of the memcache server
-     * @param int $port     The port on which memcache is running, 11211 by default
-     * @param int $weight   The weight of the server
+     * @param string $host The hostname of the memcache server
+     * @param int $port The port on which memcache is running, 11211 by default
+     * @param int $weight The weight of the server
      * @return boolean      TRUE on success or FALSE on failure.
-     * @link http://php.net/manual/en/memcached.addserver.php
+     * @link http://php.net/manual/en/Memcache.addserver.php
      */
     public function addServer($host, $port, $weight = 0)
     {
@@ -194,7 +177,7 @@ class Memcached extends AExtendedCache
             return true;
         }
 
-        if (false === $this->_memcached->addServer($host, $port, $weight)) {
+        if (false === $this->_Memcache->addServer($host, $port, $weight)) {
             return $this->_onError('setOption');
         }
 
@@ -206,7 +189,7 @@ class Memcached extends AExtendedCache
      * @param array $servers
      * @return boolean
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if one of the server configurations is not an array
-     * @link http://php.net/manual/en/memcached.addservers.php
+     * @link http://php.net/manual/en/Memcache.addservers.php
      */
     public function addServers(array $servers = array())
     {
@@ -214,56 +197,27 @@ class Memcached extends AExtendedCache
 
         foreach ($servers as $server) {
             if (false === is_array($server)) {
-                throw new CacheException('Memcached adapter: server configuration is not an array.');
+                throw new CacheException('Memcache adapter: server configuration is not an array.');
             }
 
             $server = array_merge($this->_default_server, $server);
-            $result = $result && $this->addServer($server['host'], $server['port'], $server['weight']);
+            $result = $result && $this->addServer($server['host'], $server['port'], true, $server['weight']);
+
+            $this->setServerList($server);
         }
+
+        // DISABLE AUTOMATIC COMPRESSION
+        $this->_Memcache->setCompressThreshold(99999999, 0.2);
+
+        // FIX Memcache redundancy
+        ini_set("memcache.redundancy", count($this->getServerList()));
 
         return $result;
     }
 
-    /**
-     * Sets memcached option
-     * @param int $option
-     * @param mixed $value
-     * @return boolean
-     * @link http://php.net/manual/en/memcached.setoption.php
-     */
-    public function setOption($option, $value)
+    public function setServerList($server)
     {
-        if (false === is_int($option)) {
-            $this->log('warning', sprintf('Unknown memcached option: `%s`.', $option));
-            return false;
-        }
-
-        if (false === $this->_memcached->setOption($option, $value)) {
-            return $this->_onError('setOption');
-        }
-
-        return true;
-    }
-
-    /**
-     * Gets memcached option
-     * @param mixed $option
-     * @param mixed $value
-     * @return boolean
-     * @link http://php.net/manual/en/memcached.getoption.php
-     */
-    public function getOption($option)
-    {
-        if (false === is_int($option)) {
-            $this->log('warning', sprintf('Unknown memcached option: `%s`.', $option));
-            return false;
-        }
-
-        if (false === $this->_memcached->getOption($option)) {
-            return $this->_onError('getOption');
-        }
-
-        return true;
+        $this->serverList[] = $server;
     }
 
     /**
@@ -274,31 +228,7 @@ class Memcached extends AExtendedCache
      */
     public function getServerList()
     {
-        $serverList = $this->_memcached->getServerList();
-        //FIX FOR HHVM BEHAVIOUR WHICH RETURN NULL WHEN NO SERVERS
-        return is_array($serverList) ? $serverList : array();
-    }
-
-    /**
-     * Returns the result code of the last operation
-     * @return int Result code of the last Memcached operation.
-     * @link http://php.net/manual/en/memcached.getresultcode.php
-     * @codeCoverageIgnore
-     */
-    public function getResultCode()
-    {
-        return $this->_memcached->getResultCode();
-    }
-
-    /**
-     * Return the message describing the result of the last operation
-     * @return string Message describing the result of the last Memcached operation.
-     * @link http://php.net/manual/en/memcached.getresultmessage.php
-     * @codeCoverageIgnore
-     */
-    public function getResultMessage()
-    {
-        return $this->_memcached->getResultMessage();
+        return $this->serverList;
     }
 
     /**
@@ -321,7 +251,7 @@ class Memcached extends AExtendedCache
 
         if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
 
-            if (false === $tmp = $this->_memcached->get($id)) {
+            if (false === $tmp = $this->_Memcache->get($id)) {
                 return $this->_onError('load');
             }
 
@@ -338,18 +268,18 @@ class Memcached extends AExtendedCache
      */
     public function test($id)
     {
-        if (false === $tmp = $this->_memcached->get(self::EXPIRE_PREFIX . $id)) {
+        if (false === $tmp = $this->_Memcache->get(self::EXPIRE_PREFIX . $id)) {
             return false;
         }
 
-        return (int) $tmp;
+        return (int)$tmp;
     }
 
     /**
      * Saves some string datas into a cache record
      * @param string $id Cache id
      * @param string $data Datas to cache
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default null, infinite lifetime)
      * @param string $tag Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
@@ -364,8 +294,9 @@ class Memcached extends AExtendedCache
             $lifetime = $this->getControledLifetime($lifetime);
         }
 
-        if (false === $this->_memcached->set($id, $data, $lifetime) ||
-                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, $lifetime, $lifetime)) {
+        if (false === $this->_Memcache->set($id, $data, $this->compression, $lifetime) ||
+            false === $this->_Memcache->set(self::EXPIRE_PREFIX . $id, $lifetime, $this->compression, $lifetime)
+        ) {
             return $this->_onError('save');
         }
 
@@ -390,8 +321,9 @@ class Memcached extends AExtendedCache
      */
     public function remove($id)
     {
-        if (false === $this->_memcached->delete($id) ||
-                false === $this->_memcached->delete(self::EXPIRE_PREFIX . $id)) {
+        if (false === $this->_Memcache->delete($id) ||
+            false === $this->_Memcache->delete(self::EXPIRE_PREFIX . $id)
+        ) {
             return $this->_onError('remove');
         }
 
@@ -404,7 +336,7 @@ class Memcached extends AExtendedCache
      */
     public function clear()
     {
-        if (false === $this->_memcached->flush()) {
+        if (false === $this->_Memcache->flush()) {
             return $this->_onError('clear');
         }
 
@@ -418,7 +350,7 @@ class Memcached extends AExtendedCache
      */
     public function removeByTag($tag)
     {
-        $tags = (array) $tag;
+        $tags = (array)$tag;
         if (0 === count($tags)) {
             return false;
         }
@@ -436,16 +368,16 @@ class Memcached extends AExtendedCache
     }
 
     /**
-     * Updates the expire date time for all cache records 
+     * Updates the expire date time for all cache records
      * associated to one of the provided tags
      * @param  string|array $tag
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default null, infinite lifetime)
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function updateExpireByTag($tag, $lifetime = null)
     {
-        $tags = (array) $tag;
+        $tags = (array)$tag;
         if (0 == count($tags)) {
             return false;
         }
@@ -467,16 +399,16 @@ class Memcached extends AExtendedCache
     }
 
     /**
-     * Returns the minimum expire date time for all cache records 
+     * Returns the minimum expire date time for all cache records
      * associated to one of the provided tags
      * @param  string|array $tag
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default 0, infinite lifetime)
      * @return int
      */
     public function getMinExpireByTag($tag, $lifetime = 0)
     {
-        $tags = (array) $tag;
+        $tags = (array)$tag;
 
         if (0 == count($tags)) {
             return $lifetime;
@@ -500,11 +432,11 @@ class Memcached extends AExtendedCache
     }
 
     /**
-     * Returns TRUE if the server is already added to Memcached, FALSE otherwise
+     * Returns TRUE if the server is already added to Memcache, FALSE otherwise
      * @param string $host
      * @param int $port
      * @return boolean
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if none memcached object is not initialized
+     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if none Memcache object is not initialized
      * @codeCoverageIgnore
      */
     private function _hasServer($host, $port)
@@ -527,7 +459,7 @@ class Memcached extends AExtendedCache
      */
     private function _onError($method)
     {
-        $this->log('notice', sprintf('Error occured on Memcached::%s(): [%s] %s.', $method, $this->getResultCode(), $this->getResultMessage()));
+        $this->log('notice', sprintf('Error occured on Memcache::%s().', $method));
         return false;
     }
 
