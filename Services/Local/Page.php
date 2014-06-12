@@ -165,26 +165,27 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $object->uid));
         }
 
-// User must have edit permission on page
+        // User must have edit permission on page
         $this->isGranted('EDIT', $page);
 
-// If the page is online, user must have publish permission on it
+        // If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page);
         }
 
-// Updating URL of the page is needed
+        // Updating URL of the page is needed
         if (true === property_exists($object, 'url') && null !== $this->getApplication()->getRenderer()) {
             $object->url = $this->getApplication()
-                    ->getRenderer()
-                    ->getRelativeUrl($object->url);
+                ->getRenderer()
+                ->getRelativeUrl($object->url)
+            ;
 
             if ('/' === $redirect = $this->getApplication()->getRenderer()->getRelativeUrl($object->redirect)) {
                 $object->redirect = null;
             }
         }
 
-// Updating workflow state if provided
+        // Updating workflow state if provided
         if (null === $object->workflow_state) {
             $page->setWorkflowState(null);
         } else {
@@ -200,10 +201,22 @@ class Page extends AbstractServiceLocal
             }
         }
 
+        if (null === $page->getMetaData()) {
+            $metadata_config = $this->getApplication()->getConfig()->getSection('metadata');
+            $metadata = new \BackBuilder\MetaData\MetaDataBag($metadata_config, $page);
+            $page->setMetaData($metadata->compute($page));
+        }
+        
         $page->unserialize($object);
         $this->getEntityManager()->flush();
 
-        return array('url' => $page->getUrl(), 'state' => $page->getState());
+        return array(
+            'url'   => $page->getUrl() . (true === $this->getApplication()->getController()->isUrlExtensionRequired()
+                ? '.' . $this->getApplication()->getController()->getUrlExtension()
+                : ''
+            ),
+            'state' => $page->getState()
+        );
     }
 
     /**

@@ -44,7 +44,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @MappedSuperclass
  * @Serializer\ExclusionPolicy("all")
  */
-abstract class ANestedNode extends AObjectIdentifiable implements \Serializable
+abstract class ANestedNode extends AObjectIdentifiable
 {
 
     /**

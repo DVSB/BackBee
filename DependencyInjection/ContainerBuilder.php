@@ -49,10 +49,10 @@ class ContainerBuilder
             $container->set('bbapp', $application);
             $container->set('service_container', $container);
 
-            // $container->get('config')
-            //           ->setContainer($container)
-            //           ->setEnvironment($application->getEnvironment())
-            //           ->extend($container->getParameter('bbapp.config.dir'));
+            $container->get('config')
+                      ->setContainer($container)
+                      ->setEnvironment($application->getEnvironment())
+                      ->extend($container->getParameter('bbapp.config.dir'));
 
             $container->setDefinition('site', new Definition())->setSynthetic(true);
             $container->setDefinition('routing', new Definition())->setSynthetic(true);
@@ -61,7 +61,7 @@ class ContainerBuilder
             return $container;
         }
 
-        $container->setDefinition('bbapp', new Definition())->setSynthetic(true);
+        $container->setDefinition('bbapp', new Definition())->setSynthetic(true); // No need
 
         $dirToLookingFor = array();
         $dirToLookingFor[] = $application->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
@@ -69,6 +69,13 @@ class ContainerBuilder
 
         if ($application->getBaseRepository() !== $application->getRepository()) {
             $dirToLookingFor[] = $application->getRepository() . DIRECTORY_SEPARATOR . 'Config';
+        }
+
+        if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
+            $dirToLookingFor[] = $application->getRepository()
+                . DIRECTORY_SEPARATOR . 'Config'
+                . DIRECTORY_SEPARATOR . $application->getEnvironment()
+            ;
         }
 
         // Loop into every directory where we can potentially found a services.yml or services.xml
@@ -83,7 +90,7 @@ class ContainerBuilder
         self::initApplicationVarsIntoContainer($application, $container);
         
         $logger_class = $container->getParameter('bbapp.logger.class');
-        if (true === $application->isDebugMode()) {
+        if (true === $container->getParameter('debug')) {
             $logger_class = $container->getParameter('bbapp.logger_debug.class');
         } 
 
@@ -92,7 +99,7 @@ class ContainerBuilder
             array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
         ));
 
-        if (false === $application->isDebugMode()) {
+        if (false === $container->getParameter('debug')) {
             if (false === file_exists($container_dir)) {
                 @mkdir($container_dir, 0755);
             }
@@ -145,35 +152,28 @@ class ContainerBuilder
     {
         // Add BBApplication to container
         $container->set('bbapp', $application);
-
         $container->set('service_container', $container);
 
         // Set application others variables' values
         
-        // define context, debug and environment parameters
-        $container->setParameter('debug', $application->isDebugMode());
+        // define context and environment parameters
         $container->setParameter('environment', $application->getEnvironment());
         $container->setParameter('bbapp.context', $application->getContext());
-
 
         // define config and repository directory
         $container->setParameter('bbapp.config.dir', $application->getConfigDir());
         $container->setParameter('bbapp.repository.dir', $application->getRepository());
 
         // Retrieving config.yml without calling Config services
-        $config = array();
-        $filename = $application->getRepository() . DIRECTORY_SEPARATOR . 'Config' 
-            . DIRECTORY_SEPARATOR . $application->getEnvironment() . DIRECTORY_SEPARATOR . 'config.yml'
-        ;
-        if (false === file_exists($filename)) {
-            $filename = $application->getRepository() . DIRECTORY_SEPARATOR 
-                . 'Config' . DIRECTORY_SEPARATOR . 'config.yml'
-            ;
+        $config = self::getRawConfig($application);
+
+        // Set debug into container
+        $debug = $application->isDebugMode();
+        if (array_key_exists('parameters', $config) && array_key_exists('debug', $config['parameters'])) {
+            $debug = $config['parameters']['debug'];
         }
 
-        if (true === is_readable($filename)) {
-            $config = Yaml::parse($filename);
-        }
+        $container->setParameter('debug', $debug);
 
         // Set timezone
         if (true === isset($config['date']) && true === isset($config['date']['timezone'])) {
@@ -181,9 +181,11 @@ class ContainerBuilder
         }
 
         // define cache directory
-        $cachedir = $application->getBaseDir() . DIRECTORY_SEPARATOR 
-            . 'cache' . DIRECTORY_SEPARATOR . $application->getEnvironment()
-        ;
+        $cachedir = implode(DIRECTORY_SEPARATOR, array(
+            $application->getBaseDir(), 
+            'cache', 
+            $application->getEnvironment()
+        ));
         if (true === isset($config['parameters']['cache_dir']) && false === empty($config['parameters']['cache_dir'])) {
             $cachedir = $config['parameters']['cache_dir'];
         }
@@ -198,12 +200,6 @@ class ContainerBuilder
         }
 
         // define bb base dir
-        if (true === isset($config['parameters']['base_dir']) && false === empty($config['parameters']['base_dir'])) {
-            $this->_bbdir = $config['parameters']['base_dir'];
-            $this->_repository = null;
-            $this->_base_repository = null;
-        }
-
         $container->setParameter('bbapp.base.dir', $application->getBBDir());
 
         // define data directory
@@ -213,5 +209,63 @@ class ContainerBuilder
         }
 
         $container->setParameter('bbapp.data.dir', $datadir);
+    }
+
+    /**
+     * [getRawConfig description]
+     * @return [type] [description]
+     */
+    private static function getRawConfig(BBApplication $application)
+    {
+        $config = array();
+        $file_exists = false;
+        $filepath = null;
+
+        if (BBApplication::DEFAULT_CONTEXT !== $application->getContext()) {
+            if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
+                $filepath = $application->getRepository() 
+                    . DIRECTORY_SEPARATOR . 'Config' 
+                    . DIRECTORY_SEPARATOR . $application->getEnvironment() 
+                    . DIRECTORY_SEPARATOR . 'config.yml'
+                ;
+            }
+
+            if (false === $file_exists = file_exists($filepath)) {
+                $filepath = $application->getRepository() 
+                    . DIRECTORY_SEPARATOR . 'Config'
+                    . DIRECTORY_SEPARATOR . 'config.yml'
+                ;
+            }
+        }
+
+        if (
+            (false === $file_exists = file_exists($filepath)) 
+            && BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()
+        ) {
+            $filepath = $application->getBaseRepository() 
+                . DIRECTORY_SEPARATOR . 'Config'
+                . DIRECTORY_SEPARATOR . $application->getEnvironment() 
+                . DIRECTORY_SEPARATOR . 'config.yml'
+            ;
+        }
+
+        if (false === $file_exists = file_exists($filepath)) {
+            $filepath = $application->getBaseRepository() 
+                . DIRECTORY_SEPARATOR . 'Config'
+                . DIRECTORY_SEPARATOR . 'config.yml'
+            ;
+        }
+
+        if (false === $file_exists = file_exists($filepath)) {
+            throw new \Exception('Unable to find a config.yml!');
+        }
+
+        if (true === is_readable($filepath)) {
+            $config = Yaml::parse($filepath);
+        } else {
+            throw new \Exception("config.yml is not readable! ($filepath)");
+        }
+
+        return $config;
     }
 }

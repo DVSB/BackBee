@@ -61,7 +61,7 @@ class RouteCollection extends sfRouteCollection
 
         if (null !== $application) {
             $this->_application = $application;
-            var_dump($application->getConfig()->getRouteConfig()); die;
+            // var_dump($application->getConfig()->getRouteConfig()); die;
         }
     }
 

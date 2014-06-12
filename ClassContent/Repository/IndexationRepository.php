@@ -89,15 +89,15 @@ class IndexationRepository extends EntityRepository
                 $meta->getColumnName('_node_uid') . ', ' .
                 $meta->getColumnName('_modified') . ', ' .
                 $meta->getColumnName('_created') . ')' .
-                ' VALUES (:uid, :label, :classname, :node_uid, modified, :created)';
+                ' VALUES (:uid, :label, :classname, :node_uid, :modified, :created)';
 
         $params = array(
             'uid' => $content->getUid(),
             'label' => $content->getLabel(),
             'classname' => \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content),
             'node_uid' => $content->getMainNode()->getUid(),
-            'modified' => $content->getModified()->getTimestamp(),
-            'created' => $content->getCreated()->getTimestamp()
+            'modified' => date('Y-m-d H:i:s', $content->getModified()->getTimestamp()),
+            'created' => date('Y-m-d H:i:s', $content->getCreated()->getTimestamp())
         );
 
         $types = array(
@@ -105,8 +105,8 @@ class IndexationRepository extends EntityRepository
             \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
             \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
             \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
-            \Doctrine\DBAL\Connection::PARAM_INT_ARRAY,
-            \Doctrine\DBAL\Connection::PARAM_INT_ARRAY
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
         );
 
         return $this->_executeQuery($query, $params, $types);
@@ -160,7 +160,7 @@ class IndexationRepository extends EntityRepository
     {
         $parent_uids = array();
         foreach ($contents as $content) {
-            if (true === $content->isElementContent()) {
+            if (null === $content || true === $content->isElementContent()) {
                 continue;
             }
 
@@ -217,13 +217,18 @@ class IndexationRepository extends EntityRepository
      * @return array
      */
     public function getParentContentUids(array $contents)
-    {
+    {        
         $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
 
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
                 ->select('c.' . $meta->getColumnName('content_uid'))
                 ->from($meta->getTableName(), 'c');
+        
+        $p = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('j.parent_uid')
+                ->from('content_has_subcontent', 'j');
 
         $index = 0;
         $atleastone = false;
@@ -238,12 +243,15 @@ class IndexationRepository extends EntityRepository
 
             $q->orWhere('c.' . $meta->getColumnName('subcontent_uid') . ' = :uid' . $index)
                     ->setParameter('uid' . $index, $content->getUid());
+            
+            $p->orWhere('j.content_uid = :uid' . $index)
+                    ->setParameter('uid' . $index, $content->getUid());
 
             $index++;
             $atleastone = true;
         }
 
-        return (true === $atleastone) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
+        return (true === $atleastone) ? array_unique(array_merge($q->execute()->fetchAll(\PDO::FETCH_COLUMN), $p->execute()->fetchAll(\PDO::FETCH_COLUMN))) : array();
     }
 
     /**
@@ -277,6 +285,33 @@ class IndexationRepository extends EntityRepository
 
             $q->orWhere('c.' . $meta->getColumnName('content_uid') . ' = :uid' . $index)
                     ->setParameter('uid' . $index, $content->getUid());
+
+            $index++;
+            $atleastone = true;
+        }
+
+        return (true === $atleastone) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
+    }
+
+    /**
+     * Returns every main node attach to the provided content uids
+     * @param array $content_uids
+     * @return array
+     */
+    public function getNodeUids(array $content_uids)
+    {
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\AClassContent');
+
+        $q = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('c.node_uid')
+                ->from($meta->getTableName(), 'c');
+
+        $index = 0;
+        $atleastone = false;
+        foreach ($content_uids as $uid) {
+            $q->orWhere('c.' . $meta->getColumnName('_uid') . ' = :uid' . $index)
+                    ->setParameter('uid' . $index, $uid);
 
             $index++;
             $atleastone = true;

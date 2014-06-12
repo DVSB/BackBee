@@ -22,6 +22,7 @@
 namespace BackBuilder;
 
 use Exception;
+
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Bundle\BundleLoader,
     BackBuilder\Config\Config,
@@ -29,12 +30,12 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Event\Event,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
-    BackBuilder\Exception\DatabaseConnectionException,
     BackBuilder\Exception\UnknownContextException,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File,
-    BackBuilder\Bundle\ABundle;
+    BackBuilder\Bundle\ABundle,
+    BackBuilder\Console\Console;
 
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
@@ -48,8 +49,6 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
-    Symfony\Component\Console\Application,
     Symfony\Component\Finder\Finder;
 
 /**
@@ -60,9 +59,13 @@ use Symfony\Component\Config\FileLocator,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class BBApplication implements IApplication {
+class BBApplication implements IApplication
+{
 
     const VERSION = '0.8.0';
+
+    const DEFAULT_CONTEXT = 'default';
+    const DEFAULT_ENVIRONMENT = '';
 
     /**
      * @var BackBuilder\DependencyInjection\Container
@@ -102,12 +105,16 @@ class BBApplication implements IApplication {
     public function __construct($context = null, $environment = 'production', $overwrite_config = false)
     {
         $this->_starttime = time();
-        $this->_context = (null === $context) ? 'default' : $context;
-        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : true));
+        $this->_context = (null === $context) ? self::DEFAULT_CONTEXT : $context;
+        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : false));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
-        $this->_environment = ((is_string($environment)) ? $environment : ($environment === false ? 'production' : ''));
+
+        $this->_environment = ((is_string($environment)) 
+            ? $environment 
+            : ($environment === false ? 'production' : self::DEFAULT_ENVIRONMENT))
+        ;
 
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
@@ -141,9 +148,15 @@ class BBApplication implements IApplication {
 
         $this->_initContainer()
              ->_initAutoloader()
-             ->_initContentWrapper()
-             ->_initEntityManager()
-             ->_initBundles();
+             ->_initContentWrapper();
+
+        try {
+            $this->_initEntityManager();
+        } catch (\Exception $excep) {
+            $this->getLogging()->notice('BackBee starting without EntityManager');
+        }
+
+        $this->_initBundles();
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
@@ -204,12 +217,6 @@ class BBApplication implements IApplication {
     private function _initContainer($force_reload = false)
     {
         $this->_container = ContainerBuilder::getContainer($this, $force_reload);
-
-        // if (true === $container->hasParameter('bbapp.base.dir')) {
-        //     $this->_bbdir = $container->getParameter('bbapp.base.dir');
-        //     $this->_repository = null;
-        //     $this->_base_repository = null;
-        // }
 
         return $this;
     }
@@ -289,13 +296,12 @@ class BBApplication implements IApplication {
      * @return boolean
      */
     public function isDebugMode() 
-    {
-        $debug = (bool) $this->_debug;
+    {        
         if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
-            $debug = (bool) $this->getConfig()->getParametersConfig('debug');
+            return (bool) $this->getConfig()->getParametersConfig('debug');
         }
 
-        return $debug;
+        return (bool) $this->_debug;
     }
 
     /**
@@ -361,6 +367,14 @@ class BBApplication implements IApplication {
             $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
+        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('metadata_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['metadata_cache']['cachetype'] = $doctrine_config['dbal']['metadata_type'];
+        }
+
+        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('query_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['query_cache']['cachetype'] = $doctrine_config['dbal']['query_type'];
+        }
+
         // Init ORM event
         $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
@@ -381,7 +395,7 @@ class BBApplication implements IApplication {
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
         } catch (\Exception $e) {
-            $this->warning(sprintf('%s(): Cannot initialized Doctrine EntityManager', __METHOD__));
+            $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
         }
 
         return $this;
@@ -392,6 +406,40 @@ class BBApplication implements IApplication {
         BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
 
         return $this;
+    }
+
+    /**
+     * Load every service definition defined in bundle
+     */
+    private function initBundlesServices()
+    {
+        // OVERRIDE Services Bundle within environment TODO
+        if (self::DEFAULT_ENVIRONMENT !== $this->_environment) {
+            $dirToLookingFor = $this->getRepository()
+                . DIRECTORY_SEPARATOR . 'Config'
+                . DIRECTORY_SEPARATOR . $this->_environment
+                . DIRECTORY_SEPARATOR . 'bundle';
+            ;
+
+            foreach ($this->_bundles as $b) {
+                $xml = $dirToLookingFor .
+                    DIRECTORY_SEPARATOR .
+                    $b->getId() .
+                    DIRECTORY_SEPARATOR .
+                    'services.xml';
+
+                if (true === is_file($xml)) {
+                    $loader = new XmlFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
+                    try {
+                        $loader->load('services.xml');
+                    } catch (Exception $e) { /* nothing to do, just ignore it */
+                    }
+
+                    unset($loader);
+                }
+            }
+
+        }
     }
 
     /**
@@ -565,14 +613,14 @@ class BBApplication implements IApplication {
     public function getBBUserToken()
     {
         $token = $this->getSecurityContext()->getToken();
-        if ((null === $token || !($token instanceof BackBuilder\Security\Token\BBUserToken))) {
+        if ((null === $token || !($token instanceof \BackBuilder\Security\Token\BBUserToken))) {
             if (is_null($this->getContainer()->get('bb_session'))) {
                 $token = null;
             } else {
                 if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
                     $token = unserialize($token);
 
-                    if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken')) {
+                    if (!($token instanceof \BackBuilder\Security\Token\BBUserToken)) {
                         $token = null;
                     }
                 }
@@ -677,11 +725,15 @@ class BBApplication implements IApplication {
      */
     public function getEntityManager()
     {
-        if (!$this->getContainer()->has('em')) {
-            $this->_initEntityManager();
-        }
+        try {
+            if (null === $this->getContainer()->get('em')) {
+                $this->_initEntityManager();
+            }
 
-        return $this->getContainer()->get('em');
+            return $this->getContainer()->get('em');
+        }catch(\Exception $e) {
+            $this->getLogging()->notice('BackBee starting without EntityManager');
+        }
     }
 
     /**
@@ -1020,29 +1072,25 @@ class BBApplication implements IApplication {
      * * Commands are in the 'Command' sub-directory
      * * Commands extend Symfony\Component\Console\Command\Command
      *
-     * @param Application $application An Application instance
+     * @param BackBuilder\Console\Console $console An Application instance
      */
-    public function registerCommands(Application $application)
+    public function registerCommands(Console $console)
     {
-            if (is_dir($dir = $this->getBBDir() . '/Command')) {
+        if (is_dir($dir = $this->getBBDir() . '/Command')) {
             $finder = new Finder();
-
             $finder->files()->name('*Command.php')->in($dir);
-
-            $prefix = 'BackBuilder\\Command';
+            $ns = 'BackBuilder\\Command';
 
             foreach ($finder as $file) {
-                $ns = $prefix;
                 if ($relativePath = $file->getRelativePath()) {
                     $ns .= '\\' . strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
                 if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
-                    $application->add($r->newInstance());
+                    $console->add($r->newInstance());
                 }
             }
         }
-
 
         foreach ($this->getBundles() as $bundle) {
             if (!is_dir($dir = $bundle->getBaseDir() . '/Command')) {
@@ -1051,11 +1099,9 @@ class BBApplication implements IApplication {
 
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
-
-            $prefix = $bundle->getNamespace() . '\\Command';
+            $ns = $bundle->getNamespace() . '\\Command';
 
             foreach ($finder as $file) {
-                $ns = $prefix;
                 if ($relativePath = $file->getRelativePath()) {
                     $ns .= '\\' . strtr($relativePath, '/', '\\');
                 }
@@ -1063,9 +1109,10 @@ class BBApplication implements IApplication {
                 if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
-                    $application->add($instance);
+                    $console->add($instance);
                 }
             }
+            
         }
     }
 }

@@ -42,7 +42,7 @@ use Doctrine\ORM\Tools\SchemaTool,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class ABundle implements IObjectIdentifiable, \Serializable
+abstract class ABundle implements IObjectIdentifiable
 {
 
     private $_id;
@@ -98,6 +98,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $this->_id = basename($this->_basedir);
 
         $this->_logger = $logger;
+
         if (null === $this->_logger) {
             $this->_logger = $this->_application->getLogging();
         }
@@ -111,7 +112,33 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
             $configdir = $this->getResourcesDir();
         }
 
-        $this->_config = new Config($configdir, $this->getApplication()->getBootstrapCache());
+        $this->_config = new Config(
+            $configdir,
+            $this->getApplication()->getBootstrapCache(),
+            null,
+            $this->getApplication()->isDebugMode()
+        );
+
+        // OVERRIDE Config within environment
+        $application = $this->getApplication();
+        if ($application::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
+            $dir = $application->getConfigDir() .
+                DIRECTORY_SEPARATOR .
+                $application->getEnvironment() .
+                DIRECTORY_SEPARATOR .
+                'bundle' .
+                DIRECTORY_SEPARATOR .
+                $this->_id;
+            if(true === is_dir($dir)) {
+                $this->_config->extend($dir, true);
+
+            }
+        }
+
+        $this->_config
+                ->setEnvironment($this->_application->getEnvironment())
+                ->setDebug($this->_application->isDebugMode())
+        ;
 
         // Looking for bundle's config in registry
         $registry = $this->_getRegistryConfig();

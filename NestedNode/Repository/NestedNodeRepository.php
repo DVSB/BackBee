@@ -56,6 +56,51 @@ class NestedNodeRepository extends EntityRepository
         return true;
     }
 
+    /**
+     * [updateTreeNatively description]
+     * @param  [type] $node_uid [description]
+     * @param  [type] $leftnode [description]
+     * @param  [type] $level    [description]
+     * @return [type]           [description]
+     */
+    public function updateTreeNatively($node_uid, $leftnode = 1, $level = 0)
+    {
+        $node = new \StdClass();
+        $node->uid = $node_uid;
+        $node->leftnode = $leftnode;
+        $node->rightnode = $leftnode + 1;
+        $node->level = $level;
+
+        foreach ($children = $this->getNativelyNodeChildren($node_uid) as $row) {
+            $child = $this->updateTreeNatively($row['uid'], $leftnode + 1, $level + 1);
+            $node->rightnode = $child->rightnode + 1;
+            $leftnode = $node->rightnode;
+        }
+
+        $this->_em->getConnection()->exec(sprintf(
+            'update page set leftnode = %d, rightnode = %d, level = %d where uid = "%s";',
+            $node->leftnode,
+            $node->rightnode,
+            $node->level,
+            $node->uid
+        ));
+
+        return $node;
+    }
+
+    /**
+     * [getNativelyNodeChildren description]
+     * @param  [type] $node_uid [description]
+     * @return [type]           [description]
+     */
+    private function getNativelyNodeChildren($node_uid)
+    {
+        return $this->_em->getConnection()->executeQuery(sprintf(
+            'select uid from page where parent_uid = "%s" order by modified desc',
+            $node_uid
+        ))->fetchAll();
+    }
+
     public function updateHierarchicalDatas(ANestedNode $node, $leftnode = 1, $level = 0)
     {
         $node->setLeftnode($leftnode)->setLevel($level);

@@ -86,6 +86,12 @@ class Container extends sfContainerBuilder
     private function _getContainerParameters($item)
     {
         $matches = array();
+        if (preg_match('/^%([^%]+)%$/', $item, $matches)) {
+            if ($this->hasParameter($matches[1])) {
+                return $this->getParameter($matches[1]);
+            }
+        }
+
         if (preg_match_all('/%([^%]+)%/', $item, $matches, PREG_PATTERN_ORDER)) {
             foreach ($matches[1] as $expr) {
                 if ($this->hasParameter($expr)) {
@@ -104,6 +110,10 @@ class Container extends sfContainerBuilder
      */
     private function _getContainerServices($item)
     {
+        if (false === is_string($item)) {
+            return $item;
+        }
+
         $matches = array();
         if (preg_match('/^@([a-z0-9.-]+)$/i', trim($item), $matches)) {
             if ($this->has($matches[1])) {

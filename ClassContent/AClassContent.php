@@ -372,9 +372,11 @@ abstract class AClassContent extends AContent
      */
     public function postLoad()
     {
+        $tmp_modified = $this->_modified;
         $this->_isloaded = true;
         $this->_initData();
         parent::postLoad();
+        $this->_modified = $tmp_modified;
     }
 
     /**

@@ -64,8 +64,6 @@ parameters:
     bbapp.collector.routing.class: BackBuilder\Profiler\DataCollector\RoutingDataCollector
     bbapp.collector.doctrine.class: BackBuilder\Profiler\DataCollector\DoctrineDataCollector
 
-
-
     data_collector.templates: 
         config: "%bbapp.base.dir%/Resources/scripts/Collector/config.html.twig"
         request: "%bbapp.base.dir%/Resources/scripts/Collector/request.html.twig"
@@ -77,6 +75,8 @@ parameters:
         routing: "%bbapp.base.dir%/Resources/scripts/Collector/routing.html.twig"
         db: "%bbapp.base.dir%/Resources/scripts/Collector/db.html.twig"
 
+    bbapp.analytics.class: BackBuilder\Application\Analytics
+
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
@@ -86,7 +86,7 @@ services:
         arguments:  [{em: "@em"}, "%bbapp.context%", "@logging"]
     config:
         class:      %bbapp.config.class%
-        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap"]
+        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, %debug%]
     event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
@@ -129,6 +129,10 @@ services:
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]
+
+    analytics:
+        class: BackBuilder\Application\Analytics
+        arguments:  [@bbapp]
 
     controller_resolver:
         class:      %bbapp.controller_resolver.class%
@@ -216,8 +220,8 @@ services:
             - [setContainer, [@service_container]]
 
     profiler.storage:
-        class:      Symfony\Component\HttpKernel\Profiler\FileProfilerStorage
-        arguments:  ["file:%bbapp.cache.dir%/_profiler/"]
+        class:      BackBuilder\Profiler\FileProfilerStorage
+        arguments:  [@bbapp, "file:%bbapp.cache.dir%/_profiler/"]
 
 
     profiler:
@@ -275,6 +279,9 @@ services:
     doctrine.dbal.logger.profiling:
         class: %bbapp.dbal.logger.profiling.class%
         arguments:  ["@bbapp"]
+        
+        
+    
 
     # synthetic services
     bbapp:
