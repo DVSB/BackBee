@@ -113,8 +113,7 @@ class Analytics
     protected function collectSiteData()
     {
         $site = $this->bbapp->getContainer()->get('site');
-        var_dump($site->getMetadata());exit;
-    }
+     }
     
     protected function collectControllerActionData()
     {
