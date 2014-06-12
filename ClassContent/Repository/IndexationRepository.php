@@ -160,7 +160,7 @@ class IndexationRepository extends EntityRepository
     {
         $parent_uids = array();
         foreach ($contents as $content) {
-            if (true === $content->isElementContent()) {
+            if (null === $content || true === $content->isElementContent()) {
                 continue;
             }
 
