@@ -74,6 +74,7 @@ class Memcache extends AExtendedCache
      * @var array
      */
     protected $_instance_options = array(
+        'type' => 'memcache',
         'min_cache_lifetime' => null,
         'max_cache_lifetime' => null,
         'persistent_id' => null,
