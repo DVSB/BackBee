@@ -125,7 +125,7 @@ abstract class ABundle implements IObjectIdentifiable
                 DIRECTORY_SEPARATOR .
                 $this->_id;
             if(true === is_dir($dir)) {
-                $this->_config->extend($dir, true);
+                $this->_config->extend($dir, false);
 
             }
         }
