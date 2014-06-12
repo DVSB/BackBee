@@ -282,6 +282,7 @@ class ClassContentRepository extends EntityRepository
         $result = $q->getQuery()->getResult();
 
         if (true === $multipage) {
+            $query = str_replace('USE INDEX(IDX_SELECT_PAGE)', ' ', $query);
             $count = str_replace('SELECT c.uid', 'SELECT COUNT(c.uid)', $query);
             $num_results = $this->getEntityManager()->getConnection()->executeQuery($count)->fetch(\PDO::FETCH_COLUMN);
 
