@@ -76,7 +76,8 @@ parameters:
         db: "%bbapp.base.dir%/Resources/scripts/Collector/db.html.twig"
 
 
-
+    bbapp.analytics.class: BackBuilder\Application\Analytics
+    
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
@@ -118,6 +119,10 @@ services:
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]
+
+    analytics:
+        class: BackBuilder\Application\Analytics
+        arguments:  [@bbapp]
 
     controller_resolver:
         class:      %bbapp.controller_resolver.class%
@@ -261,11 +266,12 @@ services:
         calls:
             - [setContainer, [@service_container]]
 
-
-
     doctrine.dbal.logger.profiling:
         class: %bbapp.dbal.logger.profiling.class%
         arguments:  ["@bbapp"]
+        
+        
+    
 
     # synthetic services
     bbapp:
