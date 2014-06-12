@@ -36,7 +36,7 @@ use Doctrine\DBAL\Logging\DebugStack;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Logger extends DebugStack  implements LoggerInterface, SQLLogger
+class Logger extends DebugStack implements LoggerInterface, SQLLogger
 {
 
     const ERROR = 1;
@@ -94,7 +94,7 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
                 } else if (array_key_exists('level', $loggingConfig)) {
                     $this->setLevel(strtoupper($loggingConfig['level']));
                 }
-                
+
                 if (array_key_exists('logfile', $loggingConfig)) {
                     if (false === realpath(dirname($loggingConfig['logfile']))) {
                         $loggingConfig['logfile'] = $application->getBaseDir() . DIRECTORY_SEPARATOR . $loggingConfig['logfile'];
@@ -209,7 +209,7 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
 
             if (NULL !== $this->_application) {
 
-                $error_trace .=  ' in '.$exception->getFile() . ' on line ' . $exception->getLine() . '</th></tr>';
+                $error_trace .= ' in ' . $exception->getFile() . ' on line ' . $exception->getLine() . '</th></tr>';
                 foreach ($exception->getTrace() as $trace) {
                     $this->getTemplateError($trace);
                 }
@@ -219,7 +219,7 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
                     $this->error(sprintf('Cause By : Error occurred in file `%s` at line %d with message: %s', $previous->getFile(), $previous->getLine(), $previous->getMessage()));
 
                     $error_trace .= '<tr><th colspan="5">Caused by: ' . $previous->getMessage() .
-                        ' in ' . $previous->getFile() . ' on line ' . $previous->getLine() . '</td></tr>';
+                            ' in ' . $previous->getFile() . ' on line ' . $previous->getLine() . '</td></tr>';
                     foreach ($previous->getTrace() as $trace) {
                         $this->getTemplateError($trace);
                     }
@@ -228,29 +228,38 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
             }
 
             if (false === $content = $this->_application->getRenderer()->reset()->error($httpCode, $title, $message, $error_trace)) {
-                if($this->_application->isDebugMode()) {
+                if ($this->_application->isDebugMode()) {
                     $content = '<link type="text/css" rel="stylesheet" href="ressources/css/debug.css"/>';
                 }
                 $content .= '<h1>' . $httpCode . ': ' . $title . '<h1>';
                 $content .= '<table>';
                 $content .= '<tr><th colspan="5">' . $message;
-                if($this->_application->isDebugMode()) {
+                if ($this->_application->isDebugMode()) {
                     $content .= $error_trace;
-                }else{
+                } else {
                     $content .= '</th></tr>';
                 }
                 $content .= '</table>';
             }
 
             $this->_sendErrorMail($title, '<h1>' . $httpCode . ': ' . $title . '<h1><h2>' . $message . '</h2><p>Referer : ' . $this->_application->getRequest()->server->get('HTTP_REFERER') . '</p>' . $error_trace);
+
+            if (false === $this->_application->isDebugMode() && 1 != ini_get('display_errors')) {
+                $content = '';
+            }
+
             $response = new Response($content, $httpCode);
             $response->send();
             die();
         } else {
             if (false === $this->_application->isClientSAPI()) {
                 header("HTTP/1.0 500 Internal Server Error");
+
+                if (false === $this->_application->isDebugMode() && 1 != ini_get('display_errors')) {
+                    exit(-1);
+                }
             }
-            
+
             if (NULL !== $this->_application && $this->_application->isDebugMode()) {
                 echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')' . PHP_EOL;
                 foreach ($exception->getTrace() as $trace) {
@@ -287,14 +296,15 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
 
     private function getTemplateError($trace)
     {
-        return '<tr>'.
-            '<td>'.(array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ': ' .
-            (array_key_exists('line', $trace) ? $trace['line'] : '-') . '</td>' .
-            '<td>'.(array_key_exists('class', $trace) ? $trace['class'] : '') .
-            (array_key_exists('type', $trace) ? $trace['type'] : '') .
-            (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()</td>'.
-            '</tr>';
+        return '<tr>' .
+                '<td>' . (array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ': ' .
+                (array_key_exists('line', $trace) ? $trace['line'] : '-') . '</td>' .
+                '<td>' . (array_key_exists('class', $trace) ? $trace['class'] : '') .
+                (array_key_exists('type', $trace) ? $trace['type'] : '') .
+                (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()</td>' .
+                '</tr>';
     }
+
     public function log($level, $message, array $context = array())
     {
         if (null !== $this->_buffer) {
@@ -309,11 +319,11 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
         if (array_key_exists(strtoupper($level), $this->_priorities_name)) {
             $level = $this->_priorities_name[strtoupper($level)];
         }
-        
+
         if (!array_key_exists($level, $this->_priorities)) {
             throw new LoggingException(sprintf('Unkown priority level `%d`.', $level));
         }
-        
+
         if ($level > $this->_level)
             return;
 
@@ -473,4 +483,5 @@ class Logger extends DebugStack  implements LoggerInterface, SQLLogger
     {
         return isset($this->_priorities[$code]) ? $this->_priorities[$code] : null;
     }
+
 }
