@@ -201,6 +201,12 @@ class Page extends AbstractServiceLocal
             }
         }
 
+        if (null === $page->getMetaData()) {
+            $metadata_config = $this->getApplication()->getConfig()->getSection('metadata');
+            $metadata = new \BackBuilder\MetaData\MetaDataBag($metadata_config, $page);
+            $page->setMetaData($metadata->compute($page));
+        }
+        
         $page->unserialize($object);
         $this->getEntityManager()->flush();
 
