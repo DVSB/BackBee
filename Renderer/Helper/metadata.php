@@ -52,7 +52,7 @@ class metadata extends AHelper
 
         $result = '';
         foreach ($metadata as $meta) {
-            if (0 < $meta->count()) {
+            if (0 < $meta->count() && 'title' !== $meta->getName()) {
                 $result .= '<meta ';
                 foreach ($meta as $attribute => $value) {
                     if (false !== strpos($meta->getName(), 'keyword') && 'content' === $attribute) {
