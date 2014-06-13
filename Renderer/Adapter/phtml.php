@@ -141,6 +141,9 @@ class phtml extends ARendererAdapter
             include $filename;
 
             return ob_get_clean();
+        } catch (\BackBuilder\FrontController\Exception\FrontControllerException $fe) {
+            ob_end_clean();
+            throw $fe;
         } catch (Exception $e) {
             ob_end_clean();
             throw new RendererException(
