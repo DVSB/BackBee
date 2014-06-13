@@ -29,7 +29,8 @@ use BackBuilder\BBApplication,
     BackBuilder\Routing\Matcher\UrlMatcher,
     BackBuilder\Util\File,
     BackBuilder\Services\Content\Category,
-    BackBuilder\Util\MimeType;
+    BackBuilder\Util\MimeType,
+    BackBuilder\Event\PageFilterEvent;
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpKernel\KernelEvents,
@@ -410,7 +411,10 @@ class FrontController implements HttpKernelInterface
 
         try {
             $this->_application->info(sprintf('Handling URL request `%s`.', $uri));
-
+            
+            $event = new \BackBuilder\Event\PageFilterEvent($this, $this->_application->getRequest(), self::MASTER_REQUEST, $page);
+            $this->_application->getEventDispatcher()->dispatch('application.page', $event);
+            
             if (null !== $this->getRequest()->get('bb5-mode')) {
                 $response = new Response($this->_application->getRenderer()->render($page, $this->getRequest()->get('bb5-mode')));
             } else {
