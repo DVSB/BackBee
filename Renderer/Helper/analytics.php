@@ -38,7 +38,7 @@ class analytics extends AHelper
      */
     public function __invoke()
     {
-        $this->_renderer->getApplication()->getContainer()->get('analytics')->getParams();
+        return $this->_renderer->getApplication()->getContainer()->get('analytics');
     }
 
 }
