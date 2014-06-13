@@ -31,7 +31,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 
 /**
- * Clears cache
+ * Update all bundles command
  *
  * @category    BackBuilder
  * @package     BackBuilder\Command
