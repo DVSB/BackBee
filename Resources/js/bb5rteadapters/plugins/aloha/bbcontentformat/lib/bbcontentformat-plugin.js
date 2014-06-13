@@ -33,7 +33,7 @@ define("bbcontentformat/bb5contenthandler", ['aloha','jquery',htmlClean,'aloha/c
 /**
     *
     *  new paragraph content handler
-    *  this content handler allow to control what can be pasted inside a p tag
+    *  this content handler allows us to control what can be pasted inside a p tag
     *  */
 define("bbcontentformat/bb5ParagraphCleaner",["aloha","jquery",htmlClean,'aloha/contenthandlermanager'],
     function(Aloha, $, htmlClean, ContentHandlerManager){
