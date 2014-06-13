@@ -32,7 +32,7 @@ use Doctrine\ORM\Tools\SchemaTool,
     Doctrine\ORM\EntityManager;
 
 /**
- * Clears cache
+ * Update BBApp database
  *
  * @category    BackBuilder
  * @package     BackBuilder\Command
