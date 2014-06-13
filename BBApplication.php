@@ -517,12 +517,14 @@ class BBApplication implements IApplication
      */
     private function _initConfig()
     {
+        $dir = (true === $this->hasContext()) ? $this->getBaseRepository(). '/Config' : $this->_container->getParameter('bbapp.config.dir');
+        
         $this->getContainer()
                 ->get('config')
                 ->setContainer($this->_container)
                 ->setEnvironment($this->_environment)
-                ->extend($this->_container->getParameter('bbapp.config.dir'));
-        
+                ->extend($dir);
+
         return $this->_initContextConfig();
     }
 
