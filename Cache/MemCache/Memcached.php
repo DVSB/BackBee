@@ -366,7 +366,7 @@ class Memcached extends AExtendedCache
         }
 
         if (false === $this->_memcached->set($id, $data, $lifetime) ||
-                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, $lifetime, $lifetime)) {
+                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, time() + $lifetime, $lifetime)) {
             return $this->_onError('save');
         }
 

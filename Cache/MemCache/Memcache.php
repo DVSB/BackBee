@@ -296,7 +296,7 @@ class Memcache extends AExtendedCache
         }
 
         if (false === $this->_Memcache->set($id, (is_array($data) ? $data : ''.$data), $this->compression, $lifetime) ||
-            false === $this->_Memcache->set(self::EXPIRE_PREFIX . $id, ''.$lifetime, $this->compression, $lifetime)
+            false === $this->_Memcache->set(self::EXPIRE_PREFIX . $id, ''.time() + $lifetime, $this->compression, $lifetime)
         ) {
             return $this->_onError('save');
         }

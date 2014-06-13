@@ -227,7 +227,9 @@ class BBApplication implements IApplication
                 $this->_base_repository = null;
             }
 
-            $this->_initConfig();
+            $this->getContainer()
+                ->get('config')
+                ->setEnvironment($this->_environment);
 
             $this->_container->setDefinition('site', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
             $this->_container->setDefinition('routing', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);

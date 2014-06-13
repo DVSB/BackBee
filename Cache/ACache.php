@@ -93,7 +93,7 @@ abstract class ACache
      * @param string $tag Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
-    abstract public function save($id, $data, $lifetime = null, $tag = null);
+    abstract public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false);
 
     /**
      * Removes a cache record
