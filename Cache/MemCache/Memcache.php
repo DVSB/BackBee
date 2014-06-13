@@ -294,7 +294,7 @@ class Memcache extends AExtendedCache
             $lifetime = $this->getControledLifetime($lifetime);
         }
 
-        if (false === $this->_Memcache->set($id, ''.$data, $this->compression, $lifetime) ||
+        if (false === $this->_Memcache->set($id, (is_array($data) ? $data : ''.$data), $this->compression, $lifetime) ||
             false === $this->_Memcache->set(self::EXPIRE_PREFIX . $id, ''.$lifetime, $this->compression, $lifetime)
         ) {
             return $this->_onError('save');
