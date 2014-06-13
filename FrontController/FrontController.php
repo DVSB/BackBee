@@ -422,6 +422,8 @@ class FrontController implements HttpKernelInterface
             } else {
                 return $response;
             }
+        } catch (FrontControllerException $fe) {
+            throw $fe;
         } catch (\Exception $e) {
             throw new FrontControllerException(sprintf('An error occured while rendering URL `%s`.', $this->_request->getHost() . '/' . $uri), FrontControllerException::INTERNAL_ERROR, $e);
         }
