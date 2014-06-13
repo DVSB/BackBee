@@ -174,6 +174,8 @@ class Twig extends ARendererAdapter
             $params['this'] = $this;
             $params = array_merge($params, $vars);
             $render = $this->twig->render($filename, $params);
+        } catch (\BackBuilder\FrontController\Exception\FrontControllerException $fe) {
+            throw $fe;
         } catch (\Exception $e) {
             throw new RendererException(
                     $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
