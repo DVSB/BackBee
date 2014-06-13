@@ -174,4 +174,17 @@ class Dispatcher extends EventDispatcher
         return $eventPrefix;
     }
 
+    public function getListeners($eventName = null)
+    {
+        $listeners = parent::getListeners($eventName);
+
+        // retrieve services
+        foreach ($listeners as &$listener) {
+            if (is_string($listener[0]) && 0 === strpos($listener[0], '@')) {
+                $listener[0] = $this->_application->getContainer()->get(substr($listener[0], 1));
+            }
+        }
+
+        return $listeners;
+    }
 }
