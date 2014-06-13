@@ -87,10 +87,9 @@ class Memcache extends AExtendedCache
      * @var \Memcache
      */
     private $_Memcache;
-
     private $compression = 0;
-
     private $serverList = array();
+
     /**
      * The default Memcache server connection information
      * @var array
@@ -272,7 +271,7 @@ class Memcache extends AExtendedCache
             return false;
         }
 
-        return (int)$tmp;
+        return (int) $tmp;
     }
 
     /**
@@ -294,8 +293,8 @@ class Memcache extends AExtendedCache
             $lifetime = $this->getControledLifetime($lifetime);
         }
 
-        if (false === $this->_Memcache->set($id, (is_array($data) ? $data : ''.$data), $this->compression, $lifetime) ||
-            false === $this->_Memcache->set(self::EXPIRE_PREFIX . $id, ''.$lifetime, $this->compression, $lifetime)
+        if (false === $this->_Memcache->set($id, (is_array($data) ? $data : '' . $data), $this->compression, $lifetime) ||
+                false === $this->_Memcache->set(self::EXPIRE_PREFIX . $id, '' . (0 === $lifetime ? 0 : time() + $lifetime), $this->compression, $lifetime)
         ) {
             return $this->_onError('save');
         }
@@ -322,7 +321,7 @@ class Memcache extends AExtendedCache
     public function remove($id)
     {
         if (false === $this->_Memcache->delete($id) ||
-            false === $this->_Memcache->delete(self::EXPIRE_PREFIX . $id)
+                false === $this->_Memcache->delete(self::EXPIRE_PREFIX . $id)
         ) {
             return $this->_onError('remove');
         }
@@ -350,7 +349,7 @@ class Memcache extends AExtendedCache
      */
     public function removeByTag($tag)
     {
-        $tags = (array)$tag;
+        $tags = (array) $tag;
         if (0 === count($tags)) {
             return false;
         }
@@ -377,7 +376,7 @@ class Memcache extends AExtendedCache
      */
     public function updateExpireByTag($tag, $lifetime = null)
     {
-        $tags = (array)$tag;
+        $tags = (array) $tag;
         if (0 == count($tags)) {
             return false;
         }
@@ -408,7 +407,7 @@ class Memcache extends AExtendedCache
      */
     public function getMinExpireByTag($tag, $lifetime = 0)
     {
-        $tags = (array)$tag;
+        $tags = (array) $tag;
 
         if (0 == count($tags)) {
             return $lifetime;
