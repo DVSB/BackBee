@@ -107,10 +107,14 @@ class FrontController implements HttpKernelInterface
                     $this->force_url_extension = $parameters_config['force_url_extension'];
                 }
             }
+            
+            $route = $application->getConfig()->getRouteConfig();
+            if (true === is_array($route) && 0 < count($route)) {
+                $this->registerRoutes($this, $route);
+            }
         }
 
         $this->url_extension = self::DEFAULT_URL_EXTENSION;
-        $application->getRouting();
     }
 
     /**
@@ -202,6 +206,15 @@ class FrontController implements HttpKernelInterface
         }
 
         $actionKey = $matches['_route'] . '_' . $matches['_action'];
+        if (true === isset($this->_actions[$actionKey])) {
+            $controller = array_shift($this->_actions[$actionKey]);
+            if (true === is_string($controller)) {
+                $controller = $this->_application->getContainer()->get($controller);
+            }
+
+            array_unshift($this->_actions[$actionKey], $controller);
+            unset($controller);
+        }
 
         if (isset($this->_actions[$actionKey]) && is_callable($this->_actions[$actionKey])) {
             /* nothing to do */
@@ -326,15 +339,15 @@ class FrontController implements HttpKernelInterface
      */
     public function getRouteCollection()
     {
-        $container = $this->_application->getContainer();
-        // var_dump($container->isLoaded('routing')); die;
-        if (null === $container->get('routing')) {
-            $container->set('routing', new RouteCollection($this->_application));
-            $routeConfig = $this->_application->getConfig()->getRouteConfig();
-            $this->registerRoutes($this, $routeConfig);
-        }
+        // $container = $this->_application->getContainer();
+        // // var_dump($container->isLoaded('routing')); die;
+        // if (null === $container->get('routing')) {
+        //     $container->set('routing', new RouteCollection($this->_application));
+        //     $routeConfig = $this->_application->getConfig()->getRouteConfig();
+        //     $this->registerRoutes($this, $routeConfig);
+        // }
 
-        return $container->get('routing');
+        return $this->_application->getContainer()->get('routing');
     }
 
     /**
@@ -812,23 +825,22 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Register every valid route defined in $routeConfig array
+     * Register every valid route defined in $route_config array
      * 
      * @param  ABundle $defaultController used as default controller if a route comes without any specific controller
-     * @param  array   $routeConfig       
+     * @param  array   $route_config       
      */
-    public function registerRoutes($defaultController, array $routeConfig = null)
+    public function registerRoutes($default_controller, array $route_config = null)
     {
-        if (null === $routeConfig) {
+        if (null === $route_config) {
             return;
         }
 
         $application = $this->getApplication();
         $router = $this->getRouteCollection();
-        $router->pushRouteCollection($router, $routeConfig);
-        $router->moveDefaultRoute($router);
+        $router->pushRouteCollection($route_config);
 
-        foreach ($routeConfig as $name => $route) {
+        foreach ($route_config as $name => $route) {
             if (false === array_key_exists('defaults', $route) || false === array_key_exists('_action', $route['defaults'])) {
                 $application->warning(sprintf('Unable to parse the action method for the route `%s`.', $name));
                 continue;
@@ -843,12 +855,14 @@ class FrontController implements HttpKernelInterface
                     $controller = $route['defaults']['_controller'];
                 } else {
                     $application->warning(sprintf(
-                                    'Unable to get a valid controller with id:`%s` for the route `%s`.', $route['defaults']['_controller'], $name
+                        'Unable to get a valid controller with id:`%s` for the route `%s`.', 
+                        $route['defaults']['_controller'], 
+                        $name
                     ));
                     continue;
                 }
             } else {
-                $controller = $defaultController;
+                $controller = $default_controller;
             }
 
             $handlerKey = $action;

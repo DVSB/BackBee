@@ -6,7 +6,7 @@ use ReflectionClass;
 
 use BackBuilder\BBApplication,
     BackBuilder\Config\Config,
-	BackBuilder\DependencyInjection\ContainerBuilder;
+    BackBuilder\DependencyInjection\ContainerBuilder;
 
 use Symfony\Component\DependencyInjection\Definition,
     Symfony\Component\DependencyInjection\Reference,
@@ -14,29 +14,28 @@ use Symfony\Component\DependencyInjection\Definition,
 
 class BundleLoader
 {
-	private static $bundleBaseDir = array();
+    private static $bundle_base_dir = array();
 
-	private static $bundlesConfig = array();
+    private static $bundles_config = array();
 
-	private static $application = null;
+    private static $application = null;
 
-	/**
-	 * [loadBundlesIntoApplication description]
-	 * @param  BBApplication $application  [description]
-	 * @param  array         $bundleConfig [description]
-	 * @return [type]                      [description]
-	 */
-	public static function loadBundlesIntoApplication(BBApplication $application, array $bundleConfig)
-	{
-		self::$application = $application;
+    /**
+     * [loadBundlesIntoApplication description]
+     * @param  BBApplication $application  [description]
+     * @param  array         $bundles_config [description]
+     * @return [type]                      [description]
+     */
+    public static function loadBundlesIntoApplication(BBApplication $application, array $bundles_config)
+    {
+        self::$application = $application;
 
-		foreach ($bundleConfig as $name => $classname) {
-            
+        foreach ($bundles_config as $name => $classname) {
             // Using ReflectionClass so we can read every bundle config file without the need to
             // instanciate each bundle's Config
             $r = new ReflectionClass($classname);
             $key = 'bundle.' . strtolower(basename(dirname($r->getFileName())));
-            self::$bundleBaseDir[$key] = dirname($r->getFileName());
+            self::$bundle_base_dir[$key] = dirname($r->getFileName());
             unset($r);
 
             $definition = new Definition($classname, array(new Reference('bbapp')));
@@ -80,112 +79,117 @@ class BundleLoader
             )
         ));
 
-        // store bundles base config so we can register every routes on bbapplication.start
-        $application->getContainer()->get('registry')->set('bundles.baseconfig', self::$bundlesConfig);
-
         // Cleaning memory
-        self::$bundleBaseDir = null;
-        self::$bundlesConfig = null;
+        self::$bundle_base_dir = null;
+        self::$bundles_config = null;
         self::$application = null;
-	}
+    }
 
-	private static function loadBundlesConfig()
-	{
-		foreach (self::$bundleBaseDir as $key => $baseDir) {
-            $filename = implode('/', array(
-                self::$application->getDataDir(),
-                'Bundles',
-                basename($baseDir),
-                'config.yml'
-            ));
-            
-            if (false === is_file($filename)) {
-                $filename = $baseDir . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'config.yml';
+    private static function loadBundlesConfig()
+    {
+        $services_id = array();
+        foreach (self::$bundle_base_dir as $key => $base_dir) {
+            $config = \BackBuilder\Bundle\ABundle::initBundleConfig(self::$application, $base_dir);
+            self::$bundles_config[$key] = $config;
+            $config_service_id = \BackBuilder\Bundle\ABundle::getBundleConfigServiceId($base_dir);
+            self::$application->getContainer()->set($config_service_id, $config);
+            $services_id[] = $config_service_id;
+        }
+
+        self::$application->getContainer()->get('registry')->set('bundle.config_services_id', $services_id);
+    }
+
+    private static function loadBundleEvents()
+    {
+        $eventDispatcher = self::$application->getContainer()->get('event.dispatcher');
+
+        foreach (self::$bundles_config as $key => $config) {
+            $events = $config->getEventsConfig();
+            if (false === is_array($events) || 0 === count($events)) {
+                continue;
             }
 
-			if (true === is_readable($filename)) {
-                self::$bundlesConfig[$key] = new Config(dirname($filename), self::$application->getBootstrapCache());
-			}
-		}
-	}
-
-	private static function loadBundleEvents()
-	{
-		$eventDispatcher = self::$application->getContainer()->get('event.dispatcher');
-
-		foreach (self::$bundlesConfig as $key => $config) {
-            $events = $config->getEventsConfig();
-			if (false === is_array($events) || 0 === count($events)) {
-				continue;
-			}
-
-			$eventDispatcher->addListeners($events);
-		}
-	}
+            $eventDispatcher->addListeners($events);
+        }
+    }
 
     /**
      * Load every service definition defined in bundle
      */
     private static function loadBundlesServices()
     {
-    	$container = self::$application->getContainer();
-        foreach (self::$bundleBaseDir as $dir) {
-            $xmlDir = $dir . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR;
-            if (true === is_file($xmlDir . 'services.xml')) {
-                try {
-                    ContainerBuilder::loadServicesFromXmlFile($container, $xmlDir);
-                } catch (Exception $e) { /* nothing to do, just ignore it */ }
+        $bundle_env_directory = null;
+        if (BBApplication::DEFAULT_ENVIRONMENT !== self::$application->getEnvironment()) {
+            $bundle_env_directory = implode(DIRECTORY_SEPARATOR, array(
+                self::$application->getRepository(), 'Config', self::$application->getEnvironment(), 'bundle'
+            ));
+        }
+
+        $container = self::$application->getContainer();
+        foreach (self::$bundle_base_dir as $dir) {
+            $services_directory = array($dir . DIRECTORY_SEPARATOR . 'Ressources');
+            if (null !== $bundle_env_directory) {
+                $services_directory[] = $bundle_env_directory . DIRECTORY_SEPARATOR . basename($dir);
+            }
+
+            foreach ($services_directory as $sd) {
+                $filepath = $sd . DIRECTORY_SEPARATOR . 'services.xml';
+                if (true === is_file($filepath) && true === is_readable($filepath)) {
+                    try {
+                        ContainerBuilder::loadServicesFromXmlFile($container, $sd);
+                    } catch (Exception $e) { /* nothing to do, just ignore it */ }
+                }
             }
         }
     }
 
-	private static function registerBundleClassContentDir()
-	{
-		foreach (self::$bundleBaseDir as $dir) {
-			$classContentDir = realpath($dir . DIRECTORY_SEPARATOR . 'ClassContent');
-			if (false === $classContentDir) {
-				continue;
-			}
+    private static function registerBundleClassContentDir()
+    {
+        foreach (self::$bundle_base_dir as $dir) {
+            $classcontent_dir = realpath($dir . DIRECTORY_SEPARATOR . 'ClassContent');
+            if (false === $classcontent_dir) {
+                continue;
+            }
 
-			self::$application->pushClassContentDir($classContentDir);
-		}
-	}
+            self::$application->pushClassContentDir($classcontent_dir);
+        }
+    }
 
-	private static function registerBundleResourceDir()
-	{
-		foreach (self::$bundleBaseDir as $dir) {
-			$resourcesDir = realpath($dir . DIRECTORY_SEPARATOR . 'Ressources');
-			if (false === $resourcesDir) {
-				continue;
-			}
+    private static function registerBundleResourceDir()
+    {
+        foreach (self::$bundle_base_dir as $dir) {
+            $resources_dir = realpath($dir . DIRECTORY_SEPARATOR . 'Ressources');
+            if (false === $resources_dir) {
+                continue;
+            }
 
-			self::$application->pushResourceDir($resourcesDir);
-		}
-	}
+            self::$application->pushResourceDir($resources_dir);
+        }
+    }
 
-	private static function registerBundleScriptDir()
-	{
-		$renderer = self::$application->getRenderer();
-		foreach (self::$bundleBaseDir as $dir) {
-			$scriptsDir = realpath($dir . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'scripts');
-			if (false === $scriptsDir) {
-				continue;
-			}
+    private static function registerBundleScriptDir()
+    {
+        $renderer = self::$application->getRenderer();
+        foreach (self::$bundle_base_dir as $dir) {
+            $scripts_dir = realpath($dir . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'scripts');
+            if (false === $scripts_dir) {
+                continue;
+            }
 
-			$renderer->addScriptDir($scriptsDir);
-		}
-	}
+            $renderer->addScriptDir($scripts_dir);
+        }
+    }
 
-	private static function registerBundleHelperDir()
-	{
-		$renderer = self::$application->getRenderer();
-		foreach (self::$bundleBaseDir as $dir) {
-			$helperDir = realpath($dir . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'helpers');
-			if (false === $helperDir) {
-				continue;
-			}
+    private static function registerBundleHelperDir()
+    {
+        $renderer = self::$application->getRenderer();
+        foreach (self::$bundle_base_dir as $dir) {
+            $helper_dir = realpath($dir . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'helpers');
+            if (false === $helper_dir) {
+                continue;
+            }
 
-			$renderer->addHelperDir($helperDir);
-		}
-	}
+            $renderer->addHelperDir($helper_dir);
+        }
+    }
 }

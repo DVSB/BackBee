@@ -21,15 +21,15 @@ class BundleListener
             return;
         }
 
-        $bundleConfigs = $application->getContainer()->get('registry')->get('bundles.baseconfig', array());
-        $controller = $application->getContainer()->get('controller');
-        foreach ($bundleConfigs as $key => $config) {
-            $route = $config->getRouteConfig();
+        $container = $application->getContainer();
+        $controller = $container->get('controller');
+        foreach ($container->get('registry')->get('bundle.config_services_id', array()) as $service_id) {
+            $route = $container->get($service_id)->getRouteConfig();
             if (false === is_array($route) || 0 === count($route)) {
                 continue;
             }
 
-            $controller->registerRoutes($key, $route);
+            $controller->registerRoutes(str_replace('.config', '', $service_id), $route);
         }
     }
 

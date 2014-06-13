@@ -409,40 +409,6 @@ class BBApplication implements IApplication
     }
 
     /**
-     * Load every service definition defined in bundle
-     */
-    private function initBundlesServices()
-    {
-        // OVERRIDE Services Bundle within environment TODO
-        if (self::DEFAULT_ENVIRONMENT !== $this->_environment) {
-            $dirToLookingFor = $this->getRepository()
-                . DIRECTORY_SEPARATOR . 'Config'
-                . DIRECTORY_SEPARATOR . $this->_environment
-                . DIRECTORY_SEPARATOR . 'bundle';
-            ;
-
-            foreach ($this->_bundles as $b) {
-                $xml = $dirToLookingFor .
-                    DIRECTORY_SEPARATOR .
-                    $b->getId() .
-                    DIRECTORY_SEPARATOR .
-                    'services.xml';
-
-                if (true === is_file($xml)) {
-                    $loader = new XmlFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
-                    try {
-                        $loader->load('services.xml');
-                    } catch (Exception $e) { /* nothing to do, just ignore it */
-                    }
-
-                    unset($loader);
-                }
-            }
-
-        }
-    }
-
-    /**
      * @param type $name
      * @return ABundle
      */
@@ -501,7 +467,8 @@ class BBApplication implements IApplication
 
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
-        
+
+
         if (false === $this->isClientSAPI()) {
             $response = $this->getController()->handle();
             if ($response instanceof Response) {
