@@ -141,7 +141,6 @@ class BBApplication implements IApplication
         AnnotationReader::addGlobalIgnoredName('fixture');
         AnnotationReader::addGlobalIgnoredName('column');
 
-
         $this->_initContainer()
                 ->_initAutoloader()
                 ->_initContentWrapper();
@@ -227,9 +226,7 @@ class BBApplication implements IApplication
                 $this->_base_repository = null;
             }
 
-            $this->getContainer()
-                ->get('config')
-                ->setEnvironment($this->_environment);
+            $this->_initConfig();
 
             $this->_container->setDefinition('site', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
             $this->_container->setDefinition('routing', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
