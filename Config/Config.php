@@ -44,7 +44,19 @@ class Config
      * Default config file to look for
      * @var string
      */
-    const CONFIG_FILE = 'config.yml';
+    const CONFIG_FILE = 'config';
+    
+    /**
+     * System events config file to look for
+     * @var string
+     */
+    const EVENTS_FILE = 'events';
+
+    /**
+     * System extention config file
+     * @var string
+     */
+    const EXTENTION = 'yml';
 
     /**
      * The base directory to looking for configuration files
@@ -75,6 +87,24 @@ class Config
      * @var \BackBuilder\DependencyInjection\Container
      */
     private $_container;
+
+    private $_environment = 'production';
+    
+    /**
+     * Is debug mode enabled
+     * 
+     * @var boolean
+     */
+    private $_debug = false;
+    
+    /**
+     * Debug info
+     * 
+     * Only populated in dev environment
+     * 
+     * @var array
+     */
+    protected $_debugData = array();
 
     /**
      * Magic function to get configuration section
@@ -110,13 +140,15 @@ class Config
      * @param \BackBuilder\Cache\ACache $cache Optional cache system
      * @param \BackBuilder\DependencyInjection\Container $container
      */
-    public function __construct($basedir, ACache $cache = null, Container $container = null)
+    public function __construct($basedir, ACache $cache = null, ContainerBuilder $container = null, $debug = false)
     {
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
+        $this->_debug = $debug;
         $this->setContainer($container)->extend();
     }
+    
 
     /**
      * Set the service container to be able to parse parameter and service in config
@@ -130,6 +162,18 @@ class Config
         $this->_parameters = array();
         return $this;
     }
+    
+    /**
+     * Get debug info 
+     * 
+     * Populated only in dev env
+     * 
+     * @return array
+     */
+    public function getDebugData()
+    {
+        return $this->_debugData;
+    }
 
     /**
      * If a cache system is defined, try to load a cache for the current basedir
@@ -138,6 +182,10 @@ class Config
      */
     private function _loadFromCache($basedir)
     {
+        if(true === $this->_debug) {
+            return false;
+        }
+
         if (null === $this->_cache) {
             return false;
         }
@@ -146,7 +194,7 @@ class Config
         if (false === $cached_parameters) {
             return false;
         }
-
+        
         $parameters = @\unserialize($cached_parameters);
         if (false === is_array($parameters)) {
             return false;
@@ -166,6 +214,10 @@ class Config
      */
     private function _saveToCache($basedir)
     {
+        if(true === $this->_debug) {
+            return false;
+        }
+        
         if (null !== $this->_cache) {
             return $this->_cache->save($this->_getCacheId($basedir), serialize($this->_raw_parameters));
         }
@@ -204,7 +256,7 @@ class Config
      */
     private function _getCacheId($basedir)
     {
-        return md5('config-' . $basedir);
+        return md5('config-' . $basedir . $this->_environment);
     }
 
     /**
@@ -216,8 +268,10 @@ class Config
      */
     private function _getYmlFiles($basedir)
     {
-        $yml_files = \BackBuilder\Util\File::getFilesRecursivelyByExtension($basedir, 'yml');
-        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE;
+        $yml_files = \BackBuilder\Util\File::getFilesByExtension($basedir, self::EXTENTION);
+
+        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE . '.' . self::EXTENTION;
+
         if (true === file_exists($default_file) && 1 < count($yml_files)) {
             // Ensure that config.yml is the first one
             $yml_files = array_diff($yml_files, array($default_file));
@@ -242,19 +296,26 @@ class Config
     /**
      * Try to parse a yaml config file
      * @param string $filename
-     * @throws \BackBuilder\Config\Exception\InvalidConfigException Occurs when the file can't be parse
+     * @throws \BackBuilder\Config\Exception\InvalidConfigException Occurs when the file can't be parsed
      */
     private function _loadFromFile($filename, $overwrite = false)
     {
         try {
             $yamlDatas = Yaml::parse($filename);
+
             if (is_array($yamlDatas)) {
-                if (self::CONFIG_FILE === basename($filename)) {
+                if(true === $this->_debug) {
+                    $this->_debugData[$filename] = $yamlDatas;
+                }
+                
+                if (self::CONFIG_FILE . '.' . self::EXTENTION === basename($filename) || 
+                    self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION === basename($filename)) {
+
                     foreach ($yamlDatas as $component => $config) {
                         $this->setSection($component, $config, $overwrite);
                     }
                 } else {
-                    $this->setSection(substr(basename($filename), 0, -4), $yamlDatas, $overwrite);
+                    $this->setSection(basename($filename, '.' . self::EXTENTION), $yamlDatas, $overwrite);
                 }
             }
         } catch (ParseException $e) {
@@ -308,6 +369,28 @@ class Config
     public function getAllSections()
     {
         return $this->getSection();
+    }
+
+    /**
+     * Set environment context
+     * @param string $env
+     * @return self
+     */
+    public function setEnvironment($env)
+    {
+        $this->_environment = $env;
+        return $this;
+    }
+    
+    /**
+     * Set debug mode
+     * @param boolean $debug
+     * @return self
+     */
+    public function setDebug($debug)
+    {
+        $this->_debug = $debug;
+        return $this;
     }
 
     /**
@@ -405,6 +488,15 @@ class Config
             $this->_loadFromBaseDir($basedir, $overwrite);
             $this->_saveToCache($basedir);
         }
+
+        if (!empty($this->_environment) &&
+            false === strpos($this->_environment, $basedir) &&
+            file_exists($basedir . DIRECTORY_SEPARATOR . $this->_environment)) {
+
+            $this->extend($basedir . DIRECTORY_SEPARATOR . $this->_environment, $overwrite);
+        }
+        
+        return $this;
     }
 
     /**

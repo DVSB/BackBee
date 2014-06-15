@@ -55,7 +55,7 @@ class Database
             $this->_schemaTool->dropSchema($classes);
             $this->_schemaTool->createSchema($classes);
         }catch(\Exception $e){
-            //echo $e->getMessage()."\n";
+            echo $e->getMessage()."\n";
         }
     }
 
@@ -87,7 +87,7 @@ class Database
             $schemaTool->createSchema($classes);
             unset($schemaTool);
         }catch(\Exception $e){
-            //echo $e->getMessage()."\n";
+            echo $e->getMessage()."\n";
         }
     }
 
@@ -166,6 +166,99 @@ class Database
         foreach ($this->_entityFinder->getEntities(dirname($reflection->getFileName())) as $className) {
             $classes[] = $this->_em->getClassMetadata($className);
         }
+        return $classes;
+    }
+
+    public function getSqlSchema()
+    {
+        $sql1 = $this->getBackBuilderSqlSchema();
+        $sql2 = $this->getBundleSqlSchema();
+
+        $sql = array_merge($sql1, $sql2);
+
+        $sql = implode(";\n", $sql);
+        return $sql.';';
+    }
+
+    private function getBackBuilderSqlSchema()
+    {
+        $classes = $this->_getBackbuilderSchema();
+        $sql = $this->_schemaTool->getCreateSchemaSql($classes);
+
+        return $sql;
+    }
+
+    private function getBundleSqlSchema()
+    {
+        $sql = array();
+
+        foreach ($this->_application->getBundles() as $bundle) {
+
+            $classes = $this->_getBundleSchema($bundle);
+
+            $sql = array_merge($sql, $this->_schemaTool->getCreateSchemaSql($classes));
+        }
+
+        return $sql;
+    }
+
+    public function getUpdateSqlSchema()
+    {
+        $sql1 = $this->getUpdateBackBuilderSqlSchema();
+        $sql2 = $this->getUpdateBundleSqlSchema();
+
+        $sql = array_merge($sql1, $sql2);
+
+        return $sql;
+    }
+
+    private function getUpdateBackBuilderSqlSchema()
+    {
+        $classes = $this->_getBackbuilderSchema();
+        $sql = $this->_schemaTool->getUpdateSchemaSql($classes, true);
+
+        return $sql;
+    }
+
+    private function getUpdateBundleSqlSchema()
+    {
+        $sql = array();
+
+        foreach ($this->_application->getBundles() as $bundle) {
+
+            $classes = $this->_getBundleSchema($bundle);
+
+            $sql = array_merge($sql, $this->_schemaTool->getUpdateSchemaSql($classes, true));
+        }
+
+        return $sql;
+    }
+    
+    public function getClassMetadata()
+    {
+        $classes1 = $this->getBackBuilderClassMetadata();
+        $classes2 = $this->getBundleClassMetadata();
+
+        $classes = array_merge($classes1, $classes2);
+
+        return $classes;
+    }
+
+    private function getBackBuilderClassMetadata()
+    {
+        $classes = $this->_getBackbuilderSchema();
+
+        return $classes;
+    }
+
+    private function getBundleClassMetadata()
+    {
+        $classes = array();
+
+        foreach ($this->_application->getBundles() as $bundle) {
+            $classes = array_merge($classes, $this->_getBundleSchema($bundle));
+        }
+
         return $classes;
     }
 

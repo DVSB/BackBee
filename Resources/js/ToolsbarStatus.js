@@ -84,9 +84,10 @@ BB4.ToolsbarManager.register('statustb',{
                 bb.jquery.each(currentPage.metadata, function(name, metadatas) {
                     content += '<fieldset><legend>'+name+'</legend>';
                     bb.jquery.each(metadatas, function(index, metadata) {
-                        if ('name' != metadata.attr) {
-                            if ('content' != metadata.attr)
+                        if ('name' != metadata.attr && 'property' != metadata.attr) {
+                            if ('content' != metadata.attr) {
                                 content += '<label for="bb5-meta-'+name+'-'+metadata.attr+'">'+metadata.attr+'</label>';
+                            }
                             content += '<textarea id="bb5-meta-'+name+'-'+metadata.attr+'">'+metadata.value+'</textarea>';
                         }
                     });
@@ -288,8 +289,10 @@ BB4.ToolsbarManager.register('statustb',{
                             }
                         }
                     },
-                    width: 500,
-                    maxHeigh : 200
+					
+                    width: 520,
+					height: 600,
+                    maxHeigh : 600
                 });
                 this._metadataDialog.setContent(this._getMetadataForm());
             }

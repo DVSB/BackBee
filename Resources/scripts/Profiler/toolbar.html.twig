@@ -1,0 +1,119 @@
+<div id="bb-profiler-panel">
+
+    <ul class="nav">
+    {% for name, template in templates %}
+        <li class="bb-profiler-block">
+            <a href="#{{ name }}Panel">
+                {{ template.renderblock('toolbar', {
+                    'collector': profile.getCollector(name),
+                    'profiler_url': profiler_url,
+                    'name': name
+                  })
+                }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+    
+    <div class="tab-content">
+        {% for name, template in templates %}
+        <div class="tab-pane fade in active" id="{{ name }}Panel">
+            {{ template.renderblock('panel', {
+                'collector': profile.getCollector(name),
+                'profiler_url': profiler_url,
+                'name': name
+              })
+            }}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div id="bb-profiler-close">x</div>
+</div>
+
+<style>
+    #bb-profiler-panel{
+        height: 30px;
+        background: #fff;
+        border-top: 1px;
+        background-color: #F7F7F7;
+        font: 11px Verdana,Arial,sans-serif;
+        border-top: 1px solid #ccc;
+        bottom: 0;
+        left: 0;
+        margin: 0;
+        position: fixed;
+        right: 0;
+        text-align: left;
+        z-index: 999999;
+    }
+    
+    #bb-profiler-panel.open{
+        height: auto;
+        overflow: scroll;
+    }
+    
+    #bb-profiler-panel ul.nav{
+        height: 32px;
+        width: 100%;
+        background: #eee;
+        position: fixed;
+    }
+    
+    #bb-profiler-panel ul.nav li{
+        float: left;
+    }
+    
+    #bb-profiler-panel .tab-content{
+        background: #fff;
+        padding: 10px 20px;
+    }
+    
+    #bb-profiler-panel .nav a{
+        padding: 0;
+        padding: 2px 4px;
+    }
+    
+    #bb-profiler-panel .nav a:hover{
+        background-color: #fff;
+    }
+    
+    #bb-profiler-close {
+        display: block;
+        width: 15px;
+        height: 16px;
+        top: 7px;
+        right: 5px;
+        cursor: pointer;
+        color: #000;
+        text-align: center;
+        line-height: 12px;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+        position: fixed;
+    }
+    #bb-profiler-close:hover {
+        color: #fff;
+        background-color: red;
+    }
+</style>
+
+<script>
+    $('#bb-profiler-panel ul.nav li a').click(function(){
+        $('#bb-profiler-panel').css('top', '0');
+        $('#bb-profiler-panel').addClass('open');
+        
+    });
+    
+    
+    $('#bb-profiler-close').click(function(){
+        $('#bb-profiler-panel').hide();
+    });
+    
+    $('#bb-profiler-panel .nav a').click(function(){
+        var hash = $(this).attr('href');
+        $('.tab-content .tab-pane').removeClass('active');
+        $(hash).addClass('active');
+    });
+</script>

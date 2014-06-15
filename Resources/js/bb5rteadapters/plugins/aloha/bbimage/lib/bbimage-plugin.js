@@ -226,9 +226,9 @@ define(['aloha','aloha/plugin','aloha/pluginmanager','aloha/jquery','ui/scopes',
                 /* remove default actions provided by  */
                 var component = Ui.getAdoptedComponent("imageAlignLeft");
                 if(component) jQuery(component.element).remove();
-                var component = Ui.getAdoptedComponent("imageAlignRight");
+                 component = Ui.getAdoptedComponent("imageAlignRight");
                 if(component) jQuery(component.element).remove();
-                var component = Ui.getAdoptedComponent("imageAlignNone");
+                 component = Ui.getAdoptedComponent("imageAlignNone");
                 if(component) jQuery(component.element).remove();
             
                 /*create ours.*/

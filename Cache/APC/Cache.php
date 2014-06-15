@@ -192,6 +192,17 @@ class Cache extends AExtendedCache
     }
 
     /**
+     * @todo
+     * @param type $tag
+     * @param type $lifetime
+     * @return type
+     */
+    public function getMinExpireByTag($tag, $lifetime = 0)
+    {
+        return $lifetime;
+    }
+    
+    /**
      * Updates TTL for all cache records associated to provided tag(s)
      * @param mixed $tag
      * @param int $lifetime

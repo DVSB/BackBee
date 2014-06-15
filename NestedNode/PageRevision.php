@@ -66,19 +66,19 @@ class PageRevision
     protected $_version;
 
     /**
-     * @ManyToOne(targetEntity="BackBuilder\Security\User", inversedBy="_revisions")
+     * @ManyToOne(targetEntity="BackBuilder\Security\User", inversedBy="_revisions", fetch="EXTRA_LAZY")
      * @JoinColumn(name="user_id", referencedColumnName="id")
      */
     protected $_user;
 
     /**
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_revisions")
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_revisions", fetch="EXTRA_LAZY")
      * @JoinColumn(name="page_uid", referencedColumnName="uid")
      */
     protected $_page;
 
     /**
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", cascade={"persist"})
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;

@@ -13,15 +13,19 @@ class EntityFinder
      * @var array
      */
     private $_ignoredFolder = array(
-        'Resources',
-        'Ressources',
-        'Test',
-        'TestUnit',
-        'Exception',
-        'Commands',
-        'Installer',
-        'Assets'
+        '/Resources/',
+        '/Ressources/',
+        '/Test/',
+        '/TestUnit/',
+        '/Exception/',
+        '/Commands/',
+        '/Installer/',
+        '/Assets/',
+        '/Renderer/',
+        '/Templates/',
+        '/helpers/',
     );
+
 
     /**
      * @var string
@@ -45,22 +49,28 @@ class EntityFinder
     public function getEntities($path)
     {
         $entities = array();
-        foreach (Dir::getContent($path) as $content) {
-            $subpath = $path . DIRECTORY_SEPARATOR . $content;
-            if (in_array($content, $this->_ignoredFolder))
-                continue;
-            if (is_dir($subpath)) {
-                $entities = array_merge($entities, $this->getEntities($subpath));
-            } else {
-                if (1 === preg_match('/.*(.php)$/', $subpath)) {
-                    $namespace = $this->getNamespace($subpath);
-                    if ($this->_isValidNamespace($namespace)) {
-                        $entities[] = $namespace;
-                    }
+
+        $Directory = new \RecursiveDirectoryIterator($path);
+        $Iterator = new \RecursiveIteratorIterator($Directory);
+        $objects = new \RegexIterator($Iterator, '/.*(.php)$/', \RecursiveRegexIterator::GET_MATCH);
+
+        foreach($objects as $filename => $object){
+            $file = explode('/', $filename);
+            if(!preg_filter($this->_ignoredFolder, array(), $file))
+            {
+                $namespace = $this->getNamespace($filename);
+                if ($this->_isValidNamespace($namespace)) {
+                    $entities[] = $namespace;
                 }
             }
         }
+
         return $entities;
+    }
+
+    public function parseFiles()
+    {
+
     }
     
     public function addIgnoredFolder($folder)
@@ -81,7 +91,7 @@ class EntityFinder
     private function _isValidNamespace($namespace)
     {
         return (
-            true === class_exists($namespace) && 
+            true === class_exists($namespace) &&
             $this->_isEntity(new \ReflectionClass($namespace))
         );
     }

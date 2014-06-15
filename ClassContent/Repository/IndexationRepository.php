@@ -64,6 +64,70 @@ class IndexationRepository extends EntityRepository
     }
 
     /**
+     * Replaces content in optimized tables
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    public function replaceOptContentTable(AClassContent $content)
+    {
+        if (null === $content->getMainNode()) {
+            return $this;
+        }
+
+        $command = 'REPLACE';
+        if (false === $this->_replace_supported) {
+            // REPLACE command not supported, remove first then insert
+            $this->removeOptContentTable($content);
+            $command = 'INSERT';
+        }
+
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\OptContentByModified');
+        $query = $command . ' INTO ' . $meta->getTableName() .
+                ' (' . $meta->getColumnName('_uid') . ', ' .
+                $meta->getColumnName('_label') . ', ' .
+                $meta->getColumnName('_classname') . ', ' .
+                $meta->getColumnName('_node_uid') . ', ' .
+                $meta->getColumnName('_modified') . ', ' .
+                $meta->getColumnName('_created') . ')' .
+                ' VALUES (:uid, :label, :classname, :node_uid, :modified, :created)';
+
+        $params = array(
+            'uid' => $content->getUid(),
+            'label' => $content->getLabel(),
+            'classname' => \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content),
+            'node_uid' => $content->getMainNode()->getUid(),
+            'modified' => date('Y-m-d H:i:s', $content->getModified()->getTimestamp()),
+            'created' => date('Y-m-d H:i:s', $content->getCreated()->getTimestamp())
+        );
+
+        $types = array(
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+            \Doctrine\DBAL\Connection::PARAM_STR_ARRAY
+        );
+
+        return $this->_executeQuery($query, $params, $types);
+    }
+
+    /**
+     * Removes content from optimized table
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    public function removeOptContentTable(AClassContent $content)
+    {
+        $this->getEntityManager()
+                ->createQuery('DELETE FROM BackBuilder\ClassContent\Indexes\OptContentByModified o WHERE o._uid=:uid')
+                ->setParameter('uid', $content->getUid())
+                ->execute();
+
+        return $this;
+    }
+
+    /**
      * Replaces site-content indexes for an array of contents in a site
      * @param \BackBuilder\Site\Site $site
      * @param array $contents An array of AClassContent
@@ -96,14 +160,28 @@ class IndexationRepository extends EntityRepository
     {
         $parent_uids = array();
         foreach ($contents as $content) {
+            if (null === $content || true === $content->isElementContent()) {
+                continue;
+            }
+
             if (false === array_key_exists($content->getUid(), $parent_uids)) {
-                $parent_uids[$content->getUid()] = array();
+                $parent_uids[$content->getUid()] = array($content->getUid());
             }
 
             $parent_uids[$content->getUid()] = array_merge($parent_uids[$content->getUid()], $this->_getAClassContentUids($content->getSubcontent()->toArray()));
         }
 
         return $this->_replaceIdxContentContents($parent_uids);
+    }
+
+    /**
+     * Removes content-content indexes for an array of contents
+     * @param array $contents An array of AClassContent
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
+     */
+    public function removeIdxContentContents(array $contents)
+    {
+        return $this->_removeIdxContentContents($this->_getAClassContentUids($contents));
     }
 
     /**
@@ -131,6 +209,115 @@ class IndexationRepository extends EntityRepository
         }
 
         return $this;
+    }
+
+    /**
+     * Returns an array of content uids owning provided contents
+     * @param array $contents
+     * @return array
+     */
+    public function getParentContentUids(array $contents)
+    {        
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
+
+        $q = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('c.' . $meta->getColumnName('content_uid'))
+                ->from($meta->getTableName(), 'c');
+        
+        $p = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('j.parent_uid')
+                ->from('content_has_subcontent', 'j');
+
+        $index = 0;
+        $atleastone = false;
+        foreach ($contents as $content) {
+            if (false === ($content instanceof AClassContent)) {
+                continue;
+            }
+
+            if (true === $content->isElementContent()) {
+                continue;
+            }
+
+            $q->orWhere('c.' . $meta->getColumnName('subcontent_uid') . ' = :uid' . $index)
+                    ->setParameter('uid' . $index, $content->getUid());
+            
+            $p->orWhere('j.content_uid = :uid' . $index)
+                    ->setParameter('uid' . $index, $content->getUid());
+
+            $index++;
+            $atleastone = true;
+        }
+
+        return (true === $atleastone) ? array_unique(array_merge($q->execute()->fetchAll(\PDO::FETCH_COLUMN), $p->execute()->fetchAll(\PDO::FETCH_COLUMN))) : array();
+    }
+
+    /**
+     * Returns an array of content uids owned by provided contents
+     * @param mixed $contents
+     * @return array
+     */
+    public function getDescendantsContentUids($contents)
+    {
+        if (false === is_array($contents)) {
+            $contents = array($contents);
+        }
+
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
+
+        $q = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('c.' . $meta->getColumnName('subcontent_uid'))
+                ->from($meta->getTableName(), 'c');
+
+        $index = 0;
+        $atleastone = false;
+        foreach ($contents as $content) {
+            if (false === ($content instanceof AClassContent)) {
+                continue;
+            }
+
+            if (true === $content->isElementContent()) {
+                continue;
+            }
+
+            $q->orWhere('c.' . $meta->getColumnName('content_uid') . ' = :uid' . $index)
+                    ->setParameter('uid' . $index, $content->getUid());
+
+            $index++;
+            $atleastone = true;
+        }
+
+        return (true === $atleastone) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
+    }
+
+    /**
+     * Returns every main node attach to the provided content uids
+     * @param array $content_uids
+     * @return array
+     */
+    public function getNodeUids(array $content_uids)
+    {
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\AClassContent');
+
+        $q = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('c.node_uid')
+                ->from($meta->getTableName(), 'c');
+
+        $index = 0;
+        $atleastone = false;
+        foreach ($content_uids as $uid) {
+            $q->orWhere('c.' . $meta->getColumnName('_uid') . ' = :uid' . $index)
+                    ->setParameter('uid' . $index, $uid);
+
+            $index++;
+            $atleastone = true;
+        }
+
+        return (true === $atleastone) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
     }
 
     /**
@@ -167,15 +354,15 @@ class IndexationRepository extends EntityRepository
             $command = 'REPLACE';
             if (false === $this->_replace_supported) {
                 // REPLACE command not supported, remove first then insert
-                $this->_removeIdxContentContents($parent_uids);
+                $this->_removeIdxContentContents(array_keys($parent_uids));
                 $command = 'INSERT';
             }
 
             $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
             $insert_children = array();
             foreach ($parent_uids as $parent_uid => $subcontent_uids) {
-                $insert_children[] = 'SELECT "' . $parent_uid . '", "' . $parent_uid . '"';
                 foreach ($subcontent_uids as $subcontent_uid) {
+                    $insert_children[] = 'SELECT "' . $parent_uid . '", "' . $subcontent_uid . '"';
                     $insert_children[] = 'SELECT ' . $meta->getColumnName('content_uid') . ', "' . $subcontent_uid . '"' .
                             ' FROM ' . $meta->getTableName() .
                             ' WHERE ' . $meta->getColumnName('subcontent_uid') . ' = "' . $parent_uid . '"';
@@ -195,12 +382,11 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes a set of Content-Content indexes
-     * @param array $parent_uids
+     * @param array $content_uids
      * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
-    public function _removeIdxContentContents(array $parent_uids)
+    public function _removeIdxContentContents(array $content_uids)
     {
-        $content_uids = array_keys($parent_uids);
         if (0 < count($content_uids)) {
             $this->getEntityManager()
                     ->createQuery('DELETE FROM BackBuilder\ClassContent\Indexes\IdxContentContent i 
@@ -389,7 +575,8 @@ class IndexationRepository extends EntityRepository
     {
         $content_uids = array();
         foreach ($contents as $content) {
-            if ($content instanceof AClassContent) {
+            if ($content instanceof AClassContent &&
+                    false === $content->isElementContent()) {
                 $content_uids[] = $content->getUid();
             }
         }

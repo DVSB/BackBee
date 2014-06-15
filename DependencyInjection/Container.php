@@ -37,6 +37,13 @@ class Container extends sfContainerBuilder
             if (false === $this->getDefinition($id)->isSynthetic()) {
                 throw $e;
             }
+        } catch (InvalidArgumentException $e) {
+            $method = 'get' . ucfirst($id) . 'Service';
+            if (true === method_exists($this, $method)) {
+                return $this->$method();
+            }
+
+            throw $e;
         }
         
         if (true === in_array('event.dispatcher', array_keys($this->services))) {
@@ -79,6 +86,12 @@ class Container extends sfContainerBuilder
     private function _getContainerParameters($item)
     {
         $matches = array();
+        if (preg_match('/^%([^%]+)%$/', $item, $matches)) {
+            if ($this->hasParameter($matches[1])) {
+                return $this->getParameter($matches[1]);
+            }
+        }
+
         if (preg_match_all('/%([^%]+)%/', $item, $matches, PREG_PATTERN_ORDER)) {
             foreach ($matches[1] as $expr) {
                 if ($this->hasParameter($expr)) {
@@ -97,6 +110,10 @@ class Container extends sfContainerBuilder
      */
     private function _getContainerServices($item)
     {
+        if (false === is_string($item)) {
+            return $item;
+        }
+
         $matches = array();
         if (preg_match('/^@([a-z0-9.-]+)$/i', trim($item), $matches)) {
             if ($this->has($matches[1])) {
@@ -105,5 +122,19 @@ class Container extends sfContainerBuilder
         }
 
         return $item;
+    }
+
+    /**
+     * Returns true if the given service is loaded.
+     *
+     * @param string $id The service identifier
+     *
+     * @return Boolean true if the service is loaded, false otherwise
+     */
+    public function isLoaded($id)
+    {
+        $id = strtolower($id);
+        
+        return isset($this->services[$id]) || method_exists($this, 'get' . strtr($id, array('_' => '', '.' => '_')) . 'Service');
     }
 }

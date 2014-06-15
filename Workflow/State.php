@@ -39,7 +39,7 @@ use BackBuilder\Site\Layout,
  * @Entity(repositoryClass="BackBuilder\Workflow\Repository\StateRepository")
  * @Table(name="workflow")
  */
-class State extends AObjectIdentifiable implements \Serializable
+class State extends AObjectIdentifiable
 {
 
     /**
@@ -66,7 +66,7 @@ class State extends AObjectIdentifiable implements \Serializable
     /**
      * The optional layout to be applied for state.
      * @var \BackBuilder\Site\Layout
-     * @ManyToOne(targetEntity="BackBuilder\Site\Layout")
+     * @ManyToOne(targetEntity="BackBuilder\Site\Layout", fetch="EXTRA_LAZY")
      * @JoinColumn(name="layout", referencedColumnName="uid")
      */
     protected $_layout;

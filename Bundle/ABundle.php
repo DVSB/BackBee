@@ -31,6 +31,9 @@ use BackBuilder\BBApplication,
 use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Yaml\Yaml;
 
+use Doctrine\ORM\Tools\SchemaTool,
+    Doctrine\ORM\EntityManager;
+
 /**
  * Abstract class for bundle in BackBuilder5 application
  *
@@ -39,7 +42,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class ABundle implements IObjectIdentifiable, \Serializable
+abstract class ABundle implements IObjectIdentifiable
 {
 
     private $_id;
@@ -57,17 +60,23 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
     /**
      * @var array
      */
-    private $configDefaultSections;
+    private $config_default_sections;
 
     /**
      * @var boolean
      */
-    private $manageMultisiteConfig = true;
+    private $manage_multisite_config = true;
 
     /**
      * @var boolean
      */
     private $isConfigFullyInit = false;
+    
+    /**
+     *
+     * @var \ReflectionObject
+     */
+    protected $reflected;
 
     public function __call($method, $args)
     {
@@ -89,6 +98,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         $this->_id = basename($this->_basedir);
 
         $this->_logger = $logger;
+
         if (null === $this->_logger) {
             $this->_logger = $this->_application->getLogging();
         }
@@ -98,65 +108,102 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
     private function _initConfig($configdir = null)
     {
-        if (true === is_null($configdir)) {
-            $configdir = $this->getResourcesDir();
+        $this->_config = $this->getApplication()->getContainer()->get(
+            self::getBundleConfigServiceId($this->getBaseDir())
+        );
+
+        if (null === $this->_config) {
+            $this->_config = self::initBundleConfig($this->getApplication(), $this->_basedir);
         }
 
-        // default bundle's config.yml
-        $srcConfigFilename = $this->getResourcesDir() . DIRECTORY_SEPARATOR . 'config.yml';
+        $all_sections = $this->_config->getAllRawSections();
+        $this->config_default_sections = $all_sections;
 
-        $dataBundlesDir = $this->_application->getDataDir() . DIRECTORY_SEPARATOR 
-            . 'Bundles' . DIRECTORY_SEPARATOR . $this->getId();
-
-        // Looking for bundle's config.yml in data repository
-        $filename = $dataBundlesDir . DIRECTORY_SEPARATOR . 'config.yml';
-        if (false === file_exists($filename)) {
-            if (false === file_exists(dirname($filename))) {
-                mkdir(dirname($filename), 0755, true);
-            }
-
-            copy($srcConfigFilename, $filename);
-        } else {
-            $srcFileStat = stat($srcConfigFilename);
-            $dataFileStat = stat($filename);
-            if ($srcFileStat[9] > $dataFileStat[9]) {
-                // parsing config.yml from bundle and data directory
-                $srcConfig = Yaml::parse($srcConfigFilename);
-                $dataConfig = Yaml::parse($filename);
-
-                // compute entry to add to data config.yml
-                $entryToAdd = Arrays::array_diff_assoc_recursive($srcConfig, $dataConfig);
-                // compute entry to delete from data config.yml
-                $entryToDelete = Arrays::array_diff_assoc_recursive($dataConfig, $srcConfig);
-                
-                if (true === array_key_exists('override_site', $entryToDelete)) {
-                    unset($entryToDelete['override_site']);
-                }
-
-                // add entry to data config.yml
-                $dataConfig = Arrays::array_merge_assoc_recursive($dataConfig, $entryToAdd);
-
-                // remove entry from data config.yml
-                Arrays::array_remove_assoc_recursive($dataConfig, $entryToDelete);
-
-                $this->doSaveConfig($dataConfig, $dataBundlesDir);
-            }
-        }
-
-        $this->_config = new Config(dirname($filename), $this->getApplication()->getBootstrapCache());
-        $this->_config->setContainer($this->getApplication()->getContainer());
-        $allSections = $this->_config->getAllRawSections();
-        $this->configDefaultSections = $allSections;
         if (
-                true === array_key_exists('bundle', $allSections) &&
-                true === array_key_exists('manage_multisite', $allSections['bundle']) &&
-                false === $allSections['bundle']['manage_multisite']
+            true === array_key_exists('bundle', $all_sections) &&
+            true === array_key_exists('manage_multisite', $all_sections['bundle']) &&
+            false === $all_sections['bundle']['manage_multisite']
         ) {
-            $this->manageMultisiteConfig = false;
+            $this->manage_multisite_config = false;
         }
-
 
         return $this;
+    }
+
+    /**
+     * [getBundleConfigServiceId description]
+     * @param  [type] $bundle_base_directory [description]
+     * @return [type]                        [description]
+     */
+    public static function getBundleConfigServiceId($bundle_base_directory)
+    {
+        return strtolower(implode('.', array('bundle', basename($bundle_base_directory), 'config')));
+    }
+
+    /**
+     * [initBundleConfig description]
+     * @param  BBApplication $application           [description]
+     * @param  [type]        $bundle_base_directory [description]
+     * @return [type]                               [description]
+     */
+    public static function initBundleConfig(BBApplication $application, $bundle_base_directory)
+    {
+        $config_dir = implode(DIRECTORY_SEPARATOR, array($bundle_base_directory, 'Ressources'));
+        
+        $config = new Config($config_dir, $application->getBootstrapCache(), null, $application->isDebugMode());
+        $config->setEnvironment($application->getEnvironment());
+        $config->setContainer($application->getContainer());
+
+        $id = basename($bundle_base_directory);
+        self::overrideConfigWithEnvironment($config, $application, $id);
+
+        self::overrideConfigWithRegistry($config, $application, $id);
+
+        return $config;
+    }
+
+    /**
+     * [overrideConfigWithEnvironment description]
+     * @param  Config        $config      [description]
+     * @param  BBApplication $application [description]
+     * @param  [type]        $id          [description]
+     * @return [type]                     [description]
+     */
+    private static function overrideConfigWithEnvironment(Config $config, BBApplication $application, $id)
+    {
+        if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
+            $dir = implode(DIRECTORY_SEPARATOR, array(
+                $application->getConfigDir(),
+                $application->getEnvironment(),
+                'bundle',
+                $id
+            ));
+
+            if (true === is_dir($dir)) {
+                $config->extend($dir, true);
+            }
+        }
+    }
+
+    /**
+     * [overrideConfigWithRegistry description]
+     * @param  Config        $config      [description]
+     * @param  BBApplication $application [description]
+     * @param  [type]        $id          [description]
+     * @return [type]                     [description]
+     */
+    private static function overrideConfigWithRegistry(Config $config, BBApplication $application, $id)
+    {
+        $registry = self::_getRegistryConfig($application, $id);
+        if (null !== $registry && null !== $serialized = $registry->getValue()) {
+            $registry_config = @unserialize($serialized);
+
+            if (true === is_array($registry_config)) {
+                foreach ($registry_config as $section => $value) {
+                    $config->setSection($section, $value, true);
+                }
+            }
+        }
     }
 
     /**
@@ -189,6 +236,99 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
 
         return $em;
     }
+    
+    /**
+     * Get entity manager for this bundle
+     * 
+     * This manager includes only this bundle's entities
+     * 
+     * @return \Doctrine\ORM\EntityManager
+     */
+    public function getBundleEntityManager()
+    {
+        $doctrineConfig = $this->getConfig()->getDoctrineConfig();
+        
+        if(null === $doctrineConfig) {
+            $doctrineConfig = $this->getApplication()->getConfig()->getDoctrineConfig();
+        }
+        
+        if (false === array_key_exists('proxy_ns', $doctrineConfig['dbal'])) {
+            $doctrineConfig['dbal']['proxy_ns'] = 'Proxies';
+        }
+
+        if (false === array_key_exists('proxy_dir', $doctrineConfig['dbal'])) {
+            $doctrineConfig['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir() . '/Proxies';
+        }
+        
+        $em = $this->_initEntityManager($doctrineConfig);
+        
+        // set the path to include only this bundle's entities
+        if(false === file_exists($this->getBaseDir() . '/Entity')) {
+            // Entity dir doesn't exist
+            mkdir($this->getBaseDir() . '/Entity');
+        }
+        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array($this->getBaseDir() . '/Entity'));
+        
+        
+        return $em;
+    }
+    
+    /**
+     * Install this bundle
+     */
+    public function install()
+    {
+        // create DB tables
+        $bundleEm = $this->getBundleEntityManager();
+        
+        $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
+        $schema = new SchemaTool($this->getEntityManager());
+        $schema->createSchema($metadata);
+    }
+    
+    /**
+     * Update this bundle
+     */
+    public function update()
+    {
+        // update DB tables
+        $bundleEm = $this->getBundleEntityManager();
+        
+        $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
+        $schema = new SchemaTool($this->getEntityManager());
+        $schema->updateSchema($metadata, true);
+    }
+    
+    /**
+     * Get update queries
+     * @param EntityManager $em
+     * @return String[]
+     */
+    public function getUpdateQueries(EntityManager $em)
+    {
+        $schema = new SchemaTool($em);
+        
+        $metadatas = $em->getMetadataFactory()->getAllMetadata();
+        $sqls = $schema->getUpdateSchemaSql($metadatas, true);
+        
+        return $sqls;
+    }
+    
+    /**
+     * Get create queries
+     * @param EntityManager $em
+     * @return String[]
+     */
+    public function getCreateQueries(EntityManager $em)
+    {
+        $schema = new SchemaTool($em);
+        
+        $metadatas = $em->getMetadataFactory()->getAllMetadata();
+        $sqls = $schema->getCreateSchemaSql($metadatas);
+        
+        return $sqls;
+    }
+
 
     private function completeConfigInit()
     {
@@ -268,12 +408,17 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      */
     public function getResourcesDir()
     {
-        $dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Resources';
-        if (!file_exists($dir)) {
-            $dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+        //return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+
+        $resources_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+        if ('test' === $this->_application->getContext()) {
+            $test_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
+            if (true === file_exists($test_dir)) {
+                $resources_dir = $test_dir;
+            }
         }
 
-        return $dir;
+        return $resources_dir;
     }
 
     /**
@@ -306,6 +451,11 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         return $this->_request;
     }
 
+    /**
+     * 
+     * @param string|null $configdir
+     * @return Config
+     */
     public function getConfig($configdir = null)
     {
         if (null === $this->_config) {
@@ -313,7 +463,7 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
         }
 
         if (
-                true === $this->manageMultisiteConfig &&
+                true === $this->manage_multisite_config &&
                 false === $this->isConfigFullyInit &&
                 null !== $this->getApplication()->getSite()
         ) {
@@ -328,25 +478,64 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      */
     public function saveConfig()
     {
-        if (false === $this->manageMultisiteConfig) {
+        if (false === $this->manage_multisite_config) {
             $this->doSaveConfig($this->_config->getAllSections());
             return;
         }
 
         $wipConfig = $this->_config->getAllSections();
-        $updatedSections = Arrays::array_diff_assoc_recursive($wipConfig, $this->configDefaultSections);
+        $updatedSections = Arrays::array_diff_assoc_recursive($wipConfig, $this->config_default_sections);
 
         if (0 < count($updatedSections)) {
             $overrideSection = array();
-            if (true === isset($this->configDefaultSections['override_site'])) {
-                $overrideSection = $this->configDefaultSections['override_site'];
+            if (true === isset($this->config_default_sections['override_site'])) {
+                $overrideSection = $this->config_default_sections['override_site'];
             }
 
             $overrideSection[$this->getApplication()->getSite()->getUid()] = $updatedSections;
-            $this->configDefaultSections['override_site'] = $overrideSection;
+            $this->config_default_sections['override_site'] = $overrideSection;
 
-            $this->doSaveConfig($this->configDefaultSections);
+            $this->doSaveConfig($this->config_default_sections);
+        } else {
+            $registry = $this->_getRegistryConfig();
+            if ($this->getApplication()->getEntityManager()->contains($registry)) {
+                $this->getApplication()->getEntityManager()->remove($registry);
+                $this->getApplication()->getEntityManager()->flush($registry);
+            }
         }
+    }
+
+    /**
+     * Returns the registry entry for bundle's config storing
+     * @return \BackBuilder\Bundle\Registry
+     */
+    private static function _getRegistryConfig(BBApplication $application, $id)
+    {
+        $registry = null;
+        if(null !== $application->getEntityManager()) {
+            try {
+                $registry = $application->getEntityManager()
+                    ->getRepository('BackBuilder\Bundle\Registry')
+                    ->findOneBy(array(
+                        'key' => $id, 
+                        'scope' => 'BUNDLE.CONFIG'
+                    ))
+                ;
+            } catch (\Exception $e) {
+                if (true === $application->isStarted()) {
+                    $this->warning('Unable to load registry table');
+                }
+            }
+
+            if (null === $registry) {
+                $registry = new Registry();
+                $registry->setKey($id)
+                         ->setScope('BUNDLE.CONFIG')
+                ;
+            }
+        }
+
+        return $registry;
     }
 
     /**
@@ -354,13 +543,16 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      * 
      * @param  array  $config 
      */
-    private function doSaveConfig(array $config, $configDir = null)
+    private function doSaveConfig(array $config)
     {
-        $configDir = null === $configDir 
-            ? $this->_config->getBaseDir() . DIRECTORY_SEPARATOR 
-            : $configDir . DIRECTORY_SEPARATOR;
-            
-        file_put_contents($configDir . 'config.yml', Yaml::dump($config));
+        $registry = $this->_getRegistryConfig($this->getApplication(), $this->_id);
+        $registry->setValue(serialize($config));
+
+        if (false === $this->getApplication()->getEntityManager()->contains($registry)) {
+            $this->getApplication()->getEntityManager()->persist($registry);
+        }
+
+        $this->getApplication()->getEntityManager()->flush($registry);
     }
 
     public function getProperty($key = null)
@@ -473,8 +665,20 @@ abstract class ABundle implements IObjectIdentifiable, \Serializable
      */
     public function equals(IObjectIdentifiable $identity)
     {
-        return ($this->getType() === $identity->getType()
-                && $this->getIdentifier() === $identity->getIdentifier());
+        return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }
 
+    /**
+     * Get the Bundle namespace.
+     *
+     * @return string
+     */
+    public function getNamespace()
+    {
+        if (null === $this->reflected) {
+            $this->reflected = new \ReflectionObject($this);
+        }
+
+        return $this->reflected->getNamespaceName();
+    }
 }

@@ -98,9 +98,17 @@
                 bb.jquery(this.options.selectPerPageCtnClass).remove();
                 bb.jquery(this.element).find(this.options.maxItemSelectorCtnClass).eq(0).append(this.tplMaxPerPageSelector);                
                 bb.jquery(this.element).find("select").val(this.options.maxPerPage);
+                
+                //click focus (FIREFOX bug)
+                if ($.browser.mozilla) {
+                    bb.jquery(this.element).find("select").unbind("click").click(function(){
+                        bb.jquery(self.element).find("select").focus();
+                    });
+                }
+            
                 bb.jquery(this.element).find("select").unbind("change").change(function(){
                     self.options.maxPerPage = bb.jquery(this).val();
-                    bb.jquery(document).data('bbUtilsPager.maxPerPage', self.options.maxPerPage);
+                    bb.jquery(this.element).data('bbUtilsPager.maxPerPage', self.options.maxPerPage);
                     self.options.start = 0;
                     var callback = bb.jquery.proxy(self.displayRecords, self);
                     self.getRecords(bb.jquery.proxy(self.displayRecords, self));

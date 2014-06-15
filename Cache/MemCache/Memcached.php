@@ -64,11 +64,20 @@ class Memcached extends AExtendedCache
     const TAGS_PREFIX = '__tag__';
 
     /**
+     * Expire hash prefix
+     * @var string
+     */
+    const EXPIRE_PREFIX = '__expire__';
+
+    /**
      * Memcached adapter options
      * @var array
      */
     protected $_instance_options = array(
+        'min_cache_lifetime' => null,
+        'max_cache_lifetime' => null,
         'persistent_id' => null,
+        'compression' => null,
         'servers' => array(),
         'options' => array()
     );
@@ -156,6 +165,10 @@ class Memcached extends AExtendedCache
         $this->_instance_options['options'] = array_merge($this->_memcached_options, $this->_instance_options['options']);
         foreach ($this->_instance_options['options'] as $option => $value) {
             $this->setOption($option, $value);
+        }
+
+        if (null !== $this->_instance_options['compression']) {
+            $this->setOption(\Memcached::OPT_COMPRESSION, $this->_instance_options['compression']);
         }
 
         if (false === is_array($this->_instance_options['servers'])) {
@@ -295,24 +308,24 @@ class Memcached extends AExtendedCache
      * @param \DateTime $expire Optionnal, the expiration time (now by default)
      * @return string|FALSE
      */
-    public function load($id, $bypassCheck = false, \DateTime $expire = null)
+    public function load($id, $bypassCheck = true, \DateTime $expire = null)
     {
         if (null === $expire) {
             $expire = new \DateTime();
         }
 
-        $last_timestamp = $this->test($id);
-        if (true === $bypassCheck
-                || 0 === $last_timestamp
-                || $expire->getTimestamp() <= $last_timestamp) {
+        $last_timestamp = 0;
+        if (false === $bypassCheck) {
+            $last_timestamp = $this->test($id);
+        }
+
+        if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
 
             if (false === $tmp = $this->_memcached->get($id)) {
                 return $this->_onError('load');
             }
 
-            if (true === is_array($tmp)) {
-                return $tmp[0];
-            }
+            return $tmp;
         }
 
         return false;
@@ -325,15 +338,11 @@ class Memcached extends AExtendedCache
      */
     public function test($id)
     {
-        if (false === $tmp = $this->_memcached->get($id)) {
+        if (false === $tmp = $this->_memcached->get(self::EXPIRE_PREFIX . $id)) {
             return false;
         }
 
-        if (2 === count($tmp)) {
-            return (int) $tmp[1];
-        }
-
-        return false;
+        return (int) $tmp;
     }
 
     /**
@@ -345,10 +354,18 @@ class Memcached extends AExtendedCache
      * @param string $tag Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
-    public function save($id, $data, $lifetime = null, $tag = null)
+    public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false)
     {
-        $expire = $this->_getExpireDateTime($lifetime);
-        if (false === $this->_memcached->set($id, array($data, $expire), $expire)) {
+        if (null === $lifetime) {
+            $lifetime = 0;
+        }
+
+        if (false === $bypass_control) {
+            $lifetime = $this->getControledLifetime($lifetime);
+        }
+
+        if (false === $this->_memcached->set($id, $data, $lifetime) ||
+                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, $lifetime, $lifetime)) {
             return $this->_onError('save');
         }
 
@@ -373,7 +390,8 @@ class Memcached extends AExtendedCache
      */
     public function remove($id)
     {
-        if (false === $this->_memcached->delete($id)) {
+        if (false === $this->_memcached->delete($id) ||
+                false === $this->_memcached->delete(self::EXPIRE_PREFIX . $id)) {
             return $this->_onError('remove');
         }
 
@@ -449,6 +467,39 @@ class Memcached extends AExtendedCache
     }
 
     /**
+     * Returns the minimum expire date time for all cache records 
+     * associated to one of the provided tags
+     * @param  string|array $tag
+     * @param int $lifetime Optional, the specific lifetime for this record 
+     *                      (by default 0, infinite lifetime)
+     * @return int
+     */
+    public function getMinExpireByTag($tag, $lifetime = 0)
+    {
+        $tags = (array) $tag;
+
+        if (0 == count($tags)) {
+            return $lifetime;
+        }
+
+        foreach ($tags as $tag) {
+            if (false !== $tagged = $this->load(self::TAGS_PREFIX . $tag)) {
+                foreach ($tagged as $id) {
+                    if (false !== $last_timestamp = $this->test($id)) {
+                        if (0 === $lifetime) {
+                            $lifetime = $last_timestamp;
+                        } elseif (0 !== $last_timestamp) {
+                            $lifetime = min(array($last_timestamp, $lifetime));
+                        }
+                    }
+                }
+            }
+        }
+
+        return $lifetime;
+    }
+
+    /**
      * Returns TRUE if the server is already added to Memcached, FALSE otherwise
      * @param string $host
      * @param int $port
@@ -469,31 +520,6 @@ class Memcached extends AExtendedCache
     }
 
     /**
-     * Returns the expiration timestamp
-     * @param int $lifetime
-     * @return int
-     * @codeCoverageIgnore
-     */
-    private function _getExpireDateTime($lifetime = null)
-    {
-        $expire = 0;
-
-        if (null !== $lifetime && 0 !== $lifetime) {
-            $expire = new \DateTime ();
-
-            if (0 < $lifetime) {
-                $expire->add(new \DateInterval('PT' . $lifetime . 'S'));
-            } else {
-                $expire->sub(new \DateInterval('PT' . (-1 * $lifetime) . 'S'));
-            }
-
-            return $expire->getTimestamp();
-        }
-
-        return $expire;
-    }
-
-    /**
      * Logs error result code and message
      * @param string $method
      * @return boolean
@@ -501,7 +527,7 @@ class Memcached extends AExtendedCache
      */
     private function _onError($method)
     {
-        $this->log('warning', sprintf('Error occured on Memcached::%s(): [%s] %s.', $method, $this->getResultCode(), $this->getResultMessage()));
+        $this->log('notice', sprintf('Error occured on Memcached::%s(): [%s] %s.', $method, $this->getResultCode(), $this->getResultMessage()));
         return false;
     }
 

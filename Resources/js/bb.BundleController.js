@@ -178,7 +178,14 @@
              */
             bb.jquery(popinClass).delegate('.bb-bundle-link', 'click', function (event) {
                 event.preventDefault();
-                bundleController.executeAction(bb.jquery(event.target).attr('data-href'), event);
+                var target = bb.jquery(event.target);
+                if (target.hasClass('link-confirm')) {
+                    var is_confirmed = confirm(target.attr('data-confirm'));
+                    if (!is_confirmed) {
+                        return false;
+                    }
+                }
+                bundleController.executeAction(target.attr('data-href'), event);
             });
 
             /**

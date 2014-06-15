@@ -22,12 +22,22 @@
 namespace BackBuilder\Util\Doctrine;
 
 use BackBuilder\Exception\InvalidArgumentException;
+use Doctrine\Common\Cache\MemcacheCache;
+use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\ORM\Configuration,
     Doctrine\DBAL\Connection,
     Doctrine\ORM\EntityManager,
     Doctrine\DBAL\Logging\SQLLogger,
-    Doctrine\Common\EventManager;
+    Doctrine\Common\EventManager,
+    Doctrine\ORM\Mapping\Driver\AnnotationDriver,
+    Doctrine\Common\Annotations\AnnotationReader,
+    Doctrine\Common\Annotations\SimpleAnnotationReader,
+    Doctrine\Common\Annotations\CachedReader,
+    Doctrine\Common\Cache\ArrayCache;
+
 use Psr\Log\LoggerInterface;
+
+use BackBuilder\Annotations\ChainAnnotationReader;
 
 /**
  * Utility class to create a new Doctrine entity manager
@@ -88,7 +98,9 @@ class EntityManagerCreator
     private static function _getORMConfiguration(array $options = array(), LoggerInterface $logger = null)
     {
         $config = new Configuration();
+        
         $driverImpl = $config->newDefaultAnnotationDriver();
+        
         $config->setMetadataDriverImpl($driverImpl);
 
         if (true === array_key_exists('proxy_dir', $options)) {
@@ -99,10 +111,60 @@ class EntityManagerCreator
             $config->setProxyNamespace($options['proxy_ns']);
         }
 
+        if (true === array_key_exists('auto_generate_proxies', $options)) {
+            $config->setAutoGenerateProxyClasses($options['auto_generate_proxies']);
+        }
+
+        if (true === array_key_exists('metadata_cache', $options)) {
+
+            if($options['metadata_cache']['cachetype'] == 'memcached'){
+                $memcached = new \Memcached();
+                foreach($options['metadata_cache']['servers'] AS $server){
+                    $memcached->addServer($server['host'], $server['port']);
+                }
+                $memcacheDriver = new MemcachedCache();
+                $memcacheDriver->setMemcached($memcached);
+
+                $config->setMetadataCacheImpl($memcacheDriver);
+
+            }elseif($options['metadata_cache']['cachetype'] == 'memcache'){
+                $memcache = new \Memcache();
+                foreach($options['metadata_cache']['servers'] AS $server){
+                    $memcache->addServer($server['host'], $server['port']);
+                }
+                $memcacheDriver = new MemcacheCache();
+                $memcacheDriver->setMemcache($memcache);
+
+                $config->setMetadataCacheImpl($memcacheDriver);
+            }
+
+            if (null !== $memcache){
+
+            }
+
+        }
+
+        if (true === array_key_exists('query_cache', $options)) {
+            if($options['query_cache']['cachetype'] == 'memcache'){
+
+                $memcached = new \Memcached();
+
+                foreach($options['query_cache']['servers'] AS $server){
+                    $memcached->addServer($server['host'], $server['port']);
+                }
+                $memcacheDriver = new MemcachedCache();
+                $memcacheDriver->setMemcached($memcached);
+
+                $config->setQueryCacheImpl($memcacheDriver);
+
+            }
+
+        }
+
         if ($logger instanceof SQLLogger) {
             $config->setSQLLogger($logger);
         }
-
+        
         return self::_addCustonFunctions($config, $options);
     }
 

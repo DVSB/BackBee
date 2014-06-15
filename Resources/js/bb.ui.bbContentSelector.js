@@ -1,3 +1,4 @@
+//@ sourceURL=ressources/js/bb.ui.bbContentSelector.js
 (function($){
     bb.jquery.widget('ui.bbContentSelector',{
         options : {
@@ -34,7 +35,8 @@
             mainTemplate : null,  
             categoryTree : null,
             filterParameters : null,
-            selectedContent :null
+            selectedContent :null,
+            site: null
         },
         
         i18n: {
@@ -42,7 +44,7 @@
             all: "Tous",
             state_offline :"Hors ligne",
             state_online : "En ligne",
-            state_hidden : "Caché",
+            state_hidden : "Caché", 
             state_deleted :"Effacé"
         },
     
@@ -66,8 +68,13 @@
             var itemTemplate = '<li data-uid="${uid}" class="bb5-content-item">'
             +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
             +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
-            +"<p>Date de création: <strong>${created}</strong></p>"
-            +'<p><button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button><button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button></p>'
+            +"<p>Date de crÃ©ation: <strong>${created}</strong></p>"
+            +'<p>\n\
+                    <button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button>\n\
+                    <button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button>\n\
+                    <button class="bb5-button bb5-ico-save addToList">Ajouter à ma sélection</button>\n\
+                    <button class="bb5-button bb5-ico-del deleteContent">Effacer le contenu</button>\n\
+              </p>'
             +'</li>';
             this._templates.contentItemTemplate = bb.jquery.template(itemTemplate);
             
@@ -102,7 +109,8 @@
                 onDestroy : bb.jquery.proxy(this._onDestroyScContainer,this),
                 onDelete : bb.jquery.proxy(this._onSelectedContentChange,this)
             });
-            
+            context.site = bb.frontApplication.getSiteUid();
+
             this.typeFilters = {
                 contentType:[
 
@@ -156,7 +164,62 @@
             this._initSelectContentTabs();
             bb.jquery(this.element).disableSelection();
             
-          
+            var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
+            bb.jquery(self.element).find('.bb5-windowpane-tree-inner').prepend(sitesMenu);
+            bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {    
+                useCache:true,
+                cacheTags:["userSession"],
+                async : false, 
+                success: function(result) {
+                    var context = self.getContext();
+                    var select = bb.jquery(self.element).find('.bb5-available-sites').eq(0);
+                    
+                    //click focus (FIREFOX bug)
+                    if ($.browser.mozilla) {
+                        select.unbind('click').click(function() {
+                            select.focus();
+                        });
+                    }
+                
+                    //select change event
+                    select.bind('change', function() {
+                        if (bb.jquery(this).val()) {
+                            context.site = bb.jquery(this).val();
+                            if(self.pageTree){
+                                self._initPageTree(bb.jquery(this).val());
+                            }
+                            
+                            context.selectedPageId = null;
+                            self.searchEngine.setSelectedPage(context.selectedPageId);
+                            var criteria = self.searchEngine.getSearchCriteria();
+                            if(context.selected){
+                                criteria.typeField = context.selected;
+                                self._showContent(criteria);
+                            }                      
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
+
+                    //select sites populating
+                    //select.empty();
+                    bb.jquery.each(result.result, function(index, site) {
+                        var option = bb.jquery("<option></option>").clone();
+                        bb.jquery(option).attr("value",index).text(site);
+                        select.append(option);         
+                    });
+
+                    //select current site if configured
+                    if (null !== context.site) {
+                        select.val(context.site);
+                    }
+
+                    select.trigger("change");
+                    self._trigger('ready');
+                }
+            });
+
             /*bb.jquery(this.element).find('.bb5-windowpane-tree').resizable({
                 handles: 'e, w',
                 maxWidth: 400,
@@ -199,29 +262,29 @@
         
         _initPageTree : function(){
             var self = this;
-            if(!this.pageTree){
-                var  pageTree = bb.jquery(this.element).find(this.options.pageTreeContaineClass).eq(0);
-                this.pageTree = bb.jquery(pageTree).bbPageBrowser({
-                    popup : false,
-                    editMode : false,
-                    site : bb.frontApplication.getSiteUid(),
-                    // breadcrumb : bb.frontApplication.getBreadcrumbIds(),
-                    enableNavigation : false,
-                    select:function(e,nodeInfos){
-                        /*do nothing on root*/
-                        var context = self.getContext();
-                        context.selectedPageId = nodeInfos.node_id;
-                        self.searchEngine.setSelectedPage(context.selectedPageId);
-                        var criteria = self.searchEngine.getSearchCriteria();
-                        if(context.selected){
-                            criteria.typeField = context.selected;
-                            self._showContent(criteria);
-                        }                      
-                        self.setContext(context);
-                    }
-                });
+            //            if(!this.pageTree){
+            var  pageTree = bb.jquery(this.element).find(this.options.pageTreeContaineClass).eq(0);
+            this.pageTree = bb.jquery(pageTree).bbPageBrowser({
+                popup : false,
+                editMode : false,
+                site : self.getContext().site,
+                // breadcrumb : bb.frontApplication.getBreadcrumbIds(),
+                enableNavigation : false,
+                select:function(e,nodeInfos){
+                    /*do nothing on root*/
+                    var context = self.getContext();
+                    context.selectedPageId = nodeInfos.node_id;
+                    self.searchEngine.setSelectedPage(context.selectedPageId);
+                    var criteria = self.searchEngine.getSearchCriteria();
+                    if(context.selected){
+                        criteria.typeField = context.selected;
+                        self._showContent(criteria);
+                    }                      
+                    self.setContext(context);
+                }
+            });
                 
-            }
+        //            }
         },
           
         selectModeView :function(viewMode){
@@ -401,7 +464,7 @@
                 var context = this.getContext();
                 var item = bb.jquery(e.currentTarget).parents(this.options.contentItemClass);
                 var itemUid = bb.jquery(item).attr("data-uid");
-                
+                var data = $(item).data();
                 if(bb.jquery(e.currentTarget).hasClass("addClose")){
                     this.selectedContent.set(itemUid,item);
                     this.setContext(context);
@@ -424,6 +487,16 @@
                     this.selectModeView("grid");
                     this._populateView(this.data);
                 }
+                
+                if(bb.jquery(e.currentTarget).hasClass("bb5-ico-preview")){
+                    if($.isPlainObject(data)){
+                        this._showContentPreview(data.content); 
+                    }
+                }
+                
+                if(bb.jquery(e.currentTarget).hasClass("bb5-ico-del")){
+                    this._showDeleteDialog(data.content);
+                }
             },
             
             contentClickHandler : function(e){
@@ -440,6 +513,7 @@
             
             nodeClickHandler :function (e) {
                 var context = this.getContext();
+                e = e || context.lastEvent; //useful if we want to recall  
                 if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
                     /*do nothing for root*/
                     var isRoot = (bb.jquery(context.treeview.jstree('get_selected')).attr('rel').toUpperCase() == "ROOT") ? true : false;
@@ -451,6 +525,8 @@
                     var searchCriteria = this.searchEngine.getSearchCriteria();
                     this._showContent(searchCriteria);
                 }
+                context.lastEvent = e;
+                this.setContext(context);
             },
             
             createHandler : function(e, data) {
@@ -474,10 +550,8 @@
         destroy : function(){
             bb.jquery.Widget.prototype.destroy.call(this);
         }, 
-    
         /* proxies */
         publicApi : {},
-        
         getContext: function() {
             return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         },
@@ -485,7 +559,45 @@
         setContext: function(context) {
             return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
-       
+        
+        _showDeleteDialog: function(content){
+            var self = this;
+            bb.require(["ManagerFactory"], function(ContentManager){
+                try{
+                    if(!self.contentManager){
+                        self.contentManager = ContentManager.getManager("content"); 
+                        self.contentManager.init({
+                            ws: bb.webserviceManager.getInstance("ws_local_classContent"),
+                            onDeleteContent: function(){
+                                self.callbacks.nodeClickHandler.call(self);
+                            }
+                        });  
+                    }
+                    self.contentManager.showDeleteDialog(content);
+                }catch(e){
+                    throw e;
+                }
+            });
+            
+        },
+        
+        
+        
+        _showContentPreview: function(content){
+            var self = this;
+            bb.require(["ManagerFactory"], function(Manager){
+                try{
+                    self.contentPreviewManager = Manager.getManager("contentpreview");
+                    self.contentPreviewManager.init({
+                        ws :bb.webserviceManager.getInstance('ws_local_contentBlock')
+                    });
+                    self.contentPreviewManager.showPreview(content.uid, content.type);
+                }catch(e){
+                    throw e;
+                }
+            });
+        },
+        
         _destroyTree: function() {
             var context = this.getContext();
             if (context.treeview) {
@@ -532,13 +644,16 @@
             bb.jquery(this.element).find('.bb5-listContainer').empty();
             //this.element.find(".bb5-windowpane-main").mask(bb.i18n.loading);
             this._mask("show");
+            var limit = $(this.element).find(".maxPerPageSelector").eq(0).val() || 50;
             var pagerParams = {
                 params : criteria,
+                site: context.site,
                 order_sort: '_title',
                 order_dir: 'asc',
-                limit:5,
+                limit: limit,
                 start:0
             };
+            $(this.element).find("")
             var onLoad = function(data){
                 this._populateView(data);
                 this._mask("hide");
@@ -552,7 +667,7 @@
             var myself = this;
             var context = this.getContext();
             var successCallback = (typeof successCallback!= "function")? new Function("console.log('successCallback function must be provided');") : successCallback; 
-            var pagerParams = pagerParams || false;
+            pagerParams = pagerParams || false;
             if(!pagerParams) return false;
             if(context.contentPager){
                 bb.jquery(context.contentPager).bbUtilsPager("updatePostParams",pagerParams);
@@ -574,12 +689,13 @@
                     },
                     callback: successCallback,
                     errorCallback : function(response){
-                        alert("The server sent an error message, please check your request.");
+                        alert("The server has sent an error message, please check your request.");
                         myself._mask("hide");
                     } 
                 });
+                this.setContext(context); 
             }
-            this.setContext(context);   
+             
         }, 
         
         _populateView : function(response){
@@ -647,7 +763,8 @@
                         data : function (n) { 
                             return { 
                                 //'root_uid' : n.attr ? n.attr('id').replace('node_','') : null
-                                filters : filters //accepted type
+                                filters : filters, //accepted type
+                                site : bb.frontApplication.getSiteUid()
                             }; 
                         }
                     }

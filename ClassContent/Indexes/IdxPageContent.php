@@ -30,20 +30,20 @@ namespace BackBuilder\ClassContent\Indexes;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\IndexationRepository")
- * @Table(name="idx_page_content",indexes={@index(name="IDX_PAGE", columns={"page_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"})})
+ * @Table(name="idx_page_content",indexes={@index(name="IDX_PAGE", columns={"page_uid"}), @index(name="IDX_CONTENT_PAGE", columns={"content_uid"})})
  */
 class IdxPageContent
 {
 
     /**
      * @var string
-     * @Id @Column
+     * @Id @Column(type="string", length=32)
      */
     private $page_uid;
 
     /**
      * @var string
-     * @Id @Column
+     * @Id @Column(type="string", length=32)
      */
     private $content_uid;
 

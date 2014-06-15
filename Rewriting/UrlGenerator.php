@@ -95,7 +95,7 @@ class UrlGenerator implements IUrlGenerator
     {
         $this->_application = $application;
 
-        if (NULL !== $rewritingConfig = $this->_application->getConfig()->getRewritingConfig()) {
+        if (null !== $rewritingConfig = $this->_application->getConfig()->getRewritingConfig()) {
             if (true === array_key_exists('preserve-online', $rewritingConfig)) {
                 $this->_preserveOnline = (true === $rewritingConfig['preserve-online']);
             }
@@ -117,14 +117,14 @@ class UrlGenerator implements IUrlGenerator
      */
     public function getDescriminators()
     {
-        if (NULL === $this->_descriminators) {
+        if (null === $this->_descriminators) {
             $this->_descriminators = array();
 
             if (true === array_key_exists('_content_', $this->_schemes)) {
                 foreach (array_keys($this->_schemes['_content_']) as $descriminator) {
                     $this->_descriminators[] = 'BackBuilder\ClassContent\\' . $descriminator;
 
-                    if (NULL !== $this->_application->getEventDispatcher()) {
+                    if (null !== $this->_application->getEventDispatcher()) {
                         $this->_application
                                 ->getEventDispatcher()
                                 ->addListener(str_replace(NAMESPACE_SEPARATOR, '.', $descriminator) . '.onflush', array('BackBuilder\Event\Listener\RewritingListener', 'onFlushContent'));
@@ -142,9 +142,14 @@ class UrlGenerator implements IUrlGenerator
      * @param \BackBuilder\ClassContent\AClassContent $content The optionnal main content of the page
      * @return string The URL                                  The generated URL
      */
-    public function generate(Page $page, AClassContent $content = NULL, $exceptionOnMissingScheme = true)
+    public function generate(Page $page, AClassContent $content = null, $exceptionOnMissingScheme = true)
     {
-        if (null !== $page->getUrl() && $this->_preserveOnline && ($page->getState() & Page::STATE_ONLINE)) {
+        if (
+            null !== $page->getUrl() 
+            && $this->_preserveOnline 
+            && (null === $page->getOldState() || ($page->getOldState() & Page::STATE_ONLINE))
+            && $page->getState() & Page::STATE_ONLINE
+        ) {
             return $page->getUrl();
         }
 
@@ -152,11 +157,15 @@ class UrlGenerator implements IUrlGenerator
             return $this->_generate($this->_schemes['_root_'], $page, $content);
         }
 
-        if (NULL !== $content && true === array_key_exists('_content_', $this->_schemes)) {
+        if (null !== $content && true === array_key_exists('_content_', $this->_schemes)) {
             $shortClassname = str_replace('BackBuilder\ClassContent\\', '', get_class($content));
             if (true === array_key_exists($shortClassname, $this->_schemes['_content_'])) {
                 return $this->_generate($this->_schemes['_content_'][$shortClassname], $page, $content);
             }
+        }
+
+        if (null !== $page->getUrl()) {
+            return $page->getUrl();
         }
 
         if (true == array_key_exists('_default_', $this->_schemes)) {
@@ -177,11 +186,11 @@ class UrlGenerator implements IUrlGenerator
      * @param \BackBuilder\ClassContent\AClassContent $content The optionnal main content of the page
      * @return string                                          The generated URL
      */
-    private function _generate($scheme, Page $page, AClassContent $content = NULL)
+    private function _generate($scheme, Page $page, AClassContent $content = null)
     {
         $replacement = array(
             '$parent' => ($page->isRoot()) ? '' : $page->getParent()->getUrl(),
-            '$title' => String::urlize($page->getTitle()),
+            '$title' => String::urlize($page->getTitle(), array('lengthlimit' => 30)),
             '$datetime' => $page->getCreated()->format('ymdHis'),
             '$date' => $page->getCreated()->format('ymd'),
             '$time' => $page->getCreated()->format('His'),
@@ -229,13 +238,26 @@ class UrlGenerator implements IUrlGenerator
     private function _checkUnicity(Page $page, &$url)
     {
         $baseurl = $url;
-        $pageRepository = $this->_application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
+        $page_repository = $this->_application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
 
         $count = 1;
-        $existings = $pageRepository->findBy(array('_url' => $url, '_root' => $page->getRoot()));
+        $existings = array();
+        if (1 === preg_match('#(.*)\/$#', $baseurl, $matches)) {
+            $baseurl = $matches[1] . '-%d/';
+            $existings = $page_repository->createQueryBuilder('p')
+                ->where('p._root = :root')
+                ->setParameter('root', $page->getRoot())
+                ->andWhere('p._url LIKE :url')
+                ->setParameter('url', $matches[1] . '%/')
+                ->getQuery()
+            ->getResult();
+        } else {
+            $existings = $page_repository->findBy(array('_url' => $url, '_root' => $page->getRoot()));
+        }
+
         foreach ($existings as $existing) {
             if (!$existing->isDeleted() && $existing->getUid() != $page->getUid()) {
-                $url = $baseurl . '-' . ($count++);
+                $url = sprintf($baseurl, $count++);
             }
         }
     }

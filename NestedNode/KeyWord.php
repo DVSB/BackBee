@@ -26,6 +26,8 @@ use BackBuilder\ClassContent\AClassContent,
     BackBuilder\Renderer\IRenderable;
 use Doctrine\Common\Collections\ArrayCollection;
 
+use JMS\Serializer\Annotation as Serializer;
+
 /**
  * A keywords entry of a tree in BackBuilder
  *
@@ -34,7 +36,9 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\KeyWordRepository")
- * @Table(name="keyword",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT", columns={"root_uid", "leftnode", "rightnode"}), @index(name="IDX_KEYWORD", columns={"keyword"})})
+ * @Table(name="keyword",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_KEYWORD", columns={"root_uid", "leftnode", "rightnode"}), @index(name="IDX_KEYWORD", columns={"keyword"})})
+ * 
+ * @Serializer\ExclusionPolicy("all")
  */
 class KeyWord extends ANestedNode implements IRenderable
 {
@@ -43,21 +47,26 @@ class KeyWord extends ANestedNode implements IRenderable
      * Unique identifier of the content
      * @var string
      * @Id @Column(type="string", name="uid")
+     * 
+     * @Serializer\Expose
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     protected $_uid;
 
     /**
      * The root node, cannot be NULL.
      * @var \BackBuilder\NestedNode\KeyWord
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\KeyWord", inversedBy="_descendants")
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\KeyWord", inversedBy="_descendants", fetch="EXTRA_LAZY")
      * @JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
+     * @Serializer\Exclude
      */
     protected $_root;
 
     /**
      * The parent node.
      * @var \BackBuilder\NestedNode\KeyWord
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"})
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
@@ -66,26 +75,30 @@ class KeyWord extends ANestedNode implements IRenderable
      * The keyword
      * @var string
      * @Column(type="string", name="keyword")
+     * 
+     * @Serializer\Expose
+     * @Serializer\SerializedName("keyword")
+     * @Serializer\Type("string")
      */
     protected $_keyWord;
 
     /**
      * Descendants nodes.
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\KeyWord", mappedBy="_root")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\KeyWord", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
     /**
      * Direct children nodes.
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\KeyWord", mappedBy="_parent")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\KeyWord", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
     /**
      * A collection of AClassContent indexed by this keyword
-     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent")
+     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", fetch="EXTRA_LAZY")
      * @JoinTable(name="keywords_contents",
      *      joinColumns={@JoinColumn(name="keyword_uid", referencedColumnName="uid")},
      *      inverseJoinColumns={@JoinColumn(name="content_uid", referencedColumnName="uid")}

@@ -35,7 +35,6 @@ use Doctrine\ORM\EntityRepository;
  */
 class NestedNodeRepository extends EntityRepository
 {
-
     private function _hasValidHierarchicalDatas($node)
     {
         if ($node->getLeftnode() >= $node->getRightnode())
@@ -57,10 +56,55 @@ class NestedNodeRepository extends EntityRepository
         return true;
     }
 
+    /**
+     * [updateTreeNatively description]
+     * @param  [type] $node_uid [description]
+     * @param  [type] $leftnode [description]
+     * @param  [type] $level    [description]
+     * @return [type]           [description]
+     */
+    public function updateTreeNatively($node_uid, $leftnode = 1, $level = 0)
+    {
+        $node = new \StdClass();
+        $node->uid = $node_uid;
+        $node->leftnode = $leftnode;
+        $node->rightnode = $leftnode + 1;
+        $node->level = $level;
+
+        foreach ($children = $this->getNativelyNodeChildren($node_uid) as $row) {
+            $child = $this->updateTreeNatively($row['uid'], $leftnode + 1, $level + 1);
+            $node->rightnode = $child->rightnode + 1;
+            $leftnode = $node->rightnode;
+        }
+
+        $this->_em->getConnection()->exec(sprintf(
+            'update page set leftnode = %d, rightnode = %d, level = %d where uid = "%s";',
+            $node->leftnode,
+            $node->rightnode,
+            $node->level,
+            $node->uid
+        ));
+
+        return $node;
+    }
+
+    /**
+     * [getNativelyNodeChildren description]
+     * @param  [type] $node_uid [description]
+     * @return [type]           [description]
+     */
+    private function getNativelyNodeChildren($node_uid)
+    {
+        return $this->_em->getConnection()->executeQuery(sprintf(
+            'select uid from page where parent_uid = "%s" order by modified desc',
+            $node_uid
+        ))->fetchAll();
+    }
+
     public function updateHierarchicalDatas(ANestedNode $node, $leftnode = 1, $level = 0)
     {
-        $node->setLeftnode($leftnode)
-                ->setLevel($level);
+        $node->setLeftnode($leftnode)->setLevel($level);
+
         if (0 < $node->getChildren()->count()) {
             $children = $this->createQueryBuilder('n')
                     ->andWhere("n._parent = :parent")
@@ -68,11 +112,13 @@ class NestedNodeRepository extends EntityRepository
                     ->orderBy('n._leftnode', 'asc')
                     ->getQuery()
                     ->getResult();
+
             foreach ($children as $child) {
                 $child = $this->updateHierarchicalDatas($child, $leftnode + 1, $level + 1);
                 $leftnode = $child->getRightnode();
             }
         }
+
         $node->setRightnode($leftnode + 1);
         $this->createQueryBuilder('n')
                 ->update()
@@ -84,7 +130,7 @@ class NestedNodeRepository extends EntityRepository
                 ->getQuery()
                 ->execute();
 
-//        $this->_em->flush($node);
+        $this->_em->detach($node);
 
         return $node;
     }
@@ -321,7 +367,7 @@ class NestedNodeRepository extends EntityRepository
             'rightnode' => $node->getRightnode() - ($includeNode ? 1 : 0)
         ));
 
-        if (!is_null($depth) && is_int($depth) && depth > 0) {
+        if (!is_null($depth) && is_int($depth) && $depth > 0) {
             $q = $q->andWhere('n._level >= :level')
                     ->setParameter('level', $node->getLevel() - $depth);
         }
@@ -516,9 +562,9 @@ class NestedNodeRepository extends EntityRepository
     /**
      * Déplace le noeud et ses enfants à la destination $destLeft et met à jour le reste de l'arbre
      *
-     * @param int     $destLeft		Noeud gauche de la destination
-     * @param int     $levelDiff	Différence de niveau entre les deux noeuds
-     * @param int     $parent		Futur parent du noeud à déplacer
+     * @param int     $destLeft     Noeud gauche de la destination
+     * @param int     $levelDiff    Différence de niveau entre les deux noeuds
+     * @param int     $parent       Futur parent du noeud à déplacer
      * @ don't use
      */
     private function updateNode($destLeft, $levelDiff, $parent)

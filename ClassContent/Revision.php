@@ -47,7 +47,7 @@ use Symfony\Component\Security\Core\User\UserInterface,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\RevisionRepository")
- * @Table(name="revision", indexes={@index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_CLASSNAME", columns={"classname"}), @index(name="IDX_DRAFT", columns={"owner", "state"})})
+ * @Table(name="revision", indexes={@index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}), @index(name="IDX_DRAFT", columns={"owner", "state"})})
  * @HasLifecycleCallbacks
  */
 class Revision extends AContent implements \Iterator, \Countable
@@ -92,7 +92,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * The attached revisionned content
      * @var \BackBuilder\ClassContent\AClassContent
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_revisions", fetch="LAZY")
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     private $_content;

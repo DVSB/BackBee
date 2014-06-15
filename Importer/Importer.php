@@ -22,7 +22,8 @@ namespace BackBuilder\Importer;
 
 use BackBuilder\BBApplication,
     BackBuilder\Config\Config,
-    BackBuilder\Util\Buffer;
+    BackBuilder\Util\Buffer,
+    BackBuilder\Importer\Exception\ImporterException;
 
 use Doctrine\DBAL\Driver\PDOStatement;
 
@@ -30,10 +31,12 @@ use Doctrine\DBAL\Driver\PDOStatement;
  * @category    BackBuilder
  * @package     BackBuilder\Importer
  * @copyright   Lp digital system
- * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
+ * @author      e.chau <eric.chau@lp-digital.fr>, n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class Importer
 {
+    const FLUSH_MEMORY_ON_NULL_EVERY = 1000;
+
     private $_application;
     private $_config;
     private $_connector;
@@ -42,6 +45,7 @@ class Importer
     private $_ids;
     private $_object_identifier;
     private $_importedItemsCount = 0;
+    private $_failedItemsCount = 0;
 
     /**
      * Class constructor
@@ -67,8 +71,13 @@ class Importer
         $starttime = microtime(true);
 
         $this->setConverter($this->initConvertion($config));
-        $statement = $this->getConverter()->getRows($this);
-        $items_count = $statement->rowCount();
+        $rows = $this->getConverter()->getRows($this);
+        
+        if(!is_array($rows) && !($rows instanceof \Countable)) {
+            throw new ImporterException('Result set must be an array or Countable');
+        }
+        
+        $items_count = count($rows);
         $limit = true === isset($config['limit']) ? $config['limit'] : null;
         if (0 === $items_count) {
             Buffer::dump(
@@ -83,8 +92,8 @@ class Importer
             . ' ' . $class . ' was started.' . "\n\n"
         );
 
-        $this->_doImport($statement, $flush_every, $check_existing, $limit);
-        unset($statement);
+        $this->_doImport($rows, $flush_every, $check_existing, $limit);
+        unset($rows);
 
         $this->getConverter()->onImportationFinish();
         unset($this->_converter);
@@ -94,15 +103,42 @@ class Importer
             "\n" . $this->_importedItemsCount . ' ' . $class . ' imported in ' 
             . (microtime(true) - $starttime) . ' s =====' . "\n\n"
         );
+        
+        Buffer::dump(
+            "\n" . $this->_failedItemsCount . ' ' . $class . ' failed items =====' . "\n\n"
+        , 'bold_red');
     }
 
-    private function _doImport(PDOStatement $statement, $flush_every, $check_existing, $limit = null)
+    /**
+     * 
+     * @param array|\Traversable $rows
+     * @param int $flush_every
+     * @param bool $check_existing
+     * @param int|null $limit
+     * @throws ImporterException
+     */
+    private function _doImport($rows, $flush_every, $check_existing, $limit = null)
     {
+        if(!is_array($rows) && !($rows instanceof \Traversable)) {
+            throw new ImporterException('Result set must be an array or Traversable');
+        }
+        
         $i = 0;
+        $count_null = 0;
+        $total_ignored = 0;
         $entities = array();
-        while ($row = $statement->fetch()) {
-            $entity = $this->getConverter()->convert($row);
 
+        foreach ($rows as $row) {
+            try {
+                $entity = $this->getConverter()->convert($row);
+            } catch(\Exception $e) {
+                unset($row);
+                Buffer::dump(
+                    "===== Exception while processing row: " . $e->getMessage() . "\n"
+                , 'bold_red');
+                $this->_failedItemsCount++;
+                continue;
+            }
             if (null !== $entity) {
                 $entities[] = $entity;
 
@@ -113,7 +149,30 @@ class Importer
                     $entities = array();
                 }
                 
+                $count_null = 0;
                 unset($entity);
+            } else {
+                $count_null++;
+                if (self::FLUSH_MEMORY_ON_NULL_EVERY <= $count_null) {
+                    $total_ignored += $count_null;
+                    Buffer::dump(
+                        'Cleaning memory on null (every ' . self::FLUSH_MEMORY_ON_NULL_EVERY 
+                        . ' - total: ' . $total_ignored . ') : [BEFORE] ' 
+                        .  self::convertMemorySize(memory_get_usage())
+                    );
+                    
+                    if (0 < count($entities)) {
+                        $this->save($entities, $check_existing);
+                        $i = 0;
+                        unset($entities);
+                        $entities = array();
+                    } else {
+                        $this->flushMemory();                        
+                    }
+
+                    Buffer::dump('; [AFTER] ' . self::convertMemorySize(memory_get_usage()) . "\n");
+                    $count_null = 0;
+                }
             }
 
             unset($row);
@@ -126,12 +185,14 @@ class Importer
             }
         }
 
-        if ($flush_every > $i) {
+        if ($flush_every > $i && 0 < count($entities)) {
             $this->save($entities, $check_existing);
+        } else {
+            $this->flushMemory();
         }
 
         unset($entities);
-        unset($statement);
+        unset($rows);
     }
 
     /**
@@ -268,5 +329,14 @@ class Importer
     final protected function setConverter($converter)
     {
         return $this->_converter = $converter;
+    }
+    
+    /**
+     * 
+     * @return \BackBuilder\Importer\IImporterConnector
+     */
+    public function getConnector()
+    {
+        return $this->_connector;
     }
 }

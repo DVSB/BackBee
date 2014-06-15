@@ -165,26 +165,27 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $object->uid));
         }
 
-// User must have edit permission on page
+        // User must have edit permission on page
         $this->isGranted('EDIT', $page);
 
-// If the page is online, user must have publish permission on it
+        // If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page);
         }
 
-// Updating URL of the page is needed
+        // Updating URL of the page is needed
         if (true === property_exists($object, 'url') && null !== $this->getApplication()->getRenderer()) {
             $object->url = $this->getApplication()
-                    ->getRenderer()
-                    ->getRelativeUrl($object->url);
+                ->getRenderer()
+                ->getRelativeUrl($object->url)
+            ;
 
             if ('/' === $redirect = $this->getApplication()->getRenderer()->getRelativeUrl($object->redirect)) {
                 $object->redirect = null;
             }
         }
 
-// Updating workflow state if provided
+        // Updating workflow state if provided
         if (null === $object->workflow_state) {
             $page->setWorkflowState(null);
         } else {
@@ -200,10 +201,22 @@ class Page extends AbstractServiceLocal
             }
         }
 
+        if (null === $page->getMetaData()) {
+            $metadata_config = $this->getApplication()->getConfig()->getSection('metadata');
+            $metadata = new \BackBuilder\MetaData\MetaDataBag($metadata_config, $page);
+            $page->setMetaData($metadata->compute($page));
+        }
+        
         $page->unserialize($object);
         $this->getEntityManager()->flush();
 
-        return array('url' => $page->getUrl(), 'state' => $page->getState());
+        return array(
+            'url'   => $page->getUrl() . (true === $this->getApplication()->getController()->isUrlExtensionRequired()
+                ? '.' . $this->getApplication()->getController()->getUrlExtension()
+                : ''
+            ),
+            'state' => $page->getState()
+        );
     }
 
     /**
@@ -217,7 +230,7 @@ class Page extends AbstractServiceLocal
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25)
+    public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
         if (null === $site = $this->getEntityManager()->find('\BackBuilder\Site\Site', strval($site_uid))) {
             throw new InvalidArgumentException(sprintf('Site with uid `%s` does not exist', $site_uid));
@@ -231,12 +244,12 @@ class Page extends AbstractServiceLocal
             $leaf->attr = json_decode($page->serialize());
             $leaf->data = $page->getTitle();
             $leaf->state = $page->isLeaf() ? 'leaf' : 'open';
-            $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult);
+            $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult, $having_child);
             $tree[] = $leaf;
         } else {
             try {
                 $this->isGranted('VIEW', $page);
-                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult);
+                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult, $having_child);
                 $tree['numresults'] = $children->count();
                 $tree['firstresult'] = $firstresult;
                 $tree['maxresult'] = $maxresult;
@@ -245,6 +258,7 @@ class Page extends AbstractServiceLocal
                     foreach ($children as $child) {
                         $leaf = new \stdClass();
                         $leaf->attr = json_decode($child->serialize());
+                        $leaf->attr->url = $this->getApplication()->getRouting()->getUri($leaf->attr->url, null, $child->getSite());
                         $leaf->data = $child->getTitle();
                         $leaf->state = $child->isLeaf() ? 'leaf' : 'closed';
                         if (false === $child->isLeaf() && null !== $current_uid && null !== $current = $this->_repo->find(strval($current_uid))) {
@@ -349,7 +363,7 @@ class Page extends AbstractServiceLocal
         }
 
         $this->getEntityManager()->flush($page);
-        //$this->_repo->updateHierarchicalDatas($parent, $parent->getLeftnode(), $parent->getLevel());
+        $this->_repo->updateHierarchicalDatas($parent, $parent->getLeftnode(), $parent->getLevel());
         
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();

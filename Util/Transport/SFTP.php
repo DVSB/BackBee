@@ -68,7 +68,6 @@ class SFTP extends ATransport
     public function __construct(array $config = array())
     {
         parent::__construct($config);
-
         if (false === extension_loaded('openssl')) {
             throw new TransportException('The SFTP transport requires openssl extension.');
         }
@@ -97,11 +96,9 @@ class SFTP extends ATransport
     {
         $this->_host = null !== $host ? $host : $this->_host;
         $this->_port = null !== $port ? $port : $this->_port;
-
         if (false === $this->_ssh_resource = ssh2_connect($this->_host, $this->_port)) {
             throw new TransportException(sprintf('Enable to connect to %s:%i.', $this->_host, $this->_port));
         }
-
         return $this;
     }
 
@@ -121,14 +118,19 @@ class SFTP extends ATransport
             throw new TransportException(sprintf('None SSH connection available.'));
         }
 
-        if (false === @ssh2_auth_password($this->_ssh_resource, $this->_username, $this->_password)) {
-            throw new TransportException(sprintf('Could not authenticate with username %s.', $this->_username));
+        if (null === $this->_ssh_key_pub) {
+            if (false === ssh2_auth_password($this->_ssh_resource, $this->_username, $this->_password)) {
+                throw new TransportException(sprintf('Could not authenticate with username %s.', $this->_username));
+            }
+        }else{
+            if (false === ssh2_auth_pubkey_file($this->_ssh_resource, $this->_username, $this->_ssh_key_pub, $this->_ssh_key_priv, $this->_ssh_key_pass)) {
+                throw new TransportException(sprintf('Could not authenticate with keyfile %s.', $this->_keyfile));
+            }
         }
 
-        if (false === $this->_sftp_resource = @ssh2_sftp($this->_ssh_resource)) {
+        if (false === $this->_sftp_resource = ssh2_sftp($this->_ssh_resource)) {
             throw new TransportException("Could not initialize SFTP subsystem.");
         }
-
         return $this;
     }
 
@@ -212,6 +214,8 @@ class SFTP extends ATransport
         }
 
         $remote_file = $this->_getAbsoluteRemotePath($remote_file);
+        @ssh2_sftp_mkdir($this->_sftp_resource, dirname($remote_file), 0777, true);
+        
         if (true === $overwrite || false === @ssh2_sftp_stat($this->_sftp_resource, $remote_file)) {
             if (false === @ssh2_scp_send($this->_ssh_resource, $local_file, $remote_file)) {
                 return $this->_trigger_error(sprintf('Could not send data from file %s to file %s.', $local_file, $remote_file));

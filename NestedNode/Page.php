@@ -51,7 +51,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
- * @Table(name="page",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT", columns={"root_uid", "leftnode", "rightnode"}), @index(name="IDX_URL", columns={"site_uid", "url"})})
+ * @Table(name="page",indexes={@index(name="IDX_STATE", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "state", "publishing", "archiving", "modified"}), @index(name="IDX_URL", columns={"site_uid", "url"})})
  * @HasLifecycleCallbacks
  * @fixtures(qty=1)
  */
@@ -111,7 +111,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * The owner site of this node
      * @var \BackBuilder\Site\Site
-     * @ManyToOne(targetEntity="BackBuilder\Site\Site")
+     * @ManyToOne(targetEntity="BackBuilder\Site\Site", fetch="EXTRA_LAZY")
      * @JoinColumn(name="site_uid", referencedColumnName="uid")
      */
     protected $_site;
@@ -119,7 +119,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * The layout associated to the page
      * @var \BackBuilder\Site\Layout
-     * @ManyToOne(targetEntity="BackBuilder\Site\Layout", inversedBy="_pages")
+     * @ManyToOne(targetEntity="BackBuilder\Site\Layout", inversedBy="_pages", fetch="EXTRA_LAZY")
      * @JoinColumn(name="layout_uid", referencedColumnName="uid")
      */
     protected $_layout;
@@ -127,7 +127,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * The root node, cannot be NULL.
      * @var \BackBuilder\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_descendants")
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_descendants", fetch="EXTRA_LAZY")
      * @JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
@@ -135,7 +135,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * The parent node.
      * @var \BackBuilder\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_children")
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_children", fetch="EXTRA_LAZY")
      * @JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
@@ -186,7 +186,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * The associated ContentSet
      * @var \BackBuilder\ClassContent\ContentSet
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\ContentSet", inversedBy="_pages", cascade={"persist", "remove"})
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\ContentSet", inversedBy="_pages", cascade={"persist", "remove"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="contentset", referencedColumnName="uid")
      */
     protected $_contentset;
@@ -224,7 +224,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * The optional workflow state.
      * @var \BackBuilder\Workflow\State
-     * @ManyToOne(targetEntity="BackBuilder\Workflow\State")
+     * @ManyToOne(targetEntity="BackBuilder\Workflow\State", fetch="EXTRA_LAZY")
      * @JoinColumn(name="workflow_state", referencedColumnName="uid")
      */
     protected $_workflow_state;
@@ -232,21 +232,21 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Descendants nodes.
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_root")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
     /**
      * Direct children nodes.
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_parent")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
     /**
      * Revisions of the current page
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_page")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_page", fetch="EXTRA_LAZY")
      */
     protected $_revisions;
 
@@ -280,6 +280,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public $cloning_datas;
 
     /**
+     * old state of current object (equals to null if it's not updated);
+     * this property is not persisted
+     * @var integer
+     */
+    public $old_state;
+
+    /**
      * Class constructor
      * @param string $uid The unique identifier of the page
      * @param array $options Initial options for the page:
@@ -304,6 +311,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         $this->_state = self::STATE_HIDDEN;
         $this->_type = self::TYPE_DYNAMIC;
         $this->_target = self::DEFAULT_TARGET;
+        $this->old_state = null;
     }
 
     /**
@@ -1143,4 +1151,21 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         return array_reverse($breadcrumb_uids);
     }
 
+    /**
+     * old_state property getter
+     * @return null|integer
+     */
+    public function getOldState()
+    {
+        return $this->old_state;
+    }
+
+    /**
+     * old_state property setter
+     * @return null|integer
+     */
+    public function setOldState($v)
+    {
+        $this->old_state = $v;
+    }
 }

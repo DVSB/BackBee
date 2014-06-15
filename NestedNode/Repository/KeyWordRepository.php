@@ -102,7 +102,7 @@ class KeyWordRepository extends NestedNodeRepository
                     $pageStates = array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN);
                     $secondParam = \Doctrine\DBAL\Connection::PARAM_STR_ARRAY;
                 } else {
-                    $pageStates = Page::STATE_HIDDEN;
+                    $pageStates = Page::STATE_DELETED;
                     $queryString .=" AND page.state < (?)";
                     $secondParam = 1;
                 }
@@ -157,6 +157,29 @@ class KeyWordRepository extends NestedNodeRepository
         }
         
         return $objects;
+    }
+
+    /**
+     * Check if given keyword already exists in database; it's case sensitive and make difference
+     * between "e" and "é"
+     * 
+     * @param  string $keyword string
+     * @return object|null return object if it already exists, else null
+     */
+    public function exists($keyword)
+    {
+        $object = null;
+        $result = $this->_em->getConnection()->executeQuery(sprintf(
+            'SELECT uid FROM keyword WHERE hex(lower(keyword)) = hex(lower("%s"))',
+            preg_replace('#[/\"]#', '', trim($keyword))
+        ))->fetchAll();
+
+        if (0 < count($result)) {
+            $uid = array_shift($result);
+            $object = $this->find($uid['uid']);
+        }
+
+        return $object;
     }
 }
 

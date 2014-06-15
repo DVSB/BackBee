@@ -22,6 +22,7 @@
 namespace BackBuilder;
 
 use Exception;
+
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Bundle\BundleLoader,
     BackBuilder\Config\Config,
@@ -29,19 +30,26 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Event\Event,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
-    BackBuilder\Exception\DatabaseConnectionException,
     BackBuilder\Exception\UnknownContextException,
     BackBuilder\Site\Site,
     BackBuilder\Theme\Theme,
-    BackBuilder\Util\File;
+    BackBuilder\Util\File,
+    BackBuilder\Bundle\ABundle,
+    BackBuilder\Console\Console;
+
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
-    Doctrine\ORM\EntityManager;
+    Doctrine\Common\Annotations\AnnotationRegistry,
+    Doctrine\Common\Annotations\AnnotationReader;
 
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
+use Symfony\Component\Config\FileLocator,
+    Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\HttpFoundation\Session\Session,
-    Symfony\Component\Yaml\Yaml;
+    Symfony\Component\Yaml\Yaml,
+    Symfony\Component\HttpFoundation\Response,
+    Symfony\Component\Validator\Validation,
+    Symfony\Component\Finder\Finder;
 
 /**
  * The main BackBuilder5 application
@@ -51,10 +59,13 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class BBApplication
+class BBApplication implements IApplication
 {
 
     const VERSION = '0.8.0';
+
+    const DEFAULT_CONTEXT = 'default';
+    const DEFAULT_ENVIRONMENT = '';
 
     /**
      * @var BackBuilder\DependencyInjection\Container
@@ -77,6 +88,7 @@ class BBApplication
     private $_classcontentdir;
     private $_theme;
     private $_overwrite_config;
+    private $_environment;
 
     public function __call($method, $args)
     {
@@ -90,30 +102,77 @@ class BBApplication
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
      */
-    public function __construct($context = null, $debug = false, $overwrite_config = false)
+    public function __construct($context = null, $environment = 'production', $overwrite_config = false)
     {
         $this->_starttime = time();
-        $this->_context = (null === $context) ? 'default' : $context;
-        $this->_debug = (Boolean) $debug;
+        $this->_context = (null === $context) ? self::DEFAULT_CONTEXT : $context;
+        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : false));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
 
+        $this->_environment = ((is_string($environment)) 
+            ? $environment 
+            : ($environment === false ? 'production' : self::DEFAULT_ENVIRONMENT))
+        ;
+
+        // annotations require custom autoloading
+        AnnotationRegistry::registerAutoloadNamespaces(array(
+            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
+            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
+            'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
+            'BackBuilder' => $this->getBaseDir(),
+                //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
+        ));
+
+        // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
+        AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
+        AnnotationReader::addGlobalIgnoredName('Entity');
+        AnnotationReader::addGlobalIgnoredName('Column');
+        AnnotationReader::addGlobalIgnoredName('Table');
+        AnnotationReader::addGlobalIgnoredName('HasLifecycleCallbacks');
+        AnnotationReader::addGlobalIgnoredName('Index');
+        AnnotationReader::addGlobalIgnoredName('Id');
+        AnnotationReader::addGlobalIgnoredName('GeneratedValue');
+        AnnotationReader::addGlobalIgnoredName('ManyToMany');
+        AnnotationReader::addGlobalIgnoredName('JoinTable');
+        AnnotationReader::addGlobalIgnoredName('JoinColumn');
+        AnnotationReader::addGlobalIgnoredName('ManyToOne');
+        AnnotationReader::addGlobalIgnoredName('OneToOne');
+        AnnotationReader::addGlobalIgnoredName('OneToMany');
+        AnnotationReader::addGlobalIgnoredName('PreUpdate');
+        AnnotationReader::addGlobalIgnoredName('index');
+        AnnotationReader::addGlobalIgnoredName('fixtures');
+        AnnotationReader::addGlobalIgnoredName('fixture');
+        AnnotationReader::addGlobalIgnoredName('column');
+
         $this->_initContainer()
-                ->_initContextConfig()
-                ->_initAutoloader()
-                ->_initContentWrapper()
-                ->_initEntityManager()
-                ->_initBundles();
+             ->_initAutoloader()
+             ->_initContentWrapper();
+
+        try {
+            $this->_initEntityManager();
+        } catch (\Exception $excep) {
+            $this->getLogging()->notice('BackBee starting without EntityManager');
+        }
+
+        $this->_initBundles();
+
+        if (false === $this->getContainer()->has('em')) {
+            $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
+            
+            return;
+        }
 
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
 
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
-                if(setLocale(LC_ALL, $encoding['locale']) === false)
+                if (setLocale(LC_ALL, $encoding['locale']) === false)
                     Throw new Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
         }
+
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
@@ -133,14 +192,31 @@ class BBApplication
         }
     }
 
+    /**
+     * [__destruct description]
+     */
     public function __destruct()
     {
         $this->stop();
     }
 
-    private function _initContainer()
+    /**
+     * [forceReloadConfig description]
+     * @return [type] [description]
+     */
+    public function forceReloadConfig()
     {
-        $this->_container = ContainerBuilder::getContainer($this);
+        $this->_initContainer(true);
+    }
+
+    /**
+     * [_initContainer description]
+     * @param  boolean $force_reload [description]
+     * @return [type]                [description]
+     */
+    private function _initContainer($force_reload = false)
+    {
+        $this->_container = ContainerBuilder::getContainer($this, $force_reload);
 
         return $this;
     }
@@ -152,22 +228,22 @@ class BBApplication
     {
         $this->getAutoloader()
                 ->register()
-                ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->getBaseDir(), 'bundle')))
-                ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'ClassContent', 'Repositories')))
-                ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Templates', 'helpers')))
-                ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Listeners')))
-                ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Controller')))
-                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Services', 'Public')))
-                ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Traits')));
+                ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
+                ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getRepository(), 'ClassContent', 'Repositories')))
+                ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getRepository(), 'Templates', 'helpers')))
+                ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
+                ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
+                ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
+                ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
-                    ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
-                    ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Templates', 'helpers')))
-                    ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Listeners')))
-                    ->registerNamespace('BackBuilder\Controller', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Controller')))
-                    ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Services', 'Public')))
-                    ->registerNamespace('BackBuilder\Traits', implode(DIRECTORY_SEPARATOR, array($this->getBaseRepository(), 'Traits')));
+                    ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
+                    ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getBaseRepository(), 'Templates', 'helpers')))
+                    ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getBaseRepository(), 'Listeners')))
+                    ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getBaseRepository(), 'Controller')))
+                    ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
+                    ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
         }
 
         $this->getAutoloader()
@@ -187,13 +263,14 @@ class BBApplication
         if (false === is_object($this->_theme) || true === $force_reload) {
             $this->_theme = new Theme($this);
         }
+
         return $this->_theme;
     }
 
     /**
      * @return \Swift_Mailer
      */
-    public function getMailer()
+    public function getMailer() 
     {
         if (false === $this->getContainer()->has('mailer') || is_null($this->getContainer()->get('mailer'))) {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
@@ -218,11 +295,12 @@ class BBApplication
     /**
      * @return boolean
      */
-    public function isDebugMode()
-    {
-        if ($this->getConfig()->sectionHasKey('parameters', 'debug')) {
+    public function isDebugMode() 
+    {        
+        if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
+
         return (bool) $this->_debug;
     }
 
@@ -231,15 +309,17 @@ class BBApplication
      * @return \BackBuilder\BBApplication
      * @throws \BackBuilder\Exception\UnknownContextException Thrown if unknown context provided
      */
-    private function _initContextConfig()
+    private function _initContextConfig() 
     {
         if (true === $this->hasContext()) {
-            if (false === is_dir($this->getBaseRepository() . DIRECTORY_SEPARATOR . $this->_context)) {
+            if (false === is_dir($this->getBaseRepository() . '/' . $this->_context)) {
                 throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
             }
 
-            $this->getContainer()->get('config')->extend($this->getRepository() . DIRECTORY_SEPARATOR . 'Config', $this->_overwrite_config);
+            $this->getContainer()->get('config')->setEnvironement($this->_environment);
+            $this->getContainer()->get('config')->extend($this->getRepository() . '/' . 'Config', $this->_overwrite_config);
         }
+
         return $this;
     }
 
@@ -249,9 +329,9 @@ class BBApplication
      */
     private function _initContentWrapper()
     {
-        if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig())
+        if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig()) {
             throw new BBException('None class content wrapper found');
-
+        }
         $namespace = isset($contentwrapperConfig['namespace']) ? $contentwrapperConfig['namespace'] : '';
         $protocol = isset($contentwrapperConfig['protocol']) ? $contentwrapperConfig['protocol'] : '';
         $adapter = isset($contentwrapperConfig['adapter']) ? $contentwrapperConfig['adapter'] : '';
@@ -280,11 +360,19 @@ class BBApplication
         }
 
         if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
-            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir() . DIRECTORY_SEPARATOR . 'Proxies';
+            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir() . '/' . 'Proxies';
         }
 
         if (true === array_key_exists('orm', $doctrine_config)) {
-            $doctrine_condif['dbal']['orm'] = $doctrine_config['orm'];
+            $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
+        }
+
+        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('metadata_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['metadata_cache']['cachetype'] = $doctrine_config['dbal']['metadata_type'];
+        }
+
+        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('query_type', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['query_cache']['cachetype'] = $doctrine_config['dbal']['query_type'];
         }
 
         // Init ORM event
@@ -292,10 +380,23 @@ class BBApplication
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
-        $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogging(), $evm);
-        $this->getContainer()->set('em', $em);
 
-        $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
+        try {
+            $logger = $this->getLogging();
+
+            if ($this->isDebugMode()) {
+                // doctrine data collector
+                $this->getContainer()->get('data_collector.doctrine')->addLogger('default', $this->getContainer()->get('doctrine.dbal.logger.profiling'));
+                $logger = $this->getContainer()->get('doctrine.dbal.logger.profiling');
+            }
+
+            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
+            $this->getContainer()->set('em', $em);
+
+            $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
+        } catch (\Exception $e) {
+            $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
+        }
 
         return $this;
     }
@@ -309,7 +410,7 @@ class BBApplication
 
     /**
      * @param type $name
-     * @return Bundle\ABundle
+     * @return ABundle
      */
     public function getBundle($name)
     {
@@ -321,6 +422,11 @@ class BBApplication
         return $bundle;
     }
 
+    /**
+     * returns every registered bundles
+     *
+     * @return array
+     */
     public function getBundles()
     {
         $bundles = array();
@@ -336,7 +442,7 @@ class BBApplication
      * @uses isDebugMode()
      * @return boolean
      */
-    public function debugMode()
+    public function debugMode() 
     {
         return $this->_debug;
     }
@@ -361,9 +467,13 @@ class BBApplication
 
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
-        
+
+
         if (false === $this->isClientSAPI()) {
-            $this->getController()->handle();
+            $response = $this->getController()->handle();
+            if ($response instanceof Response) {
+                $this->getController()->sendResponse($response);
+            }
         }
     }
 
@@ -437,6 +547,16 @@ class BBApplication
     }
 
     /**
+     * Get vendor dir
+     * 
+     * @return string
+     */
+    public function getVendorDir()
+    {
+        return $this->getBaseDir() . '/vendor';
+    }
+
+    /**
      * Returns TRUE if a starting context is defined, FALSE otherwise
      * @return boolean
      */
@@ -460,14 +580,14 @@ class BBApplication
     public function getBBUserToken()
     {
         $token = $this->getSecurityContext()->getToken();
-        if ((null === $token || !($token instanceof BackBuilder\Security\Token\BBUserToken))) {
+        if ((null === $token || !($token instanceof \BackBuilder\Security\Token\BBUserToken))) {
             if (is_null($this->getContainer()->get('bb_session'))) {
                 $token = null;
             } else {
                 if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
                     $token = unserialize($token);
 
-                    if (!is_a($token, 'BackBuilder\Security\Token\BBUserToken')) {
+                    if (!($token instanceof \BackBuilder\Security\Token\BBUserToken)) {
                         $token = null;
                     }
                 }
@@ -478,23 +598,11 @@ class BBApplication
     }
 
     /**
-     * Get cache provider from config
-     * @return string Cache provider config name or \BackBuilder\Cache\DAO\Cache if not found
-     */
-    public function getCacheProvider()
-    {
-        $conf = $this->getConfig()->getCacheConfig();
-        $defaultClass = '\BackBuilder\Cache\DAO\Cache';
-        $parentClass = '\BackBuilder\Cache\AExtendedCache';
-        return (isset($conf['provider']) && is_subclass_of($conf['provider'], $parentClass) ? $conf['provider'] : $defaultClass);
-    }
-
-    /**
      * @return \BackBuilder\Cache\DAO\Cache
      */
     public function getCacheControl()
     {
-        return $this->getContainer()->get('cache-control');
+        return $this->getContainer()->get('cache.control');
     }
 
     /**
@@ -518,9 +626,27 @@ class BBApplication
     /**
      * @return BackBuilder\DependencyInjection\Container
      */
-    public function getContainer()
+    public function getContainer() 
     {
         return $this->_container;
+    }
+
+    /**
+     * Get validator service
+     * 
+     * @return \Symfony\Component\Validator\ValidatorInterface
+     */
+    public function getValidator()
+    {
+        if (!$this->getContainer()->get('validator')) {
+            $validator = Validation::createValidatorBuilder()
+                    ->enableAnnotationMapping()
+                    ->getValidator();
+
+            $this->getContainer()->set('validator', $validator);
+        }
+
+        return $this->getContainer()->get('validator');
     }
 
     /**
@@ -528,14 +654,37 @@ class BBApplication
      */
     public function getConfig()
     {
-        return $this->getContainer()
-                        ->get('config')
-                        ->setContainer($this->getContainer());
+        if (null !== $this->getContainer() && true === $this->getContainer()->isLoaded('config')) {
+            $this->getContainer()
+                 ->get('config')
+                 ->setContainer($this->getContainer())
+                 ->setEnvironment($this->_environment)
+                 ->extend($this->getBBConfigDir());
+
+            $this->_initContextConfig();
+        }
+
+        return $this->getContainer()->get('config');
+    }
+
+    /**
+     * Get current environment
+     * 
+     * @return string
+     */
+    public function getEnvironment()
+    {
+        return $this->_environment;
     }
 
     public function getConfigDir()
     {
-        return $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
+        return $this->getRepository() . '/' . 'Config';
+    }
+
+    public function getBBConfigDir()
+    {
+        return $this->getBaseRepository() . '/' . 'Config';
     }
 
     /**
@@ -543,11 +692,15 @@ class BBApplication
      */
     public function getEntityManager()
     {
-        if (!$this->getContainer()->has('em')) {
-            $this->_initEntityManager();
-        }
+        try {
+            if (null === $this->getContainer()->get('em')) {
+                $this->_initEntityManager();
+            }
 
-        return $this->getContainer()->get('em');
+            return $this->getContainer()->get('em');
+        }catch(\Exception $e) {
+            $this->getLogging()->notice('BackBee starting without EntityManager');
+        }
     }
 
     /**
@@ -561,7 +714,7 @@ class BBApplication
     /**
      * @return Logger
      */
-    public function getLogging()
+    public function getLogging() 
     {
         return $this->getContainer()->get('logging');
     }
@@ -569,7 +722,7 @@ class BBApplication
     public function getMediaDir()
     {
         if (null === $this->_mediadir) {
-            $this->_mediadir = implode(DIRECTORY_SEPARATOR, array($this->getRepository(), 'Data', 'Media'));
+            $this->_mediadir = implode('/', array($this->getRepository(), 'Data', 'Media'));
         }
 
         return $this->_mediadir;
@@ -588,7 +741,7 @@ class BBApplication
         if (null === $this->_repository) {
             $this->_repository = $this->getBaseRepository();
             if (true === $this->hasContext()) {
-                $this->_repository .= DIRECTORY_SEPARATOR . $this->_context;
+                $this->_repository .= '/' . $this->_context;
             }
         }
 
@@ -598,7 +751,7 @@ class BBApplication
     public function getBaseRepository()
     {
         if (NULL === $this->_base_repository) {
-            $this->_base_repository = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'repository';
+            $this->_base_repository = $this->getBaseDir() . '/' . 'repository';
         }
         return $this->_base_repository;
     }
@@ -620,7 +773,7 @@ class BBApplication
             }
 
             //array_walk($this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
-            array_map( array('BackBuilder\Util\File','resolveFilepath') , $this->_classcontentdir);
+            array_map(array('BackBuilder\Util\File', 'resolveFilepath'), $this->_classcontentdir);
         }
 
         return $this->_classcontentdir;
@@ -780,7 +933,7 @@ class BBApplication
      */
     public function getRpcServer()
     {
-        return $this->getContainer()->get('rpcserver');
+            return $this->getContainer()->get('rpcserver');
     }
 
     /**
@@ -788,7 +941,7 @@ class BBApplication
      */
     public function getUploadServer()
     {
-        return $this->getContainer()->get('uploadserver');
+            return $this->getContainer()->get('uploadserver');
     }
 
     /**
@@ -796,7 +949,7 @@ class BBApplication
      */
     public function getUrlGenerator()
     {
-        return $this->getContainer()->get('rewriting.urlgenerator');
+            return $this->getContainer()->get('rewriting.urlgenerator');
     }
 
     /**
@@ -804,7 +957,7 @@ class BBApplication
      */
     public function getSession()
     {
-        if (null === $this->getRequest()->getSession()) {
+            if (null === $this->getRequest()->getSession()) {
             $session = new Session();
             $session->start();
             $this->getRequest()->setSession($session);
@@ -817,7 +970,7 @@ class BBApplication
      */
     public function getSecurityContext()
     {
-        return $this->getContainer()->get('security.context');
+            return $this->getContainer()->get('security.context');
     }
 
     /**
@@ -825,7 +978,7 @@ class BBApplication
      */
     public function getSite()
     {
-        $site = null;
+            $site = null;
         if (true === $this->getContainer()->has('site')) {
             $site = $this->getContainer()->get('site');
         }
@@ -838,8 +991,8 @@ class BBApplication
      */
     public function getStorageDir()
     {
-        if (null === $this->_storagedir) {
-            $this->_storagedir = $this->_container->getParameter('bbapp.data.dir') . DIRECTORY_SEPARATOR . 'Storage';
+            if (null === $this->_storagedir) {
+            $this->_storagedir = $this->_container->getParameter('bbapp.data.dir') . '/' . 'Storage';
         }
 
         return $this->_storagedir;
@@ -850,8 +1003,8 @@ class BBApplication
      */
     public function getTemporaryDir()
     {
-        if (null === $this->_tmpdir) {
-            $this->_tmpdir = $this->_container->getParameter('bbapp.data.dir') . DIRECTORY_SEPARATOR . 'Tmp';
+            if (null === $this->_tmpdir) {
+            $this->_tmpdir = $this->_container->getParameter('bbapp.data.dir') . '/' . 'Tmp';
         }
 
         return $this->_tmpdir;
@@ -862,7 +1015,7 @@ class BBApplication
      */
     public function isReady()
     {
-        return ($this->_isinitialized && null !== $this->_container);
+            return ($this->_isinitialized && null !== $this->_container);
     }
 
     /**
@@ -870,11 +1023,63 @@ class BBApplication
      */
     public function isStarted()
     {
-        return (true === $this->_isstarted);
+            return (true === $this->_isstarted);
     }
 
     public function isClientSAPI()
     {
-        return isset($GLOBALS['argv']);
+            return isset($GLOBALS['argv']);
+    }
+
+    /**
+     * Finds and registers Commands.
+     *
+     * Override this method if your bundle commands do not follow the conventions:
+     *
+     * * Commands are in the 'Command' sub-directory
+     * * Commands extend Symfony\Component\Console\Command\Command
+     *
+     * @param BackBuilder\Console\Console $console An Application instance
+     */
+    public function registerCommands(Console $console)
+    {
+        if (is_dir($dir = $this->getBBDir() . '/Command')) {
+            $finder = new Finder();
+            $finder->files()->name('*Command.php')->in($dir);
+            $ns = 'BackBuilder\\Command';
+
+            foreach ($finder as $file) {
+                if ($relativePath = $file->getRelativePath()) {
+                    $ns .= '\\' . strtr($relativePath, '/', '\\');
+                }
+                $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
+                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                    $console->add($r->newInstance());
+                }
+            }
+        }
+
+        foreach ($this->getBundles() as $bundle) {
+            if (!is_dir($dir = $bundle->getBaseDir() . '/Command')) {
+                continue;
+            }
+
+            $finder = new Finder();
+            $finder->files()->name('*Command.php')->in($dir);
+            $ns = $bundle->getNamespace() . '\\Command';
+
+            foreach ($finder as $file) {
+                if ($relativePath = $file->getRelativePath()) {
+                    $ns .= '\\' . strtr($relativePath, '/', '\\');
+                }
+                $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
+                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                    $instance = $r->newInstance();
+                    $instance->setBundle($bundle);
+                    $console->add($instance);
+                }
+            }
+            
+        }
     }
 }

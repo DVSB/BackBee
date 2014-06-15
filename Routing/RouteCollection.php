@@ -24,6 +24,7 @@ namespace BackBuilder\Routing;
 use BackBuilder\BBApplication,
     BackBuilder\Bundle\ABundle,
     BackBuilder\Site\Site;
+
 use Symfony\Component\Routing\RouteCollection as sfRouteCollection,
     Symfony\Component\HttpFoundation\Request;
 
@@ -58,9 +59,7 @@ class RouteCollection extends sfRouteCollection
             parent::__construct();
         }
 
-        if (null !== $application) {
-            $this->_application = $application;
-        }
+        $this->_application = $application;
     }
 
     public function addBundleRouting(ABundle $bundle)
@@ -69,11 +68,11 @@ class RouteCollection extends sfRouteCollection
 
         if (null !== $routeConfig = $bundle->getConfig()->getRouteConfig()) {
             $this->pushRouteCollection($router, $routeConfig);
-            $this->moveDefaultRoute($router);
+            $this->moveDefaultRoute();
         }
     }
 
-    public function pushRouteCollection($router, $routeCollection)
+    public function pushRouteCollection($routeCollection)
     {
         foreach ($routeCollection as $name => $route) {
             if (false === array_key_exists('pattern', $route) || false === array_key_exists('defaults', $route)) {
@@ -81,19 +80,29 @@ class RouteCollection extends sfRouteCollection
                 continue;
             }
 
-            $router->add(
-                    $name, new Route($route['pattern'], $route['defaults'], array_key_exists('requirements', $route) ? $route['requirements'] : array())
+            $this->add(
+                    $name, new Route(
+                        $route['pattern'], 
+                        $route['defaults'], 
+                        true === array_key_exists('requirements', $route) 
+                            ? $route['requirements'] 
+                            : array()
+                    )
             );
 
             $this->_application->debug(sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
         }
+
+        $this->moveDefaultRoute();
     }
 
-    public function moveDefaultRoute($router)
+    private function moveDefaultRoute()
     {
-        $default_route = $router->get('default');
-        $router->remove('default');
-        $router->add('default', $default_route);
+        $default_route = $this->get('default');
+        if (null !== $default_route) {
+            $this->remove('default');
+            $this->add('default', $default_route);
+        }
     }
 
     /**
@@ -113,21 +122,30 @@ class RouteCollection extends sfRouteCollection
     /**
      * Return complete url which match with routeName and routeParams; you can also customize
      * the base url; by default it use current site base url
-     * @param  string      $routeName   
-     * @param  array|null  $routeParams 
-     * @param  string|null $baseUrl     
+     * @param  string      $route_name   
+     * @param  array|null  $route_params 
+     * @param  string|null $base_url     
+     * @param  boolean     $add_ext
      * @return string              
      */
-    public function getUrlByRouteName($routeName, array $routeParams = null, $baseUrl = null)
+    public function getUrlByRouteName(
+        $route_name,
+        array $route_params = null,
+        $base_url = null,
+        $add_ext = true,
+        Site $site = null
+    )
     {
-        $uri = $this->getRoutePath($routeName);
-        if (null !== $routeParams && true === is_array($routeParams)) {
-            foreach ($routeParams as $key => $value) {
+        $uri = $this->getRoutePath($route_name);
+        if (null !== $route_params && true === is_array($route_params)) {
+            foreach ($route_params as $key => $value) {
                 $uri = str_replace('{' . $key . '}', $value, $uri);
             }
         }
 
-        return null !== $baseUrl && true === is_string($baseUrl) ? $baseUrl . $uri : $this->getUri($uri);
+        return null !== $base_url && true === is_string($base_url) 
+            ? $base_url . $uri . (false === $add_ext ? '' : $this->_getDefaultExtFromSite($site))
+            : $this->getUri($uri, false === $add_ext ? '' : null, $site);
     }
 
     /**

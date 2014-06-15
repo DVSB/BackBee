@@ -126,6 +126,11 @@ abstract class ARenderer implements IRenderer
 
     public function __call($method, $argv)
     {
+        // FIXME
+        if ('getRenderer' === $method) {
+            return $this;
+        }
+
         $helper = $this->getHelper($method);
         if (null === $helper) {
             $helper = $this->createHelper($method, $argv);
@@ -843,7 +848,8 @@ abstract class ARenderer implements IRenderer
      */
     protected function _getTemplatePath(IRenderable $object)
     {
-        return str_replace(array('BackBuilder' . NAMESPACE_SEPARATOR . 'ClassContent' . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array('', DIRECTORY_SEPARATOR), get_class($object));
+        return $object->getTemplateName();
+        //return str_replace(array('BackBuilder' . NAMESPACE_SEPARATOR . 'ClassContent' . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array('', DIRECTORY_SEPARATOR), get_class($object));
     }
 
     /**

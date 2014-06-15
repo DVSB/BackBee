@@ -2,7 +2,7 @@ parameters:
     # bbapp parameters, somes will be set at init of container by BBApplication
     bbapp.context: 'default'
     bbapp.cache.dir: ''
-    bbapp.data.dir: ''
+    bbapp.cache.autogenerate: true
     bbapp.config.dir: ''
     bbapp.locale: 'fr_FR'
     translator.fallback: 'fr'
@@ -11,6 +11,7 @@ parameters:
     bbapp.cachecontrol.class: BackBuilder\Cache\DAO\Cache
     bbapp.config.class: BackBuilder\Config\Config
     bbapp.logger.class: BackBuilder\Logging\Logger
+    bbapp.logger_debug.class: BackBuilder\Logging\DebugStackLogger
     bbapp.securitycontext.class: BackBuilder\Security\SecurityContext
     bbapp.controller.class: BackBuilder\FrontController\FrontController
     bbapp.renderer.class: BackBuilder\Renderer\Renderer
@@ -23,25 +24,74 @@ parameters:
     bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
     bbapp.registry.class: Symfony\Component\HttpFoundation\ParameterBag
     bbapp.autoloader.class: BackBuilder\AutoLoader\AutoLoader
+    bbapp.keywordbuilder.class: BackBuilder\NestedNode\Builder\KeywordBuilder
+    bbapp.controller_resolver.class: BackBuilder\Controller\ControllerResolver
+
+    bbapp.rest.hydrator.class: BackBuilder\Rest\Hydration\RestHydrator
+    bbapp.rest.encoder_provider.class: BackBuilder\Rest\Encoder\ContainerEncoderProvider
+    bbapp.rest.encoder_json.class: Symfony\Component\Serializer\Encoder\JsonEncoder
+    bbapp.rest.encoder_xml.class: Symfony\Component\Serializer\Encoder\XmlEncoder
+
+    bbapp.rest.listener_validation.class: BackBuilder\Rest\EventListener\ValidationListener
+    bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
+    bbapp.rest.listener_exception.class: BackBuilder\Rest\EventListener\ExceptionListener
+    bbapp.rest.listener_exception.mapping:
+        Exception: 
+            code: 500
+        Symfony\Component\Security\Core\Exception\ProviderNotFoundException:
+            code: 401
+            message: Authentication failed - supplied public key or signature is incorrect
+        Doctrine\ORM\ORMException:
+            code: 500
+
+    bbapp.rest_api.path: /rest/
+
+    bbapp.rest.test_controller.class: BackBuilder\Rest\Controller\TestController
+
+    bbapp.toolbar.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
+    bbapp.profiler.listener.class: BackBuilder\Event\Listener\ProfilerListener
+
+    bbapp.dbal.logger.profiling.class: BackBuilder\Logging\DebugStackLogger
+
+    # data collectors
+    bbapp.collector.config.class: BackBuilder\Profiler\DataCollector\ConfigDataCollector
+    bbapp.collector.request.class: Symfony\Component\HttpKernel\DataCollector\RequestDataCollector
+    bbapp.collector.exception.class: Symfony\Component\HttpKernel\DataCollector\ExceptionDataCollector
+    bbapp.collector.events.class: Symfony\Component\HttpKernel\DataCollector\EventDataCollector
+    bbapp.collector.logger.class: Symfony\Component\HttpKernel\DataCollector\LoggerDataCollector
+    bbapp.collector.time.class: Symfony\Component\HttpKernel\DataCollector\TimeDataCollector
+    bbapp.collector.memory.class: Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector
+    bbapp.collector.routing.class: BackBuilder\Profiler\DataCollector\RoutingDataCollector
+    bbapp.collector.doctrine.class: BackBuilder\Profiler\DataCollector\DoctrineDataCollector
+
+    data_collector.templates: 
+        config: "%bbapp.base.dir%/Resources/scripts/Collector/config.html.twig"
+        request: "%bbapp.base.dir%/Resources/scripts/Collector/request.html.twig"
+        exception: "%bbapp.base.dir%/Resources/scripts/Collector/exception.html.twig"
+        events: "%bbapp.base.dir%/Resources/scripts/Collector/events.html.twig"
+        logger: "%bbapp.base.dir%/Resources/scripts/Collector/logger.html.twig"
+#        time: "%bbapp.base.dir%/Resources/scripts/Collector/time.html.twig"
+        memory: "%bbapp.base.dir%/Resources/scripts/Collector/memory.html.twig"
+        routing: "%bbapp.base.dir%/Resources/scripts/Collector/routing.html.twig"
+        db: "%bbapp.base.dir%/Resources/scripts/Collector/db.html.twig"
+
+    bbapp.analytics.class: BackBuilder\Application\Analytics
 
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
-        arguments:  [{cachedir: "%bbapp.cache.dir%"}, "%bbapp.context%"]
-    cache-control:
+        arguments:  [{cachedir: "%bbapp.cache.dir%", cacheautogenerate: "%bbapp.cache.autogenerate%"}, "%bbapp.context%"]
+    cache.control:
         class:      %bbapp.cachecontrol.class%
         arguments:  [{em: "@em"}, "%bbapp.context%", "@logging"]
     config:
         class:      %bbapp.config.class%
-        arguments:  ["%bbapp.config.dir%", "@cache.bootstrap"]
+        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, %debug%]
     event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
     ed:
         alias: event.dispatcher
-    logging:
-        class:      %bbapp.logger.class%
-        arguments:  ["@bbapp"]
     security.context:
         class:      %bbapp.securitycontext.class%
         arguments:  ["@bbapp"]
@@ -76,10 +126,175 @@ services:
     autoloader:
         class:      %bbapp.autoloader.class%
         arguments:  ["@bbapp"]
+    keywordbuilder:
+        class:      %bbapp.keywordbuilder.class%
+        arguments:  ["@em"]
+
+    analytics:
+        class: BackBuilder\Application\Analytics
+        arguments:  [@bbapp]
+
+    controller_resolver:
+        class:      %bbapp.controller_resolver.class%
+
+    rest.hydrator:
+        class:      %bbapp.rest.hydrator.class%
+        arguments:  ["@em"]
+
+    rest.encoder_provider:
+        class:      %bbapp.rest.encoder_provider.class%
+        calls:
+            - [setContainer, [@service_container]]
+        arguments:  [{json: "rest.encoder.json", xml: "rest.encoder.xml"}]
+
+    rest.encoder.json:
+        class:      %bbapp.rest.encoder_json.class%
+
+    rest.encoder.xml:
+        class:      %bbapp.rest.encoder_xml.class%
+
+    rest.listener.body:
+        class:      %bbapp.rest.listener_body.class%
+        arguments:  [@rest.encoder_provider, true]
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+
+    rest.listener.exception:
+        class:      %bbapp.rest.listener_exception.class%
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+            - [setMapping, [%bbapp.rest.listener_exception.mapping%]]
+
+    rest.listener.validation:
+        class:      %bbapp.rest.listener_validation.class%
+        arguments:  [@service_container]
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+
+    rest.metadata.annotation_reader: 
+        class: Doctrine\Common\Annotations\AnnotationReader
+
+    rest.metadata.annotation_driver: 
+        class: BackBuilder\Rest\Mapping\Driver\AnnotationDriver
+        arguments:  [@rest.metadata.annotation_reader]
+
+    rest.metadata.factory:
+        class: Metadata\MetadataFactory
+        arguments:  [@rest.metadata.annotation_driver]
+
+    rest.controller.test:
+        class:      %bbapp.rest.test_controller.class%
+        arguments:  ["@bbapp"]
+
+    annotation_reader.cache:
+        class: Doctrine\Common\Cache\ArrayCache
+
+    annotation_reader:
+        class: Doctrine\Common\Annotations\CachedReader
+        arguments: [@annotation_reader_chained, @annotation_reader.cache]
+
+    annotation_reader_chained:
+        class: BackBuilder\Annotations\ChainAnnotationReader
+        arguments: [[@annotation_reader.full, @annotation_reader.simple]]
+
+    annotation_reader.simple:
+        class: Doctrine\Common\Annotations\SimpleAnnotationReader
+        calls:
+            - [addNamespace, ['Doctrine\ORM\Mapping']]
+
+    annotation_reader.full:
+        class: Doctrine\Common\Annotations\AnnotationReader
+
+    profiler.listener:
+        class:      %bbapp.profiler.listener.class%
+        arguments:  [@profiler]
+        calls:
+            - [setEnabled, [%debug%]]
+        tags:
+            - { name: kernel.event_subscriber }
+
+    profiler.toolbar.listener:
+        class:      %bbapp.toolbar.listener.class%
+        arguments:  [%debug%]
+        calls:
+            - [setContainer, [@service_container]]
+
+    profiler.storage:
+        class:      BackBuilder\Profiler\FileProfilerStorage
+        arguments:  [@bbapp, "file:%bbapp.cache.dir%/_profiler/"]
+
+
+    profiler:
+        class:      Symfony\Component\HttpKernel\Profiler\Profiler
+        arguments:  [@profiler.storage, @logging]
+        calls:
+            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.routing", @data_collector.doctrine]]] 
+            #"@data_collector.time", 
+
+    # data collectors
+    data_collector.config:
+        class: %bbapp.collector.config.class%
+        calls:
+            - [setKernel, [@?controller]]
+
+    data_collector.request:
+        class: %bbapp.collector.request.class%
+        tags:
+            - { name: kernel.event_subscriber }
+
+    data_collector.exception:
+        class: %bbapp.collector.exception.class%
+        tags:
+
+    data_collector.events:
+        class: %bbapp.collector.events.class%
+        tags:
+
+    data_collector.logger:
+        class: %bbapp.collector.logger.class%
+        arguments:  [@logging]
+        tags:
+            - { name: monolog.logger,  channel: profiler }
+
+    data_collector.time:
+        class: %bbapp.collector.time.class%
+        arguments:  [@?controller]
+        tags:
+            - { name: monolog.logger,  channel: profiler }
+
+    data_collector.memory:
+        class: %bbapp.collector.memory.class%
+
+    data_collector.routing:
+        class: %bbapp.collector.routing.class%
+        calls:
+            - [setContainer, [@service_container]]
+
+
+    data_collector.doctrine:
+        class: %bbapp.collector.doctrine.class%
+        calls:
+            - [setContainer, [@service_container]]
+
+    doctrine.dbal.logger.profiling:
+        class: %bbapp.dbal.logger.profiling.class%
+        arguments:  ["@bbapp"]
+        
+        
+    
+
     # synthetic services
+    bbapp:
+        synthetic: true
+    service_container:
+        synthetic: true
     site:
+        synthetic: true
+    em:
         synthetic: true
     bb_session:
         synthetic: true
     mailer:
+        synthetic: true
+    validator:
         synthetic: true

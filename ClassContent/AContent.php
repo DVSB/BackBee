@@ -35,7 +35,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @MappedSuperclass
  */
-abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializable
+abstract class AContent implements IObjectIdentifiable, IRenderable
 {
 
     /**
@@ -943,4 +943,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \Serializab
         return $this;
     }
 
+
+    public function getTemplateName()
+    {
+        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "ClassContent" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
 }

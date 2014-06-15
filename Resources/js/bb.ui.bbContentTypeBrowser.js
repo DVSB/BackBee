@@ -130,7 +130,8 @@
                         data : function (n) { 
                             return { 
                                 //'root_uid' : n.attr ? n.attr('id').replace('node_','') : null
-                                filters : filters //accepted type
+                                filters : filters,
+                                site : bb.frontApplication.getSiteUid()//accepted type
                             }; 
                         }
                     }

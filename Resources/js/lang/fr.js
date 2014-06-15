@@ -4,6 +4,7 @@
     loading: 'Chargement...',
     toolbar: {
         save: 'Enregistrer',
+        validate: 'Valider',
         refresh: 'Rafraîchir',
         cancel: 'Annuler',
         blocks: 'Blocs',
@@ -154,7 +155,8 @@
             all: 'Tous',
             date_format: 'jj/mm/aaaa',
             datetime_format: 'jj/mm/aaaa hh:mm',
-            search: 'Rechercher'
+            search: 'Rechercher',
+            having_child: 'Rubriques uniquement'
         },
         contents: {
             desc: 'Descriptif :',
@@ -221,14 +223,15 @@
     },
     popupmanager: {
         title: {
-            alert: 'Alerte'
+            alert: 'Alerte',
+            paste: '' 
         },
         button: {
             ok: 'OK',
             close: 'Fermer',
             cancel: 'Annuler',
             edit: 'Éditer',
-            delete: 'Supprimer',
+            "delete": 'Supprimer',
             remove: 'Supprimer',
             save: 'Enregistrer',
             select: 'Selectionner',
