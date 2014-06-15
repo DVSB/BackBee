@@ -2,6 +2,7 @@
 
 namespace BackBuilder\Bundle\Listener;
 
+use BackBuilder\Bundle\BundleLoader;
 use BackBuilder\Event\Event;
 
 /**
@@ -24,12 +25,20 @@ class BundleListener
         $container = $application->getContainer();
         $controller = $container->get('controller');
         foreach ($container->get('registry')->get('bundle.config_services_id', array()) as $service_id) {
-            $route = $container->get($service_id)->getRouteConfig();
-            if (false === is_array($route) || 0 === count($route)) {
-                continue;
-            }
+            $config = $container->get($service_id);
+            $recipe = BundleLoader::getBundleLoaderRecipeFor($config, BundleLoader::ROUTE_RECIPE_KEY);
+            if (null === $recipe) {
+                $route = $config->getRouteConfig();
+                if (false === is_array($route) || 0 === count($route)) {
+                    continue;
+                }
 
-            $controller->registerRoutes(str_replace('.config', '', $service_id), $route);
+                $controller->registerRoutes(str_replace('.config', '', $service_id), $route);
+            } else {
+                if (true === is_callable($recipe)) {
+                    call_user_func_array($recipe, array($application, $config));
+                }
+            }
         }
     }
 
