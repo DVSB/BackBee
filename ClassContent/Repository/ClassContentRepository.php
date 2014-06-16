@@ -32,6 +32,32 @@ use Doctrine\ORM\Tools\Pagination\Paginator,
     Doctrine\ORM\Query\ResultSetMappingBuilder,
     Doctrine\ORM\EntityRepository;
 
+use Doctrine\ORM\Query\SqlWalker;
+
+class MysqlPaginationWalker extends SqlWalker {
+
+    /**
+     * Walks down a SelectClause AST node, thereby generating the appropriate SQL.
+     *
+     * @param $selectClause
+     * @return string The SQL.
+     */
+    public function walkSelectClause($selectClause)
+    {
+        $sql = parent::walkSelectClause($selectClause);
+
+        if ($this->getQuery()->getHint('mysqlWalker.sqlCalcFoundRows') === true) {
+            if ($selectClause->isDistinct) {
+                $sql = str_replace('SELECT DISTINCT', 'SELECT DISTINCT SQL_CALC_FOUND_ROWS', $sql);
+            } else {
+                $sql = str_replace('SELECT', 'SELECT SQL_CALC_FOUND_ROWS', $sql);
+            }
+        }
+
+        return $sql;
+    }
+}
+
 /**
  * AClassContent repository
  * 
@@ -199,7 +225,7 @@ class ClassContentRepository extends EntityRepository
             $parentnode = array_filter($selector['parentnode']);
             if (false === empty($parentnode)) {
                 $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $parentnode));
-                if (null !== $nodes) {
+                if (count($nodes) != 0) {
                     $query = 'SELECT c.uid FROM page p USE INDEX(IDX_SELECT_PAGE) LEFT JOIN content c ON c.node_uid=p.uid';
                     $pageSelection = array();
                     foreach ($nodes as $node) {
@@ -209,7 +235,10 @@ class ClassContentRepository extends EntityRepository
                             $pageSelection[] = '(p.parent_uid="' . $node->getUid() . '")';
                         }
                     }
-                    $where[] = '(' . implode(' OR ', $pageSelection) . ')';
+
+                    if(count($pageSelection) != 0){
+                        $where[] = '(' . implode(' OR ', $pageSelection) . ')';
+                    }
 
                     if (true === $limitToOnline) {
                         $where[] = 'p.state IN (1, 3)';
@@ -250,6 +279,12 @@ class ClassContentRepository extends EntityRepository
             $query .= ' WHERE ' . implode(' AND ', $where);
         }
 
+        //Optimize multipage query
+        if (true === $multipage) {
+            $query = str_replace('SELECT c.uid', 'SELECT SQL_CALC_FOUND_ROWS c.uid', $query);
+            $query = str_replace('USE INDEX(IDX_SELECT_PAGE)', ' ', $query);
+        }
+
         $uids = $this->getEntityManager()
                 ->getConnection()
                 ->executeQuery(str_replace('JOIN content c', 'JOIN opt_content_modified c', $query) . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
@@ -279,22 +314,22 @@ class ClassContentRepository extends EntityRepository
                     ->orderBy('isort._value', count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
         }
 
-        $result = $q->getQuery()->getResult();
-
         if (true === $multipage) {
-            $count = str_replace('SELECT c.uid', 'SELECT COUNT(c.uid)', $query);
-            $num_results = $this->getEntityManager()->getConnection()->executeQuery($count)->fetch(\PDO::FETCH_COLUMN);
+
+           $num_results = $this->getEntityManager()->getConnection()->executeQuery('SELECT FOUND_ROWS()')->fetch(\PDO::FETCH_COLUMN);
+            $result = $q->getQuery()->getResult();
 
             $q->setFirstResult($offset)
-                    ->setMaxResults($limit);
+                ->setMaxResults($limit);
 
             $paginator = new \BackBuilder\Util\Doctrine\SettablePaginator($q);
             $paginator->setCount($num_results)
-                    ->setResult($result);
+                ->setResult($result);
 
             return $paginator;
         }
 
+        $result = $q->getQuery()->getResult();
         return $result;
     }
 

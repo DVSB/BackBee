@@ -62,12 +62,12 @@ class Analytics
      * 
      * @see ParameterBag::get
      */
-    public function getParam($path, $default = null)
+    public function get($path, $default = null)
     {
         if(!$this->initialised) {
             $this->initialise();
         }
-        
+
         return $this->params->get($path, $default, true);
     }
     
@@ -88,7 +88,7 @@ class Analytics
      * 
      * @see ParameterBag::set
      */
-    public function setParam($key, $value)
+    public function set($key, $value)
     {
         if(!$this->initialised) {
             $this->initialise();
@@ -99,13 +99,14 @@ class Analytics
     
     protected function initialise()
     {
-        $this->collectConfigData();
+        $this->collectGlobalConfigData();
         $this->collectSiteData();
-        $this->collectControllerActionData();
+        $this->collectRequestAttributesData();
+        $this->collectPageData();
     }
     
 
-    protected function collectConfigData()
+    protected function collectGlobalConfigData()
     {
         $this->params->add($this->bbapp->getConfig()->getSection('analytics'));
     }
@@ -113,9 +114,19 @@ class Analytics
     protected function collectSiteData()
     {
         $site = $this->bbapp->getContainer()->get('site');
+        $sitesConfig = $this->bbapp->getConfig()->getSection('sites');
+        
+        if(isset($sitesConfig[$site->getLabel()]['analytics'])) {
+            $this->params->add($sitesConfig[$site->getLabel()]['analytics']);
+        }
      }
     
-    protected function collectControllerActionData()
+    protected function collectRequestAttributesData()
+    {
+        
+    }
+    
+    protected function collectPageData()
     {
         
     }

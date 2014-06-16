@@ -61,7 +61,6 @@ class BBApplication implements IApplication
 {
 
     const VERSION = '0.8.0';
-
     const DEFAULT_CONTEXT = 'default';
     const DEFAULT_ENVIRONMENT = '';
 
@@ -115,7 +114,6 @@ class BBApplication implements IApplication
         ;
 
         $this->_initAnnotationReader();
-
         $this->_initContainer();
         $this->_initAutoloader();
         $this->_initContentWrapper();
@@ -277,22 +275,11 @@ class BBApplication implements IApplication
     }
 
     /**
-     * @param string $configdir
-     * @return \BackBuilder\BBApplication
-     * @throws \BackBuilder\Exception\UnknownContextException Thrown if unknown context provided
+     * @return boolean
      */
-    private function _initContextConfig()
+    public function isOverridedConfig()
     {
-        if (true === $this->hasContext()) {
-            if (false === is_dir($this->getBaseRepository() . '/' . $this->_context)) {
-                throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
-            }
-
-            $this->getContainer()->get('config')->setEnvironement($this->_environment);
-            $this->getContainer()->get('config')->extend($this->getRepository() . '/' . 'Config', $this->_overwrite_config);
-        }
-
-        return $this;
+        return $this->_overwrite_config;
     }
 
     /**
@@ -570,6 +557,18 @@ class BBApplication implements IApplication
     }
 
     /**
+     * Get cache provider from config
+     * @return string Cache provider config name or \BackBuilder\Cache\DAO\Cache if not found
+     */
+    public function getCacheProvider()
+    {
+        $conf = $this->getConfig()->getCacheConfig();
+        $defaultClass = '\BackBuilder\Cache\DAO\Cache';
+        $parentClass = '\BackBuilder\Cache\AExtendedCache';
+        return (isset($conf['provider']) && is_subclass_of($conf['provider'], $parentClass) ? $conf['provider'] : $defaultClass);
+    }
+
+    /**
      * @return \BackBuilder\Cache\DAO\Cache
      */
     public function getCacheControl()
@@ -626,17 +625,11 @@ class BBApplication implements IApplication
      */
     public function getConfig()
     {
-        if (null !== $this->getContainer() && true === $this->getContainer()->isLoaded('config')) {
-            $this->getContainer()
-                 ->get('config')
-                 ->setContainer($this->getContainer())
-                 ->setEnvironment($this->_environment)
-                 ->extend($this->getBBConfigDir());
-
-            $this->_initContextConfig();
+        if (null === $this->_container) {
+            throw new \Exception('Application\'s container is not ready!');
         }
 
-        return $this->getContainer()->get('config');
+        return $this->_container->get('config');
     }
 
     /**
@@ -670,7 +663,7 @@ class BBApplication implements IApplication
             }
 
             return $this->getContainer()->get('em');
-        }catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
     }
@@ -722,7 +715,7 @@ class BBApplication implements IApplication
 
     public function getBaseRepository()
     {
-        if (NULL === $this->_base_repository) {
+        if (null === $this->_base_repository) {
             $this->_base_repository = $this->getBaseDir() . '/' . 'repository';
         }
         return $this->_base_repository;
@@ -905,7 +898,7 @@ class BBApplication implements IApplication
      */
     public function getRpcServer()
     {
-            return $this->getContainer()->get('rpcserver');
+        return $this->getContainer()->get('rpcserver');
     }
 
     /**
@@ -913,7 +906,7 @@ class BBApplication implements IApplication
      */
     public function getUploadServer()
     {
-            return $this->getContainer()->get('uploadserver');
+        return $this->getContainer()->get('uploadserver');
     }
 
     /**
@@ -921,7 +914,7 @@ class BBApplication implements IApplication
      */
     public function getUrlGenerator()
     {
-            return $this->getContainer()->get('rewriting.urlgenerator');
+        return $this->getContainer()->get('rewriting.urlgenerator');
     }
 
     /**
@@ -929,11 +922,12 @@ class BBApplication implements IApplication
      */
     public function getSession()
     {
-            if (null === $this->getRequest()->getSession()) {
+        if (null === $this->getRequest()->getSession()) {
             $session = new Session();
             $session->start();
             $this->getRequest()->setSession($session);
         }
+
         return $this->getRequest()->getSession();
     }
 
@@ -942,7 +936,7 @@ class BBApplication implements IApplication
      */
     public function getSecurityContext()
     {
-            return $this->getContainer()->get('security.context');
+        return $this->getContainer()->get('security.context');
     }
 
     /**
@@ -950,7 +944,7 @@ class BBApplication implements IApplication
      */
     public function getSite()
     {
-            $site = null;
+        $site = null;
         if (true === $this->getContainer()->has('site')) {
             $site = $this->getContainer()->get('site');
         }
@@ -963,7 +957,7 @@ class BBApplication implements IApplication
      */
     public function getStorageDir()
     {
-            if (null === $this->_storagedir) {
+        if (null === $this->_storagedir) {
             $this->_storagedir = $this->_container->getParameter('bbapp.data.dir') . '/' . 'Storage';
         }
 
@@ -975,7 +969,7 @@ class BBApplication implements IApplication
      */
     public function getTemporaryDir()
     {
-            if (null === $this->_tmpdir) {
+        if (null === $this->_tmpdir) {
             $this->_tmpdir = $this->_container->getParameter('bbapp.data.dir') . '/' . 'Tmp';
         }
 
@@ -987,7 +981,7 @@ class BBApplication implements IApplication
      */
     public function isReady()
     {
-            return ($this->_isinitialized && null !== $this->_container);
+        return ($this->_isinitialized && null !== $this->_container);
     }
 
     /**
@@ -995,12 +989,12 @@ class BBApplication implements IApplication
      */
     public function isStarted()
     {
-            return (true === $this->_isstarted);
+        return (true === $this->_isstarted);
     }
 
     public function isClientSAPI()
     {
-            return isset($GLOBALS['argv']);
+        return isset($GLOBALS['argv']);
     }
 
     /**

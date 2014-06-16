@@ -71,7 +71,7 @@ abstract class ABundle implements IObjectIdentifiable
      * @var boolean
      */
     private $isConfigFullyInit = false;
-    
+
     /**
      *
      * @var \ReflectionObject
@@ -80,7 +80,7 @@ abstract class ABundle implements IObjectIdentifiable
 
     public function __call($method, $args)
     {
-        if (NULL !== $this->getLogger()) {
+        if (null !== $this->getLogger()) {
             if (true === is_array($args) && 0 < count($args)) {
                 $args[0] = sprintf('[%s] %s', $this->getId(), $args[0]);
             }
@@ -149,7 +149,6 @@ abstract class ABundle implements IObjectIdentifiable
     public static function initBundleConfig(BBApplication $application, $bundle_base_directory)
     {
         $config_dir = implode(DIRECTORY_SEPARATOR, array($bundle_base_directory, 'Ressources'));
-        
         $config = new Config($config_dir, $application->getBootstrapCache(), null, $application->isDebugMode());
         $config->setEnvironment($application->getEnvironment());
         $config->setContainer($application->getContainer());
@@ -236,22 +235,22 @@ abstract class ABundle implements IObjectIdentifiable
 
         return $em;
     }
-    
+
     /**
      * Get entity manager for this bundle
-     * 
+     *
      * This manager includes only this bundle's entities
-     * 
+     *
      * @return \Doctrine\ORM\EntityManager
      */
     public function getBundleEntityManager()
     {
         $doctrineConfig = $this->getConfig()->getDoctrineConfig();
-        
+
         if(null === $doctrineConfig) {
             $doctrineConfig = $this->getApplication()->getConfig()->getDoctrineConfig();
         }
-        
+
         if (false === array_key_exists('proxy_ns', $doctrineConfig['dbal'])) {
             $doctrineConfig['dbal']['proxy_ns'] = 'Proxies';
         }
@@ -259,20 +258,20 @@ abstract class ABundle implements IObjectIdentifiable
         if (false === array_key_exists('proxy_dir', $doctrineConfig['dbal'])) {
             $doctrineConfig['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir() . '/Proxies';
         }
-        
+
         $em = $this->_initEntityManager($doctrineConfig);
-        
+
         // set the path to include only this bundle's entities
         if(false === file_exists($this->getBaseDir() . '/Entity')) {
             // Entity dir doesn't exist
             mkdir($this->getBaseDir() . '/Entity');
         }
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array($this->getBaseDir() . '/Entity'));
-        
-        
+
+
         return $em;
     }
-    
+
     /**
      * Install this bundle
      */
@@ -280,12 +279,12 @@ abstract class ABundle implements IObjectIdentifiable
     {
         // create DB tables
         $bundleEm = $this->getBundleEntityManager();
-        
+
         $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($this->getEntityManager());
         $schema->createSchema($metadata);
     }
-    
+
     /**
      * Update this bundle
      */
@@ -293,12 +292,12 @@ abstract class ABundle implements IObjectIdentifiable
     {
         // update DB tables
         $bundleEm = $this->getBundleEntityManager();
-        
+
         $metadata = $bundleEm->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($this->getEntityManager());
         $schema->updateSchema($metadata, true);
     }
-    
+
     /**
      * Get update queries
      * @param EntityManager $em
@@ -307,13 +306,13 @@ abstract class ABundle implements IObjectIdentifiable
     public function getUpdateQueries(EntityManager $em)
     {
         $schema = new SchemaTool($em);
-        
+
         $metadatas = $em->getMetadataFactory()->getAllMetadata();
         $sqls = $schema->getUpdateSchemaSql($metadatas, true);
-        
+
         return $sqls;
     }
-    
+
     /**
      * Get create queries
      * @param EntityManager $em
@@ -322,10 +321,10 @@ abstract class ABundle implements IObjectIdentifiable
     public function getCreateQueries(EntityManager $em)
     {
         $schema = new SchemaTool($em);
-        
+
         $metadatas = $em->getMetadataFactory()->getAllMetadata();
         $sqls = $schema->getCreateSchemaSql($metadatas);
-        
+
         return $sqls;
     }
 
@@ -452,7 +451,7 @@ abstract class ABundle implements IObjectIdentifiable
     }
 
     /**
-     * 
+     *
      * @param string|null $configdir
      * @return Config
      */
@@ -517,7 +516,7 @@ abstract class ABundle implements IObjectIdentifiable
                 $registry = $application->getEntityManager()
                     ->getRepository('BackBuilder\Bundle\Registry')
                     ->findOneBy(array(
-                        'key' => $id, 
+                        'key' => $id,
                         'scope' => 'BUNDLE.CONFIG'
                     ))
                 ;
@@ -540,8 +539,8 @@ abstract class ABundle implements IObjectIdentifiable
 
     /**
      * Puts new settings into config files
-     * 
-     * @param  array  $config 
+     *
+     * @param  array  $config
      */
     private function doSaveConfig(array $config)
     {
@@ -591,7 +590,7 @@ abstract class ABundle implements IObjectIdentifiable
 
     public function unserialize($serialized)
     {
-        
+
     }
 
     abstract function start();

@@ -74,6 +74,7 @@ class Memcached extends AExtendedCache
      * @var array
      */
     protected $_instance_options = array(
+        'type' => 'memcached',
         'min_cache_lifetime' => null,
         'max_cache_lifetime' => null,
         'persistent_id' => null,
@@ -365,7 +366,7 @@ class Memcached extends AExtendedCache
         }
 
         if (false === $this->_memcached->set($id, $data, $lifetime) ||
-                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, $lifetime, $lifetime)) {
+                false === $this->_memcached->set(self::EXPIRE_PREFIX . $id, '' . (0 === $lifetime ? 0 : time() + $lifetime), $lifetime)) {
             return $this->_onError('save');
         }
 

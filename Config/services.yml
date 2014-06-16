@@ -27,6 +27,9 @@ parameters:
     bbapp.keywordbuilder.class: BackBuilder\NestedNode\Builder\KeywordBuilder
     bbapp.controller_resolver.class: BackBuilder\Controller\ControllerResolver
 
+    bbapp.script.command: php
+    bbapp.console.command: bin/console.php
+
     bbapp.rest.hydrator.class: BackBuilder\Rest\Hydration\RestHydrator
     bbapp.rest.encoder_provider.class: BackBuilder\Rest\Encoder\ContainerEncoderProvider
     bbapp.rest.encoder_json.class: Symfony\Component\Serializer\Encoder\JsonEncoder

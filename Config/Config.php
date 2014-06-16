@@ -219,7 +219,7 @@ class Config
         }
         
         if (null !== $this->_cache) {
-            return $this->_cache->save($this->_getCacheId($basedir), serialize($this->_raw_parameters));
+            return $this->_cache->save($this->_getCacheId($basedir), serialize($this->_raw_parameters), null, null, true);
         }
 
         return false;

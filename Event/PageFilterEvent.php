@@ -19,26 +19,44 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer\Helper;
+namespace BackBuilder\Event;
+
+use Symfony\Component\HttpKernel\Event\KernelEvent,
+    Symfony\Component\HttpKernel\HttpKernelInterface,
+    Symfony\Component\HttpFoundation\Request;
+
+use BackBuilder\NestedNode\Page;
 
 /**
- * Website analytics attributes
+ * Page Filter Event
  *
  * @category    BackBuilder
- * @package     BackBuilder\Renderer
- * @subpackage  Helper
+ * @package     BackBuilder\Event
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class analytics extends AHelper
+class PageFilterEvent extends KernelEvent
 {
     /**
-     * Return the analytics parameter bag
-     * @return \Symfony\Component\HttpFoundation\ParameterBag
+     *
+     * @var Page
      */
-    public function __invoke()
+    private $page;
+    
+    public function __construct(HttpKernelInterface $kernel, Request $request, $requestType, Page $page)
     {
-        return $this->_renderer->getApplication()->getContainer()->get('analytics');
+        parent::__construct($kernel, $request, $requestType);
+        $this->page = $page;
     }
-
+    
+    /**
+     * 
+     * @return Page
+     */
+    public function getPage()
+    {
+        return $this->page;
+    }
+           
+    
 }
