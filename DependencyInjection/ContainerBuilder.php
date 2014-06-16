@@ -110,7 +110,7 @@ class ContainerBuilder
                     $container_dir . DIRECTORY_SEPARATOR . $container_file, 
                     $dump->dump(array(
                         'class'      => $container_class, 
-                        'base_class' => '\BackBuilder\DependencyInjection\ContainerBuilder'
+                        'base_class' => '\BackBuilder\DependencyInjection\Container'
                     ))
                 );
             }
