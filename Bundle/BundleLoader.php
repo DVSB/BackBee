@@ -1,16 +1,14 @@
 <?php
-
 namespace BackBuilder\Bundle;
 
-use ReflectionClass;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Config\Config,
-    BackBuilder\DependencyInjection\ContainerBuilder;
+use BackBuilder\BBApplication;
+use BackBuilder\Config\Config;
+use BackBuilder\DependencyInjection\ContainerBuilder;
 
-use Symfony\Component\DependencyInjection\Definition,
-    Symfony\Component\DependencyInjection\Reference,
-    Symfony\Component\Yaml\Yaml;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Yaml\Yaml;
 
 class BundleLoader
 {
@@ -33,7 +31,7 @@ class BundleLoader
         foreach ($bundles_config as $name => $classname) {
             // Using ReflectionClass so we can read every bundle config file without the need to
             // instanciate each bundle's Config
-            $r = new ReflectionClass($classname);
+            $r = new \ReflectionClass($classname);
             $key = 'bundle.' . strtolower(basename(dirname($r->getFileName())));
             self::$bundle_base_dir[$key] = dirname($r->getFileName());
             unset($r);

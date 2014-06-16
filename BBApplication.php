@@ -21,8 +21,6 @@
 
 namespace BackBuilder;
 
-use Exception;
-
 use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Bundle\BundleLoader,
     BackBuilder\Config\Config,
@@ -111,44 +109,16 @@ class BBApplication implements IApplication
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
 
-        $this->_environment = ((is_string($environment)) 
-            ? $environment 
+        $this->_environment = ((is_string($environment))
+            ? $environment
             : ($environment === false ? 'production' : self::DEFAULT_ENVIRONMENT))
         ;
 
-        // annotations require custom autoloading
-        AnnotationRegistry::registerAutoloadNamespaces(array(
-            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
-            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
-            'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
-            'BackBuilder' => $this->getBaseDir(),
-                //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
-        ));
+        $this->_initAnnotationReader();
 
-        // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
-        AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
-        AnnotationReader::addGlobalIgnoredName('Entity');
-        AnnotationReader::addGlobalIgnoredName('Column');
-        AnnotationReader::addGlobalIgnoredName('Table');
-        AnnotationReader::addGlobalIgnoredName('HasLifecycleCallbacks');
-        AnnotationReader::addGlobalIgnoredName('Index');
-        AnnotationReader::addGlobalIgnoredName('Id');
-        AnnotationReader::addGlobalIgnoredName('GeneratedValue');
-        AnnotationReader::addGlobalIgnoredName('ManyToMany');
-        AnnotationReader::addGlobalIgnoredName('JoinTable');
-        AnnotationReader::addGlobalIgnoredName('JoinColumn');
-        AnnotationReader::addGlobalIgnoredName('ManyToOne');
-        AnnotationReader::addGlobalIgnoredName('OneToOne');
-        AnnotationReader::addGlobalIgnoredName('OneToMany');
-        AnnotationReader::addGlobalIgnoredName('PreUpdate');
-        AnnotationReader::addGlobalIgnoredName('index');
-        AnnotationReader::addGlobalIgnoredName('fixtures');
-        AnnotationReader::addGlobalIgnoredName('fixture');
-        AnnotationReader::addGlobalIgnoredName('column');
-
-        $this->_initContainer()
-             ->_initAutoloader()
-             ->_initContentWrapper();
+        $this->_initContainer();
+        $this->_initAutoloader();
+        $this->_initContentWrapper();
 
         try {
             $this->_initEntityManager();
@@ -156,11 +126,13 @@ class BBApplication implements IApplication
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
 
+        \BackBuilder\Util\Server::startMicrotime();
         $this->_initBundles();
+        echo \BackBuilder\Util\Server::stopMicrotime() . 's'; die;
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
-            
+
             return;
         }
 
@@ -170,7 +142,7 @@ class BBApplication implements IApplication
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
                 if (setLocale(LC_ALL, $encoding['locale']) === false)
-                    Throw new Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
+                    throw new \Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
         }
 
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
@@ -270,7 +242,7 @@ class BBApplication implements IApplication
     /**
      * @return \Swift_Mailer
      */
-    public function getMailer() 
+    public function getMailer()
     {
         if (false === $this->getContainer()->has('mailer') || is_null($this->getContainer()->get('mailer'))) {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
@@ -295,8 +267,8 @@ class BBApplication implements IApplication
     /**
      * @return boolean
      */
-    public function isDebugMode() 
-    {        
+    public function isDebugMode()
+    {
         if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
@@ -309,7 +281,7 @@ class BBApplication implements IApplication
      * @return \BackBuilder\BBApplication
      * @throws \BackBuilder\Exception\UnknownContextException Thrown if unknown context provided
      */
-    private function _initContextConfig() 
+    private function _initContextConfig()
     {
         if (true === $this->hasContext()) {
             if (false === is_dir($this->getBaseRepository() . '/' . $this->_context)) {
@@ -442,7 +414,7 @@ class BBApplication implements IApplication
      * @uses isDebugMode()
      * @return boolean
      */
-    public function debugMode() 
+    public function debugMode()
     {
         return $this->_debug;
     }
@@ -548,7 +520,7 @@ class BBApplication implements IApplication
 
     /**
      * Get vendor dir
-     * 
+     *
      * @return string
      */
     public function getVendorDir()
@@ -626,14 +598,14 @@ class BBApplication implements IApplication
     /**
      * @return BackBuilder\DependencyInjection\Container
      */
-    public function getContainer() 
+    public function getContainer()
     {
         return $this->_container;
     }
 
     /**
      * Get validator service
-     * 
+     *
      * @return \Symfony\Component\Validator\ValidatorInterface
      */
     public function getValidator()
@@ -669,7 +641,7 @@ class BBApplication implements IApplication
 
     /**
      * Get current environment
-     * 
+     *
      * @return string
      */
     public function getEnvironment()
@@ -714,7 +686,7 @@ class BBApplication implements IApplication
     /**
      * @return Logger
      */
-    public function getLogging() 
+    public function getLogging()
     {
         return $this->getContainer()->get('logging');
     }
@@ -1079,7 +1051,39 @@ class BBApplication implements IApplication
                     $console->add($instance);
                 }
             }
-            
         }
+    }
+
+    private function _initAnnotationReader()
+    {
+        // annotations require custom autoloading
+        AnnotationRegistry::registerAutoloadNamespaces(array(
+            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
+            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
+            'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
+            'BackBuilder' => $this->getBaseDir(),
+            //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
+        ));
+
+        // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
+        AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
+        AnnotationReader::addGlobalIgnoredName('Entity');
+        AnnotationReader::addGlobalIgnoredName('Column');
+        AnnotationReader::addGlobalIgnoredName('Table');
+        AnnotationReader::addGlobalIgnoredName('HasLifecycleCallbacks');
+        AnnotationReader::addGlobalIgnoredName('Index');
+        AnnotationReader::addGlobalIgnoredName('Id');
+        AnnotationReader::addGlobalIgnoredName('GeneratedValue');
+        AnnotationReader::addGlobalIgnoredName('ManyToMany');
+        AnnotationReader::addGlobalIgnoredName('JoinTable');
+        AnnotationReader::addGlobalIgnoredName('JoinColumn');
+        AnnotationReader::addGlobalIgnoredName('ManyToOne');
+        AnnotationReader::addGlobalIgnoredName('OneToOne');
+        AnnotationReader::addGlobalIgnoredName('OneToMany');
+        AnnotationReader::addGlobalIgnoredName('PreUpdate');
+        AnnotationReader::addGlobalIgnoredName('index');
+        AnnotationReader::addGlobalIgnoredName('fixtures');
+        AnnotationReader::addGlobalIgnoredName('fixture');
+        AnnotationReader::addGlobalIgnoredName('column');
     }
 }
