@@ -18,7 +18,7 @@ class BundleLoader
     const SERVICE_RECIPE_KEY = 'service';
     const CLASSCONTENT_RECIPE_KEY = 'classcontent';
     const RESOURCE_RECIPE_KEY = 'resource';
-    const TEMPALTE_RECIPE_KEY = 'template';
+    const TEMPLATE_RECIPE_KEY = 'template';
     const HELPER_RECIPE_KEY = 'helper';
     const ROUTE_RECIPE_KEY = 'route';
 
@@ -190,7 +190,7 @@ class BundleLoader
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::SERVICE_RECIPE_KEY);
+                $recipe = self::getBundleLoaderRecipeFor($config, self::CLASSCONTENT_RECIPE_KEY);
             }
 
             if (null === $recipe) {
@@ -214,7 +214,7 @@ class BundleLoader
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::SERVICE_RECIPE_KEY);
+                $recipe = self::getBundleLoaderRecipeFor($config, self::RESOURCE_RECIPE_KEY);
             }
 
             if (null === $recipe) {
@@ -239,7 +239,7 @@ class BundleLoader
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::SERVICE_RECIPE_KEY);
+                $recipe = self::getBundleLoaderRecipeFor($config, self::TEMPLATE_RECIPE_KEY);
             }
 
             if (null === $recipe) {
@@ -264,7 +264,7 @@ class BundleLoader
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::SERVICE_RECIPE_KEY);
+                $recipe = self::getBundleLoaderRecipeFor($config, self::HELPER_RECIPE_KEY);
             }
 
             if (null === $recipe) {
@@ -286,6 +286,7 @@ class BundleLoader
     {
         $recipe = null;
         $bundle_config = $config->getBundleConfig();
+        // var_dump($bundle_config);
         if (true === isset($bundle_config['bundle_loader_recipes'])) {
             $recipe = true === isset($bundle_config['bundle_loader_recipes'][$key])
                 ? $bundle_config['bundle_loader_recipes'][$key]
