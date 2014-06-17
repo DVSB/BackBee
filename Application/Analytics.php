@@ -58,6 +58,16 @@ class Analytics
         $this->params = new ParameterBag();
     }
     
+    
+    /**
+     * 
+     * @return BBApplication
+     */
+    public function getApplication()
+    {
+        return $this->bbapp;
+    }
+    
     /**
      * 
      * @see ParameterBag::get
@@ -68,7 +78,7 @@ class Analytics
             $this->initialise();
         }
 
-        return $this->params->get($path, $default, true);
+        return $this->params->get($path, $this->getGlobalConfigData($path), true);
     }
     
     /**
@@ -97,37 +107,26 @@ class Analytics
         return $this->params->set($key, $value);
     }
     
-    protected function initialise()
-    {
-        $this->collectGlobalConfigData();
-        $this->collectSiteData();
-        $this->collectRequestAttributesData();
-        $this->collectPageData();
-    }
-    
 
-    protected function collectGlobalConfigData()
+    protected function getGlobalConfigData($key, $default = null)
     {
-        $this->params->add($this->bbapp->getConfig()->getSection('analytics'));
-    }
-    
-    protected function collectSiteData()
-    {
+        // try site config
         $site = $this->bbapp->getContainer()->get('site');
         $sitesConfig = $this->bbapp->getConfig()->getSection('sites');
         
-        if(isset($sitesConfig[$site->getLabel()]['analytics'])) {
-            $this->params->add($sitesConfig[$site->getLabel()]['analytics']);
+        if(isset($sitesConfig[$site->getLabel()]['analytics'][$key])) {
+            return $sitesConfig[$site->getLabel()]['analytics'][$key];
         }
-     }
-    
-    protected function collectRequestAttributesData()
-    {
+         
+        // try global config
+        $analytics = $this->bbapp->getConfig()->getSection('analytics');
         
+        return isset($analytics[$key]) ? $analytics[$key]: $default;
     }
     
-    protected function collectPageData()
+
+    protected function initialise()
     {
-        
+     
     }
 }
