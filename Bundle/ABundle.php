@@ -511,15 +511,11 @@ abstract class ABundle implements IObjectIdentifiable
     private static function _getRegistryConfig(BBApplication $application, $id)
     {
         $registry = null;
-        if(null !== $application->getEntityManager()) {
+        $em = $application->getEntityManager();
+        if(null !== $em) {
             try {
-                $registry = $application->getEntityManager()
-                    ->getRepository('BackBuilder\Bundle\Registry')
-                    ->findOneBy(array(
-                        'key' => $id,
-                        'scope' => 'BUNDLE.CONFIG'
-                    ))
-                ;
+                $registry = $em->getRepository('BackBuilder\Bundle\Registry')
+                    ->findRegistryEntityByIdAndScope($id, 'BUNDLE.CONFIG');
             } catch (\Exception $e) {
                 if (true === $application->isStarted()) {
                     $this->warning('Unable to load registry table');

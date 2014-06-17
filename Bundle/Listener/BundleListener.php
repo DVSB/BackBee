@@ -15,7 +15,7 @@ class BundleListener
     {
         $application = $event->getTarget();
         if (
-            null === $application 
+            null === $application
             || false === is_a($application, 'BackBuilder\BBApplication')
             || false === $application->isStarted()
         ) {

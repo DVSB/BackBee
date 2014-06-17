@@ -37,6 +37,7 @@ class ContainerBuilder
 
         if (
             false === $force_reload
+            && false === $application->isDebugMode()
             && true === is_readable($container_dir . DIRECTORY_SEPARATOR . $container_file)
         ) {
             $loader = new PhpFileLoader($container, new FileLocator(array($container_dir)));
@@ -48,42 +49,27 @@ class ContainerBuilder
             $container->set('bbapp', $application);
             $container->set('service_container', $container);
 
-            $container->get('config')
-                      ->setContainer($container)
-                      ->setEnvironment($application->getEnvironment())
-                      ->extend($container->getParameter('bbapp.config.dir'));
+            self::initConfig($application, $container);
 
             $container->setDefinition('site', new Definition())->setSynthetic(true);
             $container->setDefinition('routing', new Definition())->setSynthetic(true);
             $container->setDefinition('bb_session', new Definition())->setSynthetic(true);
 
             if (false === $container->getParameter('debug')) {
+                $container->setParameter('container.do_compile', false);
                 return $container;
             }
         }
 
+        $container->setParameter('container.do_compile', true);
+        $container->setParameter('container.class', $container_class);
+        $container->setParameter('container.file', $container_file);
+        $container->setParameter('container.dir', $container_dir);
+
         self::loadApplicationServices($application, $container);
-
         self::initApplicationVarsIntoContainer($application, $container);
-
         self::loadLogger($container);
-
-        if (false === $container->getParameter('debug')) {
-            if (false === file_exists($container_dir)) {
-                @mkdir($container_dir, 0755);
-            }
-
-            if (true === is_writable($container_dir)) {
-                $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($container);
-                file_put_contents(
-                    $container_dir . DIRECTORY_SEPARATOR . $container_file,
-                    $dump->dump(array(
-                        'class'      => $container_class,
-                        'base_class' => '\BackBuilder\DependencyInjection\Container'
-                    ))
-                );
-            }
-        }
+        self::initConfig($application, $container);
 
         return $container;
     }
@@ -287,5 +273,30 @@ class ContainerBuilder
         }
 
         return $config;
+    }
+
+    private static function initConfig(BBApplication $application, Container $container)
+    {
+        $container->get('config')
+                  ->setContainer($container)
+                  ->setEnvironment($application->getEnvironment())
+                  ->extend($container->getParameter('bbapp.config.dir'))
+        ;
+
+        // init config with context if needed
+        if (true === $application->hasContext()) {
+            if (false === is_dir($application->getBaseRepository() . '/' . $application->getContext())) {
+                throw new UnknownContextException(sprintf(
+                    'Unable to find `%s` context in repository.',
+                    $application->getContext()
+                ));
+            }
+
+            $container->get('config')->setEnvironement($application->getEnvironment());
+            $container->get('config')->extend(
+                $application->getRepository() . '/' . 'Config',
+                $application->isOverridedConfig()
+            );
+        }
     }
 }

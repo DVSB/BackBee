@@ -21,7 +21,7 @@ class Container extends sfContainerBuilder
     /**
      * Change current method default behavior: if we try to get a synthetic service it will return
      * null instead of throwing an exception;
-     * 
+     *
      * @see Symfony\Component\DependencyInjection\ContainerBuilder::get()
      */
     public function get($id, $invalidBehavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
@@ -45,7 +45,7 @@ class Container extends sfContainerBuilder
 
             throw $e;
         }
-        
+
         if (true === in_array('event.dispatcher', array_keys($this->services))) {
             if (null !== $service && true === $this->hasDefinition($id)) {
                 $definition = $this->getDefinition($id);
@@ -134,7 +134,7 @@ class Container extends sfContainerBuilder
     public function isLoaded($id)
     {
         $id = strtolower($id);
-        
+
         return isset($this->services[$id]) || method_exists($this, 'get' . strtr($id, array('_' => '', '.' => '_')) . 'Service');
     }
 }

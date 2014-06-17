@@ -12,6 +12,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class BundleLoader
 {
+    const BUNDLE_SERVICE_KEY_PATTERN = 'bundle.%sbundle';
+
     const EVENT_RECIPE_KEY = 'event';
     const SERVICE_RECIPE_KEY = 'service';
     const CLASSCONTENT_RECIPE_KEY = 'classcontent';
@@ -20,7 +22,7 @@ class BundleLoader
     const HELPER_RECIPE_KEY = 'helper';
     const ROUTE_RECIPE_KEY = 'route';
 
-    private static $bundle_base_dir = array();
+    private static $bundles_base_dir = array();
 
     private static $bundles_config = array();
 
@@ -35,23 +37,34 @@ class BundleLoader
     public static function loadBundlesIntoApplication(BBApplication $application, array $bundles_config)
     {
         self::$application = $application;
+        $container = $application->getContainer();
+        self::$bundles_base_dir = true === $container->hasParameter('bundles.base_dir')
+            ? $container->getParameter('bundles.base_dir')
+            : array()
+        ;
+
+        $do_get_base_dir = !(0 < count(self::$bundles_base_dir)) ?: true;
 
         foreach ($bundles_config as $name => $classname) {
-            // Using ReflectionClass so we can read every bundle config file without the need to
-            // instanciate each bundle's Config
-            $r = new \ReflectionClass($classname);
-            $key = 'bundle.' . strtolower(basename(dirname($r->getFileName())));
-            self::$bundle_base_dir[$key] = dirname($r->getFileName());
-            unset($r);
+            $key = sprintf(self::BUNDLE_SERVICE_KEY_PATTERN, strtolower($name));
+
+            if (true === $do_get_base_dir || true === $container->getParameter('debug')) {
+                // Using ReflectionClass so we can read every bundle config file without the need to
+                // instanciate each bundle's Config
+                $r = new \ReflectionClass($classname);
+                self::$bundles_base_dir[$key] = dirname($r->getFileName());
+            }
 
             $definition = new Definition($classname, array(new Reference('bbapp')));
             $definition->addTag('bundle');
-            $application->getContainer()->setDefinition($key, $definition);
+            $container->setDefinition($key, $definition);
         }
 
-        self::loadBundlesConfig();
+        $container->setParameter('bundles.base_dir', self::$bundles_base_dir);
+
+        self::loadBundlesConfig(); // 222 ms
         self::loadBundleEvents();
-        self::loadBundlesServices();
+        self::loadBundlesServices(); // 17 ms
         self::registerBundleClassContentDir();
         self::registerBundleResourceDir();
         self::registerBundleScriptDir();
@@ -86,15 +99,18 @@ class BundleLoader
         ));
 
         // Cleaning memory
-        self::$bundle_base_dir = null;
+        self::$bundles_base_dir = null;
         self::$bundles_config = null;
         self::$application = null;
     }
 
+    /**
+     * [loadBundlesConfig description]
+     */
     private static function loadBundlesConfig()
     {
         $services_id = array();
-        foreach (self::$bundle_base_dir as $key => $base_dir) {
+        foreach (self::$bundles_base_dir as $key => $base_dir) {
             $config = \BackBuilder\Bundle\ABundle::initBundleConfig(self::$application, $base_dir);
             self::$bundles_config[$key] = $config;
             $config_service_id = \BackBuilder\Bundle\ABundle::getBundleConfigServiceId($base_dir);
@@ -117,7 +133,7 @@ class BundleLoader
                     continue;
                 }
 
-                $event_dispatcher->addListeners($events);                
+                $event_dispatcher->addListeners($events);
             } else {
                 if (true === is_callable($recipe)) {
                     call_user_func_array($recipe, array(self::$application, $config));
@@ -139,7 +155,7 @@ class BundleLoader
         }
 
         $container = self::$application->getContainer();
-        foreach (self::$bundle_base_dir as $key => $dir) {
+        foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
@@ -170,7 +186,7 @@ class BundleLoader
 
     private static function registerBundleClassContentDir()
     {
-        foreach (self::$bundle_base_dir as $key => $dir) {
+        foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
@@ -194,7 +210,7 @@ class BundleLoader
 
     private static function registerBundleResourceDir()
     {
-        foreach (self::$bundle_base_dir as $key => $dir) {
+        foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
@@ -219,14 +235,14 @@ class BundleLoader
     private static function registerBundleScriptDir()
     {
         $renderer = self::$application->getRenderer();
-        foreach (self::$bundle_base_dir as $key => $dir) {
+        foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
                 $recipe = self::getBundleLoaderRecipeFor($config, self::SERVICE_RECIPE_KEY);
             }
 
-            if (null === $recipe) {            
+            if (null === $recipe) {
                 $scripts_dir = realpath($dir . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'scripts');
                 if (false === $scripts_dir) {
                     continue;
@@ -244,14 +260,14 @@ class BundleLoader
     private static function registerBundleHelperDir()
     {
         $renderer = self::$application->getRenderer();
-        foreach (self::$bundle_base_dir as $key => $dir) {
+        foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
             if (null !== $config) {
                 $recipe = self::getBundleLoaderRecipeFor($config, self::SERVICE_RECIPE_KEY);
             }
 
-            if (null === $recipe) {  
+            if (null === $recipe) {
                 $helper_dir = realpath($dir . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'helpers');
                 if (false === $helper_dir) {
                     continue;
@@ -274,7 +290,7 @@ class BundleLoader
             $recipe = true === isset($bundle_config['bundle_loader_recipes'][$key])
                 ? $bundle_config['bundle_loader_recipes'][$key]
                 : null
-            ;            
+            ;
         }
 
         return $recipe;
