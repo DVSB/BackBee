@@ -895,7 +895,7 @@ class FrontController implements HttpKernelInterface
     /**
      * This method executed on shutdown after the response is sent
      */
-    protected function terminate()
+    public function terminate()
     {
         if (false === $this->_application->isStarted()) {
             return;
