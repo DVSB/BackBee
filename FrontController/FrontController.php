@@ -897,7 +897,7 @@ class FrontController implements HttpKernelInterface
      */
     public function terminate()
     {
-        if (false === $this->_application->isStarted()) {
+        if (!$this->_application || false === $this->_application->isStarted()) {
             return;
         }
         
