@@ -901,6 +901,10 @@ class FrontController implements HttpKernelInterface
             return;
         }
         
+        // force content output
+        @ini_set('zlib.output_compression', 0);
+        ob_implicit_flush(true);flush();
+
         // $_response may not be set
         if($this->_response instanceof Response) {
             $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
