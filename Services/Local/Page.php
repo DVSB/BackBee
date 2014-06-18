@@ -363,7 +363,7 @@ class Page extends AbstractServiceLocal
         }
 
         $this->getEntityManager()->flush($page);
-        $this->_repo->updateHierarchicalDatas($parent, $parent->getLeftnode(), $parent->getLevel());
+        //$this->_repo->updateHierarchicalDatas($parent, $parent->getLeftnode(), $parent->getLevel());
         
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
