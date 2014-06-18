@@ -900,6 +900,11 @@ class FrontController implements HttpKernelInterface
         if (false === $this->_application->isStarted()) {
             return;
         }
-        $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
+        
+        // $_response may not be set
+        if($this->_response instanceof Response) {
+            $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
+        }
+        
     }
 }
