@@ -39,8 +39,6 @@ abstract class AJob extends ContainerAware
      */
     public $args = array();
     
-    public $argumentNames = array();
-    
     /**
      * @var string The queue name
      */
