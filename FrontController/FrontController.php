@@ -39,7 +39,8 @@ use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpKernel\Event\FilterResponseEvent,
     Symfony\Component\HttpKernel\Event\GetResponseEvent,
     Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent,
-    Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+    Symfony\Component\HttpKernel\Event\FilterControllerEvent,
+    Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 /**
  * The BackBuilder front controller
@@ -73,6 +74,12 @@ class FrontController implements HttpKernelInterface
      * @var \Symfony\Component\HttpFoundation\Request
      */
     protected $_request;
+    
+    /**
+     * Response
+     * @var \Symfony\Component\HttpFoundation\Response
+     */
+    protected $_response;
 
     /**
      * Current request context
@@ -118,6 +125,8 @@ class FrontController implements HttpKernelInterface
 
         $this->url_extension = self::DEFAULT_URL_EXTENSION;
         //$this->_routeCollection = $application->getRouting();
+        
+        register_shutdown_function(array($this, 'terminate'));
     }
 
     /**
@@ -162,6 +171,7 @@ class FrontController implements HttpKernelInterface
         }
 
         $response->send();
+        $this->_response = $response;
         exit(0);
     }
     
@@ -880,5 +890,25 @@ class FrontController implements HttpKernelInterface
     public function getUrlExtension()
     {
         return $this->url_extension;
+    }
+    
+    /**
+     * This method executed on shutdown after the response is sent
+     */
+    public function terminate()
+    {
+        if (!$this->_application || false === $this->_application->isStarted()) {
+            return;
+        }
+        
+        // force content output
+        @ini_set('zlib.output_compression', 0);
+        ob_implicit_flush(true);flush();
+
+        // $_response may not be set
+        if($this->_response instanceof Response) {
+            $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
+        }
+        
     }
 }
