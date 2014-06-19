@@ -21,10 +21,11 @@
 
 namespace BackBuilder\Config;
 
-use BackBuilder\Cache\ACache,
-    BackBuilder\DependencyInjection\ContainerBuilder;
-use Symfony\Component\Yaml\Exception\ParseException,
-    Symfony\Component\Yaml\Yaml;
+use BackBuilder\Cache\ACache;
+use BackBuilder\DependencyInjection\Container;
+
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * A set of configuration parameters store in a yaml file
@@ -44,7 +45,7 @@ class Config
      * @var string
      */
     const CONFIG_FILE = 'config';
-    
+
     /**
      * System events config file to look for
      * @var string
@@ -83,24 +84,24 @@ class Config
 
     /**
      * The service container
-     * @var \BackBuilder\DependencyInjection\ContainerBuilder
+     * @var \BackBuilder\DependencyInjection\Container
      */
     private $_container;
 
     private $_environment = 'production';
-    
+
     /**
      * Is debug mode enabled
-     * 
+     *
      * @var boolean
      */
     private $_debug = false;
-    
+
     /**
      * Debug info
-     * 
+     *
      * Only populated in dev environment
-     * 
+     *
      * @var array
      */
     protected $_debugData = array();
@@ -137,9 +138,9 @@ class Config
      * Class constructor
      * @param string $basedir The base directory in which look for config files
      * @param \BackBuilder\Cache\ACache $cache Optional cache system
-     * @param \BackBuilder\DependencyInjection\ContainerBuilder $container
+     * @param \BackBuilder\DependencyInjection\Container $container
      */
-    public function __construct($basedir, ACache $cache = null, ContainerBuilder $container = null, $debug = false)
+    public function __construct($basedir, ACache $cache = null, Container $container = null, $debug = false)
     {
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
@@ -147,26 +148,26 @@ class Config
         $this->_debug = $debug;
         $this->setContainer($container)->extend();
     }
-    
+
 
     /**
      * Set the service container to be able to parse parameter and service in config
      * Resets the compiled parameters array
-     * @param \BackBuilder\DependencyInjection\ContainerBuilder $container
+     * @param \BackBuilder\DependencyInjection\Container $container
      * @return \BackBuilder\Config\Config
      */
-    public function setContainer(ContainerBuilder $container = null)
+    public function setContainer(Container $container = null)
     {
         $this->_container = $container;
         $this->_parameters = array();
         return $this;
     }
-    
+
     /**
-     * Get debug info 
-     * 
+     * Get debug info
+     *
      * Populated only in dev env
-     * 
+     *
      * @return array
      */
     public function getDebugData()
@@ -181,7 +182,7 @@ class Config
      */
     private function _loadFromCache($basedir)
     {
-        if(true === $this->_debug) {
+        if (true === $this->_debug) {
             return false;
         }
 
@@ -193,7 +194,7 @@ class Config
         if (false === $cached_parameters) {
             return false;
         }
-        
+
         $parameters = @\unserialize($cached_parameters);
         if (false === is_array($parameters)) {
             return false;
@@ -216,7 +217,7 @@ class Config
         if(true === $this->_debug) {
             return false;
         }
-        
+
         if (null !== $this->_cache) {
             return $this->_cache->save($this->_getCacheId($basedir), serialize($this->_raw_parameters), null, null, true);
         }
@@ -306,8 +307,8 @@ class Config
                 if(true === $this->_debug) {
                     $this->_debugData[$filename] = $yamlDatas;
                 }
-                
-                if (self::CONFIG_FILE . '.' . self::EXTENTION === basename($filename) || 
+
+                if (self::CONFIG_FILE . '.' . self::EXTENTION === basename($filename) ||
                     self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION === basename($filename)) {
 
                     foreach ($yamlDatas as $component => $config) {
@@ -380,7 +381,7 @@ class Config
         $this->_environment = $env;
         return $this;
     }
-    
+
     /**
      * Set debug mode
      * @param boolean $debug
@@ -480,7 +481,6 @@ class Config
         if (null === $basedir) {
             $basedir = $this->_basedir;
         }
-
         $basedir = \BackBuilder\Util\File::realpath($basedir);
 
         if (false === $this->_loadFromCache($basedir)) {
@@ -494,7 +494,7 @@ class Config
 
             $this->extend($basedir . DIRECTORY_SEPARATOR . $this->_environment, $overwrite);
         }
-        
+
         return $this;
     }
 

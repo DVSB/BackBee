@@ -59,9 +59,7 @@ class RouteCollection extends sfRouteCollection
             parent::__construct();
         }
 
-        if (null !== $application) {
-            $this->_application = $application;
-        }
+        $this->_application = $application;
     }
 
     public function addBundleRouting(ABundle $bundle)
@@ -70,11 +68,11 @@ class RouteCollection extends sfRouteCollection
 
         if (null !== $routeConfig = $bundle->getConfig()->getRouteConfig()) {
             $this->pushRouteCollection($router, $routeConfig);
-            $this->moveDefaultRoute($router);
+            $this->moveDefaultRoute();
         }
     }
 
-    public function pushRouteCollection($router, $routeCollection)
+    public function pushRouteCollection($routeCollection)
     {
         foreach ($routeCollection as $name => $route) {
             if (false === array_key_exists('pattern', $route) || false === array_key_exists('defaults', $route)) {
@@ -82,7 +80,7 @@ class RouteCollection extends sfRouteCollection
                 continue;
             }
 
-            $router->add(
+            $this->add(
                     $name, new Route(
                         $route['pattern'], 
                         $route['defaults'], 
@@ -94,13 +92,17 @@ class RouteCollection extends sfRouteCollection
 
             $this->_application->debug(sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
         }
+
+        $this->moveDefaultRoute();
     }
 
-    public function moveDefaultRoute($router)
+    private function moveDefaultRoute()
     {
-        $default_route = $router->get('default');
-        $router->remove('default');
-        $router->add('default', $default_route);
+        $default_route = $this->get('default');
+        if (null !== $default_route) {
+            $this->remove('default');
+            $this->add('default', $default_route);
+        }
     }
 
     /**

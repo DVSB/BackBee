@@ -21,7 +21,9 @@
 
 namespace BackBuilder\Event;
 
-use BackBuilder\BBApplication;
+use BackBuilder\BBApplication,
+    BackBuilder\Config\Config;
+
 use Symfony\Component\EventDispatcher\EventDispatcher,
     Symfony\Component\EventDispatcher\Event as sfEvent;
 
@@ -46,12 +48,16 @@ class Dispatcher extends EventDispatcher
      * Class constructor
      * @param \BackBuilder\BBApplication $application The current instance of BB application
      */
-    public function __construct(BBApplication $application = null)
+    public function __construct(BBApplication $application = null, Config $config = null)
     {
         $this->_application = $application;
 
-        if (NULL !== $application) {
-            if (NULL !== $eventsConfig = $this->_application->getConfig()->getEventsConfig()) {
+        if (null === $config && null !== $application) {
+            $config = $application->getConfig();
+        }
+
+        if (null !== $config) {
+            if (null !== $eventsConfig = $config->getEventsConfig()) {
                 $this->addListeners($eventsConfig);
             }
         }
