@@ -21,9 +21,8 @@
 
 namespace BackBuilder\Job\Queue;
 
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Yaml,
+    Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 use BackBuilder\Job\AJob,
     BackBuilder\Bundle\Registry;
@@ -53,27 +52,26 @@ class RegistryQueue extends AQueue
      */
     public function getJobs($status = null)
     {
-        $registryItems = $this->em->getRepository('BackBuilder\Bundle\Registry')->findBy(array(
-            'scope'   => $queue,
-            'type'    => $status
-        ));
+        $qb = $this->em->getRepository('BackBuilder\Bundle\Registry')->createQueryBuilder('r');
+        
+        // only get jobs that belong to this queue
+        $qb->andWhere('r.scope = :queueName');
+        $qb->setParameter('queueName', 'JOB.' . $this->getName());
+        
+        if(null !== $status) {
+            // status is stored within key which is a yaml-encoded string. ugly hack I know :(
+            $qb->andWhere('r.key LIKE :status');
+            $qb->setParameter('status', '%status: '. $status . '%');
+        }
+        
+        $registryItems = $qb->getQuery()->execute();
         
         $jobs = array();
         
         // convert registry items to jobs
-        foreach($registryItems as $registryItem) {
-            $jobClass = $registryItem->getType();
-            $job = new $jobClass();
-            
-            if($job instanceof ContainerAwareInterface) {
-                $job->setContainer($this->container);
-            }
-            
-            list($nodeId, $first, $delta, $status) = explode('|', $registryItem->getKey());
-            
-            $job->args = array(
-                
-            );
+        foreach($registryItems as $registry) {
+            $job = $this->convertRegistryToJob($registry);
+            $jobs[] = $job;
         }
         
         return $jobs;
@@ -96,27 +94,93 @@ class RegistryQueue extends AQueue
      */
     public function enqueue(AJob $job)
     {
-        $registryItem = new Registry();
-        $registryItem->setScope('JOB.' . $this->getName());
-        $registryItem->setType(get_class($job));
-        
-        
-        // key - save the job args + status
-        $args = $job->args;
-        $args['status'] = AQueue::JOB_STATUS_NEW;
-        $registryItem->setKey(Yaml::dump($args, 0));
-        
-        // value - set the date when job was created
-        $registryItem->setValue(date('Y-m-d H:i:s'));
+        $registry = $this->convertJobToRegistry($job);
 
-        $this->em->persist($registryItem);
+        $this->em->persist($registry);
         $this->em->flush();
         
+        $job->args['registry'] = $registry;
+        
         $this->jobs[] = $job;
+    }
+    
+    protected function convertRegistryToJob(Registry $registry)
+    {
+        $jobClass = $registry->getType();
+        $job = new $jobClass();
+        
+        if(method_exists($job, 'setEntityManager')) {
+            $job->setEntityManager($this->em);
+        }
+
+        $args = Yaml::parse($registry->getKey());
+
+        $job->status = $args['status'];
+        unset($args['status']);
+        $job->args = $args;
+        $job->args['registry'] = $registry;
+        $job->queue = $this->getName();
+        
+        return $job;
+    }
+
+
+    protected function convertJobToRegistry(AJob $job)
+    {
+        if(isset($job->args['registry'])) {
+            $registry = $job->args['registry'];
+        } else {
+            $registry = new Registry();
+        }
+        
+        $registry->setScope('JOB.' . $this->getName());
+        $registry->setType(get_class($job));
+               
+        // key - save the job args + status
+        $args = $job->args;
+        if(isset($args['registry'])) {
+            unset($args['registry']);
+        }
+        $args['status'] = $job->status;
+        $registry->setKey(Yaml::dump($args, 0));
+        
+        // value - set the date when job was created
+        if(!$registry->getValue()) {
+            $registry->setValue(date('Y-m-d H:i:s'));
+        }
+        
+        return $registry;
     }
     
     public function setEntityManager($em)
     {
         $this->em = $em;
+    }
+    
+    /**
+     * Runs all jobs
+     * 
+     * @param \Symfony\Component\HttpKernel\Event\PostResponseEvent $event
+     */
+    public function onKernelTerminate(PostResponseEvent $event)
+    {
+        $jobs = $this->getJobs(AQueue::JOB_STATUS_NEW);
+        
+        foreach($jobs as $job) {
+            // update the job status  in Registry table
+            $job->status = AQueue::JOB_STATUS_RUNNING;
+            
+            $registry = $this->convertJobToRegistry($job);
+            $this->em->persist($registry);
+            $this->em->flush();
+            
+            // run the job
+            $job->perform();
+            sleep(60);
+            // delete registry from the DB when finished
+            $this->em->remove($registry);
+            $this->em->flush();
+        }
+        exit;
     }
 }

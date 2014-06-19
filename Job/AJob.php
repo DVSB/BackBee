@@ -23,6 +23,7 @@ namespace BackBuilder\Job;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 
+use BackBuilder\Job\Queue\AQueue;
 /**
  * A base class for jobs
  * 
@@ -43,6 +44,8 @@ abstract class AJob extends ContainerAware
      * @var string The queue name
      */
     public $queue;
+    
+    public $status = AQueue::JOB_STATUS_NEW;
     
     public function setUp()
     {

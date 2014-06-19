@@ -31,14 +31,20 @@ namespace BackBuilder\Job;
  */
 class NestedNodeLRCalculateJob extends AJob
 {
+    private $em;
+    
+    public function setEntityManager($em)
+    {
+        $this->em = $em;
+    }
+    
     public function run($args)
     {
-        $em = $this->container->get('em');
         
-        if(isset($args['nodeClass']) && isset($args['nodeId'])) {
+        if(isset($args['node'])) {
             $node = $args['node'];
         } elseif(isset($args['nodeClass']) && isset($args['nodeId'])) {
-            $node = $em->getRepository($args['nodeClass'])->find($args['nodeId']);
+            $node = $this->em->getRepository($args['nodeClass'])->find($args['nodeId']);
         } else {
             throw new \InvalidArgumentException('Nested Node is missing');
         }
@@ -46,7 +52,7 @@ class NestedNodeLRCalculateJob extends AJob
         $first = $args['first'];
         $delta = $args['delta'];
         
-        $q = $em->getRepository($node)->createQueryBuilder('n')
+        $q = $this->em->getRepository(get_class($node))->createQueryBuilder('n')
                 ->set('n._leftnode', 'n._leftnode + :delta')
                 ->andWhere('n._root = :root')
                 ->andWhere('n._leftnode >= :leftnode')
@@ -58,7 +64,7 @@ class NestedNodeLRCalculateJob extends AJob
                 ->getQuery()
                 ->execute();
 
-        $q = $em->getRepository($node)->createQueryBuilder('n')
+        $q = $this->em->getRepository(get_class($node))->createQueryBuilder('n')
                 ->set('n._rightnode', 'n._rightnode + :delta')
                 ->andWhere('n._root = :root')
                 ->andWhere('n._rightnode >= :rightnode')
