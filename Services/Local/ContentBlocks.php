@@ -328,7 +328,9 @@ class ContentBlocks extends AbstractServiceLocal
         $classnames = array();
         foreach ($contents as $content) {
             $contentTypeClass = "BackBuilder\ClassContent\\" . $content->name;
-            $classnames[] = $contentTypeClass;
+            if (true === class_exists($contentTypeClass)) {
+                $classnames[] = $contentTypeClass;
+            }
         }
         /* default value is true */
         $params["limitToOnline"] = false;

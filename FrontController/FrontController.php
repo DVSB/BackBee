@@ -846,8 +846,7 @@ class FrontController implements HttpKernelInterface
 
         $application = $this->getApplication();
         $router = $this->getRouteCollection();
-        $router->pushRouteCollection($router, $routeConfig);
-        $router->moveDefaultRoute($router);
+        $router->pushRouteCollection($routeConfig);
 
         foreach ($routeConfig as $name => $route) {
             if (false === array_key_exists('defaults', $route) || false === array_key_exists('_action', $route['defaults'])) {

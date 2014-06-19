@@ -46,12 +46,12 @@ class Repository extends EntityRepository
         if (false === $this->getEntityManager()->contains($registry)) {
             $this->getEntityManager()->persist($registry);
         }
-        
+
         $this->getEntityManager()->flush($registry);
-        
+
         return $registry;
     }
-    
+
     /**
      * Removes the registry entry from DB
      * @param \BackBuilder\Bundle\Registry $registry
@@ -61,7 +61,7 @@ class Repository extends EntityRepository
     {
         $this->getEntityManager()->remove($registry);
         $this->getEntityManager()->flush($registry);
-        
+
         return $registry;
     }
 
@@ -73,10 +73,29 @@ class Repository extends EntityRepository
     public function removeEntity($entity)
     {
         $registries = $this->findRegistriesEntityById(get_class($entity), $entity->getObjectIdentifier());
-        
+
         foreach ($registries as $registry) {
             $this->remove($registry);
         }
+    }
+
+    public function findRegistryEntityByIdAndScope($id, $scope)
+    {
+        $result = $this->_em->getConnection()->executeQuery(sprintf(
+            'SELECT `key`, `value`, `scope` FROM registry WHERE `key` = "%s" AND `scope` = "%s"',
+             $id,
+             $scope
+        ))->fetch();
+
+        $registry = null;
+        if (false !== $result) {
+            $registry = new \BackBuilder\Bundle\Registry();
+            $registry->setKey($result['key']);
+            $registry->setValue($result['value']);
+            $registry->setScope($result['scope']);
+        }
+
+        return $registry;
     }
 
     /**
@@ -91,7 +110,7 @@ class Repository extends EntityRepository
 
         return $query->getResult();
     }
-    
+
     /**
      * Find the entity by hes id
      *
