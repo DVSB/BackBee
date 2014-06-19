@@ -21,8 +21,7 @@
 
 namespace BackBuilder\Job\Queue;
 
-use Symfony\Component\DependencyInjection\ContainerAware,
-    Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
 use Symfony\Component\Yaml\Yaml;
 
@@ -37,12 +36,9 @@ use BackBuilder\Job\AJob,
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class RegistryQueue extends ContainerAware
+class RegistryQueue extends AQueue
 {
-    const JOB_STATUS_NEW = 'new';
-    const JOB_STATUS_RUNNING = 'running';
     
-    private $name;
     
     /**
      *
@@ -50,23 +46,6 @@ class RegistryQueue extends ContainerAware
      */
     private $jobs;
     
-    /**
-     * 
-     * @param type string
-     */
-    public function __construct($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * 
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
     
     /**
      * @return AJob[]
@@ -80,7 +59,7 @@ class RegistryQueue extends ContainerAware
     /**
      * @return AJob[]
      */
-    public function getRegistryJobs($queue, $status = self::JOB_STATUS_NEW)
+    public function getRegistryJobs($queue, $status = AQueue::JOB_STATUS_NEW)
     {
         $em = $this->container->get('em');
         
@@ -115,16 +94,19 @@ class RegistryQueue extends ContainerAware
      * 
      * @param \BackBuilder\Job\AJob $job
      */
-    public function addJob(AJob $job)
+    public function enqueue(AJob $job)
     {
         $registryItem = new Registry();
-        $registryItem->setScope($job->queue);
+        $registryItem->setScope($this->getName());
         $registryItem->setType(get_class($job));
         
+        
+        // key - save the job args + status
         $args = $job->args;
-        $args['status'] = self::JOB_STATUS_NEW;
+        $args['status'] = AQueue::JOB_STATUS_NEW;
         $registryItem->setKey(Yaml::dump($args, 0));
         
+        // value - set the date when job was created
         $registryItem->setValue(date('Y-m-d H:i:s'));
 
         $em = $this->container->get('em');

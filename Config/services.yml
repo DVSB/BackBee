@@ -275,11 +275,11 @@ services:
         class: %bbapp.dbal.logger.profiling.class%
         arguments:  ["@bbapp"]
         
-    job.queue.registry:
+    job.queue.nested_node:
         class: %bbapp.job.queue.registry.class%
+        arguments:  ["NESTED_NODE"]
         calls:
             - [setContainer, [@service_container]]
-    
     
 
     # synthetic services
