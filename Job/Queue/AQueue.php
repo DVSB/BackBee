@@ -21,8 +21,6 @@
 
 namespace BackBuilder\Job\Queue;
 
-use Symfony\Component\DependencyInjection\ContainerAware;
-
 use BackBuilder\Job\AJob;
 
 /**
@@ -33,7 +31,7 @@ use BackBuilder\Job\AJob;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-abstract class AQueue extends ContainerAware
+abstract class AQueue
 {
     const JOB_STATUS_NEW = 'new';
     const JOB_STATUS_RUNNING = 'running';
@@ -61,7 +59,5 @@ abstract class AQueue extends ContainerAware
     abstract function enqueue(AJob $job);
     
  
-    
-    
     abstract function getJobs();
 }

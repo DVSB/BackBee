@@ -31,12 +31,6 @@ namespace BackBuilder\Job;
  */
 class NestedNodeLRCalculateJob extends AJob
 {
-
-    /**
-     * @var string The queue name
-     */
-    public $queue = 'NESTED.NODES.LR.CALCULATE';
-    
     public function run($args)
     {
         $em = $this->container->get('em');

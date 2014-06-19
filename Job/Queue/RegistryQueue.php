@@ -46,6 +46,7 @@ class RegistryQueue extends AQueue
      */
     private $jobs;
     
+    private $em;
     
     /**
      * @return AJob[]
@@ -55,15 +56,14 @@ class RegistryQueue extends AQueue
         return $this->jobs;
     }
     
+    //public function set
     
     /**
      * @return AJob[]
      */
     public function getRegistryJobs($queue, $status = AQueue::JOB_STATUS_NEW)
     {
-        $em = $this->container->get('em');
-        
-        $registryItems = $em->getRepository('BackBuilder\Bundle\Registry')->findBy(array(
+        $registryItems = $this->em->getRepository('BackBuilder\Bundle\Registry')->findBy(array(
             'scope'   => $queue,
             'type'    => $status
         ));
@@ -109,10 +109,14 @@ class RegistryQueue extends AQueue
         // value - set the date when job was created
         $registryItem->setValue(date('Y-m-d H:i:s'));
 
-        $em = $this->container->get('em');
-        $em->persist($registryItem);
-        $em->flush();
+        $this->em->persist($registryItem);
+        $this->em->flush();
         
         $this->jobs[] = $job;
+    }
+    
+    public function setEntityManager($em)
+    {
+        $this->em = $em;
     }
 }

@@ -279,7 +279,7 @@ services:
         class: %bbapp.job.queue.registry.class%
         arguments:  ["NESTED_NODE"]
         calls:
-            - [setContainer, [@service_container]]
+            - [setEntityManager, [@em]]
     
 
     # synthetic services

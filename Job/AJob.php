@@ -42,7 +42,7 @@ abstract class AJob extends ContainerAware
     /**
      * @var string The queue name
      */
-    public $queue = 'default';
+    public $queue;
     
     public function setUp()
     {
