@@ -277,12 +277,6 @@ class ContainerBuilder
 
     private static function initConfig(BBApplication $application, Container $container)
     {
-        $container->get('config')
-                  ->setContainer($container)
-                  ->setEnvironment($application->getEnvironment())
-                  ->extend($container->getParameter('bbapp.config.dir'))
-        ;
-
         // init config with context if needed
         if (true === $application->hasContext()) {
             if (false === is_dir($application->getBaseRepository() . '/' . $application->getContext())) {
@@ -294,9 +288,18 @@ class ContainerBuilder
 
             $container->get('config')->setEnvironement($application->getEnvironment());
             $container->get('config')->extend(
-                $application->getBaseRepository() . '/' . 'Config',
-                $application->isOverridedConfig()
+                $application->getBaseRepository() . '/' . 'Config'
             );
         }
+
+        $container->get('config')
+                  ->setContainer($container)
+                  ->setEnvironment($application->getEnvironment())
+                  ->extend(
+                    $container->getParameter('bbapp.config.dir'),
+                    $application->isOverridedConfig()
+                )
+        ;
+
     }
 }
