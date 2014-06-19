@@ -51,17 +51,7 @@ class RegistryQueue extends AQueue
     /**
      * @return AJob[]
      */
-    public function getJobs($scope)
-    {
-        return $this->jobs;
-    }
-    
-    //public function set
-    
-    /**
-     * @return AJob[]
-     */
-    public function getRegistryJobs($queue, $status = AQueue::JOB_STATUS_NEW)
+    public function getJobs($status = null)
     {
         $registryItems = $this->em->getRepository('BackBuilder\Bundle\Registry')->findBy(array(
             'scope'   => $queue,
@@ -89,6 +79,16 @@ class RegistryQueue extends AQueue
         return $jobs;
     }
     
+    //public function set
+    
+    /**
+     * @return AJob[]
+     */
+    public function getManagedJobs()
+    {
+        return $this->jobs;
+    }
+    
     
     /**
      * 
@@ -97,7 +97,7 @@ class RegistryQueue extends AQueue
     public function enqueue(AJob $job)
     {
         $registryItem = new Registry();
-        $registryItem->setScope($this->getName());
+        $registryItem->setScope('JOB.' . $this->getName());
         $registryItem->setType(get_class($job));
         
         

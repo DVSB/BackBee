@@ -47,6 +47,10 @@ abstract class AQueue
         $this->name = $name;
     }
     
+    /**
+     * 
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
@@ -59,5 +63,9 @@ abstract class AQueue
     abstract function enqueue(AJob $job);
     
  
-    abstract function getJobs();
+    /**
+     * @param string $status 
+     * @return AJob[]
+     */
+    abstract function getJobs($status = null);
 }
