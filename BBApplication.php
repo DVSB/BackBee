@@ -124,9 +124,7 @@ class BBApplication implements IApplication
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
 
-        // \BackBuilder\Util\Server::startMicrotime();
         $this->_initBundles();
-        // echo \BackBuilder\Util\Server::stopMicrotime() . 's'; die;
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));

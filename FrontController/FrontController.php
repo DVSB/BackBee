@@ -39,7 +39,8 @@ use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpKernel\Event\FilterResponseEvent,
     Symfony\Component\HttpKernel\Event\GetResponseEvent,
     Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent,
-    Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+    Symfony\Component\HttpKernel\Event\FilterControllerEvent,
+    Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 /**
  * The BackBuilder front controller
@@ -73,12 +74,24 @@ class FrontController implements HttpKernelInterface
      * @var \Symfony\Component\HttpFoundation\Request
      */
     protected $_request;
+    
+    /**
+     * Response
+     * @var \Symfony\Component\HttpFoundation\Response
+     */
+    protected $_response;
 
     /**
      * Current request context
      * @var \BackBuilder\Routing\RequestContext
      */
     protected $_requestContext;
+
+    /**
+     * Routes collection defined
+     * @var \BackBuilder\Routing\RouteCollection
+     */
+    protected $_routeCollection;
 
     /**
      * @var array
@@ -108,14 +121,12 @@ class FrontController implements HttpKernelInterface
                     $this->force_url_extension = $parameters_config['force_url_extension'];
                 }
             }
-            
-            $route = $application->getConfig()->getRouteConfig();
-            if (true === is_array($route) && 0 < count($route)) {
-                $this->registerRoutes($this, $route);
-            }
         }
 
         $this->url_extension = self::DEFAULT_URL_EXTENSION;
+        //$this->_routeCollection = $application->getRouting();
+        
+        register_shutdown_function(array($this, 'terminate'));
     }
 
     /**
@@ -160,6 +171,7 @@ class FrontController implements HttpKernelInterface
         }
 
         $response->send();
+        $this->_response = $response;
         exit(0);
     }
     
@@ -207,15 +219,6 @@ class FrontController implements HttpKernelInterface
         }
 
         $actionKey = $matches['_route'] . '_' . $matches['_action'];
-        if (true === isset($this->_actions[$actionKey])) {
-            $controller = array_shift($this->_actions[$actionKey]);
-            if (true === is_string($controller)) {
-                $controller = $this->_application->getContainer()->get($controller);
-            }
-
-            array_unshift($this->_actions[$actionKey], $controller);
-            unset($controller);
-        }
 
         if (isset($this->_actions[$actionKey]) && is_callable($this->_actions[$actionKey])) {
             /* nothing to do */
@@ -340,15 +343,14 @@ class FrontController implements HttpKernelInterface
      */
     public function getRouteCollection()
     {
-        // $container = $this->_application->getContainer();
-        // // var_dump($container->isLoaded('routing')); die;
-        // if (null === $container->get('routing')) {
-        //     $container->set('routing', new RouteCollection($this->_application));
-        //     $routeConfig = $this->_application->getConfig()->getRouteConfig();
-        //     $this->registerRoutes($this, $routeConfig);
-        // }
+        $container = $this->_application->getContainer();
+        if (null === $container->get('routing')) {
+            $container->set('routing', new RouteCollection($this->_application));
+            $routeConfig = $this->_application->getConfig()->getRouteConfig();
+            $this->registerRoutes($this, $routeConfig);
+        }
 
-        return $this->_application->getContainer()->get('routing');
+        return $container->get('routing');
     }
 
     /**
@@ -831,22 +833,23 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Register every valid route defined in $route_config array
+     * Register every valid route defined in $routeConfig array
      * 
      * @param  ABundle $defaultController used as default controller if a route comes without any specific controller
-     * @param  array   $route_config       
+     * @param  array   $routeConfig       
      */
-    public function registerRoutes($default_controller, array $route_config = null)
+    public function registerRoutes($defaultController, array $routeConfig = null)
     {
-        if (null === $route_config) {
+        if (null === $routeConfig) {
             return;
         }
 
         $application = $this->getApplication();
         $router = $this->getRouteCollection();
-        $router->pushRouteCollection($route_config);
+        $router->pushRouteCollection($router, $routeConfig);
+        $router->moveDefaultRoute($router);
 
-        foreach ($route_config as $name => $route) {
+        foreach ($routeConfig as $name => $route) {
             if (false === array_key_exists('defaults', $route) || false === array_key_exists('_action', $route['defaults'])) {
                 $application->warning(sprintf('Unable to parse the action method for the route `%s`.', $name));
                 continue;
@@ -858,17 +861,15 @@ class FrontController implements HttpKernelInterface
             if (true === array_key_exists('_controller', $route['defaults'])) {
                 $container = $application->getContainer();
                 if (true === $container->has($route['defaults']['_controller'])) {
-                    $controller = $route['defaults']['_controller'];
+                    $controller = $container->get($route['defaults']['_controller']);
                 } else {
                     $application->warning(sprintf(
-                        'Unable to get a valid controller with id:`%s` for the route `%s`.', 
-                        $route['defaults']['_controller'], 
-                        $name
+                                    'Unable to get a valid controller with id:`%s` for the route `%s`.', $route['defaults']['_controller'], $name
                     ));
                     continue;
                 }
             } else {
-                $controller = $default_controller;
+                $controller = $defaultController;
             }
 
             $handlerKey = $action;
@@ -889,5 +890,25 @@ class FrontController implements HttpKernelInterface
     public function getUrlExtension()
     {
         return $this->url_extension;
+    }
+    
+    /**
+     * This method executed on shutdown after the response is sent
+     */
+    public function terminate()
+    {
+        if (!$this->_application || false === $this->_application->isStarted()) {
+            return;
+        }
+        
+        // force content output
+        @ini_set('zlib.output_compression', 0);
+        ob_implicit_flush(true);flush();
+
+        // $_response may not be set
+        if($this->_response instanceof Response) {
+            $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
+        }
+        
     }
 }
