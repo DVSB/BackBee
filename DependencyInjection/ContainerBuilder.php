@@ -294,7 +294,7 @@ class ContainerBuilder
 
             $container->get('config')->setEnvironement($application->getEnvironment());
             $container->get('config')->extend(
-                $application->getRepository() . '/' . 'Config',
+                $application->getBaseRepository() . '/' . 'Config',
                 $application->isOverridedConfig()
             );
         }
