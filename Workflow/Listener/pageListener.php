@@ -22,7 +22,6 @@
 namespace BackBuilder\Workflow\Listener;
 
 use BackBuilder\Event\Event;
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
 /**
  * Listener to page events
@@ -69,6 +68,16 @@ class pageListener
                 if (!($eventArgs->getOldValue('_state') & \BackBuilder\NestedNode\Page::STATE_ONLINE) &&
                         $eventArgs->getNewValue('_state') & \BackBuilder\NestedNode\Page::STATE_ONLINE) {
                     $event->getDispatcher()->triggerEvent('putonline', $page);
+                    
+                    if (null === $page->getPublishing()) {
+                        $em = $event->getApplication()
+                                ->getEntityManager();
+                        
+                        $page->setPublishing(new \DateTime());
+                        
+                        $em->getUnitOfWork()
+                                ->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
+                    }
                 } elseif ($eventArgs->getOldValue('_state') & \BackBuilder\NestedNode\Page::STATE_ONLINE &&
                         !($eventArgs->getNewValue('_state') & \BackBuilder\NestedNode\Page::STATE_ONLINE)) {
                     $event->getDispatcher()->triggerEvent('putoffline', $page);

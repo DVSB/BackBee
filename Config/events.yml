@@ -44,6 +44,10 @@ nestednode.page.prerender:
   listeners:
     - [BackBuilder\Event\Listener\CacheListener, onPreRenderPage]
 
+nestednode.page.preupdate:
+  listeners:
+    - [BackBuilder\Workflow\Listener\pageListener, onPreUpdate]
+
 nestednode.page.postrender:
   listeners:
     - [BackBuilder\Event\Listener\CacheListener, onPostRenderPage]
