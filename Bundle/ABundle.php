@@ -479,6 +479,7 @@ abstract class ABundle implements IObjectIdentifiable
     {
         if (false === $this->manage_multisite_config) {
             $this->doSaveConfig($this->_config->getAllSections());
+
             return;
         }
 
@@ -496,7 +497,7 @@ abstract class ABundle implements IObjectIdentifiable
 
             $this->doSaveConfig($this->config_default_sections);
         } else {
-            $registry = $this->_getRegistryConfig();
+            $registry = self::_getRegistryConfig($this->getApplication(), $this->_id);
             if ($this->getApplication()->getEntityManager()->contains($registry)) {
                 $this->getApplication()->getEntityManager()->remove($registry);
                 $this->getApplication()->getEntityManager()->flush($registry);
@@ -518,7 +519,7 @@ abstract class ABundle implements IObjectIdentifiable
                     ->findRegistryEntityByIdAndScope($id, 'BUNDLE.CONFIG');
             } catch (\Exception $e) {
                 if (true === $application->isStarted()) {
-                    $this->warning('Unable to load registry table');
+                    $application->warning('Unable to load registry table');
                 }
             }
 
@@ -540,7 +541,7 @@ abstract class ABundle implements IObjectIdentifiable
      */
     private function doSaveConfig(array $config)
     {
-        $registry = $this->_getRegistryConfig($this->getApplication(), $this->_id);
+        $registry = self::_getRegistryConfig($this->getApplication(), $this->_id);
         $registry->setValue(serialize($config));
 
         if (false === $this->getApplication()->getEntityManager()->contains($registry)) {
