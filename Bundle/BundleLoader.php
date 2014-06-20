@@ -99,8 +99,8 @@ class BundleLoader
         ));
 
         // Cleaning memory
-        self::$bundles_base_dir = null;
-        self::$bundles_config = null;
+        self::$bundles_base_dir = array();
+        self::$bundles_config = array();
         self::$application = null;
     }
 
