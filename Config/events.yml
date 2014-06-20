@@ -97,6 +97,6 @@ kernel.response:
     - [@profiler.listener, onKernelResponse]
 
 
-kernel.terminate:
-  listeners:
-    - [@job.queue.nested_node, onKernelTerminate]
+#kernel.terminate:
+#  listeners:
+#    - [@job.queue.nested_node, onKernelTerminate]

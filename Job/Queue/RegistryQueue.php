@@ -164,6 +164,11 @@ class RegistryQueue extends AQueue
      */
     public function onKernelTerminate(PostResponseEvent $event)
     {
+        $this->startAllJobs();
+    }
+    
+    public function startAllJobs()
+    {
         $jobs = $this->getJobs(AQueue::JOB_STATUS_NEW);
         
         foreach($jobs as $job) {
@@ -176,11 +181,10 @@ class RegistryQueue extends AQueue
             
             // run the job
             $job->perform();
-            sleep(60);
+
             // delete registry from the DB when finished
             $this->em->remove($registry);
             $this->em->flush();
         }
-        exit;
     }
 }
