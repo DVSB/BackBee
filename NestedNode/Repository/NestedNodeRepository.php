@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,7 +28,7 @@ use Doctrine\ORM\EntityRepository;
 
 /**
  * NestedNode repository
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder/NestedNode
  * @subpackage  Repository
@@ -77,7 +77,7 @@ class NestedNodeRepository extends EntityRepository
     private function getNativelyNodeChildren($node_uid)
     {
         return $this->_em->getConnection()->executeQuery(sprintf(
-            'select uid from page where parent_uid = "%s" order by modified desc',
+            'select uid from page where parent_uid = "%s" order by leftnode asc, modified desc',
             $node_uid
         ))->fetchAll();
     }
@@ -98,7 +98,7 @@ class NestedNodeRepository extends EntityRepository
         };
 
         $starttime = microtime(true);
-        
+
         Buffer::dump("\n##### Update tree (natively) started ###\n");
 
         foreach ($node_uid as $uid) {
@@ -111,8 +111,8 @@ class NestedNodeRepository extends EntityRepository
             $this->updateTreeNatively($uid);
 
             Buffer::dump(
-                "\n   [END] update tree of $uid in " 
-                . (microtime(true) - $starttime) . 's (memory status: ' . $convert_memory(memory_get_usage()) . ')' 
+                "\n   [END] update tree of $uid in "
+                . (microtime(true) - $starttime) . 's (memory status: ' . $convert_memory(memory_get_usage()) . ')'
                 . "\n"
             );
         }
@@ -200,7 +200,7 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * 
+     *
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @param type $left
      * @param type $right
@@ -310,7 +310,7 @@ class NestedNodeRepository extends EntityRepository
         }
 
         foreach ($order as $col => $sort) {
-            $qb->orderBy('n.' . $col, $sort);    
+            $qb->orderBy('n.' . $col, $sort);
         }
 
 
@@ -492,7 +492,7 @@ class NestedNodeRepository extends EntityRepository
     /**
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @param \BackBuilder\NestedNode\ANestedNode $dest
-     * don't use 
+     * don't use
      */
     public function moveAsLastChildOf(ANestedNode $node, ANestedNode $dest)
     {
