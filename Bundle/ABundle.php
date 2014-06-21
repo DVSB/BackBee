@@ -148,7 +148,17 @@ abstract class ABundle implements IObjectIdentifiable
      */
     public static function initBundleConfig(BBApplication $application, $bundle_base_directory)
     {
-        $config_dir = implode(DIRECTORY_SEPARATOR, array($bundle_base_directory, 'Ressources'));
+        //$config_dir = implode(DIRECTORY_SEPARATOR, array($bundle_base_directory, 'Ressources'));
+
+        $config_dir = $bundle_base_directory . DIRECTORY_SEPARATOR . 'Ressources';
+        if ('test' === $application->getContext()) {
+           $test_dir = $bundle_base_directory . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
+
+           if (true === file_exists($test_dir)) {
+               $config_dir = $test_dir;
+            }
+         }
+
         $config = new Config($config_dir, $application->getBootstrapCache(), null, $application->isDebugMode());
         $config->setEnvironment($application->getEnvironment());
         $config->setContainer($application->getContainer());
@@ -410,7 +420,7 @@ abstract class ABundle implements IObjectIdentifiable
         //return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
 
         $resources_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
-        if ('test' === $this->_application->getContext()) {
+        if ('test' === $this->_application->getEnvironment()) {
             $test_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
             if (true === file_exists($test_dir)) {
                 $resources_dir = $test_dir;
