@@ -56,10 +56,12 @@ class NestedNodeLRCalculateJob extends AJob
                 ->set('n._leftnode', 'n._leftnode + :delta')
                 ->andWhere('n._root = :root')
                 ->andWhere('n._leftnode >= :leftnode')
+                ->andWhere('n._uid <> :uid')
                 ->setParameters(array(
                     'delta' => $delta,
                     'root' => $node->getRoot(),
-                    'leftnode' => $first))
+                    'leftnode' => $first,
+                    'uid' => $args['nodeId']))
                 ->update()
                 ->getQuery()
                 ->execute();
@@ -68,10 +70,12 @@ class NestedNodeLRCalculateJob extends AJob
                 ->set('n._rightnode', 'n._rightnode + :delta')
                 ->andWhere('n._root = :root')
                 ->andWhere('n._rightnode >= :rightnode')
+                ->andWhere('n._uid != :uid')
                 ->setParameters(array(
                     'delta' => $delta,
                     'root' => $node->getRoot(),
-                    'rightnode' => $first))
+                    'rightnode' => $first,
+                    'uid' => $args['nodeId']))
                 ->update()
                 ->getQuery()
                 ->execute();
