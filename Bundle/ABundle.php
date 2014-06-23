@@ -148,7 +148,17 @@ abstract class ABundle implements IObjectIdentifiable
      */
     public static function initBundleConfig(BBApplication $application, $bundle_base_directory)
     {
-        $config_dir = implode(DIRECTORY_SEPARATOR, array($bundle_base_directory, 'Ressources'));
+        //$config_dir = implode(DIRECTORY_SEPARATOR, array($bundle_base_directory, 'Ressources'));
+
+        $config_dir = $bundle_base_directory . DIRECTORY_SEPARATOR . 'Ressources';
+        if ('test' === $application->getContext()) {
+           $test_dir = $bundle_base_directory . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
+
+           if (true === file_exists($test_dir)) {
+               $config_dir = $test_dir;
+            }
+         }
+
         $config = new Config($config_dir, $application->getBootstrapCache(), null, $application->isDebugMode());
         $config->setEnvironment($application->getEnvironment());
         $config->setContainer($application->getContainer());
@@ -410,7 +420,7 @@ abstract class ABundle implements IObjectIdentifiable
         //return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
 
         $resources_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
-        if ('test' === $this->_application->getContext()) {
+        if ('test' === $this->_application->getEnvironment()) {
             $test_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
             if (true === file_exists($test_dir)) {
                 $resources_dir = $test_dir;
@@ -479,6 +489,7 @@ abstract class ABundle implements IObjectIdentifiable
     {
         if (false === $this->manage_multisite_config) {
             $this->doSaveConfig($this->_config->getAllSections());
+
             return;
         }
 
@@ -496,7 +507,7 @@ abstract class ABundle implements IObjectIdentifiable
 
             $this->doSaveConfig($this->config_default_sections);
         } else {
-            $registry = $this->_getRegistryConfig();
+            $registry = self::_getRegistryConfig($this->getApplication(), $this->_id);
             if ($this->getApplication()->getEntityManager()->contains($registry)) {
                 $this->getApplication()->getEntityManager()->remove($registry);
                 $this->getApplication()->getEntityManager()->flush($registry);
@@ -518,7 +529,7 @@ abstract class ABundle implements IObjectIdentifiable
                     ->findRegistryEntityByIdAndScope($id, 'BUNDLE.CONFIG');
             } catch (\Exception $e) {
                 if (true === $application->isStarted()) {
-                    $this->warning('Unable to load registry table');
+                    $application->warning('Unable to load registry table');
                 }
             }
 
@@ -540,7 +551,7 @@ abstract class ABundle implements IObjectIdentifiable
      */
     private function doSaveConfig(array $config)
     {
-        $registry = $this->_getRegistryConfig($this->getApplication(), $this->_id);
+        $registry = self::_getRegistryConfig($this->getApplication(), $this->_id);
         $registry->setValue(serialize($config));
 
         if (false === $this->getApplication()->getEntityManager()->contains($registry)) {
