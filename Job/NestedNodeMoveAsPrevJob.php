@@ -29,9 +29,9 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * @category    BackBuilder
  * @package     BackBuilder\Job
  * @copyright   Lp digital system
- * @author      k.golovin
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class NestedNodeLRCalculateJob extends AJob
+class NestedNodeMoveAsPrevJob extends AJob
 {
 
     /**
@@ -69,36 +69,64 @@ class NestedNodeLRCalculateJob extends AJob
             throw new \InvalidArgumentException('Nested Node is missing');
         }
 
-        $first = $args['first'];
-        $delta = $args['delta'];
+        $currentRoot = $node->getRoot();
+        $max_right = $currentRoot->getRightnode();
+        
+        $previous_left = $args['previous_left'];
+        $previous_right = $previous_left + $node->getWeight() - 1;
 
         $classname = ClassUtils::getRealClass($node);
 
+        // Update nodes of the moved tree at the end
         $this->em->getRepository($classname)
                 ->createQueryBuilder('n')
                 ->set('n._leftnode', 'n._leftnode + :delta')
+                ->set('n._rightnode', 'n._rightnode + :delta')
                 ->andWhere('n._root = :root')
-                ->andWhere('n._leftnode >= :leftnode')
+                ->andWhere('n._leftnode >= :left')
+                ->andWhere('n._rightnode <= :right')
                 ->andWhere('n._uid <> :uid')
                 ->setParameters(array(
-                    'delta' => $delta,
-                    'root' => $node->getRoot(),
-                    'leftnode' => $first,
+                    'delta' => $max_right,
+                    'root' => $currentRoot,
+                    'left' => $previous_left,
+                    'right' => $previous_right,
+                    'uid' => $node->getUid()))
+                ->update()
+                ->getQuery()
+                ->execute();
+        
+        // Move nodes between new left and old left
+        $this->em->getRepository($classname)
+                ->createQueryBuilder('n')
+                ->set('n._leftnode', 'n._leftnode + :delta')
+                ->set('n._rightnode', 'n._rightnode + :delta')
+                ->andWhere('n._root = :root')
+                ->andWhere('n._leftnode >= :newleft')
+                ->andWhere('n._rightnode < :previousleft')
+                ->andWhere('n._uid <> :uid')
+                ->setParameters(array(
+                    'delta' => $node->getWeight(),
+                    'root' => $currentRoot,
+                    'newleft' => $args['new_left'],
+                    'previousleft' => $args['previous_left'],
                     'uid' => $node->getUid()))
                 ->update()
                 ->getQuery()
                 ->execute();
 
+        // Finally move the moved node
         $this->em->getRepository($classname)
                 ->createQueryBuilder('n')
+                ->set('n._leftnode', 'n._leftnode + :delta')
                 ->set('n._rightnode', 'n._rightnode + :delta')
                 ->andWhere('n._root = :root')
-                ->andWhere('n._rightnode >= :rightnode')
-                ->andWhere('n._uid != :uid')
+                ->andWhere('n._leftnode > :left')
+                ->andWhere('n._uid <> :uid')
                 ->setParameters(array(
-                    'delta' => $delta,
-                    'root' => $node->getRoot(),
-                    'rightnode' => $first,
+                    'delta' => $args['new_left'] - $args['previous_left'] - $max_right,
+                    'root' => $currentRoot,
+                    'left' => $max_right,
                     'uid' => $node->getUid()))
                 ->update()
                 ->getQuery()
