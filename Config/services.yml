@@ -22,6 +22,8 @@ parameters:
     bbapp.translator.class: BackBuilder\Translation\Translator
     bbapp.routing.class: BackBuilder\Routing\RouteCollection
     bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
+    bbapp.registry.class: Symfony\Component\HttpFoundation\ParameterBag
+    bbapp.autoloader.class: BackBuilder\AutoLoader\AutoLoader
     bbapp.keywordbuilder.class: BackBuilder\NestedNode\Builder\KeywordBuilder
     bbapp.controller_resolver.class: BackBuilder\Controller\ControllerResolver
 
@@ -64,8 +66,8 @@ parameters:
     bbapp.collector.memory.class: Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector
     bbapp.collector.routing.class: BackBuilder\Profiler\DataCollector\RoutingDataCollector
     bbapp.collector.doctrine.class: BackBuilder\Profiler\DataCollector\DoctrineDataCollector
-
-
+    
+    bbapp.job.queue.registry.class: BackBuilder\Job\Queue\RegistryQueue
 
     data_collector.templates: 
         config: "%bbapp.base.dir%/Resources/scripts/Collector/config.html.twig"
@@ -78,9 +80,8 @@ parameters:
         routing: "%bbapp.base.dir%/Resources/scripts/Collector/routing.html.twig"
         db: "%bbapp.base.dir%/Resources/scripts/Collector/db.html.twig"
 
-
     bbapp.analytics.class: BackBuilder\Application\Analytics
-    
+
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
@@ -91,10 +92,11 @@ services:
     config:
         class:      %bbapp.config.class%
         arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, %debug%]
-
-    ed:
+    event.dispatcher:
         class:      %bbapp.ed.class%
-        arguments:  ["@bbapp"]
+        arguments:  ["@bbapp", "@config"]
+    ed:
+        alias: event.dispatcher
     security.context:
         class:      %bbapp.securitycontext.class%
         arguments:  ["@bbapp"]
@@ -116,9 +118,19 @@ services:
     translator:
         class:      %bbapp.translator.class%
         arguments:  ["@bbapp", "%bbapp.locale%"]
+        calls:
+            - [setLocale, ["%bbapp.locale%"]]
+    routing:
+        class:      %bbapp.routing.class%
+        arguments:  ["@bbapp"]
     pagebuilder:
         class:      %bbapp.pagebuilder.class%
         arguments:  ["@em"]
+    registry:
+        class:      %bbapp.registry.class%
+    autoloader:
+        class:      %bbapp.autoloader.class%
+        arguments:  ["@bbapp"]
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]
@@ -273,11 +285,17 @@ services:
         class: %bbapp.dbal.logger.profiling.class%
         arguments:  ["@bbapp"]
         
-        
+    job.queue.nested_node:
+        class: %bbapp.job.queue.registry.class%
+        arguments:  ["NESTED_NODE"]
+        calls:
+            - [setEntityManager, [@em]]
     
 
     # synthetic services
     bbapp:
+        synthetic: true
+    service_container:
         synthetic: true
     site:
         synthetic: true
@@ -285,11 +303,7 @@ services:
         synthetic: true
     bb_session:
         synthetic: true
-    routing:
-        synthetic: true
     mailer:
-        synthetic: true
-    service_container:
         synthetic: true
     validator:
         synthetic: true
