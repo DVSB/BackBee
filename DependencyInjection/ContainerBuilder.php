@@ -38,11 +38,12 @@ class ContainerBuilder
         if (
             false === $force_reload
             && false === $application->isDebugMode()
-            && true === is_readable($container_dir . DIRECTORY_SEPARATOR . $container_file)
+            && true === is_readable($container_dir . DIRECTORY_SEPARATOR . $container_file
+            && $application->getEnvironment() !== 'test')
         ) {
-            $loader = new PhpFileLoader($container, new FileLocator(array($container_dir)));
-            $loader->load($container_file);
-
+            //$loader = new PhpFileLoader($container, new FileLocator(array($container_dir)));
+            //$loader->load($container_file);
+            require $container_dir . DIRECTORY_SEPARATOR . $container_file;
             $container = new $container_class();
 
             // Add current BBApplication into container
