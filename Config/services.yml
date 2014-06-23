@@ -66,6 +66,8 @@ parameters:
     bbapp.collector.memory.class: Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector
     bbapp.collector.routing.class: BackBuilder\Profiler\DataCollector\RoutingDataCollector
     bbapp.collector.doctrine.class: BackBuilder\Profiler\DataCollector\DoctrineDataCollector
+    
+    bbapp.job.queue.registry.class: BackBuilder\Job\Queue\RegistryQueue
 
     data_collector.templates: 
         config: "%bbapp.base.dir%/Resources/scripts/Collector/config.html.twig"
@@ -283,7 +285,11 @@ services:
         class: %bbapp.dbal.logger.profiling.class%
         arguments:  ["@bbapp"]
         
-        
+    job.queue.nested_node:
+        class: %bbapp.job.queue.registry.class%
+        arguments:  ["NESTED_NODE"]
+        calls:
+            - [setEntityManager, [@em]]
     
 
     # synthetic services

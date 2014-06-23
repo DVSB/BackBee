@@ -103,3 +103,4 @@ kernel.response:
 bbapplication.init:
   listeners:
     - [BackBuilder\DependencyInjection\Listener\ContainerListener, onApplicationInit]
+

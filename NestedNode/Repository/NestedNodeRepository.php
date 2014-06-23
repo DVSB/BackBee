@@ -553,29 +553,43 @@ class NestedNodeRepository extends EntityRepository
 
     private function shiftRlValues(ANestedNode $node, $first, $delta)
     {
-        $q = $this->createQueryBuilder('n')
-                ->set('n._leftnode', 'n._leftnode + :delta')
-                ->andWhere('n._root = :root')
-                ->andWhere('n._leftnode >= :leftnode')
-                ->setParameters(array(
-                    'delta' => $delta,
-                    'root' => $node->getRoot(),
-                    'leftnode' => $first))
-                ->update()
-                ->getQuery()
-                ->execute();
-
-        $q = $this->createQueryBuilder('n')
-                ->set('n._rightnode', 'n._rightnode + :delta')
-                ->andWhere('n._root = :root')
-                ->andWhere('n._rightnode >= :rightnode')
-                ->setParameters(array(
-                    'delta' => $delta,
-                    'root' => $node->getRoot(),
-                    'rightnode' => $first))
-                ->update()
-                ->getQuery()
-                ->execute();
+        $job = new \BackBuilder\Job\NestedNodeLRCalculateJob();
+        
+        $job->args = array(
+            'nodeId' => $node->getUid(),
+            'nodeClass' => get_class($node),
+            'first' => $first,
+            'delta' => $delta
+        );
+        
+        $queue = new \BackBuilder\Job\Queue\RegistryQueue('NESTED_NODE');
+        $queue->setEntityManager($this->getEntityManager());
+        
+        $queue->enqueue($job);
+        
+//        $q = $this->createQueryBuilder('n')
+//                ->set('n._leftnode', 'n._leftnode + :delta')
+//                ->andWhere('n._root = :root')
+//                ->andWhere('n._leftnode >= :leftnode')
+//                ->setParameters(array(
+//                    'delta' => $delta,
+//                    'root' => $node->getRoot(),
+//                    'leftnode' => $first))
+//                ->update()
+//                ->getQuery()
+//                ->execute();
+//
+//        $q = $this->createQueryBuilder('n')
+//                ->set('n._rightnode', 'n._rightnode + :delta')
+//                ->andWhere('n._root = :root')
+//                ->andWhere('n._rightnode >= :rightnode')
+//                ->setParameters(array(
+//                    'delta' => $delta,
+//                    'root' => $node->getRoot(),
+//                    'rightnode' => $first))
+//                ->update()
+//                ->getQuery()
+//                ->execute();
     }
 
     private function _detachFromTree(ANestedNode $node)
