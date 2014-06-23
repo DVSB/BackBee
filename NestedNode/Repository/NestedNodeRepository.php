@@ -38,7 +38,7 @@ class NestedNodeRepository extends EntityRepository
 {
     public static $config = array(
         // calculate nested node values asynchronously via a CLI command
-        'nestedNodeCalculateAsync' => false
+        'nestedNodeCalculateAsync' => true
     );
     
     private function _hasValidHierarchicalDatas($node)
@@ -76,11 +76,11 @@ class NestedNodeRepository extends EntityRepository
         $node->leftnode = $leftnode;
         $node->rightnode = $leftnode + 1;
         $node->level = $level;
-
+        
         foreach ($children = $this->getNativelyNodeChildren($node_uid) as $row) {
             $child = $this->updateTreeNatively($row['uid'], $leftnode + 1, $level + 1);
             $node->rightnode = $child->rightnode + 1;
-            $leftnode = $node->rightnode;
+            $leftnode = $child->rightnode;
         }
 
         $this->_em->getConnection()->exec(sprintf(
@@ -465,11 +465,30 @@ class NestedNodeRepository extends EntityRepository
         }
         $newRight = $newLeft + $node->getWeight() - 1;
 
+        if (self::$config['nestedNodeCalculateAsync']) {
+            $job = new \BackBuilder\Job\NestedNodeMoveSiblingsJob();
+            $job->setEntityManager($this->_em);
+
+            $job->args = array(
+                'nodeId' => $node->getUid(),
+                'nodeClass' => get_class($node),
+                'previous_left' => $node->getLeftnode(),
+                'new_left' => $newLeft,
+                'delta' => $node->getWeight()
+            );
+
+            $queue = new \BackBuilder\Job\Queue\RegistryQueue('NESTED_NODE');
+            $queue->setEntityManager($this->getEntityManager());
+
+            $queue->enqueue($job);
+        } else {
+            $this->_detachFromTree($node)->shiftRlValues($dest, $newLeft, $node->getWeight());
+        }
+
         /* detach && room for subtree */
-        $this->_detachFromTree($node)->shiftRlValues($dest, $newLeft, $node->getWeight());
         /* move the removed subtree back to the main tree */
-        $delta = $newLeft - 1; /* newleft - currentSubtreeleft always starts at 1) */
-        $levelDiff = $dest->getLevel() - 1; /* -1 as substree level starts with 1 */
+        //$delta = $newLeft - 1; /* newleft - currentSubtreeleft always starts at 1) */
+        //$levelDiff = $dest->getLevel() - 1; /* -1 as substree level starts with 1 */
         $node->setLeftnode($newLeft)
                 ->setRightnode($newRight)
                 ->setLevel($dest->getLevel())
