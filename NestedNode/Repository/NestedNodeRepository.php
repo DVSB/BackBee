@@ -36,7 +36,11 @@ use Doctrine\ORM\EntityRepository;
  */
 class NestedNodeRepository extends EntityRepository
 {
-
+    public static $config = array(
+        // calculate nested node values asynchronously via a CLI command
+        'nestedNodeCalculateAsync' => false
+    );
+    
     private function _hasValidHierarchicalDatas($node)
     {
         if ($node->getLeftnode() >= $node->getRightnode())
@@ -660,7 +664,7 @@ class NestedNodeRepository extends EntityRepository
 
     private function shiftRlValues(ANestedNode $node, $first, $delta, ANestedNode $target = null)
     {
-        if (null !== $target) {
+        if (null !== $target && self::$config['nestedNodeCalculateAsync']) {
             $this->shiftRlValuesByJob($target, $first, $delta);
         } else {
             $q = $this->createQueryBuilder('n')
