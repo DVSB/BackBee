@@ -33,7 +33,8 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Theme\Theme,
     BackBuilder\Util\File,
     BackBuilder\Bundle\ABundle,
-    BackBuilder\Console\Console;
+    BackBuilder\Console\Console,
+    BackBuilder\NestedNode\Repository\NestedNodeRepository;
 
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
@@ -345,6 +346,11 @@ class BBApplication implements IApplication
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
         } catch (\Exception $e) {
             $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
+        }
+        
+        // init NestedNode config
+        if($this->getConfig()->getSection('nestednode')) {
+            NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));
         }
 
         return $this;
