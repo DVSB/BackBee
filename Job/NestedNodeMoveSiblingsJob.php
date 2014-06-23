@@ -24,14 +24,14 @@ namespace BackBuilder\Job;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
- * Calculates the left/right values for a nest node
+ * Calculates the left/right values for a nest node move around one of its siblings
  * 
  * @category    BackBuilder
  * @package     BackBuilder\Job
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class NestedNodeMoveAsPrevJob extends AJob
+class NestedNodeMoveSiblingsJob extends AJob
 {
 
     /**

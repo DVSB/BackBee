@@ -465,7 +465,7 @@ class NestedNodeRepository extends EntityRepository
         }
         $newRight = $newLeft + $node->getWeight() - 1;
 
-        $job = new \BackBuilder\Job\NestedNodeMoveAsPrevJob();
+        $job = new \BackBuilder\Job\NestedNodeMoveSiblingsJob();
         $job->setEntityManager($this->_em);
         
         $job->args = array(
