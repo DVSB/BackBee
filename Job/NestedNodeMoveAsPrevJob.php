@@ -71,7 +71,7 @@ class NestedNodeMoveAsPrevJob extends AJob
 
         $currentRoot = $node->getRoot();
         $max_right = $currentRoot->getRightnode();
-        
+
         $previous_left = $args['previous_left'];
         $previous_right = $previous_left + $node->getWeight() - 1;
 
@@ -95,25 +95,46 @@ class NestedNodeMoveAsPrevJob extends AJob
                 ->update()
                 ->getQuery()
                 ->execute();
-        
-        // Move nodes between new left and old left
-        $this->em->getRepository($classname)
-                ->createQueryBuilder('n')
-                ->set('n._leftnode', 'n._leftnode + :delta')
-                ->set('n._rightnode', 'n._rightnode + :delta')
-                ->andWhere('n._root = :root')
-                ->andWhere('n._leftnode >= :newleft')
-                ->andWhere('n._rightnode < :previousleft')
-                ->andWhere('n._uid <> :uid')
-                ->setParameters(array(
-                    'delta' => $node->getWeight(),
-                    'root' => $currentRoot,
-                    'newleft' => $args['new_left'],
-                    'previousleft' => $args['previous_left'],
-                    'uid' => $node->getUid()))
-                ->update()
-                ->getQuery()
-                ->execute();
+
+        if ($args['previous_left'] > $args['new_left']) {
+            // Move nodes between new left and previous left
+            $this->em->getRepository($classname)
+                    ->createQueryBuilder('n')
+                    ->set('n._leftnode', 'n._leftnode + :delta')
+                    ->set('n._rightnode', 'n._rightnode + :delta')
+                    ->andWhere('n._root = :root')
+                    ->andWhere('n._leftnode >= :newleft')
+                    ->andWhere('n._rightnode < :previousleft')
+                    ->andWhere('n._uid <> :uid')
+                    ->setParameters(array(
+                        'delta' => $node->getWeight(),
+                        'root' => $currentRoot,
+                        'newleft' => $args['new_left'],
+                        'previousleft' => $args['previous_left'],
+                        'uid' => $node->getUid()))
+                    ->update()
+                    ->getQuery()
+                    ->execute();
+        } else {
+            // Move nodes between previous right and new right
+            $this->em->getRepository($classname)
+                    ->createQueryBuilder('n')
+                    ->set('n._leftnode', 'n._leftnode + :delta')
+                    ->set('n._rightnode', 'n._rightnode + :delta')
+                    ->andWhere('n._root = :root')
+                    ->andWhere('n._leftnode > :previousright')
+                    ->andWhere('n._rightnode <= :newright')
+                    ->andWhere('n._uid <> :uid')
+                    ->setParameters(array(
+                        'delta' => -1 * $node->getWeight(),
+                        'root' => $currentRoot,
+                        'previousright' => $args['previous_left'],
+                        'newright' => $args['new_left'] + $node->getWeight() - 1,
+                        'uid' => $node->getUid()))
+                    ->update()
+                    ->getQuery()
+                    ->execute();
+        }
 
         // Finally move the moved node
         $this->em->getRepository($classname)
