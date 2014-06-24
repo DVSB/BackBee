@@ -68,6 +68,11 @@ EOF
         
         Dir::copy($repoResourcesDir, $publicResourcesDir, 0755);
         Dir::copy($bbappResourcesDir, $publicResourcesDir, 0755);
+        
+        foreach($bbapp->getBundles() as $bundle) {
+            Dir::copy($bundle->getResourcesDir(), $publicResourcesDir, 0755);
+        }
+        
     }
     
 }
