@@ -293,7 +293,8 @@ class ContainerBuilder
             );
         }
 
-        if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
+        if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment() &&
+                true === is_dir($application->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $application->getEnvironment())) {
             $container->get('config')
                 ->setContainer($container)
                 ->setEnvironment($application->getEnvironment())
