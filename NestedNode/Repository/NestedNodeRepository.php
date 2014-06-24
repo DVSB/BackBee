@@ -174,48 +174,67 @@ class NestedNodeRepository extends EntityRepository
         return $node;
     }
 
+    /**
+     * Inserts a leaf node in a tree as first child of the provided parent node
+     * @param \BackBuilder\NestedNode\ANestedNode $node     The node to be inserted
+     * @param \BackBuilder\NestedNode\ANestedNode $parent   The parent node
+     * @return \BackBuilder\NestedNode\ANestedNode          The inserted node
+     * @throws \BackBuilder\Exception\BBException           Occurs if the node is not a leaf
+     */
     public function insertNodeAsFirstChildOf(ANestedNode $node, ANestedNode $parent)
     {
-        if (FALSE === $node->isLeaf())
-            throw new \Exception("Only a leaf can be inserted");
-
-        if (null === $parent) {
-            throw new \BackBuilder\Exception\BBException('Can\'t insert node to null');
+        if (false === $node->isLeaf()) {
+            throw new \BackBuilder\Exception\BBException("Only a leaf can be inserted");
         }
 
-        if (!$this->_em->contains($node))
+        if (false === $this->_em->contains($node)) {
             $this->_em->persist($node);
-        if (!$this->_em->contains($parent))
+        }
+
+        if (false === $this->_em->contains($parent)) {
             $this->_em->persist($parent);
-        $node->setLeftnode($parent->getLeftnode() + 1);
-        $node->setRightnode($node->getLeftnode() + 1);
-        $node->setParent($parent);
-        $node->setRoot($parent->getRoot());
-        $node->setLevel($parent->getLevel() + 1);
+        }
+
+        $node->setLeftnode($parent->getLeftnode() + 1)
+                ->setRightnode($node->getLeftnode() + 1)
+                ->setLevel($parent->getLevel() + 1)
+                ->setParent($parent)
+                ->setRoot($parent->getRoot());
+
         $this->shiftRlValues($parent, $node->getLeftnode(), 2, $node);
 
         return $node;
     }
 
+    /**
+     * Inserts a leaf node in a tree as last child of the provided parent node
+     * @param \BackBuilder\NestedNode\ANestedNode $node     The node to be inserted
+     * @param \BackBuilder\NestedNode\ANestedNode $parent   The parent node
+     * @return \BackBuilder\NestedNode\ANestedNode          The inserted node
+     * @throws \BackBuilder\Exception\BBException           Occurs if the node is not a leaf
+     */
     public function insertNodeAsLastChildOf(ANestedNode $node, ANestedNode $parent)
     {
-        if (FALSE === $node->isLeaf())
-            throw new \Exception("Only a leaf can be inserted");
-
-        if (null === $parent) {
-            throw new \BackBuilder\Exception\BBException('Can\'t insert node to null');
+        if (false === $node->isLeaf()) {
+            throw new \BackBuilder\Exception\BBException("Only a leaf can be inserted");
         }
 
-        if (!$this->_em->contains($node))
+        if (false === $this->_em->contains($node)) {
             $this->_em->persist($node);
-        if (!$this->_em->contains($parent))
+        }
+
+        if (false === $this->_em->contains($parent)) {
             $this->_em->persist($parent);
-        $node->setLeftnode($parent->getRightnode());
-        $node->setRightnode($node->getLeftnode() + 1);
-        $node->setParent($parent);
-        $node->setRoot($parent->getRoot());
-        $node->setLevel($parent->getLevel() + 1);
-        $this->shiftRlValues($parent, $node->getLeftnode(), 2);
+        }
+
+        $node->setLeftnode($parent->getRightnode())
+                ->setRightnode($node->getLeftnode() + 1)
+                ->setLevel($parent->getLevel() + 1)
+                ->setParent($parent)
+                ->setRoot($parent->getRoot());
+
+        $this->shiftRlValues($parent, $node->getLeftnode(), 2, $node);
+
         return $node;
     }
 
@@ -365,6 +384,12 @@ class NestedNodeRepository extends EntityRepository
         return null;
     }
 
+    /**
+     * Returns the query build to get ancestor at level $level of the provided node
+     * @param \BackBuilder\NestedNode\ANestedNode $node
+     * @param int $level
+     * @return \Doctrine\ORM\QueryBuilder
+     */
     protected function _getAncestorQuery(ANestedNode $node, $level = 0)
     {
         return $this->createQueryBuilder('n')
@@ -380,13 +405,21 @@ class NestedNodeRepository extends EntityRepository
         ));
     }
 
+    /**
+     * Returns the ancestor at level $level of the provided node
+     * @param \BackBuilder\NestedNode\ANestedNode $node
+     * @param int $level
+     * @return \BackBuilder\NestedNode\ANestedNode|NULL
+     */
     public function getAncestor(ANestedNode $node, $level = 0)
     {
-        if ($node->getLevel() < $level)
-            return NULL;
+        if ($node->getLevel() < $level) {
+            return null;
+        }
 
-        if ($node->getLevel() == $level)
+        if ($node->getLevel() == $level) {
             return $node;
+        }
 
         return $this->_getAncestorQuery($node, $level)
                         ->getQuery()
@@ -414,7 +447,14 @@ class NestedNodeRepository extends EntityRepository
         return $q;
     }
 
-    public function getAncestors(ANestedNode $node, $depth = NULL, $includeNode = FALSE)
+    /**
+     * Returns the ancestors of the provided node
+     * @param \BackBuilder\NestedNode\ANestedNode $node
+     * @param int     $depth        Returns only ancestors from level $level or upper
+     * @param boolean $includeNode  Returns also the node itsef if TRUE
+     * @return array
+     */
+    public function getAncestors(ANestedNode $node, $depth = null, $includeNode = false)
     {
         return $this->_getAncestorsQuery($node, $depth, $includeNode)
                         ->getQuery()
@@ -577,14 +617,17 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * deletes node and it's descendants
-     * @todo Delete more efficiently. Wrap in transaction if needed.
+     * Deletes node and it's descendants
+     * @param \BackBuilder\NestedNode\ANestedNode $node
+     * @return boolean  TRUE on success, FALSE if try to delete a root
      */
     public function delete(ANestedNode $node)
     {
-        if (true === $node->isRoot())
+        if (true === $node->isRoot()) {
             return false;
-        $q = $this->createQueryBuilder('n')
+        }
+
+        $this->createQueryBuilder('n')
                 ->set('n._parent', 'NULL')
                 ->andWhere("n._leftnode >= :leftNodeValue")
                 ->andWhere("n._rightnode <= :rightNodeValue")
@@ -597,9 +640,11 @@ class NestedNodeRepository extends EntityRepository
                 ->update()
                 ->getQuery()
                 ->execute();
+
         $rightNode = $node->getRightnode();
         $weight = $node->getWeight();
-        $q = $this->createQueryBuilder('n')
+
+        $this->createQueryBuilder('n')
                 ->delete()
                 ->andWhere("n._leftnode >= :leftNodeValue")
                 ->andWhere("n._rightnode <= :rightNodeValue")
@@ -611,9 +656,10 @@ class NestedNodeRepository extends EntityRepository
                 ))
                 ->getQuery()
                 ->execute();
-        $first = $rightNode + 1;
+
         $delta = - $weight;
-        $this->shiftRLValues($node, $first, $delta);
+        $this->shiftRLValues($node->getParent(), $node->getLeftnode(), - $node->getWeight());
+
         return true;
     }
 
