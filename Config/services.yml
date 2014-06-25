@@ -186,7 +186,13 @@ services:
     rest.metadata.factory:
         class: Metadata\MetadataFactory
         arguments:  [@rest.metadata.annotation_driver]
+        calls:
+            - [setCache, [@rest.metadata.cache]]
 
+    rest.metadata.cache:
+        class: Metadata\Cache\FileCache
+        arguments:  ["%bbapp.cache.dir%/"]
+        
     rest.controller.test:
         class:      %bbapp.rest.test_controller.class%
         arguments:  ["@bbapp"]
