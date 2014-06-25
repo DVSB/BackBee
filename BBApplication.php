@@ -21,9 +21,11 @@
 
 namespace BackBuilder;
 
-use Exception;
 use BackBuilder\AutoLoader\AutoLoader,
+    BackBuilder\Bundle\BundleLoader,
     BackBuilder\Config\Config,
+    BackBuilder\DependencyInjection\ContainerBuilder,
+    BackBuilder\Event\Event,
     BackBuilder\Event\Listener\DoctrineListener,
     BackBuilder\Exception\BBException,
     BackBuilder\Exception\UnknownContextException,
@@ -32,15 +34,14 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Util\File,
     BackBuilder\Bundle\ABundle,
     BackBuilder\Console\Console;
+
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
-    Doctrine\ORM\EntityManager,
     Doctrine\Common\Annotations\AnnotationRegistry,
     Doctrine\Common\Annotations\AnnotationReader;
+
 use Symfony\Component\Config\FileLocator,
-    BackBuilder\DependencyInjection\ContainerBuilder,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
-    Symfony\Component\DependencyInjection\Loader\YamlFileLoader,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\Yaml\Yaml,
@@ -64,7 +65,7 @@ class BBApplication implements IApplication
     const DEFAULT_ENVIRONMENT = '';
 
     /**
-     * @var Symfony\Component\DependencyInjection\ContainerBuilder
+     * @var BackBuilder\DependencyInjection\Container
      */
     private $_container;
     private $_context;
@@ -81,7 +82,6 @@ class BBApplication implements IApplication
     private $_starttime;
     private $_storagedir;
     private $_tmpdir;
-    private $_bundles;
     private $_classcontentdir;
     private $_theme;
     private $_overwrite_config;
@@ -108,52 +108,27 @@ class BBApplication implements IApplication
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
 
-        $this->_environment = ((is_string($environment)) ? $environment : ($environment === false ? 'production' : self::DEFAULT_ENVIRONMENT))
+        $this->_environment = ((is_string($environment))
+            ? $environment
+            : ($environment === false ? 'production' : self::DEFAULT_ENVIRONMENT))
         ;
 
-        // annotations require custom autoloading
-        AnnotationRegistry::registerAutoloadNamespaces(array(
-            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
-            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
-            'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
-            'BackBuilder' => $this->getBaseDir(),
-                //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
-        ));
-
-        // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
-        AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
-        AnnotationReader::addGlobalIgnoredName('Entity');
-        AnnotationReader::addGlobalIgnoredName('Column');
-        AnnotationReader::addGlobalIgnoredName('Table');
-        AnnotationReader::addGlobalIgnoredName('HasLifecycleCallbacks');
-        AnnotationReader::addGlobalIgnoredName('Index');
-        AnnotationReader::addGlobalIgnoredName('Id');
-        AnnotationReader::addGlobalIgnoredName('GeneratedValue');
-        AnnotationReader::addGlobalIgnoredName('ManyToMany');
-        AnnotationReader::addGlobalIgnoredName('JoinTable');
-        AnnotationReader::addGlobalIgnoredName('JoinColumn');
-        AnnotationReader::addGlobalIgnoredName('ManyToOne');
-        AnnotationReader::addGlobalIgnoredName('OneToOne');
-        AnnotationReader::addGlobalIgnoredName('OneToMany');
-        AnnotationReader::addGlobalIgnoredName('PreUpdate');
-        AnnotationReader::addGlobalIgnoredName('index');
-        AnnotationReader::addGlobalIgnoredName('fixtures');
-        AnnotationReader::addGlobalIgnoredName('fixture');
-        AnnotationReader::addGlobalIgnoredName('column');
-
-        $this->_initContainer()
-                ->_initAutoloader()
-                ->_initContentWrapper();
+        $this->_initAnnotationReader();
+        $this->_initContainer();
+        $this->_initAutoloader();
+        $this->_initContentWrapper();
 
         try {
             $this->_initEntityManager();
         } catch (\Exception $excep) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
+
         $this->_initBundles();
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
+
             return;
         }
 
@@ -163,17 +138,17 @@ class BBApplication implements IApplication
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
             if (array_key_exists('locale', $encoding))
                 if (setLocale(LC_ALL, $encoding['locale']) === false)
-                    Throw new Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
+                    throw new \Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
         }
 
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
 
-        // Compile container so it resolves every var/abstract service called in services.yml|xml
-        $this->_container->compile();
-
         $this->_isinitialized = true;
+
+        // trigger bbapplication.init
+        $this->getEventDispatcher()->dispatch('bbapplication.init', new Event($this));
     }
 
     public function runImport()
@@ -185,248 +160,33 @@ class BBApplication implements IApplication
         }
     }
 
+    /**
+     * [__destruct description]
+     */
     public function __destruct()
     {
         $this->stop();
     }
 
+    /**
+     * [forceReloadConfig description]
+     * @return [type] [description]
+     */
     public function forceReloadConfig()
     {
         $this->_initContainer(true);
     }
 
-    private function _initContainer($forceReload = false)
+    /**
+     * [_initContainer description]
+     * @param  boolean $force_reload [description]
+     * @return [type]                [description]
+     */
+    private function _initContainer($force_reload = false)
     {
-        // Construct service container
-        $this->_container = new ContainerBuilder();
-
-        if (false === $containerdir = getenv('BB_CONTAINERDIR')) {
-            $containerdir = $this->getBaseDir() . '/container/';
-        }
-
-        $containerclass = 'bb' . md5('__container__' . $this->getContext() . $this->_environment);
-        $containerfile = $containerclass . '.php';
-
-        if (false === $forceReload &&
-                false === $this->_debug &&
-                true === is_readable($containerdir . '/' . $containerfile)) {
-
-            $loader = new \Symfony\Component\DependencyInjection\Loader\PhpFileLoader($this->_container, new FileLocator(array($containerdir)));
-            $loader->load($containerfile);
-
-            $this->_container = new $containerclass();
-
-            // Add current BBApplication into container
-            $this->_container->set('bbapp', $this);
-            $this->_container->set('service_container', $this->_container);
-
-            if (true === $this->_container->hasParameter('bbapp.base.dir')) {
-                $this->_bbdir = $this->_container->getParameter('bbapp.base.dir');
-                $this->_repository = null;
-                $this->_base_repository = null;
-            }
-
-            $this->_initConfig();
-
-            $this->_container->setDefinition('site', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
-            $this->_container->setDefinition('routing', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
-            $this->_container->setDefinition('bb_session', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
-
-            return $this;
-        }
-
-        $this->_container->setDefinition('bbapp', new \Symfony\Component\DependencyInjection\Definition())->setSynthetic(true);
-
-        $dirToLookingFor = array();
-        $dirToLookingFor[] = $this->getBBDir() . '/' . 'Config';
-        $dirToLookingFor[] = $this->getBaseRepository() . '/' . 'Config';
-        $dirToLookingFor[] = $this->getRepository() . '/' . 'Config';
-
-        if (self::DEFAULT_ENVIRONMENT !== $this->_environment) {
-            $dirToLookingFor[] = $this->getRepository()
-                    . DIRECTORY_SEPARATOR . 'Config'
-                    . DIRECTORY_SEPARATOR . $this->_environment
-            ;
-        }
-
-        foreach ($dirToLookingFor as $dir) {
-            $fileService = $dir . '/' . 'services.';
-
-            if (file_exists($fileService . 'yml') && true === is_readable($fileService . 'yml')) {
-                // Define where to looking for services.yml
-                $loader = new YamlFileLoader($this->_container, new FileLocator(array($dir)));
-                // Load every services definitions into our container
-                $loader->load('services.yml');
-            } elseif (file_exists($fileService . 'xml') && true === is_readable($fileService . 'xml')) {
-                // Define where to looking for services.yml
-                $loader = new XmlFileLoader($this->_container, new FileLocator(array($dir)));
-                // Load every services definitions into our container
-                $loader->load('services.xml');
-            }
-        }
-
-        // Add current BBApplication into container
-        $this->_container->set('bbapp', $this);
-        $this->_container->set('service_container', $this->_container);
-        $this->_container->setParameter('environment', $this->_environment);
-
-        $this->_initBBAppParamsIntoContainer();
-
-        $this->_initConfig();
-
-        // $this->_container->setParameter('debug', $this->isDebugMode());
-
-        if ($this->_debug) {
-            $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
-                    $this->_container->getParameter('bbapp.logger_debug.class'), array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
-            ));
-        } else {
-            $this->_container->setDefinition('logging', new \Symfony\Component\DependencyInjection\Definition(
-                    $this->_container->getParameter('bbapp.logger.class'), array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
-            ));
-        }
-
-        $this->_initExternalBundleServices();
-        if (false === $this->isDebugMode()) {
-            if (false === file_exists($containerdir)) {
-                @mkdir($containerdir, 0755);
-            }
-            if (true === is_writable($containerdir)) {
-                $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($this->_container);
-                file_put_contents($containerdir . '/' . $containerfile, $dump->dump(array('class' => $containerclass, 'base_class' => '\BackBuilder\DependencyInjection\ContainerBuilder')));
-            }
-        }
+        $this->_container = ContainerBuilder::getContainer($this, $force_reload);
 
         return $this;
-    }
-
-    private function _getRawConfig()
-    {
-        $config = array();
-        $file_exists = false;
-        $filepath = null;
-
-        if (self::DEFAULT_CONTEXT !== $this->_context) {
-            if (self::DEFAULT_ENVIRONMENT !== $this->_environment) {
-                $filepath = $this->getRepository()
-                        . DIRECTORY_SEPARATOR . 'Config'
-                        . DIRECTORY_SEPARATOR . $this->_environment
-                        . DIRECTORY_SEPARATOR . 'config.yml'
-                ;
-            }
-
-            if (false === $file_exists = file_exists($filepath)) {
-                $filepath = $this->getRepository()
-                        . DIRECTORY_SEPARATOR . 'Config'
-                        . DIRECTORY_SEPARATOR . 'config.yml'
-                ;
-            }
-        }
-
-        if ((false === $file_exists = file_exists($filepath)) && self::DEFAULT_ENVIRONMENT !== $this->_environment) {
-            $filepath = $this->getBaseRepository()
-                    . DIRECTORY_SEPARATOR . 'Config'
-                    . DIRECTORY_SEPARATOR . $this->_environment
-                    . DIRECTORY_SEPARATOR . 'config.yml'
-            ;
-        }
-
-        if (false === $file_exists = file_exists($filepath)) {
-            $filepath = $this->getBaseRepository()
-                    . DIRECTORY_SEPARATOR . 'Config'
-                    . DIRECTORY_SEPARATOR . 'config.yml'
-            ;
-        }
-
-        if (false === $file_exists = file_exists($filepath)) {
-            throw new \Exception('Unable to find a config.yml!');
-        }
-
-        if (true === is_readable($filepath)) {
-            $config = Yaml::parse($filepath);
-        } else {
-            throw new \Exception("config.yml is not readable! ($filepath)");
-        }
-
-        return $config;
-    }
-
-    private function _initBBAppParamsIntoContainer()
-    {
-        $config = $this->_getRawConfig();
-
-        // Set timezone
-        if (true === isset($config['date']) && true === isset($config['date']['timezone'])) {
-            date_default_timezone_set($config['date']['timezone']);
-        }
-
-        // Set every bbapp parameters
-        // define context
-        $this->_container->setParameter('bbapp.context', $this->getContext());
-        $debug = $this->_debug;
-        if (array_key_exists('parameters', $config) && array_key_exists('debug', $config['parameters'])) {
-            $debug = $config['parameters']['debug'];
-        }
-
-        $this->_container->setParameter('debug', $debug);
-
-        // define bb base dir
-        if (true === isset($config['parameters']['base_dir']) && false === empty($config['parameters']['base_dir'])) {
-            $this->_bbdir = $config['parameters']['base_dir'];
-            $this->_repository = null;
-            $this->_base_repository = null;
-        }
-
-        $this->_container->setParameter('bbapp.base.dir', $this->getBBDir());
-
-        // define cache dir
-        $cachedir = $this->getBaseDir() . '/cache/' . $this->_environment;
-        if (true === isset($config['parameters']['cache_dir']) && false === empty($config['parameters']['cache_dir'])) {
-            $cachedir = $config['parameters']['cache_dir'];
-        }
-        $this->_container->setParameter('bbapp.cache.dir', $cachedir);
-
-        if (isset($config['parameters']) && array_key_exists('cache_auto_generate', $config['parameters'])) {
-            $this->_container->setParameter('bbapp.cache.autogenerate', $config['parameters']['cache_auto_generate']);
-        }
-
-
-        // define config dir
-        $this->_container->setParameter('bbapp.config.dir', $this->getConfigDir());
-
-        // define repository dir
-        $this->_container->setParameter('bbapp.repository.dir', $this->getRepository());
-
-        // define data dir
-        $datadir = $this->getRepository() . '/' . 'Data';
-        if (true === isset($config['parameters']['data_dir']) && false === empty($config['parameters']['data_dir'])) {
-            $datadir = $config['parameters']['data_dir'];
-        }
-        $this->_container->setParameter('bbapp.data.dir', $datadir);
-
-        //$this->_container->setParameter('bbapp.cachecontrol.class', $this->getCacheProvider());
-    }
-
-    private function _initExternalBundleServices()
-    {
-        // Load external bundle services (Symfony2 Bundle)
-        $externalServices = $this->getConfig()->getSection('external_bundles');
-        if (null !== $externalServices && 0 < count($externalServices)) {
-            foreach ($externalServices as $key => $datas) {
-                $bundle = new $datas['class']();
-                if (false === ($bundle instanceof ExtensionInterface)) {
-                    $errorMsg = sprintf(
-                            'BBApplication::_initContainer(): failed to load extension %s, it must implements `%s`', $datas['class'], 'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
-                    );
-                    $this->debug($errorMsg);
-
-                    throw new BBException($errorMsg);
-                }
-
-                $config = true === isset($datas['config']) ? array($key => $datas['config']) : array();
-                $bundle->load($config, $this->_container);
-            }
-        }
     }
 
     /**
@@ -471,6 +231,7 @@ class BBApplication implements IApplication
         if (false === is_object($this->_theme) || true === $force_reload) {
             $this->_theme = new Theme($this);
         }
+
         return $this->_theme;
     }
 
@@ -512,37 +273,11 @@ class BBApplication implements IApplication
     }
 
     /**
-     * @return \BackBuilder\BBApplication
+     * @return boolean
      */
-    private function _initConfig()
+    public function isOverridedConfig()
     {
-        $dir = (true === $this->hasContext()) ? $this->getBaseRepository(). '/Config' : $this->_container->getParameter('bbapp.config.dir');
-        
-        $this->getContainer()
-                ->get('config')
-                ->setContainer($this->_container)
-                ->setEnvironment($this->_environment)
-                ->extend($dir);
-
-        return $this->_initContextConfig();
-    }
-
-    /**
-     * @param string $configdir
-     * @return \BackBuilder\BBApplication
-     * @throws \BackBuilder\Exception\UnknownContextException Thrown if unknown context provided
-     */
-    private function _initContextConfig()
-    {
-        if (true === $this->hasContext()) {
-            if (false === is_dir($this->getBaseRepository() . '/' . $this->_context)) {
-                throw new UnknownContextException(sprintf('Unable to find `%s` context in repository.', $this->_context));
-            }
-
-            $this->getContainer()->get('config')->setEnvironement($this->_environment);
-            $this->getContainer()->get('config')->extend($this->getRepository() . '/' . 'Config', $this->_overwrite_config);
-        }
-        return $this;
+        return $this->_overwrite_config;
     }
 
     /**
@@ -589,14 +324,6 @@ class BBApplication implements IApplication
             $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
-        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('metadata_type', $doctrine_config['dbal'])) {
-            $doctrine_config['dbal']['metadata_cache']['cachetype'] = $doctrine_config['dbal']['metadata_type'];
-        }
-
-        if (true === array_key_exists('dbal', $doctrine_config) && true === array_key_exists('query_type', $doctrine_config['dbal'])) {
-            $doctrine_config['dbal']['query_cache']['cachetype'] = $doctrine_config['dbal']['query_type'];
-        }
-
         // Init ORM event
         $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
@@ -625,70 +352,9 @@ class BBApplication implements IApplication
 
     private function _initBundles()
     {
-        if (null === $this->_bundles)
-            $this->_bundles = array();
+        BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
 
-        if (null !== $bundles = $this->getConfig()->getBundlesConfig()) {
-            foreach ($bundles as $name => $classname) {
-                $bundle = new $classname($this);
-                $this->_bundles['bundle.' . $bundle->getId()] = $bundle;
-            }
-        }
-
-        $this->initBundlesServices();
-
-        if (0 < count($this->_bundles)) {
-            foreach ($this->_bundles as $bundle) {
-                $bundle->init();
-                $this->getContainer()->set('bundle.' . $bundle->getId(), $bundle);
-            }
-        }
-    }
-
-    /**
-     * Load every service definition defined in bundle
-     */
-    private function initBundlesServices()
-    {
-        foreach ($this->_bundles as $b) {
-            $xml = $b->getResourcesDir() . '/' . 'services.xml';
-            if (true === is_file($xml)) {
-                $loader = new XmlFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
-                try {
-                    $loader->load('services.xml');
-                } catch (Exception $e) { /* nothing to do, just ignore it */
-                }
-
-                unset($loader);
-            }
-        }
-
-        // OVERRIDE Services Bundle within environment
-        if (self::DEFAULT_ENVIRONMENT !== $this->_environment) {
-            $dirToLookingFor = $this->getRepository()
-                    . DIRECTORY_SEPARATOR . 'Config'
-                    . DIRECTORY_SEPARATOR . $this->_environment
-                    . DIRECTORY_SEPARATOR . 'bundle';
-            ;
-
-            foreach ($this->_bundles as $b) {
-                $xml = $dirToLookingFor .
-                        DIRECTORY_SEPARATOR .
-                        $b->getId() .
-                        DIRECTORY_SEPARATOR .
-                        'services.xml';
-
-                if (true === is_file($xml)) {
-                    $loader = new XmlFileLoader($this->_container, new FileLocator(array($b->getResourcesDir())));
-                    try {
-                        $loader->load('services.xml');
-                    } catch (Exception $e) { /* nothing to do, just ignore it */
-                    }
-
-                    unset($loader);
-                }
-            }
-        }
+        return $this;
     }
 
     /**
@@ -698,7 +364,7 @@ class BBApplication implements IApplication
     public function getBundle($name)
     {
         $bundle = null;
-        if ($this->getContainer()->has('bundle.' . $name)) {
+        if (true === $this->getContainer()->has('bundle.' . $name)) {
             $bundle = $this->getContainer()->get('bundle.' . $name);
         }
 
@@ -706,12 +372,18 @@ class BBApplication implements IApplication
     }
 
     /**
-     * 
-     * @return ABundle[]
+     * returns every registered bundles
+     *
+     * @return array
      */
     public function getBundles()
     {
-        return $this->_bundles;
+        $bundles = array();
+        foreach ($this->getContainer()->findTaggedServiceIds('bundle') as $id => $datas) {
+            $bundles[] = $this->getContainer()->get($id);
+        }
+
+        return $bundles;
     }
 
     /**
@@ -740,13 +412,11 @@ class BBApplication implements IApplication
         $this->_isstarted = true;
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
-        if (null !== $this->_bundles) {
-            foreach ($this->_bundles as $bundle) {
-                $bundle->start();
-            }
-        }
-
         $this->getTheme()->init();
+
+        // trigger bbapplication.start
+        $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
+
 
         if (false === $this->isClientSAPI()) {
             $response = $this->getController()->handle();
@@ -762,15 +432,11 @@ class BBApplication implements IApplication
     public function stop()
     {
         if (true === $this->isStarted()) {
-            if (null !== $this->_bundles) {
-                foreach ($this->_bundles as $bundle) {
-                    $bundle->stop();
-                }
-            }
-
             // @todo
             // stop services
 
+            // trigger bbapplication.stop
+            $this->getEventDispatcher()->dispatch('bbapplication.stop', new Event($this));
             $this->info('BackBuilder application ended');
         }
     }
@@ -796,13 +462,12 @@ class BBApplication implements IApplication
      */
     public function getAutoloader()
     {
-        if (null === $this->_autoloader) {
-            $this->_autoloader = new AutoLoader($this);
-        }
-
-        return $this->_autoloader;
+        return $this->getContainer()->get('autoloader');
     }
 
+    /**
+     * @return string
+     */
     public function getBBDir()
     {
         if (null === $this->_bbdir) {
@@ -832,7 +497,7 @@ class BBApplication implements IApplication
 
     /**
      * Get vendor dir
-     * 
+     *
      * @return string
      */
     public function getVendorDir()
@@ -920,7 +585,7 @@ class BBApplication implements IApplication
     }
 
     /**
-     * @return ContainerBuilder
+     * @return BackBuilder\DependencyInjection\Container
      */
     public function getContainer()
     {
@@ -929,19 +594,11 @@ class BBApplication implements IApplication
 
     /**
      * Get validator service
-     * 
+     *
      * @return \Symfony\Component\Validator\ValidatorInterface
      */
     public function getValidator()
     {
-        if (!$this->getContainer()->get('validator')) {
-            $validator = Validation::createValidatorBuilder()
-                    ->enableAnnotationMapping()
-                    ->getValidator();
-
-            $this->getContainer()->set('validator', $validator);
-        }
-
         return $this->getContainer()->get('validator');
     }
 
@@ -950,12 +607,16 @@ class BBApplication implements IApplication
      */
     public function getConfig()
     {
-        return $this->getContainer()->get('config');
+        if (null === $this->_container) {
+            throw new \Exception('Application\'s container is not ready!');
+        }
+
+        return $this->_container->get('config');
     }
 
     /**
      * Get current environment
-     * 
+     *
      * @return string
      */
     public function getEnvironment()
@@ -979,7 +640,7 @@ class BBApplication implements IApplication
     public function getEntityManager()
     {
         try {
-            if ($this->getContainer()->get('em') === null) {
+            if (null === $this->getContainer()->get('em')) {
                 $this->_initEntityManager();
             }
 
@@ -1036,7 +697,7 @@ class BBApplication implements IApplication
 
     public function getBaseRepository()
     {
-        if (NULL === $this->_base_repository) {
+        if (null === $this->_base_repository) {
             $this->_base_repository = $this->getBaseDir() . '/' . 'repository';
         }
         return $this->_base_repository;
@@ -1207,8 +868,9 @@ class BBApplication implements IApplication
      */
     public function getRequest()
     {
-        if (false === $this->isStarted())
+        if (false === $this->isStarted()) {
             throw new BBException('The BackBuilder application has to be started before to access request');
+        }
 
         return $this->getController()->getRequest();
     }
@@ -1247,6 +909,7 @@ class BBApplication implements IApplication
             $session->start();
             $this->getRequest()->setSession($session);
         }
+
         return $this->getRequest()->getSession();
     }
 
@@ -1367,4 +1030,36 @@ class BBApplication implements IApplication
         }
     }
 
+    private function _initAnnotationReader()
+    {
+        // annotations require custom autoloading
+        AnnotationRegistry::registerAutoloadNamespaces(array(
+            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
+            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
+            'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
+            'BackBuilder' => $this->getBaseDir(),
+            //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
+        ));
+
+        // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
+        AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
+        AnnotationReader::addGlobalIgnoredName('Entity');
+        AnnotationReader::addGlobalIgnoredName('Column');
+        AnnotationReader::addGlobalIgnoredName('Table');
+        AnnotationReader::addGlobalIgnoredName('HasLifecycleCallbacks');
+        AnnotationReader::addGlobalIgnoredName('Index');
+        AnnotationReader::addGlobalIgnoredName('Id');
+        AnnotationReader::addGlobalIgnoredName('GeneratedValue');
+        AnnotationReader::addGlobalIgnoredName('ManyToMany');
+        AnnotationReader::addGlobalIgnoredName('JoinTable');
+        AnnotationReader::addGlobalIgnoredName('JoinColumn');
+        AnnotationReader::addGlobalIgnoredName('ManyToOne');
+        AnnotationReader::addGlobalIgnoredName('OneToOne');
+        AnnotationReader::addGlobalIgnoredName('OneToMany');
+        AnnotationReader::addGlobalIgnoredName('PreUpdate');
+        AnnotationReader::addGlobalIgnoredName('index');
+        AnnotationReader::addGlobalIgnoredName('fixtures');
+        AnnotationReader::addGlobalIgnoredName('fixture');
+        AnnotationReader::addGlobalIgnoredName('column');
+    }
 }
