@@ -27,7 +27,7 @@ namespace BackBuilder\Bundle;
  * @copyright   Lp digital system
  * @author e.chau <eric.chau@lp-digital.fr>
  *
- * @Table(name="registry", indexes={@index(name="IDX_KEY_SCOPE", columns={"key", "scope"})})
+ * @Table(name="registry", indexes={@index(name="IDX_KEY_SCOPE", columns={"`key`", "`scope`"})})
  * @Entity(repositoryClass="BackBuilder\Bundle\Registry\Repository")
  */
 class Registry
