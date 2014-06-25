@@ -92,6 +92,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
 
                 foreach ($definition as $attrname => $attrvalue) {
                     if (false === is_array($attrvalue)) {
+                        $attrvalue = ('' === $metadata->getAttribute($attrname)) ? $attrvalue : $metadata->getAttribute($attrname);
                         $metadata->setAttribute($attrname, $attrvalue, $content);
                         continue;
                     }
