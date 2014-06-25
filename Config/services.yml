@@ -285,7 +285,36 @@ services:
         
         
     
-
+    
+    
+    # validator
+    validator:
+        class: Symfony\Component\Validator\Validator
+        arguments:  ["@validator.metadata_factory", "@validator.factory", "@translator"]
+        
+    validator.metadata_factory:
+        class: Symfony\Component\Validator\Mapping\ClassMetadataFactory
+        arguments:  ["@validator.loader_annotation"]
+        
+    validator.loader_annotation:
+        class: Symfony\Component\Validator\Mapping\Loader\AnnotationLoader
+        arguments:  ["@validator.annotation_reader"]
+        
+    validator.annotation_reader: 
+        class: Doctrine\Common\Annotations\CachedReader
+        arguments: [@validator.annotation_reader.main, @validator.annotation_reader_cache]
+        
+    validator.annotation_reader.main:
+        class: Doctrine\Common\Annotations\AnnotationReader
+        
+    validator.annotation_reader_cache:
+        class: Doctrine\Common\Cache\FilesystemCache
+        arguments:  ["%bbapp.cache.dir%/", "validator.annotation.cache"]
+        
+    validator.factory: 
+        class: Symfony\Component\Validator\ConstraintValidatorFactory
+        
+        
     # synthetic services
     bbapp:
         synthetic: true
@@ -298,6 +327,4 @@ services:
     bb_session:
         synthetic: true
     mailer:
-        synthetic: true
-    validator:
         synthetic: true
