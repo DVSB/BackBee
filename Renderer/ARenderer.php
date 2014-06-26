@@ -408,7 +408,7 @@ abstract class ARenderer implements IRenderer
     {
         if (null !== $this->_object) {
             $this->_parentuid = $this->_object->getUid();
-            $this->__object = $this->_application->getEntityManager()->find(get_class($this->_object), $this->_object->getUid());
+            $this->__object = $this->_object;
         }
 
         $this->__vars = $this->_vars;
