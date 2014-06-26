@@ -63,6 +63,16 @@ class FileSystem implements IImporterConnector
             $this->_basedir = $this->_application->getRepository();
         }
     }
+    
+    /**
+     * Get the root dir 
+     * 
+     * @return string
+     */
+    public function getBaseDir()
+    {
+        return $this->_basedir;
+    }
 
     /**
      * Return the path files according to the provided pattern
