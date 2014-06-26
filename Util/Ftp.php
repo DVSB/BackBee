@@ -39,6 +39,8 @@ class Ftp
         'port' => 21,
         
         'retryAttempts' => 0,
+        // sleep between retries, in seconds
+        'retrySleep' => 0,
         'passive_mode' => true,
         'transfer_mode' => \FTP_BINARY,
         'create_mask' => 0777
@@ -170,7 +172,7 @@ class Ftp
     protected function retry(\Closure $retry)
     {
         $numRetries = $this->getParam('retryAttempts');
-
+        $sleepBetweenRetries = $this->getParam('retrySleep');
         if ($numRetries < 1) {
             return $retry();
         }
@@ -184,9 +186,17 @@ class Ftp
                 if ($firstException === null) {
                     $firstException = $e;
                 }
+                
                 if ($i === $numRetries) {
-                    throw $firstException;
+                    $ex = new \Exception($firstException->getMessage() . ', retry count: ' . $i);
+                    throw $ex;
                 }
+                
+                if($sleepBetweenRetries > 0) {
+                    sleep($sleepBetweenRetries);
+                }
+                
+                $this->reconnect();
             }
         }
     }
