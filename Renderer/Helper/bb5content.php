@@ -97,10 +97,10 @@ class bb5content extends AHelper
                 && false !== $this->_content->getParam('bb5.editable')) {
 
             // Defining hierarchical content structure
-                $this->_parent_uid = $this->_renderer->getParentUid();
-            if (null === $element) {
+            $this->_parent_uid = $this->_renderer->getParentUid();
+            if ($this->_content === $this->_renderer->getObject()) {
                 $this->_element_name = $this->_renderer->getCurrentElement();
-                $this->_parent = $this->getRenderer()->getClassContainer();
+                $this->_parent = $this->_renderer->getClassContainer();
             } else {
                 $this->_element_name = null;
                 if (null !== $this->_parent = $this->_renderer->getObject()) {

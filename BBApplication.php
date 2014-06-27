@@ -605,14 +605,6 @@ class BBApplication implements IApplication
      */
     public function getValidator()
     {
-        if (!$this->getContainer()->get('validator')) {
-            $validator = Validation::createValidatorBuilder()
-                    ->enableAnnotationMapping()
-                    ->getValidator();
-
-            $this->getContainer()->set('validator', $validator);
-        }
-
         return $this->getContainer()->get('validator');
     }
 
