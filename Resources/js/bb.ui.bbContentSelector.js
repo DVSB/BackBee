@@ -648,8 +648,8 @@
             var pagerParams = {
                 params : criteria,
                 site: context.site,
-                order_sort: '_title',
-                order_dir: 'asc',
+                order_sort: 'modified',
+                order_dir: 'desc',
                 limit: limit,
                 start:0
             };
