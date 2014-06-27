@@ -53,6 +53,7 @@ use Symfony\Component\HttpFoundation\Request,
  */
 class FrontController implements HttpKernelInterface
 {
+
     const DEFAULT_URL_EXTENSION = 'html';
 
     /**
@@ -102,7 +103,6 @@ class FrontController implements HttpKernelInterface
      * @var boolean
      */
     protected $force_url_extension = true;
-
     protected $url_extension;
 
     /**
@@ -380,10 +380,7 @@ class FrontController implements HttpKernelInterface
 
         preg_match('/(.*)(\.[' . $this->url_extension . ']+)/', $uri, $matches);
         if (
-            ('_root_' !== $uri
-            && '/' !== $uri[strlen($uri) - 1]
-            && 0 === count($matches) && true === $this->force_url_extension)
-            || (0 < count($matches) && $site->getDefaultExtension() !== $matches[2])
+                ('_root_' !== $uri && '/' !== $uri[strlen($uri) - 1] && 0 === count($matches) && true === $this->force_url_extension) || (0 < count($matches) && $site->getDefaultExtension() !== $matches[2])
         ) {
             throw new FrontControllerException(sprintf(
                     'The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND
@@ -869,9 +866,7 @@ class FrontController implements HttpKernelInterface
                     $controller = $route['defaults']['_controller'];
                 } else {
                     $application->warning(sprintf(
-                        'Unable to get a valid controller with id:`%s` for the route `%s`.',
-                        $route['defaults']['_controller'],
-                        $name
+                                    'Unable to get a valid controller with id:`%s` for the route `%s`.', $route['defaults']['_controller'], $name
                     ));
                     continue;
                 }
@@ -908,14 +903,24 @@ class FrontController implements HttpKernelInterface
             return;
         }
 
-        // force content output
-        @ini_set('zlib.output_compression', 0);
-        ob_implicit_flush(true);flush();
-
-        // $_response may not be set
-        if($this->_response instanceof Response) {
-            $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
+        if (null !== $this->getApplication()->getBBUserToken()) {
+            // Launch NestedNode jobs
+            $container = $this->getApplication()->getContainer();
+            if (true === ($container->hasParameter('bbapp.script.command') && $container->hasParameter('bbapp.console.command'))) {
+                $this->getApplication()->debug('Launching NestedNode jobs: '.sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $container->getParameter('bbapp.console.command')));
+                exec(sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $this->getApplication()->getBaseDir(). '/' . $container->getParameter('bbapp.console.command')));
+            }
         }
 
+        // force content output
+//        @ini_set('zlib.output_compression', 0); // 2014-06-23: comment by c.rouillon
+        ob_implicit_flush(true);
+        flush();
+
+        // $_response may not be set
+        if ($this->_response instanceof Response) {
+            $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
+        }
     }
+
 }
