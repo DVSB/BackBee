@@ -240,8 +240,9 @@ class FrontController implements HttpKernelInterface
         }
 
         if (null !== $actionKey) {
-            $controller = $this->_actions[$actionKey];
-
+            $controllerResolver = $this->getApplication()->getContainer()->get('controller_resolver');
+            $controller = $controllerResolver->getController($this->getRequest());
+            
             $eventName = str_replace('\\', '.', strtolower(get_class($controller[0])));
             if (0 === strpos($eventName, 'backbuilder.')) {
                 $eventName = substr($eventName, 12);
@@ -261,8 +262,8 @@ class FrontController implements HttpKernelInterface
             $controller = $event->getController();
 
             // get controller action arguments
-            $actionArguments = $this->getApplication()->getContainer()->get('controller_resolver')->getArguments(
-                    $this->getRequest(), $controller
+            $actionArguments = $controllerResolver->getArguments(
+                $this->getRequest(), $controller
             );
 
             $response = call_user_func_array($controller, $actionArguments);
