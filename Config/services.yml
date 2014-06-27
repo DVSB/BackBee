@@ -315,7 +315,7 @@ services:
         
     validator.annotation_reader_cache:
         class: Doctrine\Common\Cache\FilesystemCache
-        arguments:  ["%bbapp.cache.dir%/", "validator.annotation.cache"]
+        arguments:  ["%bbapp.cache.dir%", "validator.annotation.cache"]
         
     validator.factory: 
         class: Symfony\Component\Validator\ConstraintValidatorFactory
