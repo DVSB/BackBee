@@ -24,6 +24,11 @@ namespace BackBuilder\Controller;
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\ControllerNameParser;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+
+use BackBuilder\IApplication;
 
 /**
  * This implementation uses the '_controller' request attribute to determine
@@ -37,6 +42,24 @@ use Symfony\Component\HttpFoundation\Request,
  */
 class ControllerResolver implements ControllerResolverInterface
 {
+    /**
+     *
+     * @var IApplication
+     */
+    protected $bbapp;
+    
+    /**
+     * Constructor
+     * 
+     * @param \BackBuilder\IApplication $bbapp
+     */
+    public function __construct(IApplication $bbapp = null)
+    {
+        if(null !== $bbapp) {
+            $this->bbapp = $bbapp;
+        }
+    }
+    
     /**
      * Returns the Controller instance associated with a Request.
      *
@@ -54,9 +77,75 @@ class ControllerResolver implements ControllerResolverInterface
      */
     public function getController(Request $request)
     {
-        // @todo
+        if (!$controller = $request->attributes->get('_controller')) {
+            if(null !== $this->bbapp) {
+                $this->bbapp->getLogger()->warning('Unable to look for the controller as the "_controller" parameter is missing');
+            }
+
+            return false;
+        }
+
+        if (is_array($controller) || (is_object($controller) && method_exists($controller, '__invoke'))) {
+            return $controller;
+        }
+
+        if (false === strpos($controller, ':')) {
+            if (method_exists($controller, '__invoke')) {
+                return new $controller;
+            } elseif (function_exists($controller)) {
+                return $controller;
+            }
+        }
+
+        list($controller, $method) = $this->createController($controller, $request->attributes->get('_action'));
+
+        if (!method_exists($controller, $method)) {
+            throw new \InvalidArgumentException(sprintf('Method "%s::%s" does not exist.', get_class($controller), $method));
+        }
+
+        return array($controller, $method);
     }
 
+    /**
+     * 
+     * @param string $controllerName
+     * @param string $actionName
+     */
+    protected function createController($controllerName, $actionName = null)
+    {
+        $controllerClass = null;
+        if(null === $controllerName) {
+            // default controller
+            $controllerClass = 'BackBuilder\FrontController\FrontController';
+        } elseif(null === $actionName) {
+            // support for ControllerClass::methodName notation
+            if (false !== strpos($controllerName, '::')) {
+                list($controllerClass, $actionName) = explode('::', $controllerName, 2);
+            } else {
+                throw new \LogicException(sprintf('Unable to extract controller action from "%s".', $controllerName));
+            }
+        } else {
+            $controllerClass = $controllerName;
+        }
+        
+        if(null === $controllerClass) {
+            throw new \InvalidArgumentException(sprintf('Controller class couldn\'t be resolved for "%s".', $controllerName));
+        }
+        
+        if(class_exists($controllerClass)) {
+            $controller = new $controllerClass();
+            if ($controller instanceof ContainerAwareInterface) {
+                $controller->setContainer($this->bbapp->getContainer());
+            }
+        } else {
+            // support for service id
+            $controller = $this->bbapp->getContainer()->get($controllerClass);
+        }
+        
+        return array($controller, $actionName);
+    }
+    
+    
     /**
      * Returns the arguments to pass to the controller.
      *
