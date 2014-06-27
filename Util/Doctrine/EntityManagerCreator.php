@@ -115,9 +115,9 @@ class EntityManagerCreator
             $config->setAutoGenerateProxyClasses($options['auto_generate_proxies']);
         }
 
-        if (true === array_key_exists('metadata_cache', $options)) {
+        if (true === array_key_exists('metadata_cache', $options) && isset($options['metadata_type'])) {
 
-            if($options['metadata_cache']['cachetype'] == 'memcached'){
+            if($options['metadata_type'] == 'memcached'){
                 $memcached = new \Memcached();
                 foreach($options['metadata_cache']['servers'] AS $server){
                     $memcached->addServer($server['host'], $server['port']);
@@ -127,33 +127,43 @@ class EntityManagerCreator
 
                 $config->setMetadataCacheImpl($memcacheDriver);
 
-            }elseif($options['metadata_cache']['cachetype'] == 'memcache'){
+            }elseif($options['metadata_type'] == 'memcache'){
                 $memcache = new \Memcache();
                 foreach($options['metadata_cache']['servers'] AS $server){
                     $memcache->addServer($server['host'], $server['port']);
                 }
+
                 $memcacheDriver = new MemcacheCache();
                 $memcacheDriver->setMemcache($memcache);
 
                 $config->setMetadataCacheImpl($memcacheDriver);
             }
 
-            if (null !== $memcache){
-
             }
 
-        }
-
-        if (true === array_key_exists('query_cache', $options)) {
-            if($options['query_cache']['cachetype'] == 'memcache'){
+        if (true === array_key_exists('query_cache', $options) && isset($options['query_type'])) {
+            if($options['query_type'] == 'memcached'){
 
                 $memcached = new \Memcached();
 
                 foreach($options['query_cache']['servers'] AS $server){
                     $memcached->addServer($server['host'], $server['port']);
                 }
-                $memcacheDriver = new MemcachedCache();
-                $memcacheDriver->setMemcached($memcached);
+                $memcachedDriver = new MemcachedCache();
+                $memcachedDriver->setMemcached($memcached);
+
+                $config->setQueryCacheImpl($memcachedDriver);
+
+            }elseif($options['query_type'] == 'memcache'){
+
+                $memcache = new \Memcache();
+
+                foreach($options['query_cache']['servers'] AS $server){
+                    $memcache->addServer($server['host'], $server['port']);
+                }
+
+                $memcacheDriver = new MemcacheCache();
+                $memcacheDriver->setMemcache($memcache);
 
                 $config->setQueryCacheImpl($memcacheDriver);
 

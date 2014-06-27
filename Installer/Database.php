@@ -4,6 +4,7 @@ namespace BackBuilder\Installer;
 
 use BackBuilder\BBApplication;
 use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\ORM\EntityManager;
 
 /**
  * @category    BackBuilder
@@ -36,11 +37,16 @@ class Database
 
     /**
      * @param \BackBuilder\BBApplication $application
+     * @param \Doctrine\ORM\EntityManager $em
      */
-    public function __construct(BBApplication $application)
+    public function __construct(BBApplication $application, EntityManager $em = null)
     {
         $this->_application = $application;
-        $this->_em = $this->_application->getEntityManager();
+        if(null === $em){
+            $this->_em = $this->_application->getEntityManager();
+        }else{
+            $this->_em = $em;
+        }
         $this->_schemaTool = new SchemaTool($this->_em);
         $this->_entityFinder = new EntityFinder(dirname($this->_application->getBBDir()));
     }

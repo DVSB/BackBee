@@ -99,7 +99,7 @@ class Page extends AbstractServiceLocal
         $this->isGranted('VIEW', $layout);
 
         $layout_states = $this->getEntityManager()
-                ->getRepository('BackBuilder\WorkFlow\State')
+                ->getRepository('BackBuilder\Workflow\State')
                 ->getWorkflowStatesForLayout($layout);
 
         $result = array();
@@ -190,7 +190,7 @@ class Page extends AbstractServiceLocal
             $page->setWorkflowState(null);
         } else {
             $layout_states = $this->getEntityManager()
-                    ->getRepository('BackBuilder\WorkFlow\State')
+                    ->getRepository('BackBuilder\Workflow\State')
                     ->getWorkflowStatesForLayout($page->getLayout());
 
             foreach ($layout_states as $state) {

@@ -61,7 +61,7 @@ bb.frontApplication = (function($,gExport){
     
     var _init = function(userConfig){
         
-        /*give a chance to other to change lauching settings before app init*/
+        /*give a chance to others to change lauching settings before app.init get called*/
         bb.jquery(document).trigger("application:init",{
             settings : userConfig
         });        
