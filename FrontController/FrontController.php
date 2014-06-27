@@ -195,54 +195,24 @@ class FrontController implements HttpKernelInterface
      * Invokes associated action to the current request
      *
      * @access private
-     * @param array $matches An array of parameters provided by the URL matcher
      * @param int $type request type
      * @throws FrontControllerException
      */
-    private function _invokeAction($matches, $type = self::MASTER_REQUEST)
+    private function _invokeAction($type = self::MASTER_REQUEST)
     {
-        if (false === array_key_exists('_action', $matches)) {
-            return;
-        }
-
-        $args = array();
-        foreach ($matches as $key => $value) {
-            if ('_' != substr($key, 0, 1)) {
-                $args[$key] = $value;
-            }
-        }
-
-        $this->getRequest()->attributes = new \Symfony\Component\HttpFoundation\ParameterBag($args);
-
         $this->_dispatch('frontcontroller.request');
 
+        $controllerResolver = $this->getApplication()->getContainer()->get('controller_resolver');
+        
+        $controller = $controllerResolver->getController($this->getRequest());
+            
         // logout Event dispatch
         if (null !== $this->getRequest()->get('logout') && true == $this->getRequest()->get('logout') && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
             $this->_dispatch('frontcontroller.request.logout');
             //$this->defaultAction($this->getRequest()->getPathInfo(), $sendResponse);
         }
 
-        $actionKey = $matches['_route'] . '_' . $matches['_action'];
-        if (true === isset($this->_actions[$actionKey])) {
-            $controller = array_shift($this->_actions[$actionKey]);
-            if (true === is_string($controller)) {
-                $controller = $this->_application->getContainer()->get($controller);
-            }
-
-            array_unshift($this->_actions[$actionKey], $controller);
-            unset($controller);
-        }
-
-        if (isset($this->_actions[$actionKey]) && is_callable($this->_actions[$actionKey])) {
-            /* nothing to do */
-        } elseif (array_key_exists($matches['_action'], $this->_actions) && is_callable($this->_actions[$matches['_action']])) {
-            $actionKey = $matches['_action'];
-        }
-
-        if (null !== $actionKey) {
-            $controllerResolver = $this->getApplication()->getContainer()->get('controller_resolver');
-            $controller = $controllerResolver->getController($this->getRequest());
-            
+        if ($controller) {
             $eventName = str_replace('\\', '.', strtolower(get_class($controller[0])));
             if (0 === strpos($eventName, 'backbuilder.')) {
                 $eventName = substr($eventName, 12);
@@ -252,8 +222,8 @@ class FrontController implements HttpKernelInterface
                 $eventName = substr($eventName, 16);
             }
 
-            $eventName .= '.pre' . $matches['_action'];
-            $this->_dispatch($eventName . '.pre' . $matches['_action']);
+            $eventName .= '.pre' . $this->getRequest()->attributes->get('_action');
+            $this->_dispatch($eventName . '.pre' . $this->getRequest()->attributes->get('_action'));
 
             // dispatch kernel.controller event
             $event = new FilterControllerEvent($this, $controller, $this->getRequest(), $type);
@@ -270,7 +240,7 @@ class FrontController implements HttpKernelInterface
 
             return $response;
         } else {
-            throw new FrontControllerException(sprintf('Unknown action `%s`.', $matches['_action']), FrontControllerException::BAD_REQUEST);
+            throw new FrontControllerException(sprintf('Unknown action `%s`.', $this->getRequest()->attributes->get('_action')), FrontControllerException::BAD_REQUEST);
         }
     }
 
@@ -679,13 +649,22 @@ class FrontController implements HttpKernelInterface
         $this->_application->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
 
         try {
-            $this->_request = $request;
+            if(null !== $request) {
+                $this->_request = $request;
+            }
 
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
             $matches = $urlMatcher->match($this->getRequest()->getPathInfo());
+            
+            if(!isset($matches['_controller'])) {
+                // set default cotnroller to this
+                $matches['_controller'] = $this;
+            }
 
             if ($matches) {
-                return $this->_invokeAction($matches, $type);
+                $this->getRequest()->attributes->add($matches);
+                
+                return $this->_invokeAction($type);
             }
 
             throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getHost() . '/' . $this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);

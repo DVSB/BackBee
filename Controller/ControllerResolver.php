@@ -85,16 +85,12 @@ class ControllerResolver implements ControllerResolverInterface
             return false;
         }
 
-        if (is_array($controller) || (is_object($controller) && method_exists($controller, '__invoke'))) {
+        if (is_array($controller)) {
             return $controller;
         }
-
-        if (false === strpos($controller, ':')) {
-            if (method_exists($controller, '__invoke')) {
-                return new $controller;
-            } elseif (function_exists($controller)) {
-                return $controller;
-            }
+        
+        if (is_object($controller)) {
+            return array($controller, $request->attributes->get('_action'));
         }
 
         list($controller, $method) = $this->createController($controller, $request->attributes->get('_action'));
@@ -114,10 +110,7 @@ class ControllerResolver implements ControllerResolverInterface
     protected function createController($controllerName, $actionName = null)
     {
         $controllerClass = null;
-        if(null === $controllerName) {
-            // default controller
-            $controllerClass = 'BackBuilder\FrontController\FrontController';
-        } elseif(null === $actionName) {
+        if(null === $actionName) {
             // support for ControllerClass::methodName notation
             if (false !== strpos($controllerName, '::')) {
                 list($controllerClass, $actionName) = explode('::', $controllerName, 2);
