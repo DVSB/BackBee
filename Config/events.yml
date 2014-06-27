@@ -44,6 +44,10 @@ nestednode.page.prerender:
   listeners:
     - [BackBuilder\Event\Listener\CacheListener, onPreRenderPage]
 
+nestednode.page.preupdate:
+  listeners:
+    - [BackBuilder\Workflow\Listener\pageListener, onPreUpdate]
+
 nestednode.page.postrender:
   listeners:
     - [BackBuilder\Event\Listener\CacheListener, onPostRenderPage]
@@ -95,3 +99,7 @@ kernel.response:
   listeners:
     - [@profiler.toolbar.listener, onKernelResponse]
     - [@profiler.listener, onKernelResponse]
+
+bbapplication.init:
+  listeners:
+    - [BackBuilder\DependencyInjection\Listener\ContainerListener, onApplicationInit]

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -52,7 +52,7 @@ class JsonRPCServer
 
     /**
      * A container for services annotations
-     * @var \Symfony\Component\DependencyInjection\ContainerBuilder 
+     * @var \Symfony\Component\DependencyInjection\ContainerBuilder
      */
     protected $_annotations;
 
@@ -93,7 +93,7 @@ class JsonRPCServer
     }
 
     /**
-     * 
+     *
      * @param Symfony\Component\HttpFoundation\Request $request
      * @param array $request_payload
      * @return Symfony\Component\HttpFoundation\Response
@@ -168,6 +168,9 @@ class JsonRPCServer
                 'result' => $result,
                 'error' => NULL,
             );
+            if ($this->_application->isDebugMode()) {
+                $content['debug'] = $this->collectProfilerData($request);
+            }
         } catch (ForbiddenAccessException $e) {
             if (NULL !== $this->_application) {
                 $this->_application->warning(sprintf('Forbidden access while handling RPC request `%s::%s`.', get_class($object), $method));
@@ -200,7 +203,7 @@ class JsonRPCServer
                 $response->setContent(json_encode($return));
                 exit();
             } catch (BBException $e) {
-                
+
             }
         }
     }
@@ -226,6 +229,26 @@ class JsonRPCServer
         }
 
         return $this->getResponse($request, $request_payload);
+    }
+
+    protected function collectProfilerData(Request $request)
+    {
+        $profiler = $this->_application->getContainer()->get('profiler');
+        $profile = $profiler->collect($request, new Response(), null);
+        $debug = new \stdClass();
+        $debug->memory = number_format($profile->getCollector('memory')->getMemory() / 1024 / 1024) . ' MB';
+        $debug->db = new \stdClass();
+        $debug->db->time = number_format($profile->getCollector('db')->getTime() * 1000, 2) . ' ms';
+        $debug->db->count = $profile->getCollector('db')->getQueryCount();
+        $debug->db->queries = $profile->getCollector('db')->getQueries();
+        $debug->logger = array();
+        foreach ($profile->getCollector('logger')->getLogs() as $log) {
+            if (array_key_exists('priority', $log) && $log['priority'] < 5) {
+                $debug->logger[] = $log;
+            }
+        }
+
+        return $debug;
     }
 
     /**
@@ -294,7 +317,7 @@ class JsonRPCServer
     }
 
     /**
-     * 
+     *
      * @param string $request_method
      * @return string
      * @codeCoverageIgnore
@@ -351,7 +374,7 @@ class JsonRPCServer
     }
 
     /**
-     * 
+     *
      * @param string $classname
      * @param string $method
      * @return \ReflectionMethod

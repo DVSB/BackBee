@@ -221,11 +221,13 @@ class ClassContentRepository extends EntityRepository
             $selector['orderby'] = (array) $selector['orderby'];
         }
 
+        $has_page_joined = false;
         if (array_key_exists('parentnode', $selector) && true === is_array($selector['parentnode'])) {
             $parentnode = array_filter($selector['parentnode']);
             if (false === empty($parentnode)) {
                 $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $parentnode));
                 if (count($nodes) != 0) {
+                    $has_page_joined = true;
                     $query = 'SELECT c.uid FROM page p USE INDEX(IDX_SELECT_PAGE) LEFT JOIN content c ON c.node_uid=p.uid';
                     $pageSelection = array();
                     foreach ($nodes as $node) {
@@ -302,7 +304,7 @@ class ClassContentRepository extends EntityRepository
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
 
-        if (true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
+        if (true === $has_page_joined && true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
             $q->join('c._mainnode', 'p')
                     ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
         } else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {

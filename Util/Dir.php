@@ -39,13 +39,13 @@ class Dir
      */
     public static function copy($start_path, $copy_path, $dir_mode = 0777)
     {
-        $return = mkdir($copy_path, $dir_mode);
+        $return = mkdir($copy_path, $dir_mode, true);
         $files = self::getContent($start_path);
         foreach ($files as $file) {
             if (is_dir($start_path . DIRECTORY_SEPARATOR . $file)) {
-                $return = self::copy($start_path . DIRECTORY_SEPARATOR . $file, $copy_path . DIRECTORY_SEPARATOR . $file, $dir_mode);
+                $return = self::copy(rtrim($start_path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $file, $copy_path . DIRECTORY_SEPARATOR . $file, $dir_mode);
             } else {
-                $return = copy($start_path . DIRECTORY_SEPARATOR . $file, $copy_path . DIRECTORY_SEPARATOR . $file);
+                $return = copy(rtrim($start_path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $file, $copy_path . DIRECTORY_SEPARATOR . $file);
             }
         }
         return $return;

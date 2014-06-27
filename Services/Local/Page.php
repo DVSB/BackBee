@@ -99,7 +99,7 @@ class Page extends AbstractServiceLocal
         $this->isGranted('VIEW', $layout);
 
         $layout_states = $this->getEntityManager()
-                ->getRepository('BackBuilder\WorkFlow\State')
+                ->getRepository('BackBuilder\Workflow\State')
                 ->getWorkflowStatesForLayout($layout);
 
         $result = array();
@@ -190,7 +190,7 @@ class Page extends AbstractServiceLocal
             $page->setWorkflowState(null);
         } else {
             $layout_states = $this->getEntityManager()
-                    ->getRepository('BackBuilder\WorkFlow\State')
+                    ->getRepository('BackBuilder\Workflow\State')
                     ->getWorkflowStatesForLayout($page->getLayout());
 
             foreach ($layout_states as $state) {
@@ -206,12 +206,14 @@ class Page extends AbstractServiceLocal
             $metadata = new \BackBuilder\MetaData\MetaDataBag($metadata_config, $page);
             $page->setMetaData($metadata->compute($page));
         }
-        
+
         $page->unserialize($object);
         $this->getEntityManager()->flush();
 
         return array(
-            'url'   => $page->getUrl() . (true === $this->getApplication()->getController()->isUrlExtensionRequired()
+            'url'   => $page->getUrl() . (
+                true === $this->getApplication()->getController()->isUrlExtensionRequired()
+                && '/' !== substr($page->getUrl(), -1)
                 ? '.' . $this->getApplication()->getController()->getUrlExtension()
                 : ''
             ),
@@ -363,8 +365,8 @@ class Page extends AbstractServiceLocal
         }
 
         $this->getEntityManager()->flush($page);
-        $this->_repo->updateHierarchicalDatas($parent, $parent->getLeftnode(), $parent->getLevel());
-        
+        //$this->_repo->updateHierarchicalDatas($parent, $parent->getLeftnode(), $parent->getLevel());
+
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
         $leaf->attr->rel = 'folder';
@@ -516,10 +518,10 @@ class Page extends AbstractServiceLocal
 
     /**
      * Update page's attributes with this method's arguments
-     * @param  NestedPage $page     
-     * @param  string     $target   
-     * @param  string     $redirect 
-     * @param  Layout     $layout                  
+     * @param  NestedPage $page
+     * @param  string     $target
+     * @param  string     $redirect
+     * @param  Layout     $layout
      */
     private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout, $alttitle)
     {
