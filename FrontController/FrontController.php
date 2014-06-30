@@ -94,11 +94,6 @@ class FrontController implements HttpKernelInterface
     protected $_routeCollection;
 
     /**
-     * @var array
-     */
-    protected $_actions = array();
-
-    /**
      * @var boolean
      */
     protected $force_url_extension = true;
