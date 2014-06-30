@@ -417,10 +417,15 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns the URL of the page.
      * @codeCoverageIgnore
+     * @params bool $doRedirect : if true - returns redirect url (if specified), otherwise - current page url
      * @return string
      */
-    public function getUrl()
+    public function getUrl($doRedirect = true)
     {
+        if($this->isRedirect() && $doRedirect) {
+            return $this->getRedirect();
+        }
+        
         return $this->_url;
     }
 
@@ -455,6 +460,16 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function getRedirect()
     {
         return $this->_redirect;
+    }
+    
+    /**
+     * Determine if page is a redirect
+     * 
+     * @return bool
+     */
+    public function isRedirect()
+    {
+        return null !== $this->_redirect;
     }
 
     /**
