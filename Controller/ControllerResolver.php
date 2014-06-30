@@ -88,7 +88,9 @@ class ControllerResolver implements ControllerResolverInterface
         }
         
         if (is_object($controller)) {
-            return array($controller, $request->attributes->get('_action'));
+            if($request->attributes->has('_action')) {
+                return array($controller, $request->attributes->get('_action'));
+            }
         }
 
         list($controller, $method) = $this->createController($controller, $request->attributes->get('_action'));
