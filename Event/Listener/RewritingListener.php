@@ -113,7 +113,7 @@ class RewritingListener
         if ($new_url !== $page->getUrl()) {
             $page->setUrl($new_url);
 
-            if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {
+            if ($uow->isScheduledForUpdate($page)) {
                 $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
             } elseif (!$uow->isScheduledForDelete($page)) {
                 $uow->computeChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
