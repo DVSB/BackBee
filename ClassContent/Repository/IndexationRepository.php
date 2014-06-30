@@ -278,6 +278,8 @@ class IndexationRepository extends EntityRepository
             } else {
                 $result = $this->getParentByClassName($result['parent_uid'], $class_name);
             }
+        } else {
+            return null;
         }
         
         return $result;
