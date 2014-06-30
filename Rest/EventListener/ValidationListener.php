@@ -75,13 +75,13 @@ class ValidationListener extends APathEnabledListener
             $violations = new ConstraintViolationList();
 
             if(count($metadata->queryParams)) {
-                $queryViolations = $this->validateParams($controller[0]->getValidator(), $metadata->queryParams, $request->query);
+                $queryViolations = $this->validateParams($this->container->get('validator'), $metadata->queryParams, $request->query);
                 $violations->addAll($queryViolations);
                 
                 // set defaults
                 $this->setDefaultValues($metadata->queryParams, $request->query);
             } elseif(count($metadata->requestParams)) {
-                $requestViolations = $this->validateParams($controller[0]->getValidator(), $metadata->requestParams, $request->request);
+                $requestViolations = $this->validateParams($this->container->get('validator'), $metadata->requestParams, $request->request);
                 $violations->addAll($requestViolations);
                 
                 // set defaults
