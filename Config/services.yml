@@ -141,7 +141,8 @@ services:
 
     controller_resolver:
         class:      %bbapp.controller_resolver.class%
-
+        arguments:  [@bbapp]
+        
     rest.hydrator:
         class:      %bbapp.rest.hydrator.class%
         arguments:  ["@em"]
