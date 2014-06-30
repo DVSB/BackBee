@@ -110,7 +110,7 @@ class MetaDataListener
         }
         $page->setMetaData($metadata->compute($page));
 
-        if ($uow->isScheduledForUpdate($page)) {
+        if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {
             $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
         } elseif (!$uow->isScheduledForDelete($page)) {
             $uow->computeChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
