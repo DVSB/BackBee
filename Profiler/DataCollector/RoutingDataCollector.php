@@ -70,7 +70,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
             $controller = isset($defaults['_controller']) ? $defaults['_controller'] : 'unknown';
 
             if(is_object($controller)) {
-                $controller = '@' . get_class($controller);
+                $controller = get_class($controller);
             } elseif($this->container->hasDefinition($controller)) {
                 $controllerDefinition = $this->container->findDefinition($controller);
                 /*  @var $controllerDefinition \Symfony\Component\DependencyInjection\Definition */
