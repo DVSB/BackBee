@@ -375,8 +375,8 @@ class FrontController implements HttpKernelInterface
         if (null === $page) {
             throw new FrontControllerException(sprintf('The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND);
         }
-
-        if (null !== $redirect = $page->getRedirect()) {
+        
+        if ((null !== $redirect = $page->getRedirect()) && $page->getUseUrlRedirect()) {
             if ((null === $this->_application->getBBUserToken()) || ((null !== $this->_application->getBBUserToken()) && (TRUE === $redirect_page))) {
                 $redirect = $this->_application->getRenderer()->getUri($redirect);
 

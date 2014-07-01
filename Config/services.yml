@@ -326,6 +326,10 @@ services:
         
     validator.factory: 
         class: Symfony\Component\Validator\ConstraintValidatorFactory
+
+    nestednode.page_listener:
+        arguments:  [@bbapp]
+        class: BackBuilder\Event\Listener\PageListener
         
         
     # synthetic services
