@@ -337,11 +337,16 @@ class User implements UserInterface
 
     /**
      * @return array()
-     * @codeCoverageIgnore
      */
     public function getRoles()
     {
-        return array();
+        $roles =  array();
+        
+        if($this->getApiKeyEnabled()) {
+            $roles[] = 'ROLE_API_USER';
+        }
+        
+        return $roles;
     }
 
     /**
