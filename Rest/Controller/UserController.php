@@ -64,5 +64,76 @@ class UserController extends ARestController
         return array();
     }
     
+    /**
+     * 
+     * @Rest\RequestParam(name = "username", requirements = {
+     *  @Assert\NotBlank(message="Username not provided")
+     * })
+     * 
+     * @Rest\RequestParam(name = "password", requirements = {
+     *  @Assert\NotBlank(message="Password not provided")
+     * })
+     * 
+     * @Rest\RequestParam(name = "includeUserData", default=0, requirements = {
+     *  @Assert\Choice(choices = {0, 1})
+     * })
+     * 
+     * @Rest\RequestParam(name = "includePermissionsData", default=0, requirements = {
+     *  @Assert\Choice(choices = {0, 1})
+     * })
+     * 
+     */
+    public function loginAction(Request $request, ConstraintViolationList $violations = null)
+    {
+        $authManager = $this->getContainer()->get('security.context')->getAuthenticationManager();
+        echo 1;
+        //var_dump($this->getContainer()->get('security.context')->getUserProviders());exit;
+    }
     
+    /**
+     * 
+     * 
+     */
+    public function logoutAction(Request $request, ConstraintViolationList $violations = null)
+    {
+        
+    }
+ 
+    
+    /**
+     * 
+     * @param int $id User ID
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \Symfony\Component\Validator\ConstraintViolationList $violations
+     * @throws ValidationException
+     */
+    public function getAction($id, ConstraintViolationList $violations = null) 
+    {
+        if(null !== $violations && count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+        
+        // TODO
+        
+        return array();
+    }
+    
+    /**
+     * Get User Permissions
+     * 
+     * @param int $id User ID
+     * @param \Symfony\Component\Validator\ConstraintViolationList $violations
+     * @return type
+     * @throws ValidationException
+     */
+    public function permissionsAction($id, ConstraintViolationList $violations = null) 
+    {
+        if(null !== $violations && count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+        
+        // TODO
+        
+        return array();
+    }
 }
