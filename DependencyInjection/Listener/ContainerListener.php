@@ -18,7 +18,7 @@ class ContainerListener
         $application = $event->getTarget();
         $container = $application->getContainer();
 
-        if (true === $container->getParameter('container.do_compile') && false === $application->isDebugMode()) {
+        if (false === $application->isDebugMode()) {
             self::loadExternalBundleServices($container, $application->getConfig()->getSection('external_bundles'));
 
             $container_class = $container->getParameter('container.class');
@@ -40,6 +40,12 @@ class ContainerListener
                 );
             }
         }
+
+// $starttime = microtime(true);
+// self::dumpContainer($container);
+// echo (microtime(true) - $starttime) .'s';
+// die;
+
 
         $container->compile();
     }
@@ -77,5 +83,66 @@ class ContainerListener
                 }
             }
         }
+    }
+
+    private static function dumpContainer($container)
+    {
+        $container_dumper = array(
+            'parameters' => array(),
+            'services'   => array()
+        );
+        foreach ($container->getDefinitions() as $key => $definition) {
+            $definition_array = array();
+
+            if (true === $definition->isSynthetic()) {
+                $definition_array['synthetic'] = true;
+            } else {
+                $definition_array['class'] = $definition->getClass();
+                foreach ($definition->getArguments() as $arg) {
+                    if (is_object($arg) && is_a($arg, 'Symfony\Component\DependencyInjection\Reference')) {
+                        $definition_array['arguments'][] = '@' . $arg->__toString();
+                    } else {
+                        $definition_array['arguments'][] = $arg;
+                    }
+                }
+
+                foreach ($definition->getTags() as $key => $tag) {
+                    $definition_tag = array(
+                        'name' => $key
+                    );
+
+                    foreach (array_shift($tag) as $key => $option) {
+                        $definition_tag[$key] = $option;
+                    }
+
+                    $definition_array['tags'][] = $definition_tag;
+                }
+
+                foreach ($definition->getMethodCalls() as $method_to_call) {
+                    $method_array = array();
+                    $method_name = array_shift($method_to_call);
+                    $method_array[] = $method_name;
+                    $method_args = array();
+                    foreach (array_shift($method_to_call) as $arg) {
+                        if (true === is_object($arg)) {
+                            $method_args[] = '@' . $arg->__toString();
+                        } else {
+                            $method_args[] = $arg;
+                        }
+                    }
+
+                    $method_array[] = $method_args;
+                    $definition_array['calls'][] = $method_array;
+                }
+            }
+
+            $container_dumper['services'][$key] = $definition_array;
+        }
+
+        foreach ($container->getParameterBag()->all() as $key => $value) {
+            $container_dumper['parameters'][$key] = $value;
+        }
+
+        file_put_contents('/var/www/backbee/container/services.yml', \Symfony\Component\Yaml\Yaml::dump($container_dumper));
     }
 }
