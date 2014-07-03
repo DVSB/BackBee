@@ -27,11 +27,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->backbuilder_folder = $this->root_folder . DIRECTORY_SEPARATOR . 'BackBuilder';
         $this->repository_folder = $this->root_folder . DIRECTORY_SEPARATOR . 'repository';
 
-        $this->load('BackBuilder\AutoLoader\AutoLoader');
         $backbuilder_autoloader = new AutoLoader();
 
         $backbuilder_autoloader->register()
-                ->registerNamespace('BackBuilder\TestUnit', __DIR__)
                 ->registerNamespace('BackBuilder\Bundle\TestUnit', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Test')))
                 ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
                 ->registerNamespace('BackBuilder\TestUnit\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
