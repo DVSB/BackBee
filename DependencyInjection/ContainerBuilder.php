@@ -129,9 +129,6 @@ class ContainerBuilder
         $this->container = new Container();
         $this->hydrateContainerWithBootstrapParameters();
 
-        // $starttime = microtime(true);
-        // echo (microtime(true) - $starttime) .'s'; die;
-
         if (false === $this->tryParseContainerDump()) {
             $this->hydrateContainerWithApplicationParameters();
             $this->loadApplicationServices();
@@ -152,10 +149,10 @@ class ContainerBuilder
         ;
 
         $missing_parameters = array();
-        $this->tryAddSingleParameter('debug', $parameters, $missing_parameters);
+        $this->tryAddParameter('debug', $parameters, $missing_parameters);
         if (array_key_exists('container', $parameters)) {
-            $this->tryAddSingleParameter('dump_directory', $parameters['container'], $missing_parameters, 'container.');
-            $this->tryAddSingleParameter('autogenerate', $parameters['container'], $missing_parameters, 'container.');
+            $this->tryAddParameter('dump_directory', $parameters['container'], $missing_parameters, 'container.');
+            $this->tryAddParameter('autogenerate', $parameters['container'], $missing_parameters, 'container.');
         } else {
             $missing_parameters[] = 'container';
         }
@@ -174,7 +171,7 @@ class ContainerBuilder
      * @param  array  $missing_parameters key will be pushed into this array if key does not exist in parameters
      * @param  string $prefix             prefix to add to key when we set it into container
      */
-    private function tryAddSingleParameter($key, array $parameters, array &$missing_parameters, $prefix = '')
+    private function tryAddParameter($key, array $parameters, array &$missing_parameters, $prefix = '')
     {
         if (false === array_key_exists($key, $parameters)) {
             $missing_parameters[] = $key;
@@ -219,28 +216,20 @@ class ContainerBuilder
         $success = false;
 
         $container_directory = $this->container->getParameter('container.dump_directory');
-        $container_class = $this->getContainerDumpClassname();
-        $container_file = $container_class . '.php';
-        $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_file;
+        $container_filename = $this->getContainerDumpFilename();
+        $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_filename;
 
         if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath)) {
-            //$loader = new PhpFileLoader($container, new FileLocator(array($container_directory)));
-            //$loader->load($container_file);
-            require $container_directory . DIRECTORY_SEPARATOR . $container_file;
-            $this->container = new $container_class();
+            $loader = new \BackBuilder\DependencyInjection\Loader\PhpArrayLoader($this->container);
+            $loader->load($container_filepath);
 
-            // Add current BBApplication into container
+            // Add current application into container
             $this->container->set('bbapp', $this->application);
             $this->container->set('service_container', $this->container);
 
-            $this->container->setDefinition('site', new Definition())->setSynthetic(true);
-            $this->container->setDefinition('routing', new Definition())->setSynthetic(true);
-            $this->container->setDefinition('bb_session', new Definition())->setSynthetic(true);
-
             $success = true;
         } else {
-            $this->container->setParameter('container.class', $container_class);
-            $this->container->setParameter('container.file', $container_file);
+            $this->container->setParameter('container.filename', $container_filename);
             $this->container->setParameter('container.dir', $container_directory);
         }
 
@@ -252,7 +241,7 @@ class ContainerBuilder
      *
      * @return string uniq classname for container dump depending on context and environment
      */
-    private function getContainerDumpClassname()
+    private function getContainerDumpFilename()
     {
         return 'bb' . md5('__container__' . $this->context . $this->environment);
     }

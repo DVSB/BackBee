@@ -1,11 +1,37 @@
 <?php
-
 namespace BackBuilder\DependencyInjection\Listener;
 
-use BackBuilder\DependencyInjection\Container,
-    BackBuilder\Event\Event,
-    BackBuilder\Exception\BBException;
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
 
+use BackBuilder\DependencyInjection\Container;
+use BackBuilder\Event\Event;
+use BackBuilder\Exception\BBException;
+
+/**
+ *
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\DependencyInjection
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
+ */
 class ContainerListener
 {
     /**
@@ -19,33 +45,18 @@ class ContainerListener
         $container = $application->getContainer();
 
         if (false === $application->isDebugMode()) {
-            self::loadExternalBundleServices($container, $application->getConfig()->getSection('external_bundles'));
+            $container_filename = $container->getParameter('container.filename');
+            $container_directory = $container->getParameter('container.dir');
 
-            $container_class = $container->getParameter('container.class');
-            $container_file = $container->getParameter('container.file');
-            $container_dir = $container->getParameter('container.dir');
-
-            if (false === file_exists($container_dir)) {
-                @mkdir($container_dir, 0755);
+            if (false === is_dir($container_directory)) {
+                @mkdir($container_directory, 0755);
             }
 
-            if (true === is_writable($container_dir)) {
-                $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($container);
-                file_put_contents(
-                    $container_dir . DIRECTORY_SEPARATOR . $container_file,
-                    $dump->dump(array(
-                        'class'      => $container_class,
-                        'base_class' => '\BackBuilder\DependencyInjection\Container'
-                    ))
-                );
+            if (true === is_writable($container_directory)) {
+                $dumper = new \BackBuilder\DependencyInjection\Dumper\PhpArrayDumper($container);
+                file_put_contents($container_directory . DIRECTORY_SEPARATOR . $container_filename, $dumper->dump());
             }
         }
-
-// $starttime = microtime(true);
-// self::dumpContainer($container);
-// echo (microtime(true) - $starttime) .'s';
-// die;
-
 
         $container->compile();
     }
@@ -83,66 +94,5 @@ class ContainerListener
                 }
             }
         }
-    }
-
-    private static function dumpContainer($container)
-    {
-        $container_dumper = array(
-            'parameters' => array(),
-            'services'   => array()
-        );
-        foreach ($container->getDefinitions() as $key => $definition) {
-            $definition_array = array();
-
-            if (true === $definition->isSynthetic()) {
-                $definition_array['synthetic'] = true;
-            } else {
-                $definition_array['class'] = $definition->getClass();
-                foreach ($definition->getArguments() as $arg) {
-                    if (is_object($arg) && is_a($arg, 'Symfony\Component\DependencyInjection\Reference')) {
-                        $definition_array['arguments'][] = '@' . $arg->__toString();
-                    } else {
-                        $definition_array['arguments'][] = $arg;
-                    }
-                }
-
-                foreach ($definition->getTags() as $key => $tag) {
-                    $definition_tag = array(
-                        'name' => $key
-                    );
-
-                    foreach (array_shift($tag) as $key => $option) {
-                        $definition_tag[$key] = $option;
-                    }
-
-                    $definition_array['tags'][] = $definition_tag;
-                }
-
-                foreach ($definition->getMethodCalls() as $method_to_call) {
-                    $method_array = array();
-                    $method_name = array_shift($method_to_call);
-                    $method_array[] = $method_name;
-                    $method_args = array();
-                    foreach (array_shift($method_to_call) as $arg) {
-                        if (true === is_object($arg)) {
-                            $method_args[] = '@' . $arg->__toString();
-                        } else {
-                            $method_args[] = $arg;
-                        }
-                    }
-
-                    $method_array[] = $method_args;
-                    $definition_array['calls'][] = $method_array;
-                }
-            }
-
-            $container_dumper['services'][$key] = $definition_array;
-        }
-
-        foreach ($container->getParameterBag()->all() as $key => $value) {
-            $container_dumper['parameters'][$key] = $value;
-        }
-
-        file_put_contents('/var/www/backbee/container/services.yml', \Symfony\Component\Yaml\Yaml::dump($container_dumper));
     }
 }
