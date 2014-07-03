@@ -1,11 +1,8 @@
 parameters:
     # bbapp parameters, somes will be set at init of container by BBApplication
-    bbapp.context: 'default'
-    bbapp.cache.dir: ''
-    bbapp.cache.autogenerate: true
-    bbapp.config.dir: ''
     bbapp.locale: 'fr_FR'
     translator.fallback: 'fr'
+
     # bbapp classes
     bbapp.cachebootstrap.class: BackBuilder\Cache\File\Cache
     bbapp.cachecontrol.class: BackBuilder\Cache\DAO\Cache
@@ -39,7 +36,7 @@ parameters:
     bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
     bbapp.rest.listener_exception.class: BackBuilder\Rest\EventListener\ExceptionListener
     bbapp.rest.listener_exception.mapping:
-        Exception: 
+        Exception:
             code: 500
         Symfony\Component\Security\Core\Exception\ProviderNotFoundException:
             code: 401
@@ -66,10 +63,10 @@ parameters:
     bbapp.collector.memory.class: Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector
     bbapp.collector.routing.class: BackBuilder\Profiler\DataCollector\RoutingDataCollector
     bbapp.collector.doctrine.class: BackBuilder\Profiler\DataCollector\DoctrineDataCollector
-    
+
     bbapp.job.queue.registry.class: BackBuilder\Job\Queue\RegistryQueue
 
-    data_collector.templates: 
+    data_collector.templates:
         config: "%bbapp.base.dir%/Resources/scripts/Collector/config.html.twig"
         request: "%bbapp.base.dir%/Resources/scripts/Collector/request.html.twig"
         exception: "%bbapp.base.dir%/Resources/scripts/Collector/exception.html.twig"
@@ -103,7 +100,7 @@ services:
     controller:
         class:      %bbapp.controller.class%
         arguments:  ["@bbapp"]
-    renderer:       
+    renderer:
         class:      %bbapp.renderer.class%
         arguments:  ["@bbapp"]
     rpcserver:
@@ -142,7 +139,7 @@ services:
     controller_resolver:
         class:      %bbapp.controller_resolver.class%
         arguments:  [@bbapp]
-        
+
     rest.hydrator:
         class:      %bbapp.rest.hydrator.class%
         arguments:  ["@em"]
@@ -177,10 +174,10 @@ services:
         calls:
             - [setPath, [%bbapp.rest_api.path%]]
 
-    rest.metadata.annotation_reader: 
+    rest.metadata.annotation_reader:
         class: Doctrine\Common\Annotations\AnnotationReader
 
-    rest.metadata.annotation_driver: 
+    rest.metadata.annotation_driver:
         class: BackBuilder\Rest\Mapping\Driver\AnnotationDriver
         arguments:  [@rest.metadata.annotation_reader]
 
@@ -193,7 +190,7 @@ services:
     rest.metadata.cache:
         class: Metadata\Cache\FileCache
         arguments:  ["%bbapp.cache.dir%/"]
-        
+
     rest.controller.test:
         class:      %bbapp.rest.test_controller.class%
         arguments:  ["@bbapp"]
@@ -240,8 +237,8 @@ services:
         class:      Symfony\Component\HttpKernel\Profiler\Profiler
         arguments:  [@profiler.storage, @logging]
         calls:
-            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.routing", @data_collector.doctrine]]] 
-            #"@data_collector.time", 
+            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.routing", @data_collector.doctrine]]]
+            #"@data_collector.time",
 
     # data collectors
     data_collector.config:
@@ -291,47 +288,47 @@ services:
     doctrine.dbal.logger.profiling:
         class: %bbapp.dbal.logger.profiling.class%
         arguments:  ["@bbapp"]
-        
+
     job.queue.nested_node:
         class: %bbapp.job.queue.registry.class%
         arguments:  ["NESTED_NODE"]
         calls:
             - [setEntityManager, [@em]]
-    
-    
-    
+
+
+
     # validator
     validator:
         class: Symfony\Component\Validator\Validator
         arguments:  ["@validator.metadata_factory", "@validator.factory", "@translator"]
-        
+
     validator.metadata_factory:
         class: Symfony\Component\Validator\Mapping\ClassMetadataFactory
         arguments:  ["@validator.loader_annotation"]
-        
+
     validator.loader_annotation:
         class: Symfony\Component\Validator\Mapping\Loader\AnnotationLoader
         arguments:  ["@validator.annotation_reader"]
-        
-    validator.annotation_reader: 
+
+    validator.annotation_reader:
         class: Doctrine\Common\Annotations\CachedReader
         arguments: [@validator.annotation_reader.main, @validator.annotation_reader_cache]
-        
+
     validator.annotation_reader.main:
         class: Doctrine\Common\Annotations\AnnotationReader
-        
+
     validator.annotation_reader_cache:
         class: Doctrine\Common\Cache\FilesystemCache
         arguments:  ["%bbapp.cache.dir%", "validator.annotation.cache"]
-        
-    validator.factory: 
+
+    validator.factory:
         class: Symfony\Component\Validator\ConstraintValidatorFactory
 
     nestednode.page_listener:
         arguments:  [@bbapp]
         class: BackBuilder\Event\Listener\PageListener
-        
-        
+
+
     # synthetic services
     bbapp:
         synthetic: true

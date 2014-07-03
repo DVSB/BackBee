@@ -100,22 +100,25 @@ class BBApplication implements IApplication
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
      */
-    public function __construct($context = null, $environment = 'production', $overwrite_config = false)
+    public function __construct($context = null, $environment = null, $overwrite_config = false)
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? self::DEFAULT_CONTEXT : $context;
-        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : false));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
 
-        $this->_environment = ((is_string($environment))
+        $this->_environment = null !== $environment && true === is_string($environment)
             ? $environment
-            : ($environment === false ? 'production' : self::DEFAULT_ENVIRONMENT))
+            : self::DEFAULT_ENVIRONMENT
         ;
 
         $this->_initAnnotationReader();
+        // $starttime = microtime(true);
         $this->_initContainer();
+        // echo (microtime(true) - $starttime) .'s'; die;
+        $this->_initApplicationConfig();
+        $this->_initEnvVariables();
         $this->_initAutoloader();
         $this->_initContentWrapper();
 
@@ -135,12 +138,6 @@ class BBApplication implements IApplication
 
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
-
-        if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
-            if (array_key_exists('locale', $encoding))
-                if (setLocale(LC_ALL, $encoding['locale']) === false)
-                    throw new \Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
-        }
 
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
@@ -185,9 +182,66 @@ class BBApplication implements IApplication
      */
     private function _initContainer($force_reload = false)
     {
-        $this->_container = ContainerBuilder::getContainer($this, $force_reload);
+        $this->_container = (new ContainerBuilder($this))->getContainer();
 
         return $this;
+    }
+
+    private function _initApplicationConfig()
+    {
+        // init config with context if needed
+        if (true === $this->hasContext()) {
+            if (false === is_dir($this->getBaseRepository() . '/' . $this->getContext())) {
+                throw new UnknownContextException(sprintf(
+                    'Unable to find `%s` context in repository.',
+                    $this->getContext()
+                ));
+            }
+
+            $this->_container->get('config')->setEnvironement($this->getEnvironment());
+            $this->_container->get('config')->extend(
+                $this->getBaseRepository() . '/' . 'Config'
+            );
+        }
+
+        if (BBApplication::DEFAULT_ENVIRONMENT !== $this->getEnvironment() &&
+                true === is_dir($this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $this->getEnvironment())) {
+            $this->_container->get('config')
+                ->setContainer($this->_container)
+                ->setEnvironment($this->getEnvironment())
+                ->extend(
+                    $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $this->getEnvironment(),
+                    $this->isOverridedConfig()
+                )
+            ;
+        }
+
+        $this->_container->get('config')
+                  ->setContainer($this->_container)
+                  ->setEnvironment($this->getEnvironment())
+                  ->extend(
+                    $this->_container->getParameter('bbapp.config.dir'),
+                    $this->isOverridedConfig()
+                )
+        ;
+    }
+
+    private function _initEnvVariables()
+    {
+        $date_config = $this->getConfig()->getDateConfig();
+        if (false !== $date_config && true === isset($date_config['timezone'])) {
+            if (false === date_default_timezone_set($date_config['timezone'])) {
+                throw new \Exception(sprintf('Unabled to set default timezone (:%s)', $date_config['timezone']));
+            }
+        }
+
+        if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
+            if (true === array_key_exists('locale', $encoding)) {
+                if (false === setLocale(LC_ALL, $encoding['locale'])) {
+                    throw new \Exception(sprintf('Unabled to setLocal with locale %s', $encoding['locale']));
+                }
+            }
+        }
     }
 
     /**
@@ -266,11 +320,12 @@ class BBApplication implements IApplication
      */
     public function isDebugMode()
     {
-        if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
-            return (bool) $this->getConfig()->getParametersConfig('debug');
+        $debug = (bool) $this->_debug;
+        if (null !== $this->getContainer() && $this->getContainer()->hasParameter('debug')) {
+            $debug = $this->getContainer()->getParameter('debug');
         }
 
-        return (bool) $this->_debug;
+        return $debug;
     }
 
     /**
@@ -347,7 +402,7 @@ class BBApplication implements IApplication
         } catch (\Exception $e) {
             $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
         }
-        
+
         // init NestedNode config
         if($this->getConfig()->getSection('nestednode')) {
             NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));

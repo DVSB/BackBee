@@ -4,7 +4,7 @@ namespace BackBuilder\Bundle;
 
 use BackBuilder\BBApplication;
 use BackBuilder\Config\Config;
-use BackBuilder\DependencyInjection\ContainerBuilder;
+use BackBuilder\DependencyInjection\Util\ServiceLoader;
 
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -172,7 +172,7 @@ class BundleLoader
                     $filepath = $sd . DIRECTORY_SEPARATOR . 'services.xml';
                     if (true === is_file($filepath) && true === is_readable($filepath)) {
                         try {
-                            ContainerBuilder::loadServicesFromXmlFile($container, $sd);
+                            ServiceLoader::loadServicesFromXmlFile($container, $sd);
                         } catch (Exception $e) { /* nothing to do, just ignore it */ }
                     }
                 }

@@ -36,7 +36,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
      * Test BootstrapResolver::getBootstrapPotentialsDirectories(), the number and the order of
      * directory this method returns
      */
-    public function testGetBootstrapPotentialsDirectories()
+    /*public function testGetBootstrapPotentialsDirectories()
     {
         $context = 'api';
         $environment = 'preprod';
@@ -77,7 +77,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals($directories, $bootstrap_resolver->getBootstrapPotentialsDirectories());
-    }
+    }*/
 
     /**
      * test raise of BootstrapFileNotFoundException by providing wrong base directory to BootstrapResolver's

@@ -22,6 +22,7 @@ namespace BackBuilder\DependencyInjection;
 
 use BackBuilder\BBApplication;
 use BackBuilder\DependencyInjection\Exception\BootstrapFileNotFoundException;
+use BackBuilder\Util\Resolver\BootstrapDirectory;
 
 use Symfony\Component\Yaml\Yaml;
 
@@ -97,7 +98,7 @@ class BootstrapResolver
     {
         $bootstrap_filepath = null;
 
-        $directories = $this->getBootstrapPotentialsDirectories();
+        $directories = BootstrapDirectory::getDirectories($this->base_dir, $this->context, $this->environment);
         foreach ($directories as $directory) {
             $bootstrap_filepath = $directory . DIRECTORY_SEPARATOR . self::BOOTSTRAP_FILENAME;
             if (true === is_file($bootstrap_filepath) && true === is_readable($bootstrap_filepath)) {
@@ -112,36 +113,5 @@ class BootstrapResolver
         }
 
         return Yaml::parse($bootstrap_filepath);
-    }
-
-    /**
-     * Returns ordered directory (from specific to global) which can contains the bootstrap.yml file
-     * according to context and environment passed in this class constructor
-     *
-     * @return array which contains every directory (string) where we can find the bootstrap.yml
-     */
-    public function getBootstrapPotentialsDirectories()
-    {
-        $bootstrap_directories = array();
-
-        if (BBApplication::DEFAULT_CONTEXT !== $this->context) {
-            if (BBApplication::DEFAULT_ENVIRONMENT !== $this->environment) {
-                $bootstrap_directories[] = implode(DIRECTORY_SEPARATOR, array(
-                    $this->base_dir, $this->context, 'Config', $this->environment
-                ));
-            }
-
-            $bootstrap_directories[] = implode(DIRECTORY_SEPARATOR, array($this->base_dir, $this->context, 'Config'));
-        }
-
-        if (BBApplication::DEFAULT_ENVIRONMENT !== $this->environment) {
-            $bootstrap_directories[] = implode(DIRECTORY_SEPARATOR, array(
-                $this->base_dir, 'Config', $this->environment
-            ));
-        }
-
-        $bootstrap_directories[] = $this->base_dir . DIRECTORY_SEPARATOR . 'Config';
-
-        return $bootstrap_directories;
     }
 }
