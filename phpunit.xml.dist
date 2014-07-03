@@ -13,7 +13,7 @@
 >
     <testsuites>
         <testsuite name="BackBee Test Suite">
-            <directory suffix="*/Tests/*Test.php">/</directory>
+            <directory suffix="Test.php">*/Tests/</directory>
         </testsuite>
     </testsuites>
 
