@@ -43,6 +43,10 @@ parameters:
             message: Authentication failed - supplied public key or signature is incorrect
         Doctrine\ORM\ORMException:
             code: 500
+        Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException:
+            code: 401
+            message: Authenticaton failed - public key not provided
+
 
     bbapp.rest_api.path: /rest/
 
