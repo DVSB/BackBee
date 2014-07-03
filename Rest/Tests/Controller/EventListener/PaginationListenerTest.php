@@ -25,13 +25,14 @@ use BackBuilder\Rest\EventListener\PaginationListener;
 
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\Validator\Validation;
 
 use BackBuilder\FrontController\FrontController;
 
-use BackBuilder\Rest\Tests\Fixtures\Controller\AnnotatedController;
+use BackBuilder\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
 /**
- * Test for User class
+ * Pagination Listener class
  *
  * @category    BackBuilder
  * @package     BackBuilder\Security
@@ -43,30 +44,116 @@ class PaginationListenerTest extends \PHPUnit_Framework_TestCase
 
     public function testDefaultParams()
     {
-        $kernel = new FrontController();
-        $controller = array(new AnnotatedController(), 'defaultPaginationAction');
-        $request = new Request();
-        $request->initialize(array());
-        //__construct(HttpKernelInterface $kernel, $controller, Request $request, $requestType)
-        $event = new FilterControllerEvent($kernel, $controller, $request, FrontController::MASTER_REQUEST);
+        $controller = array(new FixtureAnnotatedController(), 'defaultPaginationAction');
+        $request = new Request(array());
+        $event = new FilterControllerEvent(new FrontController(), $controller, $request, FrontController::MASTER_REQUEST);
         
         
-        $listener = new PaginationListener();
+        $listener = $this->getListener();
         
+        $listener->onKernelController($event);
+        
+        $this->assertEquals(0, $request->attributes->get('start'));
+        $this->assertEquals(100, $request->attributes->get('limit'));
     }
     
     public function testCustomParams()
     {
-        $kernel = new FrontController();
-        $controller = array(new AnnotatedController(), 'customPaginationAction');
-        $request = new Request();
-        $request->initialize(array());
-        //__construct(HttpKernelInterface $kernel, $controller, Request $request, $requestType)
-        $event = new FilterControllerEvent($kernel, $controller, $request, FrontController::MASTER_REQUEST);
+        $controller = array(new FixtureAnnotatedController(), 'customPaginationAction');
+        
+        $request = new Request(array('from' => 220,'max' => 50));
+        $event = new FilterControllerEvent(new FrontController(), $controller, $request, FrontController::MASTER_REQUEST);
         
         
-        $listener = new PaginationListener();
+        $listener = $this->getListener();
         
+        $listener->onKernelController($event);
+        
+        $this->assertEquals(220, $request->attributes->get('from'));
+        $this->assertEquals(50, $request->attributes->get('max'));
+    }
+    
+    /**
+     * @expectedException BackBuilder\Rest\Exception\ValidationException
+     */
+    public function testInvalidLimitMax()
+    {
+        $controller = array(new FixtureAnnotatedController(), 'defaultPaginationAction');
+        
+        $event = new FilterControllerEvent(new FrontController(), $controller, new Request(array(
+            'limit' => 1001
+        )), FrontController::MASTER_REQUEST);
+        
+        $listener = $this->getListener();
+        
+        $listener->onKernelController($event);
+    }
+    
+    /**
+     * @expectedException BackBuilder\Rest\Exception\ValidationException
+     */
+    public function testInvalidLimitMin()
+    {
+        $controller = array(new FixtureAnnotatedController(), 'customPaginationAction');
+        
+        $event = new FilterControllerEvent(new FrontController(), $controller, new Request(array(
+            'max' => 5
+        )), FrontController::MASTER_REQUEST);
+        
+        $listener = $this->getListener();
+        
+        $listener->onKernelController($event);
+    }
+    
+    /**
+     * @expectedException BackBuilder\Rest\Exception\ValidationException
+     */
+    public function testInvalidStartType()
+    {
+        $controller = array(new FixtureAnnotatedController(), 'defaultPaginationAction');
+        
+        $event = new FilterControllerEvent(new FrontController(), $controller, new Request(array(
+            'start' => 'string'
+        )), FrontController::MASTER_REQUEST);
+        
+        $listener = $this->getListener();
+        
+        $listener->onKernelController($event);
+    }
+    
+    /**
+     * @expectedException BackBuilder\Rest\Exception\ValidationException
+     */
+    public function testInvalidLimitType()
+    {
+        $controller = array(new FixtureAnnotatedController(), 'defaultPaginationAction');
+        
+        $event = new FilterControllerEvent(new FrontController(), $controller, new Request(array(
+            'limit' => 'string'
+        )), FrontController::MASTER_REQUEST);
+        
+        $listener = $this->getListener();
+        
+        $listener->onKernelController($event);
+    }
+    
+    protected function getListener()
+    {
+        $refl = new \ReflectionClass('BackBuilder\Rest\Controller\Annotations\Pagination');
+        
+        \Doctrine\Common\Annotations\AnnotationRegistry::registerAutoloadNamespaces(array(
+            'BackBuilder\Rest\Controller\Annotations' => dirname($refl->getFileName()),
+        ));
+        
+        $metadataFactory =  new \Metadata\MetadataFactory(
+            new \BackBuilder\Rest\Mapping\Driver\AnnotationDriver(
+                new \Doctrine\Common\Annotations\AnnotationReader()
+            )
+        );
+        
+        $listener = new PaginationListener($metadataFactory, Validation::createValidator());
+        
+        return $listener;
     }
 
 }

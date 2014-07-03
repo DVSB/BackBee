@@ -13,7 +13,7 @@ namespace BackBuilder\Rest\Tests\Fixtures\Controller;
 
 use BackBuilder\Rest\Controller\Annotations\Pagination;
 
-class AnnotatedController 
+class FixtureAnnotatedController 
 {
     /**
      * @Pagination

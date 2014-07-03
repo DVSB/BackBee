@@ -40,6 +40,12 @@ class ActionMetadata extends MethodMetadata
     public $queryParams = array();
     public $requestParams = array();
     
+    public $paginationStartName;
+    public $paginationLimitName;
+    public $paginationLimitDefault;
+    public $paginationLimitMax;
+    public $paginationLimitMin;
+    
     public $reflection;
  
     public function __construct($class, $name)
