@@ -346,6 +346,11 @@ class User implements UserInterface
             $roles[] = 'ROLE_API_USER';
         }
         
+        if($this->_activated) {
+            $roles[] = 'ROLE_ACTIVE_USER';
+        }
+        
+        
         return $roles;
     }
 

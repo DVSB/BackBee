@@ -40,6 +40,12 @@ class UserTest extends \PHPUnit_Framework_TestCase
         
         $user->setApiKeyEnabled(true);
         $this->assertContains('ROLE_API_USER', $user->getRoles());
+        
+        $user->setActivated(false);
+        $this->assertNotContains('ROLE_ACTIVE_USER', $user->getRoles());
+        
+        $user->setActivated(true);
+        $this->assertContains('ROLE_ACTIVE_USER', $user->getRoles());
     }
 
 }

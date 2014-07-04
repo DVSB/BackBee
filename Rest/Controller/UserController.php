@@ -103,6 +103,13 @@ class UserController extends ARestController
             return $response;
         }
         
+        if (!in_array('ROLE_ACTIVE_USER', $token->getUser()->getRoles())) {
+            $response = new Response(null);
+            $response->setStatusCode(401, 'Fobidden - user is not active');
+            return $response;
+        }
+
+        
         $this->getContainer()->get('security.context')->setToken($token);
         $loginEvent = new InteractiveLoginEvent($request, $token);
         $this->getApplication()->getEventDispatcher()->dispatch(SecurityEvents::INTERACTIVE_LOGIN, $loginEvent);
