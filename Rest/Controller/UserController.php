@@ -92,9 +92,17 @@ class UserController extends ARestController
         $authManager = $this->getContainer()->get('security.context')->getAuthenticationManager();
         /* @var $authManager \BackBuilder\Security\Authentication\AuthenticationManager */
         
-        $token = new UsernamePasswordToken($request->request->get('username'), $request->request->get('password'));
-        $token->setUser($request->request->get('username'), $request->request->get('password'));
-        $token = $authManager->authenticate($token);
+        try {
+            $token = new UsernamePasswordToken($request->request->get('username'), $request->request->get('password'));
+            $token->setUser($request->request->get('username'), $request->request->get('password'));
+            $token = $authManager->authenticate($token);
+        } catch(\BackBuilder\Security\Exception\SecurityException $e) {
+            // user not found or password is nvalid
+            $response = new Response(null);
+            $response->setStatusCode(401, $e->getMessage());
+            return $response;
+        }
+        
         $this->getContainer()->get('security.context')->setToken($token);
         $loginEvent = new InteractiveLoginEvent($request, $token);
         $this->getApplication()->getEventDispatcher()->dispatch(SecurityEvents::INTERACTIVE_LOGIN, $loginEvent);

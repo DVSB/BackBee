@@ -90,6 +90,45 @@ class UserControllerTest extends TestCase
         $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->bbapp->getSecurityContext()->getToken());
     }
     
+    public function testLoginAction_InvalidUser()
+    {
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        
+        $request = new Request(array(), array(
+            'username' => 'userThatDoesntExist',
+            'password' => 'password123',
+            '_action' => 'loginAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+        ));
+        $controller = new UserController($this->bbapp);
+        
+        $response = $controller->loginAction($request);
+        
+        // TODO in case of invalid user a 404 error should be returned
+        $this->assertEquals(401, $response->getStatusCode());
+        
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+    }
+    
+    public function testLoginAction_InvalidPassword()
+    {
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        
+        $request = new Request(array(), array(
+            'username' => 'user123',
+            'password' => 'passwordInvalid',
+            '_action' => 'loginAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+        ));
+        $controller = new UserController($this->bbapp);
+        
+        $response = $controller->loginAction($request);
+        
+        $this->assertEquals(401, $response->getStatusCode());
+        
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+    }
+    
     public function testLoginAction_NoData()
     {
         $this->assertNull($this->bbapp->getSecurityContext()->getToken());
