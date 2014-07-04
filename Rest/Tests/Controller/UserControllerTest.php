@@ -30,6 +30,11 @@ use Symfony\Component\HttpFoundation\Request;
 use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\UserController;
 use BackBuilder\Test\TestCase;
+
+
+use BackBuilder\Security\User,
+    BackBuilder\Security\Group;
+
 /**
  * Test for UserController class
  *
@@ -49,6 +54,22 @@ class UserControllerTest extends TestCase
         $this->bbapp = new \BackBuilder\BBApplication(null, 'test');
         $this->initDb($this->bbapp);
         $this->bbapp->start();
+        
+        // save user
+        $group = new Group();
+        $group->setName('groupName');
+        $group->setIdentifier('GROUP_ID');
+        
+        $user = new User();
+        $user->addGroup($group);
+        $user->setLogin('user123');
+        $user->setPassword('password123');
+        $user->setActivated(true);
+        $this->bbapp->getEntityManager()->persist($group);
+        $this->bbapp->getEntityManager()->persist($user);
+        
+        
+        $this->bbapp->getEntityManager()->flush();
     }
     
     
@@ -66,7 +87,7 @@ class UserControllerTest extends TestCase
         
         $response = $controller->loginAction($request);
         
-        $this->assertInstanceOf('BackBuilder\Security\Token\BBUserToken', $this->bbapp->getSecurityContext()->getToken());
+        $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->bbapp->getSecurityContext()->getToken());
     }
     
     public function testLoginAction_NoData()
@@ -79,6 +100,7 @@ class UserControllerTest extends TestCase
             '_action' => 'loginAction',
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));
+        
         $controller = new UserController($this->bbapp);
         
         $response = $controller->loginAction($request);
@@ -101,9 +123,12 @@ class UserControllerTest extends TestCase
         $response = $controller->loginAction($request);
         $this->assertEquals(200, $response->getStatusCode());
         
-        $this->assertInternalType('array', json_decode($response->getContent()));
-        $this->assertContains('permissions', json_decode($response->getContent()));
-        $this->assertContains('user', json_decode($response->getContent()));
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('permissions', $res);
+        $this->assertContains('groupName', $res['permissions']);
+        $this->assertArrayHasKey('user', $res);
     }
     
     
@@ -112,6 +137,21 @@ class UserControllerTest extends TestCase
      */
     public function testLogoutAction()
     {
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        // login first
+        $request = new Request(array(), array(
+            'username' => 'user123',
+            'password' => 'password123',
+            '_action' => 'loginAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+        ));
+        $controller = new UserController($this->bbapp);
+        
+        $response = $controller->loginAction($request);
+        
+        $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->bbapp->getSecurityContext()->getToken());
+        
+        // logout
         $request = new Request(array(), array(
             '_action' => 'logoutAction',
             '_controller' => 'BackBuilder\Rest\Controller\UserController',

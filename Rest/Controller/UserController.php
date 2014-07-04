@@ -23,10 +23,14 @@ namespace BackBuilder\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\Validator\ConstraintViolationList;
+    Symfony\Component\Validator\ConstraintViolationList,
+    Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
+    Symfony\Component\Security\Http\SecurityEvents;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
+
+use BackBuilder\Security\Token\UsernamePasswordToken;
 
 /**
  * User Controller
@@ -53,7 +57,7 @@ class UserController extends ARestController
      * 
      * 
      */
-    public function collectionAction(Request $request, ConstraintViolationList $violations = null) 
+    public function getCollectionAction(Request $request, ConstraintViolationList $violations = null) 
     {
         if(null !== $violations && count($violations) > 0) {
             throw new ValidationException($violations);
@@ -86,33 +90,54 @@ class UserController extends ARestController
     public function loginAction(Request $request, ConstraintViolationList $violations = null)
     {
         $authManager = $this->getContainer()->get('security.context')->getAuthenticationManager();
+        /* @var $authManager \BackBuilder\Security\Authentication\AuthenticationManager */
         
+        $token = new UsernamePasswordToken($request->request->get('username'), $request->request->get('password'));
+        $token->setUser($request->request->get('username'), $request->request->get('password'));
+        $token = $authManager->authenticate($token);
+        $this->getContainer()->get('security.context')->setToken($token);
+        $loginEvent = new InteractiveLoginEvent($request, $token);
+        $this->getApplication()->getEventDispatcher()->dispatch(SecurityEvents::INTERACTIVE_LOGIN, $loginEvent);
         
         $data = array();
         
         if($request->request->get('includeUserData', false)) {
-            
+            $data['user'] = $token->getUser();
         }
         
         if($request->request->get('includePermissionsData', false)) {
-            
+            $data['permissions'] = array();
+            foreach($token->getUser()->getGroups() as $group) {
+                $data['permissions'][] = $group->getName();
+            }
+            //$data['permissions'] = $token->getUser()->getGroups();
         }
         
-        return new Response();
-        //var_dump($this->getContainer()->get('security.context')->getUserProviders());exit;
+        if(empty($data)) {
+            return new Response(null, 204);
+        }
+        
+        return new Response($this->formatItem($data));
     }
     
     /**
+     * Logout user action
      * 
-     * 
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \Symfony\Component\Validator\ConstraintViolationList $violations
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function logoutAction(Request $request, ConstraintViolationList $violations = null)
     {
+        $this->getApplication()->getSecurityContext()->setToken(null);
+        $this->getApplication()->getSession()->invalidate();
         
+        return new Response(null, 204);
     }
  
     
     /**
+     * GET User 
      * 
      * @param int $id User ID
      * @param \Symfony\Component\HttpFoundation\Request $request
@@ -131,7 +156,7 @@ class UserController extends ARestController
     }
     
     /**
-     * Get User Permissions
+     * GET User Permissions
      * 
      * @param int $id User ID
      * @param \Symfony\Component\Validator\ConstraintViolationList $violations
