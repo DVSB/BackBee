@@ -51,8 +51,11 @@ class UserControllerTest extends TestCase
         $this->bbapp->start();
     }
     
-    public function testLoginAction()
+    
+    public function testLoginAction_TokenCreated()
     {
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        
         $request = new Request(array(), array(
             'username' => 'user123',
             'password' => 'password123',
@@ -63,10 +66,64 @@ class UserControllerTest extends TestCase
         
         $response = $controller->loginAction($request);
         
-        $this->assertEquals(204, $response->getStatusCode());
-        
+        $this->assertInstanceOf('BackBuilder\Security\Token\BBUserToken', $this->bbapp->getSecurityContext()->getToken());
     }
     
+    public function testLoginAction_NoData()
+    {
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        
+        $request = new Request(array(), array(
+            'username' => 'user123',
+            'password' => 'password123',
+            '_action' => 'loginAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+        ));
+        $controller = new UserController($this->bbapp);
+        
+        $response = $controller->loginAction($request);
+        $this->assertEquals(204, $response->getStatusCode());
+    }
+    
+    public function testLoginAction_ReturnData()
+    {
+        $request = new Request(array(), array(
+            'username' => 'user123',
+            'password' => 'password123',
+            'includeUserData' => 1,
+            'includePermissionsData' => 1,
+            '_action' => 'loginAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+        ));
+        
+        $controller = new UserController($this->bbapp);
+        
+        $response = $controller->loginAction($request);
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $this->assertInternalType('array', json_decode($response->getContent()));
+        $this->assertContains('permissions', json_decode($response->getContent()));
+        $this->assertContains('user', json_decode($response->getContent()));
+    }
+    
+    
+    /**
+     * @depends testLoginAction_TokenCreated
+     */
+    public function testLogoutAction()
+    {
+        $request = new Request(array(), array(
+            '_action' => 'logoutAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+        ));
+        
+        $controller = new UserController($this->bbapp);
+        $response = $controller->logoutAction($request);
+        
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+    }
 
     protected function tearDown()
     {

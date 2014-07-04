@@ -86,7 +86,19 @@ class UserController extends ARestController
     public function loginAction(Request $request, ConstraintViolationList $violations = null)
     {
         $authManager = $this->getContainer()->get('security.context')->getAuthenticationManager();
-        echo 1;
+        
+        
+        $data = array();
+        
+        if($request->request->get('includeUserData', false)) {
+            
+        }
+        
+        if($request->request->get('includePermissionsData', false)) {
+            
+        }
+        
+        return new Response();
         //var_dump($this->getContainer()->get('security.context')->getUserProviders());exit;
     }
     
@@ -126,7 +138,7 @@ class UserController extends ARestController
      * @return type
      * @throws ValidationException
      */
-    public function permissionsAction($id, ConstraintViolationList $violations = null) 
+    public function getPermissionsAction($id, ConstraintViolationList $violations = null) 
     {
         if(null !== $violations && count($violations) > 0) {
             throw new ValidationException($violations);
