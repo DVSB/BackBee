@@ -114,10 +114,12 @@ class BBApplication implements IApplication
         ;
 
         $this->_initAnnotationReader();
-        // $starttime = microtime(true);
+$start = microtime(true);
         $this->_initContainer();
-        // echo (microtime(true) - $starttime) .'s'; die;
+echo number_format((microtime(true) - $start), 4) . 's - container<br>';
+$start = microtime(true);
         $this->_initApplicationConfig();
+echo number_format((microtime(true) - $start), 4) . 's - application config<br>';
         $this->_initEnvVariables();
         $this->_initAutoloader();
         $this->_initContentWrapper();
@@ -128,7 +130,9 @@ class BBApplication implements IApplication
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
 
+$start = microtime(true);
         $this->_initBundles();
+echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));

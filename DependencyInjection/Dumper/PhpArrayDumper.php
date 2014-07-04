@@ -64,7 +64,8 @@ class PhpArrayDumper implements DumperInterface
     {
         $dumper = array(
             'parameters' => $this->dumpContainerParameters($options),
-            'services'   => $this->dumpContainerDefinitions($options)
+            'services'   => $this->dumpContainerDefinitions($options),
+            'aliases'    => $this->dumpContainerAliases($options)
         );
 
         return serialize($dumper);
@@ -79,12 +80,7 @@ class PhpArrayDumper implements DumperInterface
      */
     private function dumpContainerParameters(array $options)
     {
-        $parameters = array();
-        foreach ($this->container->getParameterBag()->all() as $key => $value) {
-            $parameters[$key] = $value;
-        }
-
-        return $parameters;
+        return $this->container->getParameterBag()->all();
     }
 
     /**
@@ -100,6 +96,21 @@ class PhpArrayDumper implements DumperInterface
         }
 
         return $definitions;
+    }
+
+    /**
+     * [dumpContainerAliases description]
+     * @param  array  $options [description]
+     * @return [type]          [description]
+     */
+    private function dumpContainerAliases(array $options)
+    {
+        $aliases = array();
+        foreach ($this->container->getAliases() as $id => $alias) {
+            $aliases[$id] = $alias->__toString();
+        }
+
+        return $aliases;
     }
 
     /**
@@ -201,6 +212,7 @@ class PhpArrayDumper implements DumperInterface
     {
         foreach ($definition->getMethodCalls() as $method_to_call) {
             $method_call_array = array();
+
             // retrieving method to call name
             $method_name = array_shift($method_to_call);
             $method_call_array[] = $method_name;

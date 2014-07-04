@@ -44,7 +44,7 @@ class ContainerListener
         $application = $event->getTarget();
         $container = $application->getContainer();
 
-        if (false === $application->isDebugMode()) {
+        if (false/*false === $application->isDebugMode()*/) {
             $container_filename = $container->getParameter('container.filename');
             $container_directory = $container->getParameter('container.dir');
 
@@ -54,11 +54,15 @@ class ContainerListener
 
             if (true === is_writable($container_directory)) {
                 $dumper = new \BackBuilder\DependencyInjection\Dumper\PhpArrayDumper($container);
-                file_put_contents($container_directory . DIRECTORY_SEPARATOR . $container_filename, $dumper->dump());
+                file_put_contents(
+                    $container_directory . DIRECTORY_SEPARATOR . $container_filename,
+                    $dumper->dump()
+                );
             }
-        }
 
-        $container->compile();
+        } else {
+            $container->compile();
+        }
     }
 
     /**
@@ -88,7 +92,8 @@ class ContainerListener
 
                     $settings = true === isset($datas['config'])
                         ? array($key => $datas['config'])
-                        : array();
+                        : array()
+                    ;
 
                     $bundle->load($settings, $container);
                 }

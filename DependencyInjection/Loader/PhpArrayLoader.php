@@ -22,9 +22,6 @@ namespace BackBuilder\DependencyInjection\Loader;
 
 use BackBuilder\DependencyInjection\ContainerInterface;
 
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
-
 /**
  *
  *
@@ -45,9 +42,9 @@ class PhpArrayLoader
      * [__construct description]
      * @param ContainerInterface $container [description]
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface &$container)
     {
-        $this->container = $container;
+        $this->container = &$container;
     }
 
     /**
@@ -58,6 +55,7 @@ class PhpArrayLoader
     public function load($filepath)
     {
         $dump = null;
+
         if (true === is_readable($filepath)) {
             $dump = unserialize(file_get_contents($filepath));
         }
@@ -74,91 +72,6 @@ class PhpArrayLoader
             throw new \Exception();
         }
 
-        $this->loadParameters($dump['parameters']);
-        $this->loadServices($dump['services']);
-    }
-
-    /**
-     * [loadParameters description]
-     * @param  array  $parameters [description]
-     * @return [type]             [description]
-     */
-    public function loadParameters(array $parameters)
-    {
-        foreach ($parameters as $key => $value) {
-            $this->container->setParameter($key, $value);
-        }
-    }
-
-    /**
-     * [loadServices description]
-     * @param  array  $services [description]
-     * @return [type]           [description]
-     */
-    public function loadServices(array $services)
-    {
-        foreach ($services as $key => $definition) {
-            $this->container->setDefinition($key, $this->buildDefinition($definition));
-        }
-    }
-
-    /**
-     * [buildDefinition description]
-     * @param  array  $definition_array [description]
-     * @return [type]                   [description]
-     */
-    public function buildDefinition(array $array)
-    {
-        $definition = new Definition();
-        if (true === array_key_exists('synthetic', $array) && true === $array['synthetic']) {
-            $definition->setSynthetic(true);
-        } else {
-            $this->setDefinitionClass($definition, $array);
-            $this->setDefinitionArguments($definition, $array);
-            // $this->setDefinitionTags($definition, $array);
-            // $this->setDefinitionMethodCalls($definition, $array);
-        }
-
-        return $definition;
-    }
-
-    /**
-     * [setDefinitionClass description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
-     */
-    public function setDefinitionClass(Definition $definition, array $array)
-    {
-        if (true === array_key_exists('class', $array)) {
-            $definition->setClass($array['class']);
-        }
-    }
-
-    /**
-     * [setDefinitionArguments description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
-     */
-    public function setDefinitionArguments(Definition $definition, array $array)
-    {
-        if (true === array_key_exists('arguments', $array)) {
-            foreach ($array['arguments'] as $arg) {
-                $definition->addArgument($this->convertArgument($arg));
-            }
-        }
-    }
-
-    /**
-     * [convertArguement description]
-     * @param  [type] $argument [description]
-     * @return [type]           [description]
-     */
-    public function convertArgument($argument)
-    {
-        if (true === is_string($argument) && '@' === $argument[0]) {
-            $argument = new Reference(substr($argument, 1));
-        }
-
-        return $argument;
+        $this->container = new \BackBuilder\DependencyInjection\Loader\ContainerProxy($dump);
     }
 }

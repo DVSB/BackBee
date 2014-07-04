@@ -219,13 +219,12 @@ class ContainerBuilder
         $container_filename = $this->getContainerDumpFilename();
         $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_filename;
 
-        if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath)) {
+        if (/*false === $this->container->getParameter('debug') && true === is_readable($container_filepath)*/false) {
             $loader = new \BackBuilder\DependencyInjection\Loader\PhpArrayLoader($this->container);
             $loader->load($container_filepath);
 
             // Add current application into container
             $this->container->set('bbapp', $this->application);
-            $this->container->set('service_container', $this->container);
 
             $success = true;
         } else {
@@ -254,7 +253,6 @@ class ContainerBuilder
     {
         // setting default services
         $this->container->set('bbapp', $this->application);
-        $this->container->set('service_container', $this->container);
 
         // define in which directory we have to looking for services yml or xml
         $directories = ConfigDirectory::getDirectories(
