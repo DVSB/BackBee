@@ -97,7 +97,7 @@ class UserController extends ARestController
             $token->setUser($request->request->get('username'), $request->request->get('password'));
             $token = $authManager->authenticate($token);
         } catch(\BackBuilder\Security\Exception\SecurityException $e) {
-            // user not found or password is nvalid
+            // user not found or password is invalid
             $response = new Response(null);
             $response->setStatusCode(401, $e->getMessage());
             return $response;

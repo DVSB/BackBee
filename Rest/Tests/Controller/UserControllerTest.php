@@ -72,7 +72,15 @@ class UserControllerTest extends TestCase
         $this->bbapp->getEntityManager()->flush();
     }
     
-    
+    protected function getController()
+    {
+        $controller = new UserController();
+        $controller->setContainer($this->bbapp->getContainer());
+        
+        return $controller;
+    }
+
+
     public function testLoginAction_TokenCreated()
     {
         $this->assertNull($this->bbapp->getSecurityContext()->getToken());
@@ -83,7 +91,7 @@ class UserControllerTest extends TestCase
             '_action' => 'loginAction',
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));
-        $controller = new UserController($this->bbapp);
+        $controller = $this->getController();
         
         $response = $controller->loginAction($request);
         
@@ -100,7 +108,7 @@ class UserControllerTest extends TestCase
             '_action' => 'loginAction',
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));
-        $controller = new UserController($this->bbapp);
+        $controller = $this->getController();
         
         $response = $controller->loginAction($request);
         
@@ -120,7 +128,7 @@ class UserControllerTest extends TestCase
             '_action' => 'loginAction',
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));
-        $controller = new UserController($this->bbapp);
+        $controller = $this->getController();
         
         $response = $controller->loginAction($request);
         
@@ -140,7 +148,7 @@ class UserControllerTest extends TestCase
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));
         
-        $controller = new UserController($this->bbapp);
+        $controller = $this->getController();
         
         $response = $controller->loginAction($request);
         $this->assertEquals(204, $response->getStatusCode());
@@ -157,7 +165,7 @@ class UserControllerTest extends TestCase
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));
         
-        $controller = new UserController($this->bbapp);
+        $controller = $this->getController();
         
         $response = $controller->loginAction($request);
         $this->assertEquals(200, $response->getStatusCode());
@@ -184,7 +192,7 @@ class UserControllerTest extends TestCase
             '_action' => 'loginAction',
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));
-        $controller = new UserController($this->bbapp);
+        $controller = $this->getController();
         
         $response = $controller->loginAction($request);
         
@@ -196,7 +204,6 @@ class UserControllerTest extends TestCase
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));
         
-        $controller = new UserController($this->bbapp);
         $response = $controller->logoutAction($request);
         
         $this->assertEquals(204, $response->getStatusCode());
