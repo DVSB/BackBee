@@ -145,14 +145,14 @@ class ContainerProxy extends Container
     private function buildDefinition(array $array)
     {
         $definition = new Definition();
-        if (true === array_key_exists('synthetic', $array) && true === $array['synthetic']) {
-            $definition->setSynthetic(true);
-        } else {
-            $this->setDefinitionClass($definition, $array);
-            $this->setDefinitionArguments($definition, $array);
-            $this->setDefinitionTags($definition, $array);
-            $this->setDefinitionMethodCalls($definition, $array);
+        if (true === array_key_exists('synthetic', $array)) {
+            $definition->setSynthetic($array['synthetic']);
         }
+
+        $this->setDefinitionClass($definition, $array);
+        $this->setDefinitionArguments($definition, $array);
+        $this->setDefinitionTags($definition, $array);
+        $this->setDefinitionMethodCalls($definition, $array);
 
         return $definition;
     }
@@ -255,4 +255,6 @@ class ContainerProxy extends Container
             }
         }
     }
+
+    // Get tagged services to improve
 }

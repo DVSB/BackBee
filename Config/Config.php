@@ -278,7 +278,15 @@ class Config
             array_unshift($yml_files, $default_file);
         }
 
-        return $yml_files;
+        $yml_filename_to_ignore = array('services');
+        foreach ($yml_files as &$file) {
+            $name = basename($file);
+            if (true === in_array(substr($name, 0, strpos($name, '.')), $yml_filename_to_ignore)) {
+                $file = null;
+            }
+        }
+
+        return array_filter($yml_files);
     }
 
     /**

@@ -219,7 +219,7 @@ class ContainerBuilder
         $container_filename = $this->getContainerDumpFilename();
         $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_filename;
 
-        if (/*false === $this->container->getParameter('debug') && true === is_readable($container_filepath)*/false) {
+        if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath)) {
             $loader = new \BackBuilder\DependencyInjection\Loader\PhpArrayLoader($this->container);
             $loader->load($container_filepath);
 

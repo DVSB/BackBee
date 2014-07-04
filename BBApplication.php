@@ -61,7 +61,7 @@ use Symfony\Component\Config\FileLocator,
 class BBApplication implements IApplication
 {
 
-    const VERSION = '0.8.0';
+    const VERSION = '0.10.0';
     const DEFAULT_CONTEXT = 'default';
     const DEFAULT_ENVIRONMENT = '';
 
@@ -193,41 +193,21 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
 
     private function _initApplicationConfig()
     {
-        // init config with context if needed
-        if (true === $this->hasContext()) {
-            if (false === is_dir($this->getBaseRepository() . '/' . $this->getContext())) {
-                throw new UnknownContextException(sprintf(
-                    'Unable to find `%s` context in repository.',
-                    $this->getContext()
-                ));
+        $config = $this->getConfig();
+
+        $config->setEnvironment($this->getEnvironment());
+        $config_directories = (new \BackBuilder\Util\Resolver\ConfigDirectory())->getDirectories(
+            null,
+            $this->getBaseRepository(),
+            $this->getContext(),
+            $this->getEnvironment()
+        );
+
+        foreach ($config_directories as $directory) {
+            if (true === is_dir($directory)) {
+                $config->extend($directory, $this->isOverridedConfig());
             }
-
-            $this->_container->get('config')->setEnvironement($this->getEnvironment());
-            $this->_container->get('config')->extend(
-                $this->getBaseRepository() . '/' . 'Config'
-            );
         }
-
-        if (BBApplication::DEFAULT_ENVIRONMENT !== $this->getEnvironment() &&
-                true === is_dir($this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $this->getEnvironment())) {
-            $this->_container->get('config')
-                ->setContainer($this->_container)
-                ->setEnvironment($this->getEnvironment())
-                ->extend(
-                    $this->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $this->getEnvironment(),
-                    $this->isOverridedConfig()
-                )
-            ;
-        }
-
-        $this->_container->get('config')
-                  ->setContainer($this->_container)
-                  ->setEnvironment($this->getEnvironment())
-                  ->extend(
-                    $this->_container->getParameter('bbapp.config.dir'),
-                    $this->isOverridedConfig()
-                )
-        ;
     }
 
     private function _initEnvVariables()
@@ -469,7 +449,7 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
     public function start(Site $site = null)
     {
         if (null === $site) {
-            $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array());
+            $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array()); // 40 ms
         }
 
         if (null !== $site) {
@@ -479,16 +459,16 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
         $this->_isstarted = true;
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
-        $this->getTheme()->init();
+        $this->getTheme()->init(); // 30 ms
 
         // trigger bbapplication.start
-        $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
+        $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
 
 
         if (false === $this->isClientSAPI()) {
-            $response = $this->getController()->handle();
+            $response = $this->getController()->handle(); // 140 ms
             if ($response instanceof Response) {
-                $this->getController()->sendResponse($response);
+                $this->getController()->sendResponse($response); // 140 ms
             }
         }
     }

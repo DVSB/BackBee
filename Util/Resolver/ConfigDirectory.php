@@ -39,10 +39,13 @@ class ConfigDirectory
      *
      * @return array which contains every directory (string) where we can find the bootstrap.yml
      */
-    public static function getDirectories($bb_directory, $repository_directory, $context, $environment)
+    public static function getDirectories($bb_directory = null, $repository_directory, $context, $environment)
     {
         $directories = BootstrapDirectory::getDirectories($repository_directory, $context, $environment);
-        array_push($directories, $bb_directory . DIRECTORY_SEPARATOR . 'Config');
+        if (null !== $bb_directory) {
+            array_push($directories, $bb_directory . DIRECTORY_SEPARATOR . 'Config');
+        }
+
         $directories = array_reverse($directories);
 
         return $directories;

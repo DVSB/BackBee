@@ -62,10 +62,17 @@ class PhpArrayDumper implements DumperInterface
      */
     public function dump(array $options = array())
     {
+        $compiled = false;
+        if (true === array_key_exists('do_compile', $options)) {
+            $this->container->compile();
+            $compiled = true;
+        }
+
         $dumper = array(
-            'parameters' => $this->dumpContainerParameters($options),
-            'services'   => $this->dumpContainerDefinitions($options),
-            'aliases'    => $this->dumpContainerAliases($options)
+            'parameters'  => $this->dumpContainerParameters($options),
+            'services'    => $this->dumpContainerDefinitions($options),
+            'aliases'     => $this->dumpContainerAliases($options),
+            'is_compiled' => $compiled
         );
 
         return serialize($dumper);
