@@ -31,6 +31,8 @@ use Symfony\Component\Form\Forms,
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Validator\Validation;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface,
+    Symfony\Component\DependencyInjection\ContainerInterface;
 
 use BackBuilder\IApplication;
 
@@ -42,13 +44,15 @@ use BackBuilder\IApplication;
  * @copyright   Lp system
  * @author      k.golovin
  */
-class Controller
+class Controller implements ContainerAwareInterface
 {
     /**
      * Current BackBuilder application
      * @var \BackBuilder\BBApplication
      */
     protected $_application;
+    
+    protected $container;
 
     /**
      * Class constructor
@@ -69,7 +73,15 @@ class Controller
      */
     public function getApplication() 
     {
-        return $this->_application;
+        return $this->container->get('bbapp');
+    }
+    
+    
+    public function setContainer(ContainerInterface $container = null)
+    {
+        $this->container = $container;
+        
+        $this->_application = $this->container->get('bbapp');
     }
     
     
@@ -81,7 +93,7 @@ class Controller
      */
     public function getContainer() 
     {
-        return $this->_application->getContainer();
+        return $this->container;
     }
     
     

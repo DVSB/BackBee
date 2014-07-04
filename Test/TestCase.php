@@ -5,6 +5,9 @@ use BackBuilder\AutoLoader\AutoLoader;
 
 use org\bovigo\vfs\vfsStream;
 
+use Doctrine\ORM\Tools\SchemaTool,
+    Doctrine\ORM\EntityManager;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder\TestUnit
@@ -97,7 +100,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function getMockObjectContainer($obj_name)
     {
         if(!array_key_exists($obj_name, $this->mock_container)) {
-            $class_name = '\BackBuilder\TestUnit\Mock\Mock'.ucfirst($obj_name);
+            $class_name = '\BackBuilder\Test\Mock\Mock'.ucfirst($obj_name);
             $this->mock_container[$obj_name] = new $class_name();
         }
         return $this->mock_container[$obj_name];
@@ -132,9 +135,83 @@ class TestCase extends \PHPUnit_Framework_TestCase
               ->will($this->returnValue($this->getMockObjectContainer('entityManager')));
 
         $BBApp->expects($this->any())
+              ->method('getEventDispatcher')
+              ->will($this->returnValue(new \BackBuilder\Test\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
+        
+        
+        $BBApp->expects($this->any())
+              ->method('getContainer')
+              ->will($this->returnValue(new \BackBuilder\Test\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
+        
+        
+        $BBApp->expects($this->any())
               ->method('getBaseDir')
               ->will($this->returnValue(vfsStream::url('')));
 
+//        $controller = $this->getMockBuilder('BackBuilder\FrontController\FrontController')
+//                ->setConstructorArgs(array($BBApp))
+//                ->setMethods(array())
+//                ->getMock();
+        $controller = new \BackBuilder\FrontController\FrontController($BBApp);
+        
+        $BBApp->expects($this->any())
+              ->method('getController')
+              ->will($this->returnValue($controller));
+        
         return $BBApp;
     }
+    
+    
+    public function initDb($bbapp)
+    {
+        $em = $bbapp->getContainer()->get('em');
+        
+        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
+            $bbapp->getBBDir() . '/Bundle',
+            $bbapp->getBBDir() . '/Cache/DAO',
+            // the following 2 classes are throwing an exception: index IDX_CLASSNAME already exists
+//            $bbapp->getBBDir() . '/ClassContent',
+//            $bbapp->getBBDir() . '/ClassContent/Indexes',
+            $bbapp->getBBDir() . '/Logging',
+            $bbapp->getBBDir() . '/NestedNode',
+            $bbapp->getBBDir() . '/Security',
+            $bbapp->getBBDir() . '/Site',
+            $bbapp->getBBDir() . '/Site/Metadata',
+            $bbapp->getBBDir() . '/Stream/ClassWrapper',
+            $bbapp->getBBDir() . '/Theme',
+            $bbapp->getBBDir() . '/Util/Sequence/Entity',
+            $bbapp->getBBDir() . '/Workflow',
+        ));
+        
+
+        $metadata = $em->getMetadataFactory()->getAllMetadata();
+        $schema = new SchemaTool($em);
+        $schema->updateSchema($metadata, true);
+    }
+    
+    public function dropDb($bbapp)
+    {
+        $em = $bbapp->getContainer()->get('em');
+        
+        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
+            $bbapp->getBBDir() . '/Bundle',
+            $bbapp->getBBDir() . '/Cache/DAO',
+            $bbapp->getBBDir() . '/ClassContent',
+            $bbapp->getBBDir() . '/ClassContent/Indexes',
+            $bbapp->getBBDir() . '/Logging',
+            $bbapp->getBBDir() . '/NestedNode',
+            $bbapp->getBBDir() . '/Security',
+            $bbapp->getBBDir() . '/Site',
+            $bbapp->getBBDir() . '/Site/Metadata',
+            $bbapp->getBBDir() . '/Stream/ClassWrapper',
+            $bbapp->getBBDir() . '/Theme',
+            $bbapp->getBBDir() . '/Util/Sequence/Entity',
+            $bbapp->getBBDir() . '/Workflow',
+        ));
+        
+        $metadata = $em->getMetadataFactory()->getAllMetadata();
+        $schema = new SchemaTool($em);
+        $schema->dropDatabase();
+    }
+    
 }
