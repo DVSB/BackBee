@@ -23,7 +23,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public function initAutoload()
     {
-        $this->root_folder = dirname(__DIR__);
+        $this->root_folder = self::getRootFolder();
         $this->backbuilder_folder = $this->root_folder . DIRECTORY_SEPARATOR . 'BackBuilder';
         $this->repository_folder = $this->root_folder . DIRECTORY_SEPARATOR . 'repository';
 
@@ -65,7 +65,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public static function getRootFolder()
     {
-        return dirname(__DIR__);
+        return dirname(dirname(__DIR__));
     }
 
     /**
@@ -75,7 +75,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public static function getBackbuilderFolder()
     {
-        return realpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'BackBuilder');
+        return realpath(self::getRootFolder() . DIRECTORY_SEPARATOR . 'BackBuilder');
     }
 
     /**
@@ -85,7 +85,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public static function getRepositoyFolder()
     {
-        return realpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'repository');;
+        return realpath(self::getRootFolder() . DIRECTORY_SEPARATOR . 'repository');;
     }
 
     /**
