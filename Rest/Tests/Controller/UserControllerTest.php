@@ -159,7 +159,7 @@ class UserControllerTest extends TestCase
         
         $response = $controller->loginAction($request);
         
-        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertEquals(403, $response->getStatusCode());
         
         $this->assertNull($this->bbapp->getSecurityContext()->getToken());
     }
@@ -196,12 +196,13 @@ class UserControllerTest extends TestCase
         
         $response = $controller->loginAction($request);
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('application/json', $response->headers->get('Content-Type'));
         
         $res = json_decode($response->getContent(), true);
         
         $this->assertInternalType('array', $res);
         $this->assertArrayHasKey('permissions', $res);
-        $this->assertContains('groupName', $res['permissions']);
+        $this->assertContains('GROUP_ID', $res['permissions']);
         $this->assertArrayHasKey('user', $res);
     }
     
