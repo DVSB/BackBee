@@ -44,11 +44,6 @@ use Symfony\Component\DependencyInjection\Reference;
 class ContainerBuilder
 {
     /**
-     * Define default value for bbapp.cache.autogenerate (container's parameter)
-     */
-    const DEFAULT_CACHE_AUTOGENERATE = false;
-
-    /**
      * Define default name for data folder
      */
     const DEFAULT_DATA_FOLDER_NAME = 'Data';
@@ -198,7 +193,7 @@ class ContainerBuilder
         $this->container->setParameter('bbapp.cache.dir', implode(DIRECTORY_SEPARATOR, array(
             $this->application->getBaseDir(), self::DEFAULT_CACHE_FOLDER_NAME, $this->environment
         )));
-        $this->container->setParameter('bbapp.cache.autogenerate', self::DEFAULT_CACHE_AUTOGENERATE);
+        $this->container->setParameter('bbapp.cache.autogenerate', '%container.autogenerate%');
 
         // define data directory
         $this->container->setParameter(

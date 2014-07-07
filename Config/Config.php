@@ -22,6 +22,7 @@
 namespace BackBuilder\Config;
 
 use BackBuilder\Cache\ACache;
+use BackBuilder\Config\Exception\InvalidConfigException;
 use BackBuilder\DependencyInjection\Container;
 
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -160,6 +161,7 @@ class Config
     {
         $this->_container = $container;
         $this->_parameters = array();
+
         return $this;
     }
 
@@ -312,7 +314,7 @@ class Config
             $yamlDatas = Yaml::parse($filename);
 
             if (is_array($yamlDatas)) {
-                if(true === $this->_debug) {
+                if (true === $this->_debug) {
                     $this->_debugData[$filename] = $yamlDatas;
                 }
 
@@ -327,7 +329,7 @@ class Config
                 }
             }
         } catch (ParseException $e) {
-            throw new Exception\InvalidConfigException($e->getMessage(), null, $e, $e->getParsedFile(), $e->getParsedLine());
+            throw new InvalidConfigException($e->getMessage(), null, $e, $e->getParsedFile(), $e->getParsedLine());
         }
     }
 
@@ -489,6 +491,7 @@ class Config
         if (null === $basedir) {
             $basedir = $this->_basedir;
         }
+
         $basedir = \BackBuilder\Util\File::realpath($basedir);
 
         if (false === $this->_loadFromCache($basedir)) {
