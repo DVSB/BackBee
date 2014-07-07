@@ -110,7 +110,7 @@ class UserController extends ARestController
         
         if (!in_array('ROLE_ACTIVE_USER', $token->getUser()->getRoles())) {
             $response = new Response(null);
-            $response->setStatusCode(401, 'Fobidden - user is not active');
+            $response->setStatusCode(403, 'Fobidden - user is not active');
             return $response;
         }
 
@@ -128,7 +128,7 @@ class UserController extends ARestController
         if($request->request->get('includePermissionsData', false)) {
             $data['permissions'] = array();
             foreach($token->getUser()->getGroups() as $group) {
-                $data['permissions'][] = $group->getName();
+                $data['permissions'][] = $group->getIdentifier();
             }
         }
         
