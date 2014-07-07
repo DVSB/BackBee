@@ -40,7 +40,6 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Config
 {
-
     /**
      * Default config file to look for
      * @var string
@@ -108,6 +107,13 @@ class Config
     protected $_debugData = array();
 
     /**
+     * list of yaml filename we don't want to parse and load
+     *
+     * @var array
+     */
+    private $_yml_names_to_ignore;
+
+    /**
      * Magic function to get configuration section
      * The called method has to match the pattern getSectionConfig()
      * for example getDoctrineConfig() aliases getSection('doctrine')
@@ -141,12 +147,14 @@ class Config
      * @param \BackBuilder\Cache\ACache $cache Optional cache system
      * @param \BackBuilder\DependencyInjection\Container $container
      */
-    public function __construct($basedir, ACache $cache = null, Container $container = null, $debug = false)
+    public function __construct($basedir, ACache $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
     {
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
         $this->_debug = $debug;
+        $this->_yml_names_to_ignore = $yml_to_ignore;
+
         $this->setContainer($container)->extend();
     }
 
@@ -175,6 +183,16 @@ class Config
     public function getDebugData()
     {
         return $this->_debugData;
+    }
+
+    /**
+     * Add more yaml filename to ignore when we will try to find every yaml files of a directory
+     *
+     * @param string|array $filename yaml filename(s) to ignore
+     */
+    public function addYamlFilenameToIgnore($filename)
+    {
+        $this->_yml_names_to_ignore = array_unique(array_merge($this->_yml_names_to_ignore, (array) $filename));
     }
 
     /**
@@ -280,10 +298,9 @@ class Config
             array_unshift($yml_files, $default_file);
         }
 
-        $yml_filename_to_ignore = array('services');
         foreach ($yml_files as &$file) {
             $name = basename($file);
-            if (true === in_array(substr($name, 0, strpos($name, '.')), $yml_filename_to_ignore)) {
+            if (true === in_array(substr($name, 0, strpos($name, '.')), $this->_yml_names_to_ignore)) {
                 $file = null;
             }
         }

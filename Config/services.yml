@@ -83,6 +83,8 @@ parameters:
 
     bbapp.analytics.class: BackBuilder\Application\Analytics
 
+    config.yml_files_to_ignore: ['services', 'bootstrap']
+
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
@@ -92,7 +94,10 @@ services:
         arguments:  [{em: "@em"}, "%bbapp.context%", "@logging"]
     config:
         class:      %bbapp.config.class%
-        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, %debug%]
+        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, "%debug%", "%config.yml_files_to_ignore%"]
+        calls:
+            - [setContainer, ['@service_container']]
+            - [setEnvironment, ['bbapp.environment']]
     event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]

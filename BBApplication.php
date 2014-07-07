@@ -195,7 +195,6 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
     {
         $config = $this->getConfig();
 
-        $config->setEnvironment($this->getEnvironment());
         $config_directories = (new \BackBuilder\Util\Resolver\ConfigDirectory())->getDirectories(
             null,
             $this->getBaseRepository(),
