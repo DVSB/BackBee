@@ -24,6 +24,8 @@ namespace BackBuilder\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
+use JMS\Serializer\Annotation as Serializer;
+
 /**
  * User object in BackBuilder5
  *
@@ -59,6 +61,8 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="password")
      * @fixture(type="word")
+     * 
+     * @Serializer\Exclude()
      */
     protected $_password;
 
@@ -89,11 +93,15 @@ class User implements UserInterface
     /**
      * @var BackBuilder\NestedNode\PageRevision
      * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_user", fetch="EXTRA_LAZY")
+     * 
+     * @Serializer\Exclude()
      */
     protected $_revisions;
 
     /**
      * @ManyToMany(targetEntity="BackBuilder\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
+     * 
+     * @Serializer\MaxDepth(1)
      */
     protected $_groups;
     
@@ -110,6 +118,7 @@ class User implements UserInterface
      * @var String
      * @Column(type="string", name="api_key_private", nullable=true)
      * @fixture(type="string")
+     * @Serializer\Exclude()
      */
     protected $_api_key_private;
     
@@ -345,6 +354,11 @@ class User implements UserInterface
         if($this->getApiKeyEnabled()) {
             $roles[] = 'ROLE_API_USER';
         }
+        
+        if($this->_activated) {
+            $roles[] = 'ROLE_ACTIVE_USER';
+        }
+        
         
         return $roles;
     }

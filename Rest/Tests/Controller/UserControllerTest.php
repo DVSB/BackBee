@@ -59,15 +59,23 @@ class UserControllerTest extends TestCase
         $group = new Group();
         $group->setName('groupName');
         $group->setIdentifier('GROUP_ID');
+        $this->bbapp->getEntityManager()->persist($group);
         
+        // valid user
         $user = new User();
         $user->addGroup($group);
         $user->setLogin('user123');
         $user->setPassword('password123');
         $user->setActivated(true);
-        $this->bbapp->getEntityManager()->persist($group);
         $this->bbapp->getEntityManager()->persist($user);
         
+        // inactive user
+        $user = new User();
+        $user->addGroup($group);
+        $user->setLogin('user123inactive');
+        $user->setPassword('password123');
+        $user->setActivated(false);
+        $this->bbapp->getEntityManager()->persist($user);
         
         $this->bbapp->getEntityManager()->flush();
     }
@@ -125,6 +133,25 @@ class UserControllerTest extends TestCase
         $request = new Request(array(), array(
             'username' => 'user123',
             'password' => 'passwordInvalid',
+            '_action' => 'loginAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+        ));
+        $controller = $this->getController();
+        
+        $response = $controller->loginAction($request);
+        
+        $this->assertEquals(401, $response->getStatusCode());
+        
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+    }
+    
+    public function testLoginAction_InactiveUser()
+    {
+        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        
+        $request = new Request(array(), array(
+            'username' => 'user123inactive',
+            'password' => 'password123',
             '_action' => 'loginAction',
             '_controller' => 'BackBuilder\Rest\Controller\UserController',
         ));

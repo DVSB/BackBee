@@ -63,6 +63,7 @@ class Controller implements ContainerAwareInterface
     public function __construct(IApplication $application = null) 
     {
         $this->_application = $application;
+        $this->container = $application->getContainer();
     }
     
     /**
