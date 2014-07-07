@@ -255,6 +255,4 @@ class ContainerProxy extends Container
             }
         }
     }
-
-    // Get tagged services to improve
 }
