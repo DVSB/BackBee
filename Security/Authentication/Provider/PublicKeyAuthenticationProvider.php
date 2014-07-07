@@ -23,7 +23,10 @@ namespace BackBuilder\Security\Authentication\Provider;
 
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use BackBuilder\Security\Token\PublicKeyToken,
-    BackBuilder\Security\Exception\SecurityException;
+    BackBuilder\Security\Exception\SecurityException,
+    BackBuilder\Security\Encoder\RequestSignatureEncoder;
+
+
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
     Symfony\Component\Security\Core\User\UserInterface,
     Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface,
@@ -120,11 +123,8 @@ class PublicKeyAuthenticationProvider implements AuthenticationProviderInterface
     {
         try {
             $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($user);
-                    
-            if (true === $this->_encoderFactory
-                            ->getEncoder($classname)
-                            ->isApiSignatureValid($token->signature, $token->request, $user->getApiKeyPrivate())) {
-                
+            $encoder = new RequestSignatureEncoder();
+            if (true === $encoder->isApiSignatureValid($token->signature, $token->request, $user->getApiKeyPrivate())) {
                 $token = new PublicKeyToken($user->getRoles());
                 $token->setUser($user);
                 return $token;

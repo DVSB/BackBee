@@ -23,7 +23,6 @@ namespace BackBuilder\NestedNode\Repository;
 
 use BackBuilder\NestedNode\ANestedNode;
 use BackBuilder\Util\Buffer;
-
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -37,6 +36,11 @@ use Doctrine\ORM\EntityRepository;
  */
 class NestedNodeRepository extends EntityRepository
 {
+    public static $config = array(
+        // calculate nested node values asynchronously via a CLI command
+        'nestedNodeCalculateAsync' => false
+    );
+    
     private function _hasValidHierarchicalDatas($node)
     {
         if ($node->getLeftnode() >= $node->getRightnode())
@@ -72,19 +76,15 @@ class NestedNodeRepository extends EntityRepository
         $node->leftnode = $leftnode;
         $node->rightnode = $leftnode + 1;
         $node->level = $level;
-
+        
         foreach ($children = $this->getNativelyNodeChildren($node_uid) as $row) {
             $child = $this->updateTreeNatively($row['uid'], $leftnode + 1, $level + 1);
             $node->rightnode = $child->rightnode + 1;
-            $leftnode = $node->rightnode;
+            $leftnode = $child->rightnode;
         }
 
         $this->_em->getConnection()->exec(sprintf(
-            'update page set leftnode = %d, rightnode = %d, level = %d where uid = "%s";',
-            $node->leftnode,
-            $node->rightnode,
-            $node->level,
-            $node->uid
+                        'update page set leftnode = %d, rightnode = %d, level = %d where uid = "%s";', $node->leftnode, $node->rightnode, $node->level, $node->uid
         ));
 
         return $node;
@@ -98,9 +98,8 @@ class NestedNodeRepository extends EntityRepository
     private function getNativelyNodeChildren($node_uid)
     {
         return $this->_em->getConnection()->executeQuery(sprintf(
-            'select uid from page where parent_uid = "%s" order by leftnode asc, modified desc',
-            $node_uid
-        ))->fetchAll();
+                                'select uid from page where parent_uid = "%s" order by leftnode asc, modified desc', $node_uid
+                ))->fetchAll();
     }
 
     public function updateTreeNativelyWithProgressMessage($node_uid)
@@ -113,7 +112,7 @@ class NestedNodeRepository extends EntityRepository
         }
 
         $convert_memory = function($size) {
-            $unit = array('B','KB','MB','GB');
+            $unit = array('B', 'KB', 'MB', 'GB');
 
             return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
         };
@@ -132,9 +131,9 @@ class NestedNodeRepository extends EntityRepository
             $this->updateTreeNatively($uid);
 
             Buffer::dump(
-                "\n   [END] update tree of $uid in "
-                . (microtime(true) - $starttime) . 's (memory status: ' . $convert_memory(memory_get_usage()) . ')'
-                . "\n"
+                    "\n   [END] update tree of $uid in "
+                    . (microtime(true) - $starttime) . 's (memory status: ' . $convert_memory(memory_get_usage()) . ')'
+                    . "\n"
             );
         }
 
@@ -193,7 +192,7 @@ class NestedNodeRepository extends EntityRepository
         $node->setParent($parent);
         $node->setRoot($parent->getRoot());
         $node->setLevel($parent->getLevel() + 1);
-        $this->shiftRlValues($parent, $node->getLeftnode(), 2);
+        $this->shiftRlValues($parent, $node->getLeftnode(), 2, $node);
 
         return $node;
     }
@@ -322,12 +321,12 @@ class NestedNodeRepository extends EntityRepository
         }
 
         $qb = $this->createQueryBuilder('n')
-            ->andWhere('n._parent = :parent')
-        ->setParameter('parent', $node->getParent());
+                ->andWhere('n._parent = :parent')
+                ->setParameter('parent', $node->getParent());
 
         if (false === $includeNode) {
             $qb->andWhere('n._uid != :uid')
-                ->setParameter('uid', $node->getUid());
+                    ->setParameter('uid', $node->getUid());
         }
 
         foreach ($order as $col => $sort) {
@@ -466,11 +465,30 @@ class NestedNodeRepository extends EntityRepository
         }
         $newRight = $newLeft + $node->getWeight() - 1;
 
+        if (self::$config['nestedNodeCalculateAsync']) {
+            $job = new \BackBuilder\Job\NestedNodeMoveSiblingsJob();
+            $job->setEntityManager($this->_em);
+
+            $job->args = array(
+                'nodeId' => $node->getUid(),
+                'nodeClass' => get_class($node),
+                'previous_left' => $node->getLeftnode(),
+                'new_left' => $newLeft,
+                'delta' => $node->getWeight()
+            );
+
+            $queue = new \BackBuilder\Job\Queue\RegistryQueue('NESTED_NODE');
+            $queue->setEntityManager($this->getEntityManager());
+
+            $queue->enqueue($job);
+        } else {
+            $this->_detachFromTree($node)->shiftRlValues($dest, $newLeft, $node->getWeight());
+        }
+
         /* detach && room for subtree */
-        $this->_detachFromTree($node)->shiftRlValues($dest, $newLeft, $node->getWeight());
         /* move the removed subtree back to the main tree */
-        $delta = $newLeft - 1; /* newleft - currentSubtreeleft always starts at 1) */
-        $levelDiff = $dest->getLevel() - 1; /* -1 as substree level starts with 1 */
+        //$delta = $newLeft - 1; /* newleft - currentSubtreeleft always starts at 1) */
+        //$levelDiff = $dest->getLevel() - 1; /* -1 as substree level starts with 1 */
         $node->setLeftnode($newLeft)
                 ->setRightnode($newRight)
                 ->setLevel($dest->getLevel())
@@ -528,7 +546,7 @@ class NestedNodeRepository extends EntityRepository
             return FALSE;
         $newLeft = $dest->getLeftnode() + 1;
         $newRight = $newLeft + ($node->getRightnode() - $node->getLeftnode());
-        $this->shiftRLValues($dest, $newLeft, $node->getRightnode() - $node->getLeftnode() + 1);
+        $this->shiftRLValues($dest, $newLeft, $node->getRightnode() - $node->getLeftnode() + 1, $node);
         $node->setLeftnode($newLeft)
                 ->setRightnode($newRight)
                 ->setLevel($dest->getLevel() + 1)
@@ -646,31 +664,52 @@ class NestedNodeRepository extends EntityRepository
         return true;
     }
 
-    private function shiftRlValues(ANestedNode $node, $first, $delta)
+    private function shiftRlValuesByJob(ANestedNode $target, $first, $delta)
     {
-        $q = $this->createQueryBuilder('n')
-                ->set('n._leftnode', 'n._leftnode + :delta')
-                ->andWhere('n._root = :root')
-                ->andWhere('n._leftnode >= :leftnode')
-                ->setParameters(array(
-                    'delta' => $delta,
-                    'root' => $node->getRoot(),
-                    'leftnode' => $first))
-                ->update()
-                ->getQuery()
-                ->execute();
+        $job = new \BackBuilder\Job\NestedNodeLRCalculateJob();
 
-        $q = $this->createQueryBuilder('n')
-                ->set('n._rightnode', 'n._rightnode + :delta')
-                ->andWhere('n._root = :root')
-                ->andWhere('n._rightnode >= :rightnode')
-                ->setParameters(array(
-                    'delta' => $delta,
-                    'root' => $node->getRoot(),
-                    'rightnode' => $first))
-                ->update()
-                ->getQuery()
-                ->execute();
+        $job->args = array(
+            'nodeId' => $target->getUid(),
+            'nodeClass' => get_class($target),
+            'first' => $first,
+            'delta' => $delta
+        );
+
+        $queue = new \BackBuilder\Job\Queue\RegistryQueue('NESTED_NODE');
+        $queue->setEntityManager($this->getEntityManager());
+
+        $queue->enqueue($job);
+    }
+
+    private function shiftRlValues(ANestedNode $node, $first, $delta, ANestedNode $target = null)
+    {
+        if (null !== $target && self::$config['nestedNodeCalculateAsync']) {
+            $this->shiftRlValuesByJob($target, $first, $delta);
+        } else {
+            $q = $this->createQueryBuilder('n')
+                    ->set('n._leftnode', 'n._leftnode + :delta')
+                    ->andWhere('n._root = :root')
+                    ->andWhere('n._leftnode >= :leftnode')
+                    ->setParameters(array(
+                        'delta' => $delta,
+                        'root' => $node->getRoot(),
+                        'leftnode' => $first))
+                    ->update()
+                    ->getQuery()
+                    ->execute();
+
+            $q = $this->createQueryBuilder('n')
+                    ->set('n._rightnode', 'n._rightnode + :delta')
+                    ->andWhere('n._root = :root')
+                    ->andWhere('n._rightnode >= :rightnode')
+                    ->setParameters(array(
+                        'delta' => $delta,
+                        'root' => $node->getRoot(),
+                        'rightnode' => $first))
+                    ->update()
+                    ->getQuery()
+                    ->execute();
+        }
     }
 
     /**

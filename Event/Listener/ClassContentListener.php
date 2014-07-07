@@ -95,12 +95,16 @@ class ClassContentListener
                 }
 
                 $content->setLabel($value);
-                $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
+                if ($uow->isScheduledForUpdate($content)) {
+                    $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
+                }
             }
 
             if (null === $content->getLabel()) {
                 $content->setLabel($content->getProperty('name'));
-                $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
+                if ($uow->isScheduledForUpdate($content)) {
+                    $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
+                }
             }
 //
 //            if (null !== $page = $content->getMainNode()) {
@@ -114,7 +118,6 @@ class ClassContentListener
 //                    $uow->$method($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
 //                }
 //            }
-
             //self::HandleContentMainnode($content,$application);
         }
     }

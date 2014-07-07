@@ -103,3 +103,7 @@ kernel.response:
 bbapplication.init:
   listeners:
     - [BackBuilder\DependencyInjection\Listener\ContainerListener, onApplicationInit]
+
+nestednode.page.postload:
+  listeners:
+    - [@nestednode.page_listener, onPostLoad]
