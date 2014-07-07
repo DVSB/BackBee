@@ -268,7 +268,6 @@ class BBApplication implements IApplication
         if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
             return (bool) $this->getConfig()->getParametersConfig('debug');
         }
-
         return (bool) $this->_debug;
     }
 
@@ -355,7 +354,6 @@ class BBApplication implements IApplication
         if (!is_null($this->getConfig()->getBundleConfig())) {
             BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
         }
-
         return $this;
     }
 

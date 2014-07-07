@@ -58,7 +58,6 @@ class ContentBlocks extends AbstractServiceLocal
                 return $contents;
             }
         }
-
         $contents = array();
         $categories = Category::getCategories($this->getApplication()->getClassContentDir());
 

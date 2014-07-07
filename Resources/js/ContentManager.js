@@ -128,7 +128,7 @@ bb.ContentManager = (function($, gExport) {
     var _enable = function() {
         _enableContentSelection = true;
         var nodeData = bb.jquery(_settings.layoutDroppabableClass).data();
-        if (nodeData.sortable) { //useful cf LayoutManager _clone
+        if (nodeData && nodeData.sortable) { //useful cf LayoutManager _clone
 
             bb.jquery(_settings.layoutDroppabableClass).sortable("enable");
         } else {
