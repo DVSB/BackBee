@@ -25,7 +25,8 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Validator\ConstraintViolationList,
     Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
-    Symfony\Component\Security\Http\SecurityEvents;
+    Symfony\Component\Security\Http\SecurityEvents,
+    Symfony\Component\HttpFoundation\JsonResponse;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -89,6 +90,10 @@ class UserController extends ARestController
      */
     public function loginAction(Request $request, ConstraintViolationList $violations = null)
     {
+        if(null !== $violations && count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+        
         $authManager = $this->getContainer()->get('security.context')->getAuthenticationManager();
         /* @var $authManager \BackBuilder\Security\Authentication\AuthenticationManager */
         
@@ -125,14 +130,13 @@ class UserController extends ARestController
             foreach($token->getUser()->getGroups() as $group) {
                 $data['permissions'][] = $group->getName();
             }
-            //$data['permissions'] = $token->getUser()->getGroups();
         }
         
         if(empty($data)) {
             return new Response(null, 204);
         }
         
-        return new Response($this->formatItem($data));
+        return new Response($this->formatItem($data), 200, array('Content-Type' => 'application/json'));
     }
     
     /**
