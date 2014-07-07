@@ -37,15 +37,24 @@ class ContainerProxy extends Container
 {
     /**
      * [$raw_definitions description]
-     * @var [type]
+     *
+     * @var array
      */
     private $raw_definitions;
 
     /**
      * [$raw_definitions_id description]
-     * @var [type]
+     *
+     * @var array
      */
     private $raw_definitions_id;
+
+    /**
+     * [$services_dump description]
+     *
+     * @var array
+     */
+    private $services_dump;
 
     /**
      * [__construct description]
@@ -58,6 +67,7 @@ class ContainerProxy extends Container
         $this->getParameterBag()->add($container_dump['parameters']);
         $this->raw_definitions_id = array_keys($this->raw_definitions);
         $this->addAliases($container_dump['aliases']);
+        $this->services_dump = $container_dump['services_dump'];
     }
 
     /**
@@ -68,7 +78,19 @@ class ContainerProxy extends Container
      */
     public function get($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
     {
-        $this->tryLoadDefinitionFromRaw($id);
+        if (null !== $definition = $this->tryLoadDefinitionFromRaw($id)) {
+            if (true === $definition->hasTag('dumpable') && true === array_key_exists($id, $this->services_dump)) {
+                $service_dump = $this->services_dump[$id];
+                $proxy_classname = $service_dump['class_proxy'];
+                if (true === empty($proxy_classname)) {
+                    $proxy_classname = $definition->getClass();
+                }
+
+                $service_proxy = new $proxy_classname();
+                $service_proxy->restore($this, $service_dump['dump']);
+                $this->set($id, $service_proxy);
+            }
+        }
 
         return parent::get($id, $invalid_behavior);
     }
@@ -120,16 +142,29 @@ class ContainerProxy extends Container
         return parent::getDefinitions();
     }
 
+    /**
+     * [tryLoadDefinitionFromRaw description]
+     * @param  [type] $id [description]
+     * @return [type]     [description]
+     */
     private function tryLoadDefinitionFromRaw($id)
     {
+        $definition = null;
         if (true === is_string($id) && true === in_array($id, $this->raw_definitions_id)) {
-            $this->setDefinition($id, $this->buildDefinition($this->raw_definitions[$id]));
+            $this->setDefinition($id, $definition = $this->buildDefinition($this->raw_definitions[$id]));
             $this->raw_definitions_id = array_flip($this->raw_definitions_id);
             unset($this->raw_definitions_id[$id]);
             $this->raw_definitions_id = array_flip($this->raw_definitions_id);
+            $found = true;
         }
+
+        return $definition;
     }
 
+    /**
+     * [loadRawDefinitions description]
+     * @return [type] [description]
+     */
     private function loadRawDefinitions()
     {
         foreach ($this->raw_definitions_id as $id) {
@@ -190,7 +225,7 @@ class ContainerProxy extends Container
      */
     private function convertArgument($argument)
     {
-        if (true === is_string($argument) && '@' === $argument[0]) {
+        if (true === is_string($argument) && 0 < strlen($argument) && '@' === $argument[0]) {
             $argument = new Reference(substr($argument, 1));
         }
 

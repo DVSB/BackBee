@@ -23,32 +23,20 @@ namespace BackBuilder\DependencyInjection\Dumper;
 use BackBuilder\DependencyInjection\ContainerInterface;
 
 /**
- * This interface define every methods a service should implements to be dumpable by the container
+ * This interface must be implemented if you want to use a proxy class instead of your service real class
  *
  * @category    BackBuilder
  * @package     BackBuilder\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-interface DumpableServiceInterface
+interface DumpableServiceProxyInterface
 {
-    /**
-     * Returns the namespace of the class proxy to use or null if no proxy is required
+/**
+     * Restore current service to the dump's state
      *
-     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                     restore current service
      */
-    public function getClassProxy();
-
-    /**
-     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
-     * with the dump array produced by this method
-     *
-     * @return array contains every datas required by this service to be restored at the same state
-     */
-    public function dump(array $options = array());
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored();
+    public function restore(ContainerInterface $container, array $dump);
 }

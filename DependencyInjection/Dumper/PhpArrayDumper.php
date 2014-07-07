@@ -69,10 +69,11 @@ class PhpArrayDumper implements DumperInterface
         }
 
         $dumper = array(
-            'parameters'  => $this->dumpContainerParameters($options),
-            'services'    => $this->dumpContainerDefinitions($options),
-            'aliases'     => $this->dumpContainerAliases($options),
-            'is_compiled' => $compiled
+            'parameters'    => $this->dumpContainerParameters($options),
+            'services'      => $this->dumpContainerDefinitions($options),
+            'aliases'       => $this->dumpContainerAliases($options),
+            'services_dump' => $this->dumpDumpableServices($options),
+            'is_compiled'   => $compiled
         );
 
         return serialize($dumper);
@@ -235,5 +236,18 @@ class PhpArrayDumper implements DumperInterface
             // finally add method call to definition array
             $definition_array['calls'][] = $method_call_array;
         }
+    }
+
+    private function dumpDumpableServices(array $options)
+    {
+        $services_dump = array();
+        foreach ($this->container->findTaggedServiceIds('dumpable') as $service_id => $data) {
+            $services_dump[$service_id] = array(
+                'dump'        => $this->container->get($service_id)->dump(),
+                'class_proxy' => $class = $this->container->get($service_id)->getClassProxy()
+            );
+        }
+
+        return $services_dump;
     }
 }

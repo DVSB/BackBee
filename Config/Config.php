@@ -24,6 +24,8 @@ namespace BackBuilder\Config;
 use BackBuilder\Cache\ACache;
 use BackBuilder\Config\Exception\InvalidConfigException;
 use BackBuilder\DependencyInjection\Container;
+use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -36,10 +38,12 @@ use Symfony\Component\Yaml\Yaml;
  * @category    BackBuilder
  * @package     BackBuilder\Config
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
-class Config
+class Config implements DumpableServiceInterface
 {
+    const CONFIG_PROXY_CLASSNAME = '\BackBuilder\Config\ConfigProxy';
+
     /**
      * Default config file to look for
      * @var string
@@ -62,40 +66,44 @@ class Config
      * The base directory to looking for configuration files
      * @var string
      */
-    private $_basedir;
+    protected $_basedir;
 
     /**
      * The extracted configuration parameters from the config file
      * @var array
      */
-    private $_raw_parameters;
+    protected $_raw_parameters;
 
     /**
      * The already compiled parameters
      * @var array
      */
-    private $_parameters;
+    protected $_parameters;
 
     /**
      * The optional cache system
      * @var \BackBuilder\Cache\ACache
      */
-    private $_cache;
+    protected $_cache;
 
     /**
      * The service container
      * @var \BackBuilder\DependencyInjection\Container
      */
-    private $_container;
+    protected $_container;
 
-    private $_environment = 'production';
+    /**
+     * Application's environment
+     * @var string
+     */
+    protected $_environment = \BackBuilder\BBApplication::DEFAULT_ENVIRONMENT;
 
     /**
      * Is debug mode enabled
      *
      * @var boolean
      */
-    private $_debug = false;
+    protected $_debug = false;
 
     /**
      * Debug info
@@ -111,7 +119,13 @@ class Config
      *
      * @var array
      */
-    private $_yml_names_to_ignore;
+    protected $_yml_names_to_ignore;
+
+    /**
+     * [$_is_restored description]
+     * @var [type]
+     */
+    protected $_is_restored;
 
     /**
      * Magic function to get configuration section
@@ -154,6 +168,7 @@ class Config
         $this->_cache = $cache;
         $this->_debug = $debug;
         $this->_yml_names_to_ignore = $yml_to_ignore;
+        $this->_is_restored = false;
 
         $this->setContainer($container)->extend();
     }
@@ -169,6 +184,13 @@ class Config
     {
         $this->_container = $container;
         $this->_parameters = array();
+
+        return $this;
+    }
+
+    public function setCache(ACache $cache)
+    {
+        $this->_cache = $cache;
 
         return $this;
     }
@@ -533,5 +555,42 @@ class Config
     public function getBaseDir()
     {
         return $this->_basedir;
+    }
+
+    /**
+     * Returns the namespace of the class proxy to use or null if no proxy is required
+     *
+     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     */
+    public function getClassProxy()
+    {
+        return self::CONFIG_PROXY_CLASSNAME;
+    }
+
+    /**
+     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
+     * with the dump array produced by this method
+     *
+     * @return array contains every datas required by this service to be restored at the same state
+     */
+    public function dump(array $options = array())
+    {
+        return array(
+            'basedir'             => $this->_basedir,
+            'raw_parameters'      => $this->_raw_parameters,
+            'environment'         => $this->_environment,
+            'debug'               => $this->_debug,
+            'yml_names_to_ignore' => $this->_yml_names_to_ignore,
+            'has_cache'           => null !== $this->_cache,
+            'has_container'       => null !== $this->_container
+        );
+    }
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->_is_restored;
     }
 }

@@ -195,16 +195,18 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
     {
         $config = $this->getConfig();
 
-        $config_directories = (new \BackBuilder\Util\Resolver\ConfigDirectory())->getDirectories(
-            null,
-            $this->getBaseRepository(),
-            $this->getContext(),
-            $this->getEnvironment()
-        );
+        if (false === $config->isRestored()) {
+            $config_directories = (new \BackBuilder\Util\Resolver\ConfigDirectory())->getDirectories(
+                null,
+                $this->getBaseRepository(),
+                $this->getContext(),
+                $this->getEnvironment()
+            );
 
-        foreach ($config_directories as $directory) {
-            if (true === is_dir($directory)) {
-                $config->extend($directory, $this->isOverridedConfig());
+            foreach ($config_directories as $directory) {
+                if (true === is_dir($directory)) {
+                    $config->extend($directory, $this->isOverridedConfig());
+                }
             }
         }
     }

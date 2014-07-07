@@ -95,9 +95,11 @@ services:
     config:
         class:      %bbapp.config.class%
         arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, "%debug%", "%config.yml_files_to_ignore%"]
+        tags:
+            - {name: "dumpable"}
         calls:
             - [setContainer, ['@service_container']]
-            - [setEnvironment, ['bbapp.environment']]
+            - [setEnvironment, ['%bbapp.environment%']]
     event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
