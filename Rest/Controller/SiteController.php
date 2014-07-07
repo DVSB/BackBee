@@ -49,29 +49,36 @@ class SiteController extends ARestController
      * 
      * 
      */
-    public function getLayoutsAction($id, Request $request, ConstraintViolationList $violations = null) 
+    public function getLayoutsAction($uid, Request $request, ConstraintViolationList $violations = null) 
     {
         if(null !== $violations && count($violations) > 0) {
             throw new ValidationException($violations);
         }
-        
+
         $em = $this->getEntityManager();
 
-        $site = $em->getRepository('BackBuilder\Site\Site')->find($id);
+        $site = $em->getRepository('BackBuilder\Site\Site')->find($uid);
 
         
         if(!$site) {
-            return $this->create404Response(sprintf('Site not found: %s', $id));
+            return $this->create404Response(sprintf('Site not found: %s', $uid));
         }
         
         // TODO
         $layouts = array();
 
         foreach($site->getLayouts() as $layout) {
-            
+            $layouts[] = array(
+                'uid' => $layout->getUid(),
+                'site_uid' => $layout->getSite()->getUid(),
+                'label' => $layout->getLabel(),
+                'path' => $layout->getPath(),
+                'data' => json_decode($layout->getData(), true),
+                'picpath' => $layout->getPicpath()
+            );
         }
-
-        return new Response($this->formatCollection($site->getLayouts()), 200, array('Content-Type' => 'application/json'));
+        
+        return new Response($this->formatCollection($layouts), 200, array('Content-Type' => 'application/json'));
     }
     
 }

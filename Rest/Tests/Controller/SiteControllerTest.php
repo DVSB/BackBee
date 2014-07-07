@@ -123,7 +123,7 @@ class SiteControllerTest extends TestCase
         
         $this->assertCount(1, $content);
         
-        $this->assertEquals($this->layout->getUid(), $content[0]['_uid']);
+        $this->assertEquals($this->layout->getUid(), $content[0]['uid']);
         
     }
     
