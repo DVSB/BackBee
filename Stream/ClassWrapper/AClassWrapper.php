@@ -84,7 +84,13 @@ abstract class AClassWrapper implements IStreamWrapper
      * @var string
      */
     protected $extends = '\BackBuilder\ClassContent\AClassContent';
-
+    
+    /**
+     * Interface(s) used by the class content
+     * @var string
+     */
+    protected $interfaces;
+    
     /**
      * Trait(s) used by the class content
      * @var string
@@ -135,7 +141,7 @@ namespace <namespace>;
  * @HasLifecycleCallbacks
  * <docblock>
  */
-class <classname> extends <extends>
+class <classname> extends <extends> <interface>
 {
     <trait>
     public function __construct($uid = NULL, $options = NULL) 
@@ -213,6 +219,7 @@ class <classname> extends <extends>
             '<classname>',
             '<repository>',
             '<extends>',
+            '<interface>',
             '<trait>',
             '<defineDatas>',
             '<defineParam>',
@@ -221,14 +228,14 @@ class <classname> extends <extends>
             $this->classname,
             $this->repository,
             $this->extends,
+            $this->interfaces,
             $this->traits,
             (0 < count($defineDatas)) ? '$this' . implode('', $defineDatas) . ';' : '',
             (0 < count($defineParam)) ? '$this' . implode('', $defineParam) . ';' : '',
             (0 < count($defineProps)) ? '$this' . implode('', $defineProps) . ';' : '',
             $docBlock), $this->template);
-
+        
         return $phpCode;
-
     }
 
     /**
