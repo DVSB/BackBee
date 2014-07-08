@@ -285,6 +285,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var integer
      */
     public $old_state;
+    
+    /**
+     * Whether redirect url should be returned by getUrl() method
+     * 
+     * @var bool
+     */
+    private $_use_url_redirect = true;
 
     /**
      * Class constructor
@@ -416,11 +423,21 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the URL of the page.
+     * 
      * @codeCoverageIgnore
+     * @params bool $doRedirect : if true - returns redirect url (if exists), otherwise - current page url
      * @return string
      */
-    public function getUrl()
+    public function getUrl($doRedirect = null)
     {
+        if(null === $doRedirect) {
+            $doRedirect = $this->_use_url_redirect;
+        }
+        
+        if($this->isRedirect() && $doRedirect) {
+            return $this->getRedirect();
+        }
+        
         return $this->_url;
     }
 
@@ -455,6 +472,16 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function getRedirect()
     {
         return $this->_redirect;
+    }
+    
+    /**
+     * Determine if page is a redirect
+     * 
+     * @return bool
+     */
+    public function isRedirect()
+    {
+        return null !== $this->_redirect;
     }
 
     /**
@@ -1167,5 +1194,24 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function setOldState($v)
     {
         $this->old_state = $v;
+    }
+    
+    /**
+     * Tells whether getUrl() should return the redirect url or BB5 url
+     * 
+     * @param bool $useUrlRedirect
+     */
+    public function setUseUrlRedirect($useUrlRedirect)
+    {
+        $this->_use_url_redirect = $useUrlRedirect;
+    }
+    
+    /**
+     * 
+     * @return bool
+     */
+    public function getUseUrlRedirect()
+    {
+        return $this->_use_url_redirect;
     }
 }

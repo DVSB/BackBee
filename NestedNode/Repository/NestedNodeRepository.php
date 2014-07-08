@@ -39,7 +39,7 @@ class NestedNodeRepository extends EntityRepository
 {
     public static $config = array(
         // calculate nested node values asynchronously via a CLI command
-        'nestedNodeCalculateAsync' => true
+        'nestedNodeCalculateAsync' => false
     );
 
     /**

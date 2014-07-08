@@ -69,18 +69,32 @@ class AnnotationDriver implements DriverInterface
             $annotations = $this->reader->getMethodAnnotations($reflectionMethod);
 
             foreach($annotations as $annotation) {
-                $data = array(
-                    'name' => $annotation->name,
-                    'key' => $annotation->key ? $annotation->key : $annotation->name,
-                    'default' => $annotation->default,
-                    'description' => $annotation->description,
-                    'requirements' => $annotation->requirements,
-                );
                 if($annotation instanceof \BackBuilder\Rest\Controller\Annotations\QueryParam) {
+                    $data = array(
+                        'name' => $annotation->name,
+                        'key' => $annotation->key ? $annotation->key : $annotation->name,
+                        'default' => $annotation->default,
+                        'description' => $annotation->description,
+                        'requirements' => $annotation->requirements,
+                    );
                     $methodMetadata->queryParams[] = $data;
                 } elseif($annotation instanceof \BackBuilder\Rest\Controller\Annotations\RequestParam) {
+                    $data = array(
+                        'name' => $annotation->name,
+                        'key' => $annotation->key ? $annotation->key : $annotation->name,
+                        'default' => $annotation->default,
+                        'description' => $annotation->description,
+                        'requirements' => $annotation->requirements,
+                    );
                     $methodMetadata->requestParams[] = $data;
+                } elseif($annotation instanceof \BackBuilder\Rest\Controller\Annotations\Pagination) {
+                    $methodMetadata->paginationStartName = $annotation->startName;
+                    $methodMetadata->paginationLimitName = $annotation->limitName;
+                    $methodMetadata->paginationLimitDefault = $annotation->limitDefault;
+                    $methodMetadata->paginationLimitMax = $annotation->limitMax;
+                    $methodMetadata->paginationLimitMin = $annotation->limitMin;
                 }
+
             }
             
             $classMetadata->addMethodMetadata($methodMetadata);

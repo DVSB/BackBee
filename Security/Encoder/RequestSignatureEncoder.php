@@ -12,7 +12,7 @@ use BackBuilder\ApiClient\Auth\PrivateKeyAuth;
  *
  * @category    BackBuilder
  * @package     BackBuilder\Security
- * @subpackage  Context
+ * @subpackage  Encoder
  * @copyright   Lp digital system
  * @author      k.golovin
  */

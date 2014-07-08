@@ -67,6 +67,8 @@ class Site extends AObjectIdentifiable implements IJson
      * @var string
      * @Column(type="string", name="label", nullable=false)
      * @fixture(type="domainWord")
+     * 
+     * @Serializer\Expose
      */
     protected $_label;
 
@@ -95,6 +97,8 @@ class Site extends AObjectIdentifiable implements IJson
      * @Serializer\Expose
      * @Serializer\SerializedName("server_name")
      * @Serializer\Type("string")
+     * 
+     * @Serializer\Expose
      */
     protected $_server_name;
 
@@ -107,6 +111,8 @@ class Site extends AObjectIdentifiable implements IJson
     /**
      * The collection of layouts available for this site.
      * @OneToMany(targetEntity="BackBuilder\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
+     * 
+     * @Serializer\Expose
      */
     protected $_layouts;
 
@@ -117,6 +123,8 @@ class Site extends AObjectIdentifiable implements IJson
      *      joinColumns={@JoinColumn(name="site_uid", referencedColumnName="uid")},
      *      inverseJoinColumns={@JoinColumn(name="metadata_uid", referencedColumnName="uid")}
      *      )
+     * 
+     * @Serializer\Expose
      */
     protected $_metadata;
 
@@ -191,6 +199,15 @@ class Site extends AObjectIdentifiable implements IJson
     public function getLayouts()
     {
         return $this->_layouts;
+    }
+    
+    /**
+     * 
+     * @param \BackBuilder\Site\Layout $layout
+     */
+    public function addlayout(Layout $layout)
+    {
+        $this->_layouts[] = $layout;
     }
 
     /**

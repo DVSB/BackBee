@@ -46,6 +46,10 @@ parameters:
             message: Authentication failed - supplied public key or signature is incorrect
         Doctrine\ORM\ORMException:
             code: 500
+        Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException:
+            code: 401
+            message: Authenticaton failed - public key not provided
+
 
     bbapp.rest_api.path: /rest/
 
@@ -141,7 +145,8 @@ services:
 
     controller_resolver:
         class:      %bbapp.controller_resolver.class%
-
+        arguments:  [@bbapp]
+        
     rest.hydrator:
         class:      %bbapp.rest.hydrator.class%
         arguments:  ["@em"]
@@ -325,6 +330,10 @@ services:
         
     validator.factory: 
         class: Symfony\Component\Validator\ConstraintValidatorFactory
+
+    nestednode.page_listener:
+        arguments:  [@bbapp]
+        class: BackBuilder\Event\Listener\PageListener
         
         
     # synthetic services

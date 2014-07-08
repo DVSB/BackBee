@@ -31,6 +31,8 @@ use Symfony\Component\Form\Forms,
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Validator\Validation;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface,
+    Symfony\Component\DependencyInjection\ContainerInterface;
 
 use BackBuilder\IApplication;
 
@@ -42,13 +44,15 @@ use BackBuilder\IApplication;
  * @copyright   Lp system
  * @author      k.golovin
  */
-class Controller
+class Controller implements ContainerAwareInterface
 {
     /**
      * Current BackBuilder application
      * @var \BackBuilder\BBApplication
      */
     protected $_application;
+    
+    protected $container;
 
     /**
      * Class constructor
@@ -58,7 +62,10 @@ class Controller
      */
     public function __construct(IApplication $application = null) 
     {
-        $this->_application = $application;
+        if(null !== $application) {
+            $this->_application = $application;
+            $this->container = $application->getContainer();
+        }
     }
     
     /**
@@ -69,7 +76,15 @@ class Controller
      */
     public function getApplication() 
     {
-        return $this->_application;
+        return $this->container->get('bbapp');
+    }
+    
+    
+    public function setContainer(ContainerInterface $container = null)
+    {
+        $this->container = $container;
+        
+        $this->_application = $this->container->get('bbapp');
     }
     
     
@@ -81,7 +96,7 @@ class Controller
      */
     public function getContainer() 
     {
-        return $this->_application->getContainer();
+        return $this->container;
     }
     
     
@@ -176,5 +191,24 @@ class Controller
     {
         return $this->_application->getValidator();
     }
+    
+    
+    /**
+     * Shortcut for Symfony\Component\Security\Core\SecurityContext::isGranted()
+     * 
+     * @see Symfony\Component\Security\Core\SecurityContext::isGranted()
+     * @param string $permission
+     * @param mixed $object
+     * @return bool
+     */
+    protected function isGranted($attributes, $object = null)
+    {
+        $securityContext = $this->getContainer()->get('security.context');
+        
+        return $securityContext->isGranted($attributes, $object);
+    }
+    
+
+        
  
 }
