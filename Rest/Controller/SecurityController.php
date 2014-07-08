@@ -43,7 +43,7 @@ use BackBuilder\Rest\Exception\ValidationException;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class AuthController extends ARestController 
+class SecurityController extends ARestController 
 {
    
     /**
