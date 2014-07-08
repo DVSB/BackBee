@@ -36,7 +36,8 @@ class ObjectIdentityRetrieval
     private $_identifier;
     private $_class;
     private $_em;
-    private static $_pattern = '/\((\w+),(.+)\)/';
+    private static $_pattern1 = '/\((\w+),(.+)\)/';
+    private static $_pattern2 = '#(.+)\(([a-f0-9]+)\)$#i';
 
     public function __construct(EntityManager $em, $identifier, $class)
     {
@@ -48,8 +49,9 @@ class ObjectIdentityRetrieval
     public static function build(BBApplication $application, $objectIdentity)
     {
         $matches = array();
-        preg_match(self::$_pattern, $objectIdentity, $matches);
-
+        if (false == preg_match(self::$_pattern1, $objectIdentity, $matches)) {
+            preg_match(self::$_pattern2, $objectIdentity, $matches);
+        }
         return new self($application->getEntityManager(), trim($matches[1]), trim($matches[2]));
     }
 
