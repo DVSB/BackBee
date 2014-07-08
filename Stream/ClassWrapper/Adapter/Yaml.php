@@ -162,6 +162,29 @@ class Yaml extends AClassWrapper
                                         NAMESPACE_SEPARATOR . $this->extends;
                             }
                             break;
+                        case 'interfaces':
+                            $datas = false === is_array($datas) ? array($datas) : $datas;
+                            $this->interfaces = array();
+
+                            foreach ($datas as $i) {
+                                $interface = $i;
+                                if (NAMESPACE_SEPARATOR !== substr($i, 0, 1)) {
+                                    $interface = NAMESPACE_SEPARATOR . $i;
+                                }
+
+                                // add interface only if it exists
+                                if (true === interface_exists($interface)) {
+                                    $this->interfaces[] = $interface;
+                                }
+                            }
+                            
+                            // build up interface use string
+                            $str = implode(', ', $this->interfaces);
+                            if (0 < count($this->interfaces)) {
+                                $this->interfaces = 'implements ' . $str;
+                            } else {
+                                $this->interfaces = '';
+                            }
                         case 'repository':
                             $this->repository = $this->_normalizeVar($datas, true);
                             if (substr($this->repository, 0, 1) != NAMESPACE_SEPARATOR) {
