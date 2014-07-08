@@ -96,7 +96,7 @@ services:
         class:      %bbapp.config.class%
         arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, "%debug%", "%config.yml_files_to_ignore%"]
         tags:
-            - {name: "dumpable"}
+            - { name: "dumpable" }
         calls:
             - [setContainer, ['@service_container']]
             - [setEnvironment, ['%bbapp.environment%']]
@@ -343,6 +343,8 @@ services:
     # synthetic services
     bbapp:
         synthetic: true
+        tags:
+            - { name: "dumpable" }
     service_container:
         synthetic: true
     site:
