@@ -186,10 +186,8 @@ class Yaml extends AClassWrapper
                                 $this->interfaces = '';
                             }
                         case 'repository':
-                            $this->repository = $this->_normalizeVar($datas, true);
-                            if (substr($this->repository, 0, 1) != NAMESPACE_SEPARATOR) {
-                                $this->repository = NAMESPACE_SEPARATOR . $this->namespace .
-                                        NAMESPACE_SEPARATOR . $this->repository;
+                            if (class_exists($datas)) {
+                                $this->repository = $datas;
                             }
                             break;
                         case 'traits':
