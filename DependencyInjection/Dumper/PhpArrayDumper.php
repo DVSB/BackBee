@@ -131,12 +131,12 @@ class PhpArrayDumper implements DumperInterface
         $definition_array = array();
         if (true === $definition->isSynthetic()) {
             $definition_array = $this->convertSyntheticDefinitionToPhpArray($definition);
-        } else {
-            $this->hydrateDefinitionClass($definition, $definition_array);
-            $this->hydrateDefinitionArguments($definition, $definition_array);
-            $this->hydrateDefinitionTags($definition, $definition_array);
-            $this->hydrateDefinitionMethodCalls($definition, $definition_array);
         }
+
+        $this->hydrateDefinitionClass($definition, $definition_array);
+        $this->hydrateDefinitionArguments($definition, $definition_array);
+        $this->hydrateDefinitionTags($definition, $definition_array);
+        $this->hydrateDefinitionMethodCalls($definition, $definition_array);
 
         return $definition_array;
     }

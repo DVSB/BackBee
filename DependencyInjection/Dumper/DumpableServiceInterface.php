@@ -46,9 +46,4 @@ interface DumpableServiceInterface
      * @return array contains every datas required by this service to be restored at the same state
      */
     public function dump(array $options = array());
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored();
 }

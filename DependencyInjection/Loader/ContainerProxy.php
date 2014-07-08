@@ -21,6 +21,7 @@ namespace BackBuilder\DependencyInjection\Loader;
  */
 
 use BackBuilder\DependencyInjection\Container;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -79,20 +80,42 @@ class ContainerProxy extends Container
     public function get($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
     {
         if (null !== $definition = $this->tryLoadDefinitionFromRaw($id)) {
-            if (true === $definition->hasTag('dumpable') && true === array_key_exists($id, $this->services_dump)) {
-                $service_dump = $this->services_dump[$id];
-                $proxy_classname = $service_dump['class_proxy'];
-                if (true === empty($proxy_classname)) {
-                    $proxy_classname = $definition->getClass();
-                }
+            $service = null;
+            if (true === $this->isLoaded($id)) {
+                $service = parent::get($id, $invalid_behavior);
+            }
 
-                $service_proxy = new $proxy_classname();
-                $service_proxy->restore($this, $service_dump['dump']);
+            $service_proxy = $this->tryRestoreDumpableService($id, $service, $definition);
+            if (null !== $service_proxy) {
                 $this->set($id, $service_proxy);
             }
         }
 
         return parent::get($id, $invalid_behavior);
+    }
+
+    /**
+     * [set description]
+     * @param [type] $id      [description]
+     * @param [type] $service [description]
+     * @param [type] $scope   [description]
+     */
+    public function set($id, $service, $scope = self::SCOPE_CONTAINER)
+    {
+        $definition = null;
+        if (true === $this->hasDefinition($id)) {
+            $definition = $this->getDefinition($id);
+            $restored_service = $this->tryRestoreDumpableService($id, $service, $definition);
+            if (null !== $restored_service) {
+                $service = $restored_service;
+            }
+        }
+
+        parent::set($id, $service, $scope);
+
+        if (null !== $definition) {
+            $this->setDefinition($id, $definition);
+        }
     }
 
     /**
@@ -143,6 +166,49 @@ class ContainerProxy extends Container
     }
 
     /**
+     * [restoreDumpableService description]
+     * @param  Definition $definition [description]
+     * @return [type]                 [description]
+     */
+    private function tryRestoreDumpableService($id, $service, Definition $definition)
+    {
+        if (false === $definition->hasTag('dumpable')) {
+            return null;
+        }
+
+        if (null !== $service && ($service instanceof DumpableServiceProxyInterface) && $service->isRestored()) {
+            return null;
+        }
+
+        if (false === array_key_exists($id, $this->services_dump)) {
+            return null;
+        }
+
+        $service_dump = $this->services_dump[$id];
+        $service_proxy = null;
+        $proxy_classname = $service_dump['class_proxy'];
+
+        if (true === empty($proxy_classname)) {
+            if (null === $service) {
+                $service = parent::get($id);
+            }
+
+            $service_proxy = $service;
+            if (false === ($service_proxy instanceof DumpableServiceProxyInterface)) {
+                throw new \Exception('Service proxy must implements DumpableServiceProxyInterface!');
+            }
+        }
+
+        if (null === $service_proxy) {
+            $service_proxy = new $proxy_classname();
+        }
+
+        $service_proxy->restore($this, $service_dump['dump']);
+
+        return $service_proxy;
+    }
+
+    /**
      * [tryLoadDefinitionFromRaw description]
      * @param  [type] $id [description]
      * @return [type]     [description]
@@ -150,7 +216,7 @@ class ContainerProxy extends Container
     private function tryLoadDefinitionFromRaw($id)
     {
         $definition = null;
-        if (true === is_string($id) && true === in_array($id, $this->raw_definitions_id)) {
+        if (is_string($id) && is_array($this->raw_definitions_id) && in_array($id, $this->raw_definitions_id)) {
             $this->setDefinition($id, $definition = $this->buildDefinition($this->raw_definitions[$id]));
             $this->raw_definitions_id = array_flip($this->raw_definitions_id);
             unset($this->raw_definitions_id[$id]);
