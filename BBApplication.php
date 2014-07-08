@@ -358,7 +358,9 @@ class BBApplication implements IApplication
 
     private function _initBundles()
     {
-        BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
+        if (!is_null($this->getConfig()->getBundleConfig())) {
+            BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
+        }
 
         return $this;
     }

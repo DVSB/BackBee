@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -42,19 +42,19 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent,
 class ToolbarListener implements ContainerAwareInterface
 {
     private $enabled = false;
-    
+
     private $container;
-    
-    public function __construct($enabled = false) 
+
+    public function __construct($enabled = false)
     {
         $this->enabled = $enabled;
     }
-    
-    public function setContainer(ContainerInterface $container = null) 
+
+    public function setContainer(ContainerInterface $container = null)
     {
         $this->container = $container;
     }
-    
+
     /**
      * @param Request $request
      * @return boolean - true if the listener should be enabled for the $request
@@ -63,8 +63,8 @@ class ToolbarListener implements ContainerAwareInterface
     {
         return $this->enabled;
     }
-    
-    
+
+
     public function onKernelResponse(FilterResponseEvent $event)
     {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
@@ -74,7 +74,7 @@ class ToolbarListener implements ContainerAwareInterface
         if(false === $this->isEnabled()) {
             return;
         }
-        
+
         $response = $event->getResponse();
         $request = $event->getRequest();
 
@@ -82,7 +82,7 @@ class ToolbarListener implements ContainerAwareInterface
         if ($request->isXmlHttpRequest()) {
             return;
         }
-        
+
         if ($response->isRedirection()
             || ($response->headers->has('Content-Type') && false === strpos($response->headers->get('Content-Type'), 'html'))
             || 'html' !== $request->getRequestFormat()
@@ -90,27 +90,27 @@ class ToolbarListener implements ContainerAwareInterface
             return;
         }
 
-        
+
         $profiler = $event->getKernel()->getApplication()->getContainer()->get('profiler');
         $profile = $profiler->collect($request, $response, null);
         $renderer = $event->getKernel()->getApplication()->getRenderer();
-        
+
 
         $this->injectToolbar($response, $profile, $renderer);
     }
-    
-    
-    
+
+
+
     protected function loadTemplates()
     {
         $templates = array();
-        
+
         $templateNames = $this->container->getParameter('data_collector.templates');
-        
+
         foreach($templateNames as $name => $file) {
             $templates[$name] = $this->container->get('renderer')->getAdapterByExt('twig')->loadTemplate($file);
         }
-        
+
         return $templates;
     }
 
@@ -136,12 +136,12 @@ class ToolbarListener implements ContainerAwareInterface
                     'templates' => $this->loadTemplates(),
                 )
             ))."\n";
-            
+
             $content = substr($content, 0, $pos) . $toolbar . substr($content, $pos);
             $response->setContent($content);
         }
     }
-    
+
     public static function getSubscribedEvents()
     {
         return array(
