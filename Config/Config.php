@@ -122,12 +122,6 @@ class Config implements DumpableServiceInterface
     protected $_yml_names_to_ignore;
 
     /**
-     * [$_is_restored description]
-     * @var [type]
-     */
-    protected $_is_restored;
-
-    /**
      * Magic function to get configuration section
      * The called method has to match the pattern getSectionConfig()
      * for example getDoctrineConfig() aliases getSection('doctrine')
@@ -584,13 +578,5 @@ class Config implements DumpableServiceInterface
             'has_cache'           => null !== $this->_cache,
             'has_container'       => null !== $this->_container
         );
-    }
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored()
-    {
-        return $this->_is_restored;
     }
 }

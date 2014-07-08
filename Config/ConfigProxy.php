@@ -35,6 +35,13 @@ use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 class ConfigProxy extends Config implements DumpableServiceProxyInterface
 {
     /**
+     * represents if current service has been already restored or not
+     *
+     * @var boolean
+     */
+    protected $_is_restored;
+
+    /**
      * ConfigProxy's constructor
      *
      * @param array $dump
@@ -67,5 +74,14 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
         }
 
         $this->_is_restored = true;
+    }
+
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->_is_restored;
     }
 }
