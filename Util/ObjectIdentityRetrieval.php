@@ -49,10 +49,13 @@ class ObjectIdentityRetrieval
     public static function build(BBApplication $application, $objectIdentity)
     {
         $matches = array();
-        if (false == preg_match(self::$_pattern1, $objectIdentity, $matches)) {
-            preg_match(self::$_pattern2, $objectIdentity, $matches);
+        if (preg_match(self::$_pattern1, $objectIdentity, $matches)) {
+            return new self($application->getEntityManager(), trim($matches[1]), trim($matches[2]));
+        }elseif (preg_match(self::$_pattern2, $objectIdentity, $matches)) {
+            return new self($application->getEntityManager(), trim($matches[2]), trim($matches[1]));
         }
-        return new self($application->getEntityManager(), trim($matches[1]), trim($matches[2]));
+        
+        return new self($application->getEntityManager(), null, null);
     }
 
     /**
@@ -61,6 +64,9 @@ class ObjectIdentityRetrieval
      */
     public function getObject()
     {
+        if (null === $this->_identifier || null === $this->_class) {
+            return null;
+        }
         return $this->_em->getRepository($this->_class)->find($this->_identifier);
     }
 
