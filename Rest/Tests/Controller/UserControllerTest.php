@@ -19,7 +19,7 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Tests\Controller;
+namespace BackBuilder\Rest\Tests\Controller;
 
 use BackBuilder\Rest\EventListener\PaginationListener;
 
