@@ -314,6 +314,22 @@ class SecurityContext extends sfSecurityContext
             $this->_authproviders[$key] = $provider;
         }
     }
+    
+    /**
+     * Get auth provider
+     * 
+     * @param string $key
+     * @return AuthenticationProviderInterface
+     * @throws InvalidArgumentException if provider not found
+     */
+    public function getAuthProvider($key)
+    {
+        if(array_key_exists($key, $this->_authproviders)) {
+            return $this->_authproviders[$key];
+        }
+        
+        throw \InvalidArgumentException(sprintf("Auth provider doesn't exists", $key));
+    }
 
     /**
      * @codeCoverageIgnore
