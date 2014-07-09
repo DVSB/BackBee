@@ -185,6 +185,7 @@ class Yaml extends AClassWrapper
                             } else {
                                 $this->interfaces = '';
                             }
+                            break;
                         case 'repository':
                             if (class_exists($datas)) {
                                 $this->repository = $datas;
