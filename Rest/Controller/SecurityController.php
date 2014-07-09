@@ -113,6 +113,8 @@ class SecurityController extends ARestController
                 $response = new Response();
                 if(SecurityException::UNKNOWN_USER === $e->getCode()) {
                     $response->setStatusCode(404, $e->getMessage());
+                } elseif(SecurityException::INVALID_CREDENTIALS === $e->getCode()) {
+                    $response->setStatusCode(401, $e->getMessage());
                 } else {
                     $response->setStatusCode(403, $e->getMessage());
                 }
