@@ -280,7 +280,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             ($renderer->getClassContainer() instanceof AClassContent) &&
             null === $renderer->getCurrentElement()
         ) {
-            //$renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
+            $renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
         }
 
         if (null === $renderer->__render) {

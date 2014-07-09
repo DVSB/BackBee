@@ -136,31 +136,19 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         ;
 
         $this->_initAnnotationReader();
-$start = microtime(true);
         $this->_initContainer();
-echo number_format((microtime(true) - $start), 4) . 's - container<br>';
-$start = microtime(true);
         $this->_initApplicationConfig();
-echo number_format((microtime(true) - $start), 4) . 's - application config<br>';
         $this->_initEnvVariables();
-$start = microtime(true);
         $this->_initAutoloader();
-echo number_format((microtime(true) - $start), 4) . 's - autoloader<br>';
-$start = microtime(true);
         $this->_initContentWrapper();
-echo number_format((microtime(true) - $start), 4) . 's - content wrapper<br>';
 
         try {
-$start = microtime(true);
             $this->_initEntityManager();
-echo number_format((microtime(true) - $start), 4) . 's - entity manager<br>';
         } catch (\Exception $excep) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
 
-$start = microtime(true);
         $this->_initBundles();
-echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
 
         if (false === $this->getContainer()->has('em')) {
             $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
@@ -169,9 +157,7 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
         }
 
         // Force container to create SecurityContext object to activate listener
-$start = microtime(true);
         $this->getSecurityContext();
-echo number_format((microtime(true) - $start), 4) . 's - security<br>';
 
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
@@ -324,9 +310,9 @@ echo number_format((microtime(true) - $start), 4) . 's - security<br>';
 
         $this->getTheme()->init(); // 30 ms
 
+
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
-
 
         if (false === $this->isClientSAPI()) {
             $response = $this->getController()->handle(); // 140 ms
@@ -565,7 +551,7 @@ echo number_format((microtime(true) - $start), 4) . 's - security<br>';
      */
     public function getEventDispatcher()
     {
-        return $this->getContainer()->get('ed');
+        return $this->getContainer()->get('event.dispatcher');
     }
 
     /**
@@ -1040,6 +1026,8 @@ echo number_format((microtime(true) - $start), 4) . 's - security<br>';
      */
     private function _initAutoloader()
     {
+        $this->getLogging();
+        $this->getAutoloader()->setEventDispatcher($this->getEventDispatcher());
         if (true === $this->getAutoloader()->isRestored()) {
             return $this;
         }
