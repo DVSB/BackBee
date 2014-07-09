@@ -103,6 +103,8 @@ services:
     event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
+        tags:
+            - { name: "dumpable" }
     ed:
         alias: event.dispatcher
     security.context:
@@ -114,6 +116,8 @@ services:
     renderer:
         class:      %bbapp.renderer.class%
         arguments:  ["@bbapp"]
+        tags:
+            - { name: "dumpable" }
     rpcserver:
         class:      %bbapp.rpcserver.class%
         arguments:  ["@bbapp"]
@@ -139,6 +143,8 @@ services:
     autoloader:
         class:      %bbapp.autoloader.class%
         arguments:  ["@bbapp"]
+        tags:
+            - { name: "dumpable" }
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]

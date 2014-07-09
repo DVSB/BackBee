@@ -5,6 +5,8 @@ namespace BackBuilder\Bundle;
 use BackBuilder\BBApplication;
 use BackBuilder\Config\Config;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\DependencyInjection\Loader\ContainerProxy;
 
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -48,55 +50,58 @@ class BundleLoader
         foreach ($bundles_config as $name => $classname) {
             $key = sprintf(self::BUNDLE_SERVICE_KEY_PATTERN, strtolower($name));
 
-            if (true === $do_get_base_dir || true === $container->getParameter('debug')) {
-                // Using ReflectionClass so we can read every bundle config file without the need to
-                // instanciate each bundle's Config
+            if (false === $container->hasDefinition($key)) {
                 $r = new \ReflectionClass($classname);
                 self::$bundles_base_dir[$key] = dirname($r->getFileName());
+
+                $definition = new Definition($classname, array(new Reference('bbapp')));
+                $definition->addTag('bundle');
+                $container->setDefinition($key, $definition);
             }
 
-            $definition = new Definition($classname, array(new Reference('bbapp')));
-            $definition->addTag('bundle');
-            $container->setDefinition($key, $definition);
+
         }
 
         $container->setParameter('bundles.base_dir', self::$bundles_base_dir);
 
-        self::loadBundlesConfig(); // 222 ms
+        self::loadBundlesConfig();
         self::loadBundleEvents();
-        self::loadBundlesServices(); // 17 ms
+        self::loadBundlesServices();
         self::registerBundleClassContentDir();
         self::registerBundleResourceDir();
         self::registerBundleScriptDir();
         self::registerBundleHelperDir();
 
         // add BundleListener event (service.tagged.bundle)
-        $application->getContainer()->get('event.dispatcher')->addListeners(array(
-            'bbapplication.start' => array(
-                'listeners' => array(
-                    array(
-                        'BackBuilder\Bundle\Listener\BundleListener',
-                        'onApplicationStart'
+        $event_dispatcher = $application->getContainer()->get('event.dispatcher');
+        if (($event_dispatcher instanceof DumpableServiceProxyInterface) && $event_dispatcher->isRestored()) {
+            $event_dispatcher->addListeners(array(
+                'bbapplication.start' => array(
+                    'listeners' => array(
+                        array(
+                            'BackBuilder\Bundle\Listener\BundleListener',
+                            'onApplicationStart'
+                        )
+                    )
+                ),
+                'service.tagged.bundle' => array(
+                    'listeners' => array(
+                        array(
+                            'BackBuilder\Bundle\Listener\BundleListener',
+                            'onGetBundleService'
+                        )
+                    )
+                ),
+                'bbapplication.stop' => array(
+                    'listeners' => array(
+                        array(
+                            'BackBuilder\Bundle\Listener\BundleListener',
+                            'onApplicationStop'
+                        )
                     )
                 )
-            ),
-            'service.tagged.bundle' => array(
-                'listeners' => array(
-                    array(
-                        'BackBuilder\Bundle\Listener\BundleListener',
-                        'onGetBundleService'
-                    )
-                )
-            ),
-            'bbapplication.stop' => array(
-                'listeners' => array(
-                    array(
-                        'BackBuilder\Bundle\Listener\BundleListener',
-                        'onApplicationStop'
-                    )
-                )
-            )
-        ));
+            ));
+        }
 
         // Cleaning memory
         self::$bundles_base_dir = array();
@@ -110,11 +115,29 @@ class BundleLoader
     private static function loadBundlesConfig()
     {
         $services_id = array();
+        $container = self::$application->getContainer();
         foreach (self::$bundles_base_dir as $key => $base_dir) {
-            $config = \BackBuilder\Bundle\ABundle::initBundleConfig(self::$application, $base_dir);
-            self::$bundles_config[$key] = $config;
+            $config = null;
             $config_service_id = \BackBuilder\Bundle\ABundle::getBundleConfigServiceId($base_dir);
-            self::$application->getContainer()->set($config_service_id, $config);
+            if (false === $container->hasDefinition($config_service_id)) {
+                $definition = new Definition('BackBuilder\Config\Config', array(
+                    $base_dir,
+                    new Reference('cache.bootstrap'),
+                    null,
+                    '%debug%',
+                    '%config.yml_files_to_ignore%'
+                ));
+                $definition->addTag('dumpable');
+                $definition->addMethodCall('setContainer', array(new Reference('service_container')));
+                $definition->addMethodCall('setEnvironment', array('%bbapp.environment%'));
+                $config = \BackBuilder\Bundle\ABundle::initBundleConfig(self::$application, $base_dir);
+                $container->set($config_service_id, $config);
+                $container->setDefinition($config_service_id, $definition);
+            } else {
+                $config = $container->get($config_service_id);
+            }
+
+            self::$bundles_config[$key] = $config;
             $services_id[] = $config_service_id;
         }
 
@@ -125,10 +148,14 @@ class BundleLoader
     {
         $event_dispatcher = self::$application->getContainer()->get('event.dispatcher');
 
+        if (($event_dispatcher instanceof DumpableServiceProxyInterface) && $event_dispatcher->isRestored()) {
+            return;
+        }
+
         foreach (self::$bundles_config as $key => $config) {
             $recipe = self::getBundleLoaderRecipeFor($config, self::EVENT_RECIPE_KEY);
             if (null === $recipe) {
-                $events = $config->getEventsConfig();
+                $events = $config->getRawSection('events');
                 if (false === is_array($events) || 0 === count($events)) {
                     continue;
                 }
@@ -147,6 +174,11 @@ class BundleLoader
      */
     private static function loadBundlesServices()
     {
+        $container = self::$application->getContainer();
+        if (true === ($container instanceof ContainerProxy)) {
+            return;
+        }
+
         $bundle_env_directory = null;
         if (BBApplication::DEFAULT_ENVIRONMENT !== self::$application->getEnvironment()) {
             $bundle_env_directory = implode(DIRECTORY_SEPARATOR, array(
@@ -186,6 +218,10 @@ class BundleLoader
 
     private static function registerBundleClassContentDir()
     {
+        if (true === self::$application->isRestored()) {
+            return;
+        }
+
         foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
@@ -210,6 +246,10 @@ class BundleLoader
 
     private static function registerBundleResourceDir()
     {
+        if (true === self::$application->isRestored()) {
+            return;
+        }
+
         foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
@@ -235,6 +275,10 @@ class BundleLoader
     private static function registerBundleScriptDir()
     {
         $renderer = self::$application->getRenderer();
+        if (true === $renderer->isRestored()) {
+            return;
+        }
+
         foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
             $recipe = null;
@@ -259,6 +303,10 @@ class BundleLoader
 
     private static function registerBundleHelperDir()
     {
+        if (true === self::$application->getAutoloader()->isRestored()) {
+            return;
+        }
+
         $renderer = self::$application->getRenderer();
         foreach (self::$bundles_base_dir as $key => $dir) {
             $config = self::$application->getContainer()->get($key . '.config');
@@ -286,7 +334,6 @@ class BundleLoader
     {
         $recipe = null;
         $bundle_config = $config->getBundleConfig();
-        // var_dump($bundle_config);
         if (true === isset($bundle_config['bundle_loader_recipes'])) {
             $recipe = true === isset($bundle_config['bundle_loader_recipes'][$key])
                 ? $bundle_config['bundle_loader_recipes'][$key]
