@@ -1,0 +1,117 @@
+doctrine:
+  dbal:
+    driver: pdo_sqlite
+    memory: true
+
+bundles:
+  []
+
+theme:
+  name: Default
+  description: BackBuilder 5 default theme.
+  screenshot: screenshoot.png
+  folder: Resources
+  architecture:
+    layouts_dir: layouts
+    scripts_dir: scripts
+    less_dir: less
+    css_dir: css
+    img_dir: img
+    js_dir: js
+
+logging:
+  appender: \BackBuilder\Logging\Appender\File
+  logfile: log/bb5-tests.log
+  level: ERROR
+
+contentwrapper:
+  namespace:    BackBuilder\ClassContent
+  protocol:     bb.class
+  adapter:      \BackBuilder\Stream\ClassWrapper\Adapter\Yaml
+
+route:
+  # BackBuilder RPC services
+  bb.method:
+      pattern: /
+      defaults:
+          _action: rpcAction
+      requirements:
+          HTTP-X-Requested-With:  XMLHttpRequest
+          HTTP-X-BB-METHOD:       JsonRpc
+
+  # BackBuilder RPC upload service
+  bb.upload:
+      pattern: /
+      defaults:
+          _action: uploadAction
+      requirements:
+          HTTP-X-Requested-With:  XMLHttpRequest
+          HTTP-X-BB-METHOD:       Upload
+
+  # Backbuilder internal services
+  bb.internal.services:
+      pattern: /bb-internal-services/{servicename}
+      defaults:
+        _action: handleInternalServicesAction
+      requirements:
+        servicename: (generate_classcontent_cache)
+
+  # BackBuilder resources
+  bb.resources:
+      pattern: /ressources/{filename}
+      defaults:
+          _action: resourcesAction
+      requirements:
+          filename: .+
+
+  # BackBuilder media files
+  bb.images:
+      pattern: /{type}/{filename}
+      defaults:
+          _action: mediaAction
+      requirements:
+          type: (images|media)
+          filename: .+
+
+  # BackBuilder rss
+  bb.rss:
+      pattern: /rss/{uri}
+      defaults:
+          _action: rssAction
+          uri:     _root_
+      requirements:
+          uri: .+
+
+  # Default route
+  default:
+      pattern: /{uri}
+      defaults:
+          _action: defaultAction
+          uri:     _root_
+      requirements:
+          uri: .+
+
+security:
+  firewalls:
+    bb_area:
+      pattern: ^/
+      requirements:
+        HTTP-X-Requested-With: XMLHttpRequest
+        HTTP-X-BB-METHOD: (JsonRpc|Upload)
+      provider: bb_user
+      bb_auth:
+        provider: bb_user
+        nonce_dir: security/nonces
+        lifetime : 1200
+    front_area:
+      pattern: ^/
+      anonymous: ~
+
+  providers:
+    bb_user:
+      entity:
+        class: BackBuilder\Security\User
+      secret: bb5_demo_secret_key
+
+  contexts:
+    BackBuilder\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext]
