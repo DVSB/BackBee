@@ -2,30 +2,33 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\AutoLoader;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Exception\BBException,
-    BackBuilder\Event\Dispatcher,
-    BackBuilder\Logging\Logger,
-    BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
+use BackBuilder\BBApplication;
+use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\Exception\BBException;
+use BackBuilder\Event\Dispatcher;
+use BackBuilder\Logging\Logger;
+use BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
 
 if (false === defined('NAMESPACE_SEPARATOR')) {
     define('NAMESPACE_SEPARATOR', '\\');
@@ -66,7 +69,7 @@ if (false === defined('NAMESPACE_SEPARATOR')) {
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class AutoLoader
+class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
 
     /**
@@ -107,15 +110,21 @@ class AutoLoader
 
     /**
      *  Events disptacher
-     * @var \BackBuilder\Event\Dispatcher 
+     * @var \BackBuilder\Event\Dispatcher
      */
     private $_dispatcher;
 
     /**
      * Application logger
-     * @var \BackBuilder\Logging\Logger 
+     * @var \BackBuilder\Logging\Logger
      */
     private $_logger;
+
+    /**
+     * define if autolader is already restored by container or not
+     * @var boolean
+     */
+    private $_is_restored;
 
     /**
      * Class constructor
@@ -123,13 +132,12 @@ class AutoLoader
      * @param \BackBuilder\Event\Dispatcher $dispatcher Optionnal events dispatcher
      * @param \BackBuilder\Logging\Logger $logger Optionnal logging engine
      */
-    public function __construct(BBApplication $application = null, Dispatcher $dispatcher = null, Logger $logger = null)
+    public function __construct(BBApplication $application = null, Dispatcher $dispatcher = null)
     {
         $this->_availableWrappers = stream_get_wrappers();
 
-        $this->setApplication($application)
-                ->setEventDispatcher($dispatcher)
-                ->setLogger($logger);
+        $this->setApplication($application);
+        $this->setEventDispatcher($dispatcher);
     }
 
     /**
@@ -151,17 +159,6 @@ class AutoLoader
     public function setEventDispatcher(Dispatcher $dispatcher = null)
     {
         $this->_dispatcher = $dispatcher;
-        return $this;
-    }
-
-    /**
-     * Sets the logger engine
-     * @param \BackBuilder\Logging\Logger $logger
-     * @return \BackBuilder\AutoLoader\AutoLoader The current autoloader
-     */
-    public function setLogger(Logger $logger = null)
-    {
-        $this->_logger = $logger;
         return $this;
     }
 
@@ -353,15 +350,6 @@ class AutoLoader
     }
 
     /**
-     * Returns the logging engine if defined, NULL otherwise
-     * @return \BackBuilder\Logging\Logger | NULL
-     */
-    public function getLogger()
-    {
-        return $this->_logger;
-    }
-
-    /**
      * Returns the wrappers registered for provided namespaces and protocols
      * @param string|array $namespace The namespaces to look for
      * @param string|array $protocol The protocols to use
@@ -415,11 +403,11 @@ class AutoLoader
 
     /**
      * Registers this auloloader
-     * @param Boolean $throw [optional] This parameter specifies whether 
-     *                       spl_autoload_register should throw exceptions 
+     * @param Boolean $throw [optional] This parameter specifies whether
+     *                       spl_autoload_register should throw exceptions
      *                       when the autoload_function cannot be registered.
-     * @param Boolean $prepend [optional] If TRUE, spl_autoload_register will 
-     *                         prepend the autoloader on the autoload stack 
+     * @param Boolean $prepend [optional] If TRUE, spl_autoload_register will
+     *                         prepend the autoloader on the autoload stack
      *                         instead of appending it.
      * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
      */
@@ -483,4 +471,52 @@ class AutoLoader
         return $this;
     }
 
+    /**
+     * Returns the namespace of the class proxy to use or null if no proxy is required
+     *
+     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     */
+    public function getClassProxy()
+    {
+        return null;
+    }
+
+    /**
+     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
+     * with the dump array produced by this method
+     *
+     * @return array contains every datas required by this service to be restored at the same state
+     */
+    public function dump(array $options = array())
+    {
+        return array(
+            'namespaces_locations' => $this->_namespaces,
+            'wrappers_namespaces'  => $this->_streamWrappers
+        );
+    }
+
+    /**
+     * Restore current service to the dump's state
+     *
+     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                     restore current service
+     */
+    public function restore(ContainerInterface $container, array $dump)
+    {
+        $this->register();
+
+        $this->_namespaces = $dump['namespaces_locations'];
+        $this->_streamWrappers = $dump['wrappers_namespaces'];
+
+        $this->_is_restored = true;
+    }
+
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->_is_restored;
+    }
 }
