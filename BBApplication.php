@@ -143,11 +143,17 @@ $start = microtime(true);
         $this->_initApplicationConfig();
 echo number_format((microtime(true) - $start), 4) . 's - application config<br>';
         $this->_initEnvVariables();
+$start = microtime(true);
         $this->_initAutoloader();
+echo number_format((microtime(true) - $start), 4) . 's - autoloader<br>';
+$start = microtime(true);
         $this->_initContentWrapper();
+echo number_format((microtime(true) - $start), 4) . 's - content wrapper<br>';
 
         try {
+$start = microtime(true);
             $this->_initEntityManager();
+echo number_format((microtime(true) - $start), 4) . 's - entity manager<br>';
         } catch (\Exception $excep) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
@@ -163,7 +169,9 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
         }
 
         // Force container to create SecurityContext object to activate listener
+$start = microtime(true);
         $this->getSecurityContext();
+echo number_format((microtime(true) - $start), 4) . 's - security<br>';
 
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
@@ -1032,6 +1040,10 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
      */
     private function _initAutoloader()
     {
+        if (true === $this->getAutoloader()->isRestored()) {
+            return $this;
+        }
+
         $this->getAutoloader()
             ->register()
             ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
@@ -1051,10 +1063,6 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
                 ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
                 ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
         }
-
-        $this->getAutoloader()
-            ->setEventDispatcher($this->getEventDispatcher())
-            ->setLogger($this->getLogging());
 
         return $this;
     }
@@ -1104,6 +1112,7 @@ echo number_format((microtime(true) - $start), 4) . 's - bundle<br>';
         if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig()) {
             throw new BBException('None class content wrapper found');
         }
+
         $namespace = isset($contentwrapperConfig['namespace']) ? $contentwrapperConfig['namespace'] : '';
         $protocol = isset($contentwrapperConfig['protocol']) ? $contentwrapperConfig['protocol'] : '';
         $adapter = isset($contentwrapperConfig['adapter']) ? $contentwrapperConfig['adapter'] : '';
