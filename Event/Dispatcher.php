@@ -2,30 +2,32 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Event;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Config\Config;
+use BackBuilder\BBApplication;
+use BackBuilder\Config\Config;
+use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 
-use Symfony\Component\EventDispatcher\EventDispatcher,
-    Symfony\Component\EventDispatcher\Event as sfEvent;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\Event as sfEvent;
 
 /**
  * An event dispatcher for BB application
@@ -35,14 +37,13 @@ use Symfony\Component\EventDispatcher\EventDispatcher,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Dispatcher extends EventDispatcher
+class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 {
-
     /**
      * Current BackBuilder application
      * @var BackBuilder\BBApplication
      */
-    private $_application;
+    protected $_application;
 
     /**
      * Class constructor
@@ -57,8 +58,8 @@ class Dispatcher extends EventDispatcher
         }
 
         if (null !== $config) {
-            if (null !== $eventsConfig = $config->getEventsConfig()) {
-                $this->addListeners($eventsConfig);
+            if (null !== $events_config = $config->getRawSection('events')) {
+                $this->addListeners($events_config);
             }
         }
     }
@@ -136,7 +137,7 @@ class Dispatcher extends EventDispatcher
         if (0 === strpos($eventName, 'backbuilder.')) {
             $eventName = substr($eventName, 12);
         }
-        
+
         if (0 === strpos($eventName, 'classcontent.')) {
             $eventName = substr($eventName, 13);
         }
@@ -192,5 +193,61 @@ class Dispatcher extends EventDispatcher
         }
 
         return $listeners;
+    }
+
+
+    /**
+     * Returns the namespace of the class proxy to use or null if no proxy is required
+     *
+     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     */
+    public function getClassProxy()
+    {
+        return '\BackBuilder\Event\DispatcherProxy';
+    }
+
+    /**
+     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
+     * with the dump array produced by this method
+     *
+     * @return array contains every datas required by this service to be restored at the same state
+     */
+    public function dump(array $options = array())
+    {
+        return array('listeners' => $this->getListeners());
+    }
+
+    /**
+     * Triggers the listeners of an event.
+     *
+     * This method can be overridden to add functionality that is executed
+     * for each listener.
+     *
+     * @param array[callback] $listeners The event listeners.
+     * @param string          $eventName The name of the event to dispatch.
+     * @param Event           $event     The event object to pass to the event handlers/listeners.
+     */
+    protected function doDispatch($listeners, $eventName, sfEvent $event)
+    {
+        foreach ($listeners as $listener) {
+            $callable = array_shift($listener);
+            if (true === is_array($callable)) {
+                $listener = $callable;
+                $callable = array_shift($listener);
+            }
+
+            if (true === is_string($callable)) {
+                if (1 === preg_match('#^@(.+)#', $callable, $matches) && true === isset($matches[1])) {
+                    $callable = $this->_application->getContainer()->get($matches[1]);
+                }
+            }
+
+            array_unshift($listener, $callable);
+            call_user_func($listener, $event);
+
+            if ($event->isPropagationStopped()) {
+                break;
+            }
+        }
     }
 }
