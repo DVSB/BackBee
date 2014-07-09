@@ -28,12 +28,13 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpFoundation\Request;
 
 use BackBuilder\FrontController\FrontController;
-use BackBuilder\Rest\Controller\AuthController;
+use BackBuilder\Rest\Controller\SecurityController;
 use BackBuilder\Test\TestCase;
 
 
 use BackBuilder\Site\Site,
-    BackBuilder\Site\Layout;
+    BackBuilder\Security\User;
+
 
 /**
  * Test for AuthController class
@@ -48,7 +49,6 @@ class SecurityControllerTest extends TestCase
 
     protected $bbapp;
     
-    
     protected function setUp()
     {
         $this->initAutoload();
@@ -56,11 +56,21 @@ class SecurityControllerTest extends TestCase
         $this->initDb($this->bbapp);
         $this->bbapp->start();
         
+        // valid user
+        $user = new User();
+        $user->setLogin('user123');
+        $user->setPassword('password123');
+        $user->setActivated(true);
+        $this->bbapp->getEntityManager()->persist($user);
         
         
         $this->bbapp->getEntityManager()->flush();
     }
     
+    /**
+     * 
+     * @return \BackBuilder\Security\Tests\Controller\SecurityController
+     */
     protected function getController()
     {
         $controller = new SecurityController();
@@ -70,10 +80,71 @@ class SecurityControllerTest extends TestCase
     }
 
 
-    public function testAuthAction()
+    public function testAuthAction_bb_area()
     {
+        $controller = $this->getController();
         
+        $request = new Request(array(), array(
+            'username' => 'user123',
+            'password' => 'password123'
+        ));
+        $response = $controller->authenticateAction('bb_area', $request);
         
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $content = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $content);
+        $this->assertArrayHasKey('nonce', $content);
+    }
+    
+    public function testAuthAction_bb_area_userDoesntExist()
+    {
+        $controller = $this->getController();
+        
+        $request = new Request(array(), array(
+            'username' => 'userThatDoesntExist',
+            'password' => 'password123'
+        ));
+        $response = $controller->authenticateAction('bb_area', $request);
+        
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+    
+    public function testAuthAction_bb_area_invalidPassword()
+    {
+        $controller = $this->getController();
+        
+        $request = new Request(array(), array(
+            'username' => 'user123',
+            'password' => 'passwordInvalid'
+        ));
+        $response = $controller->authenticateAction('bb_area', $request);
+        
+        $this->assertEquals(401, $response->getStatusCode());
+    }
+    
+    /**
+     * 
+     */
+    public function testAuthAction_invalidFirewall()
+    {
+        $controller = $this->getController();
+        
+        $response = $controller->authenticateAction('invalidFirewallName', new Request());
+        
+        $this->assertEquals(400, $response->getStatusCode());
+    }
+    
+    /**
+     * 
+     */
+    public function testAuthAction_firewallWithoutSupportedContexts()
+    {
+        $controller = $this->getController();
+        
+        $response = $controller->authenticateAction('rest_api_area_test', new Request());
+        
+        $this->assertEquals(400, $response->getStatusCode());
     }
     
 
@@ -85,7 +156,7 @@ class SecurityControllerTest extends TestCase
     
     /**
      * 
-     * @return type
+     * @return 
      */
     protected function getEntityManager()
     {

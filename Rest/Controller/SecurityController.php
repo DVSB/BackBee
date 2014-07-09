@@ -31,7 +31,9 @@ use Symfony\Component\HttpFoundation\Response,
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
-use BackBuilder\Security\Token\UsernamePasswordToken;
+use BackBuilder\Security\Token\UsernamePasswordToken,
+    BackBuilder\Security\Token\BBUserToken,
+    BackBuilder\Security\Exception\SecurityException;
 
 use BackBuilder\Rest\Exception\ValidationException;
 
@@ -47,23 +49,81 @@ class SecurityController extends ARestController
 {
    
     /**
-     * Get all records
+     * Authenticate against a specific firewall
+     * 
+     * Note: request attributes as well as the request format depend on the 
+     * specific implementation of the firewall and its provider
      * 
      * 
      * @Rest\RequestParam(name = "firewall", description="Firewall to authenticate against", requirements = {
-     *  @Assert\Choice(choices = {}, message="The supplied firewall is invalid"), 
+     *  @Assert\Choice(choices = {"bb_area"}, message="The requested firewall is invalid"), 
      * })
      * 
      */
-    public function autheticateFirewallAction($firewall, Request $request, ConstraintViolationList $violations = null) 
+    public function authenticateAction($firewall, Request $request, ConstraintViolationList $violations = null) 
     {
         if(null !== $violations && count($violations) > 0) {
             throw new ValidationException($violations);
         }
         
-        // TODO
+        $securityConfig = $this->getApplication()->getConfig()->getSection('security');
         
-        return array();
+        if(!isset($securityConfig['firewalls'][$firewall])) {
+            $response = new Response();
+            $response->setStatusCode(400, sprintf('Firewall not configured: %s', $firewall));
+            return $response;
+        }
+        
+        $firewallConfig = $securityConfig['firewalls'][$firewall];
+        
+        $contexts = array_intersect(array_keys($firewallConfig), array('bb_auth') );
+        
+        if(0 === count($contexts)) {
+            $response = new Response();
+            $response->setStatusCode(400, sprintf('No supported security contexts found for firewall: %s', $firewall));
+            return $response;
+        }
+        
+        $securityContext = $this->_application->getSecurityContext();
+        
+        
+        $response = new Response();
+        
+        if(in_array('bb_auth', $contexts)) {
+            $contextConfig = $firewallConfig['bb_auth'];
+            
+            $created = \date_create()->format('r');
+            $nonce = md5(uniqid('', TRUE));
+            $digest = md5($nonce . $created . md5($request->request->get('password')));
+            $token = new BBUserToken();
+            $token->setCreated($created);
+            $token->setUser($request->request->get('username'));
+            $token->setDigest($digest);
+            $token->setNonce($nonce);
+            
+            $authProvider = $securityContext->getAuthProvider('bb_auth');
+            
+            try {
+                $authProvider->authenticate($token);
+
+                $response->setContent(json_encode(array(
+                    'nonce' => $nonce
+                )));
+            } catch(SecurityException $e) {
+                $response = new Response();
+                if(SecurityException::UNKNOWN_USER === $e->getCode()) {
+                    $response->setStatusCode(404, $e->getMessage());
+                } else {
+                    $response->setStatusCode(403, $e->getMessage());
+                }
+                
+                return $response;
+            }
+        }
+        
+        return $response;
     }
+    
+    
     
 }
