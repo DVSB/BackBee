@@ -67,12 +67,11 @@ class PageRepository extends NestedNodeRepository
 
     public function getOnlineSiblingsByLayout(Page $node, Layout $layout, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
-        $qb = $this->_getSiblingsQuery($node, $includeNode, $order, $limit, $start);
-        $this->_andOnline($qb);
-
-        $qb->andWhere('n._layout = :layout')
-            ->setParameter('layout', $layout);
-
+        $qb = $this->createQueryBuilder('n')
+                ->andIsSiblingsOf($node, $includeNode, $order, $limit, $start)
+                ->andWhere('n._layout = :layout')
+                ->setParameter('layout', $layout);
+        $qb = $this->_andOnline($qb);
         return $qb->getQuery()->getResult();
     }
 

@@ -293,6 +293,7 @@ class NestedNodeRepository extends EntityRepository
      * @param int $limit            max number of results
      * @param int $start            first result index
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getSiblingsQuery(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
     {

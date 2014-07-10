@@ -295,7 +295,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getSiblings
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getSiblingsQuery
      */
     public function testGetSiblings()
     {
