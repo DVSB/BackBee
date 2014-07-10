@@ -210,18 +210,22 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         try {
             $secret = $user->getPassword();
             if($this->_encoderFactory) {
-                $encoder = $this->_encoderFactory->getEncoder($user);
-                
-                if($encoder instanceof PlaintextPasswordEncoder) {
+                try {
+                    $encoder = $this->_encoderFactory->getEncoder($user);
+                    
+                    if($encoder instanceof PlaintextPasswordEncoder) {
+                        $secret = md5($secret);
+                    } elseif($encoder instanceof MessageDigestPasswordEncoder) {
+                        // $secret is already md5 encoded
+                        // NB: only md5 algo without salt is currently supported due to frontend dependency
+                    } else {
+                        // currently there is a dependency on md5 in frontend so all other encoders can't be supported
+                        throw new \RuntimeException('Encoder is not supported: ' . get_class($encoder));
+                    }
+                } catch(\RuntimeException $e) {
+                    // no encoder defined
                     $secret = md5($secret);
-                } elseif($encoder instanceof MessageDigestPasswordEncoder) {
-                    // $secret is already md5 encoded
-                    // NB: only md5 algo without salt is currently supported due to frontend dependency
-                } else {
-                    // currently there is a dependency on md5 in frontend so all other encoders can't be supported
-                    throw new \RuntimeException('Encoder is not supported: ' . get_class($encoder));
                 }
-                
             } else {
                 // no encoder - still have to encode with md5
                 $secret = md5($secret);
