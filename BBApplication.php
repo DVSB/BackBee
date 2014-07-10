@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -18,8 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
-
-namespace BackBuilder;
 
 use BackBuilder\AutoLoader\AutoLoader;
 use BackBuilder\Bundle\BundleLoader;
@@ -48,6 +47,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validation;
@@ -801,7 +801,13 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function getSession()
     {
         if (null === $this->getRequest()->getSession()) {
-            $session = new Session();
+            
+            if('test' === $this->getEnvironment()) {
+                $session = new Session(new MockArraySessionStorage());
+            } else {
+                $session = new Session();
+            }
+            
             $session->start();
             $this->getRequest()->setSession($session);
         }

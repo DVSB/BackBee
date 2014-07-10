@@ -59,8 +59,12 @@ class Repository extends EntityRepository
      */
     public function remove(\BackBuilder\Bundle\Registry $registry)
     {
-        $this->getEntityManager()->remove($registry);
-        $this->getEntityManager()->flush($registry);
+        if(\Doctrine\ORM\UnitOfWork::STATE_NEW !== $this->getEntityManager()->getUnitOfWork()->getEntityState($registry)) {
+            $this->getEntityManager()->remove($registry);
+            $this->getEntityManager()->flush($registry);
+        }
+        
+        
 
         return $registry;
     }

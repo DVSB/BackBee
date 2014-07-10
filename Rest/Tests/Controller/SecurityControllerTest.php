@@ -19,21 +19,16 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Tests\Controller;
+namespace BackBuilder\Rest\Tests\Controller;
 
-use BackBuilder\Rest\EventListener\PaginationListener;
-
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 use Symfony\Component\HttpFoundation\Request;
 
-use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\SecurityController;
 use BackBuilder\Test\TestCase;
 
 
-use BackBuilder\Site\Site,
-    BackBuilder\Security\User;
+use BackBuilder\Security\User;
 
 
 /**
@@ -84,10 +79,19 @@ class SecurityControllerTest extends TestCase
     {
         $controller = $this->getController();
         
+        $created = date('r'); //'Wed, 09 Jul 2014 14:04:27 GMT';
+        $nonce = '05a90bfd413c223a3451d68968f9e5fa';
+        $username = 'user123';
+        $password = 'password123';
+        $digest = md5($nonce . $created . md5($password));
+        
         $request = new Request(array(), array(
-            'username' => 'user123',
-            'password' => 'password123'
+            'username' => $username,
+            'created' => $created,
+            'digest' => $digest,
+            'nonce' => $nonce
         ));
+        
         $response = $controller->authenticateAction('bb_area', $request);
         
         $this->assertEquals(200, $response->getStatusCode());
@@ -97,13 +101,37 @@ class SecurityControllerTest extends TestCase
         $this->assertArrayHasKey('nonce', $content);
     }
     
+    public function testAuthAction_bb_area_expired()
+    {
+        $controller = $this->getController();
+        
+        $created = date('r', time() - 301); // -5.01 minutes
+        $nonce = '05a90bfd413c223a3451d68968f9e5fa';
+        $username = 'user123';
+        $password = 'password123';
+        $digest = md5($nonce . $created . md5($password));
+        
+        $request = new Request(array(), array(
+            'username' => $username,
+            'created' => $created,
+            'digest' => $digest,
+            'nonce' => $nonce
+        ));
+        
+        $response = $controller->authenticateAction('bb_area', $request);
+        
+        $this->assertEquals(401, $response->getStatusCode());
+    }
+    
     public function testAuthAction_bb_area_userDoesntExist()
     {
         $controller = $this->getController();
         
         $request = new Request(array(), array(
             'username' => 'userThatDoesntExist',
-            'password' => 'password123'
+            'created' => 'test',
+            'digest' => 'test',
+            'nonce' => 'test'
         ));
         $response = $controller->authenticateAction('bb_area', $request);
         
@@ -114,10 +142,19 @@ class SecurityControllerTest extends TestCase
     {
         $controller = $this->getController();
         
+        $created = date('r'); //'Wed, 09 Jul 2014 14:04:27 GMT';
+        $nonce = '05a90bfd413c223a3451d68968f9e5fa';
+        $username = 'user123';
+        $password = 'passwordInvalid';
+        $digest = md5($nonce . $created . md5($password));
+        
         $request = new Request(array(), array(
-            'username' => 'user123',
-            'password' => 'passwordInvalid'
+            'username' => $username,
+            'created' => $created,
+            'digest' => $digest,
+            'nonce' => $nonce
         ));
+        
         $response = $controller->authenticateAction('bb_area', $request);
         
         $this->assertEquals(401, $response->getStatusCode());

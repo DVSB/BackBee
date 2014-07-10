@@ -23,16 +23,12 @@ namespace BackBuilder\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\Validator\ConstraintViolationList,
-    Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
-    Symfony\Component\Security\Http\SecurityEvents,
-    Symfony\Component\HttpFoundation\JsonResponse;
+    Symfony\Component\Validator\ConstraintViolationList;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
-use BackBuilder\Security\Token\UsernamePasswordToken,
-    BackBuilder\Security\Token\BBUserToken,
+use BackBuilder\Security\Token\BBUserToken,
     BackBuilder\Security\Exception\SecurityException;
 
 use BackBuilder\Rest\Exception\ValidationException;
@@ -90,16 +86,16 @@ class SecurityController extends ARestController
         $response = new Response();
         
         if(in_array('bb_auth', $contexts)) {
-            $contextConfig = $firewallConfig['bb_auth'];
+            $username = $request->request->get('username');
+            $created = $request->request->get('created');
+            $nonce = $request->request->get('nonce');
+            $digest = $request->request->get('digest');
             
-            $created = \date_create()->format('r');
-            $nonce = md5(uniqid('', TRUE));
-            $digest = md5($nonce . $created . md5($request->request->get('password')));
             $token = new BBUserToken();
+            $token->setUser($username);
             $token->setCreated($created);
-            $token->setUser($request->request->get('username'));
-            $token->setDigest($digest);
             $token->setNonce($nonce);
+            $token->setDigest($digest);
             
             $authProvider = $securityContext->getAuthProvider('bb_auth');
             
@@ -113,6 +109,12 @@ class SecurityController extends ARestController
                 $response = new Response();
                 if(SecurityException::UNKNOWN_USER === $e->getCode()) {
                     $response->setStatusCode(404, $e->getMessage());
+                } elseif(SecurityException::INVALID_CREDENTIALS === $e->getCode()) {
+                    $response->setStatusCode(401, $e->getMessage());
+                } elseif(SecurityException::EXPIRED_AUTH === $e->getCode()) {
+                    $response->setStatusCode(401, $e->getMessage());
+                } elseif(SecurityException::EXPIRED_TOKEN === $e->getCode()) {
+                    $response->setStatusCode(401, $e->getMessage());
                 } else {
                     $response->setStatusCode(403, $e->getMessage());
                 }
