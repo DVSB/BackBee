@@ -54,7 +54,12 @@ class PageRepository extends NestedNodeRepository
 
     public function getOnlinePrevSibling(ANestedNode $node)
     {
-        $q = $this->_getPrevSiblingsQuery($node)->orderBy('n._leftnode', 'desc')->setMaxResults(1);
+        $q = $this->createQueryBuilder('n')
+                ->andParentIs($node->getParent())
+                ->andLevelEquals($node->getLevel())
+                ->andRightnodeIsLowerThan($node->getLeftnode, true)
+                ->orderBy('n._leftnode', 'desc')
+                ->setMaxResults(1);
         $q = $this->_andOnline($q);
 
         return $q->getQuery()->getOneOrNullResult();
@@ -73,7 +78,10 @@ class PageRepository extends NestedNodeRepository
 
     public function getOnlineNextSibling(ANestedNode $node)
     {
-        $q = $this->_getNextSiblingsQuery($node)
+        $q = $this->createQueryBuilder('n')
+                ->andParentIs($node->getParent())
+                ->andLevelEquals($node->getLevel())
+                ->andLeftnodeIsUpperThan($node->getLeftnode(), true)
                 ->orderBy('n._leftnode', 'asc')
                 ->setMaxResults(1);
         $q = $this->_andOnline($q);
@@ -110,9 +118,10 @@ class PageRepository extends NestedNodeRepository
     {
         if (is_null($node))
             throw new \Exception(__METHOD__ . " node can't be null");
-        $q = $this->_getPrevSiblingQuery($node);
-        //->andWhere("n._state = :online")
-        //->setParameter('online', Page::STATE_ONLINE);
+
+        $q = $this->createQueryBuilder('n')
+                ->andIsPreviousSiblingOf($node);
+        $q = $this->_andOnline($q);
         return $q->getQuery()->getOneOrNullResult();
     }
 
@@ -146,9 +155,10 @@ class PageRepository extends NestedNodeRepository
     {
         if (is_null($node))
             throw new \Exception(__METHOD__ . " node can't be null");
-        $q = $this->_getNextSiblingQuery($node);
-        //->andWhere("n._state = :online")
-        //->setParameter('online', Page::STATE_ONLINE);
+
+        $q = $this->createQueryBuilder('n')
+                ->andIsNextSiblingOf($node);
+        $q = $this->_andOnline($q);
         return $q->getQuery()->getOneOrNullResult();
     }
 

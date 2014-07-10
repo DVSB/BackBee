@@ -79,7 +79,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getAncestor
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getAncestorQuery
      */
     public function testGetAncestor()
     {
@@ -262,7 +261,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getPrevSibling
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getPrevSiblingQuery
      */
     public function testGetPrevSibling()
     {
@@ -280,7 +278,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getNextSibling
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getNextSiblingQuery
      */
     public function testGetNextSibling()
     {
