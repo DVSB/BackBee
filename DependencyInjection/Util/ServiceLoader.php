@@ -28,6 +28,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 /**
+ * Allows to easily load services into container from yml or xml file
  *
  * @category    BackBuilder
  * @package     BackBuilder\DependencyInjection
@@ -37,10 +38,10 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 class ServiceLoader
 {
     /**
-     * [loadServicesFromYamlFile description]
-     * @param  Container $container [description]
-     * @param  [type]    $dir       [description]
-     * @return [type]               [description]
+     * Load services from yaml file into your container
+     *
+     * @param  Container     $container the container we want to load services into
+     * @param  string|array  $dir       directory (or directories) in where we can find services files
      */
     public static function loadServicesFromYamlFile(Container $container, $dir)
     {
@@ -50,10 +51,10 @@ class ServiceLoader
     }
 
     /**
-     * [loadServicesFromXmlFile description]
-     * @param  Container $container [description]
-     * @param  [type]    $dir       [description]
-     * @return [type]               [description]
+     * Load services from xml file into your container
+     *
+     * @param  Container     $container the container we want to load services into
+     * @param  string|array  $dir       directory (or directories) in where we can find services files
      */
     public static function loadServicesFromXmlFile(Container $container, $dir)
     {
