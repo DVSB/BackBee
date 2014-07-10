@@ -21,19 +21,14 @@
 
 namespace BackBuilder\Rest\Tests\Controller;
 
-use BackBuilder\Rest\EventListener\PaginationListener;
-
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 use Symfony\Component\HttpFoundation\Request;
 
-use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\SecurityController;
 use BackBuilder\Test\TestCase;
 
 
-use BackBuilder\Site\Site,
-    BackBuilder\Security\User;
+use BackBuilder\Security\User;
 
 
 /**
