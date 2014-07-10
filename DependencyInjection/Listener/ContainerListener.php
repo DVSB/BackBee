@@ -21,6 +21,9 @@ namespace BackBuilder\DependencyInjection\Listener;
  */
 
 use BackBuilder\DependencyInjection\Container;
+use BackBuilder\DependencyInjection\Exception\CannotCreateContainerDirectoryException;
+use BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException;
+use BackBuilder\DependencyInjection\Loader\ContainerProxy;
 use BackBuilder\Event\Event;
 use BackBuilder\Exception\BBException;
 
@@ -45,23 +48,25 @@ class ContainerListener
         $container = $application->getContainer();
 
         if (false === $application->isDebugMode()) {
-            if (false === is_a($container, 'BackBuilder\DependencyInjection\Loader\ContainerProxy')) {
+            if (false === ($container instanceof ContainerProxy)) {
                 $container_filename = $container->getParameter('container.filename');
                 $container_directory = $container->getParameter('container.dir');
 
-                if (false === is_dir($container_directory)) {
-                    @mkdir($container_directory, 0755);
+                if (false === is_dir($container_directory) && false === @mkdir($container_directory, 0755)) {
+                    throw new CannotCreateContainerDirectoryException($container_directory);
                 }
 
-                if (true === is_writable($container_directory)) {
-                    $dumper = new \BackBuilder\DependencyInjection\Dumper\PhpArrayDumper($container);
-                    file_put_contents(
-                        $container_directory . DIRECTORY_SEPARATOR . $container_filename,
-                        $dumper->dump(array(
-                            'do_compile' => true
-                        ))
-                    );
+                if (false === is_writable($container_directory)) {
+                    throw new ContainerDirectoryNotWritableException($container_directory);
                 }
+
+                $dumper = new \BackBuilder\DependencyInjection\Dumper\PhpArrayDumper($container);
+                file_put_contents(
+                    $container_directory . DIRECTORY_SEPARATOR . $container_filename,
+                    $dumper->dump(array(
+                        'do_compile' => true
+                    ))
+                );
             }
         } else {
             $container->compile();

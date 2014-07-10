@@ -26,20 +26,15 @@ namespace BackBuilder\DependencyInjection\Exception;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class ServiceNotDumpableException extends \BackBuilder\Exception\BBException
+class ContainerDirectoryNotWritableException extends \BackBuilder\Exception\BBException
 {
     /**
-     * ServiceNotDumpableException's constructor
+     * ContainerDirectoryNotWrittableException's constructor
      *
-     * @param string      $id    id of the service which is not dumapble
-     * @param string|null $class class of the service which is not dumpable (can be null)
+     * @param string $directory absolute path of container directory which is not writtable
      */
-    public function __construct($id, $class = null)
+    public function __construct($directory)
     {
-        parent::__construct(sprintf(
-            'You tagged %s as a dumpable service but it did not implement %s.',
-            $id . (null !== $class ? " ($class)" : ''),
-            'BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface'
-        ));
+        parent::__construct("The directory (`$directory`) is not writable, permission denied.");
     }
 }
