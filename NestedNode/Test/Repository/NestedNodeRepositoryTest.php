@@ -101,7 +101,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getAncestors
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getAncestorsQuery
      */
     public function testGetAncestors()
     {
@@ -113,11 +112,12 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array($this->root_asc), $this->repo->getAncestors($this->root_asc, 0, true));
         $this->assertEquals(array($this->root_asc), $this->repo->getAncestors($child));
         $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($child, null, true));
-        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($child, 0, true));
+        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($child, 1, true));
         $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($subchild));
         $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repo->getAncestors($subchild, null, true));
-        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($subchild, 0));
-        $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repo->getAncestors($subchild, 0, true));
+        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($subchild, 2));
+        $this->assertEquals(array($child), $this->repo->getAncestors($subchild, 1));
+        $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repo->getAncestors($subchild, 2, true));
         $this->assertEquals(array($child), $this->repo->getAncestors($subchild, 1));
         $this->assertEquals(array($child, $subchild), $this->repo->getAncestors($subchild, 1, true));
     }

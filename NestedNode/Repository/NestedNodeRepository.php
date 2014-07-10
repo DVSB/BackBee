@@ -389,15 +389,15 @@ class NestedNodeRepository extends EntityRepository
      * @param int     $depth        Returns only ancestors from $depth number of generation
      * @param boolean $includeNode  Returns also the node itsef if TRUE
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getAncestorsQuery(ANestedNode $node, $depth = null, $includeNode = false)
     {
         $q = $this->createQueryBuilder('n')
                 ->andIsAncestorOf($node, !$includeNode);
 
-        if (false === empty($depth)) {
-            $q = $q->andWhere('n._level >= :level')
-                    ->setParameter('level', $node->getLevel() - $depth);
+        if (null !== $depth) {
+            $q->andLevelIsUpperThan($node->getLevel() - $depth);
         }
 
         return $q;
