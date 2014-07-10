@@ -23,9 +23,13 @@ namespace BackBuilder\Security\Authentication\Provider;
 
 use BackBuilder\Security\Exception\SecurityException,
     BackBuilder\Security\Token\BBUserToken;
+
 use Symfony\Component\Security\Core\User\UserProviderInterface,
     Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+    Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface,
+    Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface,
+    Symfony\Component\Security\Core\Encoder\PlaintextPasswordEncoder,
+    Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder;
 
 /**
  * Retrieves BBUser for BBUserToken
@@ -62,6 +66,13 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      * @var \BackBuillder\Bundle\Registry\Repository
      */
     private $_registryRepository;
+    
+    
+    /**
+     * The encoders factory
+     * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
+     */
+    private $_encoderFactory;
 
     /**
      * Class constructor
@@ -70,12 +81,13 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      * @param int $lifetime
      * @param \BackBuillder\Bundle\Registry\Repository $registryRepository
      */
-    public function __construct(UserProviderInterface $userProvider, $nonceDir, $lifetime = 300, $registryRepository = null)
+    public function __construct(UserProviderInterface $userProvider, $nonceDir, $lifetime = 300, $registryRepository = null, EncoderFactoryInterface $encoderFactory = null)
     {
         $this->_userProvider = $userProvider;
         $this->_nonceDir = $nonceDir;
         $this->_lifetime = $lifetime;
         $this->_registryRepository = $registryRepository;
+        $this->_encoderFactory = $encoderFactory;
 
         if (null === $this->_registryRepository &&
                 false === file_exists($this->_nonceDir)) {
@@ -98,8 +110,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
             throw new SecurityException('Request expired', SecurityException::EXPIRED_TOKEN);
         }
 
-        if (md5($nonce . $created . md5($secret)) !== $digest) {
-            // To Do : $secret devrait déjà être un md5
+        if (md5($nonce . $created . $secret) !== $digest) {
             throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
         }
 
@@ -197,7 +208,26 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         try {
-            $this->_checkNonce($token->getDigest(), $token->getNonce(), $token->getCreated(), $user->getPassword());
+            $secret = $user->getPassword();
+            if($this->_encoderFactory) {
+                $encoder = $this->_encoderFactory->getEncoder($user);
+                
+                if($encoder instanceof PlaintextPasswordEncoder) {
+                    $secret = md5($secret);
+                } elseif($encoder instanceof MessageDigestPasswordEncoder) {
+                    // $secret is already md5 encoded
+                    // NB: only md5 algo without salt is currently supported due to frontend dependency
+                } else {
+                    // currently there is a dependency on md5 in frontend so all other encoders can't be supported
+                    throw new \RuntimeException('Encoder is not supported: ' . get_class($encoder));
+                }
+                
+            } else {
+                // no encoder - still have to encode with md5
+                $secret = md5($secret);
+            }
+            
+            $this->_checkNonce($token->getDigest(), $token->getNonce(), $token->getCreated(), $secret);
         } catch (SecurityException $e) {
             $this->clearNonce($token);
             throw $e;
