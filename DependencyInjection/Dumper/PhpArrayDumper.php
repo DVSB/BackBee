@@ -20,7 +20,9 @@ namespace BackBuilder\DependencyInjection\Dumper;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBuilder\DependencyInjection\Exception\ServiceNotDumpableException;
+
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Dumper\DumperInterface;
@@ -92,9 +94,11 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * [dumpContainerDefinitions description]
-     * @param  array  $options [description]
-     * @return [type]          [description]
+     * Dumps every container definitions into array
+     *
+     * @param  array $options
+     *
+     * @return array contains every container definitions converted to array
      */
     private function dumpContainerDefinitions(array $options)
     {
@@ -107,9 +111,11 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * [dumpContainerAliases description]
-     * @param  array  $options [description]
-     * @return [type]          [description]
+     * Dumps every container aliases into array
+     *
+     * @param  array $options
+     *
+     * @return array contains container aliases
      */
     private function dumpContainerAliases(array $options)
     {
@@ -122,9 +128,11 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * [convertDefinitionToPhpArray description]
-     * @param  Definition $definition [description]
-     * @return [type]                 [description]
+     * Convert a single definition entity into array
+     *
+     * @param  Definition $definition the definition to convert
+     *
+     * @return array the definition converted into array
      */
     private function convertDefinitionToPhpArray(Definition $definition)
     {
@@ -142,9 +150,11 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * [convertSyntheticDefinitionToPhpArray description]
-     * @param  Definition $definition [description]
-     * @return [type]                 [description]
+     * Convert a synthetic definition entity into a synthetic definition array
+     *
+     * @param  Definition $definition the definition to convert
+     *
+     * @return array the synthetic definition array
      */
     private function convertSyntheticDefinitionToPhpArray(Definition $definition)
     {
@@ -152,21 +162,23 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * [hydrateDefinitionClass description]
-     * @param  Definition $definition       [description]
-     * @param  array      $definition_array [description]
-     * @return [type]                       [description]
+     * Try to hydrate definition class from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionClass(Definition $definition, array &$definition_array)
     {
-        $definition_array['class'] = $definition->getClass();
+        if (null !== $definition->getClass()) {
+            $definition_array['class'] = $definition->getClass();
+        }
     }
 
     /**
-     * [hydrateDefinitionArguments description]
-     * @param  Definition $definition       [description]
-     * @param  array      $definition_array [description]
-     * @return [type]                       [description]
+     * Try to hydrate definition arguments from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionArguments(Definition $definition, array &$definition_array)
     {
@@ -176,9 +188,13 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * [convertArgument description]
-     * @param  [type] $argument [description]
-     * @return [type]           [description]
+     * Converts object into string and returns it; if it's a string or a boolean, this method
+     * won't do anything; it only converts Symfony\Component\DependencyInjection\Reference into
+     * string
+     *
+     * @param  mixed          $argument the argument we may do conversion
+     *
+     * @return boolean|string the argument in acceptable type
      */
     private function convertArgument($argument)
     {
@@ -190,10 +206,10 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * [hydrateDefinitionTags description]
-     * @param  Definition $definition       [description]
-     * @param  array      $definition_array [description]
-     * @return [type]                       [description]
+     * Hydrate definition tags from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionTags(Definition $definition, array &$definition_array)
     {
@@ -211,10 +227,10 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * [hydrateDefinitionMethodCalls description]
-     * @param  Definition $definition       [description]
-     * @param  array      $definition_array [description]
-     * @return [type]                       [description]
+     * Hydrate definition array method calls with definition entity
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionMethodCalls(Definition $definition, array &$definition_array)
     {
@@ -238,14 +254,37 @@ class PhpArrayDumper implements DumperInterface
         }
     }
 
+    /**
+     * Looking for every services with `dumpable` tag and calls DumpableServiceInterface::dump()
+     * Only loaded services are dumped
+     *
+     * @param  array  $options
+     *
+     * @return array contains the dump of every dumpable services indexed by the service id
+     *
+     * @throws ServiceNotDumpableException raises if you declare a service as dumpable but it did not
+     *                                     implement DumpableServiceInterface
+     */
     private function dumpDumpableServices(array $options)
     {
         $services_dump = array();
         foreach ($this->container->findTaggedServiceIds('dumpable') as $service_id => $data) {
-            $services_dump[$service_id] = array(
-                'dump'        => $this->container->get($service_id)->dump(),
-                'class_proxy' => $class = $this->container->get($service_id)->getClassProxy()
-            );
+            if (false === $this->container->isLoaded($service_id)) {
+                continue;
+            }
+
+            $service = $this->container->get($service_id);
+            if ($service instanceof DumpableServiceInterface) {
+                $services_dump[$service_id] = array(
+                    'dump'        => $service->dump(),
+                    'class_proxy' => $service->getClassProxy()
+                );
+            } else {
+                throw new ServiceNotDumpableException(
+                    $service_id,
+                    true === isset($data['class']) ? $data['class'] : null
+                );
+            }
         }
 
         return $services_dump;
