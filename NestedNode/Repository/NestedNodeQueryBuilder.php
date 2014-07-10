@@ -67,6 +67,34 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add query part to select nodes having level lower than or equal to $level
+     * @param int $level        the level to test
+     * @param boolean $strict   if TRUE, having strictly level lower than $level
+     * @param string $alias     optional, the alias to use
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     */
+    public function andLevelIsLowerThan($level, $strict = false, $alias = null)
+    {
+        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        return $this->andWhere($alias . '._level <= :level' . $suffix)
+                        ->setParameter('level' . $suffix, $level - (true === $strict ? 1 : 0));
+    }
+
+    /**
+     * Add query part to select nodes having level upper than or equal to $level
+     * @param int $level        the level to test
+     * @param boolean $strict   if TRUE, having strictly level upper than $level
+     * @param string $alias     optional, the alias to use
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     */
+    public function andLevelIsUpperThan($level, $strict = false, $alias = null)
+    {
+        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        return $this->andWhere($alias . '._level >= :level' . $suffix)
+                        ->setParameter('level' . $suffix, $level + (true === $strict ? 1 : 0));
+    }
+
+    /**
      * Add query part to select node with leftnode equals to $leftnode
      * @param int $leftnode
      * @param string $alias     optional, the alias to use
@@ -82,7 +110,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
     /**
      * Add query part to select nodes having leftnode lower than or equal to $leftnode
      * @param int $leftnode
-     * @param boolean $strict   If TRUE, having stritly leftnode lower than $leftnode
+     * @param boolean $strict   If TRUE, having strictly leftnode lower than $leftnode
      * @param string $alias     optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
      */
@@ -96,7 +124,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
     /**
      * Add query part to select nodes having leftnode upper than or equal to $leftnode
      * @param int $leftnode
-     * @param boolean $strict   If TRUE, having stritly leftnode upper than $leftnode
+     * @param boolean $strict   If TRUE, having strictly leftnode upper than $leftnode
      * @param string $alias     optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
      */
@@ -123,7 +151,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
     /**
      * Add query part to select nodes having rightnode lower than or equal to $rightnode
      * @param int $rightnode
-     * @param boolean $strict   If TRUE, having stritly rightnode lower than $rightnode
+     * @param boolean $strict   If TRUE, having strictly rightnode lower than $rightnode
      * @param string $alias     optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
      */
@@ -137,7 +165,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
     /**
      * Add query part to select nodes having rightnode upper than or equal to $rightnode
      * @param int $rightnode
-     * @param boolean $strict   If TRUE, having stritly rightnode upper than $rightnode
+     * @param boolean $strict   If TRUE, having strictly rightnode upper than $rightnode
      * @param string $alias     optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
      */

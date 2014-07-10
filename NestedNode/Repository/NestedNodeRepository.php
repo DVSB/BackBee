@@ -414,15 +414,12 @@ class NestedNodeRepository extends EntityRepository
     {
         $q = $this->createQueryBuilder('n')
                 ->andIsAncestorOf($node, !$includeNode);
-        
-        if (false === empty($depth)) {
-            $q = $q->andWhere('n._level >= :level')
-                    ->setParameter('level', $node->getLevel() - $depth);
+
+        if (null !== $depth) {
+            $q->andLevelIsUpperThan($node->getLevel() - $depth);
         }
-        
-        return $this->_getAncestorsQuery($node, $depth, $includeNode)
-                        ->getQuery()
-                        ->getResult();
+
+        return $q->getQuery()->getResult();
     }
 
     /**
