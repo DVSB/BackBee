@@ -31,7 +31,11 @@ use Symfony\Component\HttpFoundation\Response,
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
 use BackBuilder\Security\Token\UsernamePasswordToken;
+
+use BackBuilder\Rest\Exception\ValidationException;
 
 /**
  * Site Controller
@@ -51,6 +55,10 @@ class SiteController extends ARestController
      */
     public function getLayoutsAction($uid, Request $request, ConstraintViolationList $violations = null) 
     {
+        if(!$this->isGranted("ROLE_API_USER")) {
+            throw new AccessDeniedHttpException('You have no permissions to access ' . $request->getPathInfo());
+        }
+                
         if(null !== $violations && count($violations) > 0) {
             throw new ValidationException($violations);
         }
@@ -58,10 +66,14 @@ class SiteController extends ARestController
         $em = $this->getEntityManager();
 
         $site = $em->getRepository('BackBuilder\Site\Site')->find($uid);
-
         
         if(!$site) {
             return $this->create404Response(sprintf('Site not found: %s', $uid));
+        }
+        
+        if($this->isGranted('VIEW', $site)) {
+            //return $this->create404Response(sprintf('Site not found: %s', $uid));
+            throw new AccessDeniedHttpException(sprintf('You are not authrozied to view site %s', $site->getLabel()));
         }
         
         // TODO
