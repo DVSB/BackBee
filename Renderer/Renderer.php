@@ -275,13 +275,13 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
                 ->setMode($mode, $ignoreModeIfNotSet)
                 ->_triggerEvent('prerender');
 
-        if (
-            null !== $renderer->getClassContainer() &&
-            ($renderer->getClassContainer() instanceof AClassContent) &&
-            null === $renderer->getCurrentElement()
-        ) {
-            $renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
-        }
+        // if (
+        //     null !== $renderer->getClassContainer() &&
+        //     ($renderer->getClassContainer() instanceof AClassContent) &&
+        //     null === $renderer->getCurrentElement()
+        // ) {
+        //     $renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
+        // }
 
         if (null === $renderer->__render) {
             // Rendering a page with layout
