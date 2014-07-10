@@ -296,37 +296,8 @@ class NestedNodeRepository extends EntityRepository
      */
     protected function _getSiblingsQuery(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
-        if (null === $order) {
-            $order = array('_leftnode' => 'asc');
-        }
-
-        $qb = $this->createQueryBuilder('n')
-                ->andWhere('n._level = :level')
-                ->setParameter('level', $node->getLevel());
-
-        if (null !== $node->getParent()) {
-            $qb->andWhere('n._parent = :parent')
-                    ->setParameter('parent', $node->getParent());
-        } else {
-            $qb->andWhere('n._root = :root')
-                    ->setParameter('root', $node->getRoot());
-        }
-
-        if (false === $includeNode) {
-            $qb->andWhere('n._uid != :uid')
-                    ->setParameter('uid', $node->getUid());
-        }
-
-        foreach ($order as $col => $sort) {
-            $qb->orderBy('n.' . $col, $sort);
-        }
-
-        if (null !== $limit) {
-            $qb->setMaxResults($limit)
-                    ->setFirstResult($start);
-        }
-
-        return $qb;
+        return $this->createQueryBuilder('n')
+                        ->andIsSiblingsOf($node, $includeNode, $order, $limit, $start);
     }
 
     /**
@@ -340,7 +311,8 @@ class NestedNodeRepository extends EntityRepository
      */
     public function getSiblings(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
-        return $this->_getSiblingsQuery($node, $includeNode, $order, $limit, $start)
+        return $this->createQueryBuilder('n')
+                        ->andIsSiblingsOf($node, $includeNode, $order, $limit, $start)
                         ->getQuery()
                         ->getResult();
     }
