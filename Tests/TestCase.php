@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\Test;
+namespace BackBuilder\Tests;
 
 use BackBuilder\AutoLoader\AutoLoader;
 
@@ -10,7 +10,7 @@ use Doctrine\ORM\Tools\SchemaTool,
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\TestUnit
+ * @package     BackBuilder\Tests
  * @copyright   Lp system
  * @author      n.dufreche
  */
@@ -33,9 +33,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $backbuilder_autoloader = new AutoLoader();
 
         $backbuilder_autoloader->register()
-                ->registerNamespace('BackBuilder\Bundle\TestUnit', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Test')))
+                ->registerNamespace('BackBuilder\Bundle\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Tests')))
                 ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
-                ->registerNamespace('BackBuilder\TestUnit\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
+                ->registerNamespace('BackBuilder\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
                 ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'ClassContent', 'Repositories')))
                 ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Templates', 'helpers')))
                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Listeners')))
@@ -100,7 +100,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function getMockObjectContainer($obj_name)
     {
         if(!array_key_exists($obj_name, $this->mock_container)) {
-            $class_name = '\BackBuilder\Test\Mock\Mock'.ucfirst($obj_name);
+            $class_name = '\BackBuilder\Tests\Mock\Mock'.ucfirst($obj_name);
             $this->mock_container[$obj_name] = new $class_name();
         }
         return $this->mock_container[$obj_name];
@@ -136,12 +136,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $BBApp->expects($this->any())
               ->method('getEventDispatcher')
-              ->will($this->returnValue(new \BackBuilder\Test\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
+              ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
         
         
         $BBApp->expects($this->any())
               ->method('getContainer')
-              ->will($this->returnValue(new \BackBuilder\Test\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
+              ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
         
         
         $BBApp->expects($this->any())
