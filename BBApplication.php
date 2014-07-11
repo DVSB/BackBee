@@ -34,7 +34,8 @@ use BackBuilder\AutoLoader\AutoLoader,
     BackBuilder\Util\File,
     BackBuilder\Bundle\ABundle,
     BackBuilder\Console\Console,
-    BackBuilder\NestedNode\Repository\NestedNodeRepository;
+    BackBuilder\NestedNode\Repository\NestedNodeRepository,
+    BackBuilder\Doctrine\Registry as DoctrineRegistry;
 
 use Doctrine\Common\EventManager,
     Doctrine\ORM\Configuration,
@@ -311,7 +312,7 @@ class BBApplication implements IApplication
         }
 
         if (false === array_key_exists('dbal', $doctrine_config)) {
-            throw new BBException('None dbal configuration found');
+            throw new BBException('dbal configuration found');
         }
 
         if (false === array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
@@ -348,6 +349,9 @@ class BBApplication implements IApplication
         } catch (\Exception $e) {
             $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
         }
+        
+        $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
+        $this->getContainer()->set('doctrine', $registry);
         
         // init NestedNode config
         if($this->getConfig()->getSection('nestednode')) {
@@ -594,7 +598,7 @@ class BBApplication implements IApplication
     }
 
     /**
-     * @return BackBuilder\DependencyInjection\Container
+     * @return \BackBuilder\DependencyInjection\Container
      */
     public function getContainer()
     {
@@ -646,14 +650,14 @@ class BBApplication implements IApplication
     /**
      * @return EntityManager
      */
-    public function getEntityManager()
+    public function getEntityManager($name = 'default')
     {
         try {
-            if (null === $this->getContainer()->get('em')) {
+            if (null === $this->getContainer()->get('doctrine')) {
                 $this->_initEntityManager();
             }
 
-            return $this->getContainer()->get('em');
+            return $this->getContainer()->get('doctrine')->getManager($name);
         } catch (\Exception $e) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
