@@ -73,9 +73,14 @@ class NestedNodeQueryBuilder extends QueryBuilder
      * @param string $alias     optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andParentIs(ANestedNode $node, $alias = null)
+    public function andParentIs(ANestedNode $node = null, $alias = null)
     {
         list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+
+        if (null === $node) {
+            return $this->andWhere($alias . '._parent IS NULL');
+        }
+
         return $this->andWhere($alias . '._parent = :parent' . $suffix)
                         ->setParameter('parent' . $suffix, $node);
     }
@@ -206,16 +211,24 @@ class NestedNodeQueryBuilder extends QueryBuilder
     /**
      * Add query part to select siblings of $node
      * @param \BackBuilder\NestedNode\ANestedNode $node
-     * @param boolean $includeNode  if TRUE, include $node in result array
+     * @param boolean $strict       if TRUE, $node is exclude
      * @param array $order          ordering spec
      * @param int $limit            max number of results
      * @param int $start            first result index
      * @param string $alias     optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsSiblingsOf(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0, $alias = null)
+    public function andIsSiblingsOf(ANestedNode $node, $strict = false, array $order = null, $limit = null, $start = 0, $alias = null)
     {
+        if (true === $strict) {
+            $this->andIsNot($node, $alias);
+        }
+
         list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        if (true === $node->isRoot()) {
+            $this->andWhere($alias . '._uid = :uid' . $suffix)
+                    ->setParameter('uid' . $suffix, $node->getUid());
+        }
 
         if (null === $order) {
             $order = array('_leftnode' => 'asc');
@@ -228,15 +241,6 @@ class NestedNodeQueryBuilder extends QueryBuilder
         if (null !== $limit) {
             $this->setMaxResults($limit)
                     ->setFirstResult($start);
-        }
-
-        if (false === $includeNode) {
-            $this->andIsNot($node, $alias);
-        }
-
-        if (true === $node->isRoot()) {
-            return $this->andWhere($alias . '._uid = :uid' . $suffix)
-                            ->setParameter('uid' . $suffix, $node->getUid());
         }
 
         return $this->andParentIs($node->getParent(), $alias);
@@ -318,7 +322,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
         if (null === $this->_root_alias) {
             $aliases = $this->getRootAliases();
             if (0 === count($aliases)) {
-                throw new \BackBuilder\Exception\BBException('Cnanot access to root alias');
+                throw new \BackBuilder\Exception\BBException('Cannot access to root alias');
             }
 
             $this->_root_alias = $aliases[0];

@@ -298,7 +298,7 @@ class NestedNodeRepository extends EntityRepository
     protected function _getSiblingsQuery(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
         return $this->createQueryBuilder('n')
-                        ->andIsSiblingsOf($node, $includeNode, $order, $limit, $start);
+                        ->andIsSiblingsOf($node, !$includeNode, $order, $limit, $start);
     }
 
     /**
@@ -313,7 +313,7 @@ class NestedNodeRepository extends EntityRepository
     public function getSiblings(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
         return $this->createQueryBuilder('n')
-                        ->andIsSiblingsOf($node, $includeNode, $order, $limit, $start)
+                        ->andIsSiblingsOf($node, !$includeNode, $order, $limit, $start)
                         ->getQuery()
                         ->getResult();
     }
