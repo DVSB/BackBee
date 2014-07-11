@@ -419,7 +419,9 @@ class NestedNodeRepository extends EntityRepository
             $q->andLevelIsUpperThan($node->getLevel() - $depth);
         }
 
-        return $q->getQuery()->getResult();
+        return $q->orderBy('n._rightnode', 'desc')
+                        ->getQuery()
+                        ->getResult();
     }
 
     /**
@@ -428,16 +430,15 @@ class NestedNodeRepository extends EntityRepository
      * @param int     $depth        Returns only descendants from $depth number of generation
      * @param boolean $includeNode  Returns also the node itsef if TRUE
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getDescendantsQuery(ANestedNode $node, $depth = null, $includeNode = false)
     {
         $q = $this->createQueryBuilder('n')
-                ->andIsDescendantOf($node, !$includeNode)
-                ->orderBy('n._leftnode', 'asc');
+                ->andIsDescendantOf($node, !$includeNode);
 
-        if (false === empty($depth)) {
-            $q = $q->andWhere('n._level <= :level')
-                    ->setParameter('level', $node->getLevel() + $depth);
+        if (null !== $depth) {
+            $q->andLevelIsLowerThan($node->getLevel() + $depth);
         }
 
         return $q;
@@ -452,7 +453,14 @@ class NestedNodeRepository extends EntityRepository
      */
     public function getDescendants(ANestedNode $node, $depth = null, $includeNode = false)
     {
-        return $this->_getDescendantsQuery($node, $depth, $includeNode)
+        $q = $this->createQueryBuilder('n')
+                ->andIsDescendantOf($node, !$includeNode);
+
+        if (null !== $depth) {
+            $q->andLevelIsLowerThan($node->getLevel() + $depth);
+        }
+
+        return $q->orderBy('n._leftnode', 'asc')
                         ->getQuery()
                         ->getResult();
     }

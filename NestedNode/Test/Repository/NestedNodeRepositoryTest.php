@@ -27,9 +27,9 @@ use BackBuilder\NestedNode\Repository\NestedNodeRepository,
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\TestUnit\BackBuilder\NestedNode\Repository
+ * @package     BackBuilder\NestedNode\Test\Repository
  * @copyright   Lp digital system
- * @author      c.rouillon <rouillon.charles@gmail.com>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -124,7 +124,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getDescendants
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getDescendantsQuery
      */
     public function testGetDescendants()
     {

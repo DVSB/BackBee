@@ -1,10 +1,37 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\NestedNode\Repository;
 
 use BackBuilder\NestedNode\ANestedNode;
 use Doctrine\ORM\QueryBuilder;
 
+/**
+ * This class is responsible for building DQL query strings for NestedNode
+ * 
+ * @category    BackBuilder
+ * @package     BackBuilder\NestedNode\Repository
+ * @copyright   Lp digital system
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ */
 class NestedNodeQueryBuilder extends QueryBuilder
 {
 
@@ -257,21 +284,28 @@ class NestedNodeQueryBuilder extends QueryBuilder
             $this->andLevelEquals($at_level);
         }
 
-        return $this->orderBy('n._rightnode', 'desc');
+        return $this;
     }
 
     /**
      * Add query part to select descendants of $node
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @param boolean $strict   If TRUE, $node is excluded from the selection
+     * @param int $at_level     Filter ancestors by their level
      * @param string $alias     optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsDescendantOf(ANestedNode $node, $strict = false, $alias = null)
+    public function andIsDescendantOf(ANestedNode $node, $strict = false, $at_level = null, $alias = null)
     {
-        return $this->andRootIs($node->getRoot(), $alias)
-                        ->andLeftnodeIsUpperThan($node->getLeftnode(), $strict, $alias)
-                        ->andRightnodeIsLowerThan($node->getRightnode(), $strict, $alias);
+        $this->andRootIs($node->getRoot(), $alias)
+                ->andLeftnodeIsUpperThan($node->getLeftnode(), $strict, $alias)
+                ->andRightnodeIsLowerThan($node->getRightnode(), $strict, $alias);
+
+        if (null !== $at_level) {
+            $this->andLevelEquals($at_level);
+        }
+
+        return $this;
     }
 
     /**

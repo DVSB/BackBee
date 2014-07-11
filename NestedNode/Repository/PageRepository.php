@@ -103,13 +103,16 @@ class PageRepository extends NestedNodeRepository
 
     public function getVisibleDescendants(ANestedNode $node, $depth = null, $includeNode = false, $state = Page::STATE_ONLINE)
     {
-        $q = $this->_getDescendantsQuery($node, $depth, $includeNode)
-                ->andWhere('n._state = :state')
-                ->andWhere('n._publishing IS NULL OR n._publishing <= :now')
-                ->andWhere('n._archiving IS NULL OR n._archiving > :now')
-                ->setParameter('state', $state)
-                ->setParameter('now', date('Y-m-d H:i:00', time()))
+        $q = $this->createQueryBuilder('n')
+                ->andIsDescendantOf($node, !$includeNode)
                 ->orderBy('n._leftnode', 'asc');
+
+        if (null !== $depth) {
+            $q->andLevelIsLowerThan($node->getLevel() + $depth);
+        }
+
+        $q = $this->_andOnline($q);
+
         return $q->getQuery()->getResult();
     }
 
@@ -163,14 +166,20 @@ class PageRepository extends NestedNodeRepository
 
     public function getNotDeletedDescendants(ANestedNode $node, $depth = NULL, $includeNode = FALSE, $order = array(), $paginate = false, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
-        $q = $this->_getDescendantsQuery($node, $depth, $includeNode)
+        $q = $this->createQueryBuilder('n')
+                ->andIsDescendantOf($node, !$includeNode)
                 ->andWhere('n._state < :deleted')
-                ->setParameter('deleted', Page::STATE_DELETED);
-        
+                ->setParameter('deleted', Page::STATE_DELETED)
+                ->orderBy('n._leftnode', 'asc');
+
+        if (null !== $depth) {
+            $q->andLevelIsLowerThan($node->getLevel() + $depth);
+        }
+
         if (true === $having_child) {
             $q->andWhere('n._rightnode > (n._leftnode + 1)');
         }
-        
+
         if (is_array($order) && !empty($order)) {
             if (array_key_exists("field", $order) && array_key_exists("sort", $order)) {
                 if (!empty($order["field"]) && !empty($order["sort"])) {
@@ -178,6 +187,7 @@ class PageRepository extends NestedNodeRepository
                 }
             }
         }
+
         if (true === $paginate) {
             $q = $q->setFirstResult($firstresult)
                     ->setMaxResults($maxresult);
