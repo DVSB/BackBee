@@ -708,24 +708,18 @@ class NestedNodeRepository extends EntityRepository
         } else {
             $this->createQueryBuilder('n')
                     ->set('n._leftnode', 'n._leftnode + :delta')
-                    ->andWhere('n._root = :root')
-                    ->andWhere('n._leftnode >= :leftnode')
-                    ->setParameters(array(
-                        'delta' => $delta,
-                        'root' => $node->getRoot(),
-                        'leftnode' => $first))
+                    ->andRootIs($node->getRoot())
+                    ->andLeftnodeIsUpperThan($first)
+                    ->setParameter('delta', $delta)
                     ->update()
                     ->getQuery()
                     ->execute();
 
             $this->createQueryBuilder('n')
                     ->set('n._rightnode', 'n._rightnode + :delta')
-                    ->andWhere('n._root = :root')
-                    ->andWhere('n._rightnode >= :rightnode')
-                    ->setParameters(array(
-                        'delta' => $delta,
-                        'root' => $node->getRoot(),
-                        'rightnode' => $first))
+                    ->andRootIs($node->getRoot())
+                    ->andRightnodeIsUpperThan($first)
+                    ->setParameter('delta', $delta)
                     ->update()
                     ->getQuery()
                     ->execute();
