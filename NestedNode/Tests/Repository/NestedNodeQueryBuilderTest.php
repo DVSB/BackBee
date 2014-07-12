@@ -19,15 +19,15 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Test\Repository;
+namespace BackBuilder\NestedNode\Tests\Repository;
 
 use BackBuilder\NestedNode\Repository\NestedNodeRepository,
-    BackBuilder\Test\Mock\MockBBApplication,
-    BackBuilder\NestedNode\Test\Mock\MockNestedNode;
+    BackBuilder\Tests\Mock\MockBBApplication,
+    BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Test\Repository
+ * @package     BackBuilder\NestedNode\Tests\Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -40,7 +40,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
     private $application;
 
     /**
-     * @var \BackBuilder\NestedNode\Test\Mock\MockNestedNode 
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
      */
     private $root;
 
@@ -59,7 +59,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andIsNot($this->root);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._uid != :uid0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._uid != :uid0', $q->getDql());
         $this->assertEquals($this->root->getUid(), $q->getParameter('uid0')->getValue());
     }
 
@@ -72,7 +72,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andRootIs($this->root);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
     }
 
@@ -85,13 +85,13 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andParentIs($this->root);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._parent = :parent0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._parent = :parent0', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('parent0')->getValue());
 
         $qn = $this->repo->createQueryBuilder('n')
                 ->andParentIs(null);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._parent IS NULL', $qn->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._parent IS NULL', $qn->getDql());
     }
 
     /**
@@ -102,7 +102,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
         $q = $this->repo->createQueryBuilder('n')
                 ->andLevelEquals(5);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._level = :level0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level = :level0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('level0')->getValue());
     }
 
@@ -115,13 +115,13 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andLevelIsLowerThan(5);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._level <= :level0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level <= :level0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('level0')->getValue());
 
         $qs = $this->repo->createQueryBuilder('n')
                 ->andLevelIsLowerThan(5, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._level <= :level0', $qs->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level <= :level0', $qs->getDql());
         $this->assertEquals(4, $qs->getParameter('level0')->getValue());
     }
 
@@ -134,13 +134,13 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andLevelIsUpperThan(5);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._level >= :level0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level >= :level0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('level0')->getValue());
 
         $qs = $this->repo->createQueryBuilder('n')
                 ->andLevelIsUpperThan(5, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._level >= :level0', $qs->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level >= :level0', $qs->getDql());
         $this->assertEquals(6, $qs->getParameter('level0')->getValue());
     }
 
@@ -153,7 +153,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andLeftnodeEquals(5);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._leftnode = :leftnode0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode = :leftnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('leftnode0')->getValue());
     }
 
@@ -166,13 +166,13 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andLeftnodeIsLowerThan(5);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._leftnode <= :leftnode0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode <= :leftnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('leftnode0')->getValue());
 
         $qs = $this->repo->createQueryBuilder('n')
                 ->andLeftnodeIsLowerThan(5, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._leftnode <= :leftnode0', $qs->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode <= :leftnode0', $qs->getDql());
         $this->assertEquals(4, $qs->getParameter('leftnode0')->getValue());
     }
 
@@ -185,13 +185,13 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andLeftnodeIsUpperThan(5);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._leftnode >= :leftnode0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode >= :leftnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('leftnode0')->getValue());
 
         $qs = $this->repo->createQueryBuilder('n')
                 ->andLeftnodeIsUpperThan(5, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._leftnode >= :leftnode0', $qs->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode >= :leftnode0', $qs->getDql());
         $this->assertEquals(6, $qs->getParameter('leftnode0')->getValue());
     }
 
@@ -204,7 +204,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andRightnodeEquals(5);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._rightnode = :rightnode0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._rightnode = :rightnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('rightnode0')->getValue());
     }
 
@@ -217,13 +217,13 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andRightnodeIsLowerThan(5);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._rightnode <= :rightnode0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._rightnode <= :rightnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('rightnode0')->getValue());
 
         $qs = $this->repo->createQueryBuilder('n')
                 ->andRightnodeIsLowerThan(5, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._rightnode <= :rightnode0', $qs->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._rightnode <= :rightnode0', $qs->getDql());
         $this->assertEquals(4, $qs->getParameter('rightnode0')->getValue());
     }
 
@@ -236,14 +236,14 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andRightnodeIsUpperThan(5);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._rightnode >= :rightnode0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._rightnode >= :rightnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('rightnode0')->getValue());
 
         $q->resetDQLPart('where')
                 ->setParameters(array())
                 ->andRightnodeIsUpperThan(5, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._rightnode >= :rightnode0', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._rightnode >= :rightnode0', $q->getDql());
         $this->assertEquals(6, $q->getParameter('rightnode0')->getValue());
     }
 
@@ -256,14 +256,14 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andIsSiblingsOf($this->root);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._uid = :uid0 AND n._parent IS NULL ORDER BY n._leftnode asc', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._uid = :uid0 AND n._parent IS NULL ORDER BY n._leftnode asc', $q->getDql());
         $this->assertEquals($this->root->getUid(), $q->getParameter('uid0')->getValue());
 
         $q->resetDQLPart('where')
                 ->setParameters(array())
                 ->andIsSiblingsOf($this->root, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._uid != :uid0 AND n._uid = :uid1 AND n._parent IS NULL ORDER BY n._leftnode asc', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._uid != :uid0 AND n._uid = :uid1 AND n._parent IS NULL ORDER BY n._leftnode asc', $q->getDql());
         $this->assertEquals($this->root->getUid(), $q->getParameter('uid0')->getValue());
         $this->assertEquals($this->root->getUid(), $q->getParameter('uid1')->getValue());
 
@@ -271,7 +271,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->resetDQLPart('where')
                 ->setParameters(array())
                 ->andIsSiblingsOf($this->root, null, array('_rightnode' => 'desc'));
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._uid = :uid0 AND n._parent IS NULL ORDER BY n._rightnode desc', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._uid = :uid0 AND n._parent IS NULL ORDER BY n._rightnode desc', $q->getDql());
         $this->assertEquals($this->root->getUid(), $q->getParameter('uid0')->getValue());
 
         $child1 = $this->repo->find('child1');
@@ -280,14 +280,14 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->setParameters(array())
                 ->andIsSiblingsOf($child1);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._parent = :parent0 ORDER BY n._leftnode asc', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._parent = :parent0 ORDER BY n._leftnode asc', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('parent0')->getValue());
 
         $q->resetDQLPart('where')
                 ->setParameters(array())
                 ->andIsSiblingsOf($child1, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._uid != :uid0 AND n._parent = :parent1 ORDER BY n._leftnode asc', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._uid != :uid0 AND n._parent = :parent1 ORDER BY n._leftnode asc', $q->getDql());
         $this->assertEquals($child1->getUid(), $q->getParameter('uid0')->getValue());
         $this->assertEquals($this->root, $q->getParameter('parent1')->getValue());
 
@@ -295,7 +295,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->setParameters(array())
                 ->andIsSiblingsOf($child1, true, array('_rightnode' => 'desc'), 10);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._uid != :uid0 AND n._parent = :parent1 ORDER BY n._rightnode desc', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._uid != :uid0 AND n._parent = :parent1 ORDER BY n._rightnode desc', $q->getDql());
         $this->assertEquals($child1->getUid(), $q->getParameter('uid0')->getValue());
         $this->assertEquals($this->root, $q->getParameter('parent1')->getValue());
         $this->assertEquals(10, $q->getMaxResults());
@@ -305,7 +305,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->setParameters(array())
                 ->andIsSiblingsOf($child1, true, array('_rightnode' => 'desc'), 10, 5);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._uid != :uid0 AND n._parent = :parent1 ORDER BY n._rightnode desc', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._uid != :uid0 AND n._parent = :parent1 ORDER BY n._rightnode desc', $q->getDql());
         $this->assertEquals($child1->getUid(), $q->getParameter('uid0')->getValue());
         $this->assertEquals($this->root, $q->getParameter('parent1')->getValue());
         $this->assertEquals(10, $q->getMaxResults());
@@ -322,7 +322,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andIsPreviousSiblingOf($child1);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0 AND n._rightnode = :rightnode1', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0 AND n._rightnode = :rightnode1', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
         $this->assertEquals($child1->getLeftnode() - 1, $q->getParameter('rightnode1')->getValue());
     }
@@ -337,7 +337,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andIsNextSiblingOf($child1);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode = :leftnode1', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode = :leftnode1', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
         $this->assertEquals($child1->getRightnode() + 1, $q->getParameter('leftnode1')->getValue());
     }
@@ -353,7 +353,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andIsAncestorOf($child1);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode <= :leftnode1 AND n._rightnode >= :rightnode2', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode <= :leftnode1 AND n._rightnode >= :rightnode2', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
         $this->assertEquals($child1->getLeftnode(), $q->getParameter('leftnode1')->getValue());
         $this->assertEquals($child1->getRightnode(), $q->getParameter('rightnode2')->getValue());
@@ -362,7 +362,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->setParameters(array())
                 ->andIsAncestorOf($child1, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode <= :leftnode1 AND n._rightnode >= :rightnode2', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode <= :leftnode1 AND n._rightnode >= :rightnode2', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
         $this->assertEquals($child1->getLeftnode() - 1, $q->getParameter('leftnode1')->getValue());
         $this->assertEquals($child1->getRightnode() + 1, $q->getParameter('rightnode2')->getValue());
@@ -371,7 +371,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->setParameters(array())
                 ->andIsAncestorOf($child1, true, 1);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode <= :leftnode1 AND n._rightnode >= :rightnode2 AND n._level = :level3', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode <= :leftnode1 AND n._rightnode >= :rightnode2 AND n._level = :level3', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
         $this->assertEquals($child1->getLeftnode() - 1, $q->getParameter('leftnode1')->getValue());
         $this->assertEquals($child1->getRightnode() + 1, $q->getParameter('rightnode2')->getValue());
@@ -388,7 +388,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->andIsDescendantOf($child1);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode >= :leftnode1 AND n._rightnode <= :rightnode2', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode >= :leftnode1 AND n._rightnode <= :rightnode2', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
         $this->assertEquals($child1->getLeftnode(), $q->getParameter('leftnode1')->getValue());
         $this->assertEquals($child1->getRightnode(), $q->getParameter('rightnode2')->getValue());
@@ -397,7 +397,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->setParameters(array())
                 ->andIsDescendantOf($child1, true);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode >= :leftnode1 AND n._rightnode <= :rightnode2', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode >= :leftnode1 AND n._rightnode <= :rightnode2', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
         $this->assertEquals($child1->getLeftnode() + 1, $q->getParameter('leftnode1')->getValue());
         $this->assertEquals($child1->getRightnode() - 1, $q->getParameter('rightnode2')->getValue());
@@ -406,7 +406,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 ->setParameters(array())
                 ->andIsDescendantOf($child1, true, 1);
 
-        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Test\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode >= :leftnode1 AND n._rightnode <= :rightnode2 AND n._level = :level3', $q->getDql());
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._root = :root0 AND n._leftnode >= :leftnode1 AND n._rightnode <= :rightnode2 AND n._level = :level3', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('root0')->getValue());
         $this->assertEquals($child1->getLeftnode() + 1, $q->getParameter('leftnode1')->getValue());
         $this->assertEquals($child1->getRightnode() - 1, $q->getParameter('rightnode2')->getValue());
@@ -441,7 +441,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
         $em = $this->application->getEntityManager();
 
         $st = new \Doctrine\ORM\Tools\SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Test\Mock\MockNestedNode')));
+        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Tests\Mock\MockNestedNode')));
 
         $this->_setRepo()
                 ->_setRoot();
@@ -449,13 +449,13 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Sets the NestedNode Repository
-     * @return \BackBuilder\NestedNode\Test\Repository\NestedNodeRepositoryTest
+     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRepo()
     {
         $this->repo = $this->application
                 ->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Test\Mock\MockNestedNode');
+                ->getRepository('BackBuilder\NestedNode\Tests\Mock\MockNestedNode');
 
         NestedNodeRepository::$config = array(
             'nestedNodeCalculateAsync' => false
@@ -466,7 +466,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Initiate a new tree with node added as last child
-     * @return \BackBuilder\NestedNode\Test\Repository\NestedNodeRepositoryTest
+     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRoot()
     {
