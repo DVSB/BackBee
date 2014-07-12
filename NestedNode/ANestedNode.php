@@ -27,6 +27,7 @@ use BackBuilder\Util\Numeric,
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 use JMS\Serializer\Annotation as Serializer;
+
 /**
  * Abstract class for nested node object in BackBuilder.
  *
@@ -261,13 +262,9 @@ abstract class ANestedNode extends AObjectIdentifiable
     public function isAncestorOf(ANestedNode $node, $strict = true)
     {
         if (true === $strict) {
-            return (($node->getRoot() === $this->getRoot())
-                    && ($node->getLeftnode() > $this->getLeftnode())
-                    && ($node->getRightnode() < $this->getRightnode()));
+            return (($node->getRoot() === $this->getRoot()) && ($node->getLeftnode() > $this->getLeftnode()) && ($node->getRightnode() < $this->getRightnode()));
         } else {
-            return (($node->getRoot() === $this->getRoot())
-                    && ($node->getLeftnode() >= $this->getLeftnode())
-                    && ($node->getRightnode() <= $this->getRightnode()));
+            return (($node->getRoot() === $this->getRoot()) && ($node->getLeftnode() >= $this->getLeftnode()) && ($node->getRightnode() <= $this->getRightnode()));
         }
     }
 
@@ -280,13 +277,9 @@ abstract class ANestedNode extends AObjectIdentifiable
     public function isDescendantOf(ANestedNode $node, $strict = true)
     {
         if (true === $strict) {
-            return (($this->getLeftnode() > $node->getLeftnode())
-                    && ($this->getRightnode() < $node->getRightnode())
-                    && ($this->getRoot() === $node->getRoot()));
+            return (($this->getLeftnode() > $node->getLeftnode()) && ($this->getRightnode() < $node->getRightnode()) && ($this->getRoot() === $node->getRoot()));
         } else {
-            return (($this->getLeftnode() >= $node->getLeftnode())
-                    && ($this->getRightnode() <= $node->getRightnode())
-                    && ($this->getRoot() === $node->getRoot()));
+            return (($this->getLeftnode() >= $node->getLeftnode()) && ($this->getRightnode() <= $node->getRightnode()) && ($this->getRoot() === $node->getRoot()));
         }
     }
 
@@ -453,8 +446,4 @@ abstract class ANestedNode extends AObjectIdentifiable
         return $this;
     }
 
-    public function getTemplateName()
-    {
-        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
-    }
 }
