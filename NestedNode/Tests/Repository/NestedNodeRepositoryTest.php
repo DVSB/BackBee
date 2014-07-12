@@ -19,15 +19,15 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Test\Repository;
+namespace BackBuilder\NestedNode\Tests\Repository;
 
 use BackBuilder\NestedNode\Repository\NestedNodeRepository,
-    BackBuilder\Test\Mock\MockBBApplication,
-    BackBuilder\NestedNode\Test\Mock\MockNestedNode;
+    BackBuilder\Tests\Mock\MockBBApplication,
+    BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Test\Repository
+ * @package     BackBuilder\NestedNode\Tests\Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -35,17 +35,17 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
-     * @var \BackBuilder\TestUnit\Mock\MockBBApplication
+     * @var \BackBuilder\Tests\Mock\MockBBApplication
      */
     private $application;
 
     /**
-     * @var \BackBuilder\NestedNode\Test\Mock\MockNestedNode 
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
      */
     private $root_asc;
 
     /**
-     * @var \BackBuilder\NestedNode\Test\Mock\MockNestedNode 
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
      */
     private $root_desc;
 
@@ -558,7 +558,7 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
         $em = $this->application->getEntityManager();
 
         $st = new \Doctrine\ORM\Tools\SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Test\Mock\MockNestedNode')));
+        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Tests\Mock\MockNestedNode')));
 
         $this->root = new MockNestedNode('root');
         $em->persist($this->root);
@@ -571,13 +571,13 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Sets the NestedNode Repository
-     * @return \BackBuilder\NestedNode\Test\Repository\NestedNodeRepositoryTest
+     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRepo()
     {
         $this->repo = $this->application
                 ->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Test\Mock\MockNestedNode');
+                ->getRepository('BackBuilder\NestedNode\Tests\Mock\MockNestedNode');
 
         NestedNodeRepository::$config = array(
             'nestedNodeCalculateAsync' => false
@@ -588,7 +588,7 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Initiate a new tree with node added as last child
-     * @return \BackBuilder\NestedNode\Test\Repository\NestedNodeRepositoryTest
+     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRootAsc()
     {
@@ -620,7 +620,7 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Initiate a new tree with node added as firt child
-     * @return \BackBuilder\NestedNode\Test\Repository\NestedNodeRepositoryTest
+     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRootDesc()
     {

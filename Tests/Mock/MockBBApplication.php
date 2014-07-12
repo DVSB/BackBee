@@ -19,7 +19,7 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Test\Mock;
+namespace BackBuilder\Tests\Mock;
 
 use BackBuilder\BBApplication,
     BackBuilder\Site\Site;
@@ -27,9 +27,9 @@ use org\bovigo\vfs\vfsStream;
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\TestUnit\Mock
+ * @package     BackBuilder\Tests\Mock
  * @copyright   Lp digital system
- * @author      c.rouillon <rouillon.charles@gmail.com>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class MockBBApplication extends BBApplication
 {
@@ -98,7 +98,7 @@ class MockBBApplication extends BBApplication
 
     /**
      * Initilizes the mock structure
-     * @return \BackBuilder\TestUnit\Mock\MockBBApplication
+     * @return \BackBuilder\Tests\Mock\MockBBApplication
      */
     protected function _mockInitStructure($mockConfig = null)
     {

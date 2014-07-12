@@ -19,9 +19,10 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Test\Mock;
+namespace BackBuilder\NestedNode\Tests\Mock;
 
-use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\Tests\Mock\IMock,
+    BackBuilder\NestedNode\ANestedNode;
 
 /**
  * NestedNode mock
@@ -29,11 +30,11 @@ use BackBuilder\NestedNode\ANestedNode;
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\NestedNodeRepository")
  * @Table(name="nestednode")
  * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Test\Mock
+ * @package     BackBuilder\NestedNode\Tests\Mock
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class MockNestedNode extends ANestedNode
+class MockNestedNode extends ANestedNode implements IMock
 {
 
     /**
@@ -82,16 +83,16 @@ class MockNestedNode extends ANestedNode
 
     /**
      * The root node, cannot be NULL.
-     * @var \BackBuilder\NestedNode\Test\Mock\MockNestedNode
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Test\Mock\MockNestedNode", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_descendants", fetch="EXTRA_LAZY")
      * @JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
 
     /**
      * The parent node.
-     * @var \BackBuilder\NestdNode\Test\Mock\MockNestedNode
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Test\Mock\MockNestedNode", inversedBy="_children", fetch="EXTRA_LAZY")
+     * @var \BackBuilder\NestdNode\Tests\Mock\MockNestedNode
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_children", fetch="EXTRA_LAZY")
      * @JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;

@@ -230,5 +230,9 @@ class KeyWord extends ANestedNode implements IRenderable
     {
         return true;
     }
-
+    
+    public function getTemplateName()
+    {
+        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
 }
