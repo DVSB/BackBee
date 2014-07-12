@@ -49,7 +49,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andIsNot(ANestedNode $node, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._uid != :uid' . $suffix)
                         ->setParameter('uid' . $suffix, $node->getUid());
     }
@@ -62,7 +62,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andRootIs(ANestedNode $node, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._root = :root' . $suffix)
                         ->setParameter('root' . $suffix, $node);
     }
@@ -75,7 +75,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andParentIs(ANestedNode $node = null, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
 
         if (null === $node) {
             return $this->andWhere($alias . '._parent IS NULL');
@@ -93,7 +93,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andLevelEquals($level, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._level = :level' . $suffix)
                         ->setParameter('level' . $suffix, $level);
     }
@@ -107,7 +107,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andLevelIsLowerThan($level, $strict = false, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._level <= :level' . $suffix)
                         ->setParameter('level' . $suffix, $level - (true === $strict ? 1 : 0));
     }
@@ -121,7 +121,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andLevelIsUpperThan($level, $strict = false, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._level >= :level' . $suffix)
                         ->setParameter('level' . $suffix, $level + (true === $strict ? 1 : 0));
     }
@@ -134,7 +134,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andLeftnodeEquals($leftnode, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._leftnode = :leftnode' . $suffix)
                         ->setParameter('leftnode' . $suffix, $leftnode);
     }
@@ -148,7 +148,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andLeftnodeIsLowerThan($leftnode, $strict = false, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._leftnode <= :leftnode' . $suffix)
                         ->setParameter('leftnode' . $suffix, $leftnode - (true === $strict ? 1 : 0));
     }
@@ -162,7 +162,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andLeftnodeIsUpperThan($leftnode, $strict = false, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._leftnode >= :leftnode' . $suffix)
                         ->setParameter('leftnode' . $suffix, $leftnode + (true === $strict ? 1 : 0));
     }
@@ -175,7 +175,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andRightnodeEquals($rightnode, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._rightnode = :rightnode' . $suffix)
                         ->setParameter('rightnode' . $suffix, $rightnode);
     }
@@ -189,7 +189,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andRightnodeIsLowerThan($rightnode, $strict = false, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._rightnode <= :rightnode' . $suffix)
                         ->setParameter('rightnode' . $suffix, $rightnode - (true === $strict ? 1 : 0));
     }
@@ -203,7 +203,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      */
     public function andRightnodeIsUpperThan($rightnode, $strict = false, $alias = null)
     {
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._rightnode >= :rightnode' . $suffix)
                         ->setParameter('rightnode' . $suffix, $rightnode + (true === $strict ? 1 : 0));
     }
@@ -224,7 +224,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
             $this->andIsNot($node, $alias);
         }
 
-        list($alias, $suffix) = $this->_getAliasAndSuffix($alias);
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         if (true === $node->isRoot()) {
             $this->andWhere($alias . '._uid = :uid' . $suffix)
                     ->setParameter('uid' . $suffix, $node->getUid());
@@ -317,7 +317,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      * @return string
      * @throws \BackBuilder\Exception\BBException
      */
-    private function _getRootAlias()
+    protected function getRootAlias()
     {
         if (null === $this->_root_alias) {
             $aliases = $this->getRootAliases();
@@ -336,10 +336,10 @@ class NestedNodeQueryBuilder extends QueryBuilder
      * @param string $alias
      * @return array
      */
-    private function _getAliasAndSuffix($alias = null)
+    protected function getAliasAndSuffix($alias = null)
     {
         $suffix = count($this->getParameters());
-        $alias = true === empty($alias) ? $this->_getRootAlias() : $alias;
+        $alias = true === empty($alias) ? $this->getRootAlias() : $alias;
 
         return array($alias, $suffix);
     }

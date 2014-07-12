@@ -51,7 +51,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::andIsNot
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::_getRootAlias
+     * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::getRootAlias
      */
     public function testAndIsNot()
     {
@@ -344,7 +344,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::andIsAncestorOf
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::_getAliasAndSuffix
+     * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::getAliasAndSuffix
      */
     public function testAndIsAncestorOf()
     {
