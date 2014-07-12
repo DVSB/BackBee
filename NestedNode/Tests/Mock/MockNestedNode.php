@@ -21,7 +21,8 @@
 
 namespace BackBuilder\NestedNode\Tests\Mock;
 
-use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\Tests\Mock\IMock,
+    BackBuilder\NestedNode\ANestedNode;
 
 /**
  * NestedNode mock
@@ -33,7 +34,7 @@ use BackBuilder\NestedNode\ANestedNode;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class MockNestedNode extends ANestedNode
+class MockNestedNode extends ANestedNode implements IMock
 {
 
     /**
