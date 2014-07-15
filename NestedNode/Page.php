@@ -1214,4 +1214,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     {
         return $this->_use_url_redirect;
     }
+    
+    public function getTemplateName()
+    {
+        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
 }

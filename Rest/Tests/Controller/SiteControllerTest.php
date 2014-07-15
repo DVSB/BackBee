@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\SiteController;
-use BackBuilder\Test\TestCase;
+use BackBuilder\Tests\TestCase;
 
 
 use BackBuilder\Site\Site,

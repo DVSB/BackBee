@@ -1,6 +1,6 @@
 <?php
 
-namespace BackBuilder\Test\Fixtures\Provider;
+namespace BackBuilder\Tests\Fixtures\Provider;
 
 use Faker\Provider\Lorem,
     Faker\Provider\Base;

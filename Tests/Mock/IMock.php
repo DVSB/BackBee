@@ -1,9 +1,9 @@
 <?php
-namespace BackBuilder\Test\Mock;
+namespace BackBuilder\Tests\Mock;
 
 /**
  * @category    BackBuilder
- * @package     Test\Unit\Mock
+ * @package     BackBuilder\Tests\Mock
  * @copyright   Lp system
  * @author      n.dufreche
  */
