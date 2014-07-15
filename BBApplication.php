@@ -62,7 +62,7 @@ use Symfony\Component\Config\FileLocator,
 class BBApplication implements IApplication
 {
 
-    const VERSION = '0.8.0';
+    const VERSION = '0.10.0';
     const DEFAULT_CONTEXT = 'default';
     const DEFAULT_ENVIRONMENT = '';
 
