@@ -99,9 +99,7 @@ class DoctrineObjectConstructor implements ObjectConstructorInterface
 
             $identifierList[$name] = $data[$name];
         }
-        var_dump($data);
         
-
         // Entity update, load it from database
         $object = $objectManager->find($metadata->name, $identifierList);
 

@@ -25,10 +25,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 use BackBuilder\Controller\Controller,
     BackBuilder\Rest\Formatter\IFormatter,
-    BackBuilder\Serializer\Construction\DoctrineObjectConstructor;
+    BackBuilder\Serializer\Construction\DoctrineObjectConstructor,
+    BackBuilder\Serializer\SerializerBuilder;
 
-use JMS\Serializer\SerializerBuilder,
-    JMS\Serializer\Serializer,
+use JMS\Serializer\Serializer,
     JMS\Serializer\DeserializationContext,
     JMS\Serializer\Construction\UnserializeObjectConstructor;
 
@@ -143,6 +143,7 @@ abstract class ARestController extends Controller implements IRestController, IF
                 ->setObjectConstructor($this->getContainer()->get('serializer.object_constructor'))
                 ->setPropertyNamingStrategy($this->getContainer()->get('serializer.naming_strategy'))
                 ->setAnnotationReader($this->getContainer()->get('annotation_reader'))
+                ->setMetadataDriver($this->getContainer()->get('serializer.metadata_driver'))
             ;
             
             $this->serializer = $builder->build();

@@ -43,10 +43,11 @@ class DoctrinePropertyNamingStrategy implements PropertyNamingStrategyInterface
     
     public function translateName(PropertyMetadata $property)
     {
+        
         $metadata = $this->getDoctrineMetadata($property);
         
-        if(isset($metadata->fieldNames[$property->class])) {
-            return $metadata->fieldNames[$property->class];
+        if(isset($metadata->columnNames[$property->name])) {
+            return $metadata->columnNames[$property->name];
         }
         
         return $this->delegate->translateName($property);

@@ -253,7 +253,7 @@ class UserControllerTest extends TestCase
         $content = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $content);
         
-        $this->assertEquals($this->user->getId(), $content['_id']);
+        $this->assertEquals($this->user->getId(), $content['id']);
         
     }
     
@@ -323,11 +323,10 @@ class UserControllerTest extends TestCase
             'api_key_enabled' => true,
             'api_key_public' => 'updated_api_key_public',
             'api_key_private' => 'updated_api_key_private',
-            'first_name' => 'updated_first_name',
-            'last_name' => 'updated_last_name',
+            'firstname' => 'updated_first_name',
+            'lastname' => 'updated_last_name',
             'activated' => false,
         );
-        $data['_login'] = 'dfbdf';
         
         $response = $controller->putAction($user->getId(), new Request(array(), $data));
         
@@ -340,8 +339,8 @@ class UserControllerTest extends TestCase
         $this->assertEquals($data['api_key_enabled'], $userUpdated->getApiKeyEnabled());
         $this->assertEquals($data['api_key_public'], $userUpdated->getApiKeyPublic());
         $this->assertEquals($data['api_key_private'], $userUpdated->getApiKeyPrivate());
-        $this->assertEquals($data['first_name'], $userUpdated->getFirstname());
-        $this->assertEquals($data['last_name'], $userUpdated->getLastname());
+        $this->assertEquals($data['firstname'], $userUpdated->getFirstname());
+        $this->assertEquals($data['lastname'], $userUpdated->getLastname());
         
         
         

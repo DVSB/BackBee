@@ -205,6 +205,9 @@ class UserController extends ARestController
 
         $userUpdated = $this->deserializeEntity($request->request->all(), $user);
         
+        $this->getEntityManager()->persist($userUpdated);
+        $this->getEntityManager()->flush();
+        
         return new Response("", 204);
     }
     

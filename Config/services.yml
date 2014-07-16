@@ -397,8 +397,14 @@ services:
         arguments: [@service_container, serializer.metadata_driver]
     
     serializer.metadata_driver:
+        class: JMS\Serializer\Metadata\Driver\DoctrineTypeDriver
+        arguments: [@serializer.metadata_annotation_driver, @doctrine]
+        
+    serializer.metadata_annotation_driver:
         class: JMS\Serializer\Metadata\Driver\AnnotationDriver
         arguments: [@annotation_reader]
+        
+        #JMS\Serializer\Metadata\Driver
     
     serializer.metadata.cache:
         class: Metadata\Cache\FileCache
