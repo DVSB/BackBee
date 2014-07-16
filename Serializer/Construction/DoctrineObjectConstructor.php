@@ -94,7 +94,9 @@ class DoctrineObjectConstructor implements ObjectConstructorInterface
             }
 
             if ( ! array_key_exists($name, $data)) {
-                return $this->fallbackConstructor->construct($visitor, $metadata, $data, $type, $context);
+                $object = $context->attributes->get('target')->get();
+                $objectManager->initializeObject($object);
+                return $object;
             }
 
             $identifierList[$name] = $data[$name];

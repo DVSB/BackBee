@@ -33,6 +33,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBuilder\Security\Token\UsernamePasswordToken;
 
+use BackBuilder\Security\User;
+
 /**
  * User Controller
  *
@@ -203,12 +205,38 @@ class UserController extends ARestController
             return $this->create404Response(sprintf('User not found with id %d', $id));
         }
 
-        $userUpdated = $this->deserializeEntity($request->request->all(), $user);
+        $this->deserializeEntity($request->request->all(), $user);
         
-        $this->getEntityManager()->persist($userUpdated);
+        $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
         
         return new Response("", 204);
+    }
+    
+    /**
+     * Create User 
+     * 
+     */
+    public function postAction(Request $request) 
+    {
+        $user = new User();
+        $user = $this->deserializeEntity($request->request->all(), $user);
+        
+        // handle the password
+        $encoderFactory = $this->getContainer()->get('security.context')->getEncoderFactory();
+        
+        $password = $request->request->get('password');
+        
+        if($encoderFactory) {
+            $encoder = $encoderFactory->getEncoder($user);
+            $password = $encoder->encodePassword($password, "");
+        } 
+        $user->setPassword($request->request->get('password'));
+        
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+        
+        return new Response($this->formatItem($user), 200, array('Content-Type' => 'application/json'));
     }
     
     

@@ -47,7 +47,6 @@ class User implements UserInterface
      * @GeneratedValue(strategy="IDENTITY")
      * 
      * @Serializer\Type('integer'))
-     * @Serializer\SerializedName('id')
      */
     protected $_id;
 
@@ -57,7 +56,6 @@ class User implements UserInterface
      * @Column(type="string", name="login")
      * @fixture(type="word")
      * 
-     * @Serializer\SerializedName('login')
      * @Serializer\Type('string'))
      */
     protected $_login;
