@@ -36,9 +36,10 @@ use Symfony\Component\Yaml\Yaml;
  *                 |_ bootstrap.yml (3)
  *             |_ bootstrap.yml (4)
  *         |_ CONTEXT
- *             |_ ENVIRONMENT
- *                 |_ bootstrap.yml (1)
- *             |_ bootstrap.yml (2)
+ *             |_ Config
+ *                 |_ ENVIRONMENT
+ *                     |_ bootstrap.yml (1)
+ *                 |_ bootstrap.yml (2)
  *
  *
  * @category    BackBuilder
