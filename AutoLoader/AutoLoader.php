@@ -508,6 +508,10 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
         $this->_namespaces = $dump['namespaces_locations'];
         $this->_streamWrappers = $dump['wrappers_namespaces'];
 
+        if (0 < count($dump['wrappers_namespaces'])) {
+            $this->_registerStreams();
+        }
+
         $this->_is_restored = true;
     }
 

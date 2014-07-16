@@ -145,7 +145,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
         try {
             $this->_initEntityManager();
-        } catch (\Exception $excep) {
+        } catch (\Exception $e) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
 
@@ -1089,6 +1089,10 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     private function _initContentWrapper()
     {
+        if (true === $this->getAutoloader()->isRestored()) {
+            return $this;
+        }
+
         if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig()) {
             throw new BBException('None class content wrapper found');
         }
