@@ -43,11 +43,11 @@ class Container extends sfContainerBuilder implements ContainerInterface
      *
      * @see Symfony\Component\DependencyInjection\ContainerBuilder::get()
      */
-    public function get($id, $invalidBehavior = sfContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+    public function get($id, $invalid_behavior = sfContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
     {
         $service = null;
         try {
-            $service = parent::get($id, $invalidBehavior);
+            $service = parent::get($id, $invalid_behavior);
         } catch (RuntimeException $e) {
             if (false === $this->hasDefinition($id)) {
                 throw $e;
@@ -56,13 +56,6 @@ class Container extends sfContainerBuilder implements ContainerInterface
             if (false === $this->getDefinition($id)->isSynthetic()) {
                 throw $e;
             }
-        } catch (InvalidArgumentException $e) {
-            $method = 'get' . ucfirst($id) . 'Service';
-            if (true === method_exists($this, $method)) {
-                return $this->$method();
-            }
-
-            throw $e;
         }
 
         if (true === in_array('event.dispatcher', array_keys($this->services))) {
