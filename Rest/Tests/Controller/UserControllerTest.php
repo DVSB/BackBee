@@ -46,22 +46,22 @@ use BackBuilder\Security\User,
 class UserControllerTest extends TestCase
 {
 
-    protected $bbapp;
+    
     
     protected $user;
     
     protected function setUp()
     {
         $this->initAutoload();
-        $this->bbapp = new \BackBuilder\BBApplication(null, 'test');
-        $this->initDb($this->bbapp);
-        $this->bbapp->start();
+        $bbapp = $this->getBBApp();
+        $this->initDb($bbapp);
+        $bbapp->start();
         
         // save user
         $group = new Group();
         $group->setName('groupName');
         $group->setIdentifier('GROUP_ID');
-        $this->bbapp->getEntityManager()->persist($group);
+        $bbapp->getEntityManager()->persist($group);
         
         // valid user
         $this->user = new User();
@@ -69,7 +69,7 @@ class UserControllerTest extends TestCase
         $this->user->setLogin('user123');
         $this->user->setPassword('password123');
         $this->user->setActivated(true);
-        $this->bbapp->getEntityManager()->persist($this->user);
+        $bbapp->getEntityManager()->persist($this->user);
         
         // inactive user
         $user = new User();
@@ -77,15 +77,16 @@ class UserControllerTest extends TestCase
         $user->setLogin('user123inactive');
         $user->setPassword('password123');
         $user->setActivated(false);
-        $this->bbapp->getEntityManager()->persist($user);
+        $bbapp->getEntityManager()->persist($user);
         
-        $this->bbapp->getEntityManager()->flush();
+        $bbapp->getEntityManager()->flush();
+        
     }
     
     protected function getController()
     {
         $controller = new UserController();
-        $controller->setContainer($this->bbapp->getContainer());
+        $controller->setContainer($this->getBBApp()->getContainer());
         
         return $controller;
     }
@@ -93,7 +94,7 @@ class UserControllerTest extends TestCase
 
     public function testLoginAction_TokenCreated()
     {
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
         
         $request = new Request(array(), array(
             'username' => 'user123',
@@ -105,12 +106,12 @@ class UserControllerTest extends TestCase
         
         $response = $controller->loginAction($request);
         
-        $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->bbapp->getSecurityContext()->getToken());
+        $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->getBBApp()->getSecurityContext()->getToken());
     }
     
     public function testLoginAction_InvalidUser()
     {
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
         
         $request = new Request(array(), array(
             'username' => 'userThatDoesntExist',
@@ -125,12 +126,12 @@ class UserControllerTest extends TestCase
         // TODO in case of invalid user a 404 error should be returned
         $this->assertEquals(401, $response->getStatusCode());
         
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
     }
     
     public function testLoginAction_InvalidPassword()
     {
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
         
         $request = new Request(array(), array(
             'username' => 'user123',
@@ -144,12 +145,12 @@ class UserControllerTest extends TestCase
         
         $this->assertEquals(401, $response->getStatusCode());
         
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
     }
     
     public function testLoginAction_InactiveUser()
     {
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
         
         $request = new Request(array(), array(
             'username' => 'user123inactive',
@@ -163,12 +164,12 @@ class UserControllerTest extends TestCase
         
         $this->assertEquals(403, $response->getStatusCode());
         
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
     }
     
     public function testLoginAction_NoData()
     {
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
         
         $request = new Request(array(), array(
             'username' => 'user123',
@@ -214,7 +215,7 @@ class UserControllerTest extends TestCase
      */
     public function testLogoutAction()
     {
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
         // login first
         $request = new Request(array(), array(
             'username' => 'user123',
@@ -226,7 +227,7 @@ class UserControllerTest extends TestCase
         
         $response = $controller->loginAction($request);
         
-        $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->bbapp->getSecurityContext()->getToken());
+        $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->getBBApp()->getSecurityContext()->getToken());
         
         // logout
         $request = new Request(array(), array(
@@ -238,7 +239,7 @@ class UserControllerTest extends TestCase
         
         $this->assertEquals(204, $response->getStatusCode());
         
-        $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
     }
     
     public function testGetAction()
@@ -273,12 +274,12 @@ class UserControllerTest extends TestCase
                 ->setPassword('password123')
                 ->setActivated(true);
         
-        $this->bbapp->getEntityManager()->persist($user);
-        $this->bbapp->getEntityManager()->flush();
+        $this->getBBApp()->getEntityManager()->persist($user);
+        $this->getBBApp()->getEntityManager()->flush();
         $userId = $user->getId();
         
         $this->assertInstanceOf('BackBuilder\Security\User', 
-                $this->bbapp->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId));
+                $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId));
         
         $controller = $this->getController();
         
@@ -286,7 +287,7 @@ class UserControllerTest extends TestCase
         
         $this->assertEquals(204, $response->getStatusCode());
         
-        $userAfterDelete = $this->bbapp->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId);
+        $userAfterDelete = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId);
         $this->assertTrue(is_null($userAfterDelete));
     }
     
@@ -311,8 +312,8 @@ class UserControllerTest extends TestCase
                 ->setLastname('LastName')
                 ->setActivated(true);
         
-        $this->bbapp->getEntityManager()->persist($user);
-        $this->bbapp->getEntityManager()->flush();
+        $this->getBBApp()->getEntityManager()->persist($user);
+        $this->getBBApp()->getEntityManager()->flush();
         $userId = $user->getId();
 
         $controller = $this->getController();
@@ -326,12 +327,13 @@ class UserControllerTest extends TestCase
             'last_name' => 'updated_last_name',
             'activated' => false,
         );
+        $data['_login'] = 'dfbdf';
         
         $response = $controller->putAction($user->getId(), new Request(array(), $data));
         
         $this->assertEquals(204, $response->getStatusCode());
         
-        $userUpdated = $this->bbapp->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId);
+        $userUpdated = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId);
         /* @var $userUpdated User */
         
         $this->assertEquals($data['login'], $userUpdated->getLogin());
@@ -347,7 +349,7 @@ class UserControllerTest extends TestCase
 
     protected function tearDown()
     {
-        $this->dropDb($this->bbapp);
-        $this->bbapp->stop();
+        $this->dropDb($this->getBBApp());
+        $this->getBBApp()->stop();
     }
 }

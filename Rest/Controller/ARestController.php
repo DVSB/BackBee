@@ -28,6 +28,7 @@ use BackBuilder\Controller\Controller,
     BackBuilder\Serializer\Construction\DoctrineObjectConstructor;
 
 use JMS\Serializer\SerializerBuilder,
+    JMS\Serializer\Serializer,
     JMS\Serializer\DeserializationContext,
     JMS\Serializer\Construction\UnserializeObjectConstructor;
 
@@ -138,25 +139,13 @@ abstract class ARestController extends Controller implements IRestController, IF
     protected function getSerializer()
     {
         if(null === $this->serializer) {
-            $objectConstructor = new DoctrineObjectConstructor($this->getContainer()->get('doctrine'), new UnserializeObjectConstructor());
-                    
             $builder = SerializerBuilder::create()
-                ->setObjectConstructor($objectConstructor)
-                //->set
-                //->setPropertyNamingStrategy(new SerializedNameAnnotationStrategy(new PassThroughNamingStrategy()))
+                ->setObjectConstructor($this->getContainer()->get('serializer.object_constructor'))
+                ->setPropertyNamingStrategy($this->getContainer()->get('serializer.naming_strategy'))
+                ->setAnnotationReader($this->getContainer()->get('annotation_reader'))
             ;
-            $builder->setAnnotationReader($this->getContainer()->get('annotation_reader'));
+            
             $this->serializer = $builder->build();
-            
-            
-            $this->serializer = new Serializer(
-                $metadataFactory,
-                $this->handlerRegistry,
-                $objectConstructor,
-                $this->serializationVisitors,
-                $this->deserializationVisitors,
-                $this->eventDispatcher
-            );
         }
         
         return $this->serializer;

@@ -20,6 +20,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
     private $backbuilder_folder;
     private $repository_folder;
     private $mock_container = array();
+    
+    protected $bbapp;
 
     /**
      * Autoloader initialisation
@@ -212,6 +214,19 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         $schema->dropDatabase();
+    }
+    
+    /**
+     * 
+     * @return BackBuilder\BBApplication
+     */
+    public function getBBApp()
+    {
+        if(null === $this->bbapp) {
+            $this->bbapp = new \BackBuilder\BBApplication(null, 'test');
+        }
+        
+        return $this->bbapp;
     }
     
 }

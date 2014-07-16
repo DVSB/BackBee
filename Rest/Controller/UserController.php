@@ -195,14 +195,15 @@ class UserController extends ARestController
      * 
      * @param int $id User ID
      */
-    public function putAction($id) 
+    public function putAction($id, Request $request) 
     {
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
         if(!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
         }
-        
+
+        $userUpdated = $this->deserializeEntity($request->request->all(), $user);
         
         return new Response("", 204);
     }

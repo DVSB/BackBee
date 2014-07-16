@@ -16,15 +16,50 @@
  * limitations under the License.
  */
 
-namespace JMS\Serializer\Naming;
+namespace BackBuilder\Serializer\Naming;
 
 use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
 use JMS\Serializer\Metadata\PropertyMetadata;
 
+use BackBuilder\Doctrine\Registry;
+
 class DoctrinePropertyNamingStrategy implements PropertyNamingStrategyInterface
 {
+    /**
+     *
+     * @var BackBuilder\Doctrine\Registry
+     */
+    private $doctrine;
+    
+    private $delegate;
+    
+    private static $metadataCache = array();
+    
+    public function __construct(Registry $doctrine, PropertyNamingStrategyInterface $namingStrategy) 
+    {
+        $this->doctrine = $doctrine;
+        $this->delegate = $namingStrategy;
+    }
+    
     public function translateName(PropertyMetadata $property)
     {
-        return $property->name;
+        $metadata = $this->getDoctrineMetadata($property);
+        
+        if(isset($metadata->fieldNames[$property->class])) {
+            return $metadata->fieldNames[$property->class];
+        }
+        
+        return $this->delegate->translateName($property);
+    }
+    
+    protected function getDoctrineMetadata(PropertyMetadata $property)
+    {
+        if(!isset(self::$metadataCache[$property->class])) {
+            $em = $this->doctrine->getManagerForClass($property->class);
+            /* @var $em  \Doctrine\Common\Persistence\ObjectManager */
+            self::$metadataCache[$property->class] = $em->getClassMetadata($property->class);
+        }
+        
+        return self::$metadataCache[$property->class];
     }
 }
