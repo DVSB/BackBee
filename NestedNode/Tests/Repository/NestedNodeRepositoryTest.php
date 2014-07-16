@@ -19,33 +19,33 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Test\Repository;
+namespace BackBuilder\NestedNode\Tests\Repository;
 
 use BackBuilder\NestedNode\Repository\NestedNodeRepository,
-    BackBuilder\Test\Mock\MockBBApplication,
-    BackBuilder\NestedNode\Test\Mock\MockNestedNode;
+    BackBuilder\Tests\Mock\MockBBApplication,
+    BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\TestUnit\BackBuilder\NestedNode\Repository
+ * @package     BackBuilder\NestedNode\Tests\Repository
  * @copyright   Lp digital system
- * @author      c.rouillon <rouillon.charles@gmail.com>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
-     * @var \BackBuilder\TestUnit\Mock\MockBBApplication
+     * @var \BackBuilder\Tests\Mock\MockBBApplication
      */
     private $application;
 
     /**
-     * @var \BackBuilder\NestedNode\Test\Mock\MockNestedNode 
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
      */
     private $root_asc;
 
     /**
-     * @var \BackBuilder\NestedNode\Test\Mock\MockNestedNode 
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
      */
     private $root_desc;
 
@@ -79,7 +79,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getAncestor
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getAncestorQuery
      */
     public function testGetAncestor()
     {
@@ -102,7 +101,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getAncestors
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getAncestorsQuery
      */
     public function testGetAncestors()
     {
@@ -114,18 +112,18 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array($this->root_asc), $this->repo->getAncestors($this->root_asc, 0, true));
         $this->assertEquals(array($this->root_asc), $this->repo->getAncestors($child));
         $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($child, null, true));
-        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($child, 0, true));
+        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($child, 1, true));
         $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($subchild));
         $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repo->getAncestors($subchild, null, true));
-        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($subchild, 0));
-        $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repo->getAncestors($subchild, 0, true));
+        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($subchild, 2));
+        $this->assertEquals(array($child), $this->repo->getAncestors($subchild, 1));
+        $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repo->getAncestors($subchild, 2, true));
         $this->assertEquals(array($child), $this->repo->getAncestors($subchild, 1));
         $this->assertEquals(array($child, $subchild), $this->repo->getAncestors($subchild, 1, true));
     }
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getDescendants
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getDescendantsQuery
      */
     public function testGetDescendants()
     {
@@ -262,7 +260,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getPrevSibling
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getPrevSiblingQuery
      */
     public function testGetPrevSibling()
     {
@@ -280,7 +277,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getNextSibling
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getNextSiblingQuery
      */
     public function testGetNextSibling()
     {
@@ -298,7 +294,6 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getSiblings
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_getSiblingsQuery
      */
     public function testGetSiblings()
     {
@@ -563,7 +558,7 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
         $em = $this->application->getEntityManager();
 
         $st = new \Doctrine\ORM\Tools\SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Test\Mock\MockNestedNode')));
+        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Tests\Mock\MockNestedNode')));
 
         $this->root = new MockNestedNode('root');
         $em->persist($this->root);
@@ -576,13 +571,13 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Sets the NestedNode Repository
-     * @return \BackBuilder\NestedNode\Test\Repository\NestedNodeRepositoryTest
+     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRepo()
     {
         $this->repo = $this->application
                 ->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Test\Mock\MockNestedNode');
+                ->getRepository('BackBuilder\NestedNode\Tests\Mock\MockNestedNode');
 
         NestedNodeRepository::$config = array(
             'nestedNodeCalculateAsync' => false
@@ -593,7 +588,7 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Initiate a new tree with node added as last child
-     * @return \BackBuilder\NestedNode\Test\Repository\NestedNodeRepositoryTest
+     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRootAsc()
     {
@@ -625,7 +620,7 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Initiate a new tree with node added as firt child
-     * @return \BackBuilder\NestedNode\Test\Repository\NestedNodeRepositoryTest
+     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRootDesc()
     {

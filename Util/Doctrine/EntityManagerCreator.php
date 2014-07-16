@@ -170,6 +170,36 @@ class EntityManagerCreator
             }
 
         }
+        
+        if (true === array_key_exists('orm', $options)) {
+            if (true === array_key_exists('proxy_namespace', $options['orm'])) {
+                $config->setProxyNamespace($options['orm']['proxy_namespace']);
+            }
+
+            if (true === array_key_exists('proxy_dir', $options['orm'])) {
+                $config->setProxyDir($options['orm']['proxy_dir']);
+            }
+
+            if (true === array_key_exists('auto_generate_proxy_classes', $options['orm'])) {
+                $config->setAutoGenerateProxyClasses($options['orm']['auto_generate_proxy_classes']);
+            }
+
+            if (true === array_key_exists('metadata_cache_driver', $options['orm']) && true === is_array($options['orm']['metadata_cache_driver'])) {
+                if (true === array_key_exists('type', $options['orm']['metadata_cache_driver'])) {
+                    if ('service' === $options['orm']['metadata_cache_driver']['type'] && true === isset($options['orm']['metadata_cache_driver']['id'])) {
+                        $config->setMetadataCacheImpl($options['orm']['metadata_cache_driver']['id']);
+                    }
+                }
+            }
+
+            if (true === array_key_exists('query_cache_driver', $options['orm']) && true === is_array($options['orm']['query_cache_driver'])) {
+                if (true === array_key_exists('type', $options['orm']['query_cache_driver'])) {
+                    if ('service' === $options['orm']['query_cache_driver']['type'] && true === isset($options['orm']['query_cache_driver']['id'])) {
+                        $config->setQueryCacheImpl($options['orm']['query_cache_driver']['id']);
+                    }
+                }
+            }
+        }
 
         if ($logger instanceof SQLLogger) {
             $config->setSQLLogger($logger);

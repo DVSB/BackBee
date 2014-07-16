@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace BackBuilder\Test\Mock\EventDispatcher;
+namespace BackBuilder\Tests\Mock\EventDispatcher;
 
 
 use Symfony\Component\EventDispatcher\Event;
@@ -19,7 +19,7 @@ use BackBuilder\Event\Dispatcher;
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\TestUnit\Mock\EventDispatcher
+ * @package     BackBuilder\Tests\Mock\EventDispatcher
  * @copyright   Lp system
  * @author      k.golovin
  */

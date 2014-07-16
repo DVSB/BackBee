@@ -92,8 +92,11 @@ EOF
             
             $metadata = $em->getMetadataFactory()->getAllMetadata();
             $schema = new SchemaTool($em);
+            
+            $em->getConnection()->executeQuery('SET FOREIGN_KEY_CHECKS=0');
             $schema->updateSchema($metadata, true);
-        } 
+            $em->getConnection()->executeQuery('SET FOREIGN_KEY_CHECKS=1');
+        }
 
         $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
         

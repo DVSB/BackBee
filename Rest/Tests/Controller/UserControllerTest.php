@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\UserController;
-use BackBuilder\Test\TestCase;
+use BackBuilder\Tests\TestCase;
 
 
 use BackBuilder\Security\User,
@@ -48,6 +48,8 @@ class UserControllerTest extends TestCase
 
     protected $bbapp;
     
+    protected $user;
+    
     protected function setUp()
     {
         $this->initAutoload();
@@ -62,12 +64,12 @@ class UserControllerTest extends TestCase
         $this->bbapp->getEntityManager()->persist($group);
         
         // valid user
-        $user = new User();
-        $user->addGroup($group);
-        $user->setLogin('user123');
-        $user->setPassword('password123');
-        $user->setActivated(true);
-        $this->bbapp->getEntityManager()->persist($user);
+        $this->user = new User();
+        $this->user->addGroup($group);
+        $this->user->setLogin('user123');
+        $this->user->setPassword('password123');
+        $this->user->setActivated(true);
+        $this->bbapp->getEntityManager()->persist($this->user);
         
         // inactive user
         $user = new User();
@@ -237,6 +239,110 @@ class UserControllerTest extends TestCase
         $this->assertEquals(204, $response->getStatusCode());
         
         $this->assertNull($this->bbapp->getSecurityContext()->getToken());
+    }
+    
+    public function testGetAction()
+    {
+        $controller = $this->getController();
+        
+        $response = $controller->getAction($this->user->getId());
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $content = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $content);
+        
+        $this->assertEquals($this->user->getId(), $content['_id']);
+        
+    }
+    
+    public function testGetAction_invalidUser()
+    {
+        $controller = $this->getController();
+        
+        $response = $controller->getAction(13807548404);
+        
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+    
+    public function testDeleteAction()
+    {
+        // create user
+        $user = new User();
+        $user->setLogin('usernameToDelete')
+                ->setPassword('password123')
+                ->setActivated(true);
+        
+        $this->bbapp->getEntityManager()->persist($user);
+        $this->bbapp->getEntityManager()->flush();
+        $userId = $user->getId();
+        
+        $this->assertInstanceOf('BackBuilder\Security\User', 
+                $this->bbapp->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId));
+        
+        $controller = $this->getController();
+        
+        $response = $controller->deleteAction($user->getId());
+        
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        $userAfterDelete = $this->bbapp->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId);
+        $this->assertTrue(is_null($userAfterDelete));
+    }
+    
+    public function testDeleteAction_invalidUser()
+    {
+        $controller = $this->getController();
+        
+        $response = $controller->deleteAction(13807548404);
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+    
+    public function testPutAction()
+    {
+        // create user
+        $user = new User();
+        $user->setLogin('usernameToUpdate')
+                ->setPassword('password123')
+                ->setApiKeyEnabled(false)
+                ->setApiKeyPrivate('PRIVATE_KEY')
+                ->setApiKeyPublic('PUBLIC_KEY')
+                ->setFirstname('FirstName')
+                ->setLastname('LastName')
+                ->setActivated(true);
+        
+        $this->bbapp->getEntityManager()->persist($user);
+        $this->bbapp->getEntityManager()->flush();
+        $userId = $user->getId();
+
+        $controller = $this->getController();
+        
+        $data = array(
+            'login' => 'username_updated',
+            'api_key_enabled' => true,
+            'api_key_public' => 'updated_api_key_public',
+            'api_key_private' => 'updated_api_key_private',
+            'first_name' => 'updated_first_name',
+            'last_name' => 'updated_last_name',
+            'activated' => false,
+        );
+        
+        $response = $controller->putAction($user->getId(), new Request(array(), $data));
+        
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        $userUpdated = $this->bbapp->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId);
+        /* @var $userUpdated User */
+        
+        $this->assertEquals($data['login'], $userUpdated->getLogin());
+        $this->assertEquals($data['api_key_enabled'], $userUpdated->getApiKeyEnabled());
+        $this->assertEquals($data['api_key_public'], $userUpdated->getApiKeyPublic());
+        $this->assertEquals($data['api_key_private'], $userUpdated->getApiKeyPrivate());
+        $this->assertEquals($data['first_name'], $userUpdated->getFirstname());
+        $this->assertEquals($data['last_name'], $userUpdated->getLastname());
+        
+        
+        
     }
 
     protected function tearDown()
