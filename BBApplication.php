@@ -23,6 +23,7 @@ namespace BackBuilder;
 use BackBuilder\AutoLoader\AutoLoader;
 use BackBuilder\Bundle\BundleLoader;
 use BackBuilder\Config\Config;
+use BackBuilder\Config\ConfigBuilder;
 use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
@@ -801,13 +802,13 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function getSession()
     {
         if (null === $this->getRequest()->getSession()) {
-            
+
             if('test' === $this->getEnvironment()) {
                 $session = new Session(new MockArraySessionStorage());
             } else {
                 $session = new Session();
             }
-            
+
             $session->start();
             $this->getRequest()->setSession($session);
         }
@@ -991,22 +992,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     private function _initApplicationConfig()
     {
-        $config = $this->getConfig();
-
-        if (false === ($config instanceof DumpableServiceProxyInterface) || false === $config->isRestored()) {
-            $config_directories = (new \BackBuilder\Util\Resolver\ConfigDirectory())->getDirectories(
-                null,
-                $this->getBaseRepository(),
-                $this->getContext(),
-                $this->getEnvironment()
-            );
-
-            foreach ($config_directories as $directory) {
-                if (true === is_dir($directory)) {
-                    $config->extend($directory, $this->isOverridedConfig());
-                }
-            }
-        }
+        (new ConfigBuilder($this))->extend(ConfigBuilder::APPLICATION_CONFIG, $this->getConfig());
     }
 
     private function _initEnvVariables()
