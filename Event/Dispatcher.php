@@ -23,8 +23,10 @@ namespace BackBuilder\Event;
 
 use BackBuilder\BBApplication;
 use BackBuilder\Config\Config;
+use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBuilder\Event\Exception\ContainerNotFoundException;
 
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\Event as sfEvent;
@@ -43,7 +45,14 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      * Current BackBuilder application
      * @var BackBuilder\BBApplication
      */
-    protected $_application;
+    protected $application;
+
+    /**
+     * Container we use to get services as listener
+     *
+     * @var BackBuilder\DependencyInjection\Container
+     */
+    protected $container;
 
     /**
      * Class constructor
@@ -51,7 +60,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      */
     public function __construct(BBApplication $application = null, Config $config = null)
     {
-        $this->_application = $application;
+        $this->application = $application;
 
         if (null === $config && null !== $application) {
             $config = $application->getConfig();
@@ -62,6 +71,15 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
                 $this->addListeners($events_config);
             }
         }
+
+        if (null !== $application) {
+            $this->container = $this->application->getContainer();
+        }
+    }
+
+    public function setContainer(Container $container)
+    {
+        $this->container = $container;
     }
 
     /**
@@ -72,7 +90,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     {
         foreach ($eventsConfig as $name => $listeners) {
             if (FALSE === array_key_exists('listeners', $listeners)) {
-                $this->_application->warning(sprintf('None listener found for `%s` event.', $name));
+                $this->application->warning(sprintf('None listener found for `%s` event.', $name));
                 continue;
             }
 
@@ -89,8 +107,8 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      */
     public function dispatch($eventName, sfEvent $event = null)
     {
-        if (null !== $this->_application)
-            $this->_application->debug(sprintf('Dispatching `%s` event.', $eventName));
+        if (null !== $this->application)
+            $this->application->debug(sprintf('Dispatching `%s` event.', $eventName));
 
         return parent::dispatch($eventName, $event);
     }
@@ -125,7 +143,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $eventName = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', get_class($entity)) . '.' . $eventName);
 
             if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
-                $prefix = str_replace(NAMESPACE_SEPARATOR, '.', $this->_application->getEntityManager()->getConfiguration()->getProxyNamespace());
+                $prefix = str_replace(NAMESPACE_SEPARATOR, '.', $this->application->getEntityManager()->getConfiguration()->getProxyNamespace());
                 $prefix .= '.' . $entity::MARKER . '.';
 
                 $eventName = str_replace(strtolower($prefix), '', $eventName);
@@ -151,7 +169,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      */
     public function getApplication()
     {
-        return $this->_application;
+        return $this->application;
     }
 
     /**
@@ -167,7 +185,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $eventPrefix = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', $entity) . '.');
         }
         if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
-            $prefix = str_replace(NAMESPACE_SEPARATOR, '.', $this->_application->getEntityManager()->getConfiguration()->getProxyNamespace());
+            $prefix = str_replace(NAMESPACE_SEPARATOR, '.', $this->application->getEntityManager()->getConfiguration()->getProxyNamespace());
             $prefix .= '.' . $entity::MARKER . '.';
 
             $eventPrefix = str_replace(strtolower($prefix), '', $eventPrefix);
@@ -188,7 +206,11 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
         // retrieve services
         foreach ($listeners as &$listener) {
             if (is_string($listener[0]) && 0 === strpos($listener[0], '@')) {
-                $listener[0] = $this->_application->getContainer()->get(substr($listener[0], 1));
+                if (null !== $this->container) {
+                    $listener[0] = $this->container->get(substr($listener[0], 1));
+                } else {
+                    throw new ContainerNotFoundException();
+                }
             }
         }
 
@@ -238,7 +260,11 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 
             if (true === is_string($callable)) {
                 if (1 === preg_match('#^@(.+)#', $callable, $matches) && true === isset($matches[1])) {
-                    $callable = $this->_application->getContainer()->get($matches[1]);
+                    if (null !== $this->container) {
+                        $callable = $this->container->get($matches[1]);
+                    } else {
+                        throw new ContainerNotFoundException();
+                    }
                 }
             }
 

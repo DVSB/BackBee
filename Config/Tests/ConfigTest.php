@@ -24,9 +24,7 @@ use BackBuilder\Config\Config;
 use BackBuilder\DependencyInjection\Container;
 
 /**
- * A set of configuration parameters store in a yaml file
- * The parameters had to be filtered by section
- * Note that parameters and services will be set only if setContainer() is called
+ * Set of tests for BackBuilder\Config\Config
  *
  * @category    BackBuilder
  * @package     BackBuilder\Config
@@ -57,7 +55,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($config->sectionHasKey('say', 'hello'));
         $this->assertFalse($config->sectionHasKey('say', 'hi'));
         $this->assertEquals($config->getSection('say'), array(
-                'hello'   => 'world',
+            'hello'   => 'world',
             'bonjour' => 'monde',
             'hola'    => 'mundo'
         ));

@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\FrontController;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,28 +20,27 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\FrontController;
+use BackBuilder\BBApplication;
+use BackBuilder\FrontController\Exception\FrontControllerException;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Routing\RouteCollection;
+use BackBuilder\Routing\RequestContext;
+use BackBuilder\Routing\Matcher\UrlMatcher;
+use BackBuilder\Util\File;
+use BackBuilder\Services\Content\Category;
+use BackBuilder\Util\MimeType;
+use BackBuilder\Event\PageFilterEvent;
 
-use BackBuilder\BBApplication,
-    BackBuilder\FrontController\Exception\FrontControllerException,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\Routing\RouteCollection,
-    BackBuilder\Routing\RequestContext,
-    BackBuilder\Routing\Matcher\UrlMatcher,
-    BackBuilder\Util\File,
-    BackBuilder\Services\Content\Category,
-    BackBuilder\Util\MimeType,
-    BackBuilder\Event\PageFilterEvent;
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\HttpKernel\KernelEvents,
-    Symfony\Component\HttpKernel\HttpKernelInterface,
-    Symfony\Component\HttpKernel\Exception\HttpExceptionInterface,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
-    Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent,
-    Symfony\Component\HttpKernel\Event\FilterControllerEvent,
-    Symfony\Component\HttpKernel\Event\PostResponseEvent;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 /**
  * The BackBuilder front controller
@@ -369,7 +369,6 @@ class FrontController implements HttpKernelInterface
         ;
 
         if ('_root_' == $uri) {
-
             $page = $this->_application->getEntityManager()
                 ->getRepository('BackBuilder\NestedNode\Page')
                 ->getRoot($site)
@@ -881,5 +880,4 @@ class FrontController implements HttpKernelInterface
             $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
         }
     }
-
 }
