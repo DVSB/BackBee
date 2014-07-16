@@ -181,7 +181,7 @@ class String
      */
     public static function br2nl($str)
     {
-        return preg_replace('/<br\\s*?\/??>/i', "\r\n", $str);
+        return preg_replace('/<br[^>]*>\s*/is', "\r\n", $str);
     }
 
     /**
