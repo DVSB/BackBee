@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\Config;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -18,8 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
-
-namespace BackBuilder\Config;
 
 use BackBuilder\Cache\ACache;
 use BackBuilder\Config\Exception\InvalidConfigException;
@@ -532,10 +531,11 @@ class Config implements DumpableServiceInterface
             $this->_saveToCache($basedir);
         }
 
-        if (!empty($this->_environment) &&
-            false === strpos($this->_environment, $basedir) &&
-            file_exists($basedir . DIRECTORY_SEPARATOR . $this->_environment)) {
-
+        if (
+            false === empty($this->_environment)
+            && false === strpos($this->_environment, $basedir)
+            && true === file_exists($basedir . DIRECTORY_SEPARATOR . $this->_environment)
+        ) {
             $this->extend($basedir . DIRECTORY_SEPARATOR . $this->_environment, $overwrite);
         }
 
