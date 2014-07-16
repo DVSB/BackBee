@@ -77,6 +77,11 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
         }
     }
 
+    /**
+     * Setter of Event\Dispatcher's container
+     *
+     * @param Container $container the container to set into Event\Dispatcher
+     */
     public function setContainer(Container $container)
     {
         $this->container = $container;
@@ -137,32 +142,6 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
         $this->dispatch($this->formatEventName($eventName, $entity), $event);
     }
 
-    private function formatEventName($eventName, $entity)
-    {
-        if (is_object($entity)) {
-            $eventName = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', get_class($entity)) . '.' . $eventName);
-
-            if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
-                $prefix = str_replace(NAMESPACE_SEPARATOR, '.', $this->application->getEntityManager()->getConfiguration()->getProxyNamespace());
-                $prefix .= '.' . $entity::MARKER . '.';
-
-                $eventName = str_replace(strtolower($prefix), '', $eventName);
-            }
-        } else {
-            $eventName = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', $entity) . '.' . $eventName);
-        }
-
-        if (0 === strpos($eventName, 'backbuilder.')) {
-            $eventName = substr($eventName, 12);
-        }
-
-        if (0 === strpos($eventName, 'classcontent.')) {
-            $eventName = substr($eventName, 13);
-        }
-
-        return $eventName;
-    }
-
     /**
      * Return the current instance of BBapplication
      * @return \Backbuilder\BBApplication
@@ -206,8 +185,8 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
         // retrieve services
         foreach ($listeners as &$listener) {
             if (is_string($listener[0]) && 0 === strpos($listener[0], '@')) {
-                if (null !== $this->container) {
-                    $listener[0] = $this->container->get(substr($listener[0], 1));
+                if (null !== $this->getContainer()) {
+                    $listener[0] = $this->getContainer()->get(substr($listener[0], 1));
                 } else {
                     throw new ContainerNotFoundException();
                 }
@@ -236,7 +215,11 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      */
     public function dump(array $options = array())
     {
-        return array('listeners' => $this->getListeners());
+        return array(
+            'listeners'       => $this->getListeners(),
+            'has_application' => null !== $this->application,
+            'has_container'   => null !== $this->container
+        );
     }
 
     /**
@@ -260,8 +243,8 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 
             if (true === is_string($callable)) {
                 if (1 === preg_match('#^@(.+)#', $callable, $matches) && true === isset($matches[1])) {
-                    if (null !== $this->container) {
-                        $callable = $this->container->get($matches[1]);
+                    if (null !== $this->getContainer()) {
+                        $callable = $this->getContainer()->get($matches[1]);
                     } else {
                         throw new ContainerNotFoundException();
                     }
@@ -275,5 +258,57 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
                 break;
             }
         }
+    }
+
+    /**
+     * returns the container of current dispatcher (try to get it application if current dispatcher don't have it)
+     *
+     * @return mixed null if no container has been found, else the container
+     */
+    private function getContainer()
+    {
+        if (null === $this->container && null !== $this->application) {
+            $this->container = $this->application->getContainer();
+        }
+
+        return $this->container;
+    }
+
+    /**
+     * Format the name of an event
+     *
+     * @param  string $event_name
+     * @param  object $entity
+     *
+     * @return string the formated event name
+     */
+    private function formatEventName($event_name, $entity)
+    {
+        if (is_object($entity)) {
+            $event_name = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', get_class($entity)) . '.' . $event_name);
+
+            if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
+                $prefix = str_replace(
+                    NAMESPACE_SEPARATOR,
+                    '.',
+                    $this->application->getEntityManager()->getConfiguration()->getProxyNamespace()
+                );
+                $prefix .= '.' . $entity::MARKER . '.';
+
+                $event_name = str_replace(strtolower($prefix), '', $event_name);
+            }
+        } else {
+            $event_name = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', $entity) . '.' . $event_name);
+        }
+
+        if (0 === strpos($event_name, 'backbuilder.')) {
+            $event_name = substr($event_name, 12);
+        }
+
+        if (0 === strpos($event_name, 'classcontent.')) {
+            $event_name = substr($event_name, 13);
+        }
+
+        return $event_name;
     }
 }
