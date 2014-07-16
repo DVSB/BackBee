@@ -22,6 +22,7 @@ namespace BackBuilder\Config;
 
 use BackBuilder\BBApplication;
 use BackBuilder\Config\Config;
+use BackBuilder\Config\Exception\InvalidConfigTypeException;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBuilder\Util\Resolver\ConfigDirectory;
 
@@ -101,9 +102,9 @@ class ConfigBuilder
             if (self::APPLICATION_CONFIG === $type) {
                 $this->doApplicationConfigExtend($config);
             } elseif (self::BUNDLE_CONFIG === $type) {
-
+                /* to define */
             } else {
-                throw new InvalidConfigTypeProvidedException($type);
+                throw new InvalidConfigTypeException('extend', $type);
             }
         }
     }
