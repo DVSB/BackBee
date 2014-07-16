@@ -74,7 +74,10 @@ class BundleLoader
 
         // add BundleListener event (service.tagged.bundle)
         $event_dispatcher = $application->getContainer()->get('event.dispatcher');
-        if (($event_dispatcher instanceof DumpableServiceProxyInterface) && $event_dispatcher->isRestored()) {
+        if (
+            false === ($event_dispatcher instanceof DumpableServiceProxyInterface)
+            || false === $event_dispatcher->isRestored()
+        ) {
             $event_dispatcher->addListeners(array(
                 'bbapplication.start' => array(
                     'listeners' => array(
@@ -121,7 +124,7 @@ class BundleLoader
             $config_service_id = \BackBuilder\Bundle\ABundle::getBundleConfigServiceId($base_dir);
             if (false === $container->hasDefinition($config_service_id)) {
                 $definition = new Definition('BackBuilder\Config\Config', array(
-                    $base_dir,
+                    $base_dir . DIRECTORY_SEPARATOR . 'Ressources',
                     new Reference('cache.bootstrap'),
                     null,
                     '%debug%',
