@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -40,12 +40,12 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
     private $application;
 
     /**
-     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode
      */
     private $root_asc;
 
     /**
-     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode
      */
     private $root_desc;
 
@@ -535,6 +535,14 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
+        $bootstrap_yml = array(
+            'debug'     => true,
+            'container' => array(
+                'dump_directory' => '',
+                'autogenerate'   => true
+            )
+        );
+
         $mockConfig = array(
             'cache' => array(
                 'default' => array()
@@ -543,7 +551,8 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
             'repository' => array(
                 'ClassContent' => array(),
                 'Config' => array(
-                    'config.yml' => file_get_contents(__DIR__ . '/../config.yml'),
+                    'config.yml'    => file_get_contents(__DIR__ . '/../config.yml'),
+                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml)
                 ),
                 'Data' => array(
                     'Media' => array(),
