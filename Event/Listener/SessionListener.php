@@ -51,13 +51,13 @@ class SessionListener
         }
 
         if (NULL !== $application = $event->getKernel()->getApplication()) {
-            if (!$application->getContainer()->has('session'))
-                $application->getContainer()->set('session', $application->getSession());
+            if (!$application->getContainer()->has('bb_session'))
+                $application->getContainer()->set('bb_session', $application->getSession());
 
-            $application->getContainer()->get('session')->start();
+            $application->getContainer()->get('bb_session')->start();
             $application->debug("Session started");
 
-            $request->setSession($application->getContainer()->get('session'));
+            $request->setSession($application->getContainer()->get('bb_session'));
         }
     }
 
