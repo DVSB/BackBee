@@ -218,7 +218,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     
     /**
      * 
-     * @return BackBuilder\BBApplication
+     * @return \BackBuilder\BBApplication
      */
     public function getBBApp()
     {

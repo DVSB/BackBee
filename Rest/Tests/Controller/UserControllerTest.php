@@ -350,8 +350,50 @@ class UserControllerTest extends TestCase
         $this->assertEquals($data['api_key_private'], $userUpdated->getApiKeyPrivate());
         $this->assertEquals($data['firstname'], $userUpdated->getFirstname());
         $this->assertEquals($data['lastname'], $userUpdated->getLastname());
+        
+        return $userId;
     }
     
+    /**
+     * 
+     */
+    public function testPutAction_empty_required_fields()
+    {
+        // create user
+        $user = new User();
+        $user->setLogin('usernameToUpdate')
+                ->setPassword('password123')
+                ->setApiKeyEnabled(false)
+                ->setApiKeyPrivate('PRIVATE_KEY')
+                ->setApiKeyPublic('PUBLIC_KEY')
+                ->setFirstname('FirstName')
+                ->setLastname('LastName')
+                ->setActivated(true);
+        
+        $this->getBBApp()->getEntityManager()->persist($user);
+        $this->getBBApp()->getEntityManager()->flush();
+        $userId = $user->getId();
+        
+        $controller = $this->getController();
+        
+        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
+            'firstname' => '',
+            'lastname' => '',
+            'login' => '',
+        ), array(
+            'id' => $userId,
+            '_action' => 'putAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController'
+        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+
+        $this->assertContains('First Name is required', $res['errors']['firstname']);
+        $this->assertContains('Last Name is required', $res['errors']['lastname']);
+        $this->assertContains('Login is required', $res['errors']['login']);
+    }
     
     public function testPostAction()
     {
@@ -389,6 +431,65 @@ class UserControllerTest extends TestCase
         
         $user = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($res['id']);
         $this->assertInstanceOf('BackBuilder\Security\User', $user);
+    }
+    
+    public function testPostAction_missing_required_fields()
+    {
+        $controller = $this->getController();
+        
+        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(), array(
+            '_action' => 'postAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController'
+        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+
+        $this->assertContains('Password not provided', $res['errors']['password']);
+        $this->assertContains('First Name is required', $res['errors']['firstname']);
+        $this->assertContains('Last Name is required', $res['errors']['lastname']);
+        $this->assertContains('Login is required', $res['errors']['login']);
+    }
+    
+    
+    public function testPostAction_duplicate_login()
+    {
+        // create user
+        $user = new User();
+        $user->setLogin('usernameDulicate')
+                ->setPassword('password123')
+                ->setApiKeyEnabled(false)
+                ->setApiKeyPrivate('PRIVATE_KEY')
+                ->setApiKeyPublic('PUBLIC_KEY')
+                ->setFirstname('FirstName')
+                ->setLastname('LastName')
+                ->setActivated(true);
+        $this->getBBApp()->getEntityManager()->persist($user);
+        $this->getBBApp()->getEntityManager()->flush();
+        
+        
+        $controller = $this->getController();
+        
+        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
+            'login' => 'usernameDulicate',
+            'api_key_enabled' => true,
+            'api_key_public' => 'api_key_public',
+            'api_key_private' => 'api_key_private',
+            'firstname' => 'first_name',
+            'lastname' => 'last_name',
+            'activated' => false,
+            'password' => 'password',
+        ), array(
+            '_action' => 'postAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController'
+        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+
+        $this->assertContains('User with that login already exists', $res['errors']['login']);
     }
 
     protected function tearDown()
