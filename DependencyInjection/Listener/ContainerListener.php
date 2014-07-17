@@ -1,11 +1,40 @@
 <?php
-
 namespace BackBuilder\DependencyInjection\Listener;
 
-use BackBuilder\DependencyInjection\Container,
-    BackBuilder\Event\Event,
-    BackBuilder\Exception\BBException;
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
 
+use BackBuilder\DependencyInjection\Container;
+use BackBuilder\DependencyInjection\Exception\CannotCreateContainerDirectoryException;
+use BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException;
+use BackBuilder\DependencyInjection\Loader\ContainerProxy;
+use BackBuilder\Event\Event;
+use BackBuilder\Exception\BBException;
+
+/**
+ *
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\DependencyInjection
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
+ */
 class ContainerListener
 {
     /**
@@ -18,30 +47,30 @@ class ContainerListener
         $application = $event->getTarget();
         $container = $application->getContainer();
 
-        if (true === $container->getParameter('container.do_compile') && false === $application->isDebugMode()) {
-            self::loadExternalBundleServices($container, $application->getConfig()->getSection('external_bundles'));
+        if (false === $application->isDebugMode()) {
+            if (false === ($container instanceof ContainerProxy)) {
+                $container_filename = $container->getParameter('container.filename');
+                $container_directory = $container->getParameter('container.dir');
 
-            $container_class = $container->getParameter('container.class');
-            $container_file = $container->getParameter('container.file');
-            $container_dir = $container->getParameter('container.dir');
+                if (false === is_dir($container_directory) && false === @mkdir($container_directory, 0755)) {
+                    throw new CannotCreateContainerDirectoryException($container_directory);
+                }
 
-            if (false === file_exists($container_dir)) {
-                @mkdir($container_dir, 0755);
-            }
+                if (false === is_writable($container_directory)) {
+                    throw new ContainerDirectoryNotWritableException($container_directory);
+                }
 
-            if (true === is_writable($container_dir)) {
-                $dump = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($container);
+                $dumper = new \BackBuilder\DependencyInjection\Dumper\PhpArrayDumper($container);
                 file_put_contents(
-                    $container_dir . DIRECTORY_SEPARATOR . $container_file,
-                    $dump->dump(array(
-                        'class'      => $container_class,
-                        'base_class' => '\BackBuilder\DependencyInjection\Container'
+                    $container_directory . DIRECTORY_SEPARATOR . $container_filename,
+                    $dumper->dump(array(
+                        'do_compile' => true
                     ))
                 );
             }
+        } else {
+            $container->compile();
         }
-
-        $container->compile();
     }
 
     /**
@@ -71,7 +100,8 @@ class ContainerListener
 
                     $settings = true === isset($datas['config'])
                         ? array($key => $datas['config'])
-                        : array();
+                        : array()
+                    ;
 
                     $bundle->load($settings, $container);
                 }

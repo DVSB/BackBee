@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,8 +20,6 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder;
-
 use BackBuilder\Site\Site;
 use BackBuilder\Console\Console;
 
@@ -34,7 +33,6 @@ use BackBuilder\Console\Console;
  */
 interface IApplication
 {
-
     /**
      * @param \BackBuilder\Site\Site $site
      */
@@ -44,7 +42,7 @@ interface IApplication
      * Stop the current BBApplication instance
      */
     public function stop();
-    
+
     /**
      * @return BackBuilder\FrontController\FrontController
      */
@@ -60,6 +58,10 @@ interface IApplication
      */
     public function getAutoloader();
 
+    /**
+     * [getBBDir description]
+     * @return [type] [description]
+     */
     public function getBBDir();
 
     /**
@@ -72,21 +74,26 @@ interface IApplication
      * @return string
      */
     public function getBaseDir();
-    
 
     /**
      * Returns the starting context
      * @return string|NULL
      */
     public function getContext();
-    
+
+    /**
+     * Returns the starting context
+     * @return string|NULL
+     */
+    public function getEnvironment();
+
     /**
      * @return ContainerBuilder
      */
     public function getContainer();
 
     /**
-     * 
+     *
      */
     public function registerCommands(Console $console);
 }

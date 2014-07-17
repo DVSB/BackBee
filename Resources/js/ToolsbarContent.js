@@ -178,7 +178,7 @@ BB4.ToolsbarManager.register("contenttb",{
     _onInitContentBlocks : function(blocks){
         var contentFragment = document.createDocumentFragment();
         var self = this;
-
+        console.log("blocks",blocks);
         bb.jquery.each(blocks,function(i,data){
            if(data.hasOwnProperty("isVisible") && data.isVisible==false) return true;
             var contentBlock = bb.jquery("<li></li>").clone();

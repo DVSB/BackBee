@@ -176,8 +176,8 @@ class Page extends AbstractServiceLocal
         // Updating URL of the page is needed
         if (true === property_exists($object, 'url') && null !== $this->getApplication()->getRenderer()) {
             $object->url = $this->getApplication()
-                ->getRenderer()
-                ->getRelativeUrl($object->url)
+                    ->getRenderer()
+                    ->getRelativeUrl($object->url)
             ;
 
             if ('/' === $redirect = $this->getApplication()->getRenderer()->getRelativeUrl($object->redirect)) {
@@ -211,11 +211,9 @@ class Page extends AbstractServiceLocal
         $this->getEntityManager()->flush();
 
         return array(
-            'url'   => $page->getUrl() . (
-                true === $this->getApplication()->getController()->isUrlExtensionRequired()
-                && '/' !== substr($page->getUrl(), -1)
-                ? '.' . $this->getApplication()->getController()->getUrlExtension()
-                : ''
+            'url' => $page->getUrl() . (
+            true === $this->getApplication()->getController()->isUrlExtensionRequired()
+            && '/' !== substr($page->getUrl(), -1) ? '.' . $this->getApplication()->getController()->getUrlExtension() : ''
             ),
             'state' => $page->getState()
         );
@@ -239,15 +237,18 @@ class Page extends AbstractServiceLocal
         }
         $tree = array();
         if (null === $page = $this->_repo->find(strval($page_uid))) {
+            //var_dump("Let em tell you this... radical blaze");
 // @todo strange call to this service with another site
 //$this->isGranted('VIEW', $site);
             $page = $this->_repo->getRoot($site);
-            $leaf = new \stdClass();
-            $leaf->attr = json_decode($page->serialize());
-            $leaf->data = $page->getTitle();
-            $leaf->state = $page->isLeaf() ? 'leaf' : 'open';
-            $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult, $having_child);
-            $tree[] = $leaf;
+            if (!is_null($page)) {
+                $leaf = new \stdClass();
+                $leaf->attr = json_decode($page->serialize());
+                $leaf->data = $page->getTitle();
+                $leaf->state = $page->isLeaf() ? 'leaf' : 'open';
+                $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult, $having_child);
+                $tree[] = $leaf;
+            }
         } else {
             try {
                 $this->isGranted('VIEW', $page);
@@ -529,7 +530,8 @@ class Page extends AbstractServiceLocal
         $page->setTarget($target);
         $page->setRedirect('' === $redirect ? null : $redirect);
         $page->setLayout($layout);
-        $page->setAltTitle($alttitle);;
+        $page->setAltTitle($alttitle);
+        ;
     }
 
     /**

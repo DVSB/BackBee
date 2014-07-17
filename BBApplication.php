@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -21,36 +22,42 @@
 
 namespace BackBuilder;
 
-use BackBuilder\AutoLoader\AutoLoader,
-    BackBuilder\Bundle\BundleLoader,
-    BackBuilder\Config\Config,
-    BackBuilder\DependencyInjection\ContainerBuilder,
-    BackBuilder\Event\Event,
-    BackBuilder\Event\Listener\DoctrineListener,
-    BackBuilder\Exception\BBException,
-    BackBuilder\Exception\UnknownContextException,
-    BackBuilder\Site\Site,
-    BackBuilder\Theme\Theme,
-    BackBuilder\Util\File,
-    BackBuilder\Bundle\ABundle,
-    BackBuilder\Console\Console,
-    BackBuilder\NestedNode\Repository\NestedNodeRepository,
-    BackBuilder\Doctrine\Registry as DoctrineRegistry;
 
-use Doctrine\Common\EventManager,
-    Doctrine\ORM\Configuration,
-    Doctrine\Common\Annotations\AnnotationRegistry,
-    Doctrine\Common\Annotations\AnnotationReader;
+use BackBuilder\AutoLoader\AutoLoader;
+use BackBuilder\Bundle\BundleLoader;
+use BackBuilder\Config\Config;
+use BackBuilder\Config\ConfigBuilder;
+use BackBuilder\DependencyInjection\ContainerBuilder;
+use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\Event\Event;
+use BackBuilder\Event\Listener\DoctrineListener;
+use BackBuilder\Exception\BBException;
+use BackBuilder\Exception\UnknownContextException;
+use BackBuilder\Site\Site;
+use BackBuilder\Theme\Theme;
+use BackBuilder\Util\File;
+use BackBuilder\Bundle\ABundle;
+use BackBuilder\Console\Console;
+use BackBuilder\NestedNode\Repository\NestedNodeRepository;
+use BackBuilder\Doctrine\Registry as DoctrineRegistry;
 
-use Symfony\Component\Config\FileLocator,
-    Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
-    Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
-    Symfony\Component\HttpFoundation\Session\Session,
-    Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage,
-    Symfony\Component\Yaml\Yaml,
-    Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\Validator\Validation,
-    Symfony\Component\Finder\Finder;
+use Doctrine\Common\EventManager;
+use Doctrine\ORM\Configuration;
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\AnnotationReader;
+
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Finder\Finder;
+
 
 /**
  * The main BackBuilder5 application
@@ -60,22 +67,42 @@ use Symfony\Component\Config\FileLocator,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class BBApplication implements IApplication
+class BBApplication implements IApplication, DumpableServiceInterface, DumpableServiceProxyInterface
 {
 
-    const VERSION = '0.8.0';
+    const VERSION = '0.10.0';
     const DEFAULT_CONTEXT = 'default';
     const DEFAULT_ENVIRONMENT = '';
 
     /**
-     * @var BackBuilder\DependencyInjection\Container
+     * application's service container
+     *
+     * @var BackBuilder\DependencyInjection\ContainerInterface
      */
     private $_container;
+
+    /**
+     * application's context
+     *
+     * @var string
+     */
     private $_context;
+
+    /**
+     * application's environment
+     *
+     * @var string
+     */
+    private $_environment;
+
+    /**
+     * define if application is started with debug mode or not
+     *
+     * @var boolean
+     */
     private $_debug;
     private $_isinitialized;
     private $_isstarted;
-    private $_autoloader;
     private $_bbdir;
     private $_cachedir;
     private $_mediadir;
@@ -88,42 +115,42 @@ class BBApplication implements IApplication
     private $_classcontentdir;
     private $_theme;
     private $_overwrite_config;
-    private $_environment;
 
-    public function __call($method, $args)
-    {
-        if ($this->getContainer()->has('logging')) {
-            call_user_func_array(array($this->getContainer()->get('logging'), $method), $args);
-        }
-    }
+    /**
+     * tell us if application has been restored by container or not
+     *
+     * @var boolean
+     */
+    private $_is_restored;
 
     /**
      * @param string $context
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
      */
-    public function __construct($context = null, $environment = 'production', $overwrite_config = false)
+    public function __construct($context = null, $environment = null, $overwrite_config = false)
     {
         $this->_starttime = time();
         $this->_context = (null === $context) ? self::DEFAULT_CONTEXT : $context;
-        $this->_debug = (($environment === 'production') ? false : (is_bool($environment) ? $environment : false));
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
 
-        $this->_environment = ((is_string($environment))
+        $this->_environment = null !== $environment && true === is_string($environment)
             ? $environment
-            : ($environment === false ? 'production' : self::DEFAULT_ENVIRONMENT))
+            : self::DEFAULT_ENVIRONMENT
         ;
 
         $this->_initAnnotationReader();
         $this->_initContainer();
+        $this->_initApplicationConfig();
+        $this->_initEnvVariables();
         $this->_initAutoloader();
         $this->_initContentWrapper();
 
         try {
             $this->_initEntityManager();
-        } catch (\Exception $excep) {
+        } catch (\Exception $e) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
 
@@ -138,12 +165,6 @@ class BBApplication implements IApplication
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
 
-        if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
-            if (array_key_exists('locale', $encoding))
-                if (setLocale(LC_ALL, $encoding['locale']) === false)
-                    throw new \Exception(sprintf("Unabled to setLocal with locale %s", $encoding['locale']));
-        }
-
         $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
@@ -154,15 +175,6 @@ class BBApplication implements IApplication
         $this->getEventDispatcher()->dispatch('bbapplication.init', new Event($this));
     }
 
-    public function runImport()
-    {
-        if (null !== $bundles = $this->getConfig()->getSection('importbundles')) {
-            foreach ($bundles as $classname) {
-                new $classname($this);
-            }
-        }
-    }
-
     /**
      * [__destruct description]
      */
@@ -171,57 +183,20 @@ class BBApplication implements IApplication
         $this->stop();
     }
 
-    /**
-     * [forceReloadConfig description]
-     * @return [type] [description]
-     */
-    public function forceReloadConfig()
+    public function __call($method, $args)
     {
-        $this->_initContainer(true);
-    }
-
-    /**
-     * [_initContainer description]
-     * @param  boolean $force_reload [description]
-     * @return [type]                [description]
-     */
-    private function _initContainer($force_reload = false)
-    {
-        $this->_container = ContainerBuilder::getContainer($this, $force_reload);
-
-        return $this;
-    }
-
-    /**
-     * @return \BackBuilder\BBApplication
-     */
-    private function _initAutoloader()
-    {
-        $this->getAutoloader()
-                ->register()
-                ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
-                ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getRepository(), 'ClassContent', 'Repositories')))
-                ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getRepository(), 'Templates', 'helpers')))
-                ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
-                ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
-                ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
-                ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')));
-
-        if (true === $this->hasContext()) {
-            $this->getAutoloader()
-                    ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
-                    ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getBaseRepository(), 'Templates', 'helpers')))
-                    ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getBaseRepository(), 'Listeners')))
-                    ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getBaseRepository(), 'Controller')))
-                    ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
-                    ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
+        if ($this->getContainer()->has('logging')) {
+            call_user_func_array(array($this->getContainer()->get('logging'), $method), $args);
         }
+    }
 
-        $this->getAutoloader()
-                ->setEventDispatcher($this->getEventDispatcher())
-                ->setLogger($this->getLogging());
-
-        return $this;
+    public function runImport()
+    {
+        if (null !== $bundles = $this->getConfig()->getSection('importbundles')) {
+            foreach ($bundles as $classname) {
+                new $classname($this);
+            }
+        }
     }
 
     /**
@@ -268,11 +243,12 @@ class BBApplication implements IApplication
      */
     public function isDebugMode()
     {
-        if (null !== $this->_container && $this->getConfig()->sectionHasKey('parameters', 'debug')) {
-            return (bool) $this->getConfig()->getParametersConfig('debug');
+        $debug = (bool) $this->_debug;
+        if (null !== $this->getContainer() && $this->getContainer()->hasParameter('debug')) {
+            $debug = $this->getContainer()->getParameter('debug');
         }
 
-        return (bool) $this->_debug;
+        return $debug;
     }
 
     /**
@@ -281,93 +257,6 @@ class BBApplication implements IApplication
     public function isOverridedConfig()
     {
         return $this->_overwrite_config;
-    }
-
-    /**
-     * @return \BackBuilder\BBApplication
-     * @throws BBException
-     */
-    private function _initContentWrapper()
-    {
-        if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig()) {
-            throw new BBException('None class content wrapper found');
-        }
-        $namespace = isset($contentwrapperConfig['namespace']) ? $contentwrapperConfig['namespace'] : '';
-        $protocol = isset($contentwrapperConfig['protocol']) ? $contentwrapperConfig['protocol'] : '';
-        $adapter = isset($contentwrapperConfig['adapter']) ? $contentwrapperConfig['adapter'] : '';
-
-        $this->getAutoloader()->registerStreamWrapper($namespace, $protocol, $adapter);
-
-        return $this;
-    }
-
-    /**
-     * @return \BackBuilder\BBApplication
-     * @throws BBException
-     */
-    private function _initEntityManager()
-    {
-        if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
-            throw new BBException('None database configuration found');
-        }
-
-        if (false === array_key_exists('dbal', $doctrine_config)) {
-            throw new BBException('dbal configuration found');
-        }
-
-        if (false === array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
-            $doctrine_config['dbal']['proxy_ns'] = 'Proxies';
-        }
-
-        if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
-            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir() . '/' . 'Proxies';
-        }
-
-        if (true === array_key_exists('orm', $doctrine_config)) {
-            $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
-        }
-
-        // Init ORM event
-        $evm = new EventManager();
-        $r = new \ReflectionClass('Doctrine\ORM\Events');
-        $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
-
-
-        try {
-            $logger = $this->getLogging();
-
-            if ($this->isDebugMode()) {
-                // doctrine data collector
-                $this->getContainer()->get('data_collector.doctrine')->addLogger('default', $this->getContainer()->get('doctrine.dbal.logger.profiling'));
-                $logger = $this->getContainer()->get('doctrine.dbal.logger.profiling');
-            }
-
-            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
-            $this->getContainer()->set('em', $em);
-
-            $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
-        } catch (\Exception $e) {
-            $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
-        }
-        
-        $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
-        $this->getContainer()->set('doctrine', $registry);
-        
-        // init NestedNode config
-        if($this->getConfig()->getSection('nestednode')) {
-            NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));
-        }
-
-        return $this;
-    }
-
-    private function _initBundles()
-    {
-        if (!is_null($this->getConfig()->getBundlesConfig())) {
-            BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
-        }
-
-        return $this;
     }
 
     /**
@@ -415,7 +304,7 @@ class BBApplication implements IApplication
     public function start(Site $site = null)
     {
         if (null === $site) {
-            $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array());
+            $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array()); // 40 ms
         }
 
         if (null !== $site) {
@@ -425,16 +314,16 @@ class BBApplication implements IApplication
         $this->_isstarted = true;
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
-        $this->getTheme()->init();
+        $this->getTheme()->init(); // 30 ms
+
 
         // trigger bbapplication.start
-        $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
-
+        $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
 
         if (false === $this->isClientSAPI()) {
-            $response = $this->getController()->handle();
+            $response = $this->getController()->handle(); // 140 ms
             if ($response instanceof Response) {
-                $this->getController()->sendResponse($response);
+                $this->getController()->sendResponse($response); // 140 ms
             }
         }
     }
@@ -668,7 +557,7 @@ class BBApplication implements IApplication
      */
     public function getEventDispatcher()
     {
-        return $this->getContainer()->get('ed');
+        return $this->getContainer()->get('event.dispatcher');
     }
 
     /**
@@ -918,13 +807,13 @@ class BBApplication implements IApplication
     public function getSession()
     {
         if (null === $this->getRequest()->getSession()) {
-            
+
             if('test' === $this->getEnvironment()) {
                 $session = new Session(new MockArraySessionStorage());
             } else {
                 $session = new Session();
             }
-            
+
             $session->start();
             $this->getRequest()->setSession($session);
         }
@@ -1049,6 +938,123 @@ class BBApplication implements IApplication
         }
     }
 
+    /**
+     * Returns the namespace of the class proxy to use or null if no proxy is required
+     *
+     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     */
+    public function getClassProxy()
+    {
+        return null;
+    }
+
+    /**
+     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
+     * with the dump array produced by this method
+     *
+     * @return array contains every datas required by this service to be restored at the same state
+     */
+    public function dump(array $options = array())
+    {
+        return array(
+            'classcontent_directories' => $this->_classcontentdir,
+            'resources_directories'    => $this->_resourcedir
+        );
+    }
+
+    /**
+     * Restore current service to the dump's state
+     *
+     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                     restore current service
+     */
+    public function restore(ContainerInterface $container, array $dump)
+    {
+        $this->_classcontentdir = $dump['classcontent_directories'];
+        $this->_resourcedir = $dump['resources_directories'];
+        $this->_is_restored = true;
+    }
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->_is_restored;
+    }
+
+    /**
+     * [_initContainer description]
+     * @param  boolean $force_reload [description]
+     * @return [type]                [description]
+     */
+    private function _initContainer()
+    {
+        $this->_container = (new ContainerBuilder($this))->getContainer();
+
+        return $this;
+    }
+
+    private function _initApplicationConfig()
+    {
+        (new ConfigBuilder($this))->extend(ConfigBuilder::APPLICATION_CONFIG, $this->getConfig());
+    }
+
+    private function _initEnvVariables()
+    {
+        $date_config = $this->getConfig()->getDateConfig();
+        if (false !== $date_config && true === isset($date_config['timezone'])) {
+            if (false === date_default_timezone_set($date_config['timezone'])) {
+                throw new \Exception(sprintf('Unabled to set default timezone (:%s)', $date_config['timezone']));
+            }
+        }
+
+        if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
+            if (true === array_key_exists('locale', $encoding)) {
+                if (false === setLocale(LC_ALL, $encoding['locale'])) {
+                    throw new \Exception(sprintf('Unabled to setLocal with locale %s', $encoding['locale']));
+                }
+            }
+        }
+    }
+
+    /**
+     * @return \BackBuilder\BBApplication
+     */
+    private function _initAutoloader()
+    {
+        $this->getLogging();
+        $this->getAutoloader()->setEventDispatcher($this->getEventDispatcher());
+        if (true === $this->getAutoloader()->isRestored()) {
+            return $this;
+        }
+
+        $this->getAutoloader()
+            ->register()
+            ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
+            ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getRepository(), 'ClassContent', 'Repositories')))
+            ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getRepository(), 'Templates', 'helpers')))
+            ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
+            ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
+            ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
+            ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')));
+
+        if (true === $this->hasContext()) {
+            $this->getAutoloader()
+                ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
+                ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getBaseRepository(), 'Templates', 'helpers')))
+                ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getBaseRepository(), 'Listeners')))
+                ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getBaseRepository(), 'Controller')))
+                ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
+                ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
+        }
+
+        return $this;
+    }
+
+    /**
+     * [_initAnnotationReader description]
+     */
     private function _initAnnotationReader()
     {
         // annotations require custom autoloading
@@ -1080,5 +1086,101 @@ class BBApplication implements IApplication
         AnnotationReader::addGlobalIgnoredName('fixtures');
         AnnotationReader::addGlobalIgnoredName('fixture');
         AnnotationReader::addGlobalIgnoredName('column');
+    }
+
+    /**
+     * @return \BackBuilder\BBApplication
+     * @throws BBException
+     */
+    private function _initContentWrapper()
+    {
+        if (true === $this->getAutoloader()->isRestored()) {
+            return $this;
+        }
+
+        if (null === $contentwrapperConfig = $this->getConfig()->getContentwrapperConfig()) {
+            throw new BBException('None class content wrapper found');
+        }
+
+        $namespace = isset($contentwrapperConfig['namespace']) ? $contentwrapperConfig['namespace'] : '';
+        $protocol = isset($contentwrapperConfig['protocol']) ? $contentwrapperConfig['protocol'] : '';
+        $adapter = isset($contentwrapperConfig['adapter']) ? $contentwrapperConfig['adapter'] : '';
+
+        $this->getAutoloader()->registerStreamWrapper($namespace, $protocol, $adapter);
+
+        return $this;
+    }
+
+    /**
+     * @return \BackBuilder\BBApplication
+     * @throws BBException
+     */
+    private function _initEntityManager()
+    {
+        if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
+            throw new BBException('None database configuration found');
+        }
+
+        if (false === array_key_exists('dbal', $doctrine_config)) {
+            throw new BBException('None dbal configuration found');
+        }
+
+        if (false === array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['proxy_ns'] = 'Proxies';
+        }
+
+        if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
+            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir() . '/' . 'Proxies';
+        }
+
+        if (true === array_key_exists('orm', $doctrine_config)) {
+            $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
+        }
+
+        // Init ORM event
+        $evm = new EventManager();
+        $r = new \ReflectionClass('Doctrine\ORM\Events');
+        $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
+
+
+        try {
+            $logger = $this->getLogging();
+
+            if ($this->isDebugMode()) {
+                // doctrine data collector
+                $this->getContainer()->get('data_collector.doctrine')->addLogger('default', $this->getContainer()->get('doctrine.dbal.logger.profiling'));
+                $logger = $this->getContainer()->get('doctrine.dbal.logger.profiling');
+            }
+
+            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
+            $this->getContainer()->set('em', $em);
+            
+            $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
+            $this->getContainer()->set('doctrine', $registry);
+
+            $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
+        } catch (\Exception $e) {
+            $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
+        }
+
+        // init NestedNode config
+        if($this->getConfig()->getSection('nestednode')) {
+            NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));
+        }
+
+        return $this;
+    }
+
+    /**
+     * [_initBundles description]
+     * @return [type] [description]
+     */
+    private function _initBundles()
+    {
+        if (!is_null($this->getConfig()->getBundlesConfig())) {
+            BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
+        }
+
+        return $this;
     }
 }

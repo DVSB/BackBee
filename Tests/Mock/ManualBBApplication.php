@@ -1,0 +1,201 @@
+<?php
+namespace BackBuilder\Tests\Mock;
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+use BackBuilder\BBApplication;
+use BackBuilder\IApplication;
+use BackBuilder\Console\Console;
+use BackBuilder\Site\Site;
+
+/**
+ * @category    BackBuilder
+ * @package     BackBuilder\Tests\Mock
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
+ */
+class ManualBBApplication implements IApplication
+{
+    /**
+     * @var boolean
+     */
+    protected $is_started;
+
+    /**
+     * @var string
+     */
+    protected $context;
+
+    /**
+     * @var string
+     */
+    protected $environment;
+
+    /**
+     * @var string
+     */
+    protected $bb_dir;
+
+    /**
+     * @var string
+     */
+    protected $base_repository;
+
+    /**
+     * @var boolean
+     */
+    protected $overrided_config;
+
+    /**
+     * ManualBBApplication's constructor
+     */
+    public function __construct($context = null, $environment = null)
+    {
+        $this->is_started = false;
+        $this->context = null === $context ? BBApplication::DEFAULT_CONTEXT : $context;
+        $this->environment = null === $environment ? BBApplication::DEFAULT_ENVIRONMENT : $environment;
+        $this->overrided_config = false;
+    }
+
+    /**
+     * __call allow us to catch everytime user wanted to set a value for a protected attribute;
+     *
+     * @param  string $method
+     * @param  array  $arguments
+     */
+    public function __call($method, $arguments)
+    {
+        if (1 === preg_match('#^set([a-zA-Z_]+)$#', $method, $matches) && 0 < count($matches)) {
+            $property = strtolower($matches[1]);
+            if (true === property_exists('BackBuilder\Tests\Mock\ManualBBApplication', $property)) {
+                $this->$property = array_shift($arguments);
+            }
+        }
+    }
+
+    /**
+     * @param \BackBuilder\Site\Site $site
+     */
+    public function start(Site $site = null)
+    {
+        return true === $this->is_started;
+    }
+
+    /**
+     * Stop the current BBApplication instance
+     */
+    public function stop()
+    {
+        return false === $this->is_started;
+    }
+
+    /**
+     * @return BackBuilder\FrontController\FrontController
+     */
+    public function getController()
+    {
+    }
+
+    /**
+     * @return BackBuilder\Routing\RouteCollection
+     */
+    public function getRouting()
+    {
+    }
+
+    /**
+     * @return AutoLoader
+     */
+    public function getAutoloader()
+    {
+    }
+
+    /**
+     * [getBBDir description]
+     * @return [type] [description]
+     */
+    public function getBBDir()
+    {
+        return $this->bb_dir;
+    }
+
+    /**
+     * Returns path to Data directory
+     * @return string absolute path to Data directory
+     */
+    public function getDataDir()
+    {
+    }
+
+    /**
+     * @return string
+     */
+    public function getBaseDir()
+    {
+    }
+
+    /**
+     * Returns the starting context
+     * @return string|NULL
+     */
+    public function getContext()
+    {
+        return $this->context;
+    }
+
+    /**
+     * Returns the starting context
+     * @return string|NULL
+     */
+    public function getEnvironment()
+    {
+        return $this->environment;
+    }
+
+    /**
+     * @return ContainerBuilder
+     */
+    public function getContainer()
+    {
+    }
+
+    /**
+     *
+     */
+    public function registerCommands(Console $console)
+    {
+    }
+
+    /**
+     * @return string
+     */
+    public function getBaseRepository()
+    {
+        return $this->base_repository;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isOverridedConfig()
+    {
+        return $this->overrided_config;
+    }
+}

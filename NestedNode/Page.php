@@ -1097,7 +1097,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         }
 
         if (true === property_exists($serialized, 'metadata') && null !== $this->getMetaData()) {
-            $this->setMetaData($this->getMetaData()->fromStdClass($serialized->metadata));
+            $this->setMetaData($this->getMetaData()->fromStdClass((object)$serialized->metadata));
         }
 
         if (true === property_exists($serialized, 'workflow_state')) {
@@ -1213,5 +1213,10 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function getUseUrlRedirect()
     {
         return $this->_use_url_redirect;
+    }
+    
+    public function getTemplateName()
+    {
+        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
     }
 }

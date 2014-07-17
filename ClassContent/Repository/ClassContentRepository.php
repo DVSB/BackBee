@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -31,10 +31,10 @@ use Doctrine\ORM\Tools\Pagination\Paginator,
     Doctrine\ORM\Query\ResultSetMapping,
     Doctrine\ORM\Query\ResultSetMappingBuilder,
     Doctrine\ORM\EntityRepository;
-
 use Doctrine\ORM\Query\SqlWalker;
 
-class MysqlPaginationWalker extends SqlWalker {
+class MysqlPaginationWalker extends SqlWalker
+{
 
     /**
      * Walks down a SelectClause AST node, thereby generating the appropriate SQL.
@@ -56,11 +56,12 @@ class MysqlPaginationWalker extends SqlWalker {
 
         return $sql;
     }
+
 }
 
 /**
  * AClassContent repository
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent
  * @subpackage  Repository\Element
@@ -238,7 +239,7 @@ class ClassContentRepository extends EntityRepository
                         }
                     }
 
-                    if(count($pageSelection) != 0){
+                    if (count($pageSelection) != 0) {
                         $where[] = '(' . implode(' OR ', $pageSelection) . ')';
                     }
 
@@ -257,7 +258,7 @@ class ClassContentRepository extends EntityRepository
                     } else {
                         $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
                         $where[] = 'isort.field = "' . $selector['orderby'][0] . '"';
-                        $orderby[] = 'isort._value' . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                        $orderby[] = 'isort.value' . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
                     }
                 }
             }
@@ -269,7 +270,7 @@ class ClassContentRepository extends EntityRepository
             } else {
                 $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
                 $where[] = 'isort.field = "' . $selector['orderby'][0] . '"';
-                $orderby[] = 'isort._value' . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                $orderby[] = 'isort.value' . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
             }
         }
 
@@ -303,7 +304,7 @@ class ClassContentRepository extends EntityRepository
                 ->select()
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
-
+        
         if (true === $has_page_joined && true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
             $q->join('c._mainnode', 'p')
                     ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
@@ -318,15 +319,15 @@ class ClassContentRepository extends EntityRepository
 
         if (true === $multipage) {
 
-           $num_results = $this->getEntityManager()->getConnection()->executeQuery('SELECT FOUND_ROWS()')->fetch(\PDO::FETCH_COLUMN);
+            $num_results = $this->getEntityManager()->getConnection()->executeQuery('SELECT FOUND_ROWS()')->fetch(\PDO::FETCH_COLUMN);
             $result = $q->getQuery()->getResult();
 
             $q->setFirstResult($offset)
-                ->setMaxResults($limit);
+                    ->setMaxResults($limit);
 
             $paginator = new \BackBuilder\Util\Doctrine\SettablePaginator($q);
             $paginator->setCount($num_results)
-                ->setResult($result);
+                    ->setResult($result);
 
             return $paginator;
         }
@@ -503,7 +504,7 @@ class ClassContentRepository extends EntityRepository
      * where cs.parent_uid in (select cs.content_uid from page p LEFT JOIN content_has_subcontent cs ON p.contentset = cs.parent_uid
      *       where p.uid = '0007579e1888f8c2a7a0b74c615aa501'
      * );
-     * 
+     *
      *
      * SELECT c.uid, c.label, c.classname
       FROM content_has_subcontent cs
@@ -511,9 +512,9 @@ class ClassContentRepository extends EntityRepository
       left join content c on  cs1.content_uid = c.uid
       left join page p on p.contentset = cs.parent_uid
       Where p.uid="f70d5b294dcc4d8d5c7f57b8804f4de2"
-     * 
+     *
      * select content where parent_uid
-     * 
+     *
      * @param array $classnameArr
      * @param array $orderInfos
      * @param array $paging
@@ -527,7 +528,7 @@ class ClassContentRepository extends EntityRepository
         if (array_key_exists("selectedpageField", $cond) && !is_null($cond["selectedpageField"]) && !empty($cond["selectedpageField"])) {
             $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
 
-            /* tous les contentset de premier niveau 
+            /* tous les contentset de premier niveau
              * SELECT *
               FROM `content` c
               LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid
@@ -571,7 +572,7 @@ class ClassContentRepository extends EntityRepository
 //                $contents = $newQuery->leftJoin("selectedContent._parentcontent", "cs")
 //                                ->where("cs._uid IN (:scl)")
 //                                ->setParameter("scl", $subContents)->getQuery()->getResult(); // $subContentsQuery->getResult()
-//                
+//
 //                if (0 < count($contents)) {
 //                    /* filtre  parmi ces contents */
 //                    $qb->where("c in (:sc) ")->setParameter("sc", $contents);
@@ -1013,7 +1014,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * @param \BackBuilder\ClassContent\AClassContent $content
-     * @return 
+     * @return
      */
     public function deleteContent(AClassContent $content, $updateParent = true)
     {
@@ -1028,7 +1029,7 @@ class ClassContentRepository extends EntityRepository
                         $this->deleteContent($element, false);
                         $this->_em->remove($element);
                     } else {
-                        $content->unsetSubContent($element);//persist?
+                        $content->unsetSubContent($element); //persist?
                     }
                 }
             }
@@ -1049,19 +1050,20 @@ class ClassContentRepository extends EntityRepository
             $this->_em->flush();
         }
     }
-    
+
     public function getClassnames(array $content_uids)
     {
         $content_uids = array_filter($content_uids);
         if (0 === count($content_uids)) {
             return array();
         }
-        
-        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("'.implode('","', $content_uids).'")';
-        
+
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("' . implode('","', $content_uids) . '")';
+
         return $this->getEntityManager()
-                ->getConnection()
-                ->executeQuery($sql)
-                ->fetchAll(\PDO::FETCH_COLUMN);
+                        ->getConnection()
+                        ->executeQuery($sql)
+                        ->fetchAll(\PDO::FETCH_COLUMN);
     }
+
 }

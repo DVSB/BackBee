@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\FrontController;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,28 +20,27 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\FrontController;
+use BackBuilder\BBApplication;
+use BackBuilder\FrontController\Exception\FrontControllerException;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Routing\RouteCollection;
+use BackBuilder\Routing\RequestContext;
+use BackBuilder\Routing\Matcher\UrlMatcher;
+use BackBuilder\Util\File;
+use BackBuilder\Services\Content\Category;
+use BackBuilder\Util\MimeType;
+use BackBuilder\Event\PageFilterEvent;
 
-use BackBuilder\BBApplication,
-    BackBuilder\FrontController\Exception\FrontControllerException,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\Routing\RouteCollection,
-    BackBuilder\Routing\RequestContext,
-    BackBuilder\Routing\Matcher\UrlMatcher,
-    BackBuilder\Util\File,
-    BackBuilder\Services\Content\Category,
-    BackBuilder\Util\MimeType,
-    BackBuilder\Event\PageFilterEvent;
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\HttpKernel\KernelEvents,
-    Symfony\Component\HttpKernel\HttpKernelInterface,
-    Symfony\Component\HttpKernel\Exception\HttpExceptionInterface,
-    Symfony\Component\HttpKernel\Event\FilterResponseEvent,
-    Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent,
-    Symfony\Component\HttpKernel\Event\FilterControllerEvent,
-    Symfony\Component\HttpKernel\Event\PostResponseEvent;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 /**
  * The BackBuilder front controller
@@ -198,15 +198,18 @@ class FrontController implements HttpKernelInterface
         $this->_dispatch('frontcontroller.request');
 
         $controllerResolver = $this->getApplication()->getContainer()->get('controller_resolver');
-        
         $controller = $controllerResolver->getController($this->getRequest());
-            
+
         // logout Event dispatch
-        if (null !== $this->getRequest()->get('logout') && true == $this->getRequest()->get('logout') && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (
+            null !== $this->getRequest()->get('logout')
+            && true == $this->getRequest()->get('logout')
+            && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')
+        ) {
             $this->_dispatch('frontcontroller.request.logout');
         }
 
-        if ($controller) {
+        if (null !== $controller) {
             $eventName = str_replace('\\', '.', strtolower(get_class($controller[0])));
             if (0 === strpos($eventName, 'backbuilder.')) {
                 $eventName = substr($eventName, 12);
@@ -222,6 +225,7 @@ class FrontController implements HttpKernelInterface
             // dispatch kernel.controller event
             $event = new FilterControllerEvent($this, $controller, $this->getRequest(), $type);
             $this->_application->getEventDispatcher()->dispatch(KernelEvents::CONTROLLER, $event);
+
             // a listener could have changed the controller
             $controller = $event->getController();
 
@@ -345,7 +349,12 @@ class FrontController implements HttpKernelInterface
 
         preg_match('/(.*)(\.[' . $this->url_extension . ']+)/', $uri, $matches);
         if (
-                ('_root_' !== $uri && '/' !== $uri[strlen($uri) - 1] && 0 === count($matches) && true === $this->force_url_extension) || (0 < count($matches) && $site->getDefaultExtension() !== $matches[2])
+            (
+                '_root_' !== $uri
+                && '/' !== $uri[strlen($uri) - 1]
+                && 0 === count($matches)
+                && true === $this->force_url_extension
+            ) || (0 < count($matches) && true === isset($matches[2]) && $site->getDefaultExtension() !== $matches[2])
         ) {
             throw new FrontControllerException(sprintf(
                     'The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND
@@ -353,28 +362,36 @@ class FrontController implements HttpKernelInterface
         }
 
         $uri = preg_replace('/(.*)\.' . $this->url_extension . '?$/i', '$1', $uri);
-        $redirect_page = $this->_application->getRequest()->get('bb5-redirect') ? ('false' !== $this->_application->getRequest()->get('bb5-redirect')) : TRUE;
+
+        $redirect_page = null !== $this->_application->getRequest()->get('bb5-redirect', null)
+            ? ('false' !== $this->_application->getRequest()->get('bb5-redirect'))
+            : true
+        ;
 
         if ('_root_' == $uri) {
             $page = $this->_application->getEntityManager()
-                    ->getRepository('BackBuilder\NestedNode\Page')
-                    ->getRoot($site);
+                ->getRepository('BackBuilder\NestedNode\Page')
+                ->getRoot($site)
+            ;
         } else {
             $page = $this->_application->getEntityManager()
-                    ->getRepository('BackBuilder\NestedNode\Page')
-                    ->findOneBy(array('_site' => $site,
-                '_url' => '/' . $uri,
-                '_state' => Page::getUndeletedStates()));
+                ->getRepository('BackBuilder\NestedNode\Page')
+                ->findOneBy(array(
+                    '_site' => $site,
+                    '_url' => '/' . $uri,
+                    '_state' => Page::getUndeletedStates()
+                ))
+            ;
         }
 
-        if (null !== $page && !$page->isOnline()) {
+        if (null !== $page && false === $page->isOnline()) {
             $page = (null === $this->_application->getBBUserToken()) ? null : $page;
         }
 
         if (null === $page) {
             throw new FrontControllerException(sprintf('The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND);
         }
-        
+
         if ((null !== $redirect = $page->getRedirect()) && $page->getUseUrlRedirect()) {
             if ((null === $this->_application->getBBUserToken()) || ((null !== $this->_application->getBBUserToken()) && (TRUE === $redirect_page))) {
                 $redirect = $this->_application->getRenderer()->getUri($redirect);
@@ -396,7 +413,7 @@ class FrontController implements HttpKernelInterface
             if (null !== $this->getRequest()->get('bb5-mode')) {
                 $response = new Response($this->_application->getRenderer()->render($page, $this->getRequest()->get('bb5-mode')));
             } else {
-                $response = new Response($this->_application->getRenderer()->render($page));
+                 $response = new Response($this->_application->getRenderer()->render($page));
             }
 
             if ($sendResponse) {
@@ -636,11 +653,10 @@ class FrontController implements HttpKernelInterface
     {
         // request
         $event = new GetResponseEvent($this, $this->getRequest(), $type);
-
         $this->_application->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
 
         try {
-            if(null !== $request) {
+            if (null !== $request) {
                 $this->_request = $request;
             }
 
@@ -665,7 +681,6 @@ class FrontController implements HttpKernelInterface
 
             throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getHost() . '/' . $this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);
         } catch (\Exception $e) {
-
             if (false === $catch) {
                 throw $e;
             }
@@ -823,7 +838,7 @@ class FrontController implements HttpKernelInterface
                 $route['defaults']['_controller'] = $default_controller;
             }
         }
-        
+
         $router = $this->getRouteCollection();
         $router->pushRouteCollection($route_config);
     }
@@ -870,5 +885,4 @@ class FrontController implements HttpKernelInterface
             $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
         }
     }
-
 }

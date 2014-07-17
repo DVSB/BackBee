@@ -1,318 +1,283 @@
 <?php
-
 namespace BackBuilder\DependencyInjection;
 
-use BackBuilder\BBApplication;
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\Exception\BBException;
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-use Symfony\Component\Config\FileLocator;
+use BackBuilder\IApplication;
+use BackBuilder\DependencyInjection\BootstrapResolver;
+use BackBuilder\DependencyInjection\Container;
+use BackBuilder\DependencyInjection\Util\ServiceLoader;
+use BackBuilder\Util\Resolver\ConfigDirectory;
+
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
-use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * @author e.chau <eric.chau@lp-digital.fr>
+ * This class build and hydrate a BackBee\DependencyInjection\Container for any class
+ * which implements BackBee\IApplication; it will first hydrate container with application
+ * default value (data directory, repository directory, cache directory, etc.);
+ *
+ * ContainerBuilder also manage container dump to not reload and parse every xml and yml.
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder\DependencyInjection
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class ContainerBuilder
 {
     /**
+     * Define default name for data folder
+     */
+    const DEFAULT_DATA_FOLDER_NAME = 'Data';
+
+    /**
+     * Define default name for cache folder
+     */
+    const DEFAULT_CACHE_FOLDER_NAME = 'cache';
+
+    /**
+     * Define service filename (without extension)
+     */
+    const SERVICE_FILENAME = 'services';
+
+    /**
+     * Current application which we are building a container for
+     *
+     * @var BackBuilder\IApplication
+     */
+    private $application;
+
+    /**
+     * The container we are building
+     *
+     * @var BackBuilder\DependencyInjection\Container
+     */
+    private $container;
+
+    /**
+     * Application's default repository directory
+     *
+     * @var string
+     */
+    private $repository_directory;
+
+    /**
+     * Application's context
+     *
+     * @var string
+     */
+    private $context;
+
+    /**
+     * Application's environment
+     *
+     * @var string
+     */
+    private $environment;
+
+    /**
+     * ContainerBuilder's constructor;
+     *
+     * @param BackBuilder\IApplication $application the application we want to build a container for
+     */
+    public function __construct(IApplication $application)
+    {
+        $this->application = $application;
+        $this->repository_directory = $application->getBaseRepository();
+        $this->context = $application->getContext();
+        $this->environment = $application->getEnvironment();
+    }
+
+    /**
      * Every time you invoke this method it will return a new BackBuilder\DependencyInjection\Container
+     *
      * @return BackBuilder\DependencyInjection\Container
+     *
+     * @throws ContainerAlreadyExistsException will be raise if you try to call more than one time
+     * getContainer
      */
-    public static function getContainer(BBApplication $application, $force_reload = false)
+    public function getContainer()
     {
+        if (null !== $this->container) {
+            throw new ContainerAlreadyExistsException($this->container);
+        }
+
         // Construct container
-        $container = new Container();
+        $this->container = new Container();
+        $this->hydrateContainerWithBootstrapParameters();
 
-        if (false === $container_dir = getenv('BB_CONTAINERDIR')) {
-            $container_dir = $application->getBaseDir() . '/container/';
+        if (false === $this->tryParseContainerDump()) {
+            $this->hydrateContainerWithApplicationParameters();
+            $this->loadApplicationServices();
         }
 
-        $container_class = 'bb' . md5('__container__' . $application->getContext() . $application->getEnvironment());
-        $container_file = $container_class . '.php';
-
-        if (
-            false === $force_reload
-            && false === $application->isDebugMode()
-            && true === is_readable($container_dir . DIRECTORY_SEPARATOR . $container_file
-            && $application->getEnvironment() !== 'test')
-        ) {
-            //$loader = new PhpFileLoader($container, new FileLocator(array($container_dir)));
-            //$loader->load($container_file);
-            require $container_dir . DIRECTORY_SEPARATOR . $container_file;
-            $container = new $container_class();
-
-            // Add current BBApplication into container
-            $container->set('bbapp', $application);
-            $container->set('service_container', $container);
-
-            self::initConfig($application, $container);
-
-            $container->setDefinition('site', new Definition())->setSynthetic(true);
-            $container->setDefinition('routing', new Definition())->setSynthetic(true);
-            $container->setDefinition('bb_session', new Definition())->setSynthetic(true);
-
-            if (false === $container->getParameter('debug')) {
-                $container->setParameter('container.do_compile', false);
-                return $container;
-            }
-        }
-
-        $container->setParameter('container.do_compile', true);
-        $container->setParameter('container.class', $container_class);
-        $container->setParameter('container.file', $container_file);
-        $container->setParameter('container.dir', $container_dir);
-
-        self::loadApplicationServices($application, $container);
-        self::initApplicationVarsIntoContainer($application, $container);
-        self::loadLogger($container);
-        self::initConfig($application, $container);
-
-        return $container;
+        return $this->container;
     }
 
     /**
-     * [loadServicesFromYamlFile description]
-     * @param  Container $container [description]
-     * @param  [type]    $dir       [description]
-     * @return [type]               [description]
+     * Hydrate container with bootstrap.yml parameter
+     *
+     * @throws MissingBootstrapParametersException raises if we are not able to find bootstrap.yml file
      */
-    public static function loadServicesFromYamlFile(Container $container, $dir)
+    private function hydrateContainerWithBootstrapParameters()
     {
-        $loader = new YamlFileLoader($container, new FileLocator(array($dir)));
-        $loader->load('services.yml');
-    }
-
-    /**
-     * [loadServicesFromXmlFile description]
-     * @param  Container $container [description]
-     * @param  [type]    $dir       [description]
-     * @return [type]               [description]
-     */
-    public static function loadServicesFromXmlFile(Container $container, $dir)
-    {
-        $loader = new XmlFileLoader($container, new FileLocator(array($dir)));
-        $loader->load('services.xml');
-    }
-
-    /**
-     * [loadApplicationServices description]
-     * @param  BBApplication $application [description]
-     * @param  Container     $container   [description]
-     * @return [type]                     [description]
-     */
-    private static function loadApplicationServices(BBApplication $application, Container $container)
-    {
-        $dirToLookingFor = array();
-        $dirToLookingFor[] = $application->getBBDir() . DIRECTORY_SEPARATOR . 'Config';
-        $dirToLookingFor[] = $application->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config';
-
-        if ($application->getBaseRepository() !== $application->getRepository()) {
-            $dirToLookingFor[] = $application->getRepository() . DIRECTORY_SEPARATOR . 'Config';
-        }
-
-        if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
-            $dirToLookingFor[] = $application->getRepository()
-                . DIRECTORY_SEPARATOR . 'Config'
-                . DIRECTORY_SEPARATOR . $application->getEnvironment()
-            ;
-        }
-
-        // Loop into every directory where we can potentially found a services.yml or services.xml
-        foreach ($dirToLookingFor as $dir) {
-            if (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.yml')) {
-                self::loadServicesFromYamlFile($container, $dir);
-            } elseif (true === is_readable($dir . DIRECTORY_SEPARATOR . 'services.xml')) {
-                self::loadServicesFromXmlFile($container, $dir);
-            }
-        }
-    }
-
-    /**
-     * [initApplicationVarsIntoContainer description]
-     * @param  BBApplication $application [description]
-     * @return [type]                     [description]
-     */
-    private static function initApplicationVarsIntoContainer(BBApplication $application, Container $container)
-    {
-        // Add BBApplication to container
-        $container->set('bbapp', $application);
-        $container->set('service_container', $container);
-
-        // Set application others variables' values
-
-        // define context and environment parameters
-        $container->setParameter('environment', $application->getEnvironment());
-        $container->setParameter('bbapp.context', $application->getContext());
-
-        // define config and repository directory
-        $container->setParameter('bbapp.config.dir', $application->getConfigDir());
-        $container->setParameter('bbapp.repository.dir', $application->getRepository());
-
-        // Retrieving config.yml without calling Config services
-        $config = self::getRawConfig($application);
-
-        // Set debug into container
-        $debug = $application->isDebugMode();
-        if (array_key_exists('parameters', $config) && array_key_exists('debug', $config['parameters'])) {
-            $debug = $config['parameters']['debug'];
-        }
-
-        $container->setParameter('debug', $debug);
-
-        // Set timezone
-        if (true === isset($config['date']) && true === isset($config['date']['timezone'])) {
-            date_default_timezone_set($config['date']['timezone']);
-        }
-
-        // define cache directory
-        $cachedir = implode(DIRECTORY_SEPARATOR, array(
-            $application->getBaseDir(),
-            'cache',
-            $application->getEnvironment()
-        ));
-        if (true === isset($config['parameters']['cache_dir']) && false === empty($config['parameters']['cache_dir'])) {
-            $cachedir = $config['parameters']['cache_dir'];
-        }
-
-        $container->setParameter('bbapp.cache.dir', $cachedir);
-
-        if (
-            true === isset($config['parameters'])
-            && true === array_key_exists('cache_auto_generate', $config['parameters'])
-        ) {
-            $container->setParameter('bbapp.cache.autogenerate', $config['parameters']['cache_auto_generate']);
-        }
-
-        // define bb base dir
-        $container->setParameter('bbapp.base.dir', $application->getBBDir());
-
-        // define data directory
-        $datadir = $application->getRepository() . DIRECTORY_SEPARATOR . 'Data';
-        if (true === isset($config['parameters']['data_dir']) && false === empty($config['parameters']['data_dir'])) {
-            $datadir = $config['parameters']['data_dir'];
-        }
-
-        $container->setParameter('bbapp.data.dir', $datadir);
-    }
-
-    /**
-     * [loadLogger description]
-     * @param  Container $container [description]
-     * @return [type]               [description]
-     */
-    private static function loadLogger(Container $container)
-    {
-        $logger_class = $container->getParameter('bbapp.logger.class');
-        if (true === $container->getParameter('debug')) {
-            $logger_class = $container->getParameter('bbapp.logger_debug.class');
-        }
-
-        $container->setDefinition('logging', new Definition(
-            $logger_class,
-            array(new \Symfony\Component\DependencyInjection\Reference('bbapp'))
-        ));
-    }
-
-    /**
-     * [getRawConfig description]
-     * @return [type] [description]
-     */
-    private static function getRawConfig(BBApplication $application)
-    {
-        $config = array();
-        $file_exists = false;
-        $filepath = null;
-
-        if (BBApplication::DEFAULT_CONTEXT !== $application->getContext()) {
-            if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
-                $filepath = $application->getRepository()
-                    . DIRECTORY_SEPARATOR . 'Config'
-                    . DIRECTORY_SEPARATOR . $application->getEnvironment()
-                    . DIRECTORY_SEPARATOR . 'config.yml'
-                ;
-            }
-
-            if (false === $file_exists = file_exists($filepath)) {
-                $filepath = $application->getRepository()
-                    . DIRECTORY_SEPARATOR . 'Config'
-                    . DIRECTORY_SEPARATOR . 'config.yml'
-                ;
-            }
-        }
-
-        if (
-            (false === $file_exists = file_exists($filepath))
-            && BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()
-        ) {
-            $filepath = $application->getBaseRepository()
-                . DIRECTORY_SEPARATOR . 'Config'
-                . DIRECTORY_SEPARATOR . $application->getEnvironment()
-                . DIRECTORY_SEPARATOR . 'config.yml'
-            ;
-        }
-
-        if (false === $file_exists = file_exists($filepath)) {
-            $filepath = $application->getBaseRepository()
-                . DIRECTORY_SEPARATOR . 'Config'
-                . DIRECTORY_SEPARATOR . 'config.yml'
-            ;
-        }
-
-        if (false === $file_exists = file_exists($filepath)) {
-            throw new \Exception('Unable to find a config.yml!');
-        }
-
-        if (true === is_readable($filepath)) {
-            $config = Yaml::parse($filepath);
-        } else {
-            throw new \Exception("config.yml is not readable! ($filepath)");
-        }
-
-        return $config;
-    }
-
-    private static function initConfig(BBApplication $application, Container $container)
-    {
-        // init config with context if needed
-        if (true === $application->hasContext()) {
-            if (false === is_dir($application->getBaseRepository() . '/' . $application->getContext())) {
-                throw new UnknownContextException(sprintf(
-                    'Unable to find `%s` context in repository.',
-                    $application->getContext()
-                ));
-            }
-
-            $container->get('config')->setEnvironement($application->getEnvironment());
-            $container->get('config')->extend(
-                $application->getBaseRepository() . '/' . 'Config'
-            );
-        }
-
-        if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment() &&
-                true === is_dir($application->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $application->getEnvironment())) {
-            $container->get('config')
-                ->setContainer($container)
-                ->setEnvironment($application->getEnvironment())
-                ->extend(
-                    $application->getBaseRepository() . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $application->getEnvironment(),
-                    $application->isOverridedConfig()
-                )
-            ;
-        }
-
-        $container->get('config')
-                  ->setContainer($container)
-                  ->setEnvironment($application->getEnvironment())
-                  ->extend(
-                    $container->getParameter('bbapp.config.dir'),
-                    $application->isOverridedConfig()
-                )
+        $parameters = (new BootstrapResolver($this->repository_directory, $this->context, $this->environment))
+            ->getBootstrapParameters()
         ;
 
+        $missing_parameters = array();
+        $this->tryAddParameter('debug', $parameters, $missing_parameters);
+        if (array_key_exists('container', $parameters)) {
+            $this->tryAddParameter('dump_directory', $parameters['container'], $missing_parameters, 'container.');
+            $this->tryAddParameter('autogenerate', $parameters['container'], $missing_parameters, 'container.');
+        } else {
+            $missing_parameters[] = 'container';
+        }
+
+        if (0 < count($missing_parameters)) {
+            throw new MissingBootstrapParametersException($missing_parameters);
+        }
+    }
+
+    /**
+     * Try to add $parameters[$key] into container with "$prefix + $key" as container key;
+     * add $key into missing_parameters if it does not exist as key in $parameter
+     *
+     * @param  array  $key                key we are looking for
+     * @param  array  $parameters         array from where we are looking for $key
+     * @param  array  $missing_parameters key will be pushed into this array if key does not exist in parameters
+     * @param  string $prefix             prefix to add to key when we set it into container
+     */
+    private function tryAddParameter($key, array $parameters, array &$missing_parameters, $prefix = '')
+    {
+        if (false === array_key_exists($key, $parameters)) {
+            $missing_parameters[] = $key;
+        } else {
+            $this->container->setParameter($prefix . $key, $parameters[$key]);
+        }
+    }
+
+    /**
+     * Hydrates container with application core parameters (like bbapp.context, bbapp.environement, etc.)
+     */
+    private function hydrateContainerWithApplicationParameters()
+    {
+        $this->container->setParameter('bbapp.context', $this->context);
+        $this->container->setParameter('bbapp.environment', $this->environment);
+        $this->container->setParameter('environment', $this->environment);
+
+        // set default backbee base directory, config directory and repository directory
+        $this->container->setParameter('bbapp.base.dir', $this->application->getBBDir());
+        $this->container->setParameter('bbapp.config.dir', $this->application->getConfigDir());
+        $this->container->setParameter('bbapp.repository.dir', $this->application->getRepository());
+
+        // set default cache directory and cache autogenerate value
+        $this->container->setParameter('bbapp.cache.dir', implode(DIRECTORY_SEPARATOR, array(
+            $this->application->getBaseDir(), self::DEFAULT_CACHE_FOLDER_NAME, $this->environment
+        )));
+        $this->container->setParameter('bbapp.cache.autogenerate', '%container.autogenerate%');
+
+        // define data directory
+        $this->container->setParameter(
+            'bbapp.data.dir',
+            $this->application->getRepository() . DIRECTORY_SEPARATOR . self::DEFAULT_DATA_FOLDER_NAME
+        );
+    }
+
+    /**
+     * This method try to restore container from a dump if it is possible, otherwise it will set
+     * container.class, container.file and container.dir parameters into container
+     */
+    private function tryParseContainerDump()
+    {
+        $success = false;
+
+        $container_directory = $this->container->getParameter('container.dump_directory');
+        $container_filename = $this->getContainerDumpFilename();
+        $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_filename;
+
+        if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath)) {
+            $loader = new \BackBuilder\DependencyInjection\Loader\PhpArrayLoader($this->container);
+            $loader->load($container_filepath);
+
+            // Add current application into container
+            $this->container->set('bbapp', $this->application);
+
+            $success = true;
+        } else {
+            $this->container->setParameter('container.filename', $container_filename);
+            $this->container->setParameter('container.dir', $container_directory);
+        }
+
+        return $success;
+    }
+
+    /**
+     * Generates and returns an uniq container dump classname depending on context and environment
+     *
+     * @return string uniq classname for container dump depending on context and environment
+     */
+    private function getContainerDumpFilename()
+    {
+        return 'bb' . md5('__container__' . $this->context . $this->environment);
+    }
+
+    /**
+     * Load and override services into container; the load order is from the most global to the most specific
+     * depends on context and environment
+     */
+    private function loadApplicationServices()
+    {
+        // setting default services
+        $this->container->set('bbapp', $this->application);
+
+        // define in which directory we have to looking for services yml or xml
+        $directories = ConfigDirectory::getDirectories(
+            $this->application->getBBDir(), $this->repository_directory, $this->context, $this->environment
+        );
+
+        // Loop into every directory where we can potentially found a services.yml or services.xml
+        foreach ($directories as $directory) {
+            if (true === is_readable($directory . DIRECTORY_SEPARATOR . self::SERVICE_FILENAME . '.yml')) {
+                ServiceLoader::loadServicesFromYamlFile($this->container, $directory);
+            }
+
+            if (true === is_readable($directory . DIRECTORY_SEPARATOR . self::SERVICE_FILENAME . '.xml')) {
+                ServiceLoader::loadServicesFromXmlFile($this->container, $directory);
+            }
+        }
+
+        $this->loadLoggerDefinition();
+    }
+
+    /**
+     * Load on the fly logging service definition, depends on debug value
+     */
+    private function loadLoggerDefinition()
+    {
+        $logger_class = $this->container->getParameter('bbapp.logger.class');
+        if (true === $this->container->getParameter('debug')) {
+            $logger_class = $this->container->getParameter('bbapp.logger_debug.class');
+        }
+
+        $this->container->setDefinition('logging', new Definition($logger_class, array(new Reference('bbapp'))));
     }
 }

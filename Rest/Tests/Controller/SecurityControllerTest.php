@@ -25,7 +25,7 @@ namespace BackBuilder\Rest\Tests\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
 use BackBuilder\Rest\Controller\SecurityController;
-use BackBuilder\Test\TestCase;
+use BackBuilder\Tests\TestCase;
 
 
 use BackBuilder\Security\User;

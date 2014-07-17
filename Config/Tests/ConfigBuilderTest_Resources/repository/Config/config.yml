@@ -1,0 +1,5 @@
+parameters:
+    base_directory: repository
+    context: default
+    environment: ''
+    foo: bar
