@@ -45,6 +45,7 @@ use Symfony\Component\Config\FileLocator,
     Symfony\Component\DependencyInjection\Extension\ExtensionInterface,
     Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
     Symfony\Component\HttpFoundation\Session\Session,
+    Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage,
     Symfony\Component\Yaml\Yaml,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\Validation,
@@ -61,7 +62,7 @@ use Symfony\Component\Config\FileLocator,
 class BBApplication implements IApplication
 {
 
-    const VERSION = '0.8.0';
+    const VERSION = '0.10.0';
     const DEFAULT_CONTEXT = 'default';
     const DEFAULT_ENVIRONMENT = '';
 
@@ -911,7 +912,13 @@ class BBApplication implements IApplication
     public function getSession()
     {
         if (null === $this->getRequest()->getSession()) {
-            $session = new Session();
+            
+            if('test' === $this->getEnvironment()) {
+                $session = new Session(new MockArraySessionStorage());
+            } else {
+                $session = new Session();
+            }
+            
             $session->start();
             $this->getRequest()->setSession($session);
         }

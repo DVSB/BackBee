@@ -159,20 +159,55 @@ class UserController extends ARestController
      * GET User 
      * 
      * @param int $id User ID
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param \Symfony\Component\Validator\ConstraintViolationList $violations
-     * @throws ValidationException
      */
-    public function getAction($id, ConstraintViolationList $violations = null) 
+    public function getAction($id) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
+        $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
+        
+        if(!$user) {
+            return $this->create404Response(sprintf('User not found with id %d', $id));
         }
         
-        // TODO
-        
-        return array();
+        return new Response($this->formatItem($user));
     }
+    
+    /**
+     * DELETE User 
+     * 
+     * @param int $id User ID
+     */
+    public function deleteAction($id) 
+    {
+        $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
+
+        if(!$user) {
+            return $this->create404Response(sprintf('User not found with id %d', $id));
+        }
+        
+        $this->getEntityManager()->remove($user);
+        $this->getEntityManager()->flush();
+        
+        return new Response("", 204);
+    }
+    
+    /**
+     * UPDATE User 
+     * 
+     * @param int $id User ID
+     */
+    public function putAction($id) 
+    {
+        $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
+
+        if(!$user) {
+            return $this->create404Response(sprintf('User not found with id %d', $id));
+        }
+        
+        
+        return new Response("", 204);
+    }
+    
+    
     
     /**
      * GET User Permissions
@@ -188,8 +223,10 @@ class UserController extends ARestController
             throw new ValidationException($violations);
         }
         
+        
+        
         // TODO
         
-        return array();
+        return new Response();
     }
 }

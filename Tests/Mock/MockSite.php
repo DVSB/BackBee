@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\Test\Mock;
+namespace BackBuilder\Tests\Mock;
 
 use BackBuilder\Site\Site;
 
@@ -7,7 +7,7 @@ use Faker\Factory;
 
 /**
  * @category    BackBuilder
- * @package     BackBuilder\TestUnit\Mock
+ * @package     BackBuilder\Tests\Mock
  * @copyright   Lp system
  * @author      n.dufreche
  */

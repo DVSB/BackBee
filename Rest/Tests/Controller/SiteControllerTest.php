@@ -19,7 +19,7 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Tests\Controller;
+namespace BackBuilder\Rest\Tests\Controller;
 
 use BackBuilder\Rest\EventListener\PaginationListener;
 
@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\SiteController;
-use BackBuilder\Test\TestCase;
+use BackBuilder\Tests\TestCase;
 
 
 use BackBuilder\Site\Site,

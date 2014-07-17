@@ -107,7 +107,6 @@ class Theme extends ThemeConst
         
         $manager = new ThemesManager($this->getThemeDir(self::DEFAULT_NAME));
         $this->_default_theme = $manager->hydrateTheme($this->_application->getConfig()->getSection('theme'));
-        $this->parseDirectory($this->_default_theme->getArchitecture(), $this->getDefaultDirectory());
     }
 
     /**
