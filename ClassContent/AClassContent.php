@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -33,11 +33,11 @@ use Doctrine\Common\Collections\ArrayCollection;
  * A content is also an persistant Doctrine entity
  *
  * A content has several states :
- * 
+ *
  * * STATE_NEW : new content, revision number to 0
  * * STATE_NORMAL : last commited content
  * * STATE_LOCKED : content locked on writing
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent
  * @copyright   Lp digital system
@@ -263,10 +263,6 @@ abstract class AClassContent extends AContent
      */
     public function setProperty($var, $value)
     {
-        if (false === is_array($this->_properties)) {
-            $this->_properties = array();
-        }
-
         $this->_properties[$var] = $value;
         return $this;
     }
@@ -551,24 +547,18 @@ abstract class AClassContent extends AContent
      */
     protected function _defineParam($var, $type = 'scalar', $options = null)
     {
-        if ('accept' === $var) {
-            if (true === is_array($options) && true === array_key_exists('default', $options)) {
-                return $this->_addAcceptedType($options['default']);
-            }
+        $values = array();
+        if (true === is_array($options) && true === array_key_exists('default', $options)) {
+            $values[$type] = $options['default'];
         } else {
-            $values = array();
-            if (true === is_array($options) && true === array_key_exists('default', $options)) {
-                $values[$type] = $options['default'];
-            } else {
-                $values[$type] = null;
-            }
-
-            if (false === array_key_exists($var, $this->_parameters)) {
-                $this->_parameters[$var] = $values;
-            }
-
-            $this->_defaultparameters[$var] = $values;
+            $values[$type] = null;
         }
+
+        if (false === array_key_exists($var, $this->_parameters)) {
+            $this->_parameters[$var] = $values;
+        }
+
+        $this->_defaultparameters[$var] = $values;
 
         return $this;
     }
@@ -970,7 +960,7 @@ abstract class AClassContent extends AContent
 
         $this->releaseDraft();
         foreach ($revision->getData() as $key => $value) {
-            
+
         }
     }
 
