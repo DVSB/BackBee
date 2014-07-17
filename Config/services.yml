@@ -178,8 +178,6 @@ services:
     rest.listener.validation:
         class:      %bbapp.rest.listener_validation.class%
         arguments:  [@service_container]
-        calls:
-            - [setPath, [%bbapp.rest_api.path%]]
 
     rest.metadata.annotation_reader: 
         class: Doctrine\Common\Annotations\AnnotationReader
