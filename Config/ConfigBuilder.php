@@ -37,6 +37,11 @@ use BackBuilder\Util\Resolver\ConfigDirectory;
  */
 class ConfigBuilder
 {
+    /**
+     * constants we need to define which type of extend and build we have to perform;
+     * indeed, we do different stuff depending on if it's a config for application or
+     * bundle
+     */
     const APPLICATION_CONFIG = 0;
     const BUNDLE_CONFIG = 1;
 

@@ -161,4 +161,41 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
             'brand' => 'LP Digital'
         ));
     }
+
+    /**
+     * Test Config class proxy and dump
+     *
+     * @covers Config::getClassProxy
+     * @covers Config::dump
+     */
+    public function testConfigDumpable()
+    {
+        $config = new Config(__DIR__);
+
+        $this->assertEquals(Config::CONFIG_PROXY_CLASSNAME, $config->getClassProxy());
+        $config_dump = $config->dump();
+        $this->assertTrue(array_key_exists('basedir', $config_dump));
+        $this->assertEquals(__DIR__, $config_dump['basedir']);
+        $this->assertTrue(array_key_exists('raw_parameters', $config_dump));
+        $this->assertEquals(
+            array(
+                'say' => array(
+                    'hello'   => 'world',
+                    'bonjour' => 'monde',
+                    'hola'    => 'mundo'
+                )
+            ),
+            $config_dump['raw_parameters']
+        );
+        $this->assertTrue(array_key_exists('environment', $config_dump));
+        $this->assertEquals(\BackBuilder\BBApplication::DEFAULT_ENVIRONMENT, $config_dump['environment']);
+        $this->assertTrue(array_key_exists('debug', $config_dump));
+        $this->assertEquals(false, $config_dump['debug']);
+        $this->assertTrue(array_key_exists('yml_names_to_ignore', $config_dump));
+        $this->assertEquals(array(), $config_dump['yml_names_to_ignore']);
+        $this->assertTrue(array_key_exists('has_cache', $config_dump));
+        $this->assertEquals(false, $config_dump['has_cache']);
+        $this->assertTrue(array_key_exists('has_container', $config_dump));
+        $this->assertEquals(false, $config_dump['has_container']);
+    }
 }

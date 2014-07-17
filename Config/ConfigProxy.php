@@ -39,7 +39,7 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
      *
      * @var boolean
      */
-    protected $_is_restored;
+    protected $is_restored;
 
     /**
      * ConfigProxy's constructor
@@ -48,7 +48,7 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
      */
     public function __construct()
     {
-        // Nothing to do
+        $this->is_restored = false;
     }
 
     /**
@@ -73,7 +73,7 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
             $this->setCache($container->get('cache.bootstrap'));
         }
 
-        $this->_is_restored = true;
+        $this->is_restored = true;
     }
 
 
@@ -82,6 +82,6 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
      */
     public function isRestored()
     {
-        return $this->_is_restored;
+        return $this->is_restored;
     }
 }
