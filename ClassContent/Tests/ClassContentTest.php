@@ -85,10 +85,26 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
      */
     public function testAcceptedType()
     {
-        $this->assertTrue($this->content->isAccepted($this->content->title, 'title'), 'Test is true');
+        $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
         $this->assertTrue($this->content->isAccepted('foo', 'bar'), 'Test is false');
 
-        $this->assertFalse($this->content->isAccepted(new \stdClass(), 'title'), 'Test is false');
+        $this->assertFalse($this->content->isAccepted(new \stdClass(), 'title'));
         $this->assertFalse($this->content->isAccepted('false'), 'Test is false');
+    }
+
+    /**
+     * test defineProperty
+     *
+     * @coverage \BackBuilder\ClassContent\AClassContent::_defineProperty
+     */
+    public function testDefineProperty()
+    {
+        $name = $this->content->getProperty('name');
+
+        $this->content->defineProperty('name', $name . ' foobar');
+        $this->assertEquals($name, $this->content->getProperty('name'));
+
+        $this->content->defineProperty('newproperty', 'foobar');
+        $this->assertEquals('foobar', $this->content->getProperty('newproperty'));
     }
 }
