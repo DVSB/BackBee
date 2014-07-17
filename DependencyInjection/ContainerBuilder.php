@@ -265,24 +265,6 @@ class ContainerBuilder
             }
         }
 
-        // Try to load services_ENVIRONEMENT.yml if exists
-        if (\BackBuilder\BBApplication::DEFAULT_ENVIRONMENT !== $this->environment) {
-            $service_yml_environment = self::SERVICE_FILENAME . '_' . $this->environment;
-            $service_filepath = implode(DIRECTORY_SEPARATOR, array(
-                $this->application->getBBDir(),
-                'Config',
-                $service_yml_environment . '.yml'
-            ));
-
-            if (true === file_exists($service_filepath) && true === is_readable($service_filepath)) {
-                ServiceLoader::loadServicesFromYamlFile(
-                    $this->container,
-                    dirname($service_filepath),
-                    $service_yml_environment
-                );
-            }
-        }
-
         $this->loadLoggerDefinition();
     }
 
