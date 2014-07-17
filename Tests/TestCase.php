@@ -32,7 +32,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $backbuilder_autoloader = new AutoLoader();
 
-        $backbuilder_autoloader->register()
+        $backbuilder_autoloader->setApplication($this->getBBAppStub())
+                ->register()
                 ->registerNamespace('BackBuilder\Bundle\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Tests')))
                 ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
                 ->registerNamespace('BackBuilder\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
@@ -41,6 +42,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Listeners')))
                 ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Services', 'Public')))
                 ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'vendor', 'doctrine', 'orm', 'tests', 'Doctrine', 'Tests')));
+
+
+        $backbuilder_autoloader->registerStreamWrapper('BackBuilder\ClassContent', 'bb.class', '\BackBuilder\Stream\ClassWrapper\Adapter\Yaml');
+
     }
 
     /**
@@ -137,13 +142,13 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $BBApp->expects($this->any())
               ->method('getEventDispatcher')
               ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
-        
-        
+
+
         $BBApp->expects($this->any())
               ->method('getContainer')
               ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
-        
-        
+
+
         $BBApp->expects($this->any())
               ->method('getBaseDir')
               ->will($this->returnValue(vfsStream::url('')));
@@ -153,19 +158,19 @@ class TestCase extends \PHPUnit_Framework_TestCase
 //                ->setMethods(array())
 //                ->getMock();
         $controller = new \BackBuilder\FrontController\FrontController($BBApp);
-        
+
         $BBApp->expects($this->any())
               ->method('getController')
               ->will($this->returnValue($controller));
-        
+
         return $BBApp;
     }
-    
-    
+
+
     public function initDb($bbapp)
     {
         $em = $bbapp->getContainer()->get('em');
-        
+
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
@@ -182,17 +187,17 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $bbapp->getBBDir() . '/Util/Sequence/Entity',
             $bbapp->getBBDir() . '/Workflow',
         ));
-        
+
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         $schema->updateSchema($metadata, true);
     }
-    
+
     public function dropDb($bbapp)
     {
         $em = $bbapp->getContainer()->get('em');
-        
+
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
@@ -208,10 +213,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $bbapp->getBBDir() . '/Util/Sequence/Entity',
             $bbapp->getBBDir() . '/Workflow',
         ));
-        
+
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         $schema->dropDatabase();
     }
-    
+
 }
