@@ -38,6 +38,11 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->content->load();
     }
 
+    /**
+     * test setProperty
+     *
+     * @coverage \BackBuilder\ClassContent\AClassContent::getProperty
+     */
     public function testGetProperty()
     {
         $this->assertInternalType('array', $this->content->getProperty());
@@ -45,12 +50,22 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->content->getProperty('notset'));
     }
 
+    /**
+     * test setProperty
+     *
+     * @coverage \BackBuilder\ClassContent\AClassContent::setProperty
+     */
     public function testSetProperty()
     {
         $this->content->setProperty('foo', 'bar');
         $this->assertEquals('bar', $this->content->getProperty('foo'));
     }
 
+    /**
+     * test createClone
+     *
+     * @coverage \BackBuilder\ClassContent\AClassContent::createClone
+     */
     public function testCreateClone()
     {
         $this->content->setProperty('foo', 'bar');
@@ -61,5 +76,19 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($clone->getProperty('foo'));
         $this->assertEquals('baz', $clone->title->value);
         $this->assertNotEquals($this->content->getUid(), $clone->getUid());
+    }
+
+    /**
+     * test setProperty
+     *
+     * @coverage \BackBuilder\ClassContent\AContent::_isAccepted
+     */
+    public function testAcceptedType()
+    {
+        $this->assertTrue($this->content->isAccepted($this->content->title, 'title'), 'Test is true');
+        $this->assertTrue($this->content->isAccepted('foo', 'bar'), 'Test is false');
+
+        $this->assertFalse($this->content->isAccepted(new \stdClass(), 'title'), 'Test is false');
+        $this->assertFalse($this->content->isAccepted('false'), 'Test is false');
     }
 }

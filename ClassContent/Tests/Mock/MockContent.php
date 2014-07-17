@@ -113,4 +113,24 @@ class MockContent extends AClassContent implements IMock
         $this->title->value = 'This is the title';
         $this->body = new ContentSet();
     }
+
+    public function defineData($var, $type = 'scalar', $options = null, $updateAccept = true)
+    {
+        return parent::_defineData($var, $type, $options, $updateAccept);
+    }
+
+    public function defineProperty($var, $value)
+    {
+        return parent::_defineProperty($var, $value);
+    }
+
+    public function defineParam($var, $type = 'scalar', $options = null)
+    {
+        return parent::_defineParam($var, $type, $options);
+    }
+
+    public function isAccepted($value, $var = null)
+    {
+        return parent::_isAccepted($value, $var);
+    }
 }
