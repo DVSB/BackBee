@@ -18,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
-
 namespace BackBuilder\ClassContent\Tests;
 
 use BackBuilder\ClassContent\Tests\Mock\MockContent;
@@ -40,7 +39,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test setProperty
+     * test getProperty
      *
      * @coverage \BackBuilder\ClassContent\AClassContent::getProperty
      */
