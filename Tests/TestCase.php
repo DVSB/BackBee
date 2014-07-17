@@ -32,7 +32,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $backbuilder_autoloader = new AutoLoader();
 
-        $backbuilder_autoloader->register()
+        $backbuilder_autoloader->setApplication($this->getBBAppStub())
+                ->register()
                 ->registerNamespace('BackBuilder\Bundle\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Tests')))
                 ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
                 ->registerNamespace('BackBuilder\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
@@ -41,6 +42,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Listeners')))
                 ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Services', 'Public')))
                 ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'vendor', 'doctrine', 'orm', 'tests', 'Doctrine', 'Tests')));
+
+
+        $backbuilder_autoloader->registerStreamWrapper('BackBuilder\ClassContent', 'bb.class', '\BackBuilder\Stream\ClassWrapper\Adapter\Yaml');
+
     }
 
     /**
