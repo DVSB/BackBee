@@ -77,7 +77,7 @@ class User implements UserInterface
      * @fixture(type="boolean")
      * @Serializer\Type('boolean'))
      */
-    protected $_activated;
+    protected $_activated = false;
 
     /**
      * The firstame of this user
