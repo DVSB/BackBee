@@ -47,17 +47,19 @@ class SecurityControllerTest extends TestCase
     protected function setUp()
     {
         $this->initAutoload();
+        
         $this->bbapp = new \BackBuilder\BBApplication(null, 'test');
         $this->initDb($this->bbapp);
+        
         $this->bbapp->start();
         
         // valid user
         $user = new User();
         $user->setLogin('user123');
-        $user->setPassword('password123');
+        $user->setPassword(md5('password123'));
         $user->setActivated(true);
-        $this->bbapp->getEntityManager()->persist($user);
         
+        $this->bbapp->getEntityManager()->persist($user);
         
         $this->bbapp->getEntityManager()->flush();
     }
