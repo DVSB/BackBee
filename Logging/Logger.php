@@ -88,6 +88,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         $this->setLevel(self::ERROR);
         if (NULL !== $this->_application) {
             if (NULL !== $loggingConfig = $this->_application->getConfig()->getLoggingConfig()) {
+               
                 if ($this->_application->isDebugMode()) {
                     error_reporting(E_ALL);
                     $this->setLevel(Logger::DEBUG);

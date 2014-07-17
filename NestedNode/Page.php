@@ -1097,7 +1097,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         }
 
         if (true === property_exists($serialized, 'metadata') && null !== $this->getMetaData()) {
-            $this->setMetaData($this->getMetaData()->fromStdClass($serialized->metadata));
+            $this->setMetaData($this->getMetaData()->fromStdClass((object)$serialized->metadata));
         }
 
         if (true === property_exists($serialized, 'workflow_state')) {
