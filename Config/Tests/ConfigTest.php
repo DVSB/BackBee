@@ -36,6 +36,21 @@ use BackBuilder\DependencyInjection\Container;
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * the directory which contains every resources required for running this test class
+     *
+     * @var string
+     */
+    private $test_base_dir;
+
+    /**
+     * initialize the main directory to looking for ConfigTest resources
+     */
+    public function setUp()
+    {
+        $this->test_base_dir = __DIR__ . '/ConfigTest_Resources';
+    }
+
+    /**
      * test the Config constructor
      *
      * @covers Config::extend
@@ -49,9 +64,9 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstruct()
     {
-        $config = new Config(__DIR__);
+        $config = new Config($this->test_base_dir);
 
-        $this->assertEquals(__DIR__, $config->getBaseDir());
+        $this->assertEquals($this->test_base_dir, $config->getBaseDir());
         $this->assertTrue($config->sectionHasKey('say', 'hello'));
         $this->assertFalse($config->sectionHasKey('say', 'hi'));
         $this->assertEquals($config->getSection('say'), array(
@@ -72,7 +87,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testExtend()
     {
         // test config extend with environment
-        $config = new Config(__DIR__);
+        $config = new Config($this->test_base_dir);
 
         $config->setEnvironment('test_extend');
         $config->extend();
@@ -94,7 +109,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         ));
 
         // test config extend with environment and with yml filename ignore
-        $config = new Config(__DIR__);
+        $config = new Config($this->test_base_dir);
 
         $config->setEnvironment('test_extend');
         $config->addYamlFilenameToIgnore('bar');
@@ -113,13 +128,13 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         ));
 
         // prepare test extend with and withtout override
-        $config = new Config(__DIR__);
+        $config = new Config($this->test_base_dir);
 
         $config->setEnvironment('test_extend');
         $config->extend();
 
         // test extend WITHOUT override
-        $config->extend(realpath(__DIR__ . '/test_override'));
+        $config->extend(realpath($this->test_base_dir . '/test_override'));
         $this->assertEquals($config->getSection('foo'), array(
             'bar'  => null,
             'back' => 'bee',
@@ -127,7 +142,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         ));
 
         // test extend WITH override
-        $config->extend(realpath(__DIR__ . '/test_override'), true);
+        $config->extend(realpath($this->test_base_dir . '/test_override'), true);
         $this->assertEquals($config->getSection('foo'), array(
             'bar' => null,
             'tic' => 'tac'
@@ -147,7 +162,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $container = new Container();
         $container->setParameter('brand', 'LP Digital');
 
-        $config = new Config(realpath(__DIR__) . '/test_container');
+        $config = new Config(realpath($this->test_base_dir . '/test_container'));
         $this->assertEquals($config->getSection('parameters'), array(
             'brand' => '%brand%'
         ));
@@ -170,12 +185,12 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testConfigDumpable()
     {
-        $config = new Config(__DIR__);
+        $config = new Config($this->test_base_dir);
 
         $this->assertEquals(Config::CONFIG_PROXY_CLASSNAME, $config->getClassProxy());
         $config_dump = $config->dump();
         $this->assertTrue(array_key_exists('basedir', $config_dump));
-        $this->assertEquals(__DIR__, $config_dump['basedir']);
+        $this->assertEquals($this->test_base_dir, $config_dump['basedir']);
         $this->assertTrue(array_key_exists('raw_parameters', $config_dump));
         $this->assertEquals(
             array(

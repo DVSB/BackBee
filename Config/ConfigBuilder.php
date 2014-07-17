@@ -20,7 +20,7 @@ namespace BackBuilder\Config;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\BBApplication;
+use BackBuilder\IApplication;
 use BackBuilder\Config\Config;
 use BackBuilder\Config\Exception\InvalidConfigTypeException;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
@@ -85,7 +85,7 @@ class ConfigBuilder
      *
      * @param boolean $override_config define if we should override config on extend()
      */
-    public function __construct(BBApplication $application)
+    public function __construct(IApplication $application)
     {
         $this->bb_directory = $application->getBBDir();
         $this->base_repository = $application->getBaseRepository();

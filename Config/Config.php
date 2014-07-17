@@ -354,6 +354,9 @@ class Config implements DumpableServiceInterface
                     self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION === basename($filename)) {
 
                     foreach ($yamlDatas as $component => $config) {
+                        if (false === is_array($config)) {
+                            var_dump($config); die;
+                        }
                         $this->setSection($component, $config, $overwrite);
                     }
                 } else {

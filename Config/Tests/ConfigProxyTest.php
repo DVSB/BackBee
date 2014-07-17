@@ -47,7 +47,7 @@ class ConfigProxyTest extends \PHPUnit_Framework_TestCase
     {
         // prepare variables we need to perform tests on Config\ConfigProxy
         $container = new Container();
-        $config = new Config(__DIR__);
+        $config = new Config(__DIR__ . '/ConfigTest_Resources');
         $config_dump = $config->dump();
 
         // set of tests on Config\ConfigProxy
