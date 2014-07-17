@@ -52,7 +52,7 @@ class SessionListener
 
         if (NULL !== $application = $event->getKernel()->getApplication()) {
             if (!$application->getContainer()->has('session'))
-                $application->getContainer()->set('session', new Session());
+                $application->getContainer()->set('session', $application->getSession());
 
             $application->getContainer()->get('session')->start();
             $application->debug("Session started");
