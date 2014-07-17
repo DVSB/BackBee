@@ -19,7 +19,7 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Tests;
+namespace BackBuilder\ClassContent\Tests;
 
 use BackBuilder\ClassContent\Tests\Mock\MockContent;
 
@@ -45,4 +45,21 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->content->getProperty('notset'));
     }
 
+    public function testSetProperty()
+    {
+        $this->content->setProperty('foo', 'bar');
+        $this->assertEquals('bar', $this->content->getProperty('foo'));
+    }
+
+    public function testCreateClone()
+    {
+        $this->content->setProperty('foo', 'bar');
+        $this->content->title->value = 'baz';
+        $clone = $this->content->createClone();
+
+        $this->assertInstanceOf('BackBuilder\ClassContent\Tests\Mock\MockContent', $clone);
+        $this->assertNull($clone->getProperty('foo'));
+        $this->assertEquals('baz', $clone->title->value);
+        $this->assertNotEquals($this->content->getUid(), $clone->getUid());
+    }
 }
