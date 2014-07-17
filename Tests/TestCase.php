@@ -43,9 +43,16 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Services', 'Public')))
                 ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'vendor', 'doctrine', 'orm', 'tests', 'Doctrine', 'Tests')));
 
-
         $backbuilder_autoloader->registerStreamWrapper('BackBuilder\ClassContent', 'bb.class', '\BackBuilder\Stream\ClassWrapper\Adapter\Yaml');
 
+    }
+
+    public function getClassContentDir()
+    {
+        return array(
+            $this->repository_folder . DIRECTORY_SEPARATOR . 'ClassContent',
+            $this->backbuilder_folder . DIRECTORY_SEPARATOR . 'ClassContent'
+        );
     }
 
     /**
@@ -138,6 +145,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $BBApp->expects($this->any())
               ->method('getEntityManager')
               ->will($this->returnValue($this->getMockObjectContainer('entityManager')));
+
+        $BBApp->expects($this->any())
+              ->method('getClassContentDir')
+              ->will($this->returnValue($this->getClassContentDir()));
 
         $BBApp->expects($this->any())
               ->method('getEventDispatcher')
