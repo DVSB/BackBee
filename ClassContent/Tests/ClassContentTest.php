@@ -22,6 +22,7 @@ namespace BackBuilder\ClassContent\Tests;
 
 use BackBuilder\ClassContent\Tests\Mock\MockContent;
 use BackBuilder\ClassContent\Element\image;
+use BackBuilder\ClassContent\Revision;
 
 /**
  * @category    BackBuilder
@@ -150,14 +151,14 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
             'title',
             '\BackBuilder\ClassContent\Element\date',
             array (
-                'default' => array ('value' => 'No title here')
+                'default' => array ('value' => 'Foo Bar Baz')
             )
         );
         $this->content->defineData(
             'title',
             '\BackBuilder\ClassContent\Element\image',
             array (
-                'default' => array ('value' => 'Drop picture here')
+                'default' => array ('value' => 'Foo Bar Baz')
             ),
             false
         );
@@ -167,15 +168,25 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
             array (
                 'default' => array ('value' => 'A date')
             ),
-            false
+            true
         );
 
-        $this->assertNotEquals('No title here', $this->content->title->value);
+        $this->assertNotEquals('Foo Bar Baz', $this->content->title->value);
+        $this->assertInstanceOf('BackBuilder\ClassContent\Element\date', $this->content->date);
 
         $this->assertTrue($this->content->isAccepted($this->content->date, 'title'));
         $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
         $this->assertFalse($this->content->isAccepted(new image(), 'title'));
 
-        $this->assertInstanceOf('BackBuilder\ClassContent\Element\date', $this->content->date);
+        $this->assertEquals('A date', $this->content->date->value);
+    }
+
+    public function testRevision()
+    {
+        $revision = new Revision();
+        $revision->setContent($this->content);
+        $this->content->setDraft($revision);
+
+        $this->assertInstanceOf('BackBuilder\ClassContent\Element\text', $this->content->getDraft()->getData('title'));
     }
 }
