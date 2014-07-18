@@ -99,11 +99,11 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     /**
      * Add listener to events
      *
-     * @param array $eventsConfig
+     * @param array $events_config
      */
-    public function addListeners(array $eventsConfig)
+    public function addListeners(array $events_config)
     {
-        foreach ($eventsConfig as $name => $listeners) {
+        foreach ($events_config as $name => $listeners) {
             if (FALSE === array_key_exists('listeners', $listeners)) {
                 $this->application->warning(sprintf('None listener found for `%s` event.', $name));
                 continue;
@@ -186,27 +186,6 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $eventPrefix = substr($eventPrefix, 13);
 
         return $eventPrefix;
-    }
-
-    /**
-     * @see Symfony\Component\EventDispatcher\EventDispatcherInterface::getListeners
-     */
-    public function getListeners($eventName = null)
-    {
-        $listeners = parent::getListeners($eventName);
-
-        // retrieve services
-        foreach ($listeners as &$listener) {
-            if (is_string($listener[0]) && 0 === strpos($listener[0], '@')) {
-                if (null !== $this->getContainer()) {
-                    $listener[0] = $this->getContainer()->get(substr($listener[0], 1));
-                } else {
-                    throw new ContainerNotFoundException();
-                }
-            }
-        }
-
-        return $listeners;
     }
 
     /**
