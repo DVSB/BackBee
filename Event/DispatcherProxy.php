@@ -60,8 +60,12 @@ class DispatcherProxy extends Dispatcher implements DumpableServiceProxyInterfac
     {
         $this->_application = $container->get('bbapp');
 
-        foreach ($dump['listeners'] as $name => $callable) {
-            $this->addListener($name, $callable);
+        foreach ($dump['listeners'] as $event_name => $priorities) {
+            foreach ($priorities as $priority => $listeners) {
+                foreach ($listeners as $listener) {
+                    $this->addListener($event_name, $listener, $priority);
+                }
+            }
         }
 
         if (true === $dump['has_application']) {
