@@ -24,6 +24,8 @@ namespace BackBuilder\ClassContent\Tests;
 use BackBuilder\ClassContent\Tests\Mock\MockContent;
 use BackBuilder\ClassContent\Element\image;
 use BackBuilder\ClassContent\Revision;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\Exception\BBException;
 
 /**
  * @category    BackBuilder
@@ -183,12 +185,40 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('A date', $this->content->date->value);
     }
 
-    public function testRevision()
+    /**
+     * test prepareCommitDraft
+     *
+     * @coverage \BackBuilder\ClassContent\AClassContent::prepareCommitDraft
+     */
+    public function prepareCommitDraft()
     {
+        try {
+            $this->content->prepareCommitDraft();
+            $this->fail('RevisionMissingException not raise');
+        } catch (BBException $expected) {
+            $this->assertInstanceOf('\BackBuilder\ClassContent\Exception\RevisionMissingException', $expected);
+        }
+
         $revision = new Revision();
         $revision->setContent($this->content);
         $this->content->setDraft($revision);
+        $revision->setState(Revision::STATE_CONFLICTED);
 
         $this->assertInstanceOf('BackBuilder\ClassContent\Element\text', $this->content->getDraft()->getData('title'));
+
+        try {
+            $this->content->prepareCommitDraft();
+            $this->fail('RevisionConflictedException not raise');
+        } catch (BBException $expected) {
+            $this->assertInstanceOf('\BackBuilder\ClassContent\Exception\RevisionConflictedException', $expected);
+        }
+
+        $revision->setState('bad case');
+        try {
+            $this->content->prepareCommitDraft();
+            $this->fail('RevisionUptodateException not raise');
+        } catch (BBException $expected) {
+            $this->assertInstanceOf('\BackBuilder\ClassContent\Exception\RevisionUptodateException', $expected);
+        }
     }
 }
