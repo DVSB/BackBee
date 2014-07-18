@@ -22,6 +22,7 @@
 namespace BackBuilder\ClassContent\Tests;
 
 use BackBuilder\ClassContent\Tests\Mock\MockContent;
+use BackBuilder\ClassContent\Element\image;
 
 /**
  * @category    BackBuilder
@@ -137,5 +138,45 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->content->defineParam('foo', 'scalar', 'toBeNull');
         $this->assertNull($this->content->getParam('foo:scalar'));
         $this->assertNull($this->content->getDefaultParameters()['foo']['scalar']);
+    }
+
+    /**
+     * test defineData
+     *
+     * @coverage \BackBuilder\ClassContent\AClassContent::_defineData
+     */
+    public function testDefineData()
+    {
+        $this->content->defineData(
+            'title',
+            '\BackBuilder\ClassContent\Element\date',
+            array (
+                'default' => array ('value' => 'No title here')
+            )
+        );
+        $this->content->defineData(
+            'title',
+            '\BackBuilder\ClassContent\Element\image',
+            array (
+                'default' => array ('value' => 'Drop picture here')
+            ),
+            false
+        );
+        $this->content->defineData(
+            'date',
+            '\BackBuilder\ClassContent\Element\date',
+            array (
+                'default' => array ('value' => 'A date')
+            ),
+            false
+        );
+
+        $this->assertNotEquals('No title here', $this->content->title->value);
+
+        $this->assertTrue($this->content->isAccepted($this->content->date, 'title'));
+        $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
+        $this->assertFalse($this->content->isAccepted(new image(), 'title'));
+
+        $this->assertInstanceOf('BackBuilder\ClassContent\Element\date', $this->content->date);
     }
 }
