@@ -29,7 +29,7 @@ use BackBuilder\Console\Console;
  * @category    BackBuilder
  * @package     BackBuilder
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 interface IApplication
 {
@@ -42,6 +42,52 @@ interface IApplication
      * Stop the current BBApplication instance
      */
     public function stop();
+
+    /**
+     * Returns the starting context
+     *
+     * @return string
+     */
+    public function getContext();
+
+    /**
+     * Returns the starting context
+     *
+     * @return string
+     */
+    public function getEnvironment();
+
+    /**
+     * @return string
+     */
+    public function getBBDir();
+
+    /**
+     * @return string
+     */
+    public function getBaseDir();
+
+    /**
+     * @return string
+     */
+    public function getBaseRepository();
+
+    /**
+     * @return string
+     */
+    public function getRepository();
+
+    /**
+     * @return string
+     */
+    public function getConfigDir();
+
+    /**
+     * Returns path to Data directory
+     *
+     * @return string absolute path to Data directory
+     */
+    public function getDataDir();
 
     /**
      * @return BackBuilder\FrontController\FrontController
@@ -59,38 +105,14 @@ interface IApplication
     public function getAutoloader();
 
     /**
-     * [getBBDir description]
-     * @return [type] [description]
-     */
-    public function getBBDir();
-
-    /**
-     * Returns path to Data directory
-     * @return string absolute path to Data directory
-     */
-    public function getDataDir();
-
-    /**
-     * @return string
-     */
-    public function getBaseDir();
-
-    /**
-     * Returns the starting context
-     * @return string|NULL
-     */
-    public function getContext();
-
-    /**
-     * Returns the starting context
-     * @return string|NULL
-     */
-    public function getEnvironment();
-
-    /**
      * @return ContainerBuilder
      */
     public function getContainer();
+
+    /**
+     * @return boolean
+     */
+    public function isOverridedConfig();
 
     /**
      *

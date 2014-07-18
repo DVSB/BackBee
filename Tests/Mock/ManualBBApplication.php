@@ -21,7 +21,7 @@ namespace BackBuilder\Tests\Mock;
  */
 
 use BackBuilder\BBApplication;
-use BackBuilder\IApplication;
+use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Console\Console;
 use BackBuilder\Site\Site;
 
@@ -31,7 +31,7 @@ use BackBuilder\Site\Site;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class ManualBBApplication implements IApplication
+class ManualBBApplication implements ApplicationInterface
 {
     /**
      * @var boolean
@@ -56,7 +56,22 @@ class ManualBBApplication implements IApplication
     /**
      * @var string
      */
+    protected $base_dir;
+
+    /**
+     * @var string
+     */
     protected $base_repository;
+
+    /**
+     * @var string
+     */
+    protected $repository;
+
+    /**
+     * @var string
+     */
+    protected $config_dir;
 
     /**
      * @var boolean
@@ -107,6 +122,80 @@ class ManualBBApplication implements IApplication
     }
 
     /**
+     * Returns the starting context
+     * @return string|NULL
+     */
+    public function getContext()
+    {
+        return $this->context;
+    }
+
+    /**
+     * Returns the starting context
+     * @return string|NULL
+     */
+    public function getEnvironment()
+    {
+        return $this->environment;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBBDir()
+    {
+        return $this->bb_dir;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBaseDir()
+    {
+        return $this->base_dir;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBaseRepository()
+    {
+        return $this->base_repository;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRepository()
+    {
+        return $this->repository;
+    }
+
+    /**
+     * @return string
+     */
+    public function getConfigDir()
+    {
+        return $this->config_dir;
+    }
+
+    /**
+     * Returns path to Data directory
+     *
+     * @return string absolute path to Data directory
+     */
+    public function getDataDir()
+    {
+    }
+
+    /**
+     * @return ContainerBuilder
+     */
+    public function getContainer()
+    {
+    }
+
+    /**
      * @return BackBuilder\FrontController\FrontController
      */
     public function getController()
@@ -128,67 +217,10 @@ class ManualBBApplication implements IApplication
     }
 
     /**
-     * [getBBDir description]
-     * @return [type] [description]
-     */
-    public function getBBDir()
-    {
-        return $this->bb_dir;
-    }
-
-    /**
-     * Returns path to Data directory
-     * @return string absolute path to Data directory
-     */
-    public function getDataDir()
-    {
-    }
-
-    /**
-     * @return string
-     */
-    public function getBaseDir()
-    {
-    }
-
-    /**
-     * Returns the starting context
-     * @return string|NULL
-     */
-    public function getContext()
-    {
-        return $this->context;
-    }
-
-    /**
-     * Returns the starting context
-     * @return string|NULL
-     */
-    public function getEnvironment()
-    {
-        return $this->environment;
-    }
-
-    /**
-     * @return ContainerBuilder
-     */
-    public function getContainer()
-    {
-    }
-
-    /**
      *
      */
     public function registerCommands(Console $console)
     {
-    }
-
-    /**
-     * @return string
-     */
-    public function getBaseRepository()
-    {
-        return $this->base_repository;
     }
 
     /**
