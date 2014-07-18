@@ -169,6 +169,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
             array (
                 'default' => array ('value' => 'A date')
             ),
+
             true
         );
 
