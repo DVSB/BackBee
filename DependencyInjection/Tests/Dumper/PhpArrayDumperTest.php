@@ -75,7 +75,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     {
         $this->container = new Container();
         $this->dumper = new PhpArrayDumper($this->container);
-        $config_test_directory = realpath(__DIR__ . '/../Config');
+        $config_test_directory = realpath(__DIR__ . '/PhpArrayDumperTest_Resources');
 
         if (false === is_dir($config_test_directory)) {
             throw new \Exception(sprintf('Unable to find test Config directory (%s)', $config_test_directory));

@@ -33,6 +33,21 @@ use BackBuilder\DependencyInjection\BootstrapResolver;
 class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * test resources base directory
+     *
+     * @var string
+     */
+    private $resources_base_dir;
+
+    /**
+     * define the test resources directory
+     */
+    public function setUp()
+    {
+        $this->resources_base_dir = __DIR__ . '/BootstrapResolverTest_Resources';
+    }
+
+    /**
      * Test BootstrapResolver::getBootstrapPotentialsDirectories(), the number and the order of
      * directory this method returns
      */
@@ -85,7 +100,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
      */
     public function testRaiseBootstrapFileNotFoundException()
     {
-        $bootstrap_resolver = new BootstrapResolver(__DIR__ . DIRECTORY_SEPARATOR . 'Config', null, null);
+        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir . '/Config', null, null);
 
         try {
             $bootstrap_resolver->getBootstrapParameters();
@@ -105,7 +120,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         $environment = 'preprod';
 
         // test to get bootstrap parameters WITHOUT context and WITHOUT environment
-        $bootstrap_resolver = new BootstrapResolver(__DIR__, null, null);
+        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, null, null);
         $this->assertEquals(
             array(
                 'context'     => 'default',
@@ -115,7 +130,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         );
 
         // test to get bootstrap parameters WITH context and WITH environment
-        $bootstrap_resolver = new BootstrapResolver(__DIR__, $context, $environment);
+        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, $context, $environment);
         $this->assertEquals(
             array(
                 'context'     => 'api',
@@ -125,7 +140,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         );
 
         // test to get bootstrap parameters WITH context and WITHOUT environment
-        $bootstrap_resolver = new BootstrapResolver(__DIR__, $context, null);
+        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, $context, null);
         $this->assertEquals(
             array(
                 'context'     => 'api',
@@ -135,7 +150,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         );
 
         // test to get bootstrap parameters WITHOUT context and WITH environment
-        $bootstrap_resolver = new BootstrapResolver(__DIR__, null, $environment);
+        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, null, $environment);
         $this->assertEquals(
             array(
                 'context'     => 'default',
