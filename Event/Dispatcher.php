@@ -43,6 +43,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 {
     /**
      * Current BackBuilder application
+     *
      * @var BackBuilder\BBApplication
      */
     protected $application;
@@ -55,7 +56,15 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     protected $container;
 
     /**
-     * Class constructor
+     * every registered listeners; we need it so we can dump Dispatcher properly
+     *
+     * @var array
+     */
+    protected $raw_listeners;
+
+    /**
+     * Dispatcher constructor
+     *
      * @param \BackBuilder\BBApplication $application The current instance of BB application
      */
     public function __construct(BBApplication $application = null, Config $config = null)
@@ -89,6 +98,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 
     /**
      * Add listener to events
+     *
      * @param array $eventsConfig
      */
     public function addListeners(array $eventsConfig)
@@ -178,6 +188,9 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
         return $eventPrefix;
     }
 
+    /**
+     * @see Symfony\Component\EventDispatcher\EventDispatcherInterface::getListeners
+     */
     public function getListeners($eventName = null)
     {
         $listeners = parent::getListeners($eventName);
@@ -196,6 +209,15 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
         return $listeners;
     }
 
+    /**
+     * @see Symfony\Component\EventDispatcher\EventDispatcherInterface::addListener
+     */
+    public function addListener($eventName, $listener, $priority = 0)
+    {
+        parent::addListener($eventName, $listener, $priority);
+
+        $this->raw_listeners[$eventName][$priority][] = $listener;
+    }
 
     /**
      * Returns the namespace of the class proxy to use or null if no proxy is required
@@ -216,7 +238,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     public function dump(array $options = array())
     {
         return array(
-            'listeners'       => $this->getListeners(),
+            'listeners'       => $this->raw_listeners,
             'has_application' => null !== $this->application,
             'has_container'   => null !== $this->container
         );
@@ -236,11 +258,6 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     {
         foreach ($listeners as $listener) {
             $callable = array_shift($listener);
-            if (true === is_array($callable)) {
-                $listener = $callable;
-                $callable = array_shift($listener);
-            }
-
             if (true === is_string($callable)) {
                 if (1 === preg_match('#^@(.+)#', $callable, $matches) && true === isset($matches[1])) {
                     if (null !== $this->getContainer()) {
