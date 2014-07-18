@@ -86,10 +86,10 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     public function testAcceptedType()
     {
         $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
-        $this->assertTrue($this->content->isAccepted('foo', 'bar'), 'Test is false');
+        $this->assertTrue($this->content->isAccepted('foo', 'bar'));
 
         $this->assertFalse($this->content->isAccepted(new \stdClass(), 'title'));
-        $this->assertFalse($this->content->isAccepted('false'), 'Test is false');
+        $this->assertFalse($this->content->isAccepted('false'));
     }
 
     /**
@@ -106,5 +106,36 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
         $this->content->defineProperty('newproperty', 'foobar');
         $this->assertEquals('foobar', $this->content->getProperty('newproperty'));
+    }
+
+    /**
+     * test defineParam
+     *
+     * @coverage \BackBuilder\ClassContent\AClassContent::_defineParam
+     */
+    public function testDefineParam()
+    {
+        $this->assertFalse(
+            $this->content->getDefaultParameters()['excludefromautobloc']['array']['default'],
+            'Before load excludefromautobloc have to be false'
+        );
+        $param = array (
+            'default' => array (
+                'rendertype' => 'checkbox',
+                'label' => 'Exclude from autoblocs',
+                'default' => true,
+            ),
+        );
+        $this->content->defineParam('excludefromautobloc', 'array', $param);
+        $this->assertTrue(
+            $this->content->getDefaultParameters()['excludefromautobloc']['array']['default']
+        );
+        $this->assertNotEquals(
+            $this->content->getParam('excludefromautobloc:array:default'),
+            $this->content->getDefaultParameters()['excludefromautobloc']['array']['default']
+        );
+        $this->content->defineParam('foo', 'scalar', 'toBeNull');
+        $this->assertNull($this->content->getParam('foo:scalar'));
+        $this->assertNull($this->content->getDefaultParameters()['foo']['scalar']);
     }
 }
