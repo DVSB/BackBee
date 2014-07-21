@@ -31,6 +31,11 @@ use JMS\Serializer\Construction\ObjectConstructorInterface;
 
 /**
  * Doctrine object constructor for new (or existing) objects during deserialization.
+ *
+ * @category    BackBuilder
+ * @package     Rest
+ * @copyright   Lp digital system
+ * @author      k.golovin
  */
 class DoctrineObjectConstructor implements ObjectConstructorInterface
 {

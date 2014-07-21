@@ -929,7 +929,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                     $ns .= '\\' . strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
-                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && 0 === $r->getConstructor()->getNumberOfRequiredParameters()) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
                     $console->add($instance);

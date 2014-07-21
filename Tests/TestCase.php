@@ -8,6 +8,8 @@ use org\bovigo\vfs\vfsStream;
 use Doctrine\ORM\Tools\SchemaTool,
     Doctrine\ORM\EntityManager;
 
+use BackBuilder\Tests\Mock\MockBBApplication;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Tests
@@ -223,7 +225,32 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function getBBApp()
     {
         if(null === $this->bbapp) {
-            $this->bbapp = new \BackBuilder\BBApplication(null, 'test');
+            //$this->bbapp = new \BackBuilder\BBApplication(null, 'test');
+            
+            
+            $mockConfig = array(
+                'cache' => array(
+                    'default' => array()
+                ),
+                'log' => array(),
+                'repository' => array(
+                    'ClassContent' => array(),
+                    'Config' => array(
+                        'config.yml' => file_get_contents(__DIR__ . '/config/config.yml'),
+                        'doctrine.yml' => file_get_contents(__DIR__ . '/config/doctrine.yml'),
+                        'logging.yml' => file_get_contents(__DIR__ . '/config/logging.yml'),
+                        'bootstrap.yml' => file_get_contents(__DIR__ . '/config/bootstrap.yml'),
+                    ),
+                    'Data' => array(
+                        'Media' => array(),
+                        'Storage' => array(),
+                        'Tmp' => array()
+                    ),
+                    'Ressources' => array()
+                )
+            );
+            
+            $this->bbapp = new MockBBApplication(null, $mockConfig);
         }
         
         return $this->bbapp;

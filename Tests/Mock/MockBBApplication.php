@@ -67,10 +67,10 @@ class MockBBApplication extends BBApplication
      * @param boolean $debug
      * @param boolean $overwrite_config
      */
-    public function __construct($context = null, $debug = false, $overwrite_config = false, $mockConfig = null)
+    public function __construct($context = null, $mockConfig = null)
     {
         $this->_mockInitStructure($mockConfig);
-        parent::__construct($context, $debug, $overwrite_config);
+        parent::__construct($context, 'test');
     }
 
     /**
