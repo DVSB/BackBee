@@ -169,7 +169,7 @@ class ClassContentRepository extends EntityRepository
             }
             $where[] = str_replace('\\', '\\\\', 'c.classname IN ("' . implode('","', $classnameArr) . '")');
         }
-
+       
         if (true === array_key_exists('criteria', $selector)) {
             $criteria = (array) $selector['criteria'];
             foreach ($criteria as $field => $crit) {

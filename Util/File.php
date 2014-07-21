@@ -293,7 +293,7 @@ class File
 
         $files = array();
         $parse_url = parse_url($basedir);
-        if (false !== $parse_url && isset($parse_url['scheme'])) {
+       /* if (false !== $parse_url && isset($parse_url['scheme'])) {*/
             $directory = new \RecursiveDirectoryIterator($basedir);
             $iterator = new \RecursiveIteratorIterator($directory);
             $regex = new \RegexIterator($iterator, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::GET_MATCH);
@@ -301,7 +301,7 @@ class File
             foreach ($regex as $file) {
                 $files[] = $file[0];
             }
-        } else {
+       /* } else {
             $pattern = '';
             foreach (str_split($extension) as $letter) {
                 $pattern .= '[' . strtolower($letter) . strtoupper($letter) . ']';
@@ -309,7 +309,7 @@ class File
 
             $pattern = $basedir . DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.' . $pattern;
             $files = glob($pattern, GLOB_BRACE);
-        }
+        }*/
 
         return $files;
     }
