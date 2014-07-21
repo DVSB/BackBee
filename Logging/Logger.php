@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -51,9 +51,9 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
     private $_level;
     private $_priorities;
     private $_priorities_name;
-    private $_errorHandling = FALSE;
+    private $_errorHandling = false;
     private $_errorHandlers;
-    private $_exceptionHandling = FALSE;
+    private $_exceptionHandling = false;
     private $_exceptionHandlers;
     private $_buffer;
     private $_start;
@@ -72,23 +72,26 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         $this->log($priority, $args[0], 0 < count($args) ? $args[1] : array());
     }
 
-    public function __construct(BBApplication $application = NULL, IAppender $appender = NULL)
+    public function __construct(BBApplication $application = null, IAppender $appender = null)
     {
-        if (NULL !== $application)
+        if (null !== $application) {
             $this->_application = $application;
-        if (NULL !== $appender)
-            $this->addAppender($appender);
+        }
 
-        $this->_uniqid = uniqid('', TRUE);
+        if (null !== $appender) {
+            $this->addAppender($appender);
+        }
+
+        $this->_uniqid = uniqid('', true);
 
         $r = new \ReflectionClass($this);
         $this->_priorities_name = $r->getConstants();
         $this->_priorities = array_flip($this->_priorities_name);
 
         $this->setLevel(self::ERROR);
-        if (NULL !== $this->_application) {
-            if (NULL !== $loggingConfig = $this->_application->getConfig()->getLoggingConfig()) {
-               
+
+        if (null !== $this->_application) {
+            if (null !== $loggingConfig = $this->_application->getConfig()->getLoggingConfig()) {
                 if ($this->_application->isDebugMode()) {
                     error_reporting(E_ALL);
                     $this->setLevel(Logger::DEBUG);
@@ -116,7 +119,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         }
 
         $this->_setErrorHandler()
-                ->_setExceptionHandler();
+             ->_setExceptionHandler();
     }
 
     public function __destruct()
@@ -130,11 +133,11 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     private function _setErrorHandler()
     {
-        if (TRUE === $this->_errorHandling)
+        if (true === $this->_errorHandling)
             return;
 
         $this->_errorHandlers = set_error_handler(array($this, 'errorHandler'));
-        $this->_errorHandling = TRUE;
+        $this->_errorHandling = true;
 
         return $this;
     }
@@ -145,7 +148,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             return;
 
         $this->_exceptionHandlers = set_exception_handler(array($this, 'exceptionHandler'));
-        $this->_exceptionHandling = TRUE;
+        $this->_exceptionHandling = true;
 
         return $this;
     }
@@ -187,7 +190,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $this->log($priority, sprintf('%s:%d: %s', $errfile, $errline, $errstr));
         }
 
-        if (NULL !== $this->_errorHandlers) {
+        if (null !== $this->_errorHandlers) {
             return call_user_func($this->_errorHandlers, $errno, $errstr, $errfile, $errline, $errcontext);
         }
 
@@ -208,7 +211,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $message = $exception->getMessage();
             $error_trace = '';
 
-            if (NULL !== $this->_application) {
+            if (null !== $this->_application) {
 
                 $error_trace .= ' in ' . $exception->getFile() . ' on line ' . $exception->getLine() . '</th></tr>';
                 foreach ($exception->getTrace() as $trace) {
@@ -216,7 +219,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 }
 
                 $previous = $exception->getPrevious();
-                while (NULL !== $previous) {
+                while (null !== $previous) {
                     $this->error(sprintf('Cause By : Error occurred in file `%s` at line %d with message: %s', $previous->getFile(), $previous->getLine(), $previous->getMessage()));
 
                     $error_trace .= '<tr><th colspan="5">Caused by: ' . $previous->getMessage() .
@@ -261,7 +264,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 }
             }
 
-            if (NULL !== $this->_application && $this->_application->isDebugMode()) {
+            if (null !== $this->_application && $this->_application->isDebugMode()) {
                 echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')' . PHP_EOL;
                 foreach ($exception->getTrace() as $trace) {
                     echo 'Trace: line ' .
@@ -273,7 +276,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 }
 
                 $previous = $exception->getPrevious();
-                while (NULL !== $previous) {
+                while (null !== $previous) {
                     echo PHP_EOL . 'Caused by: ' . $previous->getMessage() . ' (errNo: ' . $previous->getCode() . ')' . PHP_EOL;
                     foreach ($previous->getTrace() as $trace) {
                         echo 'Trace: line ' .
@@ -288,7 +291,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             }
         }
 
-//        if (NULL !== $this->_exceptionHandlers) {
+//        if (null !== $this->_exceptionHandlers) {
 //            return call_user_func($this->_exceptionHandlers, $exception);
 //        }
 
@@ -329,7 +332,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             return;
 
         foreach ($this->_appenders as $appender) {
-            $appender->write(array('d' => date('Y/m/d H:i:s'),
+            $appender->write(array('d' => @date('Y/m/d H:i:s'),
                 'p' => $this->_priorities[$level],
                 'm' => $message,
                 'u' => $this->_uniqid));
@@ -476,7 +479,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * Get priority name by its code
-     * 
+     *
      * @param int $code
      * @return string|null
      */

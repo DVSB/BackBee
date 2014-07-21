@@ -137,13 +137,13 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $BBApp->expects($this->any())
               ->method('getEventDispatcher')
               ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
-        
-        
+
+
         $BBApp->expects($this->any())
               ->method('getContainer')
               ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
-        
-        
+
+
         $BBApp->expects($this->any())
               ->method('getBaseDir')
               ->will($this->returnValue(vfsStream::url('')));
@@ -153,19 +153,19 @@ class TestCase extends \PHPUnit_Framework_TestCase
 //                ->setMethods(array())
 //                ->getMock();
         $controller = new \BackBuilder\FrontController\FrontController($BBApp);
-        
+
         $BBApp->expects($this->any())
               ->method('getController')
               ->will($this->returnValue($controller));
-        
+
         return $BBApp;
     }
-    
-    
+
+
     public function initDb($bbapp)
     {
         $em = $bbapp->getContainer()->get('em');
-        
+
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
@@ -182,17 +182,17 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $bbapp->getBBDir() . '/Util/Sequence/Entity',
             $bbapp->getBBDir() . '/Workflow',
         ));
-        
+
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         $schema->updateSchema($metadata, true);
     }
-    
+
     public function dropDb($bbapp)
     {
         $em = $bbapp->getContainer()->get('em');
-        
+
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
@@ -208,10 +208,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $bbapp->getBBDir() . '/Util/Sequence/Entity',
             $bbapp->getBBDir() . '/Workflow',
         ));
-        
+
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         $schema->dropDatabase();
     }
-    
+
 }

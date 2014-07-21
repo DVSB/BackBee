@@ -1,0 +1,4 @@
+debug: false
+container:
+    dump_directory: vfs://container_dump_directory/container
+    autogenerate: true

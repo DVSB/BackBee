@@ -1,0 +1,25 @@
+parameters:
+    application.test: "this is a test"
+    array.test:
+        - [foo: "bar"]
+    france.brazil.timestamp: 900270000
+    france.brazil.formated: "1998/07/12"
+    dateformat: "Y/m/d"
+    timezone: "Europe/Paris"
+
+services:
+    france.brazil.date:
+        class: \DateTime
+        arguments: ["france.brazil.timestamp%", "@timezone"]
+        tags:
+            - { name: "date" }
+        calls:
+            - [setTimestamp, ["%france.brazil.timestamp%"]]
+    synthetic.service:
+        synthetic: true
+    alias.test:
+        alias: france.brazil.date
+    timezone:
+        class: \DateTimeZone
+        arguments: ["%timezone%"]
+
