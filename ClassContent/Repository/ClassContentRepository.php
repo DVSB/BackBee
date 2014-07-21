@@ -31,10 +31,10 @@ use Doctrine\ORM\Tools\Pagination\Paginator,
     Doctrine\ORM\Query\ResultSetMapping,
     Doctrine\ORM\Query\ResultSetMappingBuilder,
     Doctrine\ORM\EntityRepository;
-
 use Doctrine\ORM\Query\SqlWalker;
 
-class MysqlPaginationWalker extends SqlWalker {
+class MysqlPaginationWalker extends SqlWalker
+{
 
     /**
      * Walks down a SelectClause AST node, thereby generating the appropriate SQL.
@@ -56,6 +56,7 @@ class MysqlPaginationWalker extends SqlWalker {
 
         return $sql;
     }
+
 }
 
 /**
@@ -169,7 +170,7 @@ class ClassContentRepository extends EntityRepository
             }
             $where[] = str_replace('\\', '\\\\', 'c.classname IN ("' . implode('","', $classnameArr) . '")');
         }
-
+       
         if (true === array_key_exists('criteria', $selector)) {
             $criteria = (array) $selector['criteria'];
             foreach ($criteria as $field => $crit) {
@@ -239,7 +240,7 @@ class ClassContentRepository extends EntityRepository
                         }
                     }
 
-                    if(count($pageSelection) != 0){
+                    if (count($pageSelection) != 0) {
                         $where[] = '(' . implode(' OR ', $pageSelection) . ')';
                     }
 
@@ -304,7 +305,7 @@ class ClassContentRepository extends EntityRepository
                 ->select()
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
-
+        
         if (true === $has_page_joined && true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
             $q->join('c._mainnode', 'p')
                     ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
@@ -319,15 +320,15 @@ class ClassContentRepository extends EntityRepository
 
         if (true === $multipage) {
 
-           $num_results = $this->getEntityManager()->getConnection()->executeQuery('SELECT FOUND_ROWS()')->fetch(\PDO::FETCH_COLUMN);
+            $num_results = $this->getEntityManager()->getConnection()->executeQuery('SELECT FOUND_ROWS()')->fetch(\PDO::FETCH_COLUMN);
             $result = $q->getQuery()->getResult();
 
             $q->setFirstResult($offset)
-                ->setMaxResults($limit);
+                    ->setMaxResults($limit);
 
             $paginator = new \BackBuilder\Util\Doctrine\SettablePaginator($q);
             $paginator->setCount($num_results)
-                ->setResult($result);
+                    ->setResult($result);
 
             return $paginator;
         }
@@ -874,7 +875,7 @@ class ClassContentRepository extends EntityRepository
                         $this->deleteContent($element, false);
                         $this->_em->remove($element);
                     } else {
-                        $content->unsetSubContent($element);//persist?
+                        $content->unsetSubContent($element); //persist?
                     }
                 }
             }
@@ -903,11 +904,12 @@ class ClassContentRepository extends EntityRepository
             return array();
         }
 
-        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("'.implode('","', $content_uids).'")';
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("' . implode('","', $content_uids) . '")';
 
         return $this->getEntityManager()
-                ->getConnection()
-                ->executeQuery($sql)
-                ->fetchAll(\PDO::FETCH_COLUMN);
+                        ->getConnection()
+                        ->executeQuery($sql)
+                        ->fetchAll(\PDO::FETCH_COLUMN);
     }
+
 }

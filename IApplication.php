@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,8 +20,6 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder;
-
 use BackBuilder\Site\Site;
 use BackBuilder\Console\Console;
 
@@ -30,11 +29,10 @@ use BackBuilder\Console\Console;
  * @category    BackBuilder
  * @package     BackBuilder
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 interface IApplication
 {
-
     /**
      * @param \BackBuilder\Site\Site $site
      */
@@ -44,7 +42,53 @@ interface IApplication
      * Stop the current BBApplication instance
      */
     public function stop();
-    
+
+    /**
+     * Returns the starting context
+     *
+     * @return string
+     */
+    public function getContext();
+
+    /**
+     * Returns the starting context
+     *
+     * @return string
+     */
+    public function getEnvironment();
+
+    /**
+     * @return string
+     */
+    public function getBBDir();
+
+    /**
+     * @return string
+     */
+    public function getBaseDir();
+
+    /**
+     * @return string
+     */
+    public function getBaseRepository();
+
+    /**
+     * @return string
+     */
+    public function getRepository();
+
+    /**
+     * @return string
+     */
+    public function getConfigDir();
+
+    /**
+     * Returns path to Data directory
+     *
+     * @return string absolute path to Data directory
+     */
+    public function getDataDir();
+
     /**
      * @return BackBuilder\FrontController\FrontController
      */
@@ -60,33 +104,23 @@ interface IApplication
      */
     public function getAutoloader();
 
-    public function getBBDir();
-
     /**
-     * Returns path to Data directory
-     * @return string absolute path to Data directory
-     */
-    public function getDataDir();
-
-    /**
-     * @return string
-     */
-    public function getBaseDir();
-    
-
-    /**
-     * Returns the starting context
-     * @return string|NULL
-     */
-    public function getContext();
-    
-    /**
-     * @return ContainerBuilder
+     * @return BackBuilder\DependencyInjection\ContainerInterface
      */
     public function getContainer();
 
     /**
-     * 
+     * @return boolean
+     */
+    public function isOverridedConfig();
+
+    /**
+     * @return boolean
+     */
+    public function isDebugMode();
+
+    /**
+     *
      */
     public function registerCommands(Console $console);
 }

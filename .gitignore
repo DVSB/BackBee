@@ -1,3 +1,8 @@
 .gitmodules
 TestUnit/
 .DS_Store
+/nbproject/private/
+/vendor
+/nbproject
+/composer.lock
+/phpunit.phar

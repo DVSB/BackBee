@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -183,6 +183,7 @@ abstract class ARenderer implements IRenderer
         if (true === file_exists($dir) && true === is_dir($dir)) {
             $this->getApplication()->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $dir);
         }
+
         return $this;
     }
 
@@ -266,11 +267,8 @@ abstract class ARenderer implements IRenderer
      */
     public function __construct(BBApplication $application = null, $config = null)
     {
-        $repdir = '';
-
         if (null !== $application) {
             $this->_application = $application;
-            $repdir = $this->_application->getRepository();
 
             $rendererConfig = $this->_application->getConfig()->getRendererConfig();
             if (is_array($rendererConfig) && isset($rendererConfig['path'])) {
@@ -785,7 +783,7 @@ abstract class ARenderer implements IRenderer
     public function setRender($render)
     {
         $this->__render = $render;
-        
+
         return $this;
     }
 
@@ -813,9 +811,9 @@ abstract class ARenderer implements IRenderer
         File::resolveFilepath($layoutfile, null, array('include_path' => $this->_layoutdir));
 
         if (false === file_exists($layoutfile)) {
-            File::resolveFilepath($layoutfile, null, array('base_dir' => $this->_layoutdir[1]));            
+            File::resolveFilepath($layoutfile, null, array('base_dir' => $this->_layoutdir[1]));
         }
-        
+
         if (false === file_exists($layoutfile) && false === touch($layoutfile)) {
             throw new RendererException(sprintf('Unable to create file %s.', $layoutfile), RendererException::LAYOUT_ERROR);
         }
@@ -911,7 +909,7 @@ abstract class ARenderer implements IRenderer
     /**
      * Helper: generate javascript's tag with $href and add it to head tag children
      * Note: guaranteed that two or more scripts with same href will be included only once
-     * 
+     *
      * @param string $href href of the js file to add
      * @return BackBuilder\Renderer\Adapter\phtml
      */
@@ -924,8 +922,8 @@ abstract class ARenderer implements IRenderer
      * Helper: generate javascript's tag with $href and add it to body tag children
      * Note: if header and footer scripts contains same href string, the script will be
      * only add in the head tag
-     * 
-     * @param string $href 
+     *
+     * @param string $href
      * @return BackBuilder\Renderer\Adapter\phtml
      */
     public function addFooterScript($href)
@@ -935,8 +933,8 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Generic add script used by self::addHeaderScript() and self::addFooterScript()
-     * @param string $type 
-     * @param string $href 
+     * @param string $type
+     * @param string $href
      */
     private function addScript($type, $href)
     {
@@ -995,7 +993,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Returns helper if it exists or null
-     * @param  [type] $method 
+     * @param  [type] $method
      * @return AHelper|null
      */
     public function getHelper($method)
@@ -1010,9 +1008,9 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Create a new helper if class exists
-     * 
-     * @param  string $method 
-     * @param  array  $argv   
+     *
+     * @param  string $method
+     * @param  array  $argv
      * @return AHelper|null
      */
     public function createHelper($method, $argv)

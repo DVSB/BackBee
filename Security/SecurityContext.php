@@ -72,13 +72,14 @@ class SecurityContext extends sfSecurityContext
     private $_aclprovider;
     private $_logout_listener;
     private $_config;
-    
+    private $_logout_listener_added = false;
+
     /**
      * An encoder factory
      * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
      */
     private $_encoderfactory;
-    
+
     public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager = NULL, AccessDecisionManagerInterface $accessDecisionManager = NULL)
     {
         $this->_application = $application;
@@ -150,7 +151,7 @@ class SecurityContext extends sfSecurityContext
         }
         return $this;
     }
-    
+
     /**
      * Returns the encoder factory or NULL if not defined
      * @return \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface|NULL
@@ -159,7 +160,7 @@ class SecurityContext extends sfSecurityContext
     {
         return $this->_encoderfactory;
     }
-    
+
     public function createFirewall($name, $config)
     {
         $config['firewall_name'] = $name;
@@ -189,13 +190,15 @@ class SecurityContext extends sfSecurityContext
         if (array_key_exists('provider', $config) && array_key_exists($config['provider'], $this->_userproviders)) {
             $defaultProvider = $this->_userproviders[$config['provider']];
         }
-//        var_dump($this->_config);die;
+
         if (array_key_exists('contexts', $this->_config)) {
             $listeners = $this->loadContexts($config);
         }
 
-        if (null !== $this->_logout_listener) {
-            $this->_dispatcher->addListener('frontcontroller.request.logout', array($this->_logout_listener, 'handle'));
+        if (null !== $this->_logout_listener && false === $this->_logout_listener_added) {
+            $this->_application->getContainer()->set('security.logout_listener', $this->_logout_listener);
+            $this->_dispatcher->addListener('frontcontroller.request.logout', array('@security.logout_listener', 'handle'));
+            $this->_logout_listener_added = true;
         }
 
         if (0 == count($listeners)) {
@@ -354,7 +357,8 @@ class SecurityContext extends sfSecurityContext
     public function _registerFirewall()
     {
         $this->_firewall = new Firewall($this->_firewallmap, $this->_dispatcher);
-        $this->_dispatcher->addListener('frontcontroller.request', array($this->_firewall, 'onKernelRequest'));
+        $this->_application->getContainer()->set('security.firewall', $this->_firewall);
+        $this->_dispatcher->addListener('frontcontroller.request', array('@security.firewall', 'onKernelRequest'));
     }
 
     /**

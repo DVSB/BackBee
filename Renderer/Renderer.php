@@ -1,16 +1,19 @@
 <?php
-
 namespace BackBuilder\Renderer;
 
-use BackBuilder\BBApplication,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\Renderer\ARenderer,
-    BackBuilder\Renderer\Exception\RendererException,
-    BackBuilder\Renderer\IRenderable,
-    BackBuilder\Renderer\IRendererAdapter,
-    BackBuilder\Site\Layout,
-    BackBuilder\Util\String;
+use BackBuilder\BBApplication;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Renderer\ARenderer;
+use BackBuilder\Renderer\Exception\RendererException;
+use BackBuilder\Renderer\IRenderable;
+use BackBuilder\Renderer\IRendererAdapter;
+use BackBuilder\Site\Layout;
+use BackBuilder\Util\String;
+
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -21,7 +24,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class Renderer extends ARenderer
+class Renderer extends ARenderer implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
 
     /**
@@ -49,25 +52,33 @@ class Renderer extends ARenderer
     private $templateFile;
 
     /**
-     * Constructor
-     * 
-     * @param BBApplication  $bbapp                   
-     * @param array|null  	 $config                  
-     * @param boolean 		 $autoloadRendererApdater 
+     * define if renderer has been restored by container or not
+     * @var boolean
      */
-    public function __construct(BBApplication $bbapp = null, $config = null, $autoloadRendererApdater = true)
+    private $_is_restored;
+
+    /**
+     * Constructor
+     *
+     * @param BBApplication  $application
+     * @param array|null  	 $config
+     * @param boolean 		 $autoloadRendererApdater
+     */
+    public function __construct(BBApplication $application = null, $config = null, $autoloadRendererApdater = true)
     {
-        parent::__construct($bbapp, $config);
+        parent::__construct($application, $config);
         $this->rendererAdapters = new ParameterBag();
         $this->manageableExt = new ParameterBag();
 
-        if (true === $autoloadRendererApdater) {
+        if (null !== $application && true === $autoloadRendererApdater) {
             $rendererConfig = $this->getApplication()->getConfig()->getRendererConfig();
             $adapters = (array) $rendererConfig['adapter'];
             foreach ($adapters as $adapter) {
                 $this->addRendererAdapter(new $adapter($this));
             }
         }
+
+        $this->_is_restored = false;
     }
 
      /**
@@ -101,8 +112,8 @@ class Renderer extends ARenderer
     /**
      * Register a renderer adapter ($rendererAdapter); this method also set
      * current $rendererAdapter as default adapter if it is not set
-     * 
-     * @param IRendererAdapter $rendererAdapter 
+     *
+     * @param IRendererAdapter $rendererAdapter
      */
     public function addRendererAdapter(IRendererAdapter $rendererAdapter)
     {
@@ -119,8 +130,8 @@ class Renderer extends ARenderer
 
     /**
      * Compute a key for renderer adapter ($rendererAdapter)
-     * 
-     * @param  IRendererAdapter $rendererAdapter 
+     *
+     * @param  IRendererAdapter $rendererAdapter
      * @return string
      */
     private function getRendererAdapterKey(IRendererAdapter $rendererAdapter)
@@ -132,8 +143,8 @@ class Renderer extends ARenderer
 
     /**
      * Extract managed extensions from rendererAdapter and store it
-     * 
-     * @param IRendererAdapter $rendererAdapter 
+     *
+     * @param IRendererAdapter $rendererAdapter
      */
     private function addManagedExtensions(IRendererAdapter $rendererAdapter)
     {
@@ -152,7 +163,7 @@ class Renderer extends ARenderer
     /**
      * Returns an adapter containing in $adapeters; it will returns in prior
      * the defaultAdpater if it is in $adapters or the first adapter found
-     * 
+     *
      * @param  array  $adapters contains object of type IRendererAdapter
      * @return IRendererAdapter
      */
@@ -170,7 +181,7 @@ class Renderer extends ARenderer
 
     /**
      * Returns the right adapter to use according to the filename extension
-     * 
+     *
      * @return IRendererAdapter
      */
     private function determineWhichAdapterToUse($filename = null)
@@ -194,9 +205,9 @@ class Renderer extends ARenderer
 
         return $this->rendererAdapters->get($adapter);
     }
-    
+
     /**
-     * 
+     *
      * @param string $ext
      * @return IRendererAdapter
      */
@@ -208,8 +219,8 @@ class Renderer extends ARenderer
     /**
      * Set the adapter referenced by $adapterKey as defaultAdapter to use in conflict
      * case; the default adapter is also considered by self::getRightAdapter()
-     * 
-     * @param  string $adapterKey 
+     *
+     * @param  string $adapterKey
      * @return boolean
      */
     public function defaultAdapter($adapterKey)
@@ -230,7 +241,7 @@ class Renderer extends ARenderer
     public function getDefaultAdapterExt()
     {
         $managedExt = $this->rendererAdapters->get($this->defaultAdapter)->getManagedFileExtensions();
-        
+
         return array_shift($managedExt);
     }
 
@@ -264,13 +275,13 @@ class Renderer extends ARenderer
                 ->setMode($mode, $ignoreModeIfNotSet)
                 ->_triggerEvent('prerender');
 
-        if (
-            null !== $renderer->getClassContainer() && 
-            ($renderer->getClassContainer() instanceof AClassContent) && 
-            null === $renderer->getCurrentElement()
-        ) {
-            //$renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
-        }
+        // if (
+        //     null !== $renderer->getClassContainer() &&
+        //     ($renderer->getClassContainer() instanceof AClassContent) &&
+        //     null === $renderer->getCurrentElement()
+        // ) {
+        //     $renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
+        // }
 
         if (null === $renderer->__render) {
             // Rendering a page with layout
@@ -314,7 +325,7 @@ class Renderer extends ARenderer
                             $value = $subcontent;
                         }
                     }
-                    
+
                     if (true === $element->equals($value)) {
                         $this->__currentelement = $key;
                         $this->__object = $parent;
@@ -391,8 +402,8 @@ class Renderer extends ARenderer
 
     /**
      * Check if $filename exists
-     * @param  string  $filename 
-     * @return boolean           
+     * @param  string  $filename
+     * @return boolean
      */
     public function isTemplateFileExists($filename)
     {
@@ -401,7 +412,7 @@ class Renderer extends ARenderer
 
     /**
      * Render a page object
-     * 
+     *
      * @param string $layoutfile A force layout script to be rendered
      * @return string The rendered output
      * @throws RendererException
@@ -558,9 +569,9 @@ class Renderer extends ARenderer
      * Try to compute and guess a valid filename for $object:
      * 		- on success return string which is the right filename with its extension
      * 		- on fail return false
-     * 		
-     * @param  IRenderable $object 
-     * @param  [type]      $mode   
+     *
+     * @param  IRenderable $object
+     * @param  [type]      $mode
      * @return string|boolean string if successfully found a valid file name, else false
      */
     private function getTemplateFile(IRenderable $object, $mode = null)
@@ -590,10 +601,10 @@ class Renderer extends ARenderer
     /**
      * Use the right adapter depending on $filename extension to define if
      * $filename is a valid template filename or not
-     * 
-     * @param  string  $filename 
+     *
+     * @param  string  $filename
      * @param  boolean $isLayout if you want to check $filename in layout dir, default: false
-     * @return boolean           
+     * @return boolean
      */
     private function isValidTemplateFile($filename, $isLayout = false)
     {
@@ -608,8 +619,8 @@ class Renderer extends ARenderer
     }
 
     /**
-     * @param  boolean $isPartial 
-     * @param  boolean $isLayout  
+     * @param  boolean $isPartial
+     * @param  boolean $isLayout
      * @return string
      */
     private function renderTemplate($isPartial = false, $isLayout = false)
@@ -633,7 +644,7 @@ class Renderer extends ARenderer
 
     /**
      * Returns an array of template files according the provided pattern
-     * 
+     *
      * @param string $pattern
      * @return array
      */
@@ -649,7 +660,7 @@ class Renderer extends ARenderer
 
     /**
      * Returns the list of available render mode for the provided object
-     * 
+     *
      * @param \BackBuilder\Renderer\IRenderable $object
      * @return array
      */
@@ -681,7 +692,7 @@ class Renderer extends ARenderer
 
     /**
      * Return the file path to current layout, try to create it if not exists
-     * 
+     *
      * @param Layout $layout
      * @return string the file path
      * @throws RendererException
@@ -714,9 +725,9 @@ class Renderer extends ARenderer
     /**
      * Compute route which matched with route_name and replace every token by its values specified in route_params;
      * You can also give base url (by default current site base url will be used)
-     * @param  string      $route_name   
-     * @param  array|null  $route_params 
-     * @param  string|null $base_url     
+     * @param  string      $route_name
+     * @param  array|null  $route_params
+     * @param  string|null $base_url
      * @param  boolean     $add_ext
      * @param  \BackBuilder\Site\Site
      * @return string
@@ -724,5 +735,61 @@ class Renderer extends ARenderer
     public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null)
     {
         return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext, $site);
+    }
+
+    /**
+     * Returns the namespace of the class proxy to use or null if no proxy is required
+     *
+     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     */
+    public function getClassProxy()
+    {
+        return null;
+    }
+
+    /**
+     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
+     * with the dump array produced by this method
+     *
+     * @return array contains every datas required by this service to be restored at the same state
+     */
+    public function dump(array $options = array())
+    {
+        return array(
+            'template_directories' => $this->_scriptdir,
+            'layout_directories'   => $this->_layoutdir,
+            'default_adapter'      => $this->defaultAdapter
+        );
+    }
+
+    /**
+     * Restore current service to the dump's state
+     *
+     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                     restore current service
+     */
+    public function restore(ContainerInterface $container, array $dump)
+    {
+        $this->_application = $container->get('bbapp');
+        $this->defaultAdapter = $dump['default_adapter'];
+        $this->_scriptdir = $dump['template_directories'];
+        $this->_layoutdir = $dump['layout_directories'];
+
+        $renderer_config = $container->get('config')->getRendererConfig();
+        $adapters = (array) $renderer_config['adapter'];
+        foreach ($adapters as $adapter) {
+            $this->addRendererAdapter(new $adapter($this));
+        }
+
+        $this->_is_restored = true;
+    }
+
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->_is_restored;
     }
 }

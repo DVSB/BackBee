@@ -1,12 +1,31 @@
 <?php
-
 namespace BackBuilder\DependencyInjection;
 
-use BackBuilder\Event\Event;
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-use Symfony\Component\DependencyInjection\ContainerBuilder as sfContainerBuilder,
-    Symfony\Component\DependencyInjection\ContainerInterface,
-    Symfony\Component\DependencyInjection\Exception\RuntimeException;
+use BackBuilder\Event\Event;
+use BackBuilder\DependencyInjection\ContainerInterface;
+
+use Symfony\Component\DependencyInjection\ContainerBuilder as sfContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface as sfContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
 /**
  * Extended Symfony Dependency injection component
@@ -16,7 +35,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder as sfContainerBuilder
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class Container extends sfContainerBuilder
+class Container extends sfContainerBuilder implements ContainerInterface
 {
     /**
      * Change current method default behavior: if we try to get a synthetic service it will return
@@ -24,11 +43,11 @@ class Container extends sfContainerBuilder
      *
      * @see Symfony\Component\DependencyInjection\ContainerBuilder::get()
      */
-    public function get($id, $invalidBehavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
+    public function get($id, $invalid_behavior = sfContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
     {
         $service = null;
         try {
-            $service = parent::get($id, $invalidBehavior);
+            $service = parent::get($id, $invalid_behavior);
         } catch (RuntimeException $e) {
             if (false === $this->hasDefinition($id)) {
                 throw $e;
@@ -37,13 +56,6 @@ class Container extends sfContainerBuilder
             if (false === $this->getDefinition($id)->isSynthetic()) {
                 throw $e;
             }
-        } catch (InvalidArgumentException $e) {
-            $method = 'get' . ucfirst($id) . 'Service';
-            if (true === method_exists($this, $method)) {
-                return $this->$method();
-            }
-
-            throw $e;
         }
 
         if (true === in_array('event.dispatcher', array_keys($this->services))) {

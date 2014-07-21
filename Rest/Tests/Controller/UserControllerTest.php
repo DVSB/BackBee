@@ -347,7 +347,10 @@ class UserControllerTest extends TestCase
 
     protected function tearDown()
     {
-        $this->dropDb($this->bbapp);
-        $this->bbapp->stop();
+        if($this->bbapp) {
+            $this->dropDb($this->bbapp);
+            $this->bbapp->stop();
+        }
+        
     }
 }

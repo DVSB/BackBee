@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\Config;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,10 +20,11 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Config;
-
 use BackBuilder\Cache\ACache;
+use BackBuilder\Config\Exception\InvalidConfigException;
 use BackBuilder\DependencyInjection\Container;
+use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -35,10 +37,11 @@ use Symfony\Component\Yaml\Yaml;
  * @category    BackBuilder
  * @package     BackBuilder\Config
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
-class Config
+class Config implements DumpableServiceInterface
 {
+    const CONFIG_PROXY_CLASSNAME = '\BackBuilder\Config\ConfigProxy';
 
     /**
      * Default config file to look for
@@ -62,40 +65,44 @@ class Config
      * The base directory to looking for configuration files
      * @var string
      */
-    private $_basedir;
+    protected $_basedir;
 
     /**
      * The extracted configuration parameters from the config file
      * @var array
      */
-    private $_raw_parameters;
+    protected $_raw_parameters;
 
     /**
      * The already compiled parameters
      * @var array
      */
-    private $_parameters;
+    protected $_parameters;
 
     /**
      * The optional cache system
      * @var \BackBuilder\Cache\ACache
      */
-    private $_cache;
+    protected $_cache;
 
     /**
      * The service container
      * @var \BackBuilder\DependencyInjection\Container
      */
-    private $_container;
+    protected $_container;
 
-    private $_environment = 'production';
+    /**
+     * Application's environment
+     * @var string
+     */
+    protected $_environment = \BackBuilder\BBApplication::DEFAULT_ENVIRONMENT;
 
     /**
      * Is debug mode enabled
      *
      * @var boolean
      */
-    private $_debug = false;
+    protected $_debug = false;
 
     /**
      * Debug info
@@ -105,6 +112,13 @@ class Config
      * @var array
      */
     protected $_debugData = array();
+
+    /**
+     * list of yaml filename we don't want to parse and load
+     *
+     * @var array
+     */
+    protected $_yml_names_to_ignore;
 
     /**
      * Magic function to get configuration section
@@ -140,12 +154,15 @@ class Config
      * @param \BackBuilder\Cache\ACache $cache Optional cache system
      * @param \BackBuilder\DependencyInjection\Container $container
      */
-    public function __construct($basedir, ACache $cache = null, Container $container = null, $debug = false)
+    public function __construct($basedir, ACache $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
     {
         $this->_basedir = $basedir;
         $this->_raw_parameters = array();
         $this->_cache = $cache;
         $this->_debug = $debug;
+        $this->_yml_names_to_ignore = $yml_to_ignore;
+        $this->_is_restored = false;
+
         $this->setContainer($container)->extend();
     }
 
@@ -160,6 +177,14 @@ class Config
     {
         $this->_container = $container;
         $this->_parameters = array();
+
+        return $this;
+    }
+
+    public function setCache(ACache $cache)
+    {
+        $this->_cache = $cache;
+
         return $this;
     }
 
@@ -173,6 +198,16 @@ class Config
     public function getDebugData()
     {
         return $this->_debugData;
+    }
+
+    /**
+     * Add more yaml filename to ignore when we will try to find every yaml files of a directory
+     *
+     * @param string|array $filename yaml filename(s) to ignore
+     */
+    public function addYamlFilenameToIgnore($filename)
+    {
+        $this->_yml_names_to_ignore = array_unique(array_merge($this->_yml_names_to_ignore, (array) $filename));
     }
 
     /**
@@ -278,7 +313,14 @@ class Config
             array_unshift($yml_files, $default_file);
         }
 
-        return $yml_files;
+        foreach ($yml_files as &$file) {
+            $name = basename($file);
+            if (true === in_array(substr($name, 0, strpos($name, '.')), $this->_yml_names_to_ignore)) {
+                $file = null;
+            }
+        }
+
+        return array_filter($yml_files);
     }
 
     /**
@@ -304,7 +346,7 @@ class Config
             $yamlDatas = Yaml::parse($filename);
 
             if (is_array($yamlDatas)) {
-                if(true === $this->_debug) {
+                if (true === $this->_debug) {
                     $this->_debugData[$filename] = $yamlDatas;
                 }
 
@@ -312,6 +354,9 @@ class Config
                     self::CONFIG_FILE . '.' . $this->_environment . '.' . self::EXTENTION === basename($filename)) {
 
                     foreach ($yamlDatas as $component => $config) {
+                        if (false === is_array($config)) {
+                            var_dump($config); die;
+                        }
                         $this->setSection($component, $config, $overwrite);
                     }
                 } else {
@@ -319,7 +364,7 @@ class Config
                 }
             }
         } catch (ParseException $e) {
-            throw new Exception\InvalidConfigException($e->getMessage(), null, $e, $e->getParsedFile(), $e->getParsedLine());
+            throw new InvalidConfigException($e->getMessage(), null, $e, $e->getParsedFile(), $e->getParsedLine());
         }
     }
 
@@ -481,6 +526,7 @@ class Config
         if (null === $basedir) {
             $basedir = $this->_basedir;
         }
+
         $basedir = \BackBuilder\Util\File::realpath($basedir);
 
         if (false === $this->_loadFromCache($basedir)) {
@@ -488,10 +534,11 @@ class Config
             $this->_saveToCache($basedir);
         }
 
-        if (!empty($this->_environment) &&
-            false === strpos($this->_environment, $basedir) &&
-            file_exists($basedir . DIRECTORY_SEPARATOR . $this->_environment)) {
-
+        if (
+            false === empty($this->_environment)
+            && false === strpos($this->_environment, $basedir)
+            && true === file_exists($basedir . DIRECTORY_SEPARATOR . $this->_environment)
+        ) {
             $this->extend($basedir . DIRECTORY_SEPARATOR . $this->_environment, $overwrite);
         }
 
@@ -505,5 +552,34 @@ class Config
     public function getBaseDir()
     {
         return $this->_basedir;
+    }
+
+    /**
+     * Returns the namespace of the class proxy to use or null if no proxy is required
+     *
+     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     */
+    public function getClassProxy()
+    {
+        return self::CONFIG_PROXY_CLASSNAME;
+    }
+
+    /**
+     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
+     * with the dump array produced by this method
+     *
+     * @return array contains every datas required by this service to be restored at the same state
+     */
+    public function dump(array $options = array())
+    {
+        return array(
+            'basedir'             => $this->_basedir,
+            'raw_parameters'      => $this->_raw_parameters,
+            'environment'         => $this->_environment,
+            'debug'               => $this->_debug,
+            'yml_names_to_ignore' => $this->_yml_names_to_ignore,
+            'has_cache'           => null !== $this->_cache,
+            'has_container'       => null !== $this->_container
+        );
     }
 }
