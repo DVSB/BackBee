@@ -114,7 +114,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        vfsStream::setup('no_rights_base_directory', 0000, $virtual_structure);
+        vfsStream::setup('no_rights_base_directory', 0444, $virtual_structure);
 
         $application = $this->generateManualBBApplication(vfsStream::url('no_rights_base_directory'));
         $application->setContainer((new ContainerBuilder($application))->getContainer());
@@ -136,60 +136,60 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    // public function testOnApplicationInitRaisesContainerDirectoryNotWritableException()
-    // {
-    //     $basic_services_yml = array(
-    //         'parameters' => array(
-    //             'bbapp.logger.class'       => 'BackBuilder\Logging\Logger',
-    //             'bbapp.logger_debug.class' => 'BackBuilder\Logging\DebugStackLogger'
-    //         )
-    //     );
+    public function testOnApplicationInitRaisesContainerDirectoryNotWritableException()
+    {
+        $basic_services_yml = array(
+            'parameters' => array(
+                'bbapp.logger.class'       => 'BackBuilder\Logging\Logger',
+                'bbapp.logger_debug.class' => 'BackBuilder\Logging\DebugStackLogger'
+            )
+        );
 
-    //     $bootstrap_yml = array(
-    //         'debug'     => false,
-    //         'container' => array(
-    //             'dump_directory' => 'vfs://no_rights_base_directory/container',
-    //             'autogenerate'   => true
-    //         )
-    //     );
+        $bootstrap_yml = array(
+            'debug'     => false,
+            'container' => array(
+                'dump_directory' => 'vfs://no_rights_base_directory/container',
+                'autogenerate'   => true
+            )
+        );
 
-    //     $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Ressources/');
-    //     $virtual_structure = array(
-    //         'backbee' => array(
-    //             'Config' => array(
-    //                 'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
-    //             )
-    //         ),
-    //         'repository' => array(
-    //             'Config' => array(
-    //                 'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml)
-    //             ),
-    //         ),
-    //         'container' => array()
-    //     );
+        $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Ressources/');
+        $virtual_structure = array(
+            'backbee' => array(
+                'Config' => array(
+                    'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                )
+            ),
+            'repository' => array(
+                'Config' => array(
+                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml)
+                ),
+            ),
+            'container' => array()
+        );
 
-    //     vfsStream::setup('cant_write_base_directory', 0000, $virtual_structure);
+        vfsStream::umask(0222);
+        vfsStream::setup('cant_write_base_directory', 0777, $virtual_structure);
 
-    //     $application = $this->generateManualBBApplication(vfsStream::url('cant_write_base_directory'));
-    //     $application->setContainer((new ContainerBuilder($application))->getContainer());
+        $application = $this->generateManualBBApplication(vfsStream::url('cant_write_base_directory'));
+        $application->setContainer((new ContainerBuilder($application))->getContainer());
 
-    //     $container = $application->getContainer();
-    //     $application->setDebug_Mode(false);
-    //     $container->setParameter('container.dump_directory', $application->getBaseDir() . '/container');
+        $container = $application->getContainer();
+        $application->setDebug_Mode(false);
+        $container->setParameter('container.dump_directory', $application->getBaseDir() . '/container');
 
-    //     $this->assertFalse($container->isFrozen());
-    //     $event = new Event($application);
-    //     try {
-    //         ContainerListener::onApplicationInit($event);
-    //         $this->fail('Raise of ContainerDirectoryNotWritableException expected.');
-    //     } catch (\Exception $e) {
-    //         var_dump(get_class($e));
-    //         $this->assertInstanceOf(
-    //             'BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException',
-    //             $e
-    //         );
-    //     }
-    // }
+        $this->assertFalse($container->isFrozen());
+        $event = new Event($application);
+        try {
+            ContainerListener::onApplicationInit($event);
+            $this->fail('Raise of ContainerDirectoryNotWritableException expected.');
+        } catch (\Exception $e) {
+            $this->assertInstanceOf(
+                'BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException',
+                $e
+            );
+        }
+    }
 
     private function generateManualBBApplication($base_directory)
     {
