@@ -105,7 +105,7 @@ interface IApplication
     public function getAutoloader();
 
     /**
-     * @return ContainerBuilder
+     * @return BackBuilder\DependencyInjection\ContainerInterface
      */
     public function getContainer();
 
@@ -113,6 +113,11 @@ interface IApplication
      * @return boolean
      */
     public function isOverridedConfig();
+
+    /**
+     * @return boolean
+     */
+    public function isDebugMode();
 
     /**
      *

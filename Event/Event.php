@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -51,7 +51,7 @@ class Event extends sfEvent
      * @param mixed $target The target of the event
      * @param mixed $eventArgs The optional arguments passed to the event
      */
-    public function __construct($target, $eventArgs = NULL)
+    public function __construct($target, $eventArgs = null)
     {
         $this->_target = $target;
         $this->_args = $eventArgs;
@@ -61,13 +61,12 @@ class Event extends sfEvent
      * Returns the target of the event, optionally checks the class of the target
      * @param type $classname The optional class name to checks
      * @return mixed
-     * @throws \InvalidArgumentException Occures on invalid type of target 
+     * @throws \InvalidArgumentException Occures on invalid type of target
      *                                   according to the waited class name
      */
     public function getTarget($classname = null)
     {
-        if (null === $classname
-                || true === self::isTargetInstanceOf($classname)) {
+        if (null === $classname || true === self::isTargetInstanceOf($classname)) {
             return $this->_target;
         }
 
@@ -76,7 +75,9 @@ class Event extends sfEvent
             $target_type = get_class($this->_target);
         }
 
-        throw new \InvalidArgumentException(sprintf('Invalid target : waiting `%s`, `%s` provided.', $classname, $this->_target));
+        throw new \InvalidArgumentException(sprintf(
+            'Invalid target : waiting `%s`, `%s` provided.', $classname, $this->_target
+        ));
     }
 
     /**
@@ -130,7 +131,7 @@ class Event extends sfEvent
 
     /**
      * Return the arguments passed to the event
-     * @return mixed|NULL
+     * @return mixed|null
      */
     public function getEventArgs()
     {

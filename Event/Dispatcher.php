@@ -37,7 +37,7 @@ use Symfony\Component\EventDispatcher\Event as sfEvent;
  * @category    BackBuilder
  * @package     BackBuilder\Event
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 {
@@ -104,8 +104,8 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     public function addListeners(array $events_config)
     {
         foreach ($events_config as $name => $listeners) {
-            if (FALSE === array_key_exists('listeners', $listeners)) {
-                $this->application->warning(sprintf('None listener found for `%s` event.', $name));
+            if (false === array_key_exists('listeners', $listeners)) {
+                $this->application->warning("None listener found for `$name` event.");
                 continue;
             }
 

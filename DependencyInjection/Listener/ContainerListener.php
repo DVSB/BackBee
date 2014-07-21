@@ -21,6 +21,7 @@ namespace BackBuilder\DependencyInjection\Listener;
  */
 
 use BackBuilder\DependencyInjection\Container;
+use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBuilder\DependencyInjection\Exception\CannotCreateContainerDirectoryException;
 use BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException;
 use BackBuilder\DependencyInjection\Loader\ContainerProxy;
@@ -50,7 +51,7 @@ class ContainerListener
         if (false === $application->isDebugMode()) {
             if (false === ($container instanceof ContainerProxy)) {
                 $container_filename = $container->getParameter('container.filename');
-                $container_directory = $container->getParameter('container.dir');
+                $container_directory = $container->getParameter('container.dump_directory');
 
                 if (false === is_dir($container_directory) && false === @mkdir($container_directory, 0755)) {
                     throw new CannotCreateContainerDirectoryException($container_directory);
@@ -60,7 +61,7 @@ class ContainerListener
                     throw new ContainerDirectoryNotWritableException($container_directory);
                 }
 
-                $dumper = new \BackBuilder\DependencyInjection\Dumper\PhpArrayDumper($container);
+                $dumper = new PhpArrayDumper($container);
                 file_put_contents(
                     $container_directory . DIRECTORY_SEPARATOR . $container_filename,
                     $dumper->dump(array(
@@ -79,33 +80,33 @@ class ContainerListener
      * @param  [type]    $config    [description]
      * @return [type]               [description]
      */
-    private static function loadExternalBundleServices(Container $container, array $config = null)
-    {
-        if (null !== $config) {
-            // Load external bundle services (Symfony2 Bundle)
-            if (0 < count($config)) {
-                foreach ($config as $key => $datas) {
-                    $bundle = new $datas['class']();
-                    if (false === ($bundle instanceof ExtensionInterface)) {
-                        $errorMsg = sprintf(
-                            'ContainerListener failed to load extension %s, it must implements `%s`',
-                            $datas['class'],
-                            'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
-                        );
+    // private static function loadExternalBundleServices(Container $container, array $config = null)
+    // {
+    //     if (null !== $config) {
+    //         // Load external bundle services (Symfony2 Bundle)
+    //         if (0 < count($config)) {
+    //             foreach ($config as $key => $datas) {
+    //                 $bundle = new $datas['class']();
+    //                 if (false === ($bundle instanceof ExtensionInterface)) {
+    //                     $errorMsg = sprintf(
+    //                         'ContainerListener failed to load extension %s, it must implements `%s`',
+    //                         $datas['class'],
+    //                         'Symfony\Component\DependencyInjection\Extension\ExtensionInterface'
+    //                     );
 
-                        $container->get('logging')->debug($errorMsg);
+    //                     $container->get('logging')->debug($errorMsg);
 
-                        throw new BBException($errorMsg);
-                    }
+    //                     throw new BBException($errorMsg);
+    //                 }
 
-                    $settings = true === isset($datas['config'])
-                        ? array($key => $datas['config'])
-                        : array()
-                    ;
+    //                 $settings = true === isset($datas['config'])
+    //                     ? array($key => $datas['config'])
+    //                     : array()
+    //                 ;
 
-                    $bundle->load($settings, $container);
-                }
-            }
-        }
-    }
+    //                 $bundle->load($settings, $container);
+    //             }
+    //         }
+    //     }
+    // }
 }

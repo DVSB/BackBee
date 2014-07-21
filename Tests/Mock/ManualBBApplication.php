@@ -79,6 +79,16 @@ class ManualBBApplication implements ApplicationInterface
     protected $overrided_config;
 
     /**
+     * @var boolean
+     */
+    protected $debug_mode;
+
+    /**
+     * @var BackBuilder\DependencyInjection\ContainerInterface
+     */
+    protected $container;
+
+    /**
      * ManualBBApplication's constructor
      */
     public function __construct($context = null, $environment = null)
@@ -193,6 +203,7 @@ class ManualBBApplication implements ApplicationInterface
      */
     public function getContainer()
     {
+        return $this->container;
     }
 
     /**
@@ -223,11 +234,19 @@ class ManualBBApplication implements ApplicationInterface
     {
     }
 
-    /**
+   /**
      * @return boolean
      */
     public function isOverridedConfig()
     {
         return $this->overrided_config;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isDebugMode()
+    {
+        return $this->debug_mode;
     }
 }

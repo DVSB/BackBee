@@ -23,6 +23,8 @@ namespace BackBuilder\DependencyInjection;
 use BackBuilder\IApplication;
 use BackBuilder\DependencyInjection\BootstrapResolver;
 use BackBuilder\DependencyInjection\Container;
+use BackBuilder\DependencyInjection\Exception\ContainerAlreadyExistsException;
+use BackBuilder\DependencyInjection\Exception\MissingBootstrapParametersException;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
 use BackBuilder\Util\Resolver\ConfigDirectory;
 
@@ -145,11 +147,12 @@ class ContainerBuilder
 
         $missing_parameters = array();
         $this->tryAddParameter('debug', $parameters, $missing_parameters);
-        if (array_key_exists('container', $parameters)) {
+        if (true === array_key_exists('container', $parameters)) {
             $this->tryAddParameter('dump_directory', $parameters['container'], $missing_parameters, 'container.');
             $this->tryAddParameter('autogenerate', $parameters['container'], $missing_parameters, 'container.');
         } else {
-            $missing_parameters[] = 'container';
+            $missing_parameters[] = 'container.dump_directory';
+            $missing_parameters[] = 'container.autogenerate';
         }
 
         if (0 < count($missing_parameters)) {
@@ -169,7 +172,7 @@ class ContainerBuilder
     private function tryAddParameter($key, array $parameters, array &$missing_parameters, $prefix = '')
     {
         if (false === array_key_exists($key, $parameters)) {
-            $missing_parameters[] = $key;
+            $missing_parameters[] = $prefix . $key;
         } else {
             $this->container->setParameter($prefix . $key, $parameters[$key]);
         }
@@ -224,7 +227,6 @@ class ContainerBuilder
             $success = true;
         } else {
             $this->container->setParameter('container.filename', $container_filename);
-            $this->container->setParameter('container.dir', $container_directory);
         }
 
         return $success;
