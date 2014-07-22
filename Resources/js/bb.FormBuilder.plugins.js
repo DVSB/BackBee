@@ -45,6 +45,11 @@
                 this.fieldWrapper = $("<p></p>");
                 this.template = $("<label class='fieldLabel'></label><input class='bb5-plugin-form-field fieldDatetime' type='text' value=''></input>").clone();
                 this.fiedId = this.id + "-" + this._settings.fieldInfos.fieldLabel;
+                var defaultSettings = {
+                    dateFormat: 'dd/mm/yy', 
+                    timeFormat: 'hh:mm'
+                };
+                
             },
             render: function() {
                 $(this.fieldWrapper).append(this.template);
@@ -52,7 +57,7 @@
                 var value = this._settings.fieldInfos.param.array.value;
                 $(this.fieldWrapper).find(".fieldDatetime").attr("id", this.fieldId).datetimepicker({
                     dateFormat: 'dd/mm/yy',
-                    timeFormat: 'hh:mm'
+                    timeFormat: 'HH:mm'
                 });
                 if (value)
                     $(this.fieldWrapper).find(".fieldDatetime").datetimepicker('setDate', new Date(value * 1000));
@@ -119,9 +124,42 @@
                 };
                 return result;
             }
-
         });
-
+        
+        /* textarea type */
+        FormBuilder.registerRenderTypePlugin("textarea",{
+            _init: function(){
+                this.id = this._settings.formId + '-' + this.id;
+                this.fieldWrapper = bb.jquery("<p></p>");
+                this.template = bb.jquery("<label class='fieldLabel'></label><textarea style='width:100%' class='bb5-plugin-form-field fieldTextarea'></textarea>").clone();
+                this.fiedId = this.id + "-" + this._settings.fieldInfos.fieldLabel;  
+                bb.jquery(this.fieldWrapper).append(this.template);
+                this.textarea = this.fieldWrapper.find("textarea").eq(0);
+            },
+            
+            render: function(){
+                bb.jquery(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
+                bb.jquery(this.fieldWrapper).find('.fieldTextarea').attr("id", this.fieldId);
+                this.populate();
+                return this.fieldWrapper;
+            },
+            populate: function(){
+                this.textarea.val(this._settings.fieldInfos.param.array.value);
+            },
+            
+            parse: function(){
+                var result = {
+                    "array": {
+                        "value": this.textarea.val()
+                    }
+                } 
+                return result;
+            }
+            
+        });
+        
+        
+        
         /*Radio type*/
         FormBuilder.registerRenderTypePlugin('radio', {
             _init: function() {
@@ -301,23 +339,23 @@
             },
             _template: {
                 mediaWrapper: '<div>'
-                        + '<p><label class="fieldLabel">Media list</label></p>'
-                        + '<div class="bb5-listContainer">'
-                        + '<ul class="bb5-list-media bb5-list-media-is-list clearfix"></ul>'
-                        + '</div>'
-                        + '<p class="bb5-edit-article-toolbar">\n\
+                + '<p><label class="fieldLabel">Media list</label></p>'
+                + '<div class="bb5-listContainer">'
+                + '<ul class="bb5-list-media bb5-list-media-is-list clearfix"></ul>'
+                + '</div>'
+                + '<p class="bb5-edit-article-toolbar">\n\
                                     <span class="bb5-edit-article-toolbar-label">Ajouter un média</span> \n\
                                     <a class="bb5-button bb5-ico-lib bb5-button-link add_media_btn bb5-button-thick bb5-button-outline" href="#">Médiathèque</a> \n\
                                 </p>'
-                        + '</div>',
+                + '</div>',
                 mediaItem: '<li class="bb5-selector-item">'
-                        + '<p><a href="javascript:;"><img class="media-pic" src="" alt=""></a></p>'
-                        + '<p><a class="media-title" href="javascript:;">${mediaTitle}</a></p>'
-                        + '<p style="visibility : hidden"><span data-i18n="mediaselector.width">L :</span> 200px, <span data-i18n="mediaselector.height">H :</span> 142px, 11.81 kB</p>'
-                        + '<p>'
-                        + '<button class="bb5-button bb5-ico-del" data-i18n="popupmanager.button.delete">Supprimer</button>'
-                        + '</p>'
-                        + '</li>'
+            + '<p><a href="javascript:;"><img class="media-pic" src="" alt=""></a></p>'
+            + '<p><a class="media-title" href="javascript:;">${mediaTitle}</a></p>'
+            + '<p style="visibility : hidden"><span data-i18n="mediaselector.width">L :</span> 200px, <span data-i18n="mediaselector.height">H :</span> 142px, 11.81 kB</p>'
+            + '<p>'
+            + '<button class="bb5-button bb5-ico-del" data-i18n="popupmanager.button.delete">Supprimer</button>'
+            + '</p>'
+            + '</li>'
             },
             _init: function() {
                 this._context = {};
@@ -607,9 +645,9 @@
                             });
                         }
 
-                        //open: bb.jquery.proxy(self.bbSelectorHandlers.openHandler,self,"bbLinkInternalContainer"),
-                        //resizeStart: bb.jquery.proxy(this.bbSelectorHandlers.resizeStartHandler,this,"bbLinkInternalContainer"),
-                        //resize : bb.jquery.proxy(this.bbSelectorHandlers.resizeHandler,this,"bbLinkInternalContainer")
+                    //open: bb.jquery.proxy(self.bbSelectorHandlers.openHandler,self,"bbLinkInternalContainer"),
+                    //resizeStart: bb.jquery.proxy(this.bbSelectorHandlers.resizeStartHandler,this,"bbLinkInternalContainer"),
+                    //resize : bb.jquery.proxy(this.bbSelectorHandlers.resizeHandler,this,"bbLinkInternalContainer")
                     });
                 }
                 this._context.linkSelector.data("bbSelector").open();
@@ -701,15 +739,15 @@
             _template: {
                 itemTpl: "<li class='page-item'>{{title}}<i class='bb5-button bb5-ico-del bb-remove-page'></i></li>",
                 mainWrapper: '<div>'
-                        + '<p><label class="fieldLabel">Page(s)</label></p>'
-                        + '<div class="bb5-page-wrapper">'
-                        + '<ul class="bb5-page-container clearfix"></ul>'
-                        + '</div>'
-                        + '<p class="bb5-edit-article-toolbar">\n\
+            + '<p><label class="fieldLabel">Page(s)</label></p>'
+            + '<div class="bb5-page-wrapper">'
+            + '<ul class="bb5-page-container clearfix"></ul>'
+            + '</div>'
+            + '<p class="bb5-edit-article-toolbar">\n\
                                     <span class="bb5-edit-article-toolbar-label">Add a page</span> \n\
                                     <a class="bb5-button bb5-ico-tree add_page_btn bb5-button-outline bb5-button-thick" href="#">Page browser</a> \n\
                                 </p>'
-                        + '</div>'
+            + '</div>'
             },
             i18n: {
                 pageBrowserTitle: "Selectionner une page"
@@ -1153,8 +1191,8 @@
                 this.id = this._settings.formId + '-' + this.id;
                 this.fieldWrapper = bb.jquery("<p></p>");
                 var template = bb.jquery("<label class='fieldLabel'>Choisir un mot clé</label>"
-                        + "<p class='selectedContainer'><strong>Sélection(s) :</strong><span class='selectedKeywords'></span></p>"
-                        + "<textarea class='bb5-plugin-form-field fieldKeyword bb5-form-inputtext' value=''></textarea>").clone();
+                    + "<p class='selectedContainer'><strong>Sélection(s) :</strong><span class='selectedKeywords'></span></p>"
+                    + "<textarea class='bb5-plugin-form-field fieldKeyword bb5-form-inputtext' value=''></textarea>").clone();
                 this.fiedId = this.id + "-" + this._settings.fieldInfos.fieldLabel;
                 this.template = this.fieldWrapper.append(template);
                 this.maxEntry = this._settings.fieldInfos.param.array.maxentry || 0;
@@ -1269,7 +1307,7 @@
                 this._findKeywordByIds(this.selected);
             },
             _updateFieldSpace: function() {
-                /*bb.jquery(this.keywordField).animate({
+            /*bb.jquery(this.keywordField).animate({
                  height : "16px"
                  },"fast");*/
 

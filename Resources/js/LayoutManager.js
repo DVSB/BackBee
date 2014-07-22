@@ -104,7 +104,7 @@ BB4.LayoutManager = (function(){
 		
         _propDialog.on('open', function() {
             if (!_currentLayout) bb.jquery(this.dialog).dialog('close');
-			
+            console.log(_currentLayout);
             bb.jquery(this.dialog).find('#bb5-zonelayout-property-ismainzone').removeAttr('checked');
             bb.jquery(this.dialog).find('#bb5-zonelayout-property-accept option').removeAttr('selected');
             bb.jquery(this.dialog).find('#bb5-zonelayout-property-maxentry').val('');
@@ -126,7 +126,8 @@ BB4.LayoutManager = (function(){
             if( null == _currentLayout._defaultClassContent)
                 bb.jquery(this.dialog).find('#bb5-zonelayout-property-defaultcontent option').first().attr('selected', 'selected');
             else {
-                bb.jquery(this.dialog).find('#bb5-zonelayout-property-defaultcontent option[value="'+_currentLayout._defaultClassContent.replace('\\', '\\\\')+'"]').attr('selected', 'selected');
+                var optionToSelect = $("#bb5-zonelayout-property-defaultcontent").val(_currentLayout._defaultClassContent);
+                //bb.jquery(this.dialog).find('#bb5-zonelayout-property-defaultcontent option[value="'+_currentLayout._defaultClassContent+'"]').attr('selected', 'selected');
             }
         });
     };

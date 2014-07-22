@@ -63,7 +63,7 @@ class dateHelper extends AHelper
     {
         if (NULL !== $culture) {
             $configCulture = $this->_renderer->getApplication()->getConfig()->getCultureConfig();
-            if (array_key_exists('default', $configCulture))
+            if (is_array($configCulture) && array_key_exists('default', $configCulture))
                 $this->culture = $configCulture['default'];
             else
                 throw new RendererException("Config from culture 'default' is incorrect");

@@ -70,8 +70,11 @@ class RevisionRepository extends EntityRepository
         $revision->setContent($content);
         $revision->setData($content->getDataToObject());
         $revision->setLabel($content->getLabel());
-        $revision->setMaxEntry($content->getMaxEntry());
-        $revision->setMinEntry($content->getMinEntry());
+        
+        $maxEntry = (array) $content->getMaxEntry();
+        $minEntry = (array) $content->getMinEntry();   
+        $revision->setMaxEntry($maxEntry);
+        $revision->setMinEntry($minEntry);
 
         $revision->setOwner($token->getUser());
         $revision->setParam(NULL, $content->getParam());

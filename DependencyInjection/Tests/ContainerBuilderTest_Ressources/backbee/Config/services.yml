@@ -1,0 +1,9 @@
+parameters:
+    foo: bar
+
+    bbapp.logger.class: BackBuilder\Logging\Logger
+    bbapp.logger_debug.class: BackBuilder\Logging\DebugStackLogger
+
+services:
+    core_service:
+        class: \DateTime

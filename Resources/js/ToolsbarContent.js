@@ -61,7 +61,7 @@ BB4.ToolsbarManager.register("contenttb",{
         });
 
         this.contentBlocksContainer = new SmartList({
-            idKey:"uid",
+            idKey : "uid",
             onInit : bb.jquery.proxy(this._onInitContentBlocks,this)
         });
 
@@ -178,7 +178,7 @@ BB4.ToolsbarManager.register("contenttb",{
     _onInitContentBlocks : function(blocks){
         var contentFragment = document.createDocumentFragment();
         var self = this;
-
+   
         bb.jquery.each(blocks,function(i,data){
            if(data.hasOwnProperty("isVisible") && data.isVisible==false) return true;
             var contentBlock = bb.jquery("<li></li>").clone();

@@ -1,0 +1,4 @@
+parameters:
+    base_directory: bbdir
+    context: default
+    environment: ''
