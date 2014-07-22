@@ -26,7 +26,9 @@ use BackBuilder\NestedNode\Page,
     BackBuilder\ClassContent\ContentSet,
     BackBuilder\NestedNode\ANestedNode,
     BackBuilder\Security\Token\BBUserToken,
-    BackBuilder\Site\Layout;
+    BackBuilder\Site\Layout,
+    BackBuilder\Site\Site,
+    BackBuilder\Exception\InvalidArgumentException;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -42,6 +44,21 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 class PageRepository extends NestedNodeRepository
 {
 
+    /**
+     * Creates a new Page QueryBuilder instance that is prepopulated for this entity name.
+     * @param string $alias      the alias to use
+     * @param string $indexBy    optional, the index to use for the query
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function createQueryBuilder($alias, $indexBy = null)
+    {
+        $qb = new PageQueryBuilder($this->_em);
+        return $qb->select($alias)->from($this->_entityName, $alias, $indexBy);
+    }
+
+    /**
+     * @deprecated since version 0.10.0
+     */
     private function _andOnline(\Doctrine\ORM\QueryBuilder $q)
     {
         return $q->andWhere('n._state >= ' . Page::STATE_ONLINE)
@@ -52,97 +69,237 @@ class PageRepository extends NestedNodeRepository
             ->setParameter('now', date('Y-m-d H:i:00', time()));
     }
 
-    public function getOnlinePrevSibling(ANestedNode $node)
+    /**
+     * Returns the online descendants of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @param int $depth                            optional, limit to $depth number of generation
+     * @param boolean $includeNode                  optional, include $page in results if TRUE (false by default)
+     * @return \BackBuilder\NestedNode\Page[]
+     */
+    public function getOnlineDescendants(Page $page, $depth = null, $includeNode = false)
     {
-        $q = $this->createQueryBuilder('n')
-                ->andParentIs($node->getParent())
-                ->andLevelEquals($node->getLevel())
-                ->andRightnodeIsLowerThan($node->getLeftnode, true)
-                ->orderBy('n._leftnode', 'desc')
-                ->setMaxResults(1);
-        $q = $this->_andOnline($q);
-
-        return $q->getQuery()->getOneOrNullResult();
-    }
-
-    public function getOnlineSiblingsByLayout(Page $node, Layout $layout, $includeNode = false, $order = null, $limit = null, $start = 0)
-    {
-        $qb = $this->createQueryBuilder('n')
-                ->andIsSiblingsOf($node, !$includeNode, $order, $limit, $start)
-                ->andWhere('n._layout = :layout')
-                ->setParameter('layout', $layout);
-        $qb = $this->_andOnline($qb);
-        return $qb->getQuery()->getResult();
-    }
-
-    public function getOnlineNextSibling(ANestedNode $node)
-    {
-        $q = $this->createQueryBuilder('n')
-                ->andParentIs($node->getParent())
-                ->andLevelEquals($node->getLevel())
-                ->andLeftnodeIsUpperThan($node->getLeftnode(), true)
-                ->orderBy('n._leftnode', 'asc')
-                ->setMaxResults(1);
-        $q = $this->_andOnline($q);
-        return $q->getQuery()->getOneOrNullResult();
-    }
-
-    public function insertNodeAsFirstChildOf(ANestedNode $node, ANestedNode $parent)
-    {
-        $node = parent::insertNodeAsFirstChildOf($node, $parent);
-        $node->setSite($parent->getSite());
-        return $node;
-    }
-
-    public function insertNodeAsLastChildOf(ANestedNode $node, ANestedNode $parent)
-    {
-        $node = parent::insertNodeAsLastChildOf($node, $parent);
-        $node->setSite($parent->getSite());
-        return $node;
-    }
-
-    public function getVisibleDescendants(ANestedNode $node, $depth = null, $includeNode = false, $state = Page::STATE_ONLINE)
-    {
-        $q = $this->createQueryBuilder('n')
-                ->andIsDescendantOf($node, !$includeNode)
-                ->orderBy('n._leftnode', 'asc');
+        $q = $this->createQueryBuilder('p')
+                ->andIsDescendantOf($page, !$includeNode)
+                ->andIsOnline()
+                ->orderBy('p._leftnode', 'asc');
 
         if (null !== $depth) {
-            $q->andLevelIsLowerThan($node->getLevel() + $depth);
+            $q->andLevelIsLowerThan($page->getLevel() + $depth);
         }
-
-        $q = $this->_andOnline($q);
 
         return $q->getQuery()->getResult();
     }
 
-    public function getVisiblePrevSibling(ANestedNode $node)
+    /**
+     * Returns the previous online sibling of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @return \BackBuilder\NestedNode\Page|NULL
+     */
+    public function getOnlinePrevSibling(Page $page)
     {
-        if (is_null($node))
-            throw new \Exception(__METHOD__ . " node can't be null");
-
-        $q = $this->createQueryBuilder('n')
-                ->andIsPreviousSiblingOf($node);
-        $q = $this->_andOnline($q);
-        return $q->getQuery()->getOneOrNullResult();
+        return $this->createQueryBuilder('p')
+                        ->andIsPreviousOnlineSiblingOf($page)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+//
+//        $q = $this->createQueryBuilder('n')
+//                ->andParentIs($page->getParent())
+//                ->andLevelEquals($page->getLevel())
+//                ->andRightnodeIsLowerThan($page->getLeftnode, true)
+//                ->orderBy('n._leftnode', 'desc')
+//                ->setMaxResults(1);
+//        $q = $this->_andOnline($q);
+//
+//        return $q->getQuery()->getOneOrNullResult();
     }
 
     /**
-     * @param \BackBuilder\NestedNode\Page $page page to move.
-     * @param \BackBuilder\NestedNode\Page $parent the new page parent.
-     * @param string $next_uid
-     * @return \BackBuilder\NestedNode\Page
+     * Returns the online siblings of the provided page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @param boolean $includeNode                  optional, include $page in results if TRUE (false by default)
+     * @param array $order                          optional, the ordering criteria ( array($field => $sort) )
+     * @param int $limit                            optional, the maximum number of results
+     * @param int $start                            optional, the first result index (0 by default)
+     * @return \BackBuilder\NestedNode\Page[]
+     */
+    public function getOnlineSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
+    {
+        return $this->createQueryBuilder('p')
+                        ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
+                        ->getQuery()
+                        ->getResult();
+    }
+
+    /**
+     * Returns the onlne siblings having layout $layout of the provided page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @param \BackBuilder\Site\Layout $layout      the layout to look for
+     * @param boolean $includeNode                  optional, include $page in results if TRUE (false by default)
+     * @param array $order                          optional, the ordering criteria ( array($field => $sort) )
+     * @param int $limit                            optional, the maximum number of results
+     * @param int $start                            optional, the first result index (0 by default)
+     * @return \BackBuilder\NestedNode\Page[]
+     */
+    public function getOnlineSiblingsByLayout(Page $page, Layout $layout, $includeNode = false, $order = null, $limit = null, $start = 0)
+    {
+        return $this->createQueryBuilder('p')
+                        ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
+                        ->andLayoutIs($layout)
+                        ->getQuery()
+                        ->getResult();
+//
+//        $qb = $this->createQueryBuilder('n')
+//                ->andIsSiblingsOf($node, !$includeNode, $order, $limit, $start)
+//                ->andWhere('n._layout = :layout')
+//                ->setParameter('layout', $layout);
+//        $qb = $this->_andOnline($qb);
+//        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Returns the next online sibling of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @return \BackBuilder\NestedNode\Page|NULL
+     */
+    public function getOnlineNextSibling(Page $page)
+    {
+        return $this->createQueryBuilder('p')
+                        ->andIsNextOnlineSiblingOf($page)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+//
+//        $q = $this->createQueryBuilder('n')
+//                ->andParentIs($page->getParent())
+//                ->andLevelEquals($page->getLevel())
+//                ->andLeftnodeIsUpperThan($page->getLeftnode(), true)
+//                ->orderBy('n._leftnode', 'asc')
+//                ->setMaxResults(1);
+//        $q = $this->_andOnline($q);
+//        return $q->getQuery()->getOneOrNullResult();
+    }
+
+    /**
+     * Inserts a leaf page in a tree as first child of the provided parent page
+     * @param \BackBuilder\NestedNode\Page $page     the page to be inserted
+     * @param \BackBuilder\NestedNode\Page $parent   the parent page
+     * @return \BackBuilder\NestedNode\Page          the inserted page
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
+     *                                                         or if $page or $parent are not an instance of Page
+     */
+    public function insertNodeAsFirstChildOf(ANestedNode $page, ANestedNode $parent)
+    {
+        if (false === ($page instanceof Page)) {
+            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($page)));
+        }
+
+        if (false === ($parent instanceof Page)) {
+            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($parent)));
+        }
+
+        $page = parent::insertNodeAsFirstChildOf($page, $parent);
+
+        return $page->setSite($parent->getSite());
+    }
+
+    /**
+     * Inserts a leaf page in a tree as last child of the provided parent node
+     * @param \BackBuilder\NestedNode\Page $page     the page to be inserted
+     * @param \BackBuilder\NestedNode\Page $parent   the parent page
+     * @return \BackBuilder\NestedNode\Page          the inserted page
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
+     *                                                         or if $page or $parent are not an instance of Page
+     */
+    public function insertNodeAsLastChildOf(ANestedNode $page, ANestedNode $parent)
+    {
+        if (false === ($page instanceof Page)) {
+            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($page)));
+        }
+
+        if (false === ($parent instanceof Page)) {
+            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($parent)));
+        }
+
+        $page = parent::insertNodeAsLastChildOf($page, $parent);
+
+        return $page->setSite($parent->getSite());
+    }
+
+    /**
+     * Returns the visible (ie online and not hidden) descendants of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @param int $depth                            optional, limit to $depth number of generation
+     * @param boolean $includeNode                  optional, include $page in results if TRUE (false by default)
+     * @return \BackBuilder\NestedNode\Page[]
+     */
+    public function getVisibleDescendants(Page $page, $depth = null, $includeNode = false)
+    {
+        $q = $this->createQueryBuilder('p')
+                ->andIsDescendantOf($page, !$includeNode)
+                ->andIsVisible()
+                ->orderBy('p._leftnode', 'asc');
+
+        if (null !== $depth) {
+            $q->andLevelIsLowerThan($page->getLevel() + $depth);
+        }
+
+        return $q->getQuery()->getResult();
+    }
+
+    /**
+     * Returns the visible (ie online and not hidden) siblings of the provided page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @param boolean $includeNode                  optional, include $page in results if TRUE (false by default)
+     * @param array $order                          optional, the ordering criteria ( array($field => $sort) )
+     * @param int $limit                            optional, the maximum number of results
+     * @param int $start                            optional, the first result index (0 by default)
+     * @return \BackBuilder\NestedNode\Page[]
+     */
+    public function getVisibleSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
+    {
+        return $this->createQueryBuilder('p')
+                        ->andIsVisibleSiblingsOf($page, !$includeNode, $order, $limit, $start)
+                        ->getQuery()
+                        ->getResult();
+    }
+
+    /**
+     * Returns the previous visible (ie online and not hidden) sibling of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @return \BackBuilder\NestedNode\Page|NULL
+     */
+    public function getVisiblePrevSibling(Page $page)
+    {
+        return $this->createQueryBuilder('p')
+                        ->andIsPreviousVisibleSiblingOf($page)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }
+
+    /**
+     * Moves $page as child of $parent by default at last position or, optionaly, before node having uid = $next_uid
+     * @param \BackBuilder\NestedNode\Page $page      the page to move
+     * @param \BackBuilder\NestedNode\Page $parent    the page parent to move in
+     * @param string $next_uid                        optional, the uid of the next sibling
+     * @return \BackBuilder\NestedNode\Page           the moved page
      */
     public function movePageInTree(Page $page, Page $parent, $next_uid = null)
     {
-        $page = $this->insertNodeAsLastChildOf($page, $parent);
         $next = ($next_uid !== null) ? $this->find($next_uid) : null;
-        if (!is_null($next)) {
-            $this->moveAsPrevSiblingOf($page, $next);
+
+        if (null !== $next && $next->getParent() === $parent) {
+            return $this->moveAsPrevSiblingOf($page, $next);
         }
-        return $page;
+
+        return $this->moveAsLastChildOf($page, $parent);
     }
 
+    /**
+     * Replaces the ContentSet of $page
+     * @param \BackBuilder\NestedNode\Page $page                       the page to change
+     * @param \BackBuilder\ClassContent\ContentSet $oldContentSet      the contentset to replace
+     * @param \BackBuilder\ClassContent\ContentSet $newContentSet      the new contentset
+     * @return \BackBuilder\ClassContent\ContentSet                    the inserted contentset
+     */
     public function replaceRootContentSet(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet)
     {
         try {
@@ -153,111 +310,126 @@ class PageRepository extends NestedNodeRepository
         }
     }
 
-    public function getVisibleNextSibling(ANestedNode $node)
+    /**
+     * Returns the previous visible sibling of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @return \BackBuilder\NestedNode\Page|NULL
+     */
+    public function getVisibleNextSibling(Page $page)
     {
-        if (is_null($node))
-            throw new \Exception(__METHOD__ . " node can't be null");
-
-        $q = $this->createQueryBuilder('n')
-                ->andIsNextSiblingOf($node);
-        $q = $this->_andOnline($q);
-        return $q->getQuery()->getOneOrNullResult();
+        return $this->createQueryBuilder('p')
+                        ->andIsNextVisibleSiblingOf($page)
+                        ->getQuery()
+                        ->getOneOrNullResult();
     }
 
-    public function getNotDeletedDescendants(ANestedNode $node, $depth = NULL, $includeNode = FALSE, $order = array(), $paginate = false, $firstresult = 0, $maxresult = 25, $having_child = false)
+    /**
+     * Returns the not deleted descendants of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @param type $depth                           optional, limit to $depth number of generation
+     * @param type $includeNode                     optional, include $page in results if TRUE (false by default)
+     * @param type $order                           optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
+     * @param type $paginate                        optional, if TRUE return a paginator rather than an array (false by default)
+     * @param type $firstresult                     optional, if paginated set the first result index (0 by default)
+     * @param type $maxresult                       optional, if paginated set the maxmum number of results (25 by default)
+     * @param type $having_child                    optional, limit to descendants having child (false by default)
+     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
+     */
+    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, $order = array('_leftnode' => 'asc'), $paginate = false, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
-        $q = $this->createQueryBuilder('n')
-                ->andIsDescendantOf($node, !$includeNode)
-                ->andWhere('n._state < :deleted')
-                ->setParameter('deleted', Page::STATE_DELETED)
-                ->orderBy('n._leftnode', 'asc');
+        // @Todo: search for calls with wrong ordering criteria format and solve them
+        if (true === array_key_exists('field', $order)) {
+            $order = array($order['field'] => (true === array_key_exists('sort', $order) ? $order['sort'] : 'asc'));
+        }
+
+        $q = $this->createQueryBuilder('p')
+                ->andIsDescendantOf($page, !$includeNode)
+                ->andStateIsLowerThan(Page::STATE_DELETED)
+                ->orderByMultiple($order);
 
         if (null !== $depth) {
-            $q->andLevelIsLowerThan($node->getLevel() + $depth);
+            $q->andLevelIsLowerThan($page->getLevel() + $depth);
         }
 
         if (true === $having_child) {
-            $q->andWhere('n._rightnode > (n._leftnode + 1)');
+            $q->andWhere('p._rightnode > (p._leftnode + 1)');
         }
 
-        if (is_array($order) && !empty($order)) {
-            if (array_key_exists("field", $order) && array_key_exists("sort", $order)) {
-                if (!empty($order["field"]) && !empty($order["sort"])) {
-                    $q->orderBy('n._' . trim($order["field"]), trim($order["sort"]));
-                }
-            }
-        }
-
-        if (true === $paginate) {
-            $q = $q->setFirstResult($firstresult)
-                    ->setMaxResults($maxresult);
-            $paginator = new Paginator($q, $fetchjoincollection = TRUE);
-            return $paginator;
-        } else {
+        if (false === $paginate) {
             return $q->getQuery()->getResult();
         }
+
+        $q->setFirstResult($firstresult)
+                ->setMaxResults($maxresult);
+
+        return new Paginator($q);
     }
 
-    public function getRoot(\BackBuilder\Site\Site $site, $restrictedStates = array())
+    /**
+     * Returns the root page for $site
+     * @param \BackBuilder\Site\Site $site   the site to test
+     * @param array $restrictedStates        optional, limit to pages having provided states
+     * @return \BackBuilder\NestedNode\Page|NULL
+     */
+    public function getRoot(Site $site, array $restrictedStates = array())
     {
-        try {
-            $q = $this->createQueryBuilder('p')
-                    ->andWhere('p._site = :site')
-                    ->andWhere('p._parent is null')
-                    ->setMaxResults(1)
-                    ->setParameters(array(
-                'site' => $site
-            ));
-            $restrictedStates = (array) $restrictedStates;
-            if (0 < count($restrictedStates)) {
-                $q = $q->andWhere('p._state IN (:states)')
-                        ->setParameter('states', implode(',', $restrictedStates));
-            }
-            return $q->getQuery()->getSingleResult();
-        } catch (\Doctrine\ORM\NoResultException $e) {
-            return null;
-        } catch (Exception $e) {
-            return null;
+        $q = $this->createQueryBuilder('p')
+                ->andSiteIs($site)
+                ->andParentIs(null)
+                ->setMaxResults(1);
+        
+        if (0 < count($restrictedStates)) {
+            $q->andStateIsIn($restrictedStates);
         }
+        
+        return $q->getQuery()->getOneOrNullResult();
     }
 
-    public function getOnlineChildren(\BackBuilder\NestedNode\Page $page, $maxResults = null, $order = array('_leftnode', 'ASC'))
+    /**
+     * Returns an array of online children of $page
+     * @param \BackBuilder\NestedNode\Page $page  the parent page
+     * @param int $maxResults                     optional, the maximum number of results
+     * @param array $order                        optional, the ordering criteria (array('_leftnode', 'asc') by default)
+     * @return \BackBuilder\NestedNode\Page[]
+     */
+    public function getOnlineChildren(Page $page, $maxResults = null, array $order = array('_leftnode', 'asc'))
     {
-        $q = $this->createQueryBuilder('n')
-                ->andWhere('n._parent = :page')
-                ->setParameters(array(
-            'page' => $page
-        ));
-        if (false === is_array($order)) {
-            $order = array($order);
+        $order = array_merge(array('_leftnode', 'asc'), $order);
+
+        $q = $this->createQueryBuilder('p')
+                ->andParentIs($page)
+                ->andIsOnline()
+                ->orderBy('p.' . $order[0], $order[1]);
+
+        if (null !== $maxResults) {
+            $q->setMaxResults($maxResults);
         }
-        if (0 === count($order)) {
-            $order[] = '_leftnode';
-        }
-        if (1 === count($order)) {
-            $order[] = 'ASC';
-        }
-        $q = $q->orderBy('n.' . $order[0], $order[1]);
-        $q = $this->_andOnline($q);
-        if (null !== $maxResults)
-            $q = $q->setMaxResults($maxResults);
+
         return $q->getQuery()->getResult();
     }
 
-    public function getChildren(\BackBuilder\NestedNode\Page $page, $order_sort = '_title', $order_dir = 'asc', $paging = array(), $restrictedStates = array(), $options = array())
+    public function getChildren(Page $page, $order_sort = '_title', $order_dir = 'asc', $paging = array(), $restrictedStates = array(), $options = array())
     {
-        $result = null;
         $q = $this->createQueryBuilder('p')
-                ->andWhere('p._parent = :page')
-                ->orderBy('p.' . $order_sort, $order_dir)
-                ->setParameters(array(
-            'page' => $page
-        ));
-        $restrictedStates = (array) $restrictedStates;
-        if (!in_array('all', $restrictedStates) && 0 < count($restrictedStates)) {
-            $q = $q->andWhere('p._state IN (:states)')
-                    ->setParameter('states', implode(',', $restrictedStates));
+                ->andParentIs($page)
+                ->orderBy('p.' . $order_sort, $order_dir);
+
+        if (true === is_array($restrictedStates) && 0 < count($restrictedStates)) {
+            $q->andStateIsIn($restrictedStates);
         }
+        
+//        $result = null;
+//        $q = $this->createQueryBuilder('p')
+//                ->andWhere('p._parent = :page')
+//                ->orderBy('p.' . $order_sort, $order_dir)
+//                ->setParameters(array(
+//            'page' => $page
+//        ));
+//        $restrictedStates = (array) $restrictedStates;
+//        if (!in_array('all', $restrictedStates) && 0 < count($restrictedStates)) {
+//            $q = $q->andWhere('p._state IN (:states)')
+//                    ->setParameter('states', implode(',', $restrictedStates));
+//        }
         if (array_key_exists('beforePubdateField', $options)) {
             $q->andWhere('p._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $options['beforePubdateField']));
         }
@@ -307,14 +479,15 @@ class PageRepository extends NestedNodeRepository
         $q = $this->createQueryBuilder('p')
                 ->update()
                 ->set('p._state', Page::STATE_DELETED)
-                ->andWhere('p._root = :root')
-                ->andWhere('p._leftnode >= :leftnode')
-                ->andWhere('p._rightnode <= :rightnode')
-                ->setParameters(array(
-            'root' => $page->getRoot(),
-            'leftnode' => $page->getLeftnode(),
-            'rightnode' => $page->getRightnode()
-        ));
+                ->andIsDescendantOf($page);
+//                ->andWhere('p._root = :root')
+//                ->andWhere('p._leftnode >= :leftnode')
+//                ->andWhere('p._rightnode <= :rightnode')
+//                ->setParameters(array(
+//            'root' => $page->getRoot(),
+//            'leftnode' => $page->getLeftnode(),
+//            'rightnode' => $page->getRightnode()
+//        ));
         return $q->getQuery()->execute();
     }
 
@@ -462,7 +635,7 @@ class PageRepository extends NestedNodeRepository
         return $new_page;
     }
 
-    public function removeEmptyPages(\BackBuilder\Site\Site $site)
+    public function removeEmptyPages(Site $site)
     {
         $q = $this->createQueryBuilder('p')
                 ->select()

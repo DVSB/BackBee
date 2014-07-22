@@ -212,30 +212,24 @@ class NestedNodeQueryBuilder extends QueryBuilder
      * Add query part to select siblings of $node
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @param boolean $strict       if TRUE, $node is exclude
-     * @param array $order          ordering spec
+     * @param array $order          ordering spec ( array($field => $sort) )
      * @param int $limit            max number of results
      * @param int $start            first result index
      * @param string $alias     optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsSiblingsOf(ANestedNode $node, $strict = false, array $order = null, $limit = null, $start = 0, $alias = null)
+    public function andIsSiblingsOf(ANestedNode $node, $strict = false, $order = null, $limit = null, $start = 0, $alias = null)
     {
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
+
         if (true === $strict) {
             $this->andIsNot($node, $alias);
+            $suffix++;
         }
 
-        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         if (true === $node->isRoot()) {
             $this->andWhere($alias . '._uid = :uid' . $suffix)
                     ->setParameter('uid' . $suffix, $node->getUid());
-        }
-
-        if (null === $order) {
-            $order = array('_leftnode' => 'asc');
-        }
-
-        foreach ($order as $col => $sort) {
-            $this->orderBy($alias . '.' . $col, $sort);
         }
 
         if (null !== $limit) {
@@ -243,7 +237,8 @@ class NestedNodeQueryBuilder extends QueryBuilder
                     ->setFirstResult($start);
         }
 
-        return $this->andParentIs($node->getParent(), $alias);
+        return $this->andParentIs($node->getParent(), $alias)
+                        ->orderByMultiple($order, $alias);
     }
 
     /**
@@ -259,6 +254,18 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add query part to select previous siblings of node
+     * @param \BackBuilder\NestedNode\ANestedNode $node
+     * @param string $alias     optional, the alias to use
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     */
+    public function andIsPreviousSiblingsOf(ANestedNode $node, $alias = null)
+    {
+        return $this->andParentIs($node->getParent(), $alias)
+                        ->andLeftnodeIsLowerThan($node->getLeftnode(), true, $alias);
+    }
+
+    /**
      * Add query part to select next sibling of node
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @param string $alias     optional, the alias to use
@@ -268,6 +275,18 @@ class NestedNodeQueryBuilder extends QueryBuilder
     {
         return $this->andRootIs($node->getRoot(), $alias)
                         ->andLeftnodeEquals($node->getRightnode() + 1, $alias);
+    }
+
+    /**
+     * Add query part to select next siblings of node
+     * @param \BackBuilder\NestedNode\ANestedNode $node
+     * @param string $alias     optional, the alias to use
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     */
+    public function andIsNextSiblingsOf(ANestedNode $node, $alias = null)
+    {
+        return $this->andParentIs($node->getParent(), $alias)
+                        ->andLeftnodeIsUpperThan($node->getRightnode(), true, $alias);
     }
 
     /**
@@ -313,12 +332,41 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add multiple ordering criteria
+     * @param array $order       optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
+     * @param string $alias      optional, the alias to use
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     */
+    public function orderByMultiple($order = array('_leftnode' => 'asc'), $alias = null)
+    {
+        if (true === empty($order)) {
+            $order = array('_leftnode' => 'asc');
+        }
+        
+        $this->resetDQLPart('orderBy');
+        $alias = $this->getFirstAlias($alias);
+        foreach ($order as $field => $sort) {
+            if (0 < count($this->getDQLPart('orderBy'))) {
+            $this->addOrderBy($alias . '.' . $field, $sort);
+            } else {
+                $this->orderBy($alias . '.' . $field, $sort);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Try to retreive the root alias for this builder
      * @return string
      * @throws \BackBuilder\Exception\BBException
      */
-    protected function getRootAlias()
+    protected function getFirstAlias($alias = null)
     {
+        if (false === empty($alias)) {
+            return $alias;
+        }
+
         if (null === $this->_root_alias) {
             $aliases = $this->getRootAliases();
             if (0 === count($aliases)) {
@@ -339,7 +387,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
     protected function getAliasAndSuffix($alias = null)
     {
         $suffix = count($this->getParameters());
-        $alias = true === empty($alias) ? $this->getRootAlias() : $alias;
+        $alias = $this->getFirstAlias($alias);
 
         return array($alias, $suffix);
     }
