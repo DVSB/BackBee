@@ -1,0 +1,197 @@
+<?php
+
+namespace BackBuilder\TestUnit\BackBuilder\Util;
+
+use BackBuilder\Util\Dir;
+
+use org\bovigo\vfs\vfsStream,
+    org\bovigo\vfs\vfsStreamFile,
+    org\bovigo\vfs\vfsStreamDirectory,
+    org\bovigo\vfs\vfsStreamWrapper;
+
+class DirTest extends \PHPUnit_Framework_TestCase
+{
+
+    /**
+     * 
+     * @covers \BackBuilder\Util\Dir::copy
+     * @covers \BackBuilder\Util\Dir::getContent
+     * 
+     */
+   public function testCopy()
+    {
+       $dir_mode = 0777;
+       $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
+        
+       $start_path = vfsStream::url('dircopy');
+       $copy_path = 'file.txt';
+        
+       $dir_path = Dir::copy($start_path, $copy_path);       
+
+       $this->assertEquals(true, $dir_path);
+       $this->assertFileEquals($copy_path, $start_path);
+
+    }
+    
+    
+     /**
+     * 
+     * @covers \BackBuilder\Util\Dir::copy
+     * @covers \BackBuilder\Util\Dir::getContent
+     * 
+     */
+    public function unreadbleCopy() {
+       $dir_mode = 0000;
+       $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
+        
+       $start_path = vfsStream::url('dircopy');    
+              
+       $unreadable = vfsStream::setup('copydir', 0000);
+       $dir_path1 = Dir::copy($start_path, $unreadable);
+
+
+       $this->assertEquals(false, $dir_path1);
+    }
+    
+    /**
+     * @covers \BackBuilder\Util\Dir::getContent
+     * @expectedException \Exception
+     */
+   public function testUnknownGetContent()
+    {
+        Dir::getContent('unknow');       
+    }
+    
+    /**
+     * @covers \BackBuilder\Util\Dir::getContent
+     * @expectedException \Exception
+     */
+   public function testFileGetContent()
+    {
+        Dir::getContent('/DirTest.php');       
+    }
+    
+    
+    /**
+     * @covers \BackBuilder\Util\Dir::getContent
+     * 
+     */
+    public function testGetContent() 
+    {         
+       $test_dir = vfsStream::setup('test_dir');
+       $path_dir = vfsStream::url('test_dir');
+       
+       $arr1 = array_diff(scandir($path_dir), array('.', '..'));
+       $arr2 = Dir::getContent($path_dir);
+       
+       $this->assertTrue(is_array($arr2));
+       $this->assertEquals($arr2, $arr1);
+    }
+    
+    
+    /**
+     * @covers \BackBuilder\Util\Dir::getContent
+     * 
+     */
+    public function testModeGetContent() 
+    {
+       $test_dir = vfsStream::setup('test_dir', 0000);
+       $path_dir = vfsStream::url('test_dir');
+       
+       $res = Dir::getContent($path_dir);
+       $this->assertEmpty($res);
+    }    
+    
+      /**
+     * @covers \BackBuilder\Util\Dir::getContent
+     * 
+     */
+    public function testModeFilesGetContent() 
+    {
+       $test_dir = vfsStream::setup('test_dir', 0000, array('file1' => 'file1 data', 'file2' => 'file2 data'));
+       $path_dir = vfsStream::url('test_dir');
+       
+       $res = Dir::getContent($path_dir);
+       $this->assertEmpty($res);
+    } 
+    
+     /**
+     * @covers \BackBuilder\Util\Dir::getContent
+     * 
+     */
+    public function testIsArrayGetContent() 
+    {
+       $test_dir = vfsStream::setup('test_dir', 0777, array('file1' => 'file1 data', 'file2' => 'file2 data'));
+       $path_dir = vfsStream::url('test_dir');
+       
+       $res = Dir::getContent($path_dir);
+       $this->assertTrue(is_array($res));
+    } 
+    
+
+    /**
+     * @covers \BackBuilder\Util\Dir::delete
+     * 
+     */
+    public function testDelete()
+    { 
+        vfsStream::setup('test_dir');
+        $path_dir = vfsStream::url('test_dir');
+        
+        $res = Dir::delete($path_dir);
+        
+        $this->assertEquals(TRUE, $res);
+        $this->assertFileNotExists($path_dir);
+    }
+
+    /**
+     * @covers \BackBuilder\Util\Dir::move
+     * 
+     */
+    public function testSimpleMove()
+    {
+       $dir_mode = 0777;
+       $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
+        
+       $start_path = vfsStream::url('dircopy');
+       $copy_path = 'file.txt';
+        
+       $dir_path = Dir::move($start_path, $copy_path, $dir_mode);       
+
+       $this->assertEquals(true, $dir_path);
+        
+    }
+    
+    /**
+     * @covers \BackBuilder\Util\Dir::move
+     * 
+     */
+    public function testCallback2ParamsMove()
+    {
+       $dir_mode = 0777;
+       $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
+        
+       $start_path = vfsStream::url('dircopy');
+       $copy_path = 'file.txt';
+        
+       $dir_path = Dir::move($start_path, $copy_path, $dir_mode, array('getContent',$start_path, $copy_path));       
+       $this->assertEquals(true, $dir_path);
+    }
+    
+    /**
+     * @covers \BackBuilder\Util\Dir::move
+     * 
+     */
+    public function testCallback3ParamsMove()
+    {
+       $dir_mode = 0777;
+       $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
+        
+       $start_path = vfsStream::url('dircopy');
+       $copy_path = 'file.txt';
+       
+       $dir_path = Dir::move($start_path, $copy_path, $dir_mode, array('getContent',$start_path, $copy_path, $dir_mode));       
+       $this->assertEquals(true, $dir_path);
+    }
+
+}
