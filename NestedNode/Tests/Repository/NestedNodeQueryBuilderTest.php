@@ -459,6 +459,14 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
+        $bootstrap_yml = array(
+            'debug' => true,
+            'container' => array(
+                'dump_directory' => '',
+                'autogenerate' => true
+            )
+        );
+
         $mockConfig = array(
             'cache' => array(
                 'default' => array()
@@ -468,6 +476,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
                 'ClassContent' => array(),
                 'Config' => array(
                     'config.yml' => file_get_contents(__DIR__ . '/../config.yml'),
+                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml)
                 ),
                 'Data' => array(
                     'Media' => array(),
