@@ -4,5 +4,5 @@ debug: false
 
 # container configuration
 container:
-    dump_directory: /var/www/bb5-next/container/
+    dump_directory: vfs://basedir/container/
     autogenerate: true

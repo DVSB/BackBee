@@ -55,7 +55,7 @@ class UserControllerTest extends TestCase
         $this->initAutoload();
         $bbapp = $this->getBBApp();
         $this->initDb($bbapp);
-        $bbapp->start();
+        $this->getBBApp()->setIsStarted(true);
         
         // save user
         $group = new Group();

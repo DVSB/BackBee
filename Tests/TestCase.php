@@ -230,7 +230,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
             
             $mockConfig = array(
                 'cache' => array(
-                    'default' => array()
+                    'test' => array(
+                        'default' => array()
+                    )
                 ),
                 'log' => array(),
                 'repository' => array(
@@ -240,6 +242,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
                         'doctrine.yml' => file_get_contents(__DIR__ . '/config/doctrine.yml'),
                         'logging.yml' => file_get_contents(__DIR__ . '/config/logging.yml'),
                         'bootstrap.yml' => file_get_contents(__DIR__ . '/config/bootstrap.yml'),
+                        'security.yml' => file_get_contents(__DIR__ . '/config/security.yml'),
                     ),
                     'Data' => array(
                         'Media' => array(),
