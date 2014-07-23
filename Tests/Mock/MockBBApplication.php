@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -62,82 +62,64 @@ class MockBBApplication extends BBApplication
 
     /**
      * Mock the BBApplication class constructor
-     * 
+     *
      * @param string $context
      * @param boolean $debug
      * @param boolean $overwrite_config
      */
-    public function __construct($context = null, $debug = false, $overwrite_config = false, $mockConfig = null)
+    public function __construct($context = null, $environment = false, $overwrite_config = false, $mockConfig = null)
     {
         $this->_mockInitStructure($mockConfig);
-        parent::__construct($context, $debug, $overwrite_config);
+        parent::__construct($context, $environment, $overwrite_config);
     }
 
     /**
-     * Mock the method returning the BackBuilder directory
+     * Mock the merhod returning the base repository directory
+     *
      * @return string
-     */
-    public function getBBDir()
+    */
+    public function getBaseRepository()
     {
-        if (null === $this->_bbdir) {
-            $r = new \ReflectionClass('\BackBuilder\BBApplication');
-            $this->_bbdir = dirname($r->getFileName());
-        }
-
-        return $this->_bbdir;
-    }
-
-    /**
-     * Mock the merhod returning the installation directory
-     * @return string
-     */
-    public function getBaseDir()
-    {
-        return vfsStream::url('basedir');
+        return vfsStream::url('repositorydir');
     }
 
     /**
      * Initilizes the mock structure
+     *
      * @return \BackBuilder\Tests\Mock\MockBBApplication
      */
     protected function _mockInitStructure($mockConfig = null)
     {
         if(null === $mockConfig) {
             $mockConfig = array(
-                'cache' => array(
-                    'default' => array()
+                'ClassContent' => array(),
+                'Config' => array(
+                    'config.yml' => file_get_contents(__DIR__ . '/' . '..' . '/' . 'config.yml'),
+                    'services.xml' => file_get_contents(__DIR__ . '/' . '..' . '/' . 'services.xml'),
                 ),
-                'log' => array(),
-                'repository' => array(
-                    'ClassContent' => array(),
-                    'Config' => array(
-                        'config.yml' => file_get_contents(__DIR__ . '/' . '..' . '/' . 'config.yml'),
-                        'services.xml' => file_get_contents(__DIR__ . '/' . '..' . '/' . 'services.xml'),
-                    ),
-                    'Data' => array(
-                        'Media' => array(),
-                        'Storage' => array(),
-                        'Tmp' => array()
-                    ),
-                    'Ressources' => array()
-                )
+                'Data' => array(
+                    'Media' => array(),
+                    'Storage' => array(),
+                    'Tmp' => array()
+                ),
+                'Ressources' => array()
             );
         }
-        
-        $this->_mock_basedir = vfsStream::setup('basedir', 0777, $mockConfig);
+
+        $this->_mock_basedir = vfsStream::setup('repositorydir', 0777, $mockConfig);
 
         return $this;
     }
-    
-    
+
+
     /**
      */
     public function setIsStarted($isStarted)
     {
         $this->_isstarted = $isStarted;
     }
-    
-    
+
+
     /**
      * @return boolean
      */
