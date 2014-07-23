@@ -186,7 +186,7 @@ class ClassContentQueryBuilder extends QueryBuilder
         if (NULL != $expression) {
             $this->andWhere(
                 $this->expr()->like(
-                    'c._label',
+                    'cc._label',
                     $this->expr()->literal('%' . $expression . '%')
                 )
             );
