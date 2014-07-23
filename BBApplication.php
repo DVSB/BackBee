@@ -104,7 +104,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     private $_isinitialized;
     private $_isstarted;
     private $_bbdir;
-    private $_cachedir;
     private $_mediadir;
     private $_repository;
     private $_base_repository;
@@ -479,11 +478,11 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     public function getCacheDir()
     {
-        if (null === $this->_cachedir) {
-            $this->_cachedir = $this->getContainer()->getParameter('bbapp.cache.dir');
+        if (null === $this->_container) {
+            throw new \Exception('Application\'s container is not ready!');
         }
 
-        return $this->_cachedir;
+        return $this->getContainer()->getParameter('bbapp.cache.dir');
     }
 
     /**
