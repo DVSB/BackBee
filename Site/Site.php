@@ -205,7 +205,7 @@ class Site extends AObjectIdentifiable implements IJson
      * 
      * @param \BackBuilder\Site\Layout $layout
      */
-    public function addlayout(Layout $layout)
+    public function addLayout(Layout $layout)
     {
         $this->_layouts[] = $layout;
     }

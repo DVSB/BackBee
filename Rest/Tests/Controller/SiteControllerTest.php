@@ -85,7 +85,7 @@ class SiteControllerTest extends TestCase
             )
         )));
         
-        $this->site->addlayout($this->layout);
+        $this->site->addLayout($this->layout);
         $this->bbapp->getEntityManager()->persist($this->layout);
         $this->bbapp->getEntityManager()->persist($this->site);
         
