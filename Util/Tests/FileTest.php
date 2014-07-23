@@ -186,21 +186,37 @@ class FileTest extends \PHPUnit_Framework_TestCase
     /**
      * 
      * @covers \BackBuilder\Util\File::extractZipArchive
-     * 
+     * @expectedException Exception
      */
-    public function testExtractZipArchive()
+    public function testExtractZipArchiveNonexistentDir()
     {
-     /* $vfs_dir = vfsStream::setup('dircopy', 0775, array('copyfile.txt' => 'copy data', 'file2.txt' => 'copy data' , 'file3.php' => 'copy data' , 'file4.yml' => 'copy data'));
-      $path = vfsStream::url('dircopy');
-      
-      $vfs_dir = vfsStream::setup('dirzip');
-      $path_zip = vfsStream::url('dirzip');
-      
-      $z = new ZipArchive();
-      $z->open($path_zip, ZIPARCHIVE::CREATE);
-      $z->addEmptyDir($path); 
-      var_dump(File::extractZipArchive($z, $path_zip));*/
-      
+      File::extractZipArchive('test', 'test');
+    
     }
+    
+    /**
+     * 
+     * @covers \BackBuilder\Util\File::extractZipArchive
+     * @expectedException Exception
+     */
+    public function testExtractZipArchiveUnreadableDir()
+    {
+      $vfs_dir = vfsStream::setup('dirzip', 0000);
+      $path_zip = vfsStream::url('dirzip');
+      File::extractZipArchive('test', $vfs_dir);
+    }
+    
+    /**
+     * 
+     * @covers \BackBuilder\Util\File::extractZipArchive
+     * @expectedException Exception
+     */
+    public function testExtractZipArchiveExistingDir()
+    {
+      $vfs_dir = vfsStream::setup('dirzip', 0777);
+      $path_zip = vfsStream::url('dirzip');
+      File::extractZipArchive('test', $path_zip, true);
+    }
+    
     
 }
