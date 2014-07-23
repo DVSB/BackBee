@@ -48,7 +48,7 @@ class SecurityControllerTest extends TestCase
     {
         $this->initAutoload();
         
-        $this->bbapp = new \BackBuilder\BBApplication(null, 'test');
+        $this->bbapp = $this->getBBApp();
         $this->initDb($this->bbapp);
         
         $this->bbapp->start();
@@ -189,8 +189,8 @@ class SecurityControllerTest extends TestCase
 
     protected function tearDown()
     {
-        $this->dropDb($this->bbapp);
-        $this->bbapp->stop();
+        $this->dropDb();
+        $this->getBBApp()->stop();
     }
     
     /**

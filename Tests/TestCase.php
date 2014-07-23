@@ -193,9 +193,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $schema->updateSchema($metadata, true);
     }
 
-    public function dropDb($bbapp)
+    public function dropDb()
     {
-        $em = $this->getBBApp()->getContainer()->get('em');
+        $bbapp = $this->getBBApp();
+        $em = $bbapp->getContainer()->get('em');
 
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
