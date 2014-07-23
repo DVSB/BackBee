@@ -1,0 +1,3 @@
+appender: \BackBuilder\Logging\Appender\Output
+logfile: log/bb5-tests.log
+level: ERROR

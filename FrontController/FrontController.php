@@ -660,17 +660,22 @@ class FrontController implements HttpKernelInterface
                 $this->_request = $request;
             }
 
-            $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
-            $matches = $urlMatcher->match($this->getRequest()->getPathInfo());
-
-            if(!isset($matches['_controller'])) {
-                // set default cotnroller to this
-                $matches['_controller'] = $this;
-            }
-
-            if ($matches) {
+            // resolve url
+            if(!$this->getRequest()->attributes->get('_controller')) {
+                $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
+                $matches = $urlMatcher->match($this->getRequest()->getPathInfo());
+                
+                if(!isset($matches['_controller'])) {
+                    // set default cotnroller to this
+                    $matches['_controller'] = $this;
+                }
+                
+                
                 $this->getRequest()->attributes->add($matches);
-
+            }
+            
+            
+            if($this->getRequest()->attributes->has('_controller')) {
                 return $this->_invokeAction($type);
             }
 

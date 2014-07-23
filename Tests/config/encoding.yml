@@ -1,0 +1,4 @@
+# /!\ Do not set your encoding parameters on this file but in encoding.yml (in same folder than this one)
+# Encoding configuration
+encoding:
+    locale: fr_FR

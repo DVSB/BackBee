@@ -63,7 +63,7 @@ class SiteControllerTest extends TestCase
     protected function setUp()
     {
         $this->initAutoload();
-        $this->bbapp = new \BackBuilder\BBApplication(null, 'test');
+        $this->bbapp = $this->getBBApp();
         $this->initDb($this->bbapp);
         $this->bbapp->start();
         
@@ -130,7 +130,7 @@ class SiteControllerTest extends TestCase
 
     protected function tearDown()
     {
-        $this->dropDb($this->bbapp);
+        $this->dropDb();
         $this->bbapp->stop();
     }
     
@@ -140,6 +140,6 @@ class SiteControllerTest extends TestCase
      */
     protected function getEntityManager()
     {
-         return $this->bbapp->getContainer()->get('em');
+         return $this->getBBApp()->getContainer()->get('em');
     }
 }

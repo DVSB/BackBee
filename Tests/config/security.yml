@@ -1,0 +1,37 @@
+firewalls:
+    bb_area:
+        pattern: ^/
+        requirements:
+            HTTP-X-Requested-With: XMLHttpRequest
+            HTTP-X-BB-METHOD: (JsonRpc|Upload)
+        provider: bb_user
+        bb_auth:
+            provider: bb_user
+            nonce_dir: security/nonces
+            lifetime: 1800
+            use_registry: true
+    rest_api_area_test:
+        pattern: ^/rest/1/_
+        anonymous: ~
+    rest_api_area:
+        pattern: ^/rest
+        provider: public_key
+        public_key: ~
+        restful: ~
+
+
+providers:
+    bb_user:
+        entity:
+            class: BackBuilder\Security\User
+        secret: bb5_secret_key
+    public_key:
+        entity:
+            class: BackBuilder\Security\User
+
+contexts:
+    BackBuilder\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext, RestfulContext]
+
+
+acl:
+    connection: default

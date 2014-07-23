@@ -1,0 +1,3 @@
+parameters:
+    # bbapp parameters, somes will be set at init of container by BBApplication
+    bbapp.cache.dir: vfs://repositorydir/cache/

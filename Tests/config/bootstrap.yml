@@ -1,0 +1,8 @@
+# Example of bootstrap.yml
+# define debug value of BBApplication
+debug: false
+
+# container configuration
+container:
+    dump_directory: vendor/container/
+    autogenerate: true

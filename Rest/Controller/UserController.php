@@ -24,6 +24,7 @@ namespace BackBuilder\Rest\Controller;
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Validator\ConstraintViolationList,
+    Symfony\Component\Validator\ConstraintViolation,
     Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
     Symfony\Component\Security\Http\SecurityEvents,
     Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,6 +33,9 @@ use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBuilder\Security\Token\UsernamePasswordToken;
+
+use BackBuilder\Security\User;
+use BackBuilder\Rest\Exception\ValidationException;
 
 /**
  * User Controller
@@ -193,18 +197,93 @@ class UserController extends ARestController
     /**
      * UPDATE User 
      * 
+     * @Rest\RequestParam(name = "login", requirements = {
+     *  @Assert\NotBlank(message="Login is required"),
+     *  @Assert\Length(min=6, minMessage="Minimum length of the login is 6 characters")
+     * })
+     * @Rest\RequestParam(name = "firstname", requirements = {
+     *  @Assert\NotBlank(message="First Name is required")
+     * })
+     * @Rest\RequestParam(name = "lastname", requirements = {
+     *  @Assert\NotBlank(message="Last Name is required")
+     * })
+     * 
      * @param int $id User ID
      */
-    public function putAction($id) 
+    public function putAction($id, Request $request, ConstraintViolationList $violations = null) 
     {
+        if(null !== $violations && count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+        
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
-
+        
         if(!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
         }
+
+        $this->deserializeEntity($request->request->all(), $user);
         
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
         
         return new Response("", 204);
+    }
+    
+    /**
+     * Create User 
+     * 
+     * 
+     * @Rest\RequestParam(name = "password", requirements = {
+     *  @Assert\NotBlank(message="Password not provided"),
+     *  @Assert\Length(min=6, minMessage="Password minimum length is 6 characters")
+     * })
+     * @Rest\RequestParam(name = "login", requirements = {
+     *  @Assert\NotBlank(message="Login is required"),
+     *  @Assert\Length(min=6, minMessage="Minimum length of the login is 6 characters")
+     * })
+     * @Rest\RequestParam(name = "firstname", requirements = {
+     *  @Assert\NotBlank(message="First Name is required")
+     * })
+     * @Rest\RequestParam(name = "lastname", requirements = {
+     *  @Assert\NotBlank(message="Last Name is required")
+     * })
+     * 
+     */
+    public function postAction(Request $request, ConstraintViolationList $violations = null)
+    {
+        if(null !== $violations && count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+        
+        $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\User')->findBy(array('_login' => $request->request->get('login')));
+        
+        if($userExists) {
+            throw new ValidationException(new ConstraintViolationList(array(
+                new ConstraintViolation('User with that login already exists', 'User with that login already exists', array(), 'login', 'login', $request->request->get('login'))
+            )));
+        }
+        
+        $user = new User();
+        $user = $this->deserializeEntity($request->request->all(), $user);
+        
+        // handle the password
+        if($request->request->has('password')) {
+            $encoderFactory = $this->getContainer()->get('security.context')->getEncoderFactory();
+            $password = $request->request->get('password');
+
+            //var_dump($request->request, $password);
+            if($encoderFactory && $encoder = $encoderFactory->getEncoder($user)) {
+                $password = $encoder->encodePassword($password, "");
+            }
+            
+            $user->setPassword($password);
+        }
+
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+        
+        return new Response($this->formatItem($user), 200, array('Content-Type' => 'application/json'));
     }
     
     

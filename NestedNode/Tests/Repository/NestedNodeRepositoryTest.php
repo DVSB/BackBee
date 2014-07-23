@@ -563,7 +563,7 @@ class NestedNodeRepositoryTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $this->application = new MockBBApplication(null, false, false, $mockConfig);
+        $this->application = new MockBBApplication(null, $mockConfig);
         $em = $this->application->getEntityManager();
 
         $st = new \Doctrine\ORM\Tools\SchemaTool($em);

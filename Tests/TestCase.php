@@ -8,6 +8,8 @@ use org\bovigo\vfs\vfsStream;
 use Doctrine\ORM\Tools\SchemaTool,
     Doctrine\ORM\EntityManager;
 
+use BackBuilder\Tests\Mock\MockBBApplication;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Tests
@@ -20,6 +22,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
     private $backbuilder_folder;
     private $repository_folder;
     private $mock_container = array();
+    
+    protected $bbapp;
 
     /**
      * Autoloader initialisation
@@ -189,8 +193,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $schema->updateSchema($metadata, true);
     }
 
-    public function dropDb($bbapp)
+    public function dropDb()
     {
+        $bbapp = $this->getBBApp();
         $em = $bbapp->getContainer()->get('em');
 
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
@@ -212,6 +217,21 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         $schema->dropDatabase();
+    }
+    
+    /**
+     * 
+     * @return \BackBuilder\BBApplication
+     */
+    public function getBBApp()
+    {
+        if(null === $this->bbapp) {
+            //$this->bbapp = new \BackBuilder\BBApplication(null, 'test');
+            
+            $this->bbapp = new MockBBApplication(null, 'test');
+        }
+        
+        return $this->bbapp;
     }
 
 }

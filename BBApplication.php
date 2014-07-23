@@ -20,6 +20,9 @@ namespace BackBuilder;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace BackBuilder;
+
+
 use BackBuilder\AutoLoader\AutoLoader;
 use BackBuilder\Bundle\BundleLoader;
 use BackBuilder\Config\Config;
@@ -38,6 +41,7 @@ use BackBuilder\Util\File;
 use BackBuilder\Bundle\ABundle;
 use BackBuilder\Console\Console;
 use BackBuilder\NestedNode\Repository\NestedNodeRepository;
+use BackBuilder\Doctrine\Registry as DoctrineRegistry;
 
 use Doctrine\Common\EventManager;
 use Doctrine\ORM\Configuration;
@@ -53,6 +57,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Finder\Finder;
+
 
 /**
  * The main BackBuilder5 application
@@ -481,7 +486,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return BackBuilder\DependencyInjection\Container
+     * @return \BackBuilder\DependencyInjection\Container
      */
     public function getContainer()
     {
@@ -533,14 +538,14 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * @return EntityManager
      */
-    public function getEntityManager()
+    public function getEntityManager($name = 'default')
     {
         try {
-            if (null === $this->getContainer()->get('em')) {
+            if (null === $this->getContainer()->get('doctrine')) {
                 $this->_initEntityManager();
             }
 
-            return $this->getContainer()->get('em');
+            return $this->getContainer()->get('doctrine')->getManager($name);
         } catch (\Exception $e) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
@@ -923,7 +928,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                     $ns .= '\\' . strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
-                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && 0 === $r->getConstructor()->getNumberOfRequiredParameters()) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
                     $console->add($instance);
@@ -1148,6 +1153,9 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
             $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
             $this->getContainer()->set('em', $em);
+            
+            $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
+            $this->getContainer()->set('doctrine', $registry);
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
         } catch (\Exception $e) {
