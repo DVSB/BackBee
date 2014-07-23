@@ -73,6 +73,27 @@ class MockBBApplication extends BBApplication
         parent::__construct($context, $environment, $overwrite_config);
     }
 
+    public function getBBDir()
+     {
+        if (null === $this->_bbdir) {
+            $r = new \ReflectionClass('\BackBuilder\BBApplication');
+            $this->_bbdir = dirname($r->getFileName());
+        }
+
+
+        return $this->_bbdir;
+     }
+     
+    /**
+     * Get vendor dir
+     *
+     * @return string
+     */
+    public function getVendorDir()
+    {
+        return $this->getBBDir() . '/vendor';
+    }
+    
     /**
      * Mock the merhod returning the base repository directory
      *
@@ -82,6 +103,8 @@ class MockBBApplication extends BBApplication
     {
         return vfsStream::url('repositorydir');
     }
+    
+    
 
     /**
      * Initilizes the mock structure
@@ -94,8 +117,11 @@ class MockBBApplication extends BBApplication
             $mockConfig = array(
                 'ClassContent' => array(),
                 'Config' => array(
-                    'config.yml' => file_get_contents(__DIR__ . '/' . '..' . '/' . 'config.yml'),
-                    'services.xml' => file_get_contents(__DIR__ . '/' . '..' . '/' . 'services.xml'),
+                    'config.yml' => file_get_contents(__DIR__ . '/../config/config.yml'),
+                    'doctrine.yml' => file_get_contents(__DIR__ . '/../config/doctrine.yml'),
+                    'logging.yml' => file_get_contents(__DIR__ . '/../config/logging.yml'),
+                    'bootstrap.yml' => file_get_contents(__DIR__ . '/../config/bootstrap.yml'),
+                    'security.yml' => file_get_contents(__DIR__ . '/../config/security.yml'),
                 ),
                 'Data' => array(
                     'Media' => array(),

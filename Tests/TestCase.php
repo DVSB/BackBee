@@ -227,33 +227,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         if(null === $this->bbapp) {
             //$this->bbapp = new \BackBuilder\BBApplication(null, 'test');
             
-            
-            $mockConfig = array(
-                'cache' => array(
-                    'test' => array(
-                        'default' => array()
-                    )
-                ),
-                'log' => array(),
-                'repository' => array(
-                    'ClassContent' => array(),
-                    'Config' => array(
-                        'config.yml' => file_get_contents(__DIR__ . '/config/config.yml'),
-                        'doctrine.yml' => file_get_contents(__DIR__ . '/config/doctrine.yml'),
-                        'logging.yml' => file_get_contents(__DIR__ . '/config/logging.yml'),
-                        'bootstrap.yml' => file_get_contents(__DIR__ . '/config/bootstrap.yml'),
-                        'security.yml' => file_get_contents(__DIR__ . '/config/security.yml'),
-                    ),
-                    'Data' => array(
-                        'Media' => array(),
-                        'Storage' => array(),
-                        'Tmp' => array()
-                    ),
-                    'Ressources' => array()
-                )
-            );
-            
-            $this->bbapp = new MockBBApplication(null, $mockConfig);
+            $this->bbapp = new MockBBApplication(null, 'test');
         }
         
         return $this->bbapp;
