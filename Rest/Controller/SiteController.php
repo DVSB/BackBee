@@ -82,7 +82,9 @@ class SiteController extends ARestController
         foreach($site->getLayouts() as $layout) {
             $layouts[] = array(
                 'uid' => $layout->getUid(),
-                'site_uid' => $layout->getSite()->getUid(),
+                'site' => array(
+                    'uid' => $layout->getSite()->getUid()
+                ),
                 'label' => $layout->getLabel(),
                 'path' => $layout->getPath(),
                 'data' => json_decode($layout->getData(), true),

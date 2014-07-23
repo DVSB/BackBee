@@ -31,6 +31,7 @@ use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\SiteController;
 use BackBuilder\Tests\TestCase;
 
+use BackBuilder\Security\Token\BBUserToken;
 
 use BackBuilder\Site\Site,
     BackBuilder\Site\Layout;
@@ -90,6 +91,15 @@ class SiteControllerTest extends TestCase
         $this->bbapp->getEntityManager()->persist($this->site);
         
         $this->bbapp->getEntityManager()->flush();
+        
+        
+        $securityContext = $this->bbapp->getContainer()->get('security.context');
+        /* @var $securityContext \BackBuilder\Security\SecurityContext */
+        
+        $token = new BBUserToken(array(
+            'ROLE_API_USER'
+        ));
+        $securityContext->setToken($token);
     }
     
     protected function getController()
@@ -105,7 +115,6 @@ class SiteControllerTest extends TestCase
     {
         $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($this->site->getUid());
         $layout = $this->getEntityManager()->getRepository('BackBuilder\Site\layout')->find($this->layout->getUid());
-        //var_dump($layout);exit;
         
         $request = new Request(array(), array(
             'id' => $this->site->getUid(),

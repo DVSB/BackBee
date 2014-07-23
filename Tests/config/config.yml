@@ -27,3 +27,9 @@ theme:
     css_dir: css
     img_dir: img
     js_dir: js
+    
+renderer:
+    adapter:      [\BackBuilder\Renderer\Adapter\Twig, \BackBuilder\Renderer\Adapter\phtml]
+    path:
+        scriptdir:    Templates/scripts
+        layoutdir:    Layouts
