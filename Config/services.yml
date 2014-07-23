@@ -203,7 +203,7 @@ services:
             - [setCache, [@rest.metadata.cache]]
 
     rest.metadata.cache:
-        class: Metadata\Cache\FileCache
+        class: BackBuilder\Rest\Metadata\Cache\FileCache
         arguments:  ["%bbapp.cache.dir%/"]
 
     rest.controller.test:
@@ -414,7 +414,7 @@ services:
         #JMS\Serializer\Metadata\Driver
     
     serializer.metadata.cache:
-        class: Metadata\Cache\FileCache
+        class: BackBuilder\Rest\Metadata\Cache\FileCache
         arguments:  ["%bbapp.cache.dir%/"]
         
     serializer.naming_strategy:

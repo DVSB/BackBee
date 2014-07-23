@@ -21,13 +21,8 @@
 
 namespace BackBuilder\Rest\Tests\Controller;
 
-use BackBuilder\Rest\EventListener\PaginationListener;
-
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-
 use Symfony\Component\HttpFoundation\Request;
 
-use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\UserController;
 use BackBuilder\Tests\TestCase;
 
@@ -45,8 +40,6 @@ use BackBuilder\Security\User,
  */
 class UserControllerTest extends TestCase
 {
-
-    
     
     protected $user;
     
@@ -263,7 +256,6 @@ class UserControllerTest extends TestCase
         $this->assertInternalType('array', $content);
         
         $this->assertEquals($this->user->getId(), $content['id']);
-        
     }
     
     public function testGetAction_invalidUser()
@@ -435,8 +427,6 @@ class UserControllerTest extends TestCase
     
     public function testPostAction_missing_required_fields()
     {
-        $controller = $this->getController();
-        
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(), array(
             '_action' => 'postAction',
             '_controller' => 'BackBuilder\Rest\Controller\UserController'
@@ -468,9 +458,6 @@ class UserControllerTest extends TestCase
         $this->getBBApp()->getEntityManager()->persist($user);
         $this->getBBApp()->getEntityManager()->flush();
         
-        
-        $controller = $this->getController();
-        
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
             'login' => 'usernameDulicate',
             'api_key_enabled' => true,
@@ -487,7 +474,7 @@ class UserControllerTest extends TestCase
         
         $this->assertEquals(400, $response->getStatusCode());
         
-        $res = json_decode($response->getContent(), true);
+        $res = \json_decode($response->getContent(), true);
 
         $this->assertContains('User with that login already exists', $res['errors']['login']);
     }
