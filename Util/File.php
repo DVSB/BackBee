@@ -48,6 +48,7 @@ class File
      */
     public static function realpath($path)
     {
+        $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
         if (false === $parse_url = parse_url($path)) {
             return false;
         }
