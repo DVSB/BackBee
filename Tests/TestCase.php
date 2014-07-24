@@ -195,17 +195,19 @@ class TestCase extends \PHPUnit_Framework_TestCase
     
     public function initAcl()
     {
-        $sql = file_get_contents($this->getBBApp()->getVendorDir() . '/symfony/symfony/src/Symfony/Component/Security/Acl/Resources/schema/sqlite.sql');
-        
         $conn = $this->getBBApp()->getContainer()->get('em')->getConnection();
-        /* @var $conn \Doctrine\DBAL\Connection */
         
-        foreach(explode("\n", $sql) as $query) {
-            $query = trim($query);
-            if('' === $query) {
-                // skip empty lines
-                continue;
-            }
+        $schema = new \Symfony\Component\Security\Acl\Dbal\Schema(array(
+            'class_table_name'         => 'acl_classes',
+            'entry_table_name'         => 'acl_entries',
+            'oid_table_name'           => 'acl_object_identities',
+            'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
+            'sid_table_name'           => 'acl_security_identities',
+        ));
+        
+        $platform = new \Doctrine\DBAL\Platforms\SqlitePlatform();
+        
+        foreach($schema->toSql($platform) as $query) {
             $conn->executeQuery($query);
         }
     }
