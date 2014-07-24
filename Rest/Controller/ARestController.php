@@ -24,9 +24,13 @@ namespace BackBuilder\Rest\Controller;
 use Symfony\Component\HttpFoundation\Response;
 
 use BackBuilder\Controller\Controller,
-    BackBuilder\Rest\Formatter\IFormatter;
+    BackBuilder\Rest\Formatter\IFormatter,
+    BackBuilder\Serializer\Construction\DoctrineObjectConstructor,
+    BackBuilder\Serializer\SerializerBuilder;
 
-use JMS\Serializer\SerializerBuilder;
+use JMS\Serializer\Serializer,
+    JMS\Serializer\DeserializationContext,
+    JMS\Serializer\Construction\UnserializeObjectConstructor;
 
 /**
  * Abstract class for an api controller
@@ -85,6 +89,24 @@ abstract class ARestController extends Controller implements IRestController, IF
         return $this->getSerializer()->serialize($item, 'json');
     }
     
+    /**
+     * Deserialize data into Doctrine entity
+     * 
+     * @param string|mixed $item Either a valid Entity class name, or a Doctrine Entity object
+     * @return mixed
+     */
+    public function deserializeEntity(array $data, $entityOrClass)
+    {
+        $context = null;
+        if(is_object($entityOrClass)) {
+            $context = DeserializationContext::create();
+            $context->attributes->set('target', $entityOrClass);
+            $entityOrClass = get_class($entityOrClass);
+        }
+ 
+        return $this->getSerializer()->deserialize(json_encode($data), $entityOrClass, 'json',  $context);
+    }
+    
     
     /**
      * Create a RESTful response
@@ -117,8 +139,13 @@ abstract class ARestController extends Controller implements IRestController, IF
     protected function getSerializer()
     {
         if(null === $this->serializer) {
-            $builder = SerializerBuilder::create();
-            $builder->setAnnotationReader($this->getContainer()->get('annotation_reader'));
+            $builder = SerializerBuilder::create()
+                ->setObjectConstructor($this->getContainer()->get('serializer.object_constructor'))
+                ->setPropertyNamingStrategy($this->getContainer()->get('serializer.naming_strategy'))
+                ->setAnnotationReader($this->getContainer()->get('annotation_reader'))
+                ->setMetadataDriver($this->getContainer()->get('serializer.metadata_driver'))
+            ;
+            
             $this->serializer = $builder->build();
         }
         

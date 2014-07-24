@@ -45,6 +45,8 @@ class User implements UserInterface
      * @var integer
      * @Id @Column(type="integer", name="id")
      * @GeneratedValue(strategy="IDENTITY")
+     * 
+     * @Serializer\Type('integer'))
      */
     protected $_id;
 
@@ -53,6 +55,8 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="login")
      * @fixture(type="word")
+     * 
+     * @Serializer\Type('string'))
      */
     protected $_login;
 
@@ -71,14 +75,16 @@ class User implements UserInterface
      * @var Boolean
      * @Column(type="boolean", name="activated")
      * @fixture(type="boolean")
+     * @Serializer\Type('boolean'))
      */
-    protected $_activated;
+    protected $_activated = false;
 
     /**
      * The firstame of this user
      * @var string
      * @Column(type="string", name="firstname", nullable=true)
      * @fixture(type="firstName")
+     * @Serializer\Type('string'))
      */
     protected $_firstname;
 
@@ -87,6 +93,7 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="lastname", nullable=true)
      * @fixture(type="lastName")
+     * @Serializer\Type('string'))
      */
     protected $_lastname;
 
@@ -110,6 +117,7 @@ class User implements UserInterface
      * @var String
      * @Column(type="string", name="api_key_public", nullable=true)
      * @fixture(type="string")
+     * @Serializer\Type('string'))
      */
     protected $_api_key_public;
     
@@ -119,6 +127,7 @@ class User implements UserInterface
      * @Column(type="string", name="api_key_private", nullable=true)
      * @fixture(type="string")
      * @Serializer\Exclude()
+     * @Serializer\Type('string'))
      */
     protected $_api_key_private;
     
@@ -127,6 +136,7 @@ class User implements UserInterface
      * @var Boolean
      * @Column(type="boolean", name="api_key_enabled")
      * @fixture(type="boolean")
+     * @Serializer\Type('boolean'))
      */
     protected $_api_key_enabled = false;
 
@@ -134,6 +144,7 @@ class User implements UserInterface
      * The creation datetime
      * @var \DateTime
      * @Column(type="datetime", name="created")
+     * @Serializer\Type('DateTime'))
      */
     protected $_created;
 
@@ -141,6 +152,7 @@ class User implements UserInterface
      * The last modification datetime
      * @var \DateTime
      * @Column(type="datetime", name="modified")
+     * @Serializer\Type('DateTime'))
      */
     protected $_modified;
     

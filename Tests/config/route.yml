@@ -1,0 +1,77 @@
+# BackBuilder RPC services
+bb.method:
+    pattern: /
+    defaults:
+        _action: rpcAction
+    requirements:
+        HTTP-X-Requested-With:  XMLHttpRequest
+        HTTP-X-BB-METHOD:       JsonRpc
+
+# BackBuilder RPC upload service
+bb.upload:
+    pattern: /
+    defaults:
+        _action: uploadAction
+    requirements:
+        HTTP-X-Requested-With:  XMLHttpRequest
+        HTTP-X-BB-METHOD:       Upload
+
+# Backbuilder internal services
+bb.internal.services:
+    pattern: /bb-internal-services/{servicename}
+    defaults:
+      _action: handleInternalServicesAction
+    requirements:
+      servicename: (generate_classcontent_cache)
+
+# BackBuilder resources
+bb.resources:
+    pattern: /ressources/{filename}
+    defaults:
+        _action: resourcesAction
+    requirements:
+        filename: .+
+
+# BackBuilder resources
+bb.bundle.resources:
+    pattern: /bundle/{bundle}/{filename}
+    defaults:
+        _action: bundleResourcesAction
+    requirements:
+        filename: .+
+
+# BackBuilder media files
+bb.images:
+    pattern: /{type}/{filename}
+    defaults:
+        _action: mediaAction
+    requirements:
+        type: (images|media)
+        filename: .+
+
+# BackBuilder REST API test page
+bb.rest.test:
+    pattern: /rest/{version}/_generateKey/
+    defaults:
+        _action: generateKeyAction
+        _controller: rest.controller.test
+    requirements:
+            version: \d
+# BackBuilder rss
+bb.rss:
+    pattern: /rss/{uri}
+    defaults:
+        _action: rssAction
+        uri:     _root_
+    requirements:
+        uri: .+
+
+# Default route
+default:
+    pattern: /{uri}
+    defaults:
+        _action: defaultAction
+        uri:     _root_
+    requirements:
+        uri: .+
+

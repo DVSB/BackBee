@@ -76,7 +76,7 @@ class ClassContentQueryBuilder extends QueryBuilder
             $site = $site->getUid();
         }
         $this->andWhere(
-            'c._uid IN (SELECT i.content_uid FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)'
+            'cc._uid IN (SELECT i.content_uid FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)'
         )->setParameter('site_uid', $site);
     }
 
@@ -108,14 +108,14 @@ class ClassContentQueryBuilder extends QueryBuilder
     public function addPageFilter(Page $page)
     {
         if ($page && !$page->isRoot()) {
-            $qb->leftJoin('c._mainnode', 'p')
+            $this->leftJoin('cc._mainnode', 'p')
                ->andWhere('p._root = :selectedPageRoot')
                ->andWhere('p._leftnode >= :selectedPageLeftnode')
                ->andWhere('p._rightnode <= :selectedPageRightnode')
                ->setParameters(array(
-                    "selectedPageRoot" => $selectedNode->getRoot(),
-                    "selectedPageLeftnode" => $selectedNode->getLeftnode(),
-                    "selectedPageRightnode" => $selectedNode->getRightnode()
+                    "selectedPageRoot" => $page->getRoot(),
+                    "selectedPageLeftnode" => $page->getLeftnode(),
+                    "selectedPageRightnode" => $page->getRightnode()
                 ));
         }
     }
@@ -186,7 +186,7 @@ class ClassContentQueryBuilder extends QueryBuilder
         if (NULL != $expression) {
             $this->andWhere(
                 $this->expr()->like(
-                    'c._label',
+                    'cc._label',
                     $this->expr()->literal('%' . $expression . '%')
                 )
             );

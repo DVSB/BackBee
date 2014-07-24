@@ -1,0 +1,35 @@
+parameters:
+  debug: false
+
+
+# Content Wrapper
+contentwrapper:
+    namespace:    BackBuilder\ClassContent
+    protocol:     bb.class
+    adapter:      \BackBuilder\Stream\ClassWrapper\Adapter\Yaml
+    
+    
+# Theme
+themes_dir:
+  default: BackBuilder
+  themes: repository/Ressources/themes
+  personal: repository/Data/themes
+  
+theme:
+  name: Default
+  description: BackBuilder 5 default theme.
+  screenshot: screenshoot.png
+  folder: Resources
+  architecture:
+    layouts_dir: layouts
+    scripts_dir: scripts
+    less_dir: less
+    css_dir: css
+    img_dir: img
+    js_dir: js
+    
+renderer:
+    adapter:      [\BackBuilder\Renderer\Adapter\Twig, \BackBuilder\Renderer\Adapter\phtml]
+    path:
+        scriptdir:    Templates/scripts
+        layoutdir:    Layouts

@@ -8,6 +8,8 @@ use org\bovigo\vfs\vfsStream;
 use Doctrine\ORM\Tools\SchemaTool,
     Doctrine\ORM\EntityManager;
 
+use BackBuilder\Tests\Mock\MockBBApplication;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Tests
@@ -20,6 +22,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
     private $backbuilder_folder;
     private $repository_folder;
     private $mock_container = array();
+    
+    protected $bbapp;
 
     /**
      * Autoloader initialisation
@@ -188,30 +192,48 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $schema = new SchemaTool($em);
         $schema->updateSchema($metadata, true);
     }
-
-    public function dropDb($bbapp)
+    
+    public function initAcl()
     {
-        $em = $bbapp->getContainer()->get('em');
-
-        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
-            $bbapp->getBBDir() . '/Bundle',
-            $bbapp->getBBDir() . '/Cache/DAO',
-            $bbapp->getBBDir() . '/ClassContent',
-            $bbapp->getBBDir() . '/ClassContent/Indexes',
-            $bbapp->getBBDir() . '/Logging',
-            $bbapp->getBBDir() . '/NestedNode',
-            $bbapp->getBBDir() . '/Security',
-            $bbapp->getBBDir() . '/Site',
-            $bbapp->getBBDir() . '/Site/Metadata',
-            $bbapp->getBBDir() . '/Stream/ClassWrapper',
-            $bbapp->getBBDir() . '/Theme',
-            $bbapp->getBBDir() . '/Util/Sequence/Entity',
-            $bbapp->getBBDir() . '/Workflow',
+        $conn = $this->getBBApp()->getContainer()->get('em')->getConnection();
+        
+        $schema = new \Symfony\Component\Security\Acl\Dbal\Schema(array(
+            'class_table_name'         => 'acl_classes',
+            'entry_table_name'         => 'acl_entries',
+            'oid_table_name'           => 'acl_object_identities',
+            'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
+            'sid_table_name'           => 'acl_security_identities',
         ));
+        
+        $platform = new \Doctrine\DBAL\Platforms\SqlitePlatform();
+        
+        foreach($schema->toSql($platform) as $query) {
+            $conn->executeQuery($query);
+        }
+    }
 
-        $metadata = $em->getMetadataFactory()->getAllMetadata();
-        $schema = new SchemaTool($em);
-        $schema->dropDatabase();
+    public function dropDb()
+    {
+        $connection = $this->getBBApp()->getContainer()->get('em')->getConnection();
+        $params = $connection->getParams();
+        $name = isset($params['path']) ? $params['path'] : (isset($params['dbname']) ? $params['dbname'] : false);
+        $name = $connection->getDatabasePlatform()->quoteSingleIdentifier($name);
+        $connection->getSchemaManager()->dropDatabase($name);
+    }
+    
+    /**
+     * 
+     * @return \BackBuilder\BBApplication
+     */
+    public function getBBApp()
+    {
+        if(null === $this->bbapp) {
+            //$this->bbapp = new \BackBuilder\BBApplication(null, 'test');
+            
+            $this->bbapp = new MockBBApplication(null, 'test');
+        }
+        
+        return $this->bbapp;
     }
 
 }

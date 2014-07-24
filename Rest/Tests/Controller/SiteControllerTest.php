@@ -21,16 +21,12 @@
 
 namespace BackBuilder\Rest\Tests\Controller;
 
-use BackBuilder\Rest\EventListener\PaginationListener;
-
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-
 use Symfony\Component\HttpFoundation\Request;
 
-use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\SiteController;
 use BackBuilder\Tests\TestCase;
 
+use BackBuilder\Security\Token\BBUserToken;
 
 use BackBuilder\Site\Site,
     BackBuilder\Site\Layout;
@@ -63,8 +59,9 @@ class SiteControllerTest extends TestCase
     protected function setUp()
     {
         $this->initAutoload();
-        $this->bbapp = new \BackBuilder\BBApplication(null, 'test');
+        $this->bbapp = $this->getBBApp();
         $this->initDb($this->bbapp);
+        $this->initAcl();
         $this->bbapp->start();
         
         // craete site
@@ -85,11 +82,20 @@ class SiteControllerTest extends TestCase
             )
         )));
         
-        $this->site->addlayout($this->layout);
+        $this->site->addLayout($this->layout);
         $this->bbapp->getEntityManager()->persist($this->layout);
         $this->bbapp->getEntityManager()->persist($this->site);
         
         $this->bbapp->getEntityManager()->flush();
+        
+        
+        $securityContext = $this->bbapp->getContainer()->get('security.context');
+        /* @var $securityContext \BackBuilder\Security\SecurityContext */
+        
+        $token = new BBUserToken(array(
+            'ROLE_API_USER'
+        ));
+        $securityContext->setToken($token);
     }
     
     protected function getController()
@@ -105,7 +111,6 @@ class SiteControllerTest extends TestCase
     {
         $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($this->site->getUid());
         $layout = $this->getEntityManager()->getRepository('BackBuilder\Site\layout')->find($this->layout->getUid());
-        //var_dump($layout);exit;
         
         $request = new Request(array(), array(
             'id' => $this->site->getUid(),
@@ -130,7 +135,7 @@ class SiteControllerTest extends TestCase
 
     protected function tearDown()
     {
-        $this->dropDb($this->bbapp);
+        $this->dropDb();
         $this->bbapp->stop();
     }
     
@@ -140,6 +145,6 @@ class SiteControllerTest extends TestCase
      */
     protected function getEntityManager()
     {
-         return $this->bbapp->getContainer()->get('em');
+         return $this->getBBApp()->getContainer()->get('em');
     }
 }

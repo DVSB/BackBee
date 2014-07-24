@@ -193,6 +193,10 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      */
     public function addListener($eventName, $listener, $priority = 0)
     {
+        if (count($listener) === 3 && isset($listener[2])) {
+            $priority = $listener[2];
+            unset($listener[2]);
+        }
         parent::addListener($eventName, $listener, $priority);
 
         $this->raw_listeners[$eventName][$priority][] = $listener;

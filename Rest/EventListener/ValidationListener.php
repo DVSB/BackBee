@@ -75,18 +75,21 @@ class ValidationListener extends APathEnabledListener
             $violations = new ConstraintViolationList();
 
             if(count($metadata->queryParams)) {
-                $queryViolations = $this->validateParams($this->container->get('validator'), $metadata->queryParams, $request->query);
-                $violations->addAll($queryViolations);
-                
                 // set defaults
                 $this->setDefaultValues($metadata->queryParams, $request->query);
-            } elseif(count($metadata->requestParams)) {
-                $requestViolations = $this->validateParams($this->container->get('validator'), $metadata->requestParams, $request->request);
-                $violations->addAll($requestViolations);
                 
+                $queryViolations = $this->validateParams($this->container->get('validator'), $metadata->queryParams, $request->query);
+                $violations->addAll($queryViolations);
+            } 
+            
+            if(count($metadata->requestParams)) {
                 // set defaults
                 $this->setDefaultValues($metadata->requestParams, $request->request);
+                
+                $requestViolations = $this->validateParams($this->container->get('validator'), $metadata->requestParams, $request->request);
+                $violations->addAll($requestViolations);
             }
+            
             if(count($violations) > 0) {
                 $request->attributes->set('violations', $violations);
             }
@@ -106,7 +109,7 @@ class ValidationListener extends APathEnabledListener
                 continue;
             }
 
-            if(null === $values->get($param['name'])) {
+            if(false === $values->has($param['name'])) {
                 $values->set($param['name'], $param['default']);
             }
         }
