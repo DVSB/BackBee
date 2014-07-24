@@ -21,13 +21,8 @@
 
 namespace BackBuilder\Rest\Tests\Controller;
 
-use BackBuilder\Rest\EventListener\PaginationListener;
-
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-
 use Symfony\Component\HttpFoundation\Request;
 
-use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\Controller\SiteController;
 use BackBuilder\Tests\TestCase;
 
@@ -66,6 +61,7 @@ class SiteControllerTest extends TestCase
         $this->initAutoload();
         $this->bbapp = $this->getBBApp();
         $this->initDb($this->bbapp);
+        $this->initAcl();
         $this->bbapp->start();
         
         // craete site

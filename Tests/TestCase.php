@@ -192,6 +192,23 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $schema = new SchemaTool($em);
         $schema->updateSchema($metadata, true);
     }
+    
+    public function initAcl()
+    {
+        $sql = file_get_contents($this->getBBApp()->getVendorDir() . '/symfony/symfony/src/Symfony/Component/Security/Acl/Resources/schema/sqlite.sql');
+        
+        $conn = $this->getBBApp()->getContainer()->get('em')->getConnection();
+        /* @var $conn \Doctrine\DBAL\Connection */
+        
+        foreach(explode("\n", $sql) as $query) {
+            $query = trim($query);
+            if('' === $query) {
+                // skip empty lines
+                continue;
+            }
+            $conn->executeQuery($query);
+        }
+    }
 
     public function dropDb()
     {

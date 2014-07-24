@@ -24,8 +24,6 @@ namespace BackBuilder\Rest\Controller;
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Validator\ConstraintViolationList,
-    Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
-    Symfony\Component\Security\Http\SecurityEvents,
     Symfony\Component\HttpFoundation\JsonResponse;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
@@ -72,7 +70,6 @@ class SiteController extends ARestController
         }
         
         if($this->isGranted('VIEW', $site)) {
-            //return $this->create404Response(sprintf('Site not found: %s', $uid));
             throw new AccessDeniedHttpException(sprintf('You are not authrozied to view site %s', $site->getLabel()));
         }
         
