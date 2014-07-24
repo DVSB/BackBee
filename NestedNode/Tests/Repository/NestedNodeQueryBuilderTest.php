@@ -21,8 +21,8 @@
 
 namespace BackBuilder\NestedNode\Tests\Repository;
 
-use BackBuilder\NestedNode\Repository\NestedNodeRepository,
-    BackBuilder\Tests\Mock\MockBBApplication,
+use BackBuilder\Tests\TestCase,
+    BackBuilder\NestedNode\Repository\NestedNodeRepository,
     BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
@@ -31,7 +31,7 @@ use BackBuilder\NestedNode\Repository\NestedNodeRepository,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
+class NestedNodeQueryBuilderTest extends TestCase
 {
 
     /**
@@ -459,35 +459,7 @@ class NestedNodeQueryBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $bootstrap_yml = array(
-            'debug' => true,
-            'container' => array(
-                'dump_directory' => '',
-                'autogenerate' => true
-            )
-        );
-
-        $mockConfig = array(
-            'cache' => array(
-                'default' => array()
-            ),
-            'log' => array(),
-            'repository' => array(
-                'ClassContent' => array(),
-                'Config' => array(
-                    'config.yml' => file_get_contents(__DIR__ . '/../config.yml'),
-                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml)
-                ),
-                'Data' => array(
-                    'Media' => array(),
-                    'Storage' => array(),
-                    'Tmp' => array()
-                ),
-                'Ressources' => array()
-            )
-        );
-
-        $this->application = new MockBBApplication(null, false, false, $mockConfig);
+        $this->application = $this->getBBApp();
         $em = $this->application->getEntityManager();
 
         $st = new \Doctrine\ORM\Tools\SchemaTool($em);
