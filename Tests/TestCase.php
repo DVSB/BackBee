@@ -214,28 +214,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function dropDb()
     {
-        $bbapp = $this->getBBApp();
-        $em = $bbapp->getContainer()->get('em');
-
-        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
-            $bbapp->getBBDir() . '/Bundle',
-            $bbapp->getBBDir() . '/Cache/DAO',
-            $bbapp->getBBDir() . '/ClassContent',
-            $bbapp->getBBDir() . '/ClassContent/Indexes',
-            $bbapp->getBBDir() . '/Logging',
-            $bbapp->getBBDir() . '/NestedNode',
-            $bbapp->getBBDir() . '/Security',
-            $bbapp->getBBDir() . '/Site',
-            $bbapp->getBBDir() . '/Site/Metadata',
-            $bbapp->getBBDir() . '/Stream/ClassWrapper',
-            $bbapp->getBBDir() . '/Theme',
-            $bbapp->getBBDir() . '/Util/Sequence/Entity',
-            $bbapp->getBBDir() . '/Workflow',
-        ));
-
-        $metadata = $em->getMetadataFactory()->getAllMetadata();
-        $schema = new SchemaTool($em);
-        $schema->dropDatabase();
+        $connection = $this->getBBApp()->getContainer()->get('em')->getConnection();
+        $params = $connection->getParams();
+        $name = isset($params['path']) ? $params['path'] : (isset($params['dbname']) ? $params['dbname'] : false);
+        $name = $connection->getDatabasePlatform()->quoteSingleIdentifier($name);
+        $connection->getSchemaManager()->dropDatabase($name);
     }
     
     /**
