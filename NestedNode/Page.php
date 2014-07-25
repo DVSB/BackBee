@@ -334,7 +334,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         );
 
         if ($this->_uid) {
-            if (null !== $this->_contentset) {
+            if (null !== $this->_contentset && null !== $this->getLayout()) {
                 $this->_contentset = $this->_contentset->createClone($this);
             } else {
                 $this->_contentset = new ContentSet();
@@ -360,19 +360,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
-     * Returns the parent node, NULL if this node is root
-     * @codeCoverageIgnore
-     * @return \BackBuilder\NestedNode\Page|NULL
-     */
-    public function getParent()
-    {
-        return $this->_parent;
-    }
-
-    /**
      * Returns the owner site of this node.
-     * @codeCoverageIgnore
      * @return \Backbuilder\Site\Site
+     * @codeCoverageIgnore
      */
     public function getSite()
     {
@@ -394,8 +384,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Return sthe layout of the page.
-     * @codeCoverageIgnore
      * @return \BackBuilder\Site\Layout
+     * @codeCoverageIgnore
      */
     public function getLayout()
     {
@@ -404,17 +394,18 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the alternate title of the page.
-     * @codeCoverageIgnore
      * @return string
+     * @codeCoverageIgnore
      */
     public function getAltTitle()
     {
         return $this->_alttitle;
     }
+
     /**
      * Returns the title of the page.
-     * @codeCoverageIgnore
      * @return string
+     * @codeCoverageIgnore
      */
     public function getTitle()
     {
@@ -423,8 +414,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the URL of the page.
-     * 
-     * @codeCoverageIgnore
      * @params bool $doRedirect : if true - returns redirect url (if exists), otherwise - current page url
      * @return string
      */
@@ -456,7 +445,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the target.
-     * @codeCoverageIgnore
      * @return string
      */
     public function getTarget()
@@ -466,8 +454,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the premanent redirect URL if defined
-     * @codeCoverageIgnore
      * @return string|NULL
+     * @codeCoverageIgnore
      */
     public function getRedirect()
     {
@@ -475,8 +463,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
     
     /**
-     * Determine if page is a redirect
-     * 
+     * Determines if page is a redirect
      * @return bool
      */
     public function isRedirect()
@@ -486,8 +473,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the associated metadata if defined
-     * @codeCoverageIgnore
      * @return \BackBuilder\MetaData\MetaDataBag|NULL
+     * @codeCoverageIgnore
      */
     public function getMetaData()
     {
@@ -496,8 +483,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the state of the page.
-     * @codeCoverageIgnore
      * @return int
+     * @codeCoverageIgnore
      */
     public function getState()
     {
@@ -506,8 +493,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the date
-     * @codeCoverageIgnore
      * @return \DateTime
+     * @codeCoverageIgnore
      */
     public function getDate()
     {
@@ -516,8 +503,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the publishing date if defined.
-     * @codeCoverageIgnore
      * @return \DateTime|NULL
+     * @codeCoverageIgnore
      */
     public function getPublishing()
     {
@@ -526,8 +513,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the archiving date if defined.
-     * @codeCoverageIgnore
      * @return \DateTime|NULL
+     * @codeCoverageIgnore
      */
     public function getArchiving()
     {
@@ -536,7 +523,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the collection of revisions.
-     * @codeCoverageIgnore
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getRevisions()
@@ -601,6 +587,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns TRUE if the page can be rendered.
      * @return Boolean
+     * @codeCoverageIgnore
      */
     public function isRenderable()
     {
@@ -633,14 +620,14 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function isOnline($ignoreSchedule = false)
     {
+        $onlineByState = ($this->getState() & self::STATE_ONLINE) && !($this->getState() & self::STATE_DELETED);
+        
         if (true === $ignoreSchedule) {
-            return (($this->getState() & self::STATE_ONLINE)
-                    && !($this->getState() & self::STATE_DELETED));
+            return $onlineByState;
         } else {
-            return (($this->getState() & self::STATE_ONLINE)
-                    && !($this->getState() & self::STATE_DELETED)
+            return $onlineByState
                     && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
-                    && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert));
+                    && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert);
         }
     }
 
@@ -650,12 +637,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function isDeleted()
     {
-        return ($this->getState() & self::STATE_DELETED);
+        return 0 < ($this->getState() & self::STATE_DELETED);
     }
 
     /**
      * Is the page is static ?
      * @return boolean
+     * @codeCoverageIgnore
      */
     public function isStatic()
     {
@@ -664,7 +652,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the associated site
-     * @codeCoverageIgnore
      * @param \BackBuilder\NestedNode\Site $site
      * @return \BackBuilder\NestedNode\Page
      */
@@ -676,7 +663,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the main contentset associated to the node.
-     * @codeCoverageIgnore
      * @param \BackBuilder\ClassContent\ContentSet $contentset
      * @return \BackBuilder\NestedNode\ANestedNode
      */
@@ -688,7 +674,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the date of the page
-     * @codeCoverageIgnore
      * @param \DateTime $date
      * @return \BackBuilder\NestedNode\Page
      */
@@ -1039,7 +1024,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     {
         $result = parent::toArray();
 
-        $result['siteuid'] = $this->getSite()->getUid();
+        $result['siteuid'] = (null !== $this->getSite()) ? $this->getSite()->getUid() : null;
         $result['title'] = $this->getTitle();
         $result['alttitle'] = $this->getAltTitle();
         $result['url'] = $this->getUrl();

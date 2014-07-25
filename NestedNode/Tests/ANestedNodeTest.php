@@ -35,7 +35,7 @@ class ANestedNodeTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \Datetime
      */
-    private $current_time;
+    protected $current_time;
 
     /**
      * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
