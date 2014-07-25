@@ -44,6 +44,7 @@ class YmlLoaderTest extends TestCase
 {
 
     protected $bbapp;
+    protected $siteDefault;
     
     protected function setUp()
     {
@@ -65,43 +66,30 @@ class YmlLoaderTest extends TestCase
         ;
         $this->bbapp->getEntityManager()->persist($adminGroup);
         
-        $this->bbapp->getEntityManager()->flush();
+        $this->siteDefault = new Site();
+        $this->siteDefault->setLabel('default');
+        $this->getBBApp()->getEntityManager()->persist($this->siteDefault);
+        $this->getBBApp()->getEntityManager()->flush();
+        
+        $loader = new YmlLoader();
+        $loader->setContainer($this->getBBApp()->getContainer());
+        $loader->load(__DIR__ . '/acl.yml');
     }
     
     public function testLoad_superadmin()
     {
-        $site = new Site();
-        $site->setLabel('default');
-        $this->bbapp->getEntityManager()->persist($site);
-        $this->bbapp->getEntityManager()->flush();
+        $this->createAuthUser('super_admin');
         
-        
-        $loader = new YmlLoader();
-        $loader->setContainer($this->bbapp->getContainer());
-        $loader->load(__DIR__ . '/acl.yml');
-        
-        $this->authUser('super_admin');
-        
-        $this->assertTrue($this->getSecurityContext()->isGranted('view', $site));
-        $this->assertTrue($this->getSecurityContext()->isGranted('EDIT', $site));
+        $this->assertTrue($this->getSecurityContext()->isGranted('VIEW', $this->siteDefault));
+        $this->assertTrue($this->getSecurityContext()->isGranted('EDIT', $this->siteDefault));
     }
     
     public function testLoad_admin()
     {
-        $site = new Site();
-        $site->setLabel('default');
-        $this->bbapp->getEntityManager()->persist($site);
-        $this->bbapp->getEntityManager()->flush();
+        $this->createAuthUser('admin_front');
         
-        
-        $loader = new YmlLoader();
-        $loader->setContainer($this->bbapp->getContainer());
-        $loader->load(__DIR__ . '/acl.yml');
-        
-        $this->authUser('admin_front');
-        
-        $this->assertTrue($this->getSecurityContext()->isGranted('view', $site));
-        $this->assertFalse($this->getSecurityContext()->isGranted('EDIT', $site));
+        $this->assertTrue($this->getSecurityContext()->isGranted('VIEW', $this->siteDefault));
+        $this->assertFalse($this->getSecurityContext()->isGranted('EDIT', $this->siteDefault));
     }
     
     /**
@@ -109,7 +97,7 @@ class YmlLoaderTest extends TestCase
      * @param string $groupId
      * @return \BackBuilder\Security\Token\BBUserToken
      */
-    protected function authUser($groupId)
+    protected function createAuthUser($groupId)
     {
         $token = new BBUserToken();
         $user = new User();
@@ -118,7 +106,7 @@ class YmlLoaderTest extends TestCase
             ->setPassword('pass')
         ;
         
-        $group = $this->bbapp->getEntityManager()->getRepository('BackBuilder\Security\Group')->findOneBy(array('_identifier' => $groupId));
+        $group = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\Group')->findOneBy(array('_identifier' => $groupId));
 
         if(!$group) {
             throw new \RuntimeException('Group not found: ' . $groupId);
@@ -128,11 +116,8 @@ class YmlLoaderTest extends TestCase
         
         $token->setUser($user);
         $token->setAuthenticated(true);
-        
-        $security = $this->getSecurityContext();
-        /* @var $security \BackBuilder\Security\SecurityContext */
 
-        $security->setToken($token);
+        $this->getSecurityContext()->setToken($token);
 
         return $token;
     }
@@ -143,7 +128,12 @@ class YmlLoaderTest extends TestCase
      */
     private function getSecurityContext()
     {
-        return $this->bbapp->getSecurityContext();
+        return $this->getBBApp()->getSecurityContext();
     }
 
+    
+    protected function tearDown()
+    {
+        //$this->dropDb();
+    }
 }

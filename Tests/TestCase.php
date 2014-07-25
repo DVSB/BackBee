@@ -53,7 +53,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param type $namespace
      * @throws \Exception
      */
-    public function load($namespace) {
+    public function load($namespace) 
+    {
         try {
             if (!file_exists($this->root_folder.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $namespace).'.php')) {
                 throw new \Exception('BackBuilderTestUnit could not find file associeted this namespace '.$namespace);
@@ -168,7 +169,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function initDb($bbapp)
     {
-        $em = $bbapp->getContainer()->get('em');
+        $em = $this->getBBApp()->getEntityManager();
+
+        $conn = $em->getConnection();
+        
 
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
@@ -190,12 +194,15 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
-        $schema->updateSchema($metadata, true);
+        //$schema->updateSchema($metadata, true);
+        
+        $classes = $em->getMetadataFactory()->getAllMetadata();
+        $schema->createSchema($classes);
     }
     
     public function initAcl()
     {
-        $conn = $this->getBBApp()->getContainer()->get('em')->getConnection();
+        $conn = $this->getBBApp()->getEntityManager()->getConnection();
         
         $schema = new \Symfony\Component\Security\Acl\Dbal\Schema(array(
             'class_table_name'         => 'acl_classes',
@@ -205,7 +212,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'sid_table_name'           => 'acl_security_identities',
         ));
         
-        $platform = new \Doctrine\DBAL\Platforms\SqlitePlatform();
+        $platform = $conn->getDatabasePlatform();
         
         foreach($schema->toSql($platform) as $query) {
             $conn->executeQuery($query);
@@ -214,23 +221,22 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function dropDb()
     {
-        $connection = $this->getBBApp()->getContainer()->get('em')->getConnection();
+        $connection = $this->getBBApp()->getEntityManager()->getConnection();
         $params = $connection->getParams();
         $name = isset($params['path']) ? $params['path'] : (isset($params['dbname']) ? $params['dbname'] : false);
         $name = $connection->getDatabasePlatform()->quoteSingleIdentifier($name);
         $connection->getSchemaManager()->dropDatabase($name);
     }
-    
+
     /**
      * 
-     * @return \BackBuilder\BBApplication
+     * @param type $config
+     * @return type
      */
-    public function getBBApp()
+    public function getBBApp(array $config = null)
     {
         if(null === $this->bbapp) {
-            //$this->bbapp = new \BackBuilder\BBApplication(null, 'test');
-            
-            $this->bbapp = new MockBBApplication(null, 'test');
+            $this->bbapp = new MockBBApplication(null, 'test', false, $config);
         }
         
         return $this->bbapp;

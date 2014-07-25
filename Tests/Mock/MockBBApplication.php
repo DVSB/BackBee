@@ -67,14 +67,14 @@ class MockBBApplication extends BBApplication
      * @param boolean $debug
      * @param boolean $overwrite_config
      */
-    public function __construct($context = null, $environment = false, $overwrite_config = false, $mockConfig = null)
+    public function __construct($context = null, $environment = false, $overwrite_config = false, array $mockConfig = null)
     {
         $this->_mockInitStructure($mockConfig);
         parent::__construct($context, $environment, $overwrite_config);
     }
 
     public function getBBDir()
-     {
+    {
         if (null === $this->_bbdir) {
             $r = new \ReflectionClass('\BackBuilder\BBApplication');
             $this->_bbdir = dirname($r->getFileName());
@@ -82,7 +82,7 @@ class MockBBApplication extends BBApplication
 
 
         return $this->_bbdir;
-     }
+    }
      
     /**
      * Get vendor dir
@@ -111,7 +111,7 @@ class MockBBApplication extends BBApplication
      *
      * @return \BackBuilder\Tests\Mock\MockBBApplication
      */
-    protected function _mockInitStructure($mockConfig = null)
+    protected function _mockInitStructure(array $mockConfig = null)
     {
         if(null === $mockConfig) {
             $mockConfig = array(
