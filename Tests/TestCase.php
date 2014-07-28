@@ -255,7 +255,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param string $groupId
      * @return \BackBuilder\Security\Token\BBUserToken
      */
-    protected function createAuthUser($groupId, $roles)
+    protected function createAuthUser($groupId, $roles = array())
     {
         $token = new BBUserToken($roles);
         $user = new User();
