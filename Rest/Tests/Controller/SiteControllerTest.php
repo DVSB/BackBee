@@ -31,6 +31,10 @@ use BackBuilder\Security\Token\BBUserToken;
 use BackBuilder\Site\Site,
     BackBuilder\Site\Layout;
 
+
+use BackBuilder\Security\Acl\Loader\YmlLoader;
+
+
 /**
  * Test for UserController class
  *
@@ -88,14 +92,27 @@ class SiteControllerTest extends TestCase
         
         $this->bbapp->getEntityManager()->flush();
         
+        // load acl
+        $loader = new YmlLoader();
+        $loader->setContainer($this->getBBApp()->getContainer());
+        $loader->load('groups:
+  super_admin:
+    sites:
+      resources: all
+      actions: all
+    layouts:
+      resources: all
+      actions: all
+  editor_layout1:
+    sites:
+      resources: all
+      actions: all
+    layouts:
+      resources: [layout1]
+      actions: all
+');
         
-        $securityContext = $this->bbapp->getContainer()->get('security.context');
-        /* @var $securityContext \BackBuilder\Security\SecurityContext */
         
-        $token = new BBUserToken(array(
-            'ROLE_API_USER'
-        ));
-        $securityContext->setToken($token);
     }
     
     protected function getController()
@@ -109,6 +126,9 @@ class SiteControllerTest extends TestCase
 
     public function testGetLayoutsAction()
     {
+        // authenticate a user with super admin authority
+        $this->createAuthUser('super_admin', array('ROLE_API_USER'));
+        
         $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($this->site->getUid());
         $layout = $this->getEntityManager()->getRepository('BackBuilder\Site\layout')->find($this->layout->getUid());
         
@@ -129,7 +149,30 @@ class SiteControllerTest extends TestCase
         $this->assertCount(1, $content);
         
         $this->assertEquals($this->layout->getUid(), $content[0]['uid']);
+    }
+    
+    public function testGetLayoutsAction_noAuthorizedLayouts()
+    {
+        // authenticate a user with super admin authority
+        $this->createAuthUser('editor_layout1', array('ROLE_API_USER'));
         
+        $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($this->site->getUid());
+        
+        $request = new Request(array(), array(
+            'id' => $this->site->getUid(),
+        ));
+        $request->headers->set('Accept', 'application/json');
+        
+        $controller = $this->getController();
+        $response = $controller->getLayoutsAction($this->site->getUid(), $request);
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('application/json', $response->headers->get('Content-Type'));
+        
+        $content = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $content);
+        
+        $this->assertCount(0, $content);
     }
     
 

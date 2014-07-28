@@ -49,17 +49,14 @@ class YmlLoader extends ContainerAware
     protected $bbapp;
 
     
-    public function load($ymlFile)
+    public function load($aclData)
     {
-        if(!file_exists($ymlFile) || !is_readable($ymlFile)) {
-            throw new \InvalidArgumentException('File cannot be read: ' . $ymlFile);
-        }
         $aclProvider = $this->container->get('bbapp')->getSecurityContext()->getACLProvider();
         
         $this->em = $this->container->get('bbapp')->getEntityManager();
         $this->bbapp = $this->container->get('bbapp');
         
-        $grid = Yaml::parse(file_get_contents($ymlFile), true);
+        $grid = Yaml::parse($aclData, true);
         
         if (false === array_key_exists('groups', $grid) || false === is_array($grid['groups'])) {
             throw new \Exception('Invalid yml: ' . $ymlFile);

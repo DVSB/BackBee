@@ -73,7 +73,7 @@ class YmlLoaderTest extends TestCase
         
         $loader = new YmlLoader();
         $loader->setContainer($this->getBBApp()->getContainer());
-        $loader->load(__DIR__ . '/acl.yml');
+        $loader->load(file_get_contents(__DIR__ . '/acl.yml'));
     }
     
     public function testLoad_superadmin()
@@ -91,46 +91,6 @@ class YmlLoaderTest extends TestCase
         $this->assertTrue($this->getSecurityContext()->isGranted('VIEW', $this->siteDefault));
         $this->assertFalse($this->getSecurityContext()->isGranted('EDIT', $this->siteDefault));
     }
-    
-    /**
-     * 
-     * @param string $groupId
-     * @return \BackBuilder\Security\Token\BBUserToken
-     */
-    protected function createAuthUser($groupId)
-    {
-        $token = new BBUserToken();
-        $user = new User();
-        $user
-            ->setLogin(uniqid('login'))
-            ->setPassword('pass')
-        ;
-        
-        $group = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\Group')->findOneBy(array('_identifier' => $groupId));
-
-        if(!$group) {
-            throw new \RuntimeException('Group not found: ' . $groupId);
-        }
-        
-        $user->addGroup($group);
-        
-        $token->setUser($user);
-        $token->setAuthenticated(true);
-
-        $this->getSecurityContext()->setToken($token);
-
-        return $token;
-    }
-    
-    /**
-     * 
-     * @return \BackBuilder\Security\SecurityContext
-     */
-    private function getSecurityContext()
-    {
-        return $this->getBBApp()->getSecurityContext();
-    }
-
     
     protected function tearDown()
     {

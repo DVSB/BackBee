@@ -8,6 +8,12 @@ use org\bovigo\vfs\vfsStream;
 use Doctrine\ORM\Tools\SchemaTool,
     Doctrine\ORM\EntityManager;
 
+
+use  BackBuilder\Security\Token\BBUserToken;
+
+use BackBuilder\Security\User,
+    BackBuilder\Security\Group;
+
 use BackBuilder\Tests\Mock\MockBBApplication;
 
 /**
@@ -242,4 +248,44 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $this->bbapp;
     }
 
+        
+
+    /**
+     * Creates a user for the specified group, and authenticates a BBUserToken
+     * @param string $groupId
+     * @return \BackBuilder\Security\Token\BBUserToken
+     */
+    protected function createAuthUser($groupId, $roles)
+    {
+        $token = new BBUserToken($roles);
+        $user = new User();
+        $user
+            ->setLogin(uniqid('login'))
+            ->setPassword('pass')
+        ;
+        
+        $group = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\Group')->findOneBy(array('_identifier' => $groupId));
+
+        if(!$group) {
+            throw new \RuntimeException('Group not found: ' . $groupId);
+        }
+        
+        $user->addGroup($group);
+        
+        $token->setUser($user);
+        $token->setAuthenticated(true);
+
+        $this->getSecurityContext()->setToken($token);
+
+        return $token;
+    }
+    
+    /**
+     * 
+     * @return \BackBuilder\Security\SecurityContext
+     */
+    protected function getSecurityContext()
+    {
+        return $this->getBBApp()->getSecurityContext();
+    }
 }

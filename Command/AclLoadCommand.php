@@ -71,11 +71,11 @@ EOF
             throw new \InvalidArgumentException(sprintf('File not found: %s', $file));
         }
         
-        $output->writeln(sprintf('<error>Processing file: %s</error>', $file));
+        $output->writeln(sprintf('<info>Processing file: %s</info>', $file));
         
         $loader = $bbapp->getContainer()->get('security.acl_loader_yml');
         
-        $loader->load($file);
+        $loader->load(file_get_contents($file));
     }
     
     
