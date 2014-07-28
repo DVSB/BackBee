@@ -110,6 +110,11 @@ services:
     security.context:
         class:      %bbapp.securitycontext.class%
         arguments:  ["@bbapp"]
+        
+    security.acl_loader_yml:
+        class:      BackBuilder\Security\Acl\Loader\YmlLoader
+        calls:
+            - [setContainer, ['@service_container']]
     controller:
         class:      %bbapp.controller.class%
         arguments:  ["@bbapp"]
