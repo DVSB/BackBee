@@ -103,6 +103,10 @@ class SecurityControllerTest extends TestCase
         $this->assertArrayHasKey('nonce', $content);
     }
     
+    /**
+     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedExceptionMessage Request expired
+     */
     public function testAuthAction_bb_area_expired()
     {
         $controller = $this->getController();
@@ -120,11 +124,13 @@ class SecurityControllerTest extends TestCase
             'nonce' => $nonce
         ));
         
-        $response = $controller->authenticateAction('bb_area', $request);
-        
-        $this->assertEquals(401, $response->getStatusCode());
+        $controller->authenticateAction('bb_area', $request);
     }
     
+    /**
+     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedExceptionMessage Unknown user
+     */
     public function testAuthAction_bb_area_userDoesntExist()
     {
         $controller = $this->getController();
@@ -135,11 +141,13 @@ class SecurityControllerTest extends TestCase
             'digest' => 'test',
             'nonce' => 'test'
         ));
-        $response = $controller->authenticateAction('bb_area', $request);
-        
-        $this->assertEquals(404, $response->getStatusCode());
+        $controller->authenticateAction('bb_area', $request);
     }
     
+    /**
+     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedExceptionMessage Invalid authentication informations
+     */
     public function testAuthAction_bb_area_invalidPassword()
     {
         $controller = $this->getController();
@@ -157,9 +165,7 @@ class SecurityControllerTest extends TestCase
             'nonce' => $nonce
         ));
         
-        $response = $controller->authenticateAction('bb_area', $request);
-        
-        $this->assertEquals(401, $response->getStatusCode());
+        $controller->authenticateAction('bb_area', $request);
     }
     
     /**

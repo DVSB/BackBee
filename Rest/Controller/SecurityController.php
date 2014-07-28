@@ -99,28 +99,13 @@ class SecurityController extends ARestController
             
             $authProvider = $securityContext->getAuthProvider('bb_auth');
             
-            try {
-                $authProvider->authenticate($token);
 
-                $response->setContent(json_encode(array(
-                    'nonce' => $nonce
-                )));
-            } catch(SecurityException $e) {
-                $response = new Response();
-                if(SecurityException::UNKNOWN_USER === $e->getCode()) {
-                    $response->setStatusCode(404, $e->getMessage());
-                } elseif(SecurityException::INVALID_CREDENTIALS === $e->getCode()) {
-                    $response->setStatusCode(401, $e->getMessage());
-                } elseif(SecurityException::EXPIRED_AUTH === $e->getCode()) {
-                    $response->setStatusCode(401, $e->getMessage());
-                } elseif(SecurityException::EXPIRED_TOKEN === $e->getCode()) {
-                    $response->setStatusCode(401, $e->getMessage());
-                } else {
-                    $response->setStatusCode(403, $e->getMessage());
-                }
-                
-                return $response;
-            }
+            $authProvider->authenticate($token);
+
+            $response->setContent(json_encode(array(
+                'nonce' => $nonce
+            )));
+            
         }
         
         return $response;
