@@ -134,7 +134,7 @@ class SecurityController extends ARestController
      */
     public function deleteSessionAction()
     {
-        if(false === $this->container->get('security.context')->isGranted('IS_AUTHENTICATED_FULLY') ){
+        if(false === $this->isGranted('IS_AUTHENTICATED_FULLY') ){
             return Response::create()->setStatusCode(401, "Session doesn't exist");
         }
         

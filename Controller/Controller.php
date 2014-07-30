@@ -203,9 +203,7 @@ class Controller implements ContainerAwareInterface
      */
     protected function isGranted($attributes, $object = null)
     {
-        $securityContext = $this->getContainer()->get('security.context');
-        
-        return $securityContext->isGranted($attributes, $object);
+        return $this->getContainer()->get('security.context')->isGranted($attributes, $object);
     }
     
 

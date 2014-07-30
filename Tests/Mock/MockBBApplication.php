@@ -122,7 +122,6 @@ class MockBBApplication extends BBApplication
                     'logging.yml' => file_get_contents(__DIR__ . '/../config/logging.yml'),
                     'bootstrap.yml' => file_get_contents(__DIR__ . '/../config/bootstrap.yml'),
                     'security.yml' => file_get_contents(__DIR__ . '/../config/security.yml'),
-                    'route.yml' => file_get_contents(__DIR__ . '/../config/route.yml'),
                 ),
                 'Data' => array(
                     'Media' => array(),
