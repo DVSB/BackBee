@@ -122,6 +122,7 @@ class MockBBApplication extends BBApplication
                     'logging.yml' => file_get_contents(__DIR__ . '/../config/logging.yml'),
                     'bootstrap.yml' => file_get_contents(__DIR__ . '/../config/bootstrap.yml'),
                     'security.yml' => file_get_contents(__DIR__ . '/../config/security.yml'),
+                    'route.yml' => file_get_contents(__DIR__ . '/../config/route.yml'),
                 ),
                 'Data' => array(
                     'Media' => array(),
@@ -138,6 +139,15 @@ class MockBBApplication extends BBApplication
     }
 
 
+    /**
+     * 
+     * @inheritDoc
+     */
+    public function start(Site $site = null) 
+    {
+        $this->_isstarted = true;
+    }
+    
     /**
      */
     public function setIsStarted($isStarted)
