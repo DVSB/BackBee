@@ -237,7 +237,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     /**
      * 
      * @param type $config
-     * @return type
+     * @return \BackBuilder\BBApplication
      */
     public function getBBApp(array $config = null)
     {
