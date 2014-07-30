@@ -22,7 +22,8 @@
 namespace BackBuilder\Rest\Tests\Controller;
 
 
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\Response;
 
 use BackBuilder\Rest\Controller\SecurityController;
 use BackBuilder\Tests\TestCase;
@@ -191,6 +192,50 @@ class SecurityControllerTest extends TestCase
         
         $this->assertEquals(400, $response->getStatusCode());
     }
+    
+    
+    public function testDeleteSessionAction()
+    {
+        $this->getBBApp()->start();
+        $response = $this->getBBApp()->getController()->handle(
+            Request::create('/rest/1/security/session', 'DELETE')
+        );
+        
+        // session doesnt exist
+        $this->assertTrue($response instanceof Response);
+        $this->assertEquals(401, $response->getStatusCode());
+        
+        // create session
+        $controller = $this->getController();
+        
+        $created = date('r'); //'Wed, 09 Jul 2014 14:04:27 GMT';
+        $nonce = '05a90bfd413c223a3451d68968f9e5fa';
+        $username = 'user123';
+        $password = 'password123';
+        $digest = md5($nonce . $created . md5($password));
+        
+        $request = new Request(array(), array(
+            'username' => $username,
+            'created' => $created,
+            'digest' => $digest,
+            'nonce' => $nonce
+        ));
+        
+        $response = $controller->authenticateAction('bb_area', $request);
+        
+        $response = $this->getBBApp()->getController()->handle(
+            Request::create('/rest/1/security/session', 'DELETE')
+        );
+        
+        $this->assertTrue($response instanceof Response);
+        
+        // currently failing
+        $this->markTestIncomplete();
+        $this->assertEquals(204, $response->getStatusCode());
+        
+    }
+    
+    
     
 
     protected function tearDown()

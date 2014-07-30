@@ -31,6 +31,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 use BackBuilder\Security\Token\BBUserToken,
     BackBuilder\Security\Exception\SecurityException;
 
+use BackBuilder\Security\Token\AnonymousToken;
+
 use BackBuilder\Rest\Exception\ValidationException;
 
 /**
@@ -62,17 +64,7 @@ class SecurityController extends ARestController
             throw new ValidationException($violations);
         }
         
-        $securityConfig = $this->getApplication()->getConfig()->getSection('security');
-        
-        if(!isset($securityConfig['firewalls'][$firewall])) {
-            $response = new Response();
-            $response->setStatusCode(400, sprintf('Firewall not configured: %s', $firewall));
-            return $response;
-        }
-        
-        $firewallConfig = $securityConfig['firewalls'][$firewall];
-        
-        $contexts = array_intersect(array_keys($firewallConfig), array('bb_auth') );
+        $contexts = $this->getSecurityContextConfig($firewall);
         
         if(0 === count($contexts)) {
             $response = new Response();
@@ -82,6 +74,11 @@ class SecurityController extends ARestController
         
         $securityContext = $this->_application->getSecurityContext();
         
+        if(null === $securityContext) {
+            $response = new Response();
+            $response->setStatusCode(400, sprintf('Firewall not configured: %s', $firewall));
+            return $response;
+        }
         
         $response = new Response();
         
@@ -111,6 +108,40 @@ class SecurityController extends ARestController
         return $response;
     }
     
-    
+    /**
+     * 
+     * @param type $firewall
+     * @return array
+     */
+    private function getSecurityContextConfig($firewall)
+    {
+        $securityConfig = $this->getApplication()->getConfig()->getSection('security');
+        
+        if(!isset($securityConfig['firewalls'][$firewall])) {
+            return null;
+        }
+        
+        $firewallConfig = $securityConfig['firewalls'][$firewall];
+        
+        $allowedContexts = array('bb_auth');
+        $contexts = array_intersect(array_keys($firewallConfig), $allowedContexts);
+        
+        return $contexts;
+    }
+ 
+    /**
+     * 
+     */
+    public function deleteSessionAction()
+    {
+        if(false === $this->container->get('security.context')->isGranted('IS_AUTHENTICATED_FULLY') ){
+            return Response::create()->setStatusCode(401, "Session doesn't exist");
+        }
+        
+        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
+        $this->getContainer()->get('request')->getSession()->invalidate();
+        
+        return new Response('');
+    }
     
 }
