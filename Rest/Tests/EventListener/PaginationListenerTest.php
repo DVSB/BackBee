@@ -38,10 +38,15 @@ use BackBuilder\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Rest\EventListener\PaginationListener
  */
 class PaginationListenerTest extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @covers ::onKernelController
+     */
     public function testDefaultParams()
     {
         $controller = array(new FixtureAnnotatedController(), 'defaultPaginationAction');
@@ -57,6 +62,9 @@ class PaginationListenerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(100, $request->attributes->get('limit'));
     }
     
+    /**
+     * @covers ::onKernelController
+     */
     public function testCustomParams()
     {
         $controller = array(new FixtureAnnotatedController(), 'customPaginationAction');
@@ -75,6 +83,7 @@ class PaginationListenerTest extends \PHPUnit_Framework_TestCase
     
     /**
      * @expectedException BackBuilder\Rest\Exception\ValidationException
+     * @covers ::onKernelController
      */
     public function testInvalidLimitMax()
     {
@@ -91,6 +100,7 @@ class PaginationListenerTest extends \PHPUnit_Framework_TestCase
     
     /**
      * @expectedException BackBuilder\Rest\Exception\ValidationException
+     * @covers ::onKernelController
      */
     public function testInvalidLimitMin()
     {
@@ -107,6 +117,7 @@ class PaginationListenerTest extends \PHPUnit_Framework_TestCase
     
     /**
      * @expectedException BackBuilder\Rest\Exception\ValidationException
+     * @covers ::onKernelController
      */
     public function testInvalidStartType()
     {
@@ -123,6 +134,7 @@ class PaginationListenerTest extends \PHPUnit_Framework_TestCase
     
     /**
      * @expectedException BackBuilder\Rest\Exception\ValidationException
+     * @covers ::onKernelController
      */
     public function testInvalidLimitType()
     {
