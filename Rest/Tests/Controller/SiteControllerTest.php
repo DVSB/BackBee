@@ -87,10 +87,10 @@ class SiteControllerTest extends TestCase
         )));
         
         $this->site->addLayout($this->layout);
-        $this->bbapp->getEntityManager()->persist($this->layout);
-        $this->bbapp->getEntityManager()->persist($this->site);
+        $this->getEntityManager()->persist($this->layout);
+        $this->getEntityManager()->persist($this->site);
         
-        $this->bbapp->getEntityManager()->flush();
+        $this->getEntityManager()->flush();
         
         // load acl
         $loader = new YmlLoader();
@@ -181,13 +181,5 @@ class SiteControllerTest extends TestCase
         $this->dropDb();
         $this->bbapp->stop();
     }
-    
-    /**
-     * 
-     * @return type
-     */
-    protected function getEntityManager()
-    {
-         return $this->getBBApp()->getContainer()->get('em');
-    }
+
 }
