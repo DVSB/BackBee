@@ -17,5 +17,14 @@
         </testsuite>
     </testsuites>
 
+
+    <filter>
+        <blacklist>
+          <directory suffix=".php">vendor</directory>
+          <directory suffix="Test.php">*/Tests/</directory>
+          <!-- code coverage reports -->
+          <directory suffix="Test.php"></directory>
+        </blacklist>
+    </filter>
     
 </phpunit>

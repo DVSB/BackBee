@@ -42,7 +42,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     /**
      * test every new and overrided method provided by BackBuilder\DependencyInjection\Container
      *
-     * @covers ContainerListener::onApplicationInit
+     * @covers ::onApplicationInit
      */
     public function testOnApplicationInitWithDebugTrue()
     {

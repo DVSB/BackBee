@@ -61,9 +61,9 @@ class ConfigBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * test extend application config with and without context and environment
      *
-     * @covers ConfigBuilder::__construct
-     * @covers ConfigBuilder::extend
-     * @covers ConfigBuilder::doApplicationConfigExtend
+     * @covers ::__construct
+     * @covers ::extend
+     * @covers ::doApplicationConfigExtend
      */
     public function testExtendApplicationConfig()
     {
