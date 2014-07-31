@@ -25,6 +25,8 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Validator\ConstraintViolationList;
 
+use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
+
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -132,16 +134,20 @@ class SecurityController extends ARestController
     /**
      * 
      */
-    public function deleteSessionAction()
+    public function deleteSessionAction(Request $request)
     {
-        if(false === $this->isGranted('IS_AUTHENTICATED_FULLY') ){
+        try {
+            if(false === $this->isGranted('IS_AUTHENTICATED_FULLY') ){
+                return Response::create()->setStatusCode(401, "Session doesn't exist");
+            }
+        } catch(AuthenticationCredentialsNotFoundException $e) {
             return Response::create()->setStatusCode(401, "Session doesn't exist");
         }
         
         $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
-        $this->getContainer()->get('request')->getSession()->invalidate();
+        $request->getSession()->invalidate();
         
-        return new Response('');
+        return new Response('', 204);
     }
     
 }

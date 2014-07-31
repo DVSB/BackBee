@@ -288,4 +288,13 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         return $this->getBBApp()->getSecurityContext();
     }
+    
+    /**
+     * 
+     * @return \Doctrine\ORM\EntityManager
+     */
+    protected function getEntityManager($name = 'default')
+    {
+        return $this->getBBApp()->getEntityManager($name);
+    }
 }

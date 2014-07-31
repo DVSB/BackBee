@@ -196,7 +196,7 @@ class Controller implements ContainerAwareInterface
     /**
      * Shortcut for Symfony\Component\Security\Core\SecurityContext::isGranted()
      * 
-     * @see Symfony\Component\Security\Core\SecurityContext::isGranted()
+     * @see \Symfony\Component\Security\Core\SecurityContext::isGranted()
      * @param string $permission
      * @param mixed $object
      * @return bool

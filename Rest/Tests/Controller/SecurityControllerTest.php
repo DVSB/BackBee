@@ -29,11 +29,12 @@ use BackBuilder\Rest\Controller\SecurityController;
 use BackBuilder\Tests\TestCase;
 
 
-use BackBuilder\Security\User;
+use BackBuilder\Security\User,
+    BackBuilder\Security\Token\BBUserToken;
 
 
 /**
- * Test for AuthController class
+ * Test for SecurityController class
  *
  * @category    BackBuilder
  * @package     BackBuilder\Security
@@ -60,9 +61,9 @@ class SecurityControllerTest extends TestCase
         $user->setPassword(md5('password123'));
         $user->setActivated(true);
         
-        $this->bbapp->getEntityManager()->persist($user);
+        $this->getEntityManager()->persist($user);
         
-        $this->bbapp->getEntityManager()->flush();
+        $this->getEntityManager()->flush();
     }
     
     /**
@@ -197,44 +198,25 @@ class SecurityControllerTest extends TestCase
     public function testDeleteSessionAction()
     {
         $this->getBBApp()->start();
-        $response = $this->getBBApp()->getController()->handle(
-            Request::create('/rest/1/security/session', 'DELETE')
-        );
+        $controller = $this->getController();
         
         // session doesnt exist
+        $response = $controller->deleteSessionAction(new Request());
         $this->assertTrue($response instanceof Response);
         $this->assertEquals(401, $response->getStatusCode());
         
-        // create session
+        // create token
+        $token = new BBUserToken();
+        $this->getSecurityContext()->setToken($token);
+        
         $controller = $this->getController();
-        
-        $created = date('r'); //'Wed, 09 Jul 2014 14:04:27 GMT';
-        $nonce = '05a90bfd413c223a3451d68968f9e5fa';
-        $username = 'user123';
-        $password = 'password123';
-        $digest = md5($nonce . $created . md5($password));
-        
-        $request = new Request(array(), array(
-            'username' => $username,
-            'created' => $created,
-            'digest' => $digest,
-            'nonce' => $nonce
-        ));
-        
-        $response = $controller->authenticateAction('bb_area', $request);
-        
-        $response = $this->getBBApp()->getController()->handle(
-            Request::create('/rest/1/security/session', 'DELETE')
-        );
-        
+        $request = new Request();
+        $request->setSession($this->getBBApp()->getSession());
+        $response = $controller->deleteSessionAction($request);
+
         $this->assertTrue($response instanceof Response);
-        
-        // currently failing
-        $this->markTestIncomplete();
         $this->assertEquals(204, $response->getStatusCode());
-        
     }
-    
     
     
 
@@ -244,12 +226,5 @@ class SecurityControllerTest extends TestCase
         $this->getBBApp()->stop();
     }
     
-    /**
-     * 
-     * @return 
-     */
-    protected function getEntityManager()
-    {
-         return $this->bbapp->getContainer()->get('em');
-    }
+    
 }
