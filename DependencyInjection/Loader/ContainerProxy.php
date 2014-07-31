@@ -252,8 +252,13 @@ class ContainerProxy extends Container
 
         $this->setDefinitionClass($definition, $array);
         $this->setDefinitionArguments($definition, $array);
+        $this->setDefinitionFactoryClass($definition, $array);
+        $this->setDefinitionFactoryService($definition, $array);
+        $this->setDefinitionFactoryMethod($definition, $array);
         $this->setDefinitionTags($definition, $array);
         $this->setDefinitionMethodCalls($definition, $array);
+        $this->setDefinitionProperties($definition, $array);
+        $this->setDefinitionConfigurator($definition, $array);
 
         return $definition;
     }
@@ -281,6 +286,42 @@ class ContainerProxy extends Container
             foreach ($array['arguments'] as $arg) {
                 $definition->addArgument($this->convertArgument($arg));
             }
+        }
+    }
+
+    /**
+     * [setDefinitionFactoryClass description]
+     * @param Definition $definition [description]
+     * @param array      $array      [description]
+     */
+    private function setDefinitionFactoryClass(Definition $definition, array $array)
+    {
+        if (true === array_key_exists('factory_class', $array)) {
+            $definition->setFactoryClass($array['factory_class']);
+        }
+    }
+
+    /**
+     * [setDefinitionFactoryService description]
+     * @param Definition $definition [description]
+     * @param array      $array      [description]
+     */
+    private function setDefinitionFactoryService(Definition $definition, array $array)
+    {
+        if (true === array_key_exists('factory_service', $array)) {
+            $definition->setFactoryService($array['factory_service']);
+        }
+    }
+
+    /**
+     * [setDefinitionFactoryMethod description]
+     * @param Definition $definition [description]
+     * @param array      $array      [description]
+     */
+    private function setDefinitionFactoryMethod(Definition $definition, array $array)
+    {
+        if (true === array_key_exists('factory_method', $array)) {
+            $definition->setFactoryMethod($array['factory_method']);
         }
     }
 
@@ -354,6 +395,47 @@ class ContainerProxy extends Container
 
                 $definition->addMethodCall($call[0], $args);
             }
+        }
+    }
+
+    /**
+     * [setDefinitionProperties description]
+     * @param Definition $definition [description]
+     * @param array      $array      [description]
+     */
+    private function setDefinitionConfigurator(Definition $definition, array $array)
+    {
+        if (true === array_key_exists('configurator', $array)) {
+            $configurator = $array['configurator'];
+            if (true === is_array($configurator)) {
+                $configurator[0] = $this->convertArgument($configurator[0]);
+            }
+
+            $definition->setConfigurator($configurator);
+        }
+    }
+
+    /**
+     * [setDefinitionProperties description]
+     * @param Definition $definition [description]
+     * @param array      $array      [description]
+     */
+    private function setDefinitionProperties(Definition $definition, array $array)
+    {
+        if (true === array_key_exists('public', $array)) {
+            $definition->setPublic($array['public']);
+        }
+
+        if (true === array_key_exists('abstract', $array)) {
+            $definition->setScope($array['abstract']);
+        }
+
+        if (true === array_key_exists('scope', $array)) {
+            $definition->setScope($array['scope']);
+        }
+
+        if (true === array_key_exists('file', $array)) {
+            $definition->setFile($array['file']);
         }
     }
 }

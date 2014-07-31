@@ -25,6 +25,7 @@ use BackBuilder\DependencyInjection\Exception\ServiceNotDumpableException;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Dumper\DumperInterface;
 
 /**
@@ -143,8 +144,17 @@ class PhpArrayDumper implements DumperInterface
 
         $this->hydrateDefinitionClass($definition, $definition_array);
         $this->hydrateDefinitionArguments($definition, $definition_array);
+        $this->hydrateDefinitionFactoryClass($definition, $definition_array);
+        $this->hydrateDefinitionFactoryMethod($definition, $definition_array);
+        $this->hydrateDefinitionFactoryService($definition, $definition_array);
         $this->hydrateDefinitionTags($definition, $definition_array);
         $this->hydrateDefinitionMethodCalls($definition, $definition_array);
+        $this->hydrateDefinitionConfigurator($definition, $definition_array);
+        $this->hydrateDefinitionParent($definition, $definition_array);
+        $this->hydrateDefinitionScopeProperty($definition, $definition_array);
+        $this->hydrateDefinitionPublicProperty($definition, $definition_array);
+        $this->hydrateDefinitionAbstractProperty($definition, $definition_array);
+        $this->hydrateDefinitionFileProperty($definition, $definition_array);
 
         return $definition_array;
     }
@@ -184,6 +194,45 @@ class PhpArrayDumper implements DumperInterface
     {
         foreach ($definition->getArguments() as $arg) {
             $definition_array['arguments'][] = $this->convertArgument($arg);
+        }
+    }
+
+    /**
+     * Try to hydrate definition factory class from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionFactoryClass(Definition $definition, array &$definition_array)
+    {
+        if (null !== $definition->getFactoryClass()) {
+            $definition_array['factory_class'] = $definition->getFactoryClass();
+        }
+    }
+
+    /**
+     * Try to hydrate definition factory service from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionFactoryService(Definition $definition, array &$definition_array)
+    {
+        if (null !== $definition->getFactoryService()) {
+            $definition_array['factory_service'] = $definition->getFactoryService();
+        }
+    }
+
+    /**
+     * Try to hydrate definition factory method from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionFactoryMethod(Definition $definition, array &$definition_array)
+    {
+        if (null !== $definition->getFactoryMethod()) {
+            $definition_array['factory_method'] = $definition->getFactoryMethod();
         }
     }
 
@@ -251,6 +300,89 @@ class PhpArrayDumper implements DumperInterface
 
             // finally add method call to definition array
             $definition_array['calls'][] = $method_call_array;
+        }
+    }
+
+    /**
+     * Try to hydrate definition array method calls with definition entity
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionConfigurator(Definition $definition, array &$definition_array)
+    {
+        if (null !== $configurator = $definition->getConfigurator()) {
+            if (true === is_string($configurator)) {
+                $definition_array['configurator'] = $definition->getConfigurator();
+            } else {
+                $definition_array['configurator'] = array($this->convertArgument($configurator[0]), $configurator[1]);
+            }
+        }
+    }
+
+    /**
+     * Try to hydrate definition array method calls with definition entity
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionParent(Definition $definition, array &$definition_array)
+    {
+        if (true === ($definition instanceof DefinitionDecorator)) {
+            $definition_array['parent'] = $definition->getParent();
+            var_dump($definition_array); die;
+        }
+    }
+
+    /**
+     * Try to hydrate definition scope property from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionScopeProperty(Definition $definition, array &$definition_array)
+    {
+        if (ContainerInterface::SCOPE_CONTAINER !== $definition->getScope()) {
+            $definition_array['scope'] = $definition->getScope();
+        }
+    }
+
+    /**
+     * Try to hydrate definition public property from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionPublicProperty(Definition $definition, array &$definition_array)
+    {
+        if (false === $definition->isPublic()) {
+            $definition_array['public'] = false;
+        }
+    }
+
+    /**
+     * Try to hydrate definition abstract property from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionAbstractProperty(Definition $definition, array &$definition_array)
+    {
+        if (true === $definition->isAbstract()) {
+            $definition_array['abstract'] = true;
+        }
+    }
+
+    /**
+     * Try to hydrate definition file property from entity into definition array
+     *
+     * @param  Definition $definition       the definition to convert
+     * @param  array      $definition_array the definition array (passed by reference)
+     */
+    private function hydrateDefinitionFileProperty(Definition $definition, array &$definition_array)
+    {
+        if (null !== $definition->getFile()) {
+            $definition_array['file'] = $definition->getFile();
         }
     }
 
