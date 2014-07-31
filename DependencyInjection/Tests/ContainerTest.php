@@ -43,11 +43,11 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     /**
      * test every new and overrided method provided by BackBuilder\DependencyInjection\Container
      *
-     * @covers Container::get
-     * @covers Container::getContainerValues
-     * @covers Container::_getContainerParameters
-     * @covers Container::_getContainerServices
-     * @covers Container::isLoaded
+     * @covers ::get
+     * @covers ::getContainerValues
+     * @covers ::_getContainerParameters
+     * @covers ::_getContainerServices
+     * @covers ::isLoaded
      */
     public function testContainerOverridedAndNewMethods()
     {

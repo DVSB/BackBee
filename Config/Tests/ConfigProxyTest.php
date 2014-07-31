@@ -39,9 +39,9 @@ class ConfigProxyTest extends \PHPUnit_Framework_TestCase
     /**
      * test restore of ConfigProxy
      *
-     * @covers ConfigProxy::__construct
-     * @covers ConfigProxy::restore
-     * @covers ConfigProxy::isRestored
+     * @covers ::__construct
+     * @covers ::restore
+     * @covers ::isRestored
      */
     public function testConfigProxy()
     {
