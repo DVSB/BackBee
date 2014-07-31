@@ -123,8 +123,9 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, null, null);
         $this->assertEquals(
             array(
-                'context'     => 'default',
-                'environment' => ''
+                'context'            => 'default',
+                'environment'        => '',
+                'bootstrap_filepath' => $this->resources_base_dir . '/Config/bootstrap.yml'
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
@@ -133,8 +134,9 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, $context, $environment);
         $this->assertEquals(
             array(
-                'context'     => 'api',
-                'environment' => 'preprod'
+                'context'            => 'api',
+                'environment'        => 'preprod',
+                'bootstrap_filepath' => $this->resources_base_dir . '/api/Config/preprod/bootstrap.yml'
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
@@ -143,8 +145,9 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, $context, null);
         $this->assertEquals(
             array(
-                'context'     => 'api',
-                'environment' => ''
+                'context'            => 'api',
+                'environment'        => '',
+                'bootstrap_filepath' => $this->resources_base_dir . '/api/Config/bootstrap.yml'
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
@@ -153,8 +156,9 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, null, $environment);
         $this->assertEquals(
             array(
-                'context'     => 'default',
-                'environment' => 'preprod'
+                'context'            => 'default',
+                'environment'        => 'preprod',
+                'bootstrap_filepath' => $this->resources_base_dir . '/Config/preprod/bootstrap.yml'
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
