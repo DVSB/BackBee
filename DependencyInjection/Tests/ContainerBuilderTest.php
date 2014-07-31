@@ -184,7 +184,12 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     public function testTryParseContainerDumpWithDebugTrue(Container $container)
     {
         $this->assertEquals(
-            'bb' . md5('__container__' . $this->application->getContext() . $this->application->getEnvironment()),
+            'bb' . md5(
+                '__container__'
+                . $this->application->getContext()
+                . $this->application->getEnvironment()
+                . filemtime($container->getParameter('bootstrap_filepath'))
+            ),
             $container->getParameter('container.filename')
         );
     }

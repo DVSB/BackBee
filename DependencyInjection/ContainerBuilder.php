@@ -147,6 +147,7 @@ class ContainerBuilder
 
         $missing_parameters = array();
         $this->tryAddParameter('debug', $parameters, $missing_parameters);
+        $this->tryAddParameter('bootstrap_filepath', $parameters, $missing_parameters);
         if (true === array_key_exists('container', $parameters)) {
             $this->tryAddParameter('dump_directory', $parameters['container'], $missing_parameters, 'container.');
             $this->tryAddParameter('autogenerate', $parameters['container'], $missing_parameters, 'container.');
@@ -214,7 +215,7 @@ class ContainerBuilder
         $success = false;
 
         $container_directory = $this->container->getParameter('container.dump_directory');
-        $container_filename = $this->getContainerDumpFilename();
+        $container_filename = $this->getContainerDumpFilename($this->container->getParameter('bootstrap_filepath'));
         $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_filename;
 
         if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath)) {
@@ -235,11 +236,13 @@ class ContainerBuilder
     /**
      * Generates and returns an uniq container dump classname depending on context and environment
      *
+     * @param  string $bootstrap_filepath the bootstrap.yml used file path
+     *
      * @return string uniq classname for container dump depending on context and environment
      */
-    private function getContainerDumpFilename()
+    private function getContainerDumpFilename($bootstrap_filepath)
     {
-        return 'bb' . md5('__container__' . $this->context . $this->environment);
+        return 'bb' . md5('__container__' . $this->context . $this->environment . filemtime($bootstrap_filepath));
     }
 
     /**

@@ -113,6 +113,9 @@ class BootstrapResolver
             throw new BootstrapFileNotFoundException($directories);
         }
 
-        return Yaml::parse($bootstrap_filepath);
+        $parameters = Yaml::parse($bootstrap_filepath);
+        $parameters['bootstrap_filepath'] = $bootstrap_filepath;
+
+        return $parameters;
     }
 }
