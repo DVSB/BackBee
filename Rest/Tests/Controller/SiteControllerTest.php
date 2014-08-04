@@ -42,6 +42,8 @@ use BackBuilder\Security\Acl\Loader\YmlLoader;
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Rest\Controller\SiteController
  */
 class SiteControllerTest extends TestCase
 {
@@ -124,6 +126,9 @@ class SiteControllerTest extends TestCase
     }
 
 
+    /**
+     * @covers ::getLayoutsAction
+     */
     public function testGetLayoutsAction()
     {
         // authenticate a user with super admin authority
@@ -151,6 +156,9 @@ class SiteControllerTest extends TestCase
         $this->assertEquals($this->layout->getUid(), $content[0]['uid']);
     }
     
+    /**
+     * @covers ::getLayoutsAction
+     */
     public function testGetLayoutsAction_noAuthorizedLayouts()
     {
         // authenticate a user with super admin authority

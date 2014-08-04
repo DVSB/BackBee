@@ -30,10 +30,15 @@ use BackBuilder\Security\User;
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Security\User
  */
 class UserTest extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @covers ::getRoles
+     */
     public function testGetRoles()
     {
         $user = new User();

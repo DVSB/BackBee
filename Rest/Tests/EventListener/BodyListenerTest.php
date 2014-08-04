@@ -39,10 +39,15 @@ use BackBuilder\Rest\EventListener\BodyListener,
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Rest\EventListener\BodyListener
  */
 class BodyListenerTest extends TestCase
 {
 
+    /**
+     * @covers ::onRequest
+     */
     public function testOnRequest()
     {
         $data = ['param' => 'value'];
@@ -53,6 +58,8 @@ class BodyListenerTest extends TestCase
     
     /**
      * @expectedException \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
+     * 
+     * @covers ::onRequest
      */
     public function testOnRequest_wrongContent()
     {
@@ -61,7 +68,7 @@ class BodyListenerTest extends TestCase
     }
     
     /**
-     * 
+     * @covers ::onRequest
      */
     public function testOnRequest_noContent()
     {
@@ -72,7 +79,9 @@ class BodyListenerTest extends TestCase
     
     /**
      * @expectedException \Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException
-     * @expectedExceptionMessage Format of the request content was not be recognized
+     * @expectedExceptionMessage Format of the request content was not recognized
+     * 
+     * @covers ::onRequest
      */
     public function testOnRequest_noContentType()
     {
@@ -81,6 +90,10 @@ class BodyListenerTest extends TestCase
         $this->invokeOnRequest($request);
     }
     
+    /**
+     * 
+     * @covers ::onRequest
+     */
     public function testOnRequest_noContentTypeNoContent()
     {
         $request = Request::create('test', "DELETE");

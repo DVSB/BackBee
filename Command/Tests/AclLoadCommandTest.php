@@ -39,6 +39,8 @@ use BackBuilder\Security\Group;
  * @package     BackBuilder\Command
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Command\AclLoadCommand
  */
 class AclLoadCommandTest extends TestCase
 {
@@ -59,6 +61,9 @@ class AclLoadCommandTest extends TestCase
         
     }
     
+    /**
+     * @covers ::execute
+     */
     public function testExecute()
     {
         // mock the Kernel or create one depending on your needs
@@ -89,8 +94,10 @@ groups:
         $this->assertContains('Processing file: vfs://test_dir/file.xml', $commandTester->getDisplay());
     }
     
+    
     /**
      * @expectedException \Symfony\Component\Yaml\Exception\ParseException
+     * @covers ::execute
      */
     public function testExecute_invalidFile()
     {
@@ -119,6 +126,7 @@ yml file'
     /**
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage File not found: file_doesnt_exist.ext
+     * @covers ::execute
      */
     public function testExecute_fileNotFound()
     {

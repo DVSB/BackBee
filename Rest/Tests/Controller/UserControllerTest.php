@@ -37,6 +37,8 @@ use BackBuilder\Security\User,
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Rest\Controller\UserController
  */
 class UserControllerTest extends TestCase
 {
@@ -85,135 +87,9 @@ class UserControllerTest extends TestCase
     }
 
 
-    public function testLoginAction_TokenCreated()
-    {
-        $this->markTestSkipped();
-        
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-        
-        $request = new Request(array(), array(
-            'username' => 'user123',
-            'password' => 'password123',
-            '_action' => 'loginAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
-        ));
-        $controller = $this->getController();
-        
-        $response = $controller->loginAction($request);
-        
-        $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->getBBApp()->getSecurityContext()->getToken());
-    }
-    
-    public function testLoginAction_InvalidUser()
-    {
-        $this->markTestSkipped();
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-        
-        $request = new Request(array(), array(
-            'username' => 'userThatDoesntExist',
-            'password' => 'password123',
-            '_action' => 'loginAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
-        ));
-        $controller = $this->getController();
-        
-        $response = $controller->loginAction($request);
-        
-        // TODO in case of invalid user a 404 error should be returned
-        $this->assertEquals(401, $response->getStatusCode());
-        
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-    }
-    
-    public function testLoginAction_InvalidPassword()
-    {
-        $this->markTestSkipped();
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-        
-        $request = new Request(array(), array(
-            'username' => 'user123',
-            'password' => 'passwordInvalid',
-            '_action' => 'loginAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
-        ));
-        $controller = $this->getController();
-        
-        $response = $controller->loginAction($request);
-        
-        $this->assertEquals(401, $response->getStatusCode());
-        
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-    }
-    
-    public function testLoginAction_InactiveUser()
-    {
-        $this->markTestSkipped();
-        
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-        
-        $request = new Request(array(), array(
-            'username' => 'user123inactive',
-            'password' => 'password123',
-            '_action' => 'loginAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
-        ));
-        $controller = $this->getController();
-        
-        $response = $controller->loginAction($request);
-        
-        $this->assertEquals(403, $response->getStatusCode());
-        
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-    }
-    
-    public function testLoginAction_NoData()
-    {
-        $this->markTestSkipped();
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-        
-        $request = new Request(array(), array(
-            'username' => 'user123',
-            'password' => 'password123',
-            '_action' => 'loginAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
-        ));
-        
-        $controller = $this->getController();
-        
-        $response = $controller->loginAction($request);
-        $this->assertEquals(204, $response->getStatusCode());
-    }
-    
-    public function testLoginAction_ReturnData()
-    {
-        $this->markTestSkipped();
-        
-        $request = new Request(array(), array(
-            'username' => 'user123',
-            'password' => 'password123',
-            'includeUserData' => 1,
-            'includePermissionsData' => 1,
-            '_action' => 'loginAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
-        ));
-        
-        $controller = $this->getController();
-        
-        $response = $controller->loginAction($request);
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('application/json', $response->headers->get('Content-Type'));
-        
-        $res = json_decode($response->getContent(), true);
-        
-        $this->assertInternalType('array', $res);
-        $this->assertArrayHasKey('permissions', $res);
-        $this->assertContains('GROUP_ID', $res['permissions']);
-        $this->assertArrayHasKey('user', $res);
-    }
-    
     
     /**
-     * @depends testLoginAction_TokenCreated
+     * @covers ::logoutAction
      */
     public function testLogoutAction()
     {
@@ -244,6 +120,9 @@ class UserControllerTest extends TestCase
         $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
     }
     
+    /**
+     * @covers ::getAction
+     */
     public function testGetAction()
     {
         $controller = $this->getController();
@@ -258,6 +137,9 @@ class UserControllerTest extends TestCase
         $this->assertEquals($this->user->getId(), $content['id']);
     }
     
+    /**
+     * @covers ::getAction
+     */
     public function testGetAction_invalidUser()
     {
         $controller = $this->getController();
@@ -267,6 +149,9 @@ class UserControllerTest extends TestCase
         $this->assertEquals(404, $response->getStatusCode());
     }
     
+    /**
+     * @covers ::deleteAction
+     */
     public function testDeleteAction()
     {
         // create user
@@ -292,6 +177,9 @@ class UserControllerTest extends TestCase
         $this->assertTrue(is_null($userAfterDelete));
     }
     
+    /**
+     * @covers ::deleteAction
+     */
     public function testDeleteAction_invalidUser()
     {
         $controller = $this->getController();
@@ -300,6 +188,9 @@ class UserControllerTest extends TestCase
         $this->assertEquals(404, $response->getStatusCode());
     }
     
+    /**
+     * @covers ::putAction
+     */
     public function testPutAction()
     {
         // create user
@@ -347,7 +238,7 @@ class UserControllerTest extends TestCase
     }
     
     /**
-     * 
+     * @covers ::putAction
      */
     public function testPutAction_empty_required_fields()
     {
@@ -387,6 +278,9 @@ class UserControllerTest extends TestCase
         $this->assertContains('Login is required', $res['errors']['login']);
     }
     
+    /**
+     * @covers ::postAction
+     */
     public function testPostAction()
     {
         $controller = $this->getController();
@@ -425,6 +319,9 @@ class UserControllerTest extends TestCase
         $this->assertInstanceOf('BackBuilder\Security\User', $user);
     }
     
+    /**
+     * @covers ::postAction
+     */
     public function testPostAction_missing_required_fields()
     {
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(), array(
@@ -442,7 +339,9 @@ class UserControllerTest extends TestCase
         $this->assertContains('Login is required', $res['errors']['login']);
     }
     
-    
+    /**
+     * @covers ::postAction
+     */
     public function testPostAction_duplicate_login()
     {
         // create user

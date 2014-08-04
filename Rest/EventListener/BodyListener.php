@@ -97,7 +97,7 @@ class BodyListener extends APathEnabledListener
             
             if(!$format) {
                 if ($this->throwExceptionOnUnsupportedContentType) {
-                    throw new UnsupportedMediaTypeHttpException("Format of the request content was not be recognized");
+                    throw new UnsupportedMediaTypeHttpException("Format of the request content was not recognized");
                 }
                 return;
             }

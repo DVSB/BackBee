@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 
 /**
- * Fixture Controller
+ * Abstract Controller
  *
  * @Annotation
  * 
@@ -34,35 +34,19 @@ use BackBuilder\Rest\Controller\Annotations as Rest;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class FixtureAnnotatedController 
+abstract class FixtureAbstractController 
 {
+    
     /**
      * @Rest\Pagination
      */
-    public function defaultPaginationAction()
-    {} 
+    public function concreteAction() 
+    {
+        
+    }
     
     /**
-     * @Rest\Pagination(startName="from", limitName="max", limitDefault=20, limitMax=100, limitMin=10)
+     * @Rest\Pagination
      */
-    public function customPaginationAction()
-    {} 
-    
-    /**
-     * @Rest\RequestParam(name = "name", key = "_name", requirements = {
-     *  @Assert\NotBlank(message="Name not provided"),
-     *  @Assert\Length(min = "2", max = "50")
-     * })
-     * 
-     * @Rest\RequestParam(name = "url", default = "http://test.com", requirements = {
-     *  @Assert\Url()
-     * })
-     * 
-     * @Rest\QueryParam(name = "url", default = "http://test.com", requirements = {
-     *  @Assert\Url()
-     * })
-     */
-    public function requestParamsAction()
-    {} 
-
+    abstract public function abstractAction();
 }

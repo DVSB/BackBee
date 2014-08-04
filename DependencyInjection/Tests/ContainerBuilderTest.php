@@ -75,7 +75,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ContainerBuilder::getContainer
+     * @covers ::getContainer
      */
     public function testGetContainerWithoutContextAndEnvironment()
     {
@@ -90,8 +90,8 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testGetContainerWithoutContextAndEnvironment
      *
-     * @covers ContainerBuilder::hydrateContainerWithBootstrapParameters
-     * @covers ContainerBuilder::tryAddParameter
+     * @covers ::hydrateContainerWithBootstrapParameters
+     * @covers ::tryAddParameter
      */
     public function testHydrateContainerWithBootstrapParameters(Container $container)
     {
@@ -107,7 +107,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
      *
      * @depends testHydrateContainerWithBootstrapParameters
      *
-     * @covers ContainerBuilder::loadApplicationServices
+     * @covers ::loadApplicationServices
      */
     public function testLoadApplicationServices(Container $container)
     {
@@ -129,7 +129,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testLoadApplicationServices
      *
-     * @covers ContainerBuilder::hydrateContainerWithApplicationParameters
+     * @covers ::hydrateContainerWithApplicationParameters
      */
     public function testHydrateContainerWithApplicationParameters(Container $container)
     {
@@ -161,7 +161,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testHydrateContainerWithApplicationParameters
      *
-     * @covers ContainerBuilder::loadLoggerDefinition
+     * @covers ::loadLoggerDefinition
      */
     public function testLoadLoggerDefinition(Container $container)
     {
@@ -178,8 +178,8 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testLoadLoggerDefinition
      *
-     * @covers ContainerBuilder::tryParseContainerDump
-     * @covers ContainerBuilder::getContainerDumpFilename
+     * @covers ::tryParseContainerDump
+     * @covers ::getContainerDumpFilename
      */
     public function testTryParseContainerDumpWithDebugTrue(Container $container)
     {
@@ -198,7 +198,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
      * test if the ContainerAlreadyExistsException is raise when we call a second time the method
      * ContainerBuilder::getContainer()
      *
-     * @covers ContainerBuilder::getContainer
+     * @covers ::getContainer
      */
     public function testRaiseContainerAlreadyExistsException()
     {
@@ -218,7 +218,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * Test to get a container for application which has a context and an environment; debug is setted to false
      *
-     * @covers ContainerBuilder::getContainer()
+     * @covers ::getContainer()
      */
     public function testGetContainerWithContextAndEnvironmentAndDebugFalse()
     {
@@ -243,7 +243,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testGetContainerWithContextAndEnvironmentAndDebugFalse
      *
-     * @covers ContainerBuilder::tryParseContainerDump
+     * @covers ::tryParseContainerDump
      */
     public function testDumpAndRestoreContainer(Container $container)
     {
@@ -273,7 +273,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * setup a wrong bootstrap.yml to raise MissingBootstrapParametersException
      *
-     * @covers ContainerBuilder::hydrateContainerWithBootstrapParameters
+     * @covers ::hydrateContainerWithBootstrapParameters
      */
     public function testRaiseOfMissingBootstrapParametersException()
     {

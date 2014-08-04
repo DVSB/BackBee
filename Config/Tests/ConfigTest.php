@@ -31,7 +31,7 @@ use BackBuilder\DependencyInjection\Container;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\Config\Config
+ * @coversDefaultClass BackBuilder\Config\Config
  */
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
@@ -53,14 +53,13 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     /**
      * test the Config constructor
      *
-     * @covers Config::extend
-     * @covers Config::_loadFromBaseDir
-     * @covers Config::_getYmlFiles
-     * @covers Config::_loadFromFile
-     * @covers Config::hasSection
-     * @covers Config::sectionHasKey
-     * @covers Config::getSection
-     * @covers Config::getBaseDir
+     * @covers ::extend
+     * @covers ::_loadFromBaseDir
+     * @covers ::_getYmlFiles
+     * @covers ::_loadFromFile
+     * @covers ::sectionHasKey
+     * @covers ::getSection
+     * @covers ::getBaseDir
      */
     public function testConstruct()
     {
@@ -79,10 +78,10 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     /**
      * test extend() with environment or not and override or not
      *
-     * @covers Config::extend
-     * @covers Config::setEnvironment
-     * @covers Config::addYamlFilenameToIgnore
-     * @covers Config::setSection
+     * @covers ::extend
+     * @covers ::setEnvironment
+     * @covers ::addYamlFilenameToIgnore
+     * @covers ::setSection
      */
     public function testExtend()
     {
@@ -152,10 +151,10 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     /**
      * Test config with container
      *
-     * @covers Config::setContainer
-     * @covers Config::getRawSection
-     * @covers Config::_compileParameters
-     * @covers Config::_compileAllParameters
+     * @covers ::setContainer
+     * @covers ::getRawSection
+     * @covers ::_compileParameters
+     * @covers ::_compileAllParameters
      */
     public function testConfigWithContainer()
     {
@@ -180,8 +179,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     /**
      * Test Config class proxy and dump
      *
-     * @covers Config::getClassProxy
-     * @covers Config::dump
+     * @covers ::getClassProxy
+     * @covers ::dump
      */
     public function testConfigDumpable()
     {

@@ -40,6 +40,8 @@ use BackBuilder\Security\User,
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Rest\Controller\SecurityController
  */
 class SecurityControllerTest extends TestCase
 {
@@ -78,8 +80,10 @@ class SecurityControllerTest extends TestCase
         return $controller;
     }
 
-
-    public function testAuthAction_bb_area()
+    /**
+     * @covers ::authenticateAction
+     */
+    public function testAuthenticateAction_bb_area()
     {
         $controller = $this->getController();
         
@@ -108,8 +112,10 @@ class SecurityControllerTest extends TestCase
     /**
      * @expectedException \BackBuilder\Security\Exception\SecurityException
      * @expectedExceptionMessage Request expired
+     * 
+     * @covers ::authenticateAction
      */
-    public function testAuthAction_bb_area_expired()
+    public function testAuthenticateAction_bb_area_expired()
     {
         $controller = $this->getController();
         
@@ -132,8 +138,10 @@ class SecurityControllerTest extends TestCase
     /**
      * @expectedException \BackBuilder\Security\Exception\SecurityException
      * @expectedExceptionMessage Unknown user
+     * 
+     * @covers ::authenticateAction
      */
-    public function testAuthAction_bb_area_userDoesntExist()
+    public function testAuthenticateAction_bb_area_userDoesntExist()
     {
         $controller = $this->getController();
         
@@ -149,8 +157,10 @@ class SecurityControllerTest extends TestCase
     /**
      * @expectedException \BackBuilder\Security\Exception\SecurityException
      * @expectedExceptionMessage Invalid authentication informations
+     * 
+     * @covers ::authenticateAction
      */
-    public function testAuthAction_bb_area_invalidPassword()
+    public function testAuthenticateAction_bb_area_invalidPassword()
     {
         $controller = $this->getController();
         
@@ -171,9 +181,9 @@ class SecurityControllerTest extends TestCase
     }
     
     /**
-     * 
+     * @covers ::authenticateAction
      */
-    public function testAuthAction_invalidFirewall()
+    public function testAuthenticateAction_invalidFirewall()
     {
         $controller = $this->getController();
         
@@ -183,9 +193,9 @@ class SecurityControllerTest extends TestCase
     }
     
     /**
-     * 
+     * @covers ::authenticateAction
      */
-    public function testAuthAction_firewallWithoutSupportedContexts()
+    public function testAuthenticateAction_firewallWithoutSupportedContexts()
     {
         $controller = $this->getController();
         
@@ -195,6 +205,9 @@ class SecurityControllerTest extends TestCase
     }
     
     
+    /**
+     * @covers ::deleteSessionAction
+     */
     public function testDeleteSessionAction()
     {
         $this->getBBApp()->start();

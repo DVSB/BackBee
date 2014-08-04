@@ -50,6 +50,11 @@ class AnnotationDriver implements DriverInterface
         $this->reader = $reader;
     }
  
+    /**
+     * 
+     * @param \ReflectionClass $class
+     * @return \Metadata\ClassMetadata
+     */
     public function loadMetadataForClass(\ReflectionClass $class)
     {
         $classMetadata = new ClassMetadata($class->getName());
