@@ -57,25 +57,34 @@ class ActionMetadata extends MethodMetadata
         $this->reflection->setAccessible(true);
     }
     
-    /**
-     * @param object $obj
-     * @param array  $args
-     *
-     * @return mixed
-     */
-    public function invoke($obj, array $args = array())
-    {
-        return $this->reflection->invokeArgs($obj, $args);
-    }
-
     public function serialize()
     {
-        return serialize(array($this->class, $this->name, $this->queryParams, $this->requestParams));
+        return \serialize([
+            $this->class, 
+            $this->name, 
+            $this->queryParams, 
+            $this->requestParams,
+            $this->paginationStartName,
+            $this->paginationLimitName,
+            $this->paginationLimitDefault,
+            $this->paginationLimitMax,
+            $this->paginationLimitMin
+        ]);
     }
 
     public function unserialize($str)
     {
-        list($this->class, $this->name, $this->queryParams, $this->requestParams) = unserialize($str);
+        list(
+            $this->class, 
+            $this->name, 
+            $this->queryParams, 
+            $this->requestParams,
+            $this->paginationStartName,
+            $this->paginationLimitName,
+            $this->paginationLimitDefault,
+            $this->paginationLimitMax,
+            $this->paginationLimitMin
+        ) = \unserialize($str);
 
         $this->reflection = new \ReflectionMethod($this->class, $this->name);
         $this->reflection->setAccessible(true);

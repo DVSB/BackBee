@@ -61,8 +61,25 @@ class FixtureAnnotatedController
      * @Rest\QueryParam(name = "url", default = "http://test.com", requirements = {
      *  @Assert\Url()
      * })
+     * 
+     * @Rest\Pagination(startName="from", limitName="max", limitDefault=20, limitMax=100, limitMin=10)
      */
     public function requestParamsAction()
     {} 
 
+    /**
+     * this is not a controller action
+     */
+    public function justARandomMethod() 
+    {
+        return 1;
+    }
+    
+    /**
+     * This is not a valid controller action as it is not a public method
+     */
+    private function privateMethodInvalidAction()
+    {
+        return 'privateMethodInvalidAction';
+    }
 }
