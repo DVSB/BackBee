@@ -264,7 +264,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
             ->setPassword('pass')
         ;
         
-        $group = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\Group')->findOneBy(array('_identifier' => $groupId));
+        $group = $this->getBBApp()->getEntityManager()
+                ->getRepository('BackBuilder\Security\Group')
+                ->findOneBy(array('_identifier' => $groupId))
+        ;
 
         if(!$group) {
             throw new \RuntimeException('Group not found: ' . $groupId);

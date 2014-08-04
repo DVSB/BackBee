@@ -39,6 +39,8 @@ use  BackBuilder\Security\Token\BBUserToken;
  * @subpackage  Tests
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Security\Acl\Loader\YmlLoader
  */
 class YmlLoaderTest extends TestCase
 {
@@ -76,6 +78,9 @@ class YmlLoaderTest extends TestCase
         $loader->load(file_get_contents(__DIR__ . '/acl.yml'));
     }
     
+    /**
+     * @covers ::load
+     */
     public function testLoad_superadmin()
     {
         $this->createAuthUser('super_admin');
@@ -84,6 +89,9 @@ class YmlLoaderTest extends TestCase
         $this->assertTrue($this->getSecurityContext()->isGranted('EDIT', $this->siteDefault));
     }
     
+    /**
+     * @covers ::load
+     */
     public function testLoad_admin()
     {
         $this->createAuthUser('admin_front');
