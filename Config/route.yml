@@ -36,7 +36,7 @@ bb.resources:
 bb.bundles.ressources:
     pattern: /bundle/{bundleName}/{type}/{filename}
     defaults:
-        _action: serveBundleRessourcesAction
+        _action: bundleResourcesAction
     requirements:
         bundleName: .+
         type: (css|less|js|img)
