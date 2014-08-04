@@ -22,7 +22,7 @@
         <blacklist>
           <file>phpunit.phar</file>
           <directory suffix=".php">vendor</directory>
-          <directory suffix="Test.php">*/Tests/</directory>
+          <directory suffix=".php">*/Tests/</directory>
           <directory suffix=".php">Tests/</directory>
           <!-- code coverage reports -->
           <directory>report</directory>
