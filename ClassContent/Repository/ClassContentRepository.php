@@ -170,7 +170,7 @@ class ClassContentRepository extends EntityRepository
             }
             $where[] = str_replace('\\', '\\\\', 'c.classname IN ("' . implode('","', $classnameArr) . '")');
         }
-       
+
         if (true === array_key_exists('criteria', $selector)) {
             $criteria = (array) $selector['criteria'];
             foreach ($criteria as $field => $crit) {
@@ -305,7 +305,7 @@ class ClassContentRepository extends EntityRepository
                 ->select()
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
-        
+
         if (true === $has_page_joined && true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
             $q->join('c._mainnode', 'p')
                     ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
@@ -625,7 +625,7 @@ class ClassContentRepository extends EntityRepository
                 continue;
             $criterion = (object) $criterion;
             $alias = uniqid("i" . rand());
-            $qb->leftJoin("c._indexation", $alias)
+            $qb->leftJoin("cc._indexation", $alias)
                     ->andWhere($alias . "._field = :field" . $alias)
                     ->andWhere($alias . "._value " . $criterion->op . " :value" . $alias)
                     ->setParameter("field" . $alias, $criterion->field)
