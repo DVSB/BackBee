@@ -71,7 +71,9 @@ class AnnotationDriverTest extends TestCase
         $this->assertArrayHasKey('defaultPaginationAction', $classMetadata->methodMetadata);
         $this->assertArrayHasKey('customPaginationAction', $classMetadata->methodMetadata);
         $this->assertArrayHasKey('requestParamsAction', $classMetadata->methodMetadata);
-
+        $this->assertArrayNotHasKey('justARandomMethod', $classMetadata->methodMetadata);
+        $this->assertArrayNotHasKey('privateMethodInvalidAction', $classMetadata->methodMetadata);
+        
         
         $this->assertEquals('from', $classMetadata->methodMetadata['customPaginationAction']->paginationStartName);
         $this->assertEquals('max', $classMetadata->methodMetadata['customPaginationAction']->paginationLimitName);
