@@ -1,0 +1,46 @@
+groups:
+  super_admin:
+    sites:
+      resources: all
+      actions: all
+    layouts:
+      resources: all
+      actions: all
+    workflow:
+      resources: all
+      actions: all
+    mediafolders:
+      resources: all
+      actions: all
+    pages:
+      resources: all
+      actions: all
+    contents:
+      resources: all
+      actions: all
+    bundles:
+      resources: all
+      actions: all
+  admin_front:
+    sites:
+      resources: [default]
+      actions: [view]
+    layouts:
+      resources: all
+      actions: [view]
+    workflow:
+      resources: all
+      actions: all
+    mediafolders:
+      resources: all
+      actions: [view, create, edit]
+    pages:
+      resources: all
+      actions: [view, create, edit, publish]
+    contents:
+      resources: all
+      actions: all
+    bundles:
+      resources: [TestBundle]
+      actions: [view, edit]
+  

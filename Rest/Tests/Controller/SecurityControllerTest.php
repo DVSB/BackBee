@@ -22,22 +22,26 @@
 namespace BackBuilder\Rest\Tests\Controller;
 
 
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\Response;
 
 use BackBuilder\Rest\Controller\SecurityController;
 use BackBuilder\Tests\TestCase;
 
 
-use BackBuilder\Security\User;
+use BackBuilder\Security\User,
+    BackBuilder\Security\Token\BBUserToken;
 
 
 /**
- * Test for AuthController class
+ * Test for SecurityController class
  *
  * @category    BackBuilder
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Rest\Controller\SecurityController
  */
 class SecurityControllerTest extends TestCase
 {
@@ -59,9 +63,9 @@ class SecurityControllerTest extends TestCase
         $user->setPassword(md5('password123'));
         $user->setActivated(true);
         
-        $this->bbapp->getEntityManager()->persist($user);
+        $this->getEntityManager()->persist($user);
         
-        $this->bbapp->getEntityManager()->flush();
+        $this->getEntityManager()->flush();
     }
     
     /**
@@ -76,8 +80,10 @@ class SecurityControllerTest extends TestCase
         return $controller;
     }
 
-
-    public function testAuthAction_bb_area()
+    /**
+     * @covers ::authenticateAction
+     */
+    public function testAuthenticateAction_bb_area()
     {
         $controller = $this->getController();
         
@@ -103,7 +109,13 @@ class SecurityControllerTest extends TestCase
         $this->assertArrayHasKey('nonce', $content);
     }
     
-    public function testAuthAction_bb_area_expired()
+    /**
+     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedExceptionMessage Request expired
+     * 
+     * @covers ::authenticateAction
+     */
+    public function testAuthenticateAction_bb_area_expired()
     {
         $controller = $this->getController();
         
@@ -120,12 +132,16 @@ class SecurityControllerTest extends TestCase
             'nonce' => $nonce
         ));
         
-        $response = $controller->authenticateAction('bb_area', $request);
-        
-        $this->assertEquals(401, $response->getStatusCode());
+        $controller->authenticateAction('bb_area', $request);
     }
     
-    public function testAuthAction_bb_area_userDoesntExist()
+    /**
+     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedExceptionMessage Unknown user
+     * 
+     * @covers ::authenticateAction
+     */
+    public function testAuthenticateAction_bb_area_userDoesntExist()
     {
         $controller = $this->getController();
         
@@ -135,12 +151,16 @@ class SecurityControllerTest extends TestCase
             'digest' => 'test',
             'nonce' => 'test'
         ));
-        $response = $controller->authenticateAction('bb_area', $request);
-        
-        $this->assertEquals(404, $response->getStatusCode());
+        $controller->authenticateAction('bb_area', $request);
     }
     
-    public function testAuthAction_bb_area_invalidPassword()
+    /**
+     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedExceptionMessage Invalid authentication informations
+     * 
+     * @covers ::authenticateAction
+     */
+    public function testAuthenticateAction_bb_area_invalidPassword()
     {
         $controller = $this->getController();
         
@@ -157,15 +177,13 @@ class SecurityControllerTest extends TestCase
             'nonce' => $nonce
         ));
         
-        $response = $controller->authenticateAction('bb_area', $request);
-        
-        $this->assertEquals(401, $response->getStatusCode());
+        $controller->authenticateAction('bb_area', $request);
     }
     
     /**
-     * 
+     * @covers ::authenticateAction
      */
-    public function testAuthAction_invalidFirewall()
+    public function testAuthenticateAction_invalidFirewall()
     {
         $controller = $this->getController();
         
@@ -175,9 +193,9 @@ class SecurityControllerTest extends TestCase
     }
     
     /**
-     * 
+     * @covers ::authenticateAction
      */
-    public function testAuthAction_firewallWithoutSupportedContexts()
+    public function testAuthenticateAction_firewallWithoutSupportedContexts()
     {
         $controller = $this->getController();
         
@@ -186,6 +204,34 @@ class SecurityControllerTest extends TestCase
         $this->assertEquals(400, $response->getStatusCode());
     }
     
+    
+    /**
+     * @covers ::deleteSessionAction
+     */
+    public function testDeleteSessionAction()
+    {
+        $this->getBBApp()->start();
+        $controller = $this->getController();
+        
+        // session doesnt exist
+        $response = $controller->deleteSessionAction(new Request());
+        $this->assertTrue($response instanceof Response);
+        $this->assertEquals(401, $response->getStatusCode());
+        
+        // create token
+        $token = new BBUserToken();
+        $this->getSecurityContext()->setToken($token);
+        
+        $controller = $this->getController();
+        $request = new Request();
+        $request->setSession($this->getBBApp()->getSession());
+        $response = $controller->deleteSessionAction($request);
+
+        $this->assertTrue($response instanceof Response);
+        $this->assertEquals(204, $response->getStatusCode());
+    }
+    
+    
 
     protected function tearDown()
     {
@@ -193,12 +239,5 @@ class SecurityControllerTest extends TestCase
         $this->getBBApp()->stop();
     }
     
-    /**
-     * 
-     * @return 
-     */
-    protected function getEntityManager()
-    {
-         return $this->bbapp->getContainer()->get('em');
-    }
+    
 }

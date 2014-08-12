@@ -196,16 +196,14 @@ class Controller implements ContainerAwareInterface
     /**
      * Shortcut for Symfony\Component\Security\Core\SecurityContext::isGranted()
      * 
-     * @see Symfony\Component\Security\Core\SecurityContext::isGranted()
+     * @see \Symfony\Component\Security\Core\SecurityContext::isGranted()
      * @param string $permission
      * @param mixed $object
      * @return bool
      */
     protected function isGranted($attributes, $object = null)
     {
-        $securityContext = $this->getContainer()->get('security.context');
-        
-        return $securityContext->isGranted($attributes, $object);
+        return $this->getContainer()->get('security.context')->isGranted($attributes, $object);
     }
     
 

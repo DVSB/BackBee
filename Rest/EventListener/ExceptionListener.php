@@ -23,7 +23,8 @@ namespace BackBuilder\Rest\EventListener;
 
 
 use BackBuilder\Event\Listener\APathEnabledListener,
-    BackBuilder\FrontController\Exception\FrontControllerException;
+    BackBuilder\FrontController\Exception\FrontControllerException,
+    BackBuilder\Security\Exception\SecurityException;
 
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent,
@@ -88,6 +89,20 @@ class ExceptionListener extends APathEnabledListener
             }
             // keep the HTTP status code
             $event->getResponse()->setStatusCode($exception->getStatusCode());
-        } 
+        } elseif($exception instanceof SecurityException) {
+            $event->setResponse(new Response());
+            
+            if(SecurityException::UNKNOWN_USER === $e->getCode()) {
+                $response->setStatusCode(404, $e->getMessage());
+            } elseif(SecurityException::INVALID_CREDENTIALS === $e->getCode()) {
+                $response->setStatusCode(401, $e->getMessage());
+            } elseif(SecurityException::EXPIRED_AUTH === $e->getCode()) {
+                $response->setStatusCode(401, $e->getMessage());
+            } elseif(SecurityException::EXPIRED_TOKEN === $e->getCode()) {
+                $response->setStatusCode(401, $e->getMessage());
+            } else {
+                $response->setStatusCode(403, $e->getMessage());
+            }
+        }
     }
 }

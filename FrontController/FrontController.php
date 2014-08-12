@@ -529,7 +529,7 @@ class FrontController implements HttpKernelInterface
     /**
      * Handle static file request for bundle
      */
-    public function serveBundleRessourcesAction($bundleName, $type, $filename)
+    public function bundleResourcesAction($bundleName, $type, $filename)
     {
         $pathInfos = array(
             "css" => "Ressources/Templates/css",
@@ -569,30 +569,6 @@ class FrontController implements HttpKernelInterface
         } else {
             File::resolveFilepath($filename, null, array('base_dir' => $base_dir));
         }
-
-        $this->_application->info(sprintf('Handling resource URL `%s`.', $filename));
-        $this->_flushfile($filename);
-    }
-
-    /**
-     * Handles a resource file request
-     *
-     * @access public
-     * @param string $filename The resource file to provide
-     * @throws FrontControllerException
-     */
-    public function bundleResourcesAction($bundle, $filename = null)
-    {
-        $this->_validateResourcesAction($filename);
-
-        $bundle = explode('-', $bundle);
-        array_walk($bundle, function(&$value) {
-            $value = ucfirst($value);
-        });
-        $bundle = implode('', $bundle);
-        $dir = $this->_application->getBundle($bundle)->getResourcesDir();
-
-        File::resolveFilepath($filename, null, array('include_path' => $dir . DIRECTORY_SEPARATOR . 'Templates'));
 
         $this->_application->info(sprintf('Handling resource URL `%s`.', $filename));
         $this->_flushfile($filename);
@@ -664,17 +640,17 @@ class FrontController implements HttpKernelInterface
             if(!$this->getRequest()->attributes->get('_controller')) {
                 $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
                 $matches = $urlMatcher->match($this->getRequest()->getPathInfo());
-                
+
                 if(!isset($matches['_controller'])) {
                     // set default cotnroller to this
                     $matches['_controller'] = $this;
                 }
-                
-                
+
+
                 $this->getRequest()->attributes->add($matches);
             }
-            
-            
+
+
             if($this->getRequest()->attributes->has('_controller')) {
                 return $this->_invokeAction($type);
             }

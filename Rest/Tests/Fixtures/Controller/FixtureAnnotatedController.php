@@ -21,7 +21,8 @@
 
 namespace BackBuilder\Rest\Tests\Fixtures\Controller;
 
-use BackBuilder\Rest\Controller\Annotations\Pagination;
+use Symfony\Component\Validator\Constraints as Assert;
+use BackBuilder\Rest\Controller\Annotations as Rest;
 
 /**
  * Fixture Controller
@@ -36,15 +37,49 @@ use BackBuilder\Rest\Controller\Annotations\Pagination;
 class FixtureAnnotatedController 
 {
     /**
-     * @Pagination
+     * @Rest\Pagination
      */
     public function defaultPaginationAction()
     {} 
     
     /**
-     * @Pagination(startName="from", limitName="max", limitDefault=20, limitMax=100, limitMin=10)
+     * @Rest\Pagination(startName="from", limitName="max", limitDefault=20, limitMax=100, limitMin=10)
      */
     public function customPaginationAction()
     {} 
+    
+    /**
+     * @Rest\RequestParam(name = "name", key = "_name", requirements = {
+     *  @Assert\NotBlank(message="Name not provided"),
+     *  @Assert\Length(min = "2", max = "50")
+     * })
+     * 
+     * @Rest\RequestParam(name = "url", default = "http://test.com", requirements = {
+     *  @Assert\Url()
+     * })
+     * 
+     * @Rest\QueryParam(name = "url", default = "http://test.com", requirements = {
+     *  @Assert\Url()
+     * })
+     * 
+     * @Rest\Pagination(startName="from", limitName="max", limitDefault=20, limitMax=100, limitMin=10)
+     */
+    public function requestParamsAction()
+    {} 
 
+    /**
+     * this is not a controller action
+     */
+    public function justARandomMethod() 
+    {
+        return 1;
+    }
+    
+    /**
+     * This is not a valid controller action as it is not a public method
+     */
+    private function privateMethodInvalidAction()
+    {
+        return 'privateMethodInvalidAction';
+    }
 }

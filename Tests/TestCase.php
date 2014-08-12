@@ -8,6 +8,12 @@ use org\bovigo\vfs\vfsStream;
 use Doctrine\ORM\Tools\SchemaTool,
     Doctrine\ORM\EntityManager;
 
+
+use  BackBuilder\Security\Token\BBUserToken;
+
+use BackBuilder\Security\User,
+    BackBuilder\Security\Group;
+
 use BackBuilder\Tests\Mock\MockBBApplication;
 
 /**
@@ -53,7 +59,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param type $namespace
      * @throws \Exception
      */
-    public function load($namespace) {
+    public function load($namespace) 
+    {
         try {
             if (!file_exists($this->root_folder.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $namespace).'.php')) {
                 throw new \Exception('BackBuilderTestUnit could not find file associeted this namespace '.$namespace);
@@ -168,7 +175,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function initDb($bbapp)
     {
-        $em = $bbapp->getContainer()->get('em');
+        $em = $this->getBBApp()->getEntityManager();
+
+        $conn = $em->getConnection();
+        
 
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
@@ -190,12 +200,15 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
-        $schema->updateSchema($metadata, true);
+        //$schema->updateSchema($metadata, true);
+        
+        $classes = $em->getMetadataFactory()->getAllMetadata();
+        $schema->createSchema($classes);
     }
     
     public function initAcl()
     {
-        $conn = $this->getBBApp()->getContainer()->get('em')->getConnection();
+        $conn = $this->getBBApp()->getEntityManager()->getConnection();
         
         $schema = new \Symfony\Component\Security\Acl\Dbal\Schema(array(
             'class_table_name'         => 'acl_classes',
@@ -205,7 +218,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'sid_table_name'           => 'acl_security_identities',
         ));
         
-        $platform = new \Doctrine\DBAL\Platforms\SqlitePlatform();
+        $platform = $conn->getDatabasePlatform();
         
         foreach($schema->toSql($platform) as $query) {
             $conn->executeQuery($query);
@@ -214,26 +227,77 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function dropDb()
     {
-        $connection = $this->getBBApp()->getContainer()->get('em')->getConnection();
+        $connection = $this->getBBApp()->getEntityManager()->getConnection();
         $params = $connection->getParams();
         $name = isset($params['path']) ? $params['path'] : (isset($params['dbname']) ? $params['dbname'] : false);
         $name = $connection->getDatabasePlatform()->quoteSingleIdentifier($name);
         $connection->getSchemaManager()->dropDatabase($name);
     }
-    
+
     /**
      * 
+     * @param type $config
      * @return \BackBuilder\BBApplication
      */
-    public function getBBApp()
+    public function getBBApp(array $config = null)
     {
         if(null === $this->bbapp) {
-            //$this->bbapp = new \BackBuilder\BBApplication(null, 'test');
-            
-            $this->bbapp = new MockBBApplication(null, 'test');
+            $this->bbapp = new MockBBApplication(null, 'test', false, $config);
         }
         
         return $this->bbapp;
     }
 
+        
+
+    /**
+     * Creates a user for the specified group, and authenticates a BBUserToken
+     * @param string $groupId
+     * @return \BackBuilder\Security\Token\BBUserToken
+     */
+    protected function createAuthUser($groupId, $roles = array())
+    {
+        $token = new BBUserToken($roles);
+        $user = new User();
+        $user
+            ->setLogin(uniqid('login'))
+            ->setPassword('pass')
+        ;
+        
+        $group = $this->getBBApp()->getEntityManager()
+                ->getRepository('BackBuilder\Security\Group')
+                ->findOneBy(array('_identifier' => $groupId))
+        ;
+
+        if(!$group) {
+            throw new \RuntimeException('Group not found: ' . $groupId);
+        }
+        
+        $user->addGroup($group);
+        
+        $token->setUser($user);
+        $token->setAuthenticated(true);
+
+        $this->getSecurityContext()->setToken($token);
+
+        return $token;
+    }
+    
+    /**
+     * 
+     * @return \BackBuilder\Security\SecurityContext
+     */
+    protected function getSecurityContext()
+    {
+        return $this->getBBApp()->getSecurityContext();
+    }
+    
+    /**
+     * 
+     * @return \Doctrine\ORM\EntityManager
+     */
+    protected function getEntityManager($name = 'default')
+    {
+        return $this->getBBApp()->getEntityManager($name);
+    }
 }

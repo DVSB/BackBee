@@ -78,6 +78,13 @@ class BodyListener extends APathEnabledListener
             return;
         }
         
+        $content = $request->getContent();
+        
+        if('' === $content) {
+            // no content provided
+            return;
+        }
+        
         if (!count($request->request->all())
             && in_array($request->getMethod(), array('POST', 'PUT', 'PATCH', 'DELETE'))
         ) {
@@ -86,8 +93,16 @@ class BodyListener extends APathEnabledListener
             $format = null === $contentType
                 ? $request->getRequestFormat()
                 : $request->getFormat($contentType);
+            
+            
+            if(!$format) {
+                if ($this->throwExceptionOnUnsupportedContentType) {
+                    throw new UnsupportedMediaTypeHttpException("Format of the request content was not recognized");
+                }
+                return;
+            }
 
-            if (!$this->encoderProvider->supports($format)) {
+            if ($format && !$this->encoderProvider->supports($format)) {
                 if ($this->throwExceptionOnUnsupportedContentType) {
                     throw new UnsupportedMediaTypeHttpException("Request body format '$format' not supported");
                 }
@@ -96,7 +111,6 @@ class BodyListener extends APathEnabledListener
             }
 
             $decoder = $this->encoderProvider->getEncoder($format);
-            $content = $request->getContent();
 
             if (!empty($content)) {
                 $data = $decoder->decode($content, $format);

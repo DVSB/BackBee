@@ -94,7 +94,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers PhpArrayDumper::dump
+     * @covers ::dump
      */
     public function testDumpBase()
     {
@@ -108,8 +108,8 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers PhpArrayDumper::dump
-     * @covers PhpArrayDumper::dumpContainerParameters
+     * @covers ::dump
+     * @covers ::dumpContainerParameters
      */
     public function testDumpContainerParameters()
     {
@@ -117,15 +117,15 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers PhpArrayDumper::dump
-     * @covers PhpArrayDumper::dumpContainerDefinitions
-     * @covers PhpArrayDumper::hydrateDefinitionClass
-     * @covers PhpArrayDumper::dumpContainerAliases
-     * @covers PhpArrayDumper::hydrateDefinitionArguments
-     * @covers PhpArrayDumper::convertDefinitionToPhpArray
-     * @covers PhpArrayDumper::convertArgument
-     * @covers PhpArrayDumper::hydrateDefinitionTags
-     * @covers PhpArrayDumper::hydrateDefinitionMethodCalls
+     * @covers ::dump
+     * @covers ::dumpContainerDefinitions
+     * @covers ::hydrateDefinitionClass
+     * @covers ::dumpContainerAliases
+     * @covers ::hydrateDefinitionArguments
+     * @covers ::convertDefinitionToPhpArray
+     * @covers ::convertArgument
+     * @covers ::hydrateDefinitionTags
+     * @covers ::hydrateDefinitionMethodCalls
      */
     public function testDumpContainerDefinitionsAndAliases()
     {
@@ -227,7 +227,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers PhpArrayDumper::dump
+     * @covers ::dump
      */
     public function testDumpContainerCompile()
     {

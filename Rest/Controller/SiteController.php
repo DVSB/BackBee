@@ -69,24 +69,26 @@ class SiteController extends ARestController
             return $this->create404Response(sprintf('Site not found: %s', $uid));
         }
         
-        if($this->isGranted('VIEW', $site)) {
-            throw new AccessDeniedHttpException(sprintf('You are not authrozied to view site %s', $site->getLabel()));
+        if(!$this->isGranted('VIEW', $site)) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to view site %s', $site->getLabel()));
         }
         
-        // TODO
         $layouts = array();
 
         foreach($site->getLayouts() as $layout) {
-            $layouts[] = array(
-                'uid' => $layout->getUid(),
-                'site' => array(
-                    'uid' => $layout->getSite()->getUid()
-                ),
-                'label' => $layout->getLabel(),
-                'path' => $layout->getPath(),
-                'data' => json_decode($layout->getData(), true),
-                'picpath' => $layout->getPicpath()
-            );
+            if($this->isGranted('VIEW', $layout)) {
+                $layouts[] = array(
+                    'uid' => $layout->getUid(),
+                    'site' => array(
+                        'uid' => $layout->getSite()->getUid()
+                    ),
+                    'label' => $layout->getLabel(),
+                    'path' => $layout->getPath(),
+                    'data' => json_decode($layout->getData(), true),
+                    'picpath' => $layout->getPicpath()
+                );
+            }
+            
         }
         
         return new Response($this->formatCollection($layouts), 200, array('Content-Type' => 'application/json'));

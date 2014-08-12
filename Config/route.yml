@@ -33,11 +33,13 @@ bb.resources:
         filename: .+
 
 # BackBuilder resources
-bb.bundle.resources:
-    pattern: /bundle/{bundle}/{filename}
+bb.bundles.ressources:
+    pattern: /bundle/{bundleName}/{type}/{filename}
     defaults:
         _action: bundleResourcesAction
     requirements:
+        bundleName: .+
+        type: (css|less|js|img)
         filename: .+
 
 # BackBuilder media files
@@ -56,7 +58,17 @@ bb.rest.test:
         _action: generateKeyAction
         _controller: rest.controller.test
     requirements:
-            version: \d
+        version: \d
+
+bb.rest.security_session_delete:
+    pattern: /rest/{version}/security/session
+    defaults:
+        _action: deleteSessionAction
+        _controller: BackBuilder\Rest\Controller\SecurityController
+    requirements:
+        version: \d
+        _method: DELETE
+
 # BackBuilder rss
 bb.rss:
     pattern: /rss/{uri}

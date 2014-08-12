@@ -25,11 +25,15 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Validator\ConstraintViolationList;
 
+use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
+
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBuilder\Security\Token\BBUserToken,
     BackBuilder\Security\Exception\SecurityException;
+
+use BackBuilder\Security\Token\AnonymousToken;
 
 use BackBuilder\Rest\Exception\ValidationException;
 
@@ -62,17 +66,7 @@ class SecurityController extends ARestController
             throw new ValidationException($violations);
         }
         
-        $securityConfig = $this->getApplication()->getConfig()->getSection('security');
-        
-        if(!isset($securityConfig['firewalls'][$firewall])) {
-            $response = new Response();
-            $response->setStatusCode(400, sprintf('Firewall not configured: %s', $firewall));
-            return $response;
-        }
-        
-        $firewallConfig = $securityConfig['firewalls'][$firewall];
-        
-        $contexts = array_intersect(array_keys($firewallConfig), array('bb_auth') );
+        $contexts = $this->getSecurityContextConfig($firewall);
         
         if(0 === count($contexts)) {
             $response = new Response();
@@ -82,6 +76,11 @@ class SecurityController extends ARestController
         
         $securityContext = $this->_application->getSecurityContext();
         
+        if(null === $securityContext) {
+            $response = new Response();
+            $response->setStatusCode(400, sprintf('Firewall not configured: %s', $firewall));
+            return $response;
+        }
         
         $response = new Response();
         
@@ -99,33 +98,56 @@ class SecurityController extends ARestController
             
             $authProvider = $securityContext->getAuthProvider('bb_auth');
             
-            try {
-                $authProvider->authenticate($token);
 
-                $response->setContent(json_encode(array(
-                    'nonce' => $nonce
-                )));
-            } catch(SecurityException $e) {
-                $response = new Response();
-                if(SecurityException::UNKNOWN_USER === $e->getCode()) {
-                    $response->setStatusCode(404, $e->getMessage());
-                } elseif(SecurityException::INVALID_CREDENTIALS === $e->getCode()) {
-                    $response->setStatusCode(401, $e->getMessage());
-                } elseif(SecurityException::EXPIRED_AUTH === $e->getCode()) {
-                    $response->setStatusCode(401, $e->getMessage());
-                } elseif(SecurityException::EXPIRED_TOKEN === $e->getCode()) {
-                    $response->setStatusCode(401, $e->getMessage());
-                } else {
-                    $response->setStatusCode(403, $e->getMessage());
-                }
-                
-                return $response;
-            }
+            $authProvider->authenticate($token);
+
+            $response->setContent(json_encode(array(
+                'nonce' => $nonce
+            )));
+            
         }
         
         return $response;
     }
     
-    
+    /**
+     * 
+     * @param type $firewall
+     * @return array
+     */
+    private function getSecurityContextConfig($firewall)
+    {
+        $securityConfig = $this->getApplication()->getConfig()->getSection('security');
+        
+        if(!isset($securityConfig['firewalls'][$firewall])) {
+            return null;
+        }
+        
+        $firewallConfig = $securityConfig['firewalls'][$firewall];
+        
+        $allowedContexts = array('bb_auth');
+        $contexts = array_intersect(array_keys($firewallConfig), $allowedContexts);
+        
+        return $contexts;
+    }
+ 
+    /**
+     * 
+     */
+    public function deleteSessionAction(Request $request)
+    {
+        try {
+            if(false === $this->isGranted('IS_AUTHENTICATED_FULLY') ){
+                return Response::create()->setStatusCode(401, "Session doesn't exist");
+            }
+        } catch(AuthenticationCredentialsNotFoundException $e) {
+            return Response::create()->setStatusCode(401, "Session doesn't exist");
+        }
+        
+        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
+        $request->getSession()->invalidate();
+        
+        return new Response('', 204);
+    }
     
 }

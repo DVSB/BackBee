@@ -31,6 +31,10 @@ use BackBuilder\Security\Token\BBUserToken;
 use BackBuilder\Site\Site,
     BackBuilder\Site\Layout;
 
+
+use BackBuilder\Security\Acl\Loader\YmlLoader;
+
+
 /**
  * Test for UserController class
  *
@@ -38,6 +42,8 @@ use BackBuilder\Site\Site,
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
+ * 
+ * @coversDefaultClass \BackBuilder\Rest\Controller\SiteController
  */
 class SiteControllerTest extends TestCase
 {
@@ -83,19 +89,32 @@ class SiteControllerTest extends TestCase
         )));
         
         $this->site->addLayout($this->layout);
-        $this->bbapp->getEntityManager()->persist($this->layout);
-        $this->bbapp->getEntityManager()->persist($this->site);
+        $this->getEntityManager()->persist($this->layout);
+        $this->getEntityManager()->persist($this->site);
         
-        $this->bbapp->getEntityManager()->flush();
+        $this->getEntityManager()->flush();
+        
+        // load acl
+        $loader = new YmlLoader();
+        $loader->setContainer($this->getBBApp()->getContainer());
+        $loader->load('groups:
+  super_admin:
+    sites:
+      resources: all
+      actions: all
+    layouts:
+      resources: all
+      actions: all
+  editor_layout1:
+    sites:
+      resources: all
+      actions: all
+    layouts:
+      resources: [layout1]
+      actions: all
+');
         
         
-        $securityContext = $this->bbapp->getContainer()->get('security.context');
-        /* @var $securityContext \BackBuilder\Security\SecurityContext */
-        
-        $token = new BBUserToken(array(
-            'ROLE_API_USER'
-        ));
-        $securityContext->setToken($token);
     }
     
     protected function getController()
@@ -107,8 +126,14 @@ class SiteControllerTest extends TestCase
     }
 
 
+    /**
+     * @covers ::getLayoutsAction
+     */
     public function testGetLayoutsAction()
     {
+        // authenticate a user with super admin authority
+        $this->createAuthUser('super_admin', array('ROLE_API_USER'));
+        
         $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($this->site->getUid());
         $layout = $this->getEntityManager()->getRepository('BackBuilder\Site\layout')->find($this->layout->getUid());
         
@@ -129,7 +154,33 @@ class SiteControllerTest extends TestCase
         $this->assertCount(1, $content);
         
         $this->assertEquals($this->layout->getUid(), $content[0]['uid']);
+    }
+    
+    /**
+     * @covers ::getLayoutsAction
+     */
+    public function testGetLayoutsAction_noAuthorizedLayouts()
+    {
+        // authenticate a user with super admin authority
+        $this->createAuthUser('editor_layout1', array('ROLE_API_USER'));
         
+        $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($this->site->getUid());
+        
+        $request = new Request(array(), array(
+            'id' => $this->site->getUid(),
+        ));
+        $request->headers->set('Accept', 'application/json');
+        
+        $controller = $this->getController();
+        $response = $controller->getLayoutsAction($this->site->getUid(), $request);
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('application/json', $response->headers->get('Content-Type'));
+        
+        $content = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $content);
+        
+        $this->assertCount(0, $content);
     }
     
 
@@ -138,13 +189,5 @@ class SiteControllerTest extends TestCase
         $this->dropDb();
         $this->bbapp->stop();
     }
-    
-    /**
-     * 
-     * @return type
-     */
-    protected function getEntityManager()
-    {
-         return $this->getBBApp()->getContainer()->get('em');
-    }
+
 }

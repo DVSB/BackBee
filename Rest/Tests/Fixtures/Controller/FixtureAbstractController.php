@@ -19,38 +19,34 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Tests;
+namespace BackBuilder\Rest\Tests\Fixtures\Controller;
 
-use BackBuilder\Security\User;
+use Symfony\Component\Validator\Constraints as Assert;
+use BackBuilder\Rest\Controller\Annotations as Rest;
 
 /**
- * Test for User class
+ * Abstract Controller
  *
+ * @Annotation
+ * 
  * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @package     BackBuilder\Rest
  * @copyright   Lp digital system
  * @author      k.golovin
- * 
- * @coversDefaultClass \BackBuilder\Security\User
  */
-class UserTest extends \PHPUnit_Framework_TestCase
+abstract class FixtureAbstractController 
 {
-
+    
     /**
-     * @covers ::getRoles
+     * @Rest\Pagination
      */
-    public function testGetRoles()
+    public function concreteAction() 
     {
-        $user = new User();
         
-        $user->setApiKeyEnabled(true);
-        $this->assertContains('ROLE_API_USER', $user->getRoles());
-        
-        $user->setActivated(false);
-        $this->assertNotContains('ROLE_ACTIVE_USER', $user->getRoles());
-        
-        $user->setActivated(true);
-        $this->assertContains('ROLE_ACTIVE_USER', $user->getRoles());
     }
-
+    
+    /**
+     * @Rest\Pagination
+     */
+    abstract public function abstractAction();
 }

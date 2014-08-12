@@ -343,7 +343,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return BackBuilder\FrontController\FrontController
+     * @return \BackBuilder\FrontController\FrontController
      */
     public function getController()
     {
@@ -351,7 +351,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return BackBuilder\Routing\RouteCollection
+     * @return \BackBuilder\Routing\RouteCollection
      */
     public function getRouting()
     {
@@ -536,7 +536,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return EntityManager
+     * @return \Doctrine\ORM\EntityManager
      */
     public function getEntityManager($name = 'default')
     {
