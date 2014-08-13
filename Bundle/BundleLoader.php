@@ -65,8 +65,10 @@ class BundleLoader
         $container->setParameter('bundles.base_dir', self::$bundles_base_dir);
 
         self::loadBundlesConfig();
-        self::loadBundleEvents();
         self::loadBundlesServices();
+        // services must be available before events are loaded
+        self::loadBundleEvents();
+
         self::registerBundleClassContentDir();
         self::registerBundleResourceDir();
         self::registerBundleScriptDir();
