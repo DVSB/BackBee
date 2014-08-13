@@ -22,7 +22,9 @@
 namespace BackBuilder\NestedNode\Tests;
 
 use BackBuilder\ClassContent\ContentSet,
+    BackBuilder\MetaData\MetaDataBag,
     BackBuilder\NestedNode\Page,
+    BackBuilder\Workflow\State,
     BackBuilder\Site\Layout,
     BackBuilder\Site\Site;
 
@@ -311,6 +313,265 @@ class PageTest extends ANestedNodeTest
     {
         $this->assertEquals($this->page, $this->page->setDate($this->current_time));
         $this->assertEquals($this->current_time, $this->page->getDate());
+        $this->assertEquals($this->page, $this->page->setDate(null));
+        $this->assertNull($this->page->getDate());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setLayout
+     */
+    public function testSetLayout()
+    {
+        $this->assertEquals(2, $this->page->getContentSet()->count());
+        $this->assertEquals(1, $this->page->getContentSet()->first()->count());
+        $this->assertInstanceOf('BackBuilder\ClassContent\ContentSet', $this->page->getContentSet()->first()->first());
+        $this->assertEquals($this->page, $this->page->getContentSet()->first()->first()->getMainNode());
+        $this->assertEquals(0, $this->page->getContentSet()->last()->count());
+
+        $topush = new ContentSet();
+        $column = new ContentSet();
+        $this->page->getContentSet()->last()->push($column);
+        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+        $child->setParent($this->page)
+                ->setLayout($this->page->getLayout(), $topush);
+
+        $this->assertEquals(2, $child->getContentSet()->count());
+        $this->assertEquals(1, $child->getContentSet()->first()->count());
+        $this->assertEquals($topush, $child->getContentSet()->first()->first());
+        $this->assertEquals($child, $child->getContentSet()->first()->first()->getMainNode());
+        $this->assertEquals(1, $child->getContentSet()->last()->count());
+        $this->assertEquals($column, $child->getContentSet()->last()->first());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setAltTitle
+     */
+    public function testSetAltTitle()
+    {
+        $this->assertEquals($this->page, $this->page->setAltTitle('alt-title'));
+        $this->assertEquals('alt-title', $this->page->getAltTitle());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setTitle
+     */
+    public function testSetTitle()
+    {
+        $this->assertEquals($this->page, $this->page->setTitle('new-title'));
+        $this->assertEquals('new-title', $this->page->getTitle());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setUrl
+     */
+    public function testSetUrl()
+    {
+        $this->assertEquals($this->page, $this->page->setUrl('new-url'));
+        $this->assertEquals('new-url', $this->page->getUrl());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setTarget
+     */
+    public function testSetTarget()
+    {
+        $this->assertEquals($this->page, $this->page->setTarget('target'));
+        $this->assertEquals('target', $this->page->getTarget());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setRedirect
+     */
+    public function testSetRedirect()
+    {
+        $this->assertEquals($this->page, $this->page->setRedirect('redirect'));
+        $this->assertEquals('redirect', $this->page->getRedirect());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setMetaData
+     */
+    public function testSetMetaData()
+    {
+        $meta = new MetaDataBag();
+        $this->assertEquals($this->page, $this->page->setMetaData($meta));
+        $this->assertEquals($meta, $this->page->getMetaData());
+        $this->assertEquals($this->page, $this->page->setMetaData(null));
+        $this->assertNull($this->page->getMetaData());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setState
+     */
+    public function testSetState()
+    {
+        $this->assertEquals($this->page, $this->page->setState(Page::STATE_DELETED));
+        $this->assertEquals(Page::STATE_DELETED, $this->page->getState());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setPublishing
+     */
+    public function testSetPublishing()
+    {
+        $this->assertEquals($this->page, $this->page->setPublishing($this->current_time));
+        $this->assertEquals($this->current_time, $this->page->getPublishing());
+        $this->assertEquals($this->page, $this->page->setPublishing(null));
+        $this->assertNull($this->page->getPublishing());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setArchiving
+     */
+    public function testSetArchiving()
+    {
+        $this->assertEquals($this->page, $this->page->setArchiving($this->current_time));
+        $this->assertEquals($this->current_time, $this->page->getArchiving());
+        $this->assertEquals($this->page, $this->page->setArchiving(null));
+        $this->assertNull($this->page->getArchiving());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setRevisions
+     */
+    public function testSetRevisions()
+    {
+        $revisions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->assertEquals($this->page, $this->page->setRevisions($revisions));
+        $this->assertEquals($revisions, $this->page->getRevisions());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setWorkflowState
+     */
+    public function testSetWorkflowState()
+    {
+        $state = new State();
+        $this->assertEquals($this->page, $this->page->setWorkflowState($state));
+        $this->assertEquals($state, $this->page->getWorkflowState());
+        $this->assertEquals($this->page, $this->page->setWorkflowState(null));
+        $this->assertNull($this->page->getWorkflowState());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::toArray
+     */
+    public function testToArray()
+    {
+        $expected = array(
+            'id' => 'node_test',
+            'rel' => 'leaf',
+            'uid' => 'test',
+            'rootuid' => 'test',
+            'parentuid' => null,
+            'created' => $this->current_time->getTimestamp(),
+            'modified' => $this->current_time->getTimestamp(),
+            'isleaf' => true,
+            'siteuid' => null,
+            'title' => 'title',
+            'alttitle' => null,
+            'url' => 'url',
+            'target' => '_self',
+            'redirect' => null,
+            'state' => Page::STATE_HIDDEN,
+            'date' => null,
+            'publishing' => null,
+            'archiving' => null,
+            'metadata' => null,
+            'layout_uid' => $this->page->getLayout()->getUid(),
+            'workflow_state' => null
+        );
+
+        $this->assertEquals($expected, $this->page->toArray());
+
+        $this->page->setSite(new Site())
+                ->setDate($this->current_time)
+                ->setArchiving($this->current_time)
+                ->setPublishing($this->current_time)
+                ->setMetadata(new MetaDataBag())
+                ->setWorkflowState(new State(null, array('code' => 1)));
+
+        $expected = array(
+            'id' => 'node_test',
+            'rel' => 'leaf',
+            'uid' => 'test',
+            'rootuid' => 'test',
+            'parentuid' => null,
+            'created' => $this->current_time->getTimestamp(),
+            'modified' => $this->current_time->getTimestamp(),
+            'isleaf' => true,
+            'siteuid' => $this->page->getSite()->getUid(),
+            'title' => 'title',
+            'alttitle' => null,
+            'url' => 'url',
+            'target' => '_self',
+            'redirect' => null,
+            'state' => Page::STATE_HIDDEN,
+            'date' => $this->current_time->getTimestamp(),
+            'publishing' => $this->current_time->getTimestamp(),
+            'archiving' => $this->current_time->getTimestamp(),
+            'metadata' => array(),
+            'layout_uid' => $this->page->getLayout()->getUid(),
+            'workflow_state' => 1
+        );
+
+        $this->assertEquals($expected, $this->page->toArray());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::serialize
+     * @covers BackBuilder\NestedNode\Page::_setDateTimeValue
+     */
+    public function testUnserialize()
+    {
+        $this->page->setSite(new Site())
+                ->setDate($this->current_time)
+                ->setArchiving($this->current_time)
+                ->setPublishing($this->current_time)
+                ->setMetadata(new MetaDataBag());
+
+        $new_page = new Page();
+        $new_page->setSite($this->page->getSite())
+                ->setLayout($this->page->getLayout())
+                ->setContentSet($this->page->getContentSet());
+
+        $this->assertEquals($this->page, $new_page->unserialize($this->page->serialize()));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getOldState
+     */
+    public function testGetOldState()
+    {
+        $this->assertEquals(null, $this->page->getOldState());
+        $this->page->setOldState(Page::STATE_DELETED);
+        $this->assertEquals(Page::STATE_DELETED, $this->page->getOldState());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setOldState
+     */
+    public function testSetOldState()
+    {
+        $this->assertEquals($this->page, $this->page->setOldState(Page::STATE_DELETED));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setUseUrlRedirect
+     */
+    public function testSetUseUrlRedirect()
+    {
+        $this->assertEquals($this->page, $this->page->setUseUrlRedirect(true));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getUseUrlRedirect
+     */
+    public function testGetUseUrlRedirect()
+    {
+        $this->assertEquals(true, $this->page->getUseUrlRedirect());
+        $this->page->setUseUrlRedirect(false);
+        $this->assertEquals(false, $this->page->getUseUrlRedirect());
     }
 
     /**
@@ -320,7 +581,46 @@ class PageTest extends ANestedNodeTest
     {
         parent::setUp();
         $this->page = new Page('test', array('title' => 'title', 'url' => 'url'));
-        $this->page->setLayout(new Layout());
+
+
+
+        $layout = new Layout();
+        $this->page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
+    }
+
+    /**
+     * Builds a default set of layout zones
+     * @return \stdClass
+     */
+    private function getDefaultLayoutZones()
+    {
+        $mainzone = new \stdClass();
+        $mainzone->id = 'main';
+        $mainzone->defaultContainer = null;
+        $mainzone->target = '#target';
+        $mainzone->gridClassPrefix = 'row';
+        $mainzone->gridSize = 8;
+        $mainzone->mainZone = true;
+        $mainzone->defaultClassContent = 'ContentSet';
+        $mainzone->options = null;
+
+        $asidezone = new \stdClass();
+        $asidezone->id = 'aside';
+        $asidezone->defaultContainer = null;
+        $asidezone->target = '#target';
+        $asidezone->gridClassPrefix = 'row';
+        $asidezone->gridSize = 4;
+        $asidezone->mainZone = false;
+        $asidezone->defaultClassContent = 'inherited';
+        $asidezone->options = null;
+
+        $data = new \stdClass();
+        $data->templateLayouts = array(
+            $mainzone,
+            $asidezone
+        );
+
+        return $data;
     }
 
 }

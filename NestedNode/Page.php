@@ -294,6 +294,12 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     private $_use_url_redirect = true;
 
     /**
+     * Properties ignored while unserializing object
+     * @var array
+     */
+    protected $_unserialized_ignored = array('_created', '_modified', '_date', '_publishing', '_archiving', '_metadata', '_workflow_state');
+    
+    /**
      * Class constructor
      * @param string $uid The unique identifier of the page
      * @param array $options Initial options for the page:
@@ -677,7 +683,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @param \DateTime $date
      * @return \BackBuilder\NestedNode\Page
      */
-    public function setDate(\DateTime $date)
+    public function setDate(\DateTime $date = null)
     {
         $this->_date = $date;
         return $this;
@@ -694,45 +700,26 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     {
         $this->_layout = $layout;
 
-        // add as much ContentSet to the page main ContentSet than defined zones in layout
+        // Add as much ContentSet to the page main ContentSet than defined zones in layout
         for ($i = $this->getContentSet()->count(); $i < count($layout->getZones()); $i++) {
-            $contentset = new ContentSet();
+            // Do this case really exist ?
+            if (null === $zone = $layout->getZone($i)) {
+                $this->getContentSet()->push(new ContentSet());
+                continue;
+            }
 
-            if (null !== $zone = $layout->getZone($i)) {
-                $contentset = new ContentSet(null, $zone->options);
+            // Create a new column
+            $contentset = new ContentSet(null, $zone->options);
 
-                if (null !== $toPushInMainZone && true === $zone->mainZone) {
-                    // New content push in the main zone
-                    $toPushInMainZone->setMainNode($this);
-                    $contentset->push($toPushInMainZone);
-                } else if ('inherited' === $zone->defaultClassContent) {
-                    // Inherited zone => same ContentSet than parent if exist
-                    if (null !== $this->getParent() && $i < $this->getParent()->getContentSet()->count()) {
-                        if (null !== $herited = $this->getParent()->getContentSet()->item($i)) {
-                            $contentset = $herited;
-                        }
-                    }
-                } else if ($zone->defaultClassContent) {
-                    // New default content push
-                    $classname = 'BackBuilder\ClassContent\\' . $zone->defaultClassContent;
-                    if (true === class_exists($classname)) {
-                        $content = new $classname();
-
-                        if (null !== $content->getProperty('labelized-by')) {
-                            try {
-                                eval('$content->' . $content->getProperty('labelized-by') . '="' . str_replace('"', '\\"', $this->getTitle()) . '";');
-                            } catch (\Exception $e) {
-                                // Nothing to do
-                            }
-                        }
-
-                        if (true === $zone->mainZone) {
-                            $content->setMainNode($this);
-                        }
-
-                        $contentset->push($content);
-                    }
-                }
+            if (null !== $toPushInMainZone && true === $zone->mainZone) {
+                // Existing content push in the main zone
+                $contentset->push($toPushInMainZone->setMainNode($this));
+            } else if ('inherited' === $zone->defaultClassContent) {
+                // Inherited zone => same ContentSet than parent if exist
+                $contentset = $this->getInheritedContent($i, $contentset);
+            } else if ($zone->defaultClassContent) {
+                // New default content push
+                $contentset->push($this->createNewDefaultContent('BackBuilder\ClassContent\\' . $zone->defaultClassContent, $zone->mainZone));
             }
 
             $this->getContentSet()->push($contentset);
@@ -742,8 +729,50 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Returns the inherited content from parent, $default if not found
+     * @param int $index
+     * @param \BackBuilder\ClassContent\AClassContent $default
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    private function getInheritedContent($index, AClassContent $default)
+    {
+        if (
+                null !== $this->getParent() &&
+                $index < $this->getParent()->getContentSet()->count() &&
+                null !== $this->getParent()->getContentSet()->item($index)
+        ) {
+            return $this->getParent()->getContentSet()->item($index);
+        }
+
+        return $default;
+    }
+
+    /**
+     * Creates a new default content to be pushed in layout columns
+     * @param string $classname
+     * @param boolean $mainzone
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    private function createNewDefaultContent($classname, $mainzone = false)
+    {
+        $content = new $classname();
+        if (null !== $content->getProperty('labelized-by')) {
+            try {
+                eval('$content->' . $content->getProperty('labelized-by') . '="' . str_replace('"', '\\"', $this->getTitle()) . '";');
+            } catch (\Exception $e) {
+                // Nothing to do
+            }
+        }
+
+        if (true === $mainzone) {
+            $content->setMainNode($this);
+        }
+
+        return $content;
+    }
+
+    /**
      * Sets the alternate title of the page.
-     * @codeCoverageIgnore
      * @param string $alttitle
      * @return \BackBuilder\NestedNode\Page
      */
@@ -754,7 +783,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
     /**
      * Sets the title of the page.
-     * @codeCoverageIgnore
      * @param string $title
      * @return \BackBuilder\NestedNode\Page
      */
@@ -766,7 +794,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the URL of the page
-     * @codeCoverageIgnore
      * @param string $url
      * @return \BackBuilder\NestedNode\Page
      */
@@ -778,7 +805,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the target if a permanent redirect is defined
-     * @codeCoverageIgnore
      * @param string $target
      * @return \BackBuilder\NestedNode\Page
      */
@@ -790,7 +816,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets a permanent redirect
-     * @codeCoverageIgnore
      * @param string $redirect
      * @return \BackBuilder\NestedNode\Page
      */
@@ -802,7 +827,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the associated metadata
-     * @codeCoverageIgnore
      * @param \BackBuilder\MetaData\MetaDataBag $metadata
      * @return \BackBuilder\NestedNode\Page
      */
@@ -814,7 +838,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the state
-     * @codeCoverageIgnore
      * @param int $state
      * @return \BackBuilder\NestedNode\Page
      */
@@ -826,7 +849,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the publishing date
-     * @codeCoverageIgnore
      * @param \DateTime $publishing
      * @return \BackBuilder\NestedNode\Page
      */
@@ -838,7 +860,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the archiving date
-     * @codeCoverageIgnore
      * @param \DateTime $archiving
      * @return \BackBuilder\NestedNode\Page
      */
@@ -850,7 +871,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets a collection of revisions for the page
-     * @codeCoverageIgnore
      * @param \Doctrine\Common\Collections\ArrayCollection $revisions
      * @return \BackBuilder\NestedNode\Page
      */
@@ -864,7 +884,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Sets the workflow state
      * @param \BackBuilder\Workflow\State $state
      * @return \BackBuilder\NestedNode\Page
-     * @codeCoverageIgnore
      */
     public function setWorkflowState(State $state = null)
     {
@@ -1050,39 +1069,30 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function unserialize($serialized, $strict = false)
     {
-        if (false === is_object($serialized))
-            $serialized = json_decode($serialized);
-
-        foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
-            if (in_array($property, array('_created', '_modified', '_publishing', '_archiving', '_metadata', '_workflow_state'))) {
-                continue;
-            } else if (TRUE === property_exists($this, $property)) {
-                $this->$property = $value;
-            } else if (TRUE === $strict)
-                throw new BBException(sprintf('Unknown property `%s` in %s.', $property, get_class($this)));
-        }
-
-        if (true === property_exists($serialized, 'publishing')) {
-            $publishing = null;
-            if (0 < $serialized->publishing) {
-                $publishing = new \DateTime();
-                $publishing->setTimestamp($serialized->publishing);
+        if (false === is_object($serialized)) {
+            if (null === $serialized = json_decode($serialized)) {
+                throw new InvalidArgumentException('The serialized value can not be unserialized to node object.');
             }
-            $this->setPublishing($publishing);
+        }
+        
+        parent::unserialize($serialized, $strict);
+
+        if (true === property_exists($serialized, 'date')) {
+            $this->_setDateTimeValue('_date', $serialized->date);
+        }
+        
+        if (true === property_exists($serialized, 'publishing')) {
+            $this->_setDateTimeValue('_publishing', $serialized->publishing);
         }
 
         if (true === property_exists($serialized, 'archiving')) {
-            $archiving = null;
-            if (0 < $serialized->archiving) {
-                $archiving = new \DateTime();
-                $archiving->setTimestamp($serialized->archiving);
-            }
-            $this->setArchiving($archiving);
+            $this->_setDateTimeValue('_archiving', $serialized->archiving);
         }
 
-        if (true === property_exists($serialized, 'metadata') && null !== $this->getMetaData()) {
-            $this->setMetaData($this->getMetaData()->fromStdClass((object)$serialized->metadata));
+        if (true === property_exists($serialized, 'metadata')) {
+            $meta = new MetaDataBag();
+            $meta->fromStdClass((object)$serialized->metadata);
+            $this->setMetaData($meta);
         }
 
         if (true === property_exists($serialized, 'workflow_state')) {
@@ -1093,6 +1103,24 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * Assign DateTime object to a property giving a time stamp
+     * @param string $property
+     * @param int $timestamp
+     * @return \BackBuilder\NestedNode\Page
+     */
+    private function _setDateTimeValue($property, $timestamp = null)
+    {
+        $date = null;
+        if (null !== $timestamp && 0 < $timestamp) {
+            $date = new \DateTime();
+            $date->setTimestamp($timestamp);
+        }
+
+        $this->$property = $date;
         return $this;
     }
 
@@ -1174,32 +1202,39 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * old_state property setter
-     * @return null|integer
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setOldState($v)
     {
         $this->old_state = $v;
+        return $this;
     }
-    
+
     /**
      * Tells whether getUrl() should return the redirect url or BB5 url
-     * 
      * @param bool $useUrlRedirect
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setUseUrlRedirect($useUrlRedirect)
     {
         $this->_use_url_redirect = $useUrlRedirect;
+        return $this;
     }
-    
+
     /**
-     * 
+     * Should getUrl() return the redirect url or bb5 url ?
      * @return bool
      */
     public function getUseUrlRedirect()
     {
         return $this->_use_url_redirect;
     }
-    
+
+    /**
+     * Returns default template name
+     * @return string
+     * @codeCoverageIgnore
+     */
     public function getTemplateName()
     {
         return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
