@@ -133,19 +133,30 @@ class RouteCollection extends sfRouteCollection
         array $route_params = null,
         $base_url = null,
         $add_ext = true,
-        Site $site = null
+        Site $site = null,
+        $build_query = false
     )
     {
         $uri = $this->getRoutePath($route_name);
+        $params_to_add = array();
         if (null !== $route_params && true === is_array($route_params)) {
             foreach ($route_params as $key => $value) {
-                $uri = str_replace('{' . $key . '}', $value, $uri);
+                $uri = str_replace('{' . $key . '}', $value, $uri, $count);
+                if (0 === $count) {
+                    $params_to_add[$key] = $value;
+                }
             }
         }
 
-        return null !== $base_url && true === is_string($base_url) 
+        $path = null !== $base_url && true === is_string($base_url) 
             ? $base_url . $uri . (false === $add_ext ? '' : $this->_getDefaultExtFromSite($site))
             : $this->getUri($uri, false === $add_ext ? '' : null, $site);
+        
+        if (false === empty($params_to_add) && true === $build_query) {
+            $path = $path . '?' . http_build_query($params_to_add);
+        }
+        
+        return $path;
     }
 
     /**
