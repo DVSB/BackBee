@@ -30,6 +30,7 @@ use BackBuilder\Controller\Controller,
 
 use JMS\Serializer\Serializer,
     JMS\Serializer\DeserializationContext,
+    JMS\Serializer\SerializationContext,
     JMS\Serializer\Construction\UnserializeObjectConstructor;
 
 /**
@@ -86,7 +87,11 @@ abstract class ARestController extends Controller implements IRestController, IF
      */
     public function formatItem($item)
     {
-        return $this->getSerializer()->serialize($item, 'json');
+        // serialize properties with null values
+        $context = new SerializationContext();
+        $context->setSerializeNull(true);
+
+        return $this->getSerializer()->serialize($item, 'json', $context);
     }
     
     /**
