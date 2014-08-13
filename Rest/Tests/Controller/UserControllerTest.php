@@ -86,39 +86,6 @@ class UserControllerTest extends TestCase
         return $controller;
     }
 
-
-    
-    /**
-     * @covers ::logoutAction
-     */
-    public function testLogoutAction()
-    {
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-        // login first
-        $request = new Request(array(), array(
-            'username' => 'user123',
-            'password' => 'password123',
-            '_action' => 'loginAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
-        ));
-        $controller = $this->getController();
-        
-        $response = $controller->loginAction($request);
-        
-        $this->assertInstanceOf('BackBuilder\Security\Token\UsernamePasswordToken', $this->getBBApp()->getSecurityContext()->getToken());
-        
-        // logout
-        $request = new Request(array(), array(
-            '_action' => 'logoutAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
-        ));
-        
-        $response = $controller->logoutAction($request);
-        
-        $this->assertEquals(204, $response->getStatusCode());
-        
-        $this->assertNull($this->getBBApp()->getSecurityContext()->getToken());
-    }
     
     /**
      * @covers ::getAction
