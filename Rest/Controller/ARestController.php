@@ -25,13 +25,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 use BackBuilder\Controller\Controller,
     BackBuilder\Rest\Formatter\IFormatter,
-    BackBuilder\Serializer\Construction\DoctrineObjectConstructor,
     BackBuilder\Serializer\SerializerBuilder;
 
 use JMS\Serializer\Serializer,
     JMS\Serializer\DeserializationContext,
-    JMS\Serializer\SerializationContext,
-    JMS\Serializer\Construction\UnserializeObjectConstructor;
+    JMS\Serializer\SerializationContext;
+
+use BackBuilder\Rest\Exception\ValidationException;
+
+use Symfony\Component\Validator\ConstraintViolationList,
+    Symfony\Component\Validator\ConstraintViolation;
 
 /**
  * Abstract class for an api controller
@@ -155,5 +158,12 @@ abstract class ARestController extends Controller implements IRestController, IF
         }
         
         return $this->serializer;
+    }
+    
+    protected function createValidationException($field, $value, $message)
+    {
+        return new ValidationException(new ConstraintViolationList(array(
+            new ConstraintViolation($message, $message, array(), $field, $field, $value)
+        )));
     }
 }
