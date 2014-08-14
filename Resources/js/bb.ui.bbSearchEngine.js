@@ -58,6 +58,8 @@
             
             bb.jquery(this.element).find(this.options.formFields.searchBtn).bind("click",function(e){
                 e.preventDefault();
+                /*trigger on change on every fields to make sure they will be updated*/
+                bb.jquery(self.element).find(self.options.formFieldsClass).trigger("change");
                 self._trigger("beforeSearch", {
                     "type":"beforeEvents"
                 }, {
@@ -138,10 +140,10 @@
             });
         },
         
-        
         _context: {
             searchCriteria:null
         },
+        
         _initFormAutoBind : function(){
             bb.jquery(this.element).find(this.options.formFieldsClass).live("change",bb.jquery.proxy(this._updateSearchCriteria,this)); 
         },
@@ -151,8 +153,6 @@
         },
          
         _updateSearchCriteria : function(e){
-            /*apply validatation here*/
-           
             var currentField = bb.jquery(e.currentTarget);
             var fieldName = bb.jquery(currentField).attr("data-field-name");
             switch(fieldName){

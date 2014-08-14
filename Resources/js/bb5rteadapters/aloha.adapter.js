@@ -66,7 +66,7 @@ bb.RteManager.registerAdapter("aloha",{
         /*handle plugins conf here*/
         var availablePlugins = this._getAvailablePlugins(rteConfig);
         bb.jquery.extend(true,Aloha.settings,rteConfig.settings);
-        loadScript(bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor-0.25.3/aloha/lib/aloha-full.js", function(){
+        loadScript(bb.baseurl+bb.resourcesdir+"js/libs/alohaeditor-0.25.3/aloha/lib/aloha-full-bb5-min.js", function(){
             Aloha.ready(function(){
                 self.trigger("onReady");
                 /*show toolbar*/
