@@ -554,15 +554,52 @@ class PageTest extends ANestedNodeTest
 
     /**
      * @covers BackBuilder\NestedNode\Page::isLinkedToHisParentBy
-     */    
+     */
     public function testIsLinkedToHisParentBy()
     {
-//                $child = new Page('child', array('title' => 'child', 'url' => 'url'));
-//        $child->setParent($this->page)
-//                ->setLayout($this->page->getLayout());
-        
+        $this->assertFalse($this->page->isLinkedToHisParentBy($this->page->getContentSet()->first()));
+        $this->assertFalse($this->page->isLinkedToHisParentBy($this->page->getContentSet()->last()));
+        $this->assertFalse($this->page->isLinkedToHisParentBy(null));
+
+        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+        $child->setParent($this->page)
+                ->setLayout($this->page->getLayout());
+
+        $this->assertFalse($child->isLinkedToHisParentBy($child->getContentSet()->first()));
+        $this->assertTrue($child->isLinkedToHisParentBy($child->getContentSet()->last()));
     }
-    
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::replaceRootContentSet
+     */
+    public function testReplaceRootContentSet()
+    {
+        $oldContentSet = $this->page->getContentSet()->last();
+        $newContentSet = new ContentSet();
+
+        $this->assertEquals($newContentSet, $this->page->replaceRootContentSet($this->page->getContentSet()->last(), $newContentSet));
+        $this->assertEquals($oldContentSet, $this->page->getContentSet()->last());
+        $this->assertEquals($newContentSet, $this->page->replaceRootContentSet($this->page->getContentSet()->last(), $newContentSet, true));
+        $this->assertEquals($oldContentSet, $this->page->getContentSet()->last());
+        $this->assertEquals($newContentSet, $this->page->replaceRootContentSet($this->page->getContentSet()->last(), $newContentSet, false));
+        $this->assertEquals($newContentSet, $this->page->getContentSet()->last());
+
+        $this->page->replaceRootContentSet($this->page->getContentSet()->last(), $oldContentSet, false);
+        $this->assertEquals($newContentSet, $this->page->replaceRootContentSet($this->page->getContentSet()->last(), $newContentSet, null));
+        $this->assertEquals($newContentSet, $this->page->getContentSet()->last());
+
+        $this->page->replaceRootContentSet($this->page->getContentSet()->last(), $oldContentSet, false);
+        $this->assertEquals($newContentSet, $this->page->replaceRootContentSet($this->page->getContentSet()->last(), $newContentSet, 'fake'));
+        $this->assertEquals($newContentSet, $this->page->getContentSet()->last());
+
+        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+        $child->setParent($this->page)
+                ->setLayout($this->page->getLayout());
+
+        $this->assertEquals($newContentSet, $child->replaceRootContentSet($child->getContentSet()->last(), $newContentSet));
+        $this->assertEquals($newContentSet, $child->getContentSet()->last());
+    }
+
     /**
      * @covers BackBuilder\NestedNode\Page::toArray
      */

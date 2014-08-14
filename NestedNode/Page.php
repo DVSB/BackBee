@@ -1019,15 +1019,14 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function isLinkedToHisParentBy(ContentSet $contentset = null)
     {
-        $contentset = (!is_null($contentset)) ? $contentset : false;
-        $result = false;
-        if (false !== $contentset) {
-            $inheritedZones = $this->getInheritedZones();
-            if (array_key_exists($contentset->getUid(), $inheritedZones)) {
-                $result = true; //$inheritedZones[$contentset->getUid()];
-            }
+        if (
+                null !== $contentset &&
+                true === array_key_exists($contentset->getUid(), $this->getInheritedZones())
+        ) {
+            return true;
         }
-        return $result;
+
+        return false;
     }
 
     /**
@@ -1039,17 +1038,15 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function replaceRootContentSet(ContentSet $contentToReplace, ContentSet $newContentSet, $checkContentsLinkToParent = true)
     {
-        /* check link with parent */
-        $result = false;
-        $checkContentsLinkToParent = (is_bool($checkContentsLinkToParent)) ? $checkContentsLinkToParent : false;
-        $contentIsLinked = ($checkContentsLinkToParent) ? $this->isLinkedToHisParentBy($contentToReplace) : true;
+        $checkContentsLinkToParent = (true === is_bool($checkContentsLinkToParent)) ? $checkContentsLinkToParent : false;
+        $contentIsLinked = (true === $checkContentsLinkToParent) ? $this->isLinkedToHisParentBy($contentToReplace) : true;
 
-        if ($contentIsLinked) {
-            $mainContentSet = $this->getContentSet();
-            if ($mainContentSet) {
-                $result = $mainContentSet->replaceChildBy($contentToReplace, $newContentSet);
+        if (true === $contentIsLinked) {
+            if (null !== $this->getContentSet()) {
+                $this->getContentSet()->replaceChildBy($contentToReplace, $newContentSet);
             }
         }
+
         return $newContentSet;
     }
 
