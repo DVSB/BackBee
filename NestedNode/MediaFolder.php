@@ -134,6 +134,7 @@ class MediaFolder extends ANestedNode
     /**
      * Returns a collection of media
      * @return \Doctrine\Common\Collections\ArrayCollection
+     * @codeCoverageIgnore
      */
     public function getMedias()
     {
