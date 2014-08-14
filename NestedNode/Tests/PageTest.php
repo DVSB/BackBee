@@ -319,6 +319,8 @@ class PageTest extends ANestedNodeTest
 
     /**
      * @covers BackBuilder\NestedNode\Page::setLayout
+     * @covers BackBuilder\NestedNode\Page::getInheritedContent
+     * @covers BackBuilder\NestedNode\Page::createNewDefaultContent
      */
     public function testSetLayout()
     {
@@ -453,6 +455,114 @@ class PageTest extends ANestedNodeTest
         $this->assertNull($this->page->getWorkflowState());
     }
 
+    /**
+     * @covers BackBuilder\NestedNode\Page::getInheritedContensetZoneParams
+     */
+    public function testGetInheritedContensetZoneParams()
+    {
+        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+        $child->setParent($this->page);
+
+        $this->assertNull($child->getInheritedContensetZoneParams($child->getContentSet()));
+        $this->assertNull($child->getInheritedContensetZoneParams($child->getContentSet()));
+
+        $child->setLayout($this->page->getLayout());
+
+        $expected = $this->page->getLayout()->getZone(1);
+        $this->assertEquals($expected, $child->getInheritedContensetZoneParams($child->getContentSet()->last()));
+        $this->assertNull($child->getInheritedContensetZoneParams($child->getContentSet()->first()));
+        $this->assertNull($this->page->getInheritedContensetZoneParams($this->page->getContentSet()->first()));
+        $this->assertNull($this->page->getInheritedContensetZoneParams($this->page->getContentSet()->last()));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getRootContentSetPosition
+     */
+    public function testGetRootContentSetPosition()
+    {
+        $column1 = $this->page->getContentSet()->first();
+        $column2 = $this->page->getContentSet()->last();
+
+        $this->assertEquals(0, $this->page->getRootContentSetPosition($column1));
+        $this->assertEquals(1, $this->page->getRootContentSetPosition($column2));
+        $this->assertFalse($this->page->getRootContentSetPosition(new ContentSet()));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getParentZoneAtSamePositionIfExists
+     */
+    public function testGetParentZoneAtSamePositionIfExists()
+    {
+        $this->assertFalse($this->page->getParentZoneAtSamePositionIfExists($this->page->getContentSet()->first()));
+        $this->assertFalse($this->page->getParentZoneAtSamePositionIfExists($this->page->getContentSet()->last()));
+
+        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+        $child->setParent($this->page)
+                ->setLayout($this->page->getLayout());
+
+        $this->assertFalse($child->getParentZoneAtSamePositionIfExists(new ContentSet()));
+        $this->assertEquals($this->page->getContentSet()->first(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->first()));
+        $this->assertEquals($this->page->getContentSet()->last(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->last()));
+
+        $thirdcolumn = new \stdClass();
+        $thirdcolumn->id = 'third';
+        $thirdcolumn->defaultContainer = null;
+        $thirdcolumn->target = '#target';
+        $thirdcolumn->gridClassPrefix = 'row';
+        $thirdcolumn->gridSize = 4;
+        $thirdcolumn->mainZone = false;
+        $thirdcolumn->defaultClassContent = 'inherited';
+        $thirdcolumn->options = null;
+
+        $data = $this->getDefaultLayoutZones();
+        $data->templateLayouts[] = $thirdcolumn;
+
+        $layout = new Layout();
+        $child->setLayout($layout->setDataObject($data));
+        $this->assertEquals($this->page->getContentSet()->last(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->item(1)));
+        $this->assertFalse($child->getParentZoneAtSamePositionIfExists($child->getContentSet()->last()));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getInheritedZones
+     */
+    public function testGetInheritedZones()
+    {
+        $this->assertEquals(array(), $this->page->getInheritedZones());
+
+        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+        $child->setParent($this->page)
+                ->setLayout($this->page->getLayout());
+
+        $this->assertEquals(array($child->getContentSet()->last()->getUid() => $child->getContentSet()->last()), $child->getInheritedZones());
+        $this->assertEquals(array($child->getContentSet()->last()->getUid() => $child->getContentSet()->last()), $child->getInheritedZones(false));
+        $this->assertEquals(array($child->getContentSet()->last()->getUid() => $child->getContentSet()->last()), $child->getInheritedZones(null));
+        $this->assertEquals(array($child->getContentSet()->last()->getUid() => $child->getContentSet()->last()), $child->getInheritedZones('fake'));
+        $this->assertEquals(array($child->getContentSet()->last()->getUid()), $child->getInheritedZones(true));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getPageMainZones
+     */
+    public function testGetPageMainZones()
+    {
+        $this->assertEquals(array($this->page->getContentSet()->first()->getUid() => $this->page->getContentSet()->first()), $this->page->getPageMainZones());
+
+        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+        $this->assertEquals(array(), $child->getPageMainZones());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isLinkedToHisParentBy
+     */    
+    public function testIsLinkedToHisParentBy()
+    {
+//                $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+//        $child->setParent($this->page)
+//                ->setLayout($this->page->getLayout());
+        
+    }
+    
     /**
      * @covers BackBuilder\NestedNode\Page::toArray
      */

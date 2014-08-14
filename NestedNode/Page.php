@@ -894,19 +894,26 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns the inherited zone according to the provided ContentSet
      * @param \BackBuilder\ClassContent\ContentSet $contentSet
-     * @return \StdClass The inherited zone
+     * @return \StdClass|NULL The inherited zone if found
      */
     public function getInheritedContensetZoneParams(ContentSet $contentSet)
     {
         $zone = null;
-        if (null !== $layoutZones = $this->getLayout()->getZones()) {
-            $contentSetCount = $this->getContentSet()->count();
 
-            for ($i = 0; $i < count($contentSetCount); $i++) {
-                $parentContentset = $this->getParent()->getContentSet()->item($i);
-                if ($contentSet->getUid() === $parentContentset->getUid()) {
-                    $zone = $layoutZones[$i];
-                }
+        if (
+                null === $this->getLayout() ||
+                null === $this->getParent() ||
+                false === is_array($this->getLayout()->getZones())
+        ) {
+            return $zone;
+        }
+
+        $layoutZones = $this->getLayout()->getZones();
+        for ($i = 0; $i < $this->getParent()->getContentSet()->count(); $i++) {
+            $parentContentset = $this->getParent()->getContentSet()->item($i);
+
+            if ($contentSet->getUid() === $parentContentset->getUid()) {
+                $zone = $layoutZones[$i];
             }
         }
 
@@ -914,9 +921,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
-     * Returns the index of the provided ContentSet in the main ContentSet
+     * Returns the index of the provided ContentSet in the main ContentSetif found, FALSE otherwise
      * @param \BackBuilder\ClassContent\ContentSet $contentSet
-     * @return int
+     * @return int|FALSE
      */
     public function getRootContentSetPosition(ContentSet $contentSet)
     {
@@ -979,18 +986,29 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function getPageMainZones()
     {
+        $result = array();
+
+        if (null === $this->getLayout()) {
+            return $result;
+        }
+
         $currentpageRootZones = $this->getContentSet();
         $layoutZones = $this->getLayout()->getZones();
-        $result = array();
-        for ($i = 0; $i < count($currentpageRootZones); $i++) {
+
+        for ($i = 0; $i < count($layoutZones); $i++) {
+            $zoneInfos = $layoutZones[$i];
             $currentZone = $currentpageRootZones->item($i);
-            if (count($layoutZones) > $i) {
-                $zoneInfos = $layoutZones[$i];
-                if ($zoneInfos && property_exists($zoneInfos, 'mainZone') && true === $zoneInfos->mainZone) {
-                    $result[$currentZone->getUid()] = $currentZone;
-                }
+
+            if (
+                    null !== $currentZone &&
+                    null !== $zoneInfos &&
+                    true === property_exists($zoneInfos, 'mainZone') &&
+                    true === $zoneInfos->mainZone
+            ) {
+                $result[$currentZone->getUid()] = $currentZone;
             }
         }
+
         return $result;
     }
 
@@ -999,7 +1017,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @param \BackBuilder\ClassContent\ContentSet $contentset
      * @return Boolean
      */
-    private function _isLinkedToHisParentBy(ContentSet $contentset = null)
+    public function isLinkedToHisParentBy(ContentSet $contentset = null)
     {
         $contentset = (!is_null($contentset)) ? $contentset : false;
         $result = false;
@@ -1024,7 +1042,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         /* check link with parent */
         $result = false;
         $checkContentsLinkToParent = (is_bool($checkContentsLinkToParent)) ? $checkContentsLinkToParent : false;
-        $contentIsLinked = ($checkContentsLinkToParent) ? $this->_isLinkedToHisParentBy($contentToReplace) : true;
+        $contentIsLinked = ($checkContentsLinkToParent) ? $this->isLinkedToHisParentBy($contentToReplace) : true;
 
         if ($contentIsLinked) {
             $mainContentSet = $this->getContentSet();
