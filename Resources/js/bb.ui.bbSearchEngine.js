@@ -140,10 +140,10 @@
             });
         },
         
-        
         _context: {
             searchCriteria:null
         },
+        
         _initFormAutoBind : function(){
             bb.jquery(this.element).find(this.options.formFieldsClass).live("change",bb.jquery.proxy(this._updateSearchCriteria,this)); 
         },
@@ -153,7 +153,6 @@
         },
          
         _updateSearchCriteria : function(e){
-            /*apply validatation here*/
             var currentField = bb.jquery(e.currentTarget);
             var fieldName = bb.jquery(currentField).attr("data-field-name");
             switch(fieldName){

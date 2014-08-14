@@ -98,6 +98,8 @@ class ClassContentQueryBuilder extends QueryBuilder
         $this->leftJoin('cc._mainnode', 'mp');
         $this->andWhere('mp._state IN (:states)')
              ->setParameter('states', array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
+        $this->andWhere('mp._publishing < :today')
+             ->setParameter('today', new \DateTime());
     }
 
     /**
