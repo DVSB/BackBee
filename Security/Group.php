@@ -23,6 +23,8 @@ namespace BackBuilder\Security;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
+use JMS\Serializer\Annotation as Serializer;
+
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Security
@@ -30,6 +32,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity()
  * @Table(name="groups", uniqueConstraints={@UniqueConstraint(name="UNI_IDENTIFIER",columns={"identifier"})})
+ * 
+ * @Serializer\ExclusionPolicy("all")
  */
 class Group
 {
@@ -39,6 +43,9 @@ class Group
      * @var integer
      * @Id @Column(type="integer", name="id")
      * @GeneratedValue(strategy="IDENTITY")
+     * 
+     * @Serializer\Expose
+     * @Serializer\ReadOnly
      */
     protected $_id;
 
@@ -46,6 +53,8 @@ class Group
      * Group name
      * @var string
      * @Column(type="string", name="name")
+     * 
+     * @Serializer\Expose
      */
     protected $_name;
 
@@ -53,6 +62,8 @@ class Group
      * Group name identifier
      * @var string
      * @Column(type="string", name="identifier")
+     * 
+     * @Serializer\Expose
      */
     protected $_identifier;
 
@@ -64,6 +75,7 @@ class Group
      *      joinColumns={@JoinColumn(name="group_id", referencedColumnName="id")},
      *      inverseJoinColumns={@JoinColumn(name="user_id", referencedColumnName="id")}
      * )
+     * 
      */
     protected $_users;
 
@@ -72,6 +84,7 @@ class Group
      * @var \BackBuilder\Site\Site
      * @ManyToOne(targetEntity="BackBuilder\Site\Site", fetch="EXTRA_LAZY")
      * @JoinColumn(name="site_uid", referencedColumnName="uid")
+     * 
      */
     protected $_site;
 
@@ -194,6 +207,21 @@ class Group
     {
         $this->_site = $site;
         return $this;
+    }
+    
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("site_uid")
+     *
+     * @return string|null
+     */
+    public function getSiteUid()
+    {
+        if(null === $this->_site) {
+            return null;
+        }
+        
+        return $this->_site->getUid();
     }
 
 }

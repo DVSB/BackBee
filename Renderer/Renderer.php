@@ -253,7 +253,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         if (null === $obj) {
             return null;
         }
-
+        
         $bbapp = $this->getApplication();
         if (false === $obj->isRenderable() && null === $bbapp->getBBUserToken()) {
             return null;
@@ -433,6 +433,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             $layout = $this->getObject()->getLayout();
             $zones = $layout->getZones();
             $zoneIndex = 0;
+
             foreach ($contentSet->getData() as $content) {
                 if (true === array_key_exists($zoneIndex, $zones)) {
                     $zone = $zones[$zoneIndex];
@@ -732,9 +733,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * @param  \BackBuilder\Site\Site
      * @return string
      */
-    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null)
+    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null, $build_query = false)
     {
-        return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext, $site);
+        return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext, $site, $build_query);
     }
 
     /**
