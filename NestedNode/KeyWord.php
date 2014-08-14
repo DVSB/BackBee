@@ -129,6 +129,7 @@ class KeyWord extends ANestedNode implements IRenderable
     /**
      * Returns a collection of indexed AClassContent
      * @return Doctrine\Common\Collections\Collection
+     * @codeCoverageIgnore
      */
     public function getContent()
     {
@@ -225,14 +226,21 @@ class KeyWord extends ANestedNode implements IRenderable
     /**
      * Returns TRUE if the page can be rendered.
      * @return Boolean
+     * @codeCoverageIgnore
      */
     public function isRenderable()
     {
         return true;
     }
-    
+
+    /**
+     * Returns default template name
+     * @return string
+     * @codeCoverageIgnore
+     */
     public function getTemplateName()
     {
         return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
     }
+
 }
