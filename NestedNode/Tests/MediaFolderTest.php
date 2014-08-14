@@ -34,13 +34,9 @@ use BackBuilder\ClassContent\ContentSet,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class PageTest extends \PHPUnit_Framework_TestCase
+class PageTest extends ANestedNodeTest
 {
-    /**
-     * @var \Datetime
-     */
-    private $current_time;
-    
+
     /**
      * @var \BackBuilder\NestedNode\Page
      */
@@ -58,6 +54,8 @@ class PageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(Page::STATE_HIDDEN, $page->getState());
         $this->assertFalse($page->isStatic());
         $this->assertEquals(Page::DEFAULT_TARGET, $page->getTarget());
+
+        parent::test__construct();
     }
 
     /**
@@ -724,12 +722,14 @@ class PageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Sets up the fixture
+     * Sets up the fixtureyout()
      */
     public function setUp()
     {
-        $this->current_time = new \Datetime();
+        parent::setUp();
         $this->page = new Page('test', array('title' => 'title', 'url' => 'url'));
+
+
 
         $layout = new Layout();
         $this->page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
