@@ -183,9 +183,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
-            // the following 2 classes are throwing an exception: index IDX_CLASSNAME already exists
-//            $bbapp->getBBDir() . '/ClassContent',
-//            $bbapp->getBBDir() . '/ClassContent/Indexes',
+            $bbapp->getBBDir() . '/ClassContent',
+            $bbapp->getBBDir() . '/ClassContent/Indexes',
             $bbapp->getBBDir() . '/Logging',
             $bbapp->getBBDir() . '/NestedNode',
             $bbapp->getBBDir() . '/Security',
