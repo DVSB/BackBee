@@ -246,7 +246,7 @@ class NestedNodeRepository extends EntityRepository
         return $this->createQueryBuilder('n')
                         ->andParentIs($node->getParent())
                         ->andLevelEquals($node->getLevel())
-                        ->andRightnodeIsLowerThan($node->getLeftnode, true);
+                        ->andRightnodeIsLowerThan($node->getLeftnode(), true);
     }
 
     /**
@@ -767,14 +767,13 @@ class NestedNodeRepository extends EntityRepository
      * Refresh an existing node
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @return \BackBuilder\NestedNode\Repository\NestedNodeRepository
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $node is not flushed yet
      */
     protected function _refreshExistingNode(ANestedNode $node)
     {
         if (true === $this->_em->contains($node)) {
             $this->_em->refresh($node);
         } elseif (null === $node = $this->find($node->getUid())) {
-            throw new InvalidArgumentException('Node has to be flushed before refreshed');
+            $this->_em->persist($node);
         }
 
         return $this;
