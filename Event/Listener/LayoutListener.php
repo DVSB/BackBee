@@ -62,7 +62,11 @@ class LayoutListener
                     ->generateThumbnail($layout, $dispatcher->getApplication());
 
             // Update the layout file
-            $dispatcher->getApplication()->getRenderer()->updateLayout($layout);
+            try {
+                $dispatcher->getApplication()->getRenderer()->updateLayout($layout);
+            } catch (\BackBuilder\Renderer\Exception\RendererException $e) {
+                $dispatcher->getApplication()->warning($e->getMessage());
+            }
 
             if (is_a($event->getEventArgs(), 'Doctrine\ORM\Event\PreUpdateEventArgs')) {
                 if ($event->getEventArgs()->hasChangedField('_picpath'))
