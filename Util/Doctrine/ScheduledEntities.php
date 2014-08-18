@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,10 +23,12 @@ namespace BackBuilder\Util\Doctrine;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Util\ClassUtils;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\Revision;
 
 /**
  * Utility class to deal with managed Doctrine entities
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @subpackage  Doctrine
@@ -105,8 +107,8 @@ class ScheduledEntities
     public static function getScheduledEntityByClassname(EntityManager $em, $classnames)
     {
         return array_merge(
-                self::getScheduledEntityInsertionsByClassname($em, $classnames), 
-                self::getScheduledEntityUpdatesByClassname($em, $classnames), 
+                self::getScheduledEntityInsertionsByClassname($em, $classnames),
+                self::getScheduledEntityUpdatesByClassname($em, $classnames),
                 self::getScheduledEntityDeletionsByClassname($em, $classnames)
         );
     }
@@ -117,14 +119,12 @@ class ScheduledEntities
      * @param boolean $with_revision Includes AClassContent which has scheduled revision
      * @return array
      */
-    public static function getScheduledAClassContentInsertions(EntityManager $em, $with_revision = false)
+    public static function getScheduledAClassContentInsertions(EntityManager $em, $with_revision = false, $exclude_base_element = false)
     {
         $entities = array();
         foreach ($em->getUnitOfWork()->getScheduledEntityInsertions() as $entity) {
-            if ($entity instanceof \BackBuilder\ClassContent\AClassContent) {
-                $entities[] = $entity;
-            } elseif (true === $with_revision && $entity instanceof \BackBuilder\ClassContent\Revision) {
-                $entities[] = $entity->getContent();
+            if (false !== $tmp = self::getScheduledEntity($entity, $with_revision, $exclude_base_element)) {
+                $entities[] = $tmp;
             }
         }
 
@@ -137,18 +137,29 @@ class ScheduledEntities
      * @param boolean $with_revision Includes AClassContent which has scheduled revision
      * @return array
      */
-    public static function getScheduledAClassContentUpdates(EntityManager $em, $with_revision = false)
+    public static function getScheduledAClassContentUpdates(EntityManager $em, $with_revision = false, $exclude_base_element = false)
     {
         $entities = array();
         foreach ($em->getUnitOfWork()->getScheduledEntityUpdates() as $entity) {
-            if ($entity instanceof \BackBuilder\ClassContent\AClassContent) {
-                $entities[] = $entity;
-            } elseif (true === $with_revision && $entity instanceof \BackBuilder\ClassContent\Revision) {
-                $entities[] = $entity->getContent();
+            if (false !== $tmp = self::getScheduledEntity($entity, $with_revision, $exclude_base_element)) {
+                $entities[] = $tmp;
             }
         }
 
         return $entities;
+    }
+
+    private static function getScheduledEntity($entity, $with_revision, $exclude_base_element)
+    {
+        if ($entity instanceof AClassContent &&
+            (!$exclude_base_element || !$entity->isElementContent())) {
+            return $entity;
+        } elseif (true === $with_revision && $entity instanceof Revision) {
+            if (!$exclude_base_element || !$entity->isElementContent()) {
+                return $entity->getContent();
+            }
+        }
+        return false;
     }
 
     /**
@@ -156,11 +167,12 @@ class ScheduledEntities
      * @param \Doctrine\ORM\EntityManager $em
      * @return array
      */
-    public static function getSchedulesAClassContentDeletions(EntityManager $em)
+    public static function getSchedulesAClassContentDeletions(EntityManager $em, $exclude_base_element = false)
     {
         $entities = array();
         foreach ($em->getUnitOfWork()->getScheduledEntityDeletions() as $entity) {
-            if ($entity instanceof \BackBuilder\ClassContent\AClassContent) {
+            if ($entity instanceof AClassContent &&
+                (!$exclude_base_element || !$entity->isElementContent())) {
                 $entities[] = $entity;
             }
         }
