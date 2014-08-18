@@ -110,7 +110,7 @@ class PageQueryBuilderTest extends TestCase
                 ->andIsPreviousOnlineSiblingOf($page);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode <= :leftnode0 AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode desc ASC', $q->getDql());
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode <= :leftnode0 AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode DESC', $q->getDql());
     }
 
     /**
@@ -123,7 +123,7 @@ class PageQueryBuilderTest extends TestCase
                 ->andIsNextOnlineSiblingOf($page);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode >= :leftnode0 AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY ._leftnode asc ASC', $q->getDql());
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode >= :leftnode0 AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode ASC', $q->getDql());
     }
 
     /**
@@ -149,7 +149,7 @@ class PageQueryBuilderTest extends TestCase
                 ->andIsPreviousVisibleSiblingOf($page);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode <= :leftnode0 AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode desc ASC', $q->getDql());
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode <= :leftnode0 AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode DESC', $q->getDql());
     }
 
     /**
@@ -162,7 +162,7 @@ class PageQueryBuilderTest extends TestCase
                 ->andIsNextVisibleSiblingOf($page);
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode >= :leftnode0 AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY ._leftnode asc ASC', $q->getDql());
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode >= :leftnode0 AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode ASC', $q->getDql());
     }
 
     /**

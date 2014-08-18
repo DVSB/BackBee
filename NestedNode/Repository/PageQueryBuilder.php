@@ -36,6 +36,11 @@ use BackBuilder\NestedNode\Page,
 class PageQueryBuilder extends NestedNodeQueryBuilder
 {
 
+    public static $config = array(
+        // date scheme to use in order to test publishing and archiving, should be Y-m-d H:i:00 for get 1 minute query cache
+        'dateSchemeForPublishing' => 'Y-m-d H:i:00'
+    );
+
     /**
      * Add query part to select online pages
      * @param string $alias     optional, the alias to use
@@ -48,7 +53,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
                         ->andWhere($alias . '._publishing IS NULL OR ' . $alias . '._publishing <= :now' . $suffix)
                         ->andWhere($alias . '._archiving IS NULL OR ' . $alias . '._archiving > :now' . $suffix)
                         ->setParameter('states' . $suffix, array(Page::STATE_ONLINE, Page::STATE_ONLINE & Page::STATE_HIDDEN))
-                        ->setParameter('now' . $suffix, date('Y-m-d H:i:00', time()));
+                        ->setParameter('now' . $suffix, date(self::$config['dateSchemeForPublishing'], time()));
     }
 
     /**
@@ -106,7 +111,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
         $alias = $this->getFirstAlias();
         return $this->andIsPreviousSiblingsOf($page, $alias)
                         ->andIsOnline($alias)
-                        ->orderBy($alias . '._leftnode desc')
+                        ->orderBy($alias . '._leftnode', 'DESC')
                         ->setMaxResults(1);
     }
 
@@ -118,9 +123,10 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      */
     public function andIsNextOnlineSiblingOf(Page $page, $alias = null)
     {
+        $alias = $this->getFirstAlias();
         return $this->andIsNextSiblingsOf($page, $alias)
                         ->andIsOnline($alias)
-                        ->orderBy($alias . '._leftnode asc')
+                        ->orderBy($alias . '._leftnode', 'ASC')
                         ->setMaxResults(1);
     }
 
@@ -151,7 +157,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
         $alias = $this->getFirstAlias();
         return $this->andIsPreviousSiblingsOf($page, $alias)
                         ->andIsVisible($alias)
-                        ->orderBy($alias . '._leftnode desc')
+                        ->orderBy($alias . '._leftnode', 'DESC')
                         ->setMaxResults(1);
     }
 
@@ -163,9 +169,10 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      */
     public function andIsNextVisibleSiblingOf(Page $page, $alias = null)
     {
+        $alias = $this->getFirstAlias();
         return $this->andIsNextSiblingsOf($page, $alias)
                         ->andIsVisible($alias)
-                        ->orderBy($alias . '._leftnode asc')
+                        ->orderBy($alias . '._leftnode', 'ASC')
                         ->setMaxResults(1);
     }
 
