@@ -52,7 +52,7 @@ class AclLoadCommand extends ACommand
             ->setHelp(<<<EOF
 The <info>%command.name%</info> loads acl DB tables: 
 
-   <info>php acl:db:init</info>
+   <info>php acl:load</info>
 EOF
             )
         ;

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -59,13 +59,13 @@ class IndexationListener implements EventSubscriberInterface
 
     /**
      * Array of content uids already treated
-     * @var type 
+     * @var type
      */
     private static $_content_content_done = array();
 
     /**
      * Array of content uids already treated
-     * @var type 
+     * @var type
      */
     private static $_site_content_done = array();
 
@@ -82,7 +82,7 @@ class IndexationListener implements EventSubscriberInterface
 
         self::$_em->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
                 ->replaceIdxSiteContents($site, array_diff($contents_inserted, self::$_site_content_done))
-                ->removeIdxContentContents($contents_removed);
+                ->removeIdxSiteContents($site, $contents_removed);
 
         self::$_site_content_done = array_merge(self::$_site_content_done, $contents_inserted);
     }
@@ -107,18 +107,18 @@ class IndexationListener implements EventSubscriberInterface
 
     /**
      * Subscriber to nestednode.page.onflush event
-     *     - Replace page-content and site-content indexes if 
+     *     - Replace page-content and site-content indexes if
      *       the Page target is inserted or updated
      *     - Remove page-content and site-content if the Page target is deleted
      * @param \BackBuilder\Event\Event $event
      */
     public static function onFlushPage(Event $event)
     {
-        
+
     }
 
     /**
-     * Checks the event validity 
+     * Checks the event validity
      * @param \BackBuilder\Event\Event $event
      * @return boolean
      */
@@ -170,8 +170,8 @@ class IndexationListener implements EventSubscriberInterface
             return;
         }
 
-        $contents_inserted = ScheduledEntities::getScheduledAClassContentInsertions(self::$_em, true);
-        $contents_updated = ScheduledEntities::getScheduledAClassContentUpdates(self::$_em, true);
+        $contents_inserted = ScheduledEntities::getScheduledAClassContentInsertions(self::$_em, true, true);
+        $contents_updated = ScheduledEntities::getScheduledAClassContentUpdates(self::$_em, true, true);
         $contents_deleted = ScheduledEntities::getSchedulesAClassContentDeletions(self::$_em, true);
 
         // Updates content-content indexes
