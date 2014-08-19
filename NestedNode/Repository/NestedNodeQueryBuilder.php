@@ -359,7 +359,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
     /**
      * Add qery part to select page having modified date lower than $date
      * @param \DateTime $date   the date to test
-     * @param type $alias       optiona, the alias to use
+     * @param string $alias       optiona, the alias to use
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
     public function andModifiedIsLowerThan(\DateTime $date, $alias = null)
@@ -372,7 +372,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
     /**
      * Add qery part to select page having modified date greater than $date
      * @param \DateTime $date   the date to test
-     * @param type $alias       optiona, the alias to use
+     * @param string $alias       optiona, the alias to use
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
     public function andModifiedIsGreaterThan(\DateTime $date, $alias = null)

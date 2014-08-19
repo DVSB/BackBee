@@ -467,6 +467,7 @@ class NestedNodeQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('n')
                 ->andModifiedIsLowerThan($now);
 
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._modified < :date0', $q->getDql());
     }
 
@@ -480,6 +481,7 @@ class NestedNodeQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('n')
                 ->andModifiedIsGreaterThan($now);
 
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._modified > :date0', $q->getDql());
     }
 

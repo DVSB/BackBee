@@ -233,6 +233,18 @@ class PageQueryBuilderTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andTitleIsLike
+     */
+    public function testAndTitleIsLike()
+    {
+        $q = $this->repo->createQueryBuilder('p')
+                ->andTitleIsLike('test');
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals("SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._title LIKE '%test%'", $q->getDql());
+    }
+
+    /**
      * Sets up the fixture
      */
     public function setUp()

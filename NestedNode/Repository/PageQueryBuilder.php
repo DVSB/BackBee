@@ -226,7 +226,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
     /**
      * Add query part to select page owned by $site
      * @param \BackBuilder\Site\Site $site   the site to test
-     * @param type $alias                    optional, the alias to use
+     * @param string $alias                    optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
     public function andSiteIs(Site $site, $alias = null)
@@ -234,6 +234,18 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
         list($alias, $suffix) = $this->getAliasAndSuffix($alias);
         return $this->andWhere($alias . '._site = :site' . $suffix)
                         ->setParameter('site' . $suffix, $site);
+    }
+
+    /**
+     * Add query part to select page having title like $query
+     * @param string $query
+     * @param string $alias
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andTitleIsLike($query, $alias = null)
+    {
+        $alias = $this->getFirstAlias();
+        return $this->andWhere($this->expr()->like($alias . '._title', $this->expr()->literal('%' . $query . '%')));
     }
 
 }
