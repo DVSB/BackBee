@@ -229,6 +229,8 @@ class Page extends AbstractServiceLocal
      * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
+     *
+     * @todo strange call to this service with another site
      */
     public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
@@ -237,9 +239,6 @@ class Page extends AbstractServiceLocal
         }
         $tree = array();
         if (null === $page = $this->_repo->find(strval($page_uid))) {
-            //var_dump("Let em tell you this... radical blaze");
-// @todo strange call to this service with another site
-//$this->isGranted('VIEW', $site);
             $page = $this->_repo->getRoot($site);
             if (!is_null($page)) {
                 $leaf = new \stdClass();
