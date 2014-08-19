@@ -32,7 +32,7 @@ use BackBuilder\Security\User,
     BackBuilder\Site\Site;
 
 /**
- * Test for UserController class
+ * Test for GroupController class
  *
  * @category    BackBuilder
  * @package     BackBuilder\Security

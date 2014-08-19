@@ -226,7 +226,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
-     * @return type
+     * @return \Symfony\Component\Security\Acl\Dbal\MutableAclProvider
      */
     public function getACLProvider()
     {

@@ -24,15 +24,10 @@ namespace BackBuilder\Rest\Controller;
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Validator\ConstraintViolationList,
-    Symfony\Component\Validator\ConstraintViolation,
-    Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
-    Symfony\Component\Security\Http\SecurityEvents,
-    Symfony\Component\HttpFoundation\JsonResponse;
+    Symfony\Component\Validator\ConstraintViolation;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
-
-use BackBuilder\Security\Token\UsernamePasswordToken;
 
 use BackBuilder\Security\Group;
 use BackBuilder\Rest\Exception\ValidationException;
