@@ -325,14 +325,11 @@ class PhpArrayDumper implements DumperInterface
      *
      * @param  Definition $definition       the definition to convert
      * @param  array      $definition_array the definition array (passed by reference)
-     *
-     * @todo debug and remove var_dump
      */
     private function hydrateDefinitionParent(Definition $definition, array &$definition_array)
     {
         if (true === ($definition instanceof DefinitionDecorator)) {
             $definition_array['parent'] = $definition->getParent();
-            var_dump($definition_array); die;
         }
     }
 
