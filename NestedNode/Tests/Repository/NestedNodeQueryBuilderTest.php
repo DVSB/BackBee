@@ -441,6 +441,9 @@ class NestedNodeQueryBuilderTest extends TestCase
         $this->assertEquals(1, $q->getParameter('level3')->getValue());
     }
 
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::orderByMultiple
+     */
     public function testOrderByMultiple()
     {
         $q = $this->repo->createQueryBuilder('n')
@@ -452,6 +455,32 @@ class NestedNodeQueryBuilderTest extends TestCase
 
         $q->orderByMultiple(array('_leftnode' => 'asc', '_rightnode' => 'desc'));
         $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n ORDER BY n._leftnode asc, n._rightnode desc', $q->getDql());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::andModifiedIsLowerThan
+     */
+    public function testAndModifiedIsLowerThan()
+    {
+        $now = new \DateTime();
+
+        $q = $this->repo->createQueryBuilder('n')
+                ->andModifiedIsLowerThan($now);
+
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._modified < :date0', $q->getDql());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder::andModifiedIsGreaterThan
+     */
+    public function testAndModifiedIsGreaterThan()
+    {
+        $now = new \DateTime();
+
+        $q = $this->repo->createQueryBuilder('n')
+                ->andModifiedIsGreaterThan($now);
+
+        $this->assertEquals('SELECT n FROM BackBuilder\NestedNode\Tests\Mock\MockNestedNode n WHERE n._modified > :date0', $q->getDql());
     }
 
     /**

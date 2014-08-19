@@ -342,18 +342,44 @@ class NestedNodeQueryBuilder extends QueryBuilder
         if (true === empty($order)) {
             $order = array('_leftnode' => 'asc');
         }
-        
+
         $this->resetDQLPart('orderBy');
         $alias = $this->getFirstAlias($alias);
         foreach ($order as $field => $sort) {
             if (0 < count($this->getDQLPart('orderBy'))) {
-            $this->addOrderBy($alias . '.' . $field, $sort);
+                $this->addOrderBy($alias . '.' . $field, $sort);
             } else {
                 $this->orderBy($alias . '.' . $field, $sort);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Add qery part to select page having modified date lower than $date
+     * @param \DateTime $date   the date to test
+     * @param type $alias       optiona, the alias to use
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andModifiedIsLowerThan(\DateTime $date, $alias = null)
+    {
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
+        return $this->andWhere($alias . '._modified < :date' . $suffix)
+                        ->setParameter('date' . $suffix, $date);
+    }
+
+    /**
+     * Add qery part to select page having modified date greater than $date
+     * @param \DateTime $date   the date to test
+     * @param type $alias       optiona, the alias to use
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andModifiedIsGreaterThan(\DateTime $date, $alias = null)
+    {
+        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
+        return $this->andWhere($alias . '._modified > :date' . $suffix)
+                        ->setParameter('date' . $suffix, $date);
     }
 
     /**
