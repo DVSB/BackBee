@@ -21,36 +21,30 @@
 
 namespace BackBuilder\Security;
 
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use BackBuilder\Security\Listeners\UsernamePasswordAuthenticationListener;
-use BackBuilder\Security\Authentication\Provider\UserAuthenticationProvider;
-use Symfony\Component\Security\Http\HttpUtils;
+use BackBuilder\BBApplication;
+use BackBuilder\Event\DispatcherProxy;
+use BackBuilder\Routing\Matcher\RequestMatcher;
+use BackBuilder\Security\Access\DecisionManager;
+use BackBuilder\Security\Authentication\AuthenticationManager;
+use BackBuilder\Security\Authentication\TrustResolver;
+use BackBuilder\Security\Authorization\Adaptator\Yml;
+use BackBuilder\Security\Authorization\Voter\BBRoleVoter;
+use BackBuilder\Security\Authorization\Voter\SudoVoter;
+use BackBuilder\Security\Context\ContextInterface;
+use BackBuilder\Security\Exception\SecurityException;
 use BackBuilder\Security\Listeners\LogoutListener;
-use BackBuilder\Security\Exception\SecurityException,
-    BackBuilder\Security\Listeners\BBAuthenticationListener,
-    BackBuilder\Security\Listeners\AnonymousAuthenticationListener,
-    BackBuilder\Security\Authentication\AuthenticationManager,
-    BackBuilder\Security\Authentication\Provider\BBAuthenticationProvider,
-    BackBuilder\Security\Listeners\ContextListener,
-    BackBuilder\Security\Logout\LogoutSuccessHandler,
-    BackBuilder\Security\Context\ContextInterface;
-use Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider,
-    Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use BackBuilder\Security\Role\RoleHierarchy;
+
+use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
+use Symfony\Component\Security\Core\Authorization\Voter\RoleVoter;
+use Symfony\Component\Security\Core\SecurityContext as sfSecurityContext;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Firewall;
 use Symfony\Component\Security\Http\FirewallMap;
-use BackBuilder\Routing\Matcher\RequestMatcher;
-use BackBuilder\BBApplication,
-    BackBuilder\Security\Authentication\TrustResolver,
-    BackBuilder\Security\Access\DecisionManager,
-    BackBuilder\Security\Role\RoleHierarchy,
-    BackBuilder\Security\Authorization\Voter\SudoVoter,
-    BackBuilder\Security\Authorization\Voter\BBRoleVoter,
-    BackBuilder\Security\Authorization\Adaptator\Yml;
-use Symfony\Component\Security\Core\SecurityContext as sfSecurityContext,
-    Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
-    Symfony\Component\Security\Core\Authorization\Voter\RoleVoter,
-    Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter,
-    Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+
 
 /**
  * @category    BackBuilder
@@ -80,16 +74,16 @@ class SecurityContext extends sfSecurityContext
      */
     private $_encoderfactory;
 
-    public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager = NULL, AccessDecisionManagerInterface $accessDecisionManager = NULL)
+    public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager = null, AccessDecisionManagerInterface $accessDecisionManager = null)
     {
         $this->_application = $application;
 
-        if (NULL !== $this->_application) {
+        if (null !== $this->_application) {
             $this->_logger = $this->_application->getLogging();
             $this->_dispatcher = $this->_application->getEventDispatcher();
         }
 
-        if (NULL === $securityConfig = $this->_application->getConfig()->getSecurityConfig()) {
+        if (null === $securityConfig = $this->_application->getConfig()->getSecurityConfig()) {
             trigger_error('None security configuration found', E_USER_NOTICE);
             return;
         }
@@ -97,7 +91,7 @@ class SecurityContext extends sfSecurityContext
 
         $this->_authmanager = $authenticationManager;
 
-        if (NULL === $this->_authmanager) {
+        if (null === $this->_authmanager) {
             $this->_authmanager = new AuthenticationManager(array());
             $this->_authmanager->setEventDispatcher($this->_dispatcher);
         }
@@ -108,7 +102,7 @@ class SecurityContext extends sfSecurityContext
              ->_createFirewallMap($securityConfig)
              ->_registerFirewall();
 
-        if (NULL === $accessDecisionManager) {
+        if (null === $accessDecisionManager) {
             $trustResolver = new TrustResolver('BackBuilder\Security\Token\AnonymousToken', 'BackBuilder\Security\Token\RememberMeToken');
 
             $voters = array();
@@ -130,7 +124,6 @@ class SecurityContext extends sfSecurityContext
                                 false,
                                 $this->getApplication()
                 );
-//                $voters[] = new RoleVoter();
             }
 
             $accessDecisionManager = new DecisionManager($voters, 'affirmative', false, true);
@@ -153,8 +146,8 @@ class SecurityContext extends sfSecurityContext
     }
 
     /**
-     * Returns the encoder factory or NULL if not defined
-     * @return \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface|NULL
+     * Returns the encoder factory or null if not defined
+     * @return \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface|null
      */
     public function getEncoderFactory()
     {
@@ -166,23 +159,27 @@ class SecurityContext extends sfSecurityContext
         $config['firewall_name'] = $name;
         $listeners = array();
 
-        if (NULL === $this->_firewallmap)
+        if (null === $this->_firewallmap) {
             return $this;
+        }
 
         $requestMatcher = new RequestMatcher();
 
-        if (array_key_exists('pattern', $config))
+        if (array_key_exists('pattern', $config)) {
             $requestMatcher->matchPath($config['pattern']);
+        }
 
         if (array_key_exists('requirements', $config)) {
             foreach ($config['requirements'] as $key => $value) {
-                if (0 === strpos($key, 'HTTP-'))
+                if (0 === strpos($key, 'HTTP-')) {
                     $requestMatcher->matchHeader(substr($key, 5), $value);
+                }
             }
         }
 
-        if (array_key_exists('security', $config) && FALSE === $config['security']) {
-            $this->_firewallmap->add($requestMatcher, array(), NULL);
+        if (array_key_exists('security', $config) && false === $config['security']) {
+            $this->_firewallmap->add($requestMatcher, array(), null);
+
             return $this;
         }
 
@@ -197,14 +194,21 @@ class SecurityContext extends sfSecurityContext
 
         if (null !== $this->_logout_listener && false === $this->_logout_listener_added) {
             $this->_application->getContainer()->set('security.logout_listener', $this->_logout_listener);
-            $this->_dispatcher->addListener('frontcontroller.request.logout', array('@security.logout_listener', 'handle'));
+            if (false === ($this->_dispatcher instanceof DispatcherProxy) || !$this->_dispatcher->isRestored()) {
+                $this->_dispatcher->addListener(
+                    'frontcontroller.request.logout',
+                    array('@security.logout_listener', 'handle')
+                );
+            }
+
             $this->_logout_listener_added = true;
         }
 
         if (0 == count($listeners)) {
             throw new SecurityException(sprintf('No authentication listener registered for firewall "%s".', $name));
         }
-        $this->_firewallmap->add($requestMatcher, $listeners, NULL);
+
+        $this->_firewallmap->add($requestMatcher, $listeners, null);
 
         return $this;
     }
@@ -221,6 +225,7 @@ class SecurityContext extends sfSecurityContext
                 }
             }
         }
+
         return $listeners;
     }
 
@@ -237,8 +242,9 @@ class SecurityContext extends sfSecurityContext
     {
         $this->_firewallmap = new FirewallMap();
 
-        if (FALSE === array_key_exists('firewalls', $config))
+        if (false === array_key_exists('firewalls', $config)) {
             return $this;
+        }
 
         $firewalls = (array) $config['firewalls'];
         foreach ($firewalls as $name => $firewall) {
@@ -253,15 +259,15 @@ class SecurityContext extends sfSecurityContext
         if (true === array_key_exists('acl', $config)) {
             if (true === array_key_exists('connection', $config['acl']) && 'default' === $config['acl']['connection']) {
                 $this->_aclprovider = new \Symfony\Component\Security\Acl\Dbal\MutableAclProvider(
-                                $this->getApplication()->getEntityManager()->getConnection(),
-                                new \Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy(),
-                                array(
-                                    'class_table_name' => 'acl_classes',
-                                    'entry_table_name' => 'acl_entries',
-                                    'oid_table_name' => 'acl_object_identities',
-                                    'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
-                                    'sid_table_name' => 'acl_security_identities'
-                        ));
+                    $this->getApplication()->getEntityManager()->getConnection(),
+                    new \Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy(),
+                    array(
+                        'class_table_name'         => 'acl_classes',
+                        'entry_table_name'         => 'acl_entries',
+                        'oid_table_name'           => 'acl_object_identities',
+                        'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
+                        'sid_table_name'           => 'acl_security_identities'
+                ));
             }
         }
 
@@ -272,8 +278,9 @@ class SecurityContext extends sfSecurityContext
     {
         $this->_userproviders = array();
 
-        if (FALSE === array_key_exists('providers', $config))
+        if (false === array_key_exists('providers', $config)) {
             return $this;
+        }
 
         $providers = (array) $config['providers'];
         foreach ($providers as $name => $provider) {
@@ -281,8 +288,7 @@ class SecurityContext extends sfSecurityContext
 
             if (array_key_exists('entity', $provider)) {
                 $manager = $this->_application->getEntityManager();
-                if(null !== $manager)
-                {
+                if (null !== $manager) {
                     if (array_key_exists('manager_name', $provider['entity'])) {
                         $manager = $provider['entity']['manager_name']->getEntityManager();
                     }
@@ -303,6 +309,7 @@ class SecurityContext extends sfSecurityContext
                 }
             }
         }
+
         return $this;
     }
 
@@ -314,20 +321,20 @@ class SecurityContext extends sfSecurityContext
             $this->_authproviders[$key] = $provider;
         }
     }
-    
+
     /**
      * Get auth provider
-     * 
+     *
      * @param string $key
      * @return AuthenticationProviderInterface
      * @throws InvalidArgumentException if provider not found
      */
     public function getAuthProvider($key)
     {
-        if(array_key_exists($key, $this->_authproviders)) {
+        if (array_key_exists($key, $this->_authproviders)) {
             return $this->_authproviders[$key];
         }
-        
+
         throw \InvalidArgumentException(sprintf("Auth provider doesn't exists", $key));
     }
 
@@ -348,7 +355,7 @@ class SecurityContext extends sfSecurityContext
      */
     public function addFirewall($requestMatcher, $listeners)
     {
-        $this->_firewallmap->add($requestMatcher, $listeners, NULL);
+        $this->_firewallmap->add($requestMatcher, $listeners, null);
     }
 
     /**
@@ -358,7 +365,12 @@ class SecurityContext extends sfSecurityContext
     {
         $this->_firewall = new Firewall($this->_firewallmap, $this->_dispatcher);
         $this->_application->getContainer()->set('security.firewall', $this->_firewall);
-        $this->_dispatcher->addListener('frontcontroller.request', array('@security.firewall', 'onKernelRequest'));
+        if (false === ($this->_dispatcher instanceof DispatcherProxy) || false === $this->_dispatcher->isRestored()) {
+            $this->_dispatcher->addListener(
+                'frontcontroller.request',
+                array('@security.firewall', 'onKernelRequest')
+            );
+        }
     }
 
     /**
