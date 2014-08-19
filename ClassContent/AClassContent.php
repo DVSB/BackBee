@@ -828,7 +828,8 @@ abstract class AClassContent extends AContent
         $rendermode = NULL;
 
         if (is_array($this->getParam('rendermode'))) {
-            $rendermode = @array_pop($this->getParam('rendermode'));
+            $rendermode = (array) $this->getParam('rendermode');
+            $rendermode = array_pop($this->getParam('rendermode'));
 
             if (isset($rendermode['rendertype'])) {
                 switch ($rendermode['rendertype']) {
