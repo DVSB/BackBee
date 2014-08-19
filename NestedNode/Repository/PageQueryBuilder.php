@@ -108,7 +108,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      */
     public function andIsPreviousOnlineSiblingOf(Page $page, $alias = null)
     {
-        $alias = $this->getFirstAlias();
+        $alias = $this->getFirstAlias($alias);
         return $this->andIsPreviousSiblingsOf($page, $alias)
                         ->andIsOnline($alias)
                         ->orderBy($alias . '._leftnode', 'DESC')
@@ -123,7 +123,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      */
     public function andIsNextOnlineSiblingOf(Page $page, $alias = null)
     {
-        $alias = $this->getFirstAlias();
+        $alias = $this->getFirstAlias($alias);
         return $this->andIsNextSiblingsOf($page, $alias)
                         ->andIsOnline($alias)
                         ->orderBy($alias . '._leftnode', 'ASC')
@@ -154,7 +154,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      */
     public function andIsPreviousVisibleSiblingOf(Page $page, $alias = null)
     {
-        $alias = $this->getFirstAlias();
+        $alias = $this->getFirstAlias($alias);
         return $this->andIsPreviousSiblingsOf($page, $alias)
                         ->andIsVisible($alias)
                         ->orderBy($alias . '._leftnode', 'DESC')
@@ -169,7 +169,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      */
     public function andIsNextVisibleSiblingOf(Page $page, $alias = null)
     {
-        $alias = $this->getFirstAlias();
+        $alias = $this->getFirstAlias($alias);
         return $this->andIsNextSiblingsOf($page, $alias)
                         ->andIsVisible($alias)
                         ->orderBy($alias . '._leftnode', 'ASC')
@@ -244,8 +244,45 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      */
     public function andTitleIsLike($query, $alias = null)
     {
-        $alias = $this->getFirstAlias();
+        $alias = $this->getFirstAlias($alias);
         return $this->andWhere($this->expr()->like($alias . '._title', $this->expr()->literal('%' . $query . '%')));
+    }
+
+    /**
+     * Add query part to select page matching provided criteria
+     * @param array $restrictedStates   optional, limit to pages having provided states, empty by default
+     * @param array $options            optional, the search criteria: array('beforePubdateField' => timestamp against page._modified,
+     *                                                                       'afterPubdateField' => timestamp against page._modified,
+     *                                                                       'searchField' => string to search for title
+     * @param string $alias
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @Todo: more generic search function
+     */
+    public function andSearchCriteria($restrictedStates = array(), $options = array(), $alias = null)
+    {
+        $alias = $this->getFirstAlias($alias);
+        if (true === is_array($restrictedStates) && 0 < count($restrictedStates) && false === in_array('all', $restrictedStates)) {
+            $this->andStateIsIn($restrictedStates, $alias);
+        }
+
+        if (false === is_array($options)) {
+            $options = array();
+        }
+
+        if (true === array_key_exists('beforePubdateField', $options)) {
+            $date = new \DateTime();
+            $this->andModifiedIsLowerThan($date->setTimestamp($options['beforePubdateField']), $alias);
+        }
+
+        if (true === array_key_exists('afterPubdateField', $options)) {
+            $date = new \DateTime();
+            $this->andModifiedIsGreaterThan($date->setTimestamp($options['afterPubdateField']), $alias);
+        }
+
+        if (true === array_key_exists('searchField', $options)) {
+            $this->andTitleIsLike($options['searchField'], $alias);
+        }
+        return $this;
     }
 
 }

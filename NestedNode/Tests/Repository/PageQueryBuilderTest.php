@@ -245,6 +245,49 @@ class PageQueryBuilderTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andSearchCriteria
+     */
+    public function testAndSearchCriteria()
+    {
+        $now = new \DateTime();
+
+        $q = $this->repo->createQueryBuilder('p')
+                ->andSearchCriteria('fake');
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p', $q->getDql());
+
+        $q->resetDQLPart('where')
+                ->andSearchCriteria(array(), 'fake');
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p', $q->getDql());
+
+        $q->resetDQLPart('where')
+                ->andSearchCriteria(array('all'));
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p', $q->getDql());
+
+        $q->resetDQLPart('where')
+                ->andSearchCriteria(array(), array('beforePubdateField' => $now->getTimestamp()));
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._modified < :date0', $q->getDql());
+
+        $q->resetDQLPart('where')
+                ->andSearchCriteria(array(), array('afterPubdateField' => $now->getTimestamp()));
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._modified > :date1', $q->getDql());
+
+        $q->resetDQLPart('where')
+                ->andSearchCriteria(array(Page::STATE_ONLINE));
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN(:states2)', $q->getDql());
+
+        $q->resetDQLPart('where')
+                ->andSearchCriteria(array(), array('searchField' => 'test'));
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals("SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._title LIKE '%test%'", $q->getDql());
+    }
+
+    /**
      * Sets up the fixture
      */
     public function setUp()
