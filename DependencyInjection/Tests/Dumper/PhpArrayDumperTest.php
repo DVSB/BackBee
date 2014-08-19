@@ -29,7 +29,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Test for BootstrapResolver
+ * Test for PhpArrayDumper
  *
  * @category    BackBuilder
  * @package     BackBuilder\DependencyInjection
