@@ -34,6 +34,8 @@ use Symfony\Component\Security\Acl\Permission\MaskBuilder as sfMaskBuilder;
  *           ->add('view')
  *           ->add('create')
  *           ->add('edit')
+ *       var_dump($builder->get());        // int(7)
+ *       var_dump($builder->getPattern()); // string(32) ".............................ECV"
  *       ;
  * </code>
  *
