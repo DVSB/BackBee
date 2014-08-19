@@ -23,3 +23,44 @@ services:
         class: \DateTimeZone
         arguments: ["%timezone%"]
 
+    service_scope_prototype:
+        class: \DateTime
+        scope: prototype
+    service_scope_container:
+        class: \DateTime
+        scope: container
+    service_public_false:
+        class: \DateTime
+        public: false
+    service_public_true:
+        synthetic: true
+        public: true
+    service_with_file:
+        synthetic: true
+        file: /var/foo/bar
+    service_with_file:
+        synthetic: true
+        file: /var/foo/bar
+    service_factory_class:
+        class: \DateTime
+        factory_class: \FooBar\DateTimeFactory
+        factory_method: get
+    fake_service_datetime_factory:
+        class: \FooBar\DateTimeFactory
+    service_factory_service:
+        class: \DateTime
+        factory_service: fake_service_datetime_factory
+        factory_method: get
+    datetime_manager:
+        abstract: true
+        calls:
+            - [modify, ['+1 day']]
+    datetime_with_parent:
+        class: \DateTime
+        abstract: false
+        parent: datetime_manager
+    service.configurator:
+        class: \FooBar\DateTimeConfigurator
+    service.use.configurator:
+        class: \DateTime
+        configurator: ["@service.configurator", configure]
