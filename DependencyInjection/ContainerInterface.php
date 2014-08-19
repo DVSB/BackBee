@@ -32,4 +32,5 @@ use Symfony\Component\DependencyInjection\TaggedContainerInterface;
  */
 interface ContainerInterface extends TaggedContainerInterface
 {
+    const DUMPABLE_SERVICE_TAG = 'dumpable';
 }
