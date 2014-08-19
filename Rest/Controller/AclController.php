@@ -133,8 +133,6 @@ class AclController extends ARestController
             throw new ValidationException($violations);
         }
 
-        
-        
         $objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
 
         $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
@@ -163,6 +161,67 @@ class AclController extends ARestController
             'mask' => $ace->getMask(),
             'group_id' => $ace->getSecurityIdentity()->getUsername(),
             'object_class' => $ace->getAcl()->getObjectIdentity()->getType()
+        ];
+
+        return new Response(json_encode($data));
+    }
+    
+    /**
+     * 
+     * @Rest\RequestParam(name = "group_id", description="Security Group ID", requirements = {
+     *  @Assert\NotBlank(message="Group ID cannot be empty") 
+     * })
+     * 
+     * @Rest\RequestParam(name = "object_class", description="Object Class name", requirements = {
+     *  @Assert\NotBlank(message="Object Class cannot be empty")
+     * })
+     * 
+     * @Rest\RequestParam(name = "object_id", description="Object ID", requirements = {
+     *  @Assert\NotBlank(message="Object ID cannot be empty")
+     * })
+     * 
+     * @Rest\RequestParam(name = "mask", description="Permission Mask", requirements = {
+     *  @Assert\NotBlank(message="Mask must be provided"), 
+     *  @Assert\Type(type="integer", message="Mask must be an integer"), 
+     * })
+     */
+    public function postObjectAceAction(Request $request, ConstraintViolationList $violations = null) 
+    {
+        if(null !== $violations && count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+
+        //$objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
+
+        
+        $objectIdentity = new ObjectIdentity($request->request->get('object_id'), $request->request->get('object_class'));
+        $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
+        try {
+            $acl = $aclProvider->createAcl($objectIdentity);
+            /* @var $acl \Symfony\Component\Security\Acl\Domain\Acl */
+        } catch(\Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException $e) {
+            // ACL already exists for this $objectIdentity
+        }
+        
+        $securityIdentity = new UserSecurityIdentity($request->request->get('group_id'), 'BackBuilder\Security\Group');
+        
+        // grant owner access
+        $acl->insertObjectAce($securityIdentity, $request->request->get('mask'));
+        
+        $aclProvider->updateAcl($acl);
+        
+        
+        $aces = $acl->getObjectAces();
+        
+        $ace = $aces[0];
+        /* @var $ace \Symfony\Component\Security\Acl\Domain\Entry */
+
+        $data = [
+            'id' => $ace->getId(),
+            'mask' => $ace->getMask(),
+            'group_id' => $ace->getSecurityIdentity()->getUsername(),
+            'object_class' => $ace->getAcl()->getObjectIdentity()->getType(),
+            'object_id' => $ace->getAcl()->getObjectIdentity()->getIdentifier()
         ];
 
         return new Response(json_encode($data));
