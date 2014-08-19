@@ -193,7 +193,6 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     protected function _defineParam($var, $type = 'scalar', $options = null)
     {
         if ('accept' === $var) {
-            var_dump($options);
             if (true === is_array($options) && true === array_key_exists('default', $options)) {
                 return $this->_addAcceptedType($options['default']);
             }
