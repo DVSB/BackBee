@@ -55,7 +55,7 @@ class PageQueryBuilderTest extends TestCase
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
         $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN (:states0) AND (p._publishing IS NULL OR p._publishing <= :now0) AND (p._archiving IS NULL OR p._archiving > :now0)', $q->getDql());
-        $this->assertEquals(array(Page::STATE_ONLINE, Page::STATE_ONLINE & Page::STATE_HIDDEN), $q->getParameter('states0')->getValue());
+        $this->assertEquals(array(Page::STATE_ONLINE, Page::STATE_ONLINE + Page::STATE_HIDDEN), $q->getParameter('states0')->getValue());
         $this->assertEquals(date('Y-m-d H:i:00', time()), $q->getParameter('now0')->getValue());
     }
 

@@ -52,7 +52,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
         return $this->andWhere($alias . '._state IN (:states' . $suffix . ')')
                         ->andWhere($alias . '._publishing IS NULL OR ' . $alias . '._publishing <= :now' . $suffix)
                         ->andWhere($alias . '._archiving IS NULL OR ' . $alias . '._archiving > :now' . $suffix)
-                        ->setParameter('states' . $suffix, array(Page::STATE_ONLINE, Page::STATE_ONLINE & Page::STATE_HIDDEN))
+                        ->setParameter('states' . $suffix, array(Page::STATE_ONLINE, Page::STATE_ONLINE + Page::STATE_HIDDEN))
                         ->setParameter('now' . $suffix, date(self::$config['dateSchemeForPublishing'], time()));
     }
 
@@ -68,7 +68,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
                         ->andWhere($alias . '._publishing IS NULL OR ' . $alias . '._publishing <= :now' . $suffix)
                         ->andWhere($alias . '._archiving IS NULL OR ' . $alias . '._archiving > :now' . $suffix)
                         ->setParameter('states' . $suffix, Page::STATE_ONLINE)
-                        ->setParameter('now' . $suffix, date('Y-m-d H:i:00', time()));
+                        ->setParameter('now' . $suffix, date(self::$config['dateSchemeForPublishing'], time()));
     }
 
     /**

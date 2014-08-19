@@ -101,16 +101,6 @@ class PageRepository extends NestedNodeRepository
                         ->andIsPreviousOnlineSiblingOf($page)
                         ->getQuery()
                         ->getOneOrNullResult();
-//
-//        $q = $this->createQueryBuilder('n')
-//                ->andParentIs($page->getParent())
-//                ->andLevelEquals($page->getLevel())
-//                ->andRightnodeIsLowerThan($page->getLeftnode, true)
-//                ->orderBy('n._leftnode', 'desc')
-//                ->setMaxResults(1);
-//        $q = $this->_andOnline($q);
-//
-//        return $q->getQuery()->getOneOrNullResult();
     }
 
     /**
@@ -147,13 +137,6 @@ class PageRepository extends NestedNodeRepository
                         ->andLayoutIs($layout)
                         ->getQuery()
                         ->getResult();
-//
-//        $qb = $this->createQueryBuilder('n')
-//                ->andIsSiblingsOf($node, !$includeNode, $order, $limit, $start)
-//                ->andWhere('n._layout = :layout')
-//                ->setParameter('layout', $layout);
-//        $qb = $this->_andOnline($qb);
-//        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -167,15 +150,6 @@ class PageRepository extends NestedNodeRepository
                         ->andIsNextOnlineSiblingOf($page)
                         ->getQuery()
                         ->getOneOrNullResult();
-//
-//        $q = $this->createQueryBuilder('n')
-//                ->andParentIs($page->getParent())
-//                ->andLevelEquals($page->getLevel())
-//                ->andLeftnodeIsUpperThan($page->getLeftnode(), true)
-//                ->orderBy('n._leftnode', 'asc')
-//                ->setMaxResults(1);
-//        $q = $this->_andOnline($q);
-//        return $q->getQuery()->getOneOrNullResult();
     }
 
     /**
@@ -335,7 +309,7 @@ class PageRepository extends NestedNodeRepository
      * @param type $having_child                    optional, limit to descendants having child (false by default)
      * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
      */
-    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, $order = array('_leftnode' => 'asc'), $paginate = false, $firstresult = 0, $maxresult = 25, $having_child = false)
+    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, array $order = array('_leftnode' => 'asc'), $paginate = false, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
         // @Todo: search for calls with wrong ordering criteria format and solve them
         if (true === array_key_exists('field', $order)) {
@@ -348,7 +322,7 @@ class PageRepository extends NestedNodeRepository
                 ->orderByMultiple($order);
 
         if (null !== $depth) {
-            $q->andLevelIsLowerThan($page->getLevel() + $depth);
+            $q->andLevelIsLowerThan($page->getLevel() + $depth, true);
         }
 
         if (true === $having_child) {
