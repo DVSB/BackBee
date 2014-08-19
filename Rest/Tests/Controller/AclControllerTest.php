@@ -76,14 +76,14 @@ class AclControllerTest extends TestCase
         
         // setup ACE for site
         $aclProvider = $this->getSecurityContext()->getACLProvider();
-        $siteIdentity = ObjectIdentity::fromDomainObject($this->site);
-        $acl = $aclProvider->createAcl($siteIdentity);
+        $objectIdentity = ObjectIdentity::fromDomainObject($this->site);
+        $acl = $aclProvider->createAcl($objectIdentity);
         
          // retrieving the security identity of the currently logged-in user
         $securityIdentity = new UserSecurityIdentity($this->groupEditor->getName(), 'BackBuilder\Security\Group');
 
         // grant owner access
-        $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_PUBLISH);
+        $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_EDIT);
         
         $aclProvider->updateAcl($acl);
     }
@@ -96,17 +96,121 @@ class AclControllerTest extends TestCase
         return $controller;
     }
 
+    /**
+     * @covers ::postObjectAceAction
+     */
+    public function test_postObjectAceAction()
+    {
+        $data = [
+            'group_id' => $this->groupEditor->getName(),
+            'object_class' => get_class($this->site),
+            'object_id' => $this->site->getUid(),
+            'mask' => MaskBuilder::MASK_VIEW
+        ];
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postObjectAceAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $res = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $this->assertInternalType('array', $res);
+        $this->assertInternalType('int', $res['id']);
+        
+        $this->assertEquals($data['group_id'], $res['group_id']);
+        $this->assertEquals($data['object_class'], $res['object_class']);
+        $this->assertEquals($data['object_id'], $res['object_id']);
+        $this->assertEquals($data['mask'], $res['mask']);
+    }
+    
+    /**
+     * @covers ::postObjectAceAction
+     */
+    public function test_postObjectAceAction_missingFields()
+    {
+         $response = $this->getBBApp()->getController()->handle(new Request([], [], [
+            '_action' => 'postObjectAceAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertEquals(400, $response->getStatusCode());
+
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        
+        $this->assertArrayHasKey('group_id', $res['errors']);
+        $this->assertArrayHasKey('object_class', $res['errors']);
+        $this->assertArrayHasKey('object_id', $res['errors']);
+        $this->assertArrayHasKey('mask', $res['errors']);
+    }
+    
+    
+    /**
+     * @covers ::postClassAceAction
+     */
+    public function test_postClassAceAction()
+    {
+        $data = [
+            'group_id' => $this->groupEditor->getName(),
+            'object_class' => get_class($this->site),
+            'mask' => MaskBuilder::MASK_VIEW
+        ];
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postClassAceAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $this->assertInternalType('array', $res);
+        $this->assertInternalType('int', $res['id']);
+        
+        $this->assertEquals($data['group_id'], $res['group_id']);
+        $this->assertEquals($data['object_class'], $res['object_class']);
+        $this->assertEquals($data['mask'], $res['mask']);
+    }
+    
+    
+    
+    /**
+     * @covers ::postClassAceAction
+     */
+    public function test_postClassAceAction_missingFields()
+    {
+        $response = $this->getBBApp()->getController()->handle(new Request([], [], [
+            '_action' => 'postClassAceAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertEquals(400, $response->getStatusCode());
+
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        
+        $this->assertArrayHasKey('group_id', $res['errors']);
+        $this->assertArrayHasKey('object_class', $res['errors']);
+        $this->assertArrayHasKey('mask', $res['errors']);
+        
+    }
     
     /**
      * @covers ::getEntryCollectionAction
      */
     public function testGetClassCollectionAction()
     {
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-        ), array(
+        $response = $this->getBBApp()->getController()->handle(new Request([], [
+        ], [
             '_action' => 'getClassCollectionAction',
             '_controller' =>  $this->getController()
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/'] ));
         
         $res = json_decode($response->getContent(), true);
         

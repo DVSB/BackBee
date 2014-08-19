@@ -461,9 +461,9 @@ class ContentBlocks extends AbstractServiceLocal
      */
     public function updateContentparameters($params = null, $contentInfos = null)
     {
-        if (is_null($params) || !is_array($params))
+        if (is_null($params) || !is_array($params)) {
             throw new \Exception("params can't be null");
-        // var_dump($params);
+        }
         $contentTypeClass = "BackBuilder\ClassContent\\" . $contentInfos["contentType"];
 
         $em = $this->bbapp->getEntityManager();
