@@ -25,6 +25,7 @@ use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -58,6 +59,12 @@ class ContainerProxy extends Container
     private $services_dump;
 
     /**
+     * [$already_compiled description]
+     * @var boolean
+     */
+    private $already_compiled;
+
+    /**
      * [__construct description]
      */
     public function __construct(array $container_dump)
@@ -69,6 +76,17 @@ class ContainerProxy extends Container
         $this->raw_definitions_id = array_keys($this->raw_definitions);
         $this->addAliases($container_dump['aliases']);
         $this->services_dump = $container_dump['services_dump'];
+        $this->already_compiled = $container_dump['is_compiled'];
+    }
+
+    /**
+     * Returns boolean that determine if container has been compiled before the dump or not
+     *
+     * @return boolean true if the container has been compiled before the dump, otherwise false
+     */
+    public function isCompiled()
+    {
+        return $this->already_compiled;
     }
 
     /**
@@ -245,7 +263,13 @@ class ContainerProxy extends Container
      */
     private function buildDefinition(array $array)
     {
-        $definition = new Definition();
+        $definition = null;
+        if (true === array_key_exists('parent', $array)) {
+            $definition = new DefinitionDecorator($array['parent']);
+        } else {
+            $definition = new Definition();
+        }
+
         if (true === array_key_exists('synthetic', $array)) {
             $definition->setSynthetic($array['synthetic']);
         }
