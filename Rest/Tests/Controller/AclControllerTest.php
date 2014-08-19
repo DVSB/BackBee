@@ -76,14 +76,14 @@ class AclControllerTest extends TestCase
         
         // setup ACE for site
         $aclProvider = $this->getSecurityContext()->getACLProvider();
-        $siteIdentity = ObjectIdentity::fromDomainObject($this->site);
-        $acl = $aclProvider->createAcl($siteIdentity);
+        $objectIdentity = ObjectIdentity::fromDomainObject($this->site);
+        $acl = $aclProvider->createAcl($objectIdentity);
         
          // retrieving the security identity of the currently logged-in user
         $securityIdentity = new UserSecurityIdentity($this->groupEditor->getName(), 'BackBuilder\Security\Group');
 
         // grant owner access
-        $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_PUBLISH);
+        $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_EDIT);
         
         $aclProvider->updateAcl($acl);
     }
@@ -98,15 +98,42 @@ class AclControllerTest extends TestCase
 
     
     /**
+     * @covers ::postClassAceAction
+     */
+    public function test_postClassAceAction()
+    {
+        $data = [
+            'group_id' => $this->groupEditor->getName(),
+            'object_class' => get_class($this->site),
+            'mask' => MaskBuilder::MASK_VIEW
+        ];
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postClassAceAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $this->assertInternalType('array', $res);
+        $this->assertInternalType('int', $res['id']);
+        
+        $this->assertEquals($data['group_id'], $res['group_id']);
+        $this->assertEquals($data['group_id'], $res['group_id']);
+        $this->assertEquals($data['mask'], $res['mask']);
+    }
+    
+    /**
      * @covers ::getEntryCollectionAction
      */
     public function testGetClassCollectionAction()
     {
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-        ), array(
+        $response = $this->getBBApp()->getController()->handle(new Request([], [
+        ], [
             '_action' => 'getClassCollectionAction',
             '_controller' =>  $this->getController()
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/'] ));
         
         $res = json_decode($response->getContent(), true);
         
