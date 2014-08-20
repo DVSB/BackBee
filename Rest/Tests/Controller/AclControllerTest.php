@@ -151,12 +151,37 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'DELETE'] ));
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $this->assertEquals(204, $response->getStatusCode());
+    }
+    
+    /**
+     * @covers ::postPermissionMapAction
+     */
+    public function test_postPermissionMapAction_invalidPermission() 
+    {
+        $data = [[
+            'sid' => $this->groupEditor->getId(),
+            'object_class' => get_class($this->site),
+            'permissions' => ['permissionThatDoesnExist' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
         
         $res = json_decode($response->getContent(), true);
 
-
-        $this->assertEquals(204, $response->getStatusCode());
+        $this->assertEquals(400, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        // TODO - would be better to use proper php array for 0[permissions]
+        $this->assertEquals('Invalid permission mask: permissionThatDoesnExist', $res['errors']['0[permissions]'][0]);
     }
     
             

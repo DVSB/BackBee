@@ -252,6 +252,7 @@ class AclController extends ARestController
                         $objectClass
                     )
                 );
+                continue;
             }
             
             $objectIdentity = null;
@@ -275,7 +276,21 @@ class AclController extends ARestController
             $permissions = array_keys($permissions);
             $permissions = array_unique($permissions);
             
-            $mask = $aclManager->getMask($permissions);
+            try {
+                $mask = $aclManager->getMask($permissions);
+            } catch(\BackBuilder\Security\Acl\Permission\InvalidPermissionException $e) {
+                $violations->add(
+                    new ConstraintViolation(
+                        $e->getMessage(), 
+                        $e->getMessage(), 
+                        [], 
+                        sprintf('%s[permissions]', $i), 
+                        sprintf('%s[permissions]', $i), 
+                        $e->getPermission()
+                    )
+                );
+                continue;
+            }
             
             if($objectId) {
                 $aclManager->insertOrUpdateObjectAce($objectIdentity, $securityIdentity, $mask);

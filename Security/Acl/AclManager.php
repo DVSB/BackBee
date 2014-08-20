@@ -29,7 +29,8 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
-use BackBuilder\Security\Acl\Permission\MaskBuilder;
+use BackBuilder\Security\Acl\Permission\MaskBuilder,
+    BackBuilder\Security\Acl\Permission\InvalidPermissionException;
 
 class AclManager
 {
@@ -197,7 +198,12 @@ class AclManager
         $maskBuilder = new MaskBuilder();
         
         foreach($permissions as $permission) {
-            $maskBuilder->add($permission);
+            try {
+                $maskBuilder->add($permission);
+            } catch (\InvalidArgumentException $e) {
+                throw new InvalidPermissionException('Invalid permission mask: ' . $permission, $permission);
+            }
+            
         }
         
         return $maskBuilder->get();
