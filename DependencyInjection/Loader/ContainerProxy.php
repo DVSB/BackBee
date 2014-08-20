@@ -22,6 +22,7 @@ namespace BackBuilder\DependencyInjection\Loader;
 
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -207,7 +208,7 @@ class ContainerProxy extends Container
 
             $service_proxy = $service;
             if (false === ($service_proxy instanceof DumpableServiceProxyInterface)) {
-                throw new \Exception('Service proxy must implements DumpableServiceProxyInterface!');
+                throw new InvalidServiceProxyException(get_class($service_proxy));
             }
         }
 
@@ -460,7 +461,7 @@ class ContainerProxy extends Container
         }
 
         if (true === array_key_exists('abstract', $array)) {
-            $definition->setScope($array['abstract']);
+            $definition->setAbstract($array['abstract']);
         }
 
         if (true === array_key_exists('scope', $array)) {
