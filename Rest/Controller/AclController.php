@@ -27,13 +27,13 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\ConstraintViolation;
 
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
+    Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
-use BackBuilder\Security\Group,
-    BackBuilder\Security\Acl\Permission\MaskBuilder;
+use BackBuilder\Security\Group;
 
 use BackBuilder\Rest\Exception\ValidationException;
 
@@ -97,7 +97,7 @@ class AclController extends ARestController
             $qb->leftJoin('g._site', 's')
                 ->andWhere('s._uid = :site_uid')
                 ->setParameter('site_uid', $site->getUid())
-             ;
+            ;
         }
         
         $groups = $qb->getQuery()->getResult();
@@ -139,13 +139,9 @@ class AclController extends ARestController
         $objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
 
         $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
-        try {
-            $acl = $aclProvider->createAcl($objectIdentity);
-            /* @var $acl \Symfony\Component\Security\Acl\Domain\Acl */
-        } catch(\Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException $e) {
-            // ACL already exists for this $objectIdentity
-            $acl = $aclProvider->findAcl($objectIdentity);
-        }
+        
+        $aclManager = $this->getContainer()->get("security.acl_manager");
+        $acl = $aclManager->getAcl($objectIdentity);
         
         $securityIdentity = new UserSecurityIdentity($request->request->get('group_id'), 'BackBuilder\Security\Group');
         
@@ -197,13 +193,10 @@ class AclController extends ARestController
 
         $objectIdentity = new ObjectIdentity($request->request->get('object_id'), $request->request->get('object_class'));
         $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
-        try {
-            $acl = $aclProvider->createAcl($objectIdentity);
-            /* @var $acl \Symfony\Component\Security\Acl\Domain\Acl */
-        } catch(\Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException $e) {
-            // ACL already exists for this $objectIdentity
-            $acl = $aclProvider->findAcl($objectIdentity);
-        }
+        
+        $aclManager = $this->getContainer()->get("security.acl_manager");
+
+        $acl = $aclManager->getAcl($objectIdentity);
         
         $securityIdentity = new UserSecurityIdentity($request->request->get('group_id'), 'BackBuilder\Security\Group');
         
@@ -230,25 +223,19 @@ class AclController extends ARestController
     }
     
     /**
+     * Bulk permissions create/update 
+     * 
      * 
      * @param security object $sid 
      */
-    public function postGroupPermissionMapAction($sid, Request $request) 
+    public function postPermissionMapAction(Request $request) 
     {
-        
         $em = $this->getEntityManager();
-        
-        $group = $em->getRepository('BackBuilder\Security\Group')->find($sid);
-        
-        if(!$group) {
-            // TODO validate
-        }
-        
-        $securityIdentity = new UserSecurityIdentity($group->getObjectIdentifier(), get_class($group));
-        
         $permissionMap = $request->request->all();
+        $aclManager = $this->getContainer()->get("security.acl_manager");
         
         $violations = new ConstraintViolationList();
+        
         foreach($permissionMap as $i => $objectMap) {
             $permissions = $objectMap['permissions'];
             $objectClass = $objectMap['object_class'];
@@ -267,48 +254,41 @@ class AclController extends ARestController
                 );
             }
             
+            $objectIdentity = null;
+            
             if(isset($objectMap['object_id'])) {
                 $objectId = $objectMap['object_id'];
-                $object = $em->getRepository($objectClass)->find($objectId);
-                
-                if(!$object) {
-                    $violations->add(
-                    new ConstraintViolation(
-                        "Object $objectClass::$objectId doesn't exist", 
-                        "Object $objectClass::$objectId doesn't exist", 
-                        [], 
-                        sprintf('%s[object_id]', $i), 
-                        sprintf('%s[object_id]', $i), 
-                        $objectId
-                    )
-                );
-                }
+                // object scope
+                $objectIdentity = new ObjectIdentity($objectId, $objectClass);
+            } else {
+                // class scope
+                $objectIdentity = new ObjectIdentity('class', $objectClass);
             }
             
+            $sid = $objectMap['sid'];
+            $securityIdentity = new UserSecurityIdentity($sid, 'BackBuilder\Security\Group');
+
             // convert values to booleans
             $permissions = array_map('BackBuilder\Util\String::toBoolean', $permissions);
-            
             // remove false values
             $permissions = array_filter($permissions);
-            
             $permissions = array_keys($permissions);
-            
             $permissions = array_unique($permissions);
             
-            $maskBuilder = new MaskBuilder();
+            $mask = $aclManager->getMask($permissions);
             
-            foreach($permissions as $permission) {
-                $maskBuilder->add($permission);
+            if($objectId) {
+                $aclManager->insertOrUpdateObjectAce($objectIdentity, $securityIdentity, $mask);
+            } else {
+                $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, $mask);
             }
-            
-            //var_dump($maskBuilder->get());
         }
         
         if(count($violations) > 0) {
             throw new ValidationException($violations);
         }
         
-        
-        return new Response();
+        return new Response('', 204);
     }
+    
 }

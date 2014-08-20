@@ -97,12 +97,13 @@ class AclControllerTest extends TestCase
     }
 
     /**
-     * @covers ::postGroupPermissionMapAction
+     * @covers ::postPermissionMapAction
      */
-    public function test_postGroupPermissionMapAction() 
+    public function test_postPermissionMapAction() 
     {
         $data = [
             [
+                'sid' => $this->groupEditor->getId(),
                 'object_class' => get_class($this->site),
                 'permissions' => [
                     'view' => 1,
@@ -118,6 +119,7 @@ class AclControllerTest extends TestCase
                 ]
             ], 
             [
+                'sid' => $this->groupEditor->getId(),
                 'object_class' => get_class($this->site),
                 'object_id' => $this->site->getUid(),
                 'permissions' => [
@@ -134,6 +136,7 @@ class AclControllerTest extends TestCase
                 ]
             ], 
             [
+                'sid' => $this->groupEditor->getId(),
                 'object_class' => 'BackBuilder\Site\Layout',
                 'permissions' => [
                     'view' => 'true',
@@ -146,54 +149,16 @@ class AclControllerTest extends TestCase
         ];
         
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
-            'sid' => $this->groupEditor->getId(),
-            '_action' => 'postGroupPermissionMapAction',
+            '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
         ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'DELETE'] ));
         
         $res = json_decode($response->getContent(), true);
 
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(204, $response->getStatusCode());
     }
     
-    /**
-     * @covers ::postGroupPermissionMapAction
-     */
-    public function test_postObjectPermissionMapAction() 
-    {
-        $data = [
-            'oid_class' => get_class($this->site),
-            
-            'map' => [
-                [
-                    'sid' => $this->groupEditor->getName(),
-                    'permissions' => [
-                        'view' => 1,
-                        'create' => 1,
-                        'edit' => 1,
-                        'delete' => 1,
-                        'undelete' => 1,
-                        'commit' => 1,
-                        'publish' => 1,
-                        'operator' => 1,
-                        'master' => 1,
-                        'owner' => 1
-                    ]
-                ], 
-                [
-                    'sid' => 'anotherName',
-                    'permissions' => [
-                        'view' => 1,
-                        'create' => 1,
-                        'edit' => 1,
-                        'commit' => 1,
-                        'publish' => 1
-                    ]
-                ]
-            ]
-        ];
-    }
             
     /**
      * @covers ::deleteAceAction
