@@ -201,7 +201,7 @@ class AclManager
             try {
                 $maskBuilder->add($permission);
             } catch (\InvalidArgumentException $e) {
-                throw new InvalidPermissionException('Invalid permission mask: ' . $permission, $permission);
+                throw new InvalidPermissionException('Invalid permission mask: ' . $permission, $permission, $e);
             }
             
         }
