@@ -37,6 +37,9 @@ use BackBuilder\Security\Group,
 
 use BackBuilder\Rest\Exception\ValidationException;
 
+
+use BackBuilder\Util\String;
+
 /**
  * User Controller
  *
@@ -141,6 +144,7 @@ class AclController extends ARestController
             /* @var $acl \Symfony\Component\Security\Acl\Domain\Acl */
         } catch(\Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException $e) {
             // ACL already exists for this $objectIdentity
+            $acl = $aclProvider->findAcl($objectIdentity);
         }
         
         $securityIdentity = new UserSecurityIdentity($request->request->get('group_id'), 'BackBuilder\Security\Group');
@@ -163,7 +167,7 @@ class AclController extends ARestController
             'object_class' => $ace->getAcl()->getObjectIdentity()->getType()
         ];
 
-        return new Response(json_encode($data));
+        return new Response(json_encode($data), 201);
     }
     
     /**
@@ -191,9 +195,6 @@ class AclController extends ARestController
             throw new ValidationException($violations);
         }
 
-        //$objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
-
-        
         $objectIdentity = new ObjectIdentity($request->request->get('object_id'), $request->request->get('object_class'));
         $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
         try {
@@ -201,6 +202,7 @@ class AclController extends ARestController
             /* @var $acl \Symfony\Component\Security\Acl\Domain\Acl */
         } catch(\Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException $e) {
             // ACL already exists for this $objectIdentity
+            $acl = $aclProvider->findAcl($objectIdentity);
         }
         
         $securityIdentity = new UserSecurityIdentity($request->request->get('group_id'), 'BackBuilder\Security\Group');
@@ -224,7 +226,89 @@ class AclController extends ARestController
             'object_id' => $ace->getAcl()->getObjectIdentity()->getIdentifier()
         ];
 
-        return new Response(json_encode($data));
+        return new Response(json_encode($data), 201);
     }
     
+    /**
+     * 
+     * @param security object $sid 
+     */
+    public function postGroupPermissionMapAction($sid, Request $request) 
+    {
+        
+        $em = $this->getEntityManager();
+        
+        $group = $em->getRepository('BackBuilder\Security\Group')->find($sid);
+        
+        if(!$group) {
+            // TODO validate
+        }
+        
+        $securityIdentity = new UserSecurityIdentity($group->getObjectIdentifier(), get_class($group));
+        
+        $permissionMap = $request->request->all();
+        
+        $violations = new ConstraintViolationList();
+        foreach($permissionMap as $i => $objectMap) {
+            $permissions = $objectMap['permissions'];
+            $objectClass = $objectMap['object_class'];
+            $objectId = null;
+            
+            if(!class_exists($objectClass)) {
+                $violations->add(
+                    new ConstraintViolation(
+                        "Class $objectClass doesn't exist", 
+                        "Class $objectClass doesn't exist", 
+                        [], 
+                        sprintf('%s[object_class]', $i), 
+                        sprintf('%s[object_class]', $i), 
+                        $objectClass
+                    )
+                );
+            }
+            
+            if(isset($objectMap['object_id'])) {
+                $objectId = $objectMap['object_id'];
+                $object = $em->getRepository($objectClass)->find($objectId);
+                
+                if(!$object) {
+                    $violations->add(
+                    new ConstraintViolation(
+                        "Object $objectClass::$objectId doesn't exist", 
+                        "Object $objectClass::$objectId doesn't exist", 
+                        [], 
+                        sprintf('%s[object_id]', $i), 
+                        sprintf('%s[object_id]', $i), 
+                        $objectId
+                    )
+                );
+                }
+            }
+            
+            // convert values to booleans
+            $permissions = array_map('BackBuilder\Util\String::toBoolean', $permissions);
+            
+            // remove false values
+            $permissions = array_filter($permissions);
+            
+            $permissions = array_keys($permissions);
+            
+            $permissions = array_unique($permissions);
+            
+            $maskBuilder = new MaskBuilder();
+            
+            foreach($permissions as $permission) {
+                $maskBuilder->add($permission);
+            }
+            
+            //var_dump($maskBuilder->get());
+        }
+        
+        if(count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+        
+        
+        return new Response();
+    }
 }

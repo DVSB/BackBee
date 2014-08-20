@@ -21,6 +21,8 @@
 
 namespace BackBuilder\Security;
 
+use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
+
 use Doctrine\Common\Collections\ArrayCollection;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -35,7 +37,7 @@ use JMS\Serializer\Annotation as Serializer;
  * 
  * @Serializer\ExclusionPolicy("all")
  */
-class Group
+class Group implements DomainObjectInterface
 {
 
     /**
@@ -222,6 +224,14 @@ class Group
         }
         
         return $this->_site->getUid();
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    public function getObjectIdentifier()
+    {
+        return $this->getIdentifier();
     }
 
 }

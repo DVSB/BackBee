@@ -73,7 +73,7 @@ class YmlLoader extends ContainerAware
                 $this->em->flush($group);
             }
 
-            $securityIdentity = new UserSecurityIdentity($group_identifier, 'BackBuilder\Security\Group');
+            $securityIdentity = new UserSecurityIdentity($group->getObjectIdentifier(), get_class($group));
 
             if (true === array_key_exists('sites', $rights)) {
                 $sites = $this->addSiteRights($rights['sites'], $aclProvider, $securityIdentity);

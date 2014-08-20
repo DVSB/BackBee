@@ -142,7 +142,7 @@ class ValidationListener extends APathEnabledListener
                     $violation->getMessageTemplate(), 
                     $violation->getMessageParameters(), 
                     $violation->getRoot(), 
-                    $param['name'], 
+                    $param['name'] . $violation->getPropertyPath(), 
                     $violation->getInvalidValue(), 
                     $violation->getMessagePluralization(), 
                     $violation->getCode()
