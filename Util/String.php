@@ -233,4 +233,37 @@ class String
         return @round($bytes / pow(1024, ($i = floor(log($bytes, 1024)))), $roundPrecision) . ' ' . $unit[$i];
     }
     
+    /**
+     * Converts a string to boolean
+     * 
+     * @param string $str
+     * @return boolean
+     */
+    public static function toBoolean($str)
+    {
+        $booleanTrue = array(
+            '1',
+            'on',
+            'true',
+            'yes'
+        );
+        
+        if(in_array($str, $booleanTrue, true)) {
+            return true;
+        }
+        
+        $booleanFalse = array(
+            '0',
+            'off',
+            'false',
+            'no'
+        );
+        
+        if(in_array($str, $booleanFalse, true)) {
+            return false;
+        }
+        
+        return $str == true;
+    }
 }
+ 
