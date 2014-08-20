@@ -343,6 +343,13 @@ services:
 
     validator.factory:
         class: Symfony\Component\Validator\ConstraintValidatorFactory
+        
+    array.validator:
+        class: BackBuilder\Validator\ArrayValidator
+        
+    entity.validator:
+        class: BackBuilder\Validator\EntityValidator
+        arguments:  ["@em"]
 
     nestednode.page_listener:
         arguments:  [@bbapp]
