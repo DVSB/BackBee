@@ -185,7 +185,7 @@ class AclManager
     }
     
     /**
-     * Calvulate mask for a list of permissions
+     * Calculate mask for a list of permissions
      * 
      * ['view', 'edit'] => (int) 5
      * 
