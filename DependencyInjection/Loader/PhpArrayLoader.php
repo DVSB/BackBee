@@ -21,6 +21,9 @@ namespace BackBuilder\DependencyInjection\Loader;
  */
 
 use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\Exception\ContainerDumpInvalidFormatException;
+use BackBuilder\DependencyInjection\Exception\InvalidContainerDumpFilePathException;
+use BackBuilder\DependencyInjection\Exception\MissingParametersContainerDumpException;
 
 /**
  *
@@ -33,14 +36,16 @@ use BackBuilder\DependencyInjection\ContainerInterface;
 class PhpArrayLoader
 {
     /**
-     * [$container description]
+     * The container to hydrate
+     *
      * @var BackBuilder\DependencyInjection\ContainerInterface
      */
     private $container;
 
     /**
-     * [__construct description]
-     * @param ContainerInterface $container [description]
+     * PhpArrayLoader's constructor
+     *
+     * @param ContainerInterface $container the container to hydrate with container dump
      */
     public function __construct(ContainerInterface &$container)
     {
@@ -48,9 +53,11 @@ class PhpArrayLoader
     }
 
     /**
-     * [load description]
-     * @param  [type] $filepath [description]
-     * @return [type]           [description]
+     * Try to restore container with the dump located at $filepath path
+     *
+     * @param  string $filepath [description]
+     *
+     * @throws
      */
     public function load($filepath)
     {
@@ -61,15 +68,21 @@ class PhpArrayLoader
         }
 
         if (null === $dump) {
-            throw new \Exception($filepath . ' is not readable.');
+            throw new InvalidContainerDumpFilePathException($filepath);
         }
 
         if (false === is_array($dump)) {
-            throw new \Exception('Content getted from ' . $filepath . ' is not a valid format (array expected).');
+            throw new ContainerDumpInvalidFormatException($filepath, gettype($dump));
         }
 
-        if (false === array_key_exists('parameters', $dump) || false === array_key_exists('services', $dump)) {
-            throw new \Exception();
+        if (
+            false === array_key_exists('parameters', $dump)
+            || false === array_key_exists('services', $dump)
+            || false === array_key_exists('aliases', $dump)
+            || false === array_key_exists('services_dump', $dump)
+            || false === array_key_exists('is_compiled', $dump)
+        ) {
+            throw new MissingParametersContainerDumpException();
         }
 
         $this->container = new \BackBuilder\DependencyInjection\Loader\ContainerProxy($dump);

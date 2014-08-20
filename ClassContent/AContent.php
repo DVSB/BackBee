@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,7 +28,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Abstract class for every content and its revisions in BackBuilder
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent
  * @copyright   Lp digital system
@@ -564,7 +564,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
 
     /**
      * Checks for an accepted type
-     * @param string $value the value from which the type will be checked
+     * @param mixed $value the value from which the type will be checked
      * @param string $var the element to be checks
      * @return Boolean
      */
@@ -652,7 +652,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
     }
 
     /**
-     * Returns the unique identifier for this object. 
+     * Returns the unique identifier for this object.
      * @return string
      * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
      * @codeCoverageIgnore
@@ -824,8 +824,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
     /**
      * Goes all over the $param and keep looping until $pieces is empty to return
      * the values user is looking for
-     * @param  mixed $param   
-     * @param  array  $pieces 
+     * @param  mixed $param
+     * @param  array  $pieces
      * @return mixed
      */
     private function _getRecursivelyParam($param, array $pieces)
@@ -911,7 +911,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
      * @param string $serialized
      * @param Boolean $strict If TRUE, all missing or additionnal element will generate an error
      * @return \BackBuilder\ClassContent\AClassContent The current instance
-     * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a 
+     * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
      *                                                                      property does not match an element
      */
     public function unserialize($serialized, $strict = false)

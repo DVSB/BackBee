@@ -330,7 +330,6 @@ class PhpArrayDumper implements DumperInterface
     {
         if (true === ($definition instanceof DefinitionDecorator)) {
             $definition_array['parent'] = $definition->getParent();
-            var_dump($definition_array); die;
         }
     }
 

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -41,7 +41,7 @@ class ClassContent extends AbstractServiceLocal
     /**
      * Return the serialized form of a page
      * @exposed(secured=true)
-     * 
+     *
      */
     public function find($classname, $uid)
     {
@@ -60,13 +60,11 @@ class ClassContent extends AbstractServiceLocal
 
     private function prepareContentData($initial_content, $datas, $accept, $isParentAContentSet = false, $persist = True)
     {
-        //var_dump('prepareContentData');
         $result = array();
         $em = $this->getApplication()->getEntityManager();
 
         if (is_array($datas) && count($datas)) {
             foreach ($datas as $key => $contentInfo) {
-                //var_dump($key);
                 if ($accept && is_array($accept) && count($accept) && !array_key_exists($key, $accept))
                     continue;
 
@@ -285,7 +283,6 @@ class ClassContent extends AbstractServiceLocal
         $contents = array();
         if ($name == "tous") {
             $categoryList = Category::getCategories($this->getApplication()->getClassContentDir());
-            //var_dump($categoryList); die();
             foreach ($categoryList as $cat) {
                 $cat->setBBapp($this->getApplication());
                 foreach ($cat->getContents() as $content)
@@ -427,7 +424,7 @@ class ClassContent extends AbstractServiceLocal
             foreach ($pages as $page) {
                 $pageObject = new \stdClass();
                 $pageObject->title = $page->getTitle();
-                $pageObject->uid = $page->getUid(); 
+                $pageObject->uid = $page->getUid();
                 $results->pages[] = $pageObject;
             }
         }
