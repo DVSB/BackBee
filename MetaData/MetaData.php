@@ -255,9 +255,14 @@ class MetaData implements \IteratorAggregate, \Countable
                                     $content->releaseDraft();
                                 }
 
-                                $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags('' . $content)));
+                                if ($content instanceof \BackBuilder\ClassContent\Element\File) {
+                                    $new_value = $content->path;
+                                } else {
+                                    $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags('' . $content)));
+                                }
+                                
                                 $this->_attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->_attributes[$attribute]);
-
+                                
                                 if (null !== $draft) {
                                     $content->setDraft($draft);
                                 }
