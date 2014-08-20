@@ -119,7 +119,7 @@ class String
         $options = self::_getOptions($options, array(
                     'extension' => '',
                     'spacereplace' => NULL,
-                    'lengthlimit' => 250
+                    'lengthlimit' => 2000
                 ));
 
         $str = trim(preg_replace('/(?:[^\w\-\.~\+% ]+|%(?![A-Fa-f0-9]{2}))/', '', self::toASCII($str, $charset)));
