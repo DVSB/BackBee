@@ -22,12 +22,8 @@
 namespace BackBuilder\Security\Acl;
 
 use Symfony\Component\Security\Core\SecurityContextInterface;
-use Symfony\Component\Security\Acl\Model\AclProviderInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
-
-use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
 use BackBuilder\Security\Acl\Permission\MaskBuilder,
     BackBuilder\Security\Acl\Permission\InvalidPermissionException;
@@ -82,7 +78,6 @@ class AclManager
         
         foreach($acl->getObjectAces() as $index => $ace) {
             if ($ace->getSecurityIdentity()->equals($sid)) {
-                
                 $acl->updateObjectAce($index, $mask, $strategy);
                 break;
             }
@@ -112,7 +107,6 @@ class AclManager
         $found = false;
         foreach($acl->getClassAces() as $index => $ace) {
             if ($ace->getSecurityIdentity()->equals($sid)) {
-                
                 $acl->updateClassAce($index, $mask, $strategy);
                 $found = true;
                 break;
@@ -142,7 +136,6 @@ class AclManager
         
         foreach($acl->getObjectAces() as $index => $ace) {
             if ($ace->getSecurityIdentity()->equals($sid)) {
-                
                 $acl->updateObjectAce($index, $mask, $strategy);
                 break;
             }
@@ -171,7 +164,6 @@ class AclManager
         
         foreach($acl->getClassAces() as $index => $ace) {
             if ($ace->getSecurityIdentity()->equals($sid)) {
-                
                 $acl->updateClassAce($index, $mask, $strategy);
                 $found = true;
                 break;
@@ -180,6 +172,67 @@ class AclManager
         
         if(false === $found) {
             $acl->insertClassAce($sid, $mask, 0, true, $strategy);
+        }
+        
+        $this->securityContext->getACLProvider()->updateAcl($acl);
+    }
+    
+    
+    /**
+     * Deletes a class-scope ACE
+     * 
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $sid
+     * @param int $mask
+     * @param mixed $strategy
+     */
+    public function deleteClassAce(ObjectIdentityInterface $objectIdentity, SecurityIdentityInterface $sid)
+    {
+        $acl = $this->getAcl($objectIdentity);
+        
+        $found = false;
+        
+        foreach($acl->getClassAces() as $index => $ace) {
+            if ($ace->getSecurityIdentity()->equals($sid)) {
+                
+                $acl->deleteClassAce($index);
+                $found = true;
+                break;
+            }
+        }
+        
+        if(false === $found) {
+            throw new \InvalidArgumentException('ACE not found for the supplied combination of ObjectIdentity and SecurityIdentity');
+        }
+        
+        $this->securityContext->getACLProvider()->updateAcl($acl);
+    }
+    
+    /**
+     * Deletes an object-scope ACE
+     * 
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $sid
+     * @param int $mask
+     * @param mixed $strategy
+     */
+    public function deleteObjectAce(ObjectIdentityInterface $objectIdentity, SecurityIdentityInterface $sid)
+    {
+        $acl = $this->getAcl($objectIdentity);
+        
+        $found = false;
+        
+        foreach($acl->getObjectAces() as $index => $ace) {
+            if ($ace->getSecurityIdentity()->equals($sid)) {
+                
+                $acl->deleteObjectAce($index);
+                $found = true;
+                break;
+            }
+        }
+        
+        if(false === $found) {
+            throw new \InvalidArgumentException('ACE not found for the supplied combination of ObjectIdentity and SecurityIdentity');
         }
         
         $this->securityContext->getACLProvider()->updateAcl($acl);
