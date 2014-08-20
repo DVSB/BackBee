@@ -147,7 +147,7 @@ class String
                     'extension' => '',
                     'separators' => '/[.\'’ ]+/',
                     'spacereplace' => '-',
-                    'lengthlimit' => 250
+                    'lengthlimit' => 2000
                 ));
 
         $str = str_replace(array('®', '%', '€', '“', '”', '…'), array('', 'percent', 'euro', '"', '"', '...'), $str);
