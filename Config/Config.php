@@ -355,7 +355,7 @@ class Config implements DumpableServiceInterface
 
                     foreach ($yamlDatas as $component => $config) {
                         if (false === is_array($config)) {
-                            var_dump($config); die;
+                           $this->_container->get('logger')->error('Bad configuration, array expected, given : ' . $config);
                         }
                         $this->setSection($component, $config, $overwrite);
                     }

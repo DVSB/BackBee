@@ -29,7 +29,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Test for BootstrapResolver
+ * Test for PhpArrayDumper
  *
  * @category    BackBuilder
  * @package     BackBuilder\DependencyInjection
@@ -119,30 +119,182 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers ::dump
      * @covers ::dumpContainerDefinitions
-     * @covers ::hydrateDefinitionClass
-     * @covers ::dumpContainerAliases
-     * @covers ::hydrateDefinitionArguments
      * @covers ::convertDefinitionToPhpArray
-     * @covers ::convertArgument
+     * @covers ::hydrateDefinitionClass
+     * @covers ::hydrateDefinitionArguments
      * @covers ::hydrateDefinitionTags
      * @covers ::hydrateDefinitionMethodCalls
+     * @covers ::convertArgument
      */
-    public function testDumpContainerDefinitionsAndAliases()
+    public function testDumpContainerBasicsDefinitions()
     {
-        foreach ($this->raw_services['services'] as $id => $definition) {
-            if (true === array_key_exists('alias', $definition)) {
-                $this->assertTrue(array_key_exists($id, $this->dump['aliases']));
-                $this->assertEquals($this->raw_services['services'][$id]['alias'], $this->dump['aliases'][$id]);
-            } else {
-                $this->assertTrue(array_key_exists($id, $this->dump['services']));
-                $this->assertEquals($this->raw_services['services'][$id], $this->dump['services'][$id]);
-            }
-        }
+        $this->assertTrue(array_key_exists('france.brazil.date', $this->dump['services']));
+        $this->assertTrue(array_key_exists('france.brazil.date', $this->raw_services['services']));
+
+        // Test definition's class
+        $this->assertTrue(array_key_exists('class', $this->dump['services']['france.brazil.date']));
+        $this->assertTrue(array_key_exists('class', $this->raw_services['services']['france.brazil.date']));
+        $this->assertEquals(
+            $this->dump['services']['france.brazil.date']['class'],
+            $this->raw_services['services']['france.brazil.date']['class']
+        );
+
+        // Test definition's arguments
+        $this->assertTrue(array_key_exists('arguments', $this->dump['services']['france.brazil.date']));
+        $this->assertTrue(array_key_exists('arguments', $this->raw_services['services']['france.brazil.date']));
+        $this->assertEquals(
+            $this->dump['services']['france.brazil.date']['arguments'],
+            $this->raw_services['services']['france.brazil.date']['arguments']
+        );
+
+        // Test definition's tags
+        $this->assertTrue(array_key_exists('tags', $this->dump['services']['france.brazil.date']));
+        $this->assertTrue(array_key_exists('tags', $this->raw_services['services']['france.brazil.date']));
+        $this->assertEquals(
+            $this->dump['services']['france.brazil.date']['tags'],
+            $this->raw_services['services']['france.brazil.date']['tags']
+        );
+
+        // Test definition's calls
+        $this->assertTrue(array_key_exists('calls', $this->dump['services']['france.brazil.date']));
+        $this->assertTrue(array_key_exists('calls', $this->raw_services['services']['france.brazil.date']));
+        $this->assertEquals(
+            $this->dump['services']['france.brazil.date']['calls'],
+            $this->raw_services['services']['france.brazil.date']['calls']
+        );
     }
 
     /**
-     * [testDumpableService description]
-     * @return [type] [description]
+     * @covers ::dumpContainerAliases
+     * @covers ::convertDefinitionToPhpArray
+     */
+    public function testDumpContainerAliases()
+    {
+        $this->assertTrue(array_key_exists('alias.test', $this->dump['aliases']));
+        $this->assertTrue(array_key_exists('alias.test', $this->raw_services['services']));
+        $this->assertTrue(array_key_exists('alias', $this->raw_services['services']['alias.test']));
+
+        $this->assertEquals(
+            $this->raw_services['services']['alias.test']['alias'],
+            $this->dump['aliases']['alias.test']
+        );
+    }
+
+    /**
+     * @covers ::hydrateDefinitionScopeProperty
+     * @covers ::convertDefinitionToPhpArray
+     */
+    public function testHydrateDefinitionScopeProperty()
+    {
+        $this->assertEquals(
+            $this->raw_services['services']['service_scope_prototype']['scope'],
+            $this->dump['services']['service_scope_prototype']['scope']
+        );
+
+        // Test that if scope is equals to `container` (the default value), PhpArrayDumper won't dump it
+        $this->assertFalse(array_key_exists('scope', $this->dump['services']['service_scope_container']));
+    }
+
+    /**
+     * @covers ::hydrateDefinitionPublicProperty
+     * @covers ::convertDefinitionToPhpArray
+     */
+    public function testHydrateDefinitionPublicProperty()
+    {
+        $this->assertEquals(
+            $this->raw_services['services']['service_public_false']['public'],
+            $this->dump['services']['service_public_false']['public']
+        );
+
+        // Test that if public is equals to `true` (the default value), PhpArrayDumper won't dump it
+        $this->assertFalse(array_key_exists('public', $this->dump['services']['service_public_true']));
+    }
+
+    /**
+     * @covers ::hydrateDefinitionFileProperty
+     * @covers ::convertDefinitionToPhpArray
+     */
+    public function testHydrateDefinitionFileProperty()
+    {
+        $this->assertEquals(
+            $this->raw_services['services']['service_with_file']['file'],
+            $this->dump['services']['service_with_file']['file']
+        );
+    }
+
+    /**
+     * @covers ::hydrateDefinitionFactoryClass
+     * @covers ::hydrateDefinitionFactoryService
+     * @covers ::hydrateDefinitionFactoryMethod
+     * @covers ::convertDefinitionToPhpArray
+     */
+    public function testContainerDumpFactoryServiceAndClassAndMethod()
+    {
+        // Test factory class
+        $this->assertEquals(
+            $this->raw_services['services']['service_factory_class']['factory_class'],
+            $this->dump['services']['service_factory_class']['factory_class']
+        );
+
+        $this->assertEquals(
+            $this->raw_services['services']['service_factory_class']['factory_method'],
+            $this->dump['services']['service_factory_class']['factory_method']
+        );
+
+        // Test factory service
+        $this->assertEquals(
+            $this->raw_services['services']['service_factory_service']['factory_service'],
+            $this->dump['services']['service_factory_service']['factory_service']
+        );
+
+        $this->assertEquals(
+            $this->raw_services['services']['service_factory_service']['factory_method'],
+            $this->dump['services']['service_factory_service']['factory_method']
+        );
+    }
+
+    /**
+     * @covers ::hydrateDefinitionAbstractProperty
+     * @covers ::hydrateDefinitionParent
+     * @covers ::convertDefinitionToPhpArray
+     */
+    public function testContainerDumpParentAndChildService()
+    {
+        // Test parent service
+        $this->assertTrue($this->dump['services']['datetime_manager']['abstract']);
+        $this->assertEquals(
+            $this->raw_services['services']['datetime_manager']['abstract'],
+            $this->dump['services']['datetime_manager']['abstract']
+        );
+
+        // Test child service
+        $this->assertTrue(array_key_exists('parent', $this->dump['services']['datetime_with_parent']));
+        // Test that if abstract is equals to `false` (the default value), PhpArrayDumper won't dump it
+        $this->assertFalse(array_key_exists('abstract', $this->dump['services']['datetime_with_parent']));
+
+        $this->assertEquals(
+            $this->raw_services['services']['datetime_with_parent']['parent'],
+            $this->dump['services']['datetime_with_parent']['parent']
+        );
+    }
+
+    /**
+     * @covers ::hydrateDefinitionConfigurator
+     * @covers ::convertDefinitionToPhpArray
+     */
+    public function testhydrateDefinitionConfigurator()
+    {
+        $this->assertTrue(array_key_exists('service.use.configurator', $this->dump['services']));
+        $this->assertTrue(array_key_exists('service.use.configurator', $this->raw_services['services']));
+
+        $this->assertEquals(
+            $this->raw_services['services']['service.use.configurator']['configurator'],
+            $this->dump['services']['service.use.configurator']['configurator']
+        );
+    }
+
+    /**
+     * @covers ::dumpDumpableServices
      */
     public function testDumpableService()
     {
@@ -203,8 +355,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * [testNotDumpableService description]
-     * @return [type] [description]
+     * @covers ::dumpDumpableServices
      */
     public function testNotDumpableService()
     {

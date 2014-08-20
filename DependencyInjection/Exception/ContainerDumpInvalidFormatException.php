@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection;
+namespace BackBuilder\DependencyInjection\Exception;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,36 +20,22 @@ namespace BackBuilder\DependencyInjection;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\TaggedContainerInterface;
-
 /**
  * @category    BackBuilder
  * @package     BackBuilder\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-interface ContainerInterface extends TaggedContainerInterface
+class ContainerDumpInvalidFormatException extends \BackBuilder\Exception\BBException
 {
-    const DUMPABLE_SERVICE_TAG = 'dumpable';
-
     /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::setDefinition
+     * ContainerDumpInvalidFormatException's constructor
+     *
+     * @param string $filepath the path to container dump file
+     * @param string $type     the invalid type
      */
-    public function setDefinition($id, Definition $definition);
-
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::getDefinition
-     */
-    public function getDefinition($id);
-
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::hasDefinition
-     */
-    public function hasDefinition($id);
-
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::getDefinitions
-     */
-    public function getDefinitions();
+    public function __construct($filepath, $type)
+    {
+        parent::__construct("Content getted from $filepath is not a valid format: $type (array expected).");
+    }
 }

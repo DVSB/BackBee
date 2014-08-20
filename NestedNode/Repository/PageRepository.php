@@ -305,11 +305,11 @@ class PageRepository extends NestedNodeRepository
      * @param type $order                           optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
      * @param type $paginate                        optional, if TRUE return a paginator rather than an array (false by default)
      * @param type $firstresult                     optional, if paginated set the first result index (0 by default)
-     * @param type $maxresult                       optional, if paginated set the maxmum number of results (25 by default)
+     * @param type $maxresults                      optional, if paginated set the maxmum number of results (25 by default)
      * @param type $having_child                    optional, limit to descendants having child (false by default)
      * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
      */
-    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, array $order = array('_leftnode' => 'asc'), $paginate = false, $firstresult = 0, $maxresult = 25, $having_child = false)
+    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, array $order = array('_leftnode' => 'asc'), $paginate = false, $firstresult = 0, $maxresults = 25, $having_child = false)
     {
         // @Todo: search for calls with wrong ordering criteria format and solve them
         if (true === array_key_exists('field', $order)) {
@@ -322,7 +322,7 @@ class PageRepository extends NestedNodeRepository
                 ->orderByMultiple($order);
 
         if (null !== $depth) {
-            $q->andLevelIsLowerThan($page->getLevel() + $depth, true);
+            $q->andLevelIsLowerThan($page->getLevel() + $depth);
         }
 
         if (true === $having_child) {
@@ -333,8 +333,9 @@ class PageRepository extends NestedNodeRepository
             return $q->getQuery()->getResult();
         }
 
+        //@Todo: allow use of $firstresult or $maxresults without paginator
         $q->setFirstResult($firstresult)
-                ->setMaxResults($maxresult);
+                ->setMaxResults($maxresults);
 
         return new Paginator($q);
     }
@@ -355,7 +356,7 @@ class PageRepository extends NestedNodeRepository
         if (0 < count($restrictedStates)) {
             $q->andStateIsIn($restrictedStates);
         }
-        
+
         return $q->getQuery()->getOneOrNullResult();
     }
 
@@ -368,7 +369,7 @@ class PageRepository extends NestedNodeRepository
      */
     public function getOnlineChildren(Page $page, $maxResults = null, array $order = array('_leftnode', 'asc'))
     {
-        $order = array_merge(array('_leftnode', 'asc'), $order);
+        $order = array_replace(array('_leftnode', 'asc'), $order);
 
         $q = $this->createQueryBuilder('p')
                 ->andParentIs($page)
@@ -382,130 +383,124 @@ class PageRepository extends NestedNodeRepository
         return $q->getQuery()->getResult();
     }
 
+    /**
+     * Returns an array of children of $page
+     * @param \BackBuilder\NestedNode\Page $page    the parent page
+     * @param string $order_sort                    optional, the sort field, title by default
+     * @param string $order_dir                     optional, the sort direction, asc by default
+     * @param string $paging                        optional, the paging criteria: array('start' => xx, 'limit' => xx), empty by default
+     * @param array $restrictedStates               optional, limit to pages having provided states, empty by default
+     * @param array $options                        optional, the search criteria: array('beforePubdateField' => timestamp against page._modified,
+     *                                                                                   'afterPubdateField' => timestamp against page._modified,
+     *                                                                                   'searchField' => string to search for title
+     * @return array|\Doctrine\ORM\Tools\Pagination\Paginator     Returns Paginaor is paging criteria provided, array otherwise
+     */
     public function getChildren(Page $page, $order_sort = '_title', $order_dir = 'asc', $paging = array(), $restrictedStates = array(), $options = array())
     {
         $q = $this->createQueryBuilder('p')
                 ->andParentIs($page)
+                ->andSearchCriteria($restrictedStates, $options)
                 ->orderBy('p.' . $order_sort, $order_dir);
 
-        if (true === is_array($restrictedStates) && 0 < count($restrictedStates)) {
-            $q->andStateIsIn($restrictedStates);
+        if (
+                true === is_array($paging) &&
+                true === array_key_exists("start", $paging) &&
+                true === array_key_exists("limit", $paging)
+        ) {
+            $q->setFirstResult($paging["start"])
+                    ->setMaxResults($paging["limit"]);
+
+            return new Paginator($q);
         }
-        
-//        $result = null;
-//        $q = $this->createQueryBuilder('p')
-//                ->andWhere('p._parent = :page')
-//                ->orderBy('p.' . $order_sort, $order_dir)
-//                ->setParameters(array(
-//            'page' => $page
-//        ));
-//        $restrictedStates = (array) $restrictedStates;
-//        if (!in_array('all', $restrictedStates) && 0 < count($restrictedStates)) {
-//            $q = $q->andWhere('p._state IN (:states)')
-//                    ->setParameter('states', implode(',', $restrictedStates));
-//        }
-        if (array_key_exists('beforePubdateField', $options)) {
-            $q->andWhere('p._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $options['beforePubdateField']));
-        }
-        if (array_key_exists('afterPubdateField', $options)) {
-            $q->andWhere('p._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $options['afterPubdateField']));
-        }
-        if (array_key_exists('searchField', $options)) {
-            $q->andWhere($q->expr()->like('p._title', $q->expr()->literal('%' . $options['searchField'] . '%')));
-        }
-        if (is_array($paging)) {
-            if (array_key_exists("start", $paging) && array_key_exists("limit", $paging)) {
-                $q->setFirstResult($paging["start"])
-                        ->setMaxResults($paging["limit"]);
-                $result = new \Doctrine\ORM\Tools\Pagination\Paginator($q);
-            }
-        } else {
-            $result = $q->getQuery()->getResult();
-        }
-        return $result;
+
+        return $q->getQuery()->getResult();
     }
 
+    /**
+     * Returns count of children of $page
+     * @param \BackBuilder\NestedNode\Page $page    the parent page
+     * @param array $restrictedStates               optional, limit to pages having provided states, empty by default
+     * @param array $options                        optional, the search criteria: array('beforePubdateField' => timestamp against page._modified,
+     *                                                                                   'afterPubdateField' => timestamp against page._modified,
+     *                                                                                   'searchField' => string to search for title
+     * @return int                                  the children count
+     */
     public function countChildren(Page $page, $restrictedStates = array(), $options = array())
     {
-        $q = $this->createQueryBuilder("p")
-                ->select("COUNT(p)")
-                ->andWhere("p._parent = :page")
-                ->setParameters(array('page' => $page));
-        $restrictedStates = (array) $restrictedStates;
-        if (!in_array('all', $restrictedStates) && 0 < count($restrictedStates)) {
-            $q = $q->andWhere('p._state IN (:states)')
-                    ->setParameter('states', implode(',', $restrictedStates));
-        }
-        if (array_key_exists('beforePubdateField', $options)) {
-            $q->andWhere('p._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $options['beforePubdateField']));
-        }
-        if (array_key_exists('afterPubdateField', $options)) {
-            $q->andWhere('p._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $options['afterPubdateField']));
-        }
-        if (array_key_exists('searchField', $options)) {
-            $q->andWhere($q->expr()->like('p._title', $q->expr()->literal('%' . $options['searchField'] . '%')));
-        }
-        return $q->getQuery()->getSingleScalarResult();
+        return $this->createQueryBuilder('p')
+                        ->select("COUNT(p)")
+                        ->andParentIs($page)
+                        ->andSearchCriteria($restrictedStates, $options)
+                        ->getQuery()
+                        ->getSingleScalarResult();
     }
 
+    /**
+     * Set state of $page and is descendant to STATE_DELETED
+     * @param \BackBuilder\NestedNode\Page $page    the page to delete
+     * @return integer                              the number of page having their state changed
+     */
     public function toTrash(Page $page)
     {
-        $q = $this->createQueryBuilder('p')
-                ->update()
-                ->set('p._state', Page::STATE_DELETED)
-                ->andIsDescendantOf($page);
-//                ->andWhere('p._root = :root')
-//                ->andWhere('p._leftnode >= :leftnode')
-//                ->andWhere('p._rightnode <= :rightnode')
-//                ->setParameters(array(
-//            'root' => $page->getRoot(),
-//            'leftnode' => $page->getLeftnode(),
-//            'rightnode' => $page->getRightnode()
-//        ));
-        return $q->getQuery()->execute();
+        return $this->createQueryBuilder('p')
+                        ->update()
+                        ->set('p._state', Page::STATE_DELETED)
+                        ->andIsDescendantOf($page)
+                        ->getQuery()
+                        ->execute();
     }
 
+    /**
+     * Returns an array of pages having title like $wordSearch
+     * @param string $wordsSearch   the string to test against title page
+     * @param array $limit          optional, the query limit restriction, array(0, 10) by default
+     * @return array|null
+     */
     public function likeAPage($wordsSearch = "", array $limit = array(0, 10))
     {
-        if ("" === $wordsSearch)
-            return null;
-        $q = $this->createQueryBuilder('p');
-        $q->andWhere($q->expr()->like('p._title', $q->expr()->literal('%' . $wordsSearch . '%')));
-        $q->setFirstResult($limit[0])->setMaxResults($limit[1]);
-        try {
-            $result = $q->getQuery()->getResult();
-            return $result;
-        } catch (\Doctrine\ORM\NoResultException $e) {
-            return null;
-        } catch (Exception $e) {
+        $limit = array_replace(array(0, 10), $limit);
+        
+        if ("" === $wordsSearch) {
             return null;
         }
+        
+        return $this->createQueryBuilder('p')
+                ->andTitleIsLike($wordsSearch)
+                ->setFirstResult($limit[0])
+                ->setMaxResults($limit[1])
+                ->getQuery()
+                ->getResult();
     }
 
     /**
      * Copy a page to a new one
-     * @param \BackBuilder\NestedNode\Page $page
-     * @param string $title Optional, the title of the copy, by default the title of the page
-     * @param \BackBuilder\NestedNode\Page $parent Optional, the parent of the copy, by default the parent of the page
-     * @return \BackBuilder\NestedNode\Page The copy of the page
-     * @throws \BackBuilder\Exception\BBException Occure if the page is deleted
+     * @param \BackBuilder\NestedNode\Page $page                 the page to copy
+     * @param string $title                                      optional, the title of the copy, by default the title of the page
+     * @param \BackBuilder\NestedNode\Page $parent               optional, the parent of the copy, by default the parent of the page
+     * @return \BackBuilder\NestedNode\Page                      the copy of the page
+     * @throws \BackBuilder\Exception\InvalidArgumentException   occures if the page is deleted
      */
     private function _copy(Page $page, $title = null, Page $parent = null)
     {
         if (Page::STATE_DELETED & $page->getState()) {
-            throw new \BackBuilder\Exception\BBException('Cannot duplicate a deleted page');
+            throw new InvalidArgumentException('Cannot duplicate a deleted page');
         }
-        // Setting default values if not provided
-        $title = (null === $title) ? $page->getTitle() : $title;
-        $parent = (null === $parent) ? $page->getParent() : $parent;
+
         // Cloning the page
         $new_page = clone $page;
-        $new_page->setTitle($title)
-                ->setLayout($page->getLayout());
-        // Setting the clone as first child of the parent
-        if (null !== $parent) {
+        $new_page->setTitle(null === $title ? $page->getTitle() : $title);
+
+        // Setting the layout if exists
+        if (null !== $page->getLayout()) {
+            $new_page->setLayout($page->getLayout());
+        }
+
+        // Setting the clone as first child of the parent if exists
+        if (null !== $parent || null !== $page->getParent()) {
+            $parent = (null === $parent) ? $page->getParent() : $parent;
             $new_page = $this->insertNodeAsFirstChildOf($new_page, $parent);
         }
+
         // Persisting entities
         $this->_em->persist($new_page);
         $this->_em->flush();
@@ -514,7 +509,42 @@ class PageRepository extends NestedNodeRepository
     }
 
     /**
-     * Replace subcontent of ContentSet by their clone if exist
+     * Copy recursively a page to a new one
+     * @param \BackBuilder\NestedNode\Page $page                 the page to copy
+     * @param string $title                                      optional, the title of the copy, by default the title of the page
+     * @param \BackBuilder\NestedNode\Page $parent               optional, the parent of the copy, by default the parent of the page
+     * @return \BackBuilder\NestedNode\Page                      the copy of the page
+     * @throws \BackBuilder\Exception\InvalidArgumentException   occures if the page is deleted or if the page is recursively duplicated in itself
+     */
+    private function _copy_recursively(Page $page, $title = null, Page $parent = null)
+    {
+        if (null !== $parent && true === $parent->isDescendantOf($page)) {
+            throw new InvalidArgumentException('Cannot recursively duplicate a page in itself');
+        }
+
+        // Cloning the page
+        $new_page = $this->_copy($page, $title, $parent);
+
+        // Storing current children before clonage
+        $children = array();
+        if (false === $page->isLeaf()) {
+            $children = $this->getDescendants($page, 1);
+        }
+        foreach (array_reverse($children) as $child) {
+            if (!(Page::STATE_DELETED & $child->getState())) {
+                $this->_em->refresh($new_page);
+                $new_child = $this->duplicate($child, null, $new_page, true, null);
+                $new_page->getChildren()->add($new_child);
+                $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
+            }
+        }
+        $this->_em->flush();
+
+        return $new_page;
+    }
+
+    /**
+     * Replace subcontents of ContentSet by their clones if exist
      * @param \BackBuilder\ClassContent\AClassContent $content
      * @param \BackBuilder\Security\Token\BBUserToken $token
      * @param array $cloning_datas
@@ -522,24 +552,43 @@ class PageRepository extends NestedNodeRepository
      */
     private function _updateRelatedPostCloning(AClassContent $content, BBUserToken $token, array $cloning_datas)
     {
-        if (($content instanceof ContentSet) && true === array_key_exists('pages', $cloning_datas) && true === array_key_exists('contents', $cloning_datas) && 0 < count($cloning_datas['pages']) && 0 < count($cloning_datas['contents'])) {
-            // reading copied elements
-            $copied_pages = array_keys($cloning_datas['pages']);
-            $copied_contents = array_keys($cloning_datas['contents']);
-            // Updating subcontent if needed
-            foreach ($content as $subcontent) {
-                if (false === $this->_em->contains($subcontent)) {
-                    $subcontent = $this->_em->find(get_class($subcontent), $subcontent->getUid());
-                }
-                if (null !== $subcontent->getMainNode() && true === in_array($subcontent->getMainNode()->getUid(), $copied_pages) && true === in_array($subcontent->getUid(), $copied_contents)) {
-                    // Loading draft for content
-                    if (NULL !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
-                        $content->setDraft($draft);
-                    }
-                    $content->replaceChildBy($subcontent, $cloning_datas['contents'][$subcontent->getUid()]);
-                }
-            }
+        if (
+                false === ($content instanceof ContentSet) ||
+                false === array_key_exists('pages', $cloning_datas) ||
+                false === array_key_exists('contents', $cloning_datas) ||
+                0 === count($cloning_datas['pages']) ||
+                0 === count($cloning_datas['contents'])
+        ) {
+            // Nothing to do
+            return $this;
         }
+
+        // Reading copied elements
+        $copied_pages = array_keys($cloning_datas['pages']);
+        $copied_contents = array_keys($cloning_datas['contents']);
+
+        // Updating subcontent if needed
+        foreach ($content as $subcontent) {
+            if (false === $this->_em->contains($subcontent)) {
+                $subcontent = $this->_em->find(get_class($subcontent), $subcontent->getUid());
+            }
+
+            if (
+                    null === $subcontent->getMainNode() ||
+                    false === in_array($subcontent->getMainNode()->getUid(), $copied_pages) ||
+                    false === in_array($subcontent->getUid(), $copied_contents)
+            ) {
+                continue;
+            }
+
+            // Loading draft for content
+            if (null !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
+                $content->setDraft($draft);
+            }
+
+            $content->replaceChildBy($subcontent, $cloning_datas['contents'][$subcontent->getUid()]);
+        }
+
         return $this;
     }
 
@@ -553,51 +602,33 @@ class PageRepository extends NestedNodeRepository
     private function _updateMainNodePostCloning(AClassContent $content, BBUserToken $token, array $cloning_pages)
     {
         $mainnode = $content->getMainNode();
-        if (null !== $mainnode && 0 < count($cloning_pages) && true === in_array($mainnode->getUid(), array_keys($cloning_pages))) {
+        if (null !== $mainnode && true === in_array($mainnode->getUid(), array_keys($cloning_pages))) {
 
             // Loading draft for content
             if (NULL !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
                 $content->setDraft($draft);
             }
+
             $content->setMainNode($cloning_pages[$mainnode->getUid()]);
         }
+
         return $this;
     }
 
     /**
      * Duplicate a page and optionnaly its descendants
-     * @param \BackBuilder\NestedNode\Page $page The page to duplicate
-     * @param string $title Optional, the title of the copy, by default the title of the page
-     * @param \BackBuilder\NestedNode\Page $parent Optional, the parent of the copy, by default the parent of the page
-     * @param boolean $recursive If true duplicate recursively the descendants of the page
-     * @param \BackBuilder\Security\Token\BBUserToken The BBuser token to allow te updte of revisions
-     * @return \BackBuilder\NestedNode\Page The copy of the page
-     * @throws \BackBuilder\Exception\BBException Occure if the page is recursively duplicated in itself
+     * @param \BackBuilder\NestedNode\Page $page                the page to duplicate
+     * @param string $title                                     optional, the title of the copy, by default the title of the copied page
+     * @param \BackBuilder\NestedNode\Page $parent              optional, the parent of the copy, by default the parent of the copied page
+     * @param boolean $recursive                                if true (default) duplicate recursively the descendants of the page
+     * @param \BackBuilder\Security\Token\BBUserToken           the BBuser token to allow the update of revisions
+     * @return \BackBuilder\NestedNode\Page                     the copy of the page
+     * @throws \BackBuilder\Exception\InvalidArgumentException  occures if the page is deleted or if the page is recursively duplicated in itself
      */
     public function duplicate(Page $page, $title = null, Page $parent = null, $recursive = true, BBUserToken $token = null)
     {
-        if (true === $recursive && true === $parent->isDescendantOf($page)) {
-            throw new \BackBuilder\Exception\BBException('Cannot recursively duplicate a page in itself');
-        }
-        // Storing current children before clonage
-        $children = array();
-        if (false === $page->isLeaf()) {
-            $children = $this->getDescendants($page, 1);
-        }
-        // Cloning the page
-        $new_page = $this->_copy($page, $title, $parent);
-        // Cloning children if needed
-        if (true === $recursive) {
-            foreach (array_reverse($children) as $child) {
-                if (!(Page::STATE_DELETED & $child->getState())) {
-                    $this->_em->refresh($new_page);
-                    $new_child = $this->duplicate($child, null, $new_page, $recursive, null);
-                    $new_page->getChildren()->add($new_child);
-                    $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
-                }
-            }
-            $this->_em->flush();
-        }
+        $new_page = (true === $recursive) ? $this->_copy_recursively($page, $title, $parent) : $this->_copy($page, $title, $parent);
+
         // Finally updating contentset and mainnode
         if (null !== $token) {
             foreach ($new_page->cloning_datas['contents'] as $content) {
@@ -606,9 +637,16 @@ class PageRepository extends NestedNodeRepository
             }
             $this->_em->flush();
         }
+
         return $new_page;
     }
 
+    /**
+     * Removes page with no contentset for $site
+     * @param \BackBuilder\Site\Site $site
+     * @codeCoverageIgnore
+     * @Todo: what if the deleted page has chldren ?
+     */
     public function removeEmptyPages(Site $site)
     {
         $q = $this->createQueryBuilder('p')
@@ -621,4 +659,5 @@ class PageRepository extends NestedNodeRepository
             $this->delete($page);
         }
     }
+
 }

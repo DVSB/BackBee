@@ -68,6 +68,8 @@ class ContainerListener
                         'do_compile' => true
                     ))
                 );
+            } elseif (false === $container->isCompiled()) {
+                $container->compile();
             }
         } else {
             $container->compile();

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -182,6 +182,22 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
                     $this->push($value);
                 }
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @inherited
+     */
+    protected function _defineParam($var, $type = 'scalar', $options = null)
+    {
+        if ('accept' === $var) {
+            if (true === is_array($options) && true === array_key_exists('default', $options)) {
+                return $this->_addAcceptedType($options['default']);
+            }
+        } else {
+            parent::_defineParam($var, $type, $options);
         }
 
         return $this;
@@ -527,7 +543,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * @param string $serialized
      * @param Boolean $strict If TRUE, all missing or additionnal element will generate an error
      * @return \BackBuilder\ClassContent\AClassContent The current instance
-     * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a 
+     * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
      *                                                                      property does not match an element
      */
     public function unserialize($serialized, $strict = false)

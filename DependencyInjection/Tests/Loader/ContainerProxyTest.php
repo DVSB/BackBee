@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection;
+namespace BackBuilder\DependencyInjection\Tests\Loader;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,36 +20,20 @@ namespace BackBuilder\DependencyInjection;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\TaggedContainerInterface;
-
 /**
+ * Test for ContainerProxy
+ *
  * @category    BackBuilder
  * @package     BackBuilder\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
+ *
+ * @coversDefaultClass \BackBuilder\DependencyInjection\Loader\ContainerProxy
  */
-interface ContainerInterface extends TaggedContainerInterface
+class ContainerProxyTest extends \PHPUnit_Framework_TestCase
 {
-    const DUMPABLE_SERVICE_TAG = 'dumpable';
+    public function test()
+    {
 
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::setDefinition
-     */
-    public function setDefinition($id, Definition $definition);
-
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::getDefinition
-     */
-    public function getDefinition($id);
-
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::hasDefinition
-     */
-    public function hasDefinition($id);
-
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::getDefinitions
-     */
-    public function getDefinitions();
+    }
 }

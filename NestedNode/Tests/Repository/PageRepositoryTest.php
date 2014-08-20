@@ -54,6 +54,8 @@ class PageRepositoryTest extends TestCase
      */
     private $repo;
 
+    private $dbinit = false;
+    
     /**
      * @covers \BackBuilder\NestedNode\Repository\PageRepository::createQueryBuilder
      */
@@ -317,21 +319,271 @@ class PageRepositoryTest extends TestCase
         $child1 = $this->repo->find('child1');
         $child2 = $this->repo->find('child2');
         $child3 = $this->repo->find('child3');
-        
+
         $this->assertEquals(array($child3, $child2, $child1), $this->repo->getNotDeletedDescendants($this->root));
-        $this->assertEquals(array(), $this->repo->getNotDeletedDescendants($this->root), 0);
+        $this->assertEquals(array(), $this->repo->getNotDeletedDescendants($this->root, 0));
+        $this->assertEquals(array($this->root, $child3, $child2, $child1), $this->repo->getNotDeletedDescendants($this->root, null, true));
+        $this->assertEquals(array($child1, $child2, $child3), $this->repo->getNotDeletedDescendants($this->root, null, false, array('field' => '_title')));
+        $this->assertEquals(array($child3, $child2, $child1), $this->repo->getNotDeletedDescendants($this->root, null, false, array('field' => '_title', 'sort' => 'desc')));
+        $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $this->repo->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true));
+        $this->assertEquals(3, $this->repo->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true)->count());
+        $this->assertEquals(2, $this->repo->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true, 1)->getIterator()->count());
+        $this->assertEquals(1, $this->repo->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true, 1, 1)->getIterator()->count());
+        $this->assertEquals(array($this->root), $this->repo->getNotDeletedDescendants($this->root, null, true, array('_leftnode' => 'asc'), false, 0, 25, true));
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getRoot
+     */
+    public function testGetRoot()
+    {
+        $this->assertEquals($this->root, $this->repo->getRoot($this->root->getSite()));
+        $this->assertEquals($this->root, $this->repo->getRoot($this->root->getSite(), array(Page::STATE_HIDDEN)));
+        $this->assertNull($this->repo->getRoot($this->root->getSite(), array(Page::STATE_ONLINE)));
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOnlineChildren
+     */
+    public function testGetOnlineChildren()
+    {
+
+        $this->assertEquals(array(), $this->repo->getOnlineChildren($this->root));
+
+        $child1 = $this->repo->find('child1');
+        $child3 = $this->repo->find('child3');
+        $child1->setState(Page::STATE_ONLINE);
+        $child3->setState(Page::STATE_ONLINE);
+        $this->application->getEntityManager()->flush();
+
+        $this->assertEquals(array($child3, $child1), $this->repo->getOnlineChildren($this->root));
+        $this->assertEquals(array($child3), $this->repo->getOnlineChildren($this->root, 1));
+        $this->assertEquals(array($child1, $child3), $this->repo->getOnlineChildren($this->root, null, array('_title')));
+        $this->assertEquals(array($child3, $child1), $this->repo->getOnlineChildren($this->root, null, array('_title', 'desc')));
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getChildren
+     */
+    public function testGetChildren()
+    {
+        $child1 = $this->repo->find('child1');
+        $child2 = $this->repo->find('child2');
+        $child3 = $this->repo->find('child3');
+
+        $this->assertEquals(array($child1, $child2, $child3), $this->repo->getChildren($this->root));
+        $this->assertEquals(array($child3, $child2, $child1), $this->repo->getChildren($this->root, '_leftnode'));
+        $this->assertEquals(array($child3, $child2, $child1), $this->repo->getChildren($this->root, '_title', 'desc'));
+        $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $this->repo->getChildren($this->root, '_title', 'desc', array('start' => 0, 'limit' => 2)));
+        $this->assertEquals(3, $this->repo->getChildren($this->root, '_title', 'desc', array('start' => 0, 'limit' => 2))->count());
+        $this->assertEquals(1, $this->repo->getChildren($this->root, '_title', 'desc', array('start' => 1, 'limit' => 1))->getIterator()->count());
+
+        $child1->setState(Page::STATE_ONLINE);
+        $child3->setState(Page::STATE_ONLINE);
+        $this->application->getEntityManager()->flush();
+
+        $this->assertEquals(array($child1, $child3), $this->repo->getChildren($this->root, '_title', 'asc', array(), array(Page::STATE_ONLINE)));
+
+        $tomorrow = new \DateTime('tomorrow');
+        $yesterday = new \DateTime('yesterday');
+
+        $this->assertEquals(array($child1, $child2, $child3), $this->repo->getChildren($this->root, '_title', 'asc', array(), array(), array('beforePubdateField' => $tomorrow->getTimestamp())));
+        $this->assertEquals(array(), $this->repo->getChildren($this->root, '_title', 'asc', array(), array(), array('beforePubdateField' => $yesterday->getTimestamp())));
+        $this->assertEquals(array(), $this->repo->getChildren($this->root, '_title', 'asc', array(), array(), array('afterPubdateField' => $tomorrow->getTimestamp())));
+        $this->assertEquals(array($child1, $child2, $child3), $this->repo->getChildren($this->root, '_title', 'asc', array(), array(), array('afterPubdateField' => $yesterday->getTimestamp())));
+        $this->assertEquals(array($child1, $child2, $child3), $this->repo->getChildren($this->root, '_title', 'asc', array(), array(), array('searchField' => 'child')));
+        $this->assertEquals(array($child1), $this->repo->getChildren($this->root, '_title', 'asc', array(), array(), array('searchField' => '1')));
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::countChildren
+     */
+    public function testCountChildren()
+    {
+        $child1 = $this->repo->find('child1');
+        $child3 = $this->repo->find('child3');
+
+        $this->assertEquals(3, $this->repo->countChildren($this->root));
+
+        $child1->setState(Page::STATE_ONLINE);
+        $child3->setState(Page::STATE_ONLINE);
+        $this->application->getEntityManager()->flush();
+
+        $this->assertEquals(2, $this->repo->countChildren($this->root, array(Page::STATE_ONLINE)));
+
+        $tomorrow = new \DateTime('tomorrow');
+        $yesterday = new \DateTime('yesterday');
+
+        $this->assertEquals(3, $this->repo->countChildren($this->root, array(), array('beforePubdateField' => $tomorrow->getTimestamp())));
+        $this->assertEquals(0, $this->repo->countChildren($this->root, array(), array('beforePubdateField' => $yesterday->getTimestamp())));
+        $this->assertEquals(0, $this->repo->countChildren($this->root, array(), array('afterPubdateField' => $tomorrow->getTimestamp())));
+        $this->assertEquals(3, $this->repo->countChildren($this->root, array(), array('afterPubdateField' => $yesterday->getTimestamp())));
+        $this->assertEquals(3, $this->repo->countChildren($this->root, array(), array('searchField' => 'child')));
+        $this->assertEquals(1, $this->repo->countChildren($this->root, array(), array('searchField' => '1')));
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::toTrash
+     */
+    public function testToTrash()
+    {
+
+        $this->assertEquals(4, $this->repo->toTrash($this->root));
+
+        $child1 = $this->repo->find('child1');
+        $child2 = $this->repo->find('child2');
+        $child3 = $this->repo->find('child3');
+
+        $this->application->getEntityManager()->refresh($this->root);
+        $this->application->getEntityManager()->refresh($child1);
+        $this->application->getEntityManager()->refresh($child2);
+        $this->application->getEntityManager()->refresh($child3);
+
+        $this->assertEquals(Page::STATE_DELETED, $this->root->getState());
+        $this->assertEquals(Page::STATE_DELETED, $child1->getState());
+        $this->assertEquals(Page::STATE_DELETED, $child2->getState());
+        $this->assertEquals(Page::STATE_DELETED, $child3->getState());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::likeAPage
+     */
+    public function testLikeAPage()
+    {
+        $this->assertNull($this->repo->likeAPage());
+
+        $child1 = $this->repo->find('child1');
+        $child2 = $this->repo->find('child2');
+        $child3 = $this->repo->find('child3');
+
+        $this->assertEquals(array($child1, $child2, $child3), $this->repo->likeAPage('child'));
+        $this->assertEquals(array($child1, $child2, $child3), $this->repo->likeAPage('child', array()));
+        $this->assertEquals(array($child2, $child3), $this->repo->likeAPage('child', array(1, 2)));
+        $this->assertEquals(array($child2, $child3), $this->repo->likeAPage('child', array(1)));
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::duplicate
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::_copy
+     */
+    public function testDuplicate()
+    {
+        // Duplicate a root not recursively to new a one
+        $root2 = $this->repo->duplicate($this->root, null, null, false);
+        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $root2);
+        $this->assertNull($root2->getParent());
+        $this->assertTrue($root2->isLeaf());
+
+        // Duplicate a root not recursively to one of its descendant
+        $child1 = $this->repo->find('child1');
+        $child4 = $this->repo->duplicate($this->root, null, $child1, false);
+        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $child4);
+        $this->assertEquals('root', $child4->getTitle());
+        $this->assertEquals($child1, $child4->getParent());
+        $this->assertTrue($root2->isLeaf());
+
+        // Duplicate a page with a new title and a new parent
+        $child5 = $this->repo->duplicate($child1, 'child5', $root2);
+        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $child5);
+        $this->assertEquals('child5', $child5->getTitle());
+        $this->assertEquals($root2, $child5->getParent());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::duplicate
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::_copy_recursively
+     */
+    public function testDuplicateRecursively()
+    {
+        // Recursively duplicate a root to a new one
+        $root2 = $this->repo->duplicate($this->root);
+        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $root2);
+        $this->assertEquals('root', $root2->getTitle());
+        $this->assertEquals($this->root->getLayout(), $root2->getLayout());
+        $this->assertNull($root2->getParent());
+
+        $descendants = $this->repo->getDescendants($this->root);
+        $new_descendants = $this->repo->getDescendants($root2);
+        $this->assertEquals(count($descendants), count($new_descendants));
+
+        for ($i = 0; $i < count($descendants); $i++) {
+            $this->assertEquals($descendants[$i]->getTitle(), $new_descendants[$i]->getTitle());
+        }
+
+        // Duplicate a page with a new title and a new parent
+        $child1 = $this->repo->find('child1');
+        $child5 = $this->repo->duplicate($child1, 'child5', $root2);
+        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $child5);
+        $this->assertEquals('child5', $child5->getTitle());
+        $this->assertEquals($root2, $child5->getParent());
+
+        // Duplicate children except deleted ones
+        $child5->setState(Page::STATE_DELETED);
+        $root3 = $this->repo->duplicate($root2);
+        $this->assertEquals(count($this->repo->getDescendants($root2)) - 1, count($this->repo->getDescendants($root3)));
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::duplicate
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::_updateRelatedPostCloning
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::_updateMainNodePostCloning
+     */
+    public function testDuplicateWithToken()
+    {
+        $token = new \BackBuilder\Security\Token\BBUserToken();
+        $token->setUser(new \BackBuilder\Security\User('user'));
+
+        $root2 = $this->repo->duplicate($this->root, null, null, true, $token);
+        $descendants = $this->repo->getDescendants($root2);
+        $expected_datas = array(
+            'pages' => array(
+                'root' => $root2,
+                'child1' => $descendants[2],
+                'child2' => $descendants[1],
+                'child3' => $descendants[0]
+            ),
+            'contents' => array(
+                $this->root->getContentSet()->getUid() => $root2->getContentSet(),
+                $this->root->getContentSet()->first()->getUid() => $root2->getContentSet()->first(),
+                $this->root->getContentSet()->first()->last()->getUid() => $root2->getContentSet()->first()->last()
+            )
+        );
+
+        $this->assertEquals($expected_datas, $root2->cloning_datas);
+        $this->assertEquals($this->root, $this->root->getContentSet()->first()->last()->getMainNode());
+        $this->assertEquals($root2, $root2->getContentSet()->first()->last()->getMainNode());
+        $this->assertInstanceOf('BackBuilder\ClassContent\Revision', $root2->getContentSet()->first()->last()->getDraft());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::_copy
+     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     */
+    public function testDuplicatePageIn0neOfItsDescendants()
+    {
+        $child1 = $this->repo->find('child1');
+        $this->repo->duplicate($this->root, null, $child1);
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageRepository::duplicate
+     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     */
+    public function testDuplicateDeletedPage()
+    {
+        $this->root->setState(Page::STATE_HIDDEN + Page::STATE_DELETED);
+        $this->repo->duplicate($this->root);
     }
 
     /**
      * Sets up the fixture
      */
-    public function setUp()
+    protected function setUp()
     {
+
         $this->initAutoload();
         $this->application = $this->getBBApp();
         $this->initDb($this->application);
-
-        $this->initAcl();
         $this->application->start();
 
         $site = new Site('site-test', array('label' => 'site-test'));
@@ -364,6 +616,16 @@ class PageRepositoryTest extends TestCase
         $this->getEntityManager()->refresh($child2);
     }
 
+    /**
+     * Tears down the fixture
+     */
+    protected function tearDown()
+    {
+        $this->dropDb($this->application);
+        $this->application->getEntityManager()->clear();
+        gc_collect_cycles();
+    }
+    
     /**
      * Sets the NestedNode Repository
      * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
