@@ -306,4 +306,31 @@ class AclController extends ARestController
         return new Response('', 204);
     }
     
+    
+    /**
+     * @Rest\RequestParam(name = "object_class", description="Object Class name", requirements = {
+     *  @Assert\NotBlank(message="Object Class cannot be empty")
+     * })
+     * 
+     * @param string|int $sid
+     */
+    public function deleteClassAceAction($sid, Request $request)
+    {
+        $aclManager = $this->getContainer()->get("security.acl_manager");
+        $securityIdentity = new UserSecurityIdentity($sid, 'BackBuilder\Security\Group');
+        $objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
+
+        try {
+            $aclManager->deleteClassAce($objectIdentity, $securityIdentity);
+        } catch (\InvalidArgumentException $ex) {
+            throw $this->createValidationException(
+                'object_class', 
+                $request->request->get('object_class'), 
+                sprintf("Class ace doesn't exist for class %s", $request->request->get('object_class'))
+            );
+        }
+        
+        
+        return new Response('', 204);
+    }
 }
