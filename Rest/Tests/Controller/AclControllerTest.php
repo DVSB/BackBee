@@ -97,6 +97,136 @@ class AclControllerTest extends TestCase
     }
 
     /**
+     * @covers ::postGroupPermissionMapAction
+     */
+    public function test_postGroupPermissionMapAction() 
+    {
+        $data = [
+            [
+                'object_class' => get_class($this->site),
+                'permissions' => [
+                    'view' => 1,
+                    'create' => 1,
+                    'edit' => 1,
+                    'delete' => 1,
+                    'undelete' => 'off',
+                    'commit' => '0',
+                    'publish' => 1,
+                    'operator' => 1,
+                    'master' => 'false',
+                    'owner' => 1
+                ]
+            ], 
+            [
+                'object_class' => get_class($this->site),
+                'object_id' => $this->site->getUid(),
+                'permissions' => [
+                    'view' => 1,
+                    'create' => 1,
+                    'edit' => 1,
+                    'delete' => 1,
+                    'undelete' => 'off',
+                    'commit' => '0',
+                    'publish' => 1,
+                    'operator' => 1,
+                    'master' => 'false',
+                    'owner' => 1
+                ]
+            ], 
+            [
+                'object_class' => 'BackBuilder\Site\Layout',
+                'permissions' => [
+                    'view' => 'true',
+                    'create' => '1',
+                    'edit' => 1,
+                    'commit' => '0',
+                    'publish' => 'off'
+                ]
+            ]
+        ];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            'sid' => $this->groupEditor->getId(),
+            '_action' => 'postGroupPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'DELETE'] ));
+        
+        $res = json_decode($response->getContent(), true);
+
+
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+    
+    /**
+     * @covers ::postGroupPermissionMapAction
+     */
+    public function test_postObjectPermissionMapAction() 
+    {
+        $data = [
+            'oid_class' => get_class($this->site),
+            
+            'map' => [
+                [
+                    'sid' => $this->groupEditor->getName(),
+                    'permissions' => [
+                        'view' => 1,
+                        'create' => 1,
+                        'edit' => 1,
+                        'delete' => 1,
+                        'undelete' => 1,
+                        'commit' => 1,
+                        'publish' => 1,
+                        'operator' => 1,
+                        'master' => 1,
+                        'owner' => 1
+                    ]
+                ], 
+                [
+                    'sid' => 'anotherName',
+                    'permissions' => [
+                        'view' => 1,
+                        'create' => 1,
+                        'edit' => 1,
+                        'commit' => 1,
+                        'publish' => 1
+                    ]
+                ]
+            ]
+        ];
+    }
+            
+    /**
+     * @covers ::deleteAceAction
+     */
+    public function test_deleteAceAction()
+    {
+        $this->markTestIncomplete();
+        //TODO 
+        $data = [
+            'group_id' => $this->groupEditor->getName(),
+            'object_class' => get_class($this->site),
+            'object_id' => $this->site->getUid(),
+            'mask' => MaskBuilder::MASK_VIEW
+        ];
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'deleteAceAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'DELETE'] ));
+        
+        $res = json_decode($response->getContent(), true);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $this->assertInternalType('array', $res);
+        $this->assertInternalType('int', $res['id']);
+        
+        $this->assertEquals($data['group_id'], $res['group_id']);
+        $this->assertEquals($data['object_class'], $res['object_class']);
+        $this->assertEquals($data['object_id'], $res['object_id']);
+        $this->assertEquals($data['mask'], $res['mask']);
+    }
+    
+    /**
      * @covers ::postObjectAceAction
      */
     public function test_postObjectAceAction()
@@ -114,7 +244,7 @@ class AclControllerTest extends TestCase
         
         $res = json_decode($response->getContent(), true);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
         
         $this->assertInternalType('array', $res);
         $this->assertInternalType('int', $res['id']);
@@ -166,7 +296,7 @@ class AclControllerTest extends TestCase
         
         $res = json_decode($response->getContent(), true);
         
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
         
         $this->assertInternalType('array', $res);
         $this->assertInternalType('int', $res['id']);
