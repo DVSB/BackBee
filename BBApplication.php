@@ -1141,7 +1141,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
-
         try {
             $logger = $this->getLogging();
 
@@ -1153,7 +1152,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
             $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
             $this->getContainer()->set('em', $em);
-            
+
             $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
             $this->getContainer()->set('doctrine', $registry);
 
@@ -1177,7 +1176,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     private function _initBundles()
     {
         if (!is_null($this->getConfig()->getBundlesConfig())) {
-            BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
+            (new BundleLoader($this))->load($this->getConfig()->getBundlesConfig());
         }
 
         return $this;

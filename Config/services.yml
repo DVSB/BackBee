@@ -85,6 +85,8 @@ parameters:
 
     config.yml_files_to_ignore: ['services', 'bootstrap']
 
+    bundle_config_configurator.class: BackBuilder\Bundle\BundleConfigConfigurator
+
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
@@ -118,8 +120,7 @@ services:
     security.acl_manager:
         class:      BackBuilder\Security\Acl\AclManager
         arguments:  ["@security.context"]
-            
-            
+
     controller:
         class:      %bbapp.controller.class%
         arguments:  ["@bbapp"]
@@ -158,6 +159,11 @@ services:
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]
+
+    bundle_config_configurator:
+        class:      %bundle_config_configurator.class%
+        arguments:  ["@bbapp"]
+        public:     false
 
     analytics:
         class: BackBuilder\Application\Analytics

@@ -79,7 +79,7 @@ element.keyword.render:
   listeners:
     - [BackBuilder\Event\Listener\elementListener, onRender]
 
-frontcontroller.request: 
+frontcontroller.request:
   listeners:
     - [@rest.listener.body, onRequest]
 
@@ -107,3 +107,15 @@ bbapplication.init:
 nestednode.page.postload:
   listeners:
     - [@nestednode.page_listener, onPostLoad]
+
+bbapplication.start:
+  listeners:
+    - [BackBuilder\Bundle\Listener\BundleListener, onApplicationStart]
+
+service.tagged.bundle:
+  listeners:
+    - [BackBuilder\Bundle\Listener\BundleListener, onGetBundleService]
+
+bbapplication.stop:
+  listeners:
+    - [BackBuilder\Bundle\Listener\BundleListener, onApplicationStop]

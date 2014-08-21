@@ -21,6 +21,7 @@
 
 namespace BackBuilder\Bundle;
 
+use BackBuilder\Bundle\AbstractBaseBundle;
 use BackBuilder\BBApplication,
     BackBuilder\Config\Config,
     BackBuilder\Routing\RouteCollection as Routing,
@@ -42,7 +43,7 @@ use Doctrine\ORM\Tools\SchemaTool,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class ABundle implements IObjectIdentifiable
+abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
 {
 
     private $_id;
@@ -108,10 +109,6 @@ abstract class ABundle implements IObjectIdentifiable
 
     private function _initConfig($configdir = null)
     {
-        $this->_config = $this->getApplication()->getContainer()->get(
-            self::getBundleConfigServiceId($this->getBaseDir())
-        );
-
         if (null === $this->_config) {
             $this->_config = self::initBundleConfig($this->getApplication(), $this->_basedir);
         }
@@ -128,16 +125,6 @@ abstract class ABundle implements IObjectIdentifiable
         }
 
         return $this;
-    }
-
-    /**
-     * [getBundleConfigServiceId description]
-     * @param  [type] $bundle_base_directory [description]
-     * @return [type]                        [description]
-     */
-    public static function getBundleConfigServiceId($bundle_base_directory)
-    {
-        return strtolower(implode('.', array('bundle', basename($bundle_base_directory), 'config')));
     }
 
     /**
@@ -164,55 +151,8 @@ abstract class ABundle implements IObjectIdentifiable
         $config->setContainer($application->getContainer());
 
         $id = basename($bundle_base_directory);
-        self::overrideConfigWithEnvironment($config, $application, $id);
-
-        self::overrideConfigWithRegistry($config, $application, $id);
 
         return $config;
-    }
-
-    /**
-     * [overrideConfigWithEnvironment description]
-     * @param  Config        $config      [description]
-     * @param  BBApplication $application [description]
-     * @param  [type]        $id          [description]
-     * @return [type]                     [description]
-     */
-    private static function overrideConfigWithEnvironment(Config $config, BBApplication $application, $id)
-    {
-        if (BBApplication::DEFAULT_ENVIRONMENT !== $application->getEnvironment()) {
-            $dir = implode(DIRECTORY_SEPARATOR, array(
-                $application->getConfigDir(),
-                $application->getEnvironment(),
-                'bundle',
-                $id
-            ));
-
-            if (true === is_dir($dir)) {
-                $config->extend($dir, true);
-            }
-        }
-    }
-
-    /**
-     * [overrideConfigWithRegistry description]
-     * @param  Config        $config      [description]
-     * @param  BBApplication $application [description]
-     * @param  [type]        $id          [description]
-     * @return [type]                     [description]
-     */
-    private static function overrideConfigWithRegistry(Config $config, BBApplication $application, $id)
-    {
-        $registry = self::_getRegistryConfig($application, $id);
-        if (null !== $registry && null !== $serialized = $registry->getValue()) {
-            $registry_config = @unserialize($serialized);
-
-            if (true === is_array($registry_config)) {
-                foreach ($registry_config as $section => $value) {
-                    $config->setSection($section, $value, true);
-                }
-            }
-        }
     }
 
     /**

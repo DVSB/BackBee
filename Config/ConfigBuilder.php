@@ -21,10 +21,14 @@ namespace BackBuilder\Config;
  */
 
 use BackBuilder\IApplication;
+use BackBuilder\Bundle\Registry;
 use BackBuilder\Config\Config;
 use BackBuilder\Config\Exception\InvalidConfigTypeException;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\Util\Resolver\BundleConfigDirectory;
 use BackBuilder\Util\Resolver\ConfigDirectory;
+
+use Doctrine\ORM\EntityManager;
 
 /**
  * Allow us to build and extend config depending on the type (which can be equals to
@@ -44,6 +48,13 @@ class ConfigBuilder
      */
     const APPLICATION_CONFIG = 0;
     const BUNDLE_CONFIG = 1;
+
+    /**
+     * [$application description]
+     *
+     * @var [type]
+     */
+    private $em;
 
     /**
      * BackBee base directory
@@ -94,20 +105,26 @@ class ConfigBuilder
         $this->override_config = $application->isOverridedConfig();
     }
 
+    public function setEntityManager(EntityManager $em)
+    {
+        $this->em = $em;
+    }
+
     /**
      * Do every extend according to application context, environment and config target type (APPLICATION OR BUNDLE)
      *
-     * @param  integer $type   define which kind of extend we want to apply
+     * @param integer $type    define which kind of extend we want to apply
      *                         (self::APPLICATION_CONFIG or self::BUNDLE_CONFIG)
-     * @param  Config  $config the config we want to extend
+     * @param Config  $config  the config we want to extend
+     * @param array   $options options for extend config action
      */
-    public function extend($type, Config $config)
+    public function extend($type, Config $config, $options = array())
     {
         if (false === ($config instanceof DumpableServiceProxyInterface) || false === $config->isRestored()) {
             if (self::APPLICATION_CONFIG === $type) {
                 $this->doApplicationConfigExtend($config);
             } elseif (self::BUNDLE_CONFIG === $type) {
-                /* to define */
+                $this->doBundleConfigExtend($config, $options);
             } else {
                 throw new InvalidConfigTypeException('extend', $type);
             }
@@ -121,7 +138,7 @@ class ConfigBuilder
      */
     private function doApplicationConfigExtend(Config $config)
     {
-        $config_directories = (new ConfigDirectory())->getDirectories(
+        $config_directories = ConfigDirectory::getDirectories(
             null,
             $this->base_repository,
             $this->context,
@@ -133,5 +150,90 @@ class ConfigBuilder
                 $config->extend($directory, $this->override_config);
             }
         }
+    }
+
+    /**
+     * [doBundleConfigExtend description]
+     * @param  Config $config  [description]
+     * @param  array  $options [description]
+     * @return [type]          [description]
+     */
+    private function doBundleConfigExtend(Config $config, array $options)
+    {
+        $this->overrideConfigWithEnvironment($config, $options['bundle_id']);
+        $this->overrideConfigWithRegistry($config, $options['bundle_id']);
+    }
+
+    /**
+     * [overrideConfigWithEnvironment description]
+     *
+     * @param  Config $config    [description]
+     * @param  [type] $bundle_id [description]
+     */
+    private function overrideConfigWithEnvironment(Config $config, $bundle_id)
+    {
+        $directories = BundleConfigDirectory::getDirectories(
+            $this->base_repository,
+            $this->context,
+            $this->environment,
+            $bundle_id
+        );
+
+        foreach ($directories as $directory) {
+            $config->extend($directory, true);
+        }
+    }
+
+    /**
+     * [overrideConfigWithRegistry description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $bundle_id     [description]
+     */
+    private function overrideConfigWithRegistry(Config $config, $bundle_id)
+    {
+        $registry = $this->getRegistryConfig($bundle_id);
+        if (null !== $registry && null !== $serialized = $registry->getValue()) {
+            $registry_config = @unserialize($serialized);
+
+            if (true === is_array($registry_config)) {
+                foreach ($registry_config as $section => $value) {
+                    $config->setSection($section, $value, true);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the registry entry for bundle's config storing
+     *
+     * @param string $bundle_id the id of the bundle we are looking for override config in registry
+     *
+     * @return \BackBuilder\Bundle\Registry
+     */
+    private function getRegistryConfig($bundle_id)
+    {
+        $registry = null;
+        if(null !== $this->em) {
+            try {
+                $registry = $this->em->getRepository('BackBuilder\Bundle\Registry')
+                    ->findRegistryEntityByIdAndScope($bundle_id, 'BUNDLE.CONFIG')
+                ;
+
+                if (null === $registry) {
+                    $registry = new Registry();
+                    $registry->setKey($bundle_id)
+                             ->setScope('BUNDLE.CONFIG')
+                    ;
+                }
+            } catch (\Exception $e) {
+                die($e->getMessage());
+                // if (true === $this->application->isStarted()) {
+                //     $this->application->warning('Unable to load registry table');
+                // }
+            }
+        }
+
+        return $registry;
     }
 }
