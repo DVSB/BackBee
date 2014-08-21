@@ -54,8 +54,6 @@ class PageRepositoryTest extends TestCase
      */
     private $repo;
 
-    private $dbinit = false;
-    
     /**
      * @covers \BackBuilder\NestedNode\Repository\PageRepository::createQueryBuilder
      */
@@ -324,6 +322,7 @@ class PageRepositoryTest extends TestCase
         $this->assertEquals(array(), $this->repo->getNotDeletedDescendants($this->root, 0));
         $this->assertEquals(array($this->root, $child3, $child2, $child1), $this->repo->getNotDeletedDescendants($this->root, null, true));
         $this->assertEquals(array($child1, $child2, $child3), $this->repo->getNotDeletedDescendants($this->root, null, false, array('field' => '_title')));
+        $this->assertEquals(array($child1, $child2, $child3), $this->repo->getNotDeletedDescendants($this->root, null, false, array('field' => 'title')));
         $this->assertEquals(array($child3, $child2, $child1), $this->repo->getNotDeletedDescendants($this->root, null, false, array('field' => '_title', 'sort' => 'desc')));
         $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $this->repo->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true));
         $this->assertEquals(3, $this->repo->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true)->count());
@@ -580,7 +579,6 @@ class PageRepositoryTest extends TestCase
      */
     protected function setUp()
     {
-
         $this->initAutoload();
         $this->application = $this->getBBApp();
         $this->initDb($this->application);
@@ -616,16 +614,6 @@ class PageRepositoryTest extends TestCase
         $this->getEntityManager()->refresh($child2);
     }
 
-    /**
-     * Tears down the fixture
-     */
-    protected function tearDown()
-    {
-        $this->dropDb($this->application);
-        $this->application->getEntityManager()->clear();
-        gc_collect_cycles();
-    }
-    
     /**
      * Sets the NestedNode Repository
      * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest

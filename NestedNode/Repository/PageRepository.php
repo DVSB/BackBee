@@ -313,6 +313,9 @@ class PageRepository extends NestedNodeRepository
     {
         // @Todo: search for calls with wrong ordering criteria format and solve them
         if (true === array_key_exists('field', $order)) {
+            if ('_' !== substr($order['field'], 0, 1)) {
+                $order['field'] = '_' . $order['field'];
+            }
             $order = array($order['field'] => (true === array_key_exists('sort', $order) ? $order['sort'] : 'asc'));
         }
 
