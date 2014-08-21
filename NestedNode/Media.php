@@ -21,11 +21,11 @@
 
 namespace BackBuilder\NestedNode;
 
+use BackBuilder\NestedNode\MediaFolder,
+    BackBuilder\ClassContent\AClassContent;
+
 /**
- * PageRevison object in BackBuilder 4
- *
- * A page revision is...
- *
+ * Media entity in BackBee
  * @category    BackBuilder
  * @package     BackBuilder\NestedNode
  * @copyright   Lp digital system
@@ -38,7 +38,7 @@ class Media
 {
 
     /**
-     * Unique identifier of the revision
+     * Unique identifier of the media
      * @var integer
      * @Id @Column(type="integer", name="id")
      * @GeneratedValue(strategy="IDENTITY")
@@ -46,12 +46,16 @@ class Media
     protected $_id;
 
     /**
+     * The media folder owning this media
+     * @var \BackBuilder\NestedNode\MediaFolder
      * @ManyToOne(targetEntity="BackBuilder\NestedNode\MediaFolder", inversedBy="_medias", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="media_folder_uid", referencedColumnName="uid")
      */
     protected $_media_folder;
 
     /**
+     * The element content of this media
+     * @var \BackBuilder\ClassContent\AClassContent
      * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
@@ -66,27 +70,29 @@ class Media
 
     /**
      * The publication datetime
-     * @var DateTime
+     * @var \DateTime
      * @Column(type="datetime", name="date")
      */
     protected $_date;
 
     /**
      * The creation datetime
-     * @var DateTime
+     * @var \DateTime
      * @Column(type="datetime", name="created")
      */
     protected $_created;
 
     /**
      * The last modification datetime
-     * @var DateTime
+     * @var \DateTime
      * @Column(type="datetime", name="modified")
      */
     protected $_modified;
 
     /**
-     * Class constructor
+     * Class constructor of a media entity
+     * @param string $title     optional, the title of the new media, 'Untitled media' by default
+     * @param \DateTime $date   optional, the publication date, current time by default
      */
     public function __construct($title = NULL, $date = NULL)
     {
@@ -97,92 +103,169 @@ class Media
         $this->_modified = new \DateTime();
     }
 
+    /**
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return string
+     * @deprecated since version 0.10.0
+     */
     public static function getAbsolutePath($content = NULL)
     {
         return __DIR__ . '/../../repository/' . Media::getUploadDir();
     }
 
+    /**
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return string
+     * @deprecated since version 0.10.0
+     */
     public static function getWebPath($content = NULL)
     {
         return '/images/';
     }
 
+    /**
+     * @return string
+     * @deprecated since version 0.10.0
+     */
     public static function getUploadTmpDir()
     {
         return __DIR__ . '/../../repository/Data/Tmp/';
     }
 
+    /**
+     * @return string
+     * @deprecated since version 0.10.0
+     */
     protected static function getUploadDir()
     {
         return 'Data/Media/';
     }
 
-    public function setMediaFolder(\BackBuilder\NestedNode\MediaFolder $media_folder)
+    /**
+     * Sets the media folder
+     * @param \BackBuilder\NestedNode\MediaFolder $media_folder
+     * @return \BackBuilder\NestedNode\Media
+     */
+    public function setMediaFolder(MediaFolder $media_folder)
     {
         $this->_media_folder = $media_folder;
         return $this;
     }
 
-    public function setContent($content)
+    /**
+     * Sets the element content to the media
+     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @return \BackBuilder\NestedNode\Media
+     */
+    public function setContent(AClassContent $content)
     {
         $this->_content = $content;
         return $this;
     }
 
+    /**
+     * Sets the title
+     * @param string $title
+     * @return \BackBuilder\NestedNode\Media
+     */
     public function setTitle($title)
     {
         $this->_title = $title;
         return $this;
     }
 
-    public function setDate($date)
+    /**
+     * Sets the publication date
+     * @param \DateTime $date
+     * @return \BackBuilder\NestedNode\Media
+     */
+    public function setDate(\DateTime $date)
     {
         $this->_date = $date;
         return $this;
     }
 
-    public function setCreated($created)
+    /**
+     * Sets the created date
+     * @param \DateTime $created
+     * @return \BackBuilder\NestedNode\Media
+     */
+    public function setCreated(\DateTime $created)
     {
         $this->_created = $created;
         return $this;
     }
 
-    public function setModified($modified)
+    /**
+     * Sets the last modified date
+     * @param \DateTime $modified
+     * @return \BackBuilder\NestedNode\Media
+     */
+    public function setModified(\DateTime $modified)
     {
         $this->_modified = $modified;
         return $this;
     }
 
+    /**
+     * Returns the unique identifier
+     * @return integer
+     * @codeCoverageIgnore
+     */
     public function getId()
     {
         return $this->_id;
     }
 
+    /**
+     * Gets the title
+     * @return string
+     */
     public function getTitle()
     {
         return $this->_title;
     }
 
+    /**
+     * Gets the publication date
+     * @return \DateTime
+     */
     public function getDate()
     {
         return $this->_date;
     }
 
+    /**
+     * Gets the created date
+     * @return \DateTime
+     */
     public function getCreated()
     {
         return $this->_created;
     }
 
+    /**
+     * Gets the last mofified date
+     * @return \DateTime
+     */
     public function getModified()
     {
         return $this->_modified;
     }
 
+    /**
+     * Returns the media folder owning the media
+     * @return \BackBuilder\NestedNode\MediaFolder
+     */
     public function getMediaFolder()
     {
         return $this->_media_folder;
     }
 
+    /**
+     * Returns the element content of the media
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
     public function getContent()
     {
         return $this->_content;
