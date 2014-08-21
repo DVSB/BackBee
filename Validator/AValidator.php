@@ -1,11 +1,30 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Validator;
 
 /**
- * Form's validator
+ * Validator
  *
- * @category    BackBuilder\Bundle
+ * @category    BackBuilder
  * @package     BackBuilder\Validator
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
@@ -34,7 +53,7 @@ abstract class AValidator
      * @param string $prefix
      * @return array
      */
-    protected function truncatePrefix($datas, $prefix = '')
+    public function truncatePrefix($datas, $prefix = '')
     {
         return array_combine(str_replace($prefix, '', array_keys($datas)), array_values($datas));
     }
@@ -50,7 +69,7 @@ abstract class AValidator
      * @param mixed $func
      * @param boolean $start
      */
-    protected function doGeneralValidator($data, $key, &$validator, $config, &$errors, &$func = null, $start = false)
+    public function doGeneralValidator($data, $key, &$validator, $config, &$errors, &$func = null, $start = false)
     {
         $parameters = array();
         if (true === isset($config[self::CONFIG_PARAMETER_PARAMETERS])) {
@@ -63,8 +82,7 @@ abstract class AValidator
         }
         if (true === isset($config[self::CONFIG_PARAMETER_VALIDATOR])) {
             $cConfig = $config[self::CONFIG_PARAMETER_VALIDATOR];
-            foreach ($cConfig as $sub_validator => $sub_validator_conf)
-            {
+            foreach ($cConfig as $sub_validator => $sub_validator_conf) {
                 $this->doGeneralValidator($data, $key, $sub_validator, $sub_validator_conf, $errors, $func, true);
                 break;
             }

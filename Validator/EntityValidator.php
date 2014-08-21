@@ -1,14 +1,33 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ * 
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Validator;
 
 use Doctrine\ORM\EntityManager;
 use BackBuilder\Validator\AValidator;
 
 /**
- * Form's validator
+ * Entity's validator
  *
- * @category    BackBuilder\Bundle
+ * @category    BackBuilder
  * @package     BackBuilder\Validator
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
@@ -50,8 +69,7 @@ class EntityValidator extends AValidator
             $datas = $this->truncatePrefix($datas, $prefix);
         }
 
-        foreach ($datas as $key => $data)
-        {
+        foreach ($datas as $key => $data) {
             if (true === isset($config[$key])) {
                 $cConfig = $config[$key];
                 if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR])) {
@@ -76,7 +94,7 @@ class EntityValidator extends AValidator
                     }
                     if (true === $do_set) {
                         if (true === isset($cConfig[self::CONFIG_PARAMETER_ENTITY])) {
-                            $data = $this->find($cConfig[self::CONFIG_PARAMETER_ENTITY], $data);
+                            $data = $this->em->find($cConfig[self::CONFIG_PARAMETER_ENTITY], $data);
                         }
                         $entity->{'set' . ucfirst($key)}($data);
                     }
@@ -88,18 +106,6 @@ class EntityValidator extends AValidator
     }
 
     /**
-     * Find entity
-     * 
-     * @param string $class
-     * @param mixed $id
-     * @return object|null
-     */
-    private function find($class, $id)
-    {
-        return $this->em->find($class, $id);
-    }
-
-    /**
      * Valid if this field is unique
      * 
      * @param array $errors
@@ -107,7 +113,7 @@ class EntityValidator extends AValidator
      * @param string $data
      * @param array $config
      */
-    private function doUniqueValidator($entity, &$errors, $key, $data, $config)
+    public function doUniqueValidator($entity, &$errors, $key, $data, $config)
     {
         if (false === empty($data)) {
             $entities_found = $this->em->getRepository(get_class($entity))->findBy(array($key => $data));
@@ -140,7 +146,7 @@ class EntityValidator extends AValidator
      * @param array $datas
      * @param array $config
      */
-    protected function doPasswordValidator(&$errors, $key, $data, $datas, $config)
+    public function doPasswordValidator(&$errors, $key, $data, $datas, $config)
     {
         if ($data !== $datas[self::PREFIX_PASSWORD_CONFIRM . $key]) {
             $errors[$key] = $config[self::CONFIG_PARAMETER_ERROR];
@@ -154,7 +160,7 @@ class EntityValidator extends AValidator
      * @param array $config
      * @return boolean
      */
-    private function isValid($entity, $config)
+    public function isValid($entity, $config)
     {
         if (false === is_object($entity)) {
             return false;
@@ -172,8 +178,12 @@ class EntityValidator extends AValidator
      * @param object $entity
      * @return \ReflectionClass
      */
-    private function getReflectionClass($entity)
+    public function getReflectionClass($entity)
     {
+        if (null === $entity || false === is_object($entity)) {
+            throw new \InvalidArgumentException(sprintf('Entity must be an object'));
+        }
+        
         return new \ReflectionClass(get_class($entity));
     }
 
@@ -183,7 +193,7 @@ class EntityValidator extends AValidator
      * @param object $entity
      * @return array
      */
-    private function getIdProperties($entity)
+    public function getIdProperties($entity)
     {
         $ids = array();
         $reflection_class = $this->getReflectionClass($entity);

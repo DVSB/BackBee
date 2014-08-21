@@ -14,7 +14,8 @@
         "twig/extensions" : "1.0.1",
         "swiftmailer/swiftmailer": "5.1.0",
         "jms/serializer": "0.15.0",
-        "jms/metadata": "1.5.0"
+        "jms/metadata": "1.5.0",
+        "respect/validation": "0.7.*@dev"
     },
     "autoload": {
         "psr-4": {
