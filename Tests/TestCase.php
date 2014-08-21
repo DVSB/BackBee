@@ -193,6 +193,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
+            $bbapp->getBBDir() . '/ClassContent',
+            $bbapp->getBBDir() . '/ClassContent/Indexes',
             $bbapp->getBBDir() . '/Logging',
             $bbapp->getBBDir() . '/NestedNode',
             $bbapp->getBBDir() . '/Security',
@@ -321,6 +323,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
-        $schema->dropDatabase();
+        $schema->dropSchema($metadata);
     }
 }
