@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Dumper;
+namespace BackBuilder\DependencyInjection\Exception;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -21,27 +21,22 @@ namespace BackBuilder\DependencyInjection\Dumper;
  */
 
 /**
- * This interface define every methods a service should implements to be dumpable by the container
- *
  * @category    BackBuilder
  * @package     BackBuilder\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-interface DumpableServiceInterface
+class InvalidServiceProxyException extends \BackBuilder\Exception\BBException
 {
     /**
-     * Returns the namespace of the class proxy to use or null if no proxy is required
+     * InvalidServiceProxyException's constructor
      *
-     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     * @param string $classname the classname of the service which must implements DumpableServiceProxyInterface
      */
-    public function getClassProxy();
+    public function __construct($classname)
+    {
+        $interface = 'BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface';
 
-    /**
-     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
-     * with the dump array produced by this method
-     *
-     * @return array contains every datas required by this service to be restored at the same state
-     */
-    public function dump(array $options = array());
+        parent::__construct("$classname must implements $interface to be a valid service proxy.");
+    }
 }

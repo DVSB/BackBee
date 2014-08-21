@@ -66,7 +66,7 @@ class PhpArrayDumper implements DumperInterface
     public function dump(array $options = array())
     {
         $compiled = false;
-        if (true === array_key_exists('do_compile', $options)) {
+        if (true === array_key_exists('do_compile', $options) && true === $options['do_compile']) {
             $this->container->compile();
             $compiled = true;
         }

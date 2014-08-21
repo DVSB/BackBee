@@ -115,6 +115,11 @@ services:
         class:      BackBuilder\Security\Acl\Loader\YmlLoader
         calls:
             - [setContainer, ['@service_container']]
+    security.acl_manager:
+        class:      BackBuilder\Security\Acl\AclManager
+        arguments:  ["@security.context"]
+            
+            
     controller:
         class:      %bbapp.controller.class%
         arguments:  ["@bbapp"]

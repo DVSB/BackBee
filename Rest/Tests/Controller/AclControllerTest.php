@@ -97,12 +97,13 @@ class AclControllerTest extends TestCase
     }
 
     /**
-     * @covers ::postGroupPermissionMapAction
+     * @covers ::postPermissionMapAction
      */
-    public function test_postGroupPermissionMapAction() 
+    public function test_postPermissionMapAction() 
     {
         $data = [
             [
+                'sid' => $this->groupEditor->getId(),
                 'object_class' => get_class($this->site),
                 'permissions' => [
                     'view' => 1,
@@ -118,6 +119,7 @@ class AclControllerTest extends TestCase
                 ]
             ], 
             [
+                'sid' => $this->groupEditor->getId(),
                 'object_class' => get_class($this->site),
                 'object_id' => $this->site->getUid(),
                 'permissions' => [
@@ -134,6 +136,7 @@ class AclControllerTest extends TestCase
                 ]
             ], 
             [
+                'sid' => $this->groupEditor->getId(),
                 'object_class' => 'BackBuilder\Site\Layout',
                 'permissions' => [
                     'view' => 'true',
@@ -146,84 +149,65 @@ class AclControllerTest extends TestCase
         ];
         
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
-            'sid' => $this->groupEditor->getId(),
-            '_action' => 'postGroupPermissionMapAction',
+            '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'DELETE'] ));
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
         
-        $res = json_decode($response->getContent(), true);
-
-
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(204, $response->getStatusCode());
     }
     
     /**
-     * @covers ::postGroupPermissionMapAction
+     * @covers ::postPermissionMapAction
      */
-    public function test_postObjectPermissionMapAction() 
+    public function test_postPermissionMapAction_invalidPermission() 
     {
-        $data = [
-            'oid_class' => get_class($this->site),
-            
-            'map' => [
-                [
-                    'sid' => $this->groupEditor->getName(),
-                    'permissions' => [
-                        'view' => 1,
-                        'create' => 1,
-                        'edit' => 1,
-                        'delete' => 1,
-                        'undelete' => 1,
-                        'commit' => 1,
-                        'publish' => 1,
-                        'operator' => 1,
-                        'master' => 1,
-                        'owner' => 1
-                    ]
-                ], 
-                [
-                    'sid' => 'anotherName',
-                    'permissions' => [
-                        'view' => 1,
-                        'create' => 1,
-                        'edit' => 1,
-                        'commit' => 1,
-                        'publish' => 1
-                    ]
-                ]
-            ]
-        ];
+        $data = [[
+            'sid' => $this->groupEditor->getId(),
+            'object_class' => get_class($this->site),
+            'permissions' => ['permissionThatDoesnExist' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $res = json_decode($response->getContent(), true);
+
+        $this->assertEquals(400, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        // TODO - would be better to use proper php array for 0[permissions]
+        $this->assertEquals('Invalid permission mask: permissionThatDoesnExist', $res['errors']['0[permissions]'][0]);
     }
+    
             
     /**
-     * @covers ::deleteAceAction
+     * @covers ::deleteClassAceAction
      */
-    public function test_deleteAceAction()
+    public function test_deleteClassAceAction()
     {
-        $this->markTestIncomplete();
-        //TODO 
+        // save the ACE
+        $objectIdentity = new ObjectIdentity('class', get_class($this->site));
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
+        $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, MaskBuilder::MASK_VIEW);
+        
         $data = [
-            'group_id' => $this->groupEditor->getName(),
             'object_class' => get_class($this->site),
             'object_id' => $this->site->getUid(),
             'mask' => MaskBuilder::MASK_VIEW
         ];
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
-            '_action' => 'deleteAceAction',
+            'sid' => $this->groupEditor->getId(),
+            '_action' => 'deleteClassAceAction',
             '_controller' =>  $this->getController()
         ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'DELETE'] ));
-        
-        $res = json_decode($response->getContent(), true);
 
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $this->assertInternalType('array', $res);
-        $this->assertInternalType('int', $res['id']);
-        
-        $this->assertEquals($data['group_id'], $res['group_id']);
-        $this->assertEquals($data['object_class'], $res['object_class']);
-        $this->assertEquals($data['object_id'], $res['object_id']);
-        $this->assertEquals($data['mask'], $res['mask']);
+        $this->assertEquals(204, $response->getStatusCode());
     }
     
     /**
