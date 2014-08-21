@@ -21,7 +21,8 @@
 
 namespace BackBuilder\NestedNode\Tests;
 
-use BackBuilder\NestedNode\KeyWord;
+use BackBuilder\Tests\TestCase,
+    BackBuilder\NestedNode\KeyWord;
 
 /**
  * @category    BackBuilder
@@ -29,7 +30,7 @@ use BackBuilder\NestedNode\KeyWord;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class KeyWordTest extends \PHPUnit_Framework_TestCase
+class KeyWordTest extends TestCase
 {
 
     /**

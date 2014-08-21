@@ -26,7 +26,8 @@ use BackBuilder\ClassContent\ContentSet,
     BackBuilder\NestedNode\Page,
     BackBuilder\Workflow\State,
     BackBuilder\Site\Layout,
-    BackBuilder\Site\Site;
+    BackBuilder\Site\Site,
+    BackBuilder\Tests\TestCase;
 
 /**
  * @category    BackBuilder
@@ -34,7 +35,7 @@ use BackBuilder\ClassContent\ContentSet,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class PageTest extends \PHPUnit_Framework_TestCase
+class PageTest extends TestCase
 {
     /**
      * @var \Datetime

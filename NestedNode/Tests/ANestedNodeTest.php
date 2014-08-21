@@ -21,7 +21,8 @@
 
 namespace BackBuilder\NestedNode\Tests;
 
-use BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
+use BackBuilder\Tests\TestCase,
+    BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
  * @category    BackBuilder
@@ -29,7 +30,7 @@ use BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class ANestedNodeTest extends \PHPUnit_Framework_TestCase
+class ANestedNodeTest extends TestCase
 {
 
     /**
