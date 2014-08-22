@@ -37,6 +37,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class NestedNodeRepository extends EntityRepository
 {
+
     public static $config = array(
         // calculate nested node values asynchronously via a CLI command
         'nestedNodeCalculateAsync' => false
@@ -56,7 +57,7 @@ class NestedNodeRepository extends EntityRepository
         $node->leftnode = $leftnode;
         $node->rightnode = $leftnode + 1;
         $node->level = $level;
-        
+
         foreach ($children = $this->getNativelyNodeChildren($node_uid) as $row) {
             $child = $this->updateTreeNatively($row['uid'], $leftnode + 1, $level + 1);
             $node->rightnode = $child->rightnode + 1;
@@ -215,17 +216,13 @@ class NestedNodeRepository extends EntityRepository
     /**
      * Returns the query build to get the previous sibling of the provided node
      * @param \BackBuilder\NestedNode\ANestedNode $node
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getPrevSiblingQuery(ANestedNode $node)
     {
         return $this->createQueryBuilder('n')
-                        ->andWhere('n._root = :root')
-                        ->andWhere('n._rightnode = :rightnode')
-                        ->setParameters(array(
-                            'root' => $node->getRoot(),
-                            'rightnode' => $node->getLeftnode() - 1
-        ));
+                        ->andIsPreviousSiblingOf($node);
     }
 
     /**
@@ -235,55 +232,44 @@ class NestedNodeRepository extends EntityRepository
      */
     public function getPrevSibling(ANestedNode $node)
     {
-        return $this->_getPrevSiblingQuery($node)
+        return $this->createQueryBuilder('n')
+                        ->andIsPreviousSiblingOf($node)
                         ->getQuery()
                         ->getOneOrNullResult();
     }
 
+    /**
+     * @deprecated since version 0.10.0
+     */
     protected function _getPrevSiblingsQuery(ANestedNode $node)
     {
         return $this->createQueryBuilder('n')
-                        ->andWhere('n._parent = :parent')
-                        ->andWhere('n._level = :level')
-                        ->andWhere('n._rightnode < :rightnode')
-                        ->setParameters(array(
-                            'parent' => $node->getParent(),
-                            'level' => $node->getLevel(),
-                            'rightnode' => $node->getLeftnode()
-        ));
+                        ->andParentIs($node->getParent())
+                        ->andLevelEquals($node->getLevel())
+                        ->andRightnodeIsLowerThan($node->getLeftnode(), true);
     }
 
+    /**
+     * @deprecated since version 0.10.0
+     */
     protected function _getNextSiblingsQuery(ANestedNode $node)
     {
-        if (null === $parent = $node->getParent()) {
-            return null;
-        }
-
         return $this->createQueryBuilder('n')
-                        ->andWhere('n._parent = :parent')
-                        ->andWhere('n._level = :level')
-                        ->andWhere('n._leftnode > :leftnode')
-                        ->setParameters(array(
-                            'parent' => $parent,
-                            'level' => $node->getLevel(),
-                            'leftnode' => $node->getRightnode()
-        ));
+                        ->andParentIs($node->getParent())
+                        ->andLevelEquals($node->getLevel())
+                        ->andLeftnodeIsUpperThan($node->getLeftnode(), true);
     }
 
     /**
      * Returns the query build to get the next sibling of the provided node
      * @param \BackBuilder\NestedNode\ANestedNode $node
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getNextSiblingQuery(ANestedNode $node)
     {
         return $this->createQueryBuilder('n')
-                        ->andWhere('n._root = :root')
-                        ->andWhere('n._leftnode = :leftnode')
-                        ->setParameters(array(
-                            'root' => $node->getRoot(),
-                            'leftnode' => $node->getRightnode() + 1
-        ));
+                        ->andIsNextSiblingOf($node);
     }
 
     /**
@@ -293,7 +279,8 @@ class NestedNodeRepository extends EntityRepository
      */
     public function getNextSibling(ANestedNode $node)
     {
-        return $this->_getNextSiblingQuery($node)
+        return $this->createQueryBuilder('n')
+                        ->andIsNextSiblingOf($node)
                         ->getQuery()
                         ->getOneOrNullResult();
     }
@@ -305,41 +292,13 @@ class NestedNodeRepository extends EntityRepository
      * @param array $order          ordering spec
      * @param int $limit            max number of results
      * @param int $start            first result index
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getSiblingsQuery(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
-        if (null === $order) {
-            $order = array('_leftnode' => 'asc');
-        }
-
-        $qb = $this->createQueryBuilder('n')
-                ->andWhere('n._level = :level')
-                ->setParameter('level', $node->getLevel());
-
-        if (null !== $node->getParent()) {
-            $qb->andWhere('n._parent = :parent')
-                ->setParameter('parent', $node->getParent());
-        } else {
-            $qb->andWhere('n._root = :root')
-                ->setParameter('root', $node->getRoot());
-        }
-
-        if (false === $includeNode) {
-            $qb->andWhere('n._uid != :uid')
-                ->setParameter('uid', $node->getUid());
-        }
-
-        foreach ($order as $col => $sort) {
-            $qb->orderBy('n.' . $col, $sort);
-        }
-
-        if (null !== $limit) {
-            $qb->setMaxResults($limit)
-                ->setFirstResult($start);
-        }
-
-        return $qb;
+        return $this->createQueryBuilder('n')
+                        ->andIsSiblingsOf($node, !$includeNode, $order, $limit, $start);
     }
 
     /**
@@ -353,9 +312,10 @@ class NestedNodeRepository extends EntityRepository
      */
     public function getSiblings(ANestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
-        return $this->_getSiblingsQuery($node, $includeNode, $order, $limit, $start)
-                ->getQuery()
-                ->getResult();
+        return $this->createQueryBuilder('n')
+                        ->andIsSiblingsOf($node, !$includeNode, $order, $limit, $start)
+                        ->getQuery()
+                        ->getResult();
     }
 
     /**
@@ -392,21 +352,13 @@ class NestedNodeRepository extends EntityRepository
      * Returns the query build to get ancestor at level $level of the provided node
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @param int $level
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getAncestorQuery(ANestedNode $node, $level = 0)
     {
         return $this->createQueryBuilder('n')
-                        ->andWhere('n._root = :root')
-                        ->andWhere('n._leftnode <= :leftnode')
-                        ->andWhere('n._rightnode >= :rightnode')
-                        ->andWhere('n._level = :level')
-                        ->setParameters(array(
-                            'root' => $node->getRoot(),
-                            'leftnode' => $node->getLeftnode(),
-                            'rightnode' => $node->getRightnode(),
-                            'level' => $level
-        ));
+                        ->andIsAncestorOf($node, false, $level);
     }
 
     /**
@@ -425,7 +377,8 @@ class NestedNodeRepository extends EntityRepository
             return $node;
         }
 
-        return $this->_getAncestorQuery($node, $level)
+        return $this->createQueryBuilder('n')
+                        ->andIsAncestorOf($node, false, $level)
                         ->getQuery()
                         ->getSingleResult();
     }
@@ -435,24 +388,16 @@ class NestedNodeRepository extends EntityRepository
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @param int     $depth        Returns only ancestors from $depth number of generation
      * @param boolean $includeNode  Returns also the node itsef if TRUE
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getAncestorsQuery(ANestedNode $node, $depth = null, $includeNode = false)
     {
         $q = $this->createQueryBuilder('n')
-                ->andWhere('n._root = :root')
-                ->andWhere('n._leftnode < :leftnode')
-                ->andWhere('n._rightnode > :rightnode')
-                ->orderBy('n._rightnode', 'desc')
-                ->setParameters(array(
-            'root' => $node->getRoot(),
-            'leftnode' => $node->getLeftnode() + ($includeNode ? 1 : 0),
-            'rightnode' => $node->getRightnode() - ($includeNode ? 1 : 0)
-        ));
+                ->andIsAncestorOf($node, !$includeNode);
 
-        if (false === empty($depth)) {
-            $q = $q->andWhere('n._level >= :level')
-                    ->setParameter('level', $node->getLevel() - $depth);
+        if (null !== $depth) {
+            $q->andLevelIsUpperThan($node->getLevel() - $depth);
         }
 
         return $q;
@@ -467,7 +412,14 @@ class NestedNodeRepository extends EntityRepository
      */
     public function getAncestors(ANestedNode $node, $depth = null, $includeNode = false)
     {
-        return $this->_getAncestorsQuery($node, $depth, $includeNode)
+        $q = $this->createQueryBuilder('n')
+                ->andIsAncestorOf($node, !$includeNode);
+
+        if (null !== $depth) {
+            $q->andLevelIsUpperThan($node->getLevel() - $depth);
+        }
+
+        return $q->orderBy('n._rightnode', 'desc')
                         ->getQuery()
                         ->getResult();
     }
@@ -477,24 +429,16 @@ class NestedNodeRepository extends EntityRepository
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @param int     $depth        Returns only descendants from $depth number of generation
      * @param boolean $includeNode  Returns also the node itsef if TRUE
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @deprecated since version 0.10.0
      */
     protected function _getDescendantsQuery(ANestedNode $node, $depth = null, $includeNode = false)
     {
         $q = $this->createQueryBuilder('n')
-                ->andWhere('n._root = :root')
-                ->andWhere('n._leftnode >= :leftnode')
-                ->andWhere('n._rightnode <= :rightnode')
-                ->orderBy('n._leftnode', 'asc')
-                ->setParameters(array(
-            'root' => $node->getRoot(),
-            'leftnode' => $node->getLeftnode() + ($includeNode ? 0 : 1),
-            'rightnode' => $node->getRightnode() - ($includeNode ? 0 : 1)
-        ));
+                ->andIsDescendantOf($node, !$includeNode);
 
-        if (false === empty($depth)) {
-            $q = $q->andWhere('n._level <= :level')
-                    ->setParameter('level', $node->getLevel() + $depth);
+        if (null !== $depth) {
+            $q->andLevelIsLowerThan($node->getLevel() + $depth);
         }
 
         return $q;
@@ -509,7 +453,14 @@ class NestedNodeRepository extends EntityRepository
      */
     public function getDescendants(ANestedNode $node, $depth = null, $includeNode = false)
     {
-        return $this->_getDescendantsQuery($node, $depth, $includeNode)
+        $q = $this->createQueryBuilder('n')
+                ->andIsDescendantOf($node, !$includeNode);
+
+        if (null !== $depth) {
+            $q->andLevelIsLowerThan($node->getLevel() + $depth);
+        }
+
+        return $q->orderBy('n._leftnode', 'asc')
                         ->getQuery()
                         ->getResult();
     }
@@ -709,28 +660,14 @@ class NestedNodeRepository extends EntityRepository
 
         $this->createQueryBuilder('n')
                 ->set('n._parent', 'NULL')
-                ->andWhere("n._leftnode >= :leftNodeValue")
-                ->andWhere("n._rightnode <= :rightNodeValue")
-                ->andWhere("n._root = :root")
-                ->setParameters(array(
-                    "leftNodeValue" => $node->getLeftnode(),
-                    "rightNodeValue" => $node->getRightnode(),
-                    "root" => $node->getRoot()
-                ))
+                ->andIsDescendantOf($node)
                 ->update()
                 ->getQuery()
                 ->execute();
 
         $this->createQueryBuilder('n')
                 ->delete()
-                ->andWhere("n._leftnode >= :leftNodeValue")
-                ->andWhere("n._rightnode <= :rightNodeValue")
-                ->andWhere("n._root = :root")
-                ->setParameters(array(
-                    "leftNodeValue" => $node->getLeftnode(),
-                    "rightNodeValue" => $node->getRightnode(),
-                    "root" => $node->getRoot()
-                ))
+                ->andIsDescendantOf($node)
                 ->getQuery()
                 ->execute();
 
@@ -771,24 +708,18 @@ class NestedNodeRepository extends EntityRepository
         } else {
             $this->createQueryBuilder('n')
                     ->set('n._leftnode', 'n._leftnode + :delta')
-                    ->andWhere('n._root = :root')
-                    ->andWhere('n._leftnode >= :leftnode')
-                    ->setParameters(array(
-                        'delta' => $delta,
-                        'root' => $node->getRoot(),
-                        'leftnode' => $first))
+                    ->andRootIs($node->getRoot())
+                    ->andLeftnodeIsUpperThan($first)
+                    ->setParameter('delta', $delta)
                     ->update()
                     ->getQuery()
                     ->execute();
 
             $this->createQueryBuilder('n')
                     ->set('n._rightnode', 'n._rightnode + :delta')
-                    ->andWhere('n._root = :root')
-                    ->andWhere('n._rightnode >= :rightnode')
-                    ->setParameters(array(
-                        'delta' => $delta,
-                        'root' => $node->getRoot(),
-                        'rightnode' => $first))
+                    ->andRootIs($node->getRoot())
+                    ->andRightnodeIsUpperThan($first)
+                    ->setParameter('delta', $delta)
                     ->update()
                     ->getQuery()
                     ->execute();
@@ -814,17 +745,10 @@ class NestedNodeRepository extends EntityRepository
                 ->set('n._rightnode', 'n._rightnode - :delta_node')
                 ->set('n._level', 'n._level - :delta_level')
                 ->set('n._root', ':node')
-                ->andWhere('n._leftnode >= :leftnode')
-                ->andWhere('n._rightnode <= :rightnode')
-                ->andWhere('n._root = :root')
-                ->setParameters(array(
-                    'delta_node' => $node->getLeftnode() - 1,
-                    'delta_level' => $node->getLevel(),
-                    'leftnode' => $node->getLeftnode(),
-                    'rightnode' => $node->getRightnode(),
-                    'root' => $node->getRoot(),
-                    'node' => $node
-                ))
+                ->andIsDescendantOf($node)
+                ->setParameter('delta_node', $node->getLeftnode() - 1)
+                ->setParameter('delta_level', $node->getLevel())
+                ->setParameter('node', $node)
                 ->update()
                 ->getQuery()
                 ->execute();
@@ -843,14 +767,13 @@ class NestedNodeRepository extends EntityRepository
      * Refresh an existing node
      * @param \BackBuilder\NestedNode\ANestedNode $node
      * @return \BackBuilder\NestedNode\Repository\NestedNodeRepository
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $node is not flushed yet
      */
     protected function _refreshExistingNode(ANestedNode $node)
     {
         if (true === $this->_em->contains($node)) {
             $this->_em->refresh($node);
         } elseif (null === $node = $this->find($node->getUid())) {
-            throw new InvalidArgumentException('Node has to be flushed before refreshed');
+            $this->_em->persist($node);
         }
 
         return $this;
@@ -873,6 +796,18 @@ class NestedNodeRepository extends EntityRepository
         }
 
         return $this;
+    }
+
+    /**
+     * Creates a new NestedNode QueryBuilder instance that is prepopulated for this entity name.
+     * @param string $alias
+     * @param string $indexBy The index for the from.
+     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     */
+    public function createQueryBuilder($alias, $indexBy = null)
+    {
+        $qb = new NestedNodeQueryBuilder($this->_em);
+        return $qb->select($alias)->from($this->_entityName, $alias, $indexBy);
     }
 
 }

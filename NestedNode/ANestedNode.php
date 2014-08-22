@@ -118,6 +118,12 @@ abstract class ANestedNode extends AObjectIdentifiable
     protected $_children;
 
     /**
+     * Properties ignored while unserializing object
+     * @var array
+     */
+    protected $_unserialized_ignored = array('_created', '_modified');
+    
+    /**
      * Class constructor
      * @param string $uid The unique identifier of the node
      * @param array $options Initial options for the node
@@ -434,7 +440,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
         foreach (get_object_vars($serialized) as $property => $value) {
             $property = '_' . $property;
-            if (true === in_array($property, array('_created', '_modified'))) {
+            if (true === in_array($property, $this->_unserialized_ignored)) {
                 continue;
             } else if (true === property_exists($this, $property)) {
                 $this->$property = $value;
