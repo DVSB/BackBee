@@ -1,0 +1,9 @@
+{% set time = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ time.getLabel() }}</label>
+    <input type="time" 
+        {% if time.getValue() is not null%}value="{{ time.getValue() }}"{% endif %} 
+        class="form-control" 
+        {% if time.getPlaceholder() is not null %}placeholder="{{ time.getPlaceholder() }}"{% endif %}
+    >
+</div>

@@ -1,0 +1,9 @@
+{% set email = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ email.getLabel() }}</label>
+    <input type="email" 
+        {% if email.getValue() is not null%}value="{{ email.getValue() }}"{% endif %} 
+        class="form-control" 
+        {% if email.getPlaceholder() is not null %}placeholder="{{ email.getPlaceholder() }}"{% endif %}
+    >
+</div>

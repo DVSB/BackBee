@@ -1,0 +1,9 @@
+{% set week = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ week.getLabel() }}</label>
+    <input type="week" 
+        {% if week.getValue() is not null%}value="{{ week.getValue() }}"{% endif %} 
+        class="form-control" 
+        {% if week.getPlaceholder() is not null %}placeholder="{{ week.getPlaceholder() }}"{% endif %}
+    >
+</div>

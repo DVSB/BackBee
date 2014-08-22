@@ -1,0 +1,8 @@
+{% set datetime = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ datetime.getLabel() }}</label>
+    <input type="datetime" 
+        {% if datetime.getValue() is not null%}value="{{ datetime.getValue() }}"{% endif %} 
+        class="form-control" 
+    >
+</div>

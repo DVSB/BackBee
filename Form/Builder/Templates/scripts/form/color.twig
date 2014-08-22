@@ -1,0 +1,8 @@
+{% set color = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ color.getLabel() }}</label>
+    <input type="color" 
+        {% if color.getValue() is not null%}value="{{ color.getValue() }}"{% endif %} 
+        class="form-control" 
+    >
+</div>
