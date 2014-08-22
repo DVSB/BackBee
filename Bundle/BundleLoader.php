@@ -241,7 +241,7 @@ class BundleLoader
         // $definition->addTag('dumpable');
         $definition->addMethodCall('setContainer', array(new Reference('service_container')));
         $definition->addMethodCall('setEnvironment', array('%bbapp.environment%'));
-        $definition->setConfigurator(array(new Reference('bundle_config_configurator'), 'configure'));
+        $definition->setConfigurator(array(new Reference('config.configurator'), 'configureBundleConfig'));
 
         return $definition;
     }

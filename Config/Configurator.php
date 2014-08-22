@@ -39,7 +39,7 @@ use Doctrine\ORM\EntityManager;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class ConfigBuilder
+class Configurator
 {
     /**
      * constants we need to define which type of extend and build we have to perform;
@@ -54,7 +54,7 @@ class ConfigBuilder
      *
      * @var [type]
      */
-    private $em;
+    private $application;
 
     /**
      * BackBee base directory
@@ -92,22 +92,26 @@ class ConfigBuilder
     private $override_config;
 
     /**
-     * ConfigBuilder's constructor
+     * [$configs_default_sections description]
+     *
+     * @var [type]
+     */
+    private $configs_default_sections;
+
+    /**
+     * Configurator's constructor
      *
      * @param boolean $override_config define if we should override config on extend()
      */
     public function __construct(IApplication $application)
     {
+        $this->application = $application;
         $this->bb_directory = $application->getBBDir();
         $this->base_repository = $application->getBaseRepository();
         $this->context = $application->getContext();
         $this->environment = $application->getEnvironment();
         $this->override_config = $application->isOverridedConfig();
-    }
-
-    public function setEntityManager(EntityManager $em)
-    {
-        $this->em = $em;
+        $this->configs_default_sections = array();
     }
 
     /**
@@ -129,6 +133,51 @@ class ConfigBuilder
                 throw new InvalidConfigTypeException('extend', $type);
             }
         }
+    }
+
+    public function configureApplicationConfig(Config $config)
+    {
+        $this->extend(self::APPLICATION_CONFIG, $config);
+        $this->storeConfigDefaultSections($config);
+    }
+
+    /**
+     * [configureBundleConfig description]
+     * @param  Config $config [description]
+     * @return [type]         [description]
+     */
+    public function configureBundleConfig(Config $config)
+    {
+        $this->extend(self::BUNDLE_CONFIG, $config, array('bundle_id' => basename(dirname($config->getBaseDir()))));
+        $this->storeConfigDefaultSections($config);
+    }
+
+    /**
+     * [getConfigDefaultSections description]
+     *
+     * @param  Config $config [description]
+     *
+     * @return [type]         [description]
+     */
+    public function getConfigDefaultSections(Config $config)
+    {
+        $index = spl_object_hash($config);
+        $default_sections = null;
+        if (true === array_key_exists($index, $this->configs_default_sections)) {
+            $default_sections = $this->configs_default_sections[$index];
+        }
+
+        return $default_sections;
+    }
+
+    /**
+     * [storeConfigDefaultSections description]
+     *
+     * @param  Config $config [description]
+     */
+    private function storeConfigDefaultSections(Config $config)
+    {
+        $this->configs_default_sections[spl_object_hash($config)] = $config->getAllRawSections();
     }
 
     /**
@@ -154,23 +203,28 @@ class ConfigBuilder
 
     /**
      * [doBundleConfigExtend description]
+     *
      * @param  Config $config  [description]
      * @param  array  $options [description]
+     *
      * @return [type]          [description]
      */
     private function doBundleConfigExtend(Config $config, array $options)
     {
-        $this->overrideConfigWithEnvironment($config, $options['bundle_id']);
-        $this->overrideConfigWithRegistry($config, $options['bundle_id']);
+        $this->overrideConfigByFile($config, $options['bundle_id']);
+        $config_config = $this->application->getConfig()->getConfigConfig();
+        if (!array_key_exists('save_in_registry', $config_config) || true === $config_config['save_in_registry']) {
+            $this->overrideConfigByRegistry($config, $options['bundle_id']);
+        }
     }
 
     /**
-     * [overrideConfigWithEnvironment description]
+     * [overrideConfigByFile description]
      *
      * @param  Config $config    [description]
      * @param  [type] $bundle_id [description]
      */
-    private function overrideConfigWithEnvironment(Config $config, $bundle_id)
+    private function overrideConfigByFile(Config $config, $bundle_id)
     {
         $directories = BundleConfigDirectory::getDirectories(
             $this->base_repository,
@@ -185,12 +239,12 @@ class ConfigBuilder
     }
 
     /**
-     * [overrideConfigWithRegistry description]
+     * [overrideConfigByRegistry description]
      *
      * @param  Config $config [description]
      * @param  [type] $bundle_id     [description]
      */
-    private function overrideConfigWithRegistry(Config $config, $bundle_id)
+    private function overrideConfigByRegistry(Config $config, $bundle_id)
     {
         $registry = $this->getRegistryConfig($bundle_id);
         if (null !== $registry && null !== $serialized = $registry->getValue()) {
@@ -214,9 +268,9 @@ class ConfigBuilder
     private function getRegistryConfig($bundle_id)
     {
         $registry = null;
-        if(null !== $this->em) {
+        if(null !== $em = $this->application->getEntityManager()) {
             try {
-                $registry = $this->em->getRepository('BackBuilder\Bundle\Registry')
+                $registry = $em->getRepository('BackBuilder\Bundle\Registry')
                     ->findRegistryEntityByIdAndScope($bundle_id, 'BUNDLE.CONFIG')
                 ;
 

@@ -26,7 +26,6 @@ namespace BackBuilder;
 use BackBuilder\AutoLoader\AutoLoader;
 use BackBuilder\Bundle\BundleLoader;
 use BackBuilder\Config\Config;
-use BackBuilder\Config\ConfigBuilder;
 use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
@@ -142,7 +141,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
         $this->_initAnnotationReader();
         $this->_initContainer();
-        $this->_initApplicationConfig();
         $this->_initEnvVariables();
         $this->_initAutoloader();
         $this->_initContentWrapper();
@@ -992,11 +990,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->_container = (new ContainerBuilder($this))->getContainer();
 
         return $this;
-    }
-
-    private function _initApplicationConfig()
-    {
-        (new ConfigBuilder($this))->extend(ConfigBuilder::APPLICATION_CONFIG, $this->getConfig());
     }
 
     private function _initEnvVariables()

@@ -85,8 +85,8 @@ parameters:
 
     config.yml_files_to_ignore: ['services', 'bootstrap']
 
+    bbapp.config.configurator.class: BackBuilder\Config\Configurator
     bbapp.bundle.loader.class: BackBuilder\Bundle\BundleLoader
-    bundle_config_configurator.class: BackBuilder\Bundle\BundleConfigConfigurator
 
 services:
     cache.bootstrap:
@@ -103,6 +103,7 @@ services:
         calls:
             - [setContainer, ['@service_container']]
             - [setEnvironment, ['%bbapp.environment%']]
+        configurator: ["@config.configurator", configureApplicationConfig]
     event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
@@ -165,8 +166,8 @@ services:
         class:      %bbapp.bundle.loader.class%
         arguments:  ["@bbapp"]
 
-    bundle_config_configurator:
-        class:      %bundle_config_configurator.class%
+    config.configurator:
+        class:      %bbapp.config.configurator.class%
         arguments:  ["@bbapp"]
         public:     false
 
