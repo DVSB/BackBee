@@ -1,0 +1,9 @@
+{% set object = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ object.getLabel() }}</label>
+    <input type="text" 
+        {% if object.getValue() is not null%}value="{{ object.getValue() }}"{% endif %} 
+        class="form-control" 
+        {% if object.getPlaceholder() is not null %}placeholder="{{ object.getPlaceholder() }}"{% endif %}
+    >
+</div>

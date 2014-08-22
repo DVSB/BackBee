@@ -356,6 +356,11 @@ services:
         class: BackBuilder\Validator\EntityValidator
         arguments:  ["@em"]
 
+    #form
+    form.builder:
+        class: BackBuilder\Form\Builder\GlobalFormBuilder
+        arguments: ["@renderer"]
+        
     nestednode.page_listener:
         arguments:  [@bbapp]
         class: BackBuilder\Event\Listener\PageListener
