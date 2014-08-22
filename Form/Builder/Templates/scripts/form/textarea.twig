@@ -1,0 +1,5 @@
+{% set textarea = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ textarea.getLabel() }}</label>
+    <textarea class="form-control" rows="{{ textarea.getRows() }}"></textarea>
+</div>

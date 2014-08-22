@@ -29,53 +29,34 @@ namespace BackBuilder\Form\Builder\Form\Element;
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
-class Select extends Element
+class Textarea extends Element
 {
-    const OPTION_PARAMETER = 'options';
-    const SELECTED_PARAMETER = 'selected';
-    const MULTIPLE_PARAMETER = 'multiple';
+    const ROWS_PARAMETER = 'rows';
     
-    protected $options = array();
-    protected $multiple = false;
+    protected $rows = 5;
     
     public function __construct($key, array $config = array())
     {
         parent::__construct($key, $config);
         $this->buildCustomConfig($config);
-        $this->type = 'select';
-        $this->template =  'form/select';
+        $this->type = 'text';
+        $this->template =  'form/textarea';
     }
     
     public function buildCustomConfig(array $config = array())
     {
-        if (true === isset($config[self::OPTION_PARAMETER])) {
-            $this->options = $config[self::OPTION_PARAMETER];
-        }
-        if (true === isset($config[self::SELECTED_PARAMETER])) {
-            $this->value = $config[self::SELECTED_PARAMETER];
-        }
-        if (true === isset($config[self::MULTIPLE_PARAMETER]) && true === $config[self::MULTIPLE_PARAMETER]) {
-            $this->multiple = true;
+        if (true === isset($config[self::ROWS_PARAMETER])) {
+            $this->rows = $config[self::ROWS_PARAMETER]; 
         }
     }
     
-    public function getOptions()
+    public function getRows()
     {
-        return $this->options;
+        return $this->rows;
     }
     
-    public function isMultiple()
+    public function setRows($rows)
     {
-        return $this->multiple;
-    }
-    
-    public function setOptions(array $options = array())
-    {
-        $this->options = $options;
-    }
-    
-    public function setMultiple($multiple)
-    {
-        $this->multiple = (bool) $multiple;
+        $this->rows = $rows;
     }
 }

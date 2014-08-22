@@ -55,7 +55,7 @@ class GlobalFormBuilder extends AFormBuilder
                 }
             }
         }
-        
+
         return $this->renderer->assign('form', $form)
                               ->partial($form->getTemplate());
     }
