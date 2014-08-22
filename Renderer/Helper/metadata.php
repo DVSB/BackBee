@@ -49,7 +49,9 @@ class metadata extends AHelper
         if (null === $metadata = $page->getMetaData()) {
             $metadata = new MetaDataBag($renderer->getApplication()->getConfig()->getMetadataConfig(), $page);
             $page->setMetaData($metadata);
-            $renderer->getApplication()->getEntityManager()->flush($page);
+            if($renderer->getApplication()->getEntityManager()->contains($page)) {
+                $renderer->getApplication()->getEntityManager()->flush($page);
+            }
         }
 
         $result = '';
