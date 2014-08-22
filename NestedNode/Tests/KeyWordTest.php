@@ -102,10 +102,22 @@ class KeyWordTest extends TestCase
             'created' => $this->current_time->getTimestamp(),
             'modified' => $this->current_time->getTimestamp(),
             'isleaf' => true,
-            'keyword' => null
+            'keyword' => 'test'
         );
 
         $this->assertEquals($expected, $this->keyword->toArray());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\MediaFolder::toStdObject
+     */
+    public function testToStdObject()
+    {
+        $obj = $this->keyword->toStdObject();
+        $this->assertEquals('test', $obj->uid);
+        $this->assertEquals(0, $obj->level);
+        $this->assertEquals('test', $obj->keyword);
+        $this->assertEquals(array(), $obj->children);
     }
 
     /**
@@ -115,6 +127,7 @@ class KeyWordTest extends TestCase
     {
         $this->current_time = new \Datetime();
         $this->keyword = new KeyWord('test');
+        $this->keyword->setKeyWord('test');
     }
 
 }

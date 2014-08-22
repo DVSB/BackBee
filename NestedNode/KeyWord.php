@@ -25,7 +25,6 @@ use BackBuilder\ClassContent\AClassContent,
     BackBuilder\NestedNode\ANestedNode,
     BackBuilder\Renderer\IRenderable;
 use Doctrine\Common\Collections\ArrayCollection;
-
 use JMS\Serializer\Annotation as Serializer;
 
 /**
@@ -241,6 +240,20 @@ class KeyWord extends ANestedNode implements IRenderable
     public function getTemplateName()
     {
         return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
+
+    /**
+     * Returns a stdObj representation of the node
+     * @return \stdClass
+     */
+    public function toStdObject()
+    {
+        $object = new \stdClass();
+        $object->uid = $this->getUid();
+        $object->level = $this->getLevel();
+        $object->keyword = $this->getKeyword();
+        $object->children = array();
+        return $object;
     }
 
 }
