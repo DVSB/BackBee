@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\Bundle;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,21 +20,17 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Bundle;
-
+use BackBuilder\BBApplication;
 use BackBuilder\Bundle\AbstractBaseBundle;
-use BackBuilder\BBApplication,
-    BackBuilder\Config\Config,
-    BackBuilder\Routing\RouteCollection as Routing,
-    BackBuilder\Logging\Logger,
-    BackBuilder\Security\Acl\Domain\IObjectIdentifiable,
-    BackBuilder\Util\Arrays,
-    BackBuilder\Bundle\Exception\BundleException;
-use Symfony\Component\Security\Core\Util\ClassUtils,
-    Symfony\Component\Yaml\Yaml;
+use BackBuilder\Bundle\Exception\BundleException;
+use BackBuilder\Logging\Logger;
+use BackBuilder\Routing\RouteCollection as Routing;
+use BackBuilder\Util\Arrays;
 
-use Doctrine\ORM\Tools\SchemaTool,
-    Doctrine\ORM\EntityManager;
+use Symfony\Component\Security\Core\Util\ClassUtils;
+
+use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\ORM\EntityManager;
 
 /**
  * Abstract class for bundle in BackBuilder5 application
@@ -43,20 +40,13 @@ use Doctrine\ORM\Tools\SchemaTool,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
+abstract class ABundle extends AbstractBaseBundle
 {
-
-    private $_id;
-    private $_application;
     private $_em;
     private $_logger;
-    private $_basedir;
-    private $_config;
     private $_properties;
     private $_routing;
     private $_request;
-
-    private $started;
 
     /**
      * @var array
@@ -92,67 +82,13 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
 
     public function __construct(BBApplication $application, Logger $logger = null)
     {
-        $this->_application = $application;
-
-        $r = new \ReflectionObject($this);
-        $this->_basedir = dirname($r->getFileName());
-        $this->_id = basename($this->_basedir);
+        parent::__construct($application);
 
         $this->_logger = $logger;
 
         if (null === $this->_logger) {
-            $this->_logger = $this->_application->getLogging();
+            $this->_logger = $this->getApplication()->getLogging();
         }
-
-        $this->started = false;
-    }
-
-    private function _initConfig($configdir = null)
-    {
-        if (null === $this->_config) {
-            $this->_config = self::initBundleConfig($this->getApplication(), $this->_basedir);
-        }
-
-        $all_sections = $this->_config->getAllRawSections();
-        $this->config_default_sections = $all_sections;
-
-        if (
-            true === array_key_exists('bundle', $all_sections) &&
-            true === array_key_exists('manage_multisite', $all_sections['bundle']) &&
-            false === $all_sections['bundle']['manage_multisite']
-        ) {
-            $this->manage_multisite_config = false;
-        }
-
-        return $this;
-    }
-
-    /**
-     * [initBundleConfig description]
-     * @param  BBApplication $application           [description]
-     * @param  [type]        $bundle_base_directory [description]
-     * @return [type]                               [description]
-     */
-    public static function initBundleConfig(BBApplication $application, $bundle_base_directory)
-    {
-        //$config_dir = implode(DIRECTORY_SEPARATOR, array($bundle_base_directory, 'Ressources'));
-
-        $config_dir = $bundle_base_directory . DIRECTORY_SEPARATOR . 'Ressources';
-        if ('test' === $application->getContext()) {
-           $test_dir = $bundle_base_directory . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
-
-           if (true === file_exists($test_dir)) {
-               $config_dir = $test_dir;
-            }
-         }
-
-        $config = new Config($config_dir, $application->getBootstrapCache(), null, $application->isDebugMode());
-        $config->setEnvironment($application->getEnvironment());
-        $config->setContainer($application->getContainer());
-
-        $id = basename($bundle_base_directory);
-
-        return $config;
     }
 
     /**
@@ -281,15 +217,15 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
 
     private function completeConfigInit()
     {
-        $overrideSection = $this->_config->getSection('override_site');
+        $overrideSection = $this->getConfig()->getSection('override_site');
 
         if (null !== $overrideSection) {
             $site = $this->getApplication()->getSite();
             if (null !== $site && true === isset($overrideSection[$site->getUid()])) {
                 $siteConfig = $overrideSection[$site->getUid()];
                 foreach ($siteConfig as $section => $datas) {
-                    $this->_config->setSection($section, Arrays::array_merge_assoc_recursive(
-                                    $this->_config->getSection($section), $siteConfig[$section]
+                    $this->getConfig()->setSection($section, Arrays::array_merge_assoc_recursive(
+                                    $this->getConfig()->getSection($section), $siteConfig[$section]
                             ), true);
                 }
             }
@@ -305,19 +241,10 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
             $this->_routing = false;
         }
 
-        $this->_routing = new Routing($this->_application);
+        $this->_routing = new Routing($this->getApplication());
         $this->_routing->addBundleRouting($this);
 
         return $this;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @return BBApplication
-     */
-    public function getApplication()
-    {
-        return $this->_application;
     }
 
     /**
@@ -348,7 +275,7 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
      */
     public function getBaseDir()
     {
-        return $this->_basedir;
+        return $this->getBaseDirectory();
     }
 
     /**
@@ -360,7 +287,7 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
         //return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
 
         $resources_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
-        if ('test' === $this->_application->getEnvironment()) {
+        if ('test' === $this->getApplication()->getEnvironment()) {
             $test_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
             if (true === file_exists($test_dir)) {
                 $resources_dir = $test_dir;
@@ -371,14 +298,9 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
     }
 
     /**
-     * @codeCoverageIgnore
-     * @return integer
+     * [getRouting description]
+     * @return [type] [description]
      */
-    public function getId()
-    {
-        return $this->_id;
-    }
-
     public function getRouting()
     {
         if (NULL === $this->_routing)
@@ -401,39 +323,17 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
     }
 
     /**
-     *
-     * @param string|null $configdir
-     * @return Config
-     */
-    public function getConfig($configdir = null)
-    {
-        if (null === $this->_config) {
-            $this->_initConfig($configdir);
-        }
-
-        if (
-                true === $this->manage_multisite_config &&
-                false === $this->isConfigFullyInit &&
-                null !== $this->getApplication()->getSite()
-        ) {
-            $this->completeConfigInit();
-        }
-
-        return $this->_config;
-    }
-
-    /**
      * Do save of bundle new config, allow and manage multisite config
      */
     public function saveConfig()
     {
         if (false === $this->manage_multisite_config) {
-            $this->doSaveConfig($this->_config->getAllSections());
+            $this->doSaveConfig($this->getConfig()->getAllSections());
 
             return;
         }
 
-        $wipConfig = $this->_config->getAllSections();
+        $wipConfig = $this->getConfig()->getAllSections();
         $updatedSections = Arrays::array_diff_assoc_recursive($wipConfig, $this->config_default_sections);
 
         if (0 < count($updatedSections)) {
@@ -447,41 +347,12 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
 
             $this->doSaveConfig($this->config_default_sections);
         } else {
-            $registry = self::_getRegistryConfig($this->getApplication(), $this->_id);
+            $registry = self::_getRegistryConfig($this->getApplication(), $this->getId());
             if ($this->getApplication()->getEntityManager()->contains($registry)) {
                 $this->getApplication()->getEntityManager()->remove($registry);
                 $this->getApplication()->getEntityManager()->flush($registry);
             }
         }
-    }
-
-    /**
-     * Returns the registry entry for bundle's config storing
-     * @return \BackBuilder\Bundle\Registry
-     */
-    private static function _getRegistryConfig(BBApplication $application, $id)
-    {
-        $registry = null;
-        $em = $application->getEntityManager();
-        if(null !== $em) {
-            try {
-                $registry = $em->getRepository('BackBuilder\Bundle\Registry')
-                    ->findRegistryEntityByIdAndScope($id, 'BUNDLE.CONFIG');
-            } catch (\Exception $e) {
-                if (true === $application->isStarted()) {
-                    $application->warning('Unable to load registry table');
-                }
-            }
-
-            if (null === $registry) {
-                $registry = new Registry();
-                $registry->setKey($id)
-                         ->setScope('BUNDLE.CONFIG')
-                ;
-            }
-        }
-
-        return $registry;
     }
 
     /**
@@ -491,7 +362,7 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
      */
     private function doSaveConfig(array $config)
     {
-        $registry = self::_getRegistryConfig($this->getApplication(), $this->_id);
+        $registry = self::_getRegistryConfig($this->getApplication(), $this->getId());
         $registry->setValue(serialize($config));
 
         if (false === $this->getApplication()->getEntityManager()->contains($registry)) {
@@ -505,8 +376,9 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
     {
         if (NULL === $this->_properties) {
             $this->_properties = $this->getConfig()->getSection('bundle');
-            if (NULL === $this->_properties)
+            if (NULL === $this->_properties) {
                 $this->_properties = array();
+            }
         }
 
         if (NULL === $key)
@@ -537,81 +409,6 @@ abstract class ABundle extends AbstractBaseBundle implements IObjectIdentifiable
 
     public function unserialize($serialized)
     {
-
-    }
-
-    abstract function start();
-
-    abstract function stop();
-
-    /**
-     * [isStarted description]
-     * @return boolean [description]
-     */
-    public function isStarted()
-    {
-        return $this->started;
-    }
-
-    /**
-     * [started description]
-     * @return [type] [description]
-     */
-    public function started()
-    {
-        $this->started = true;
-    }
-
-
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*               Implementation of IObjectIdentifiable                    */
-    /*                                                                        */
-    /*     * **************************************************************** */
-
-    /**
-     * Returns a unique identifier for this domain object.
-     * @return string
-     * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
-     * @codeCoverageIgnore
-     */
-    public function getObjectIdentifier()
-    {
-        return $this->getType() . '(' . $this->getIdentifier() . ')';
-    }
-
-    /**
-     * Returns the unique identifier for this object.
-     * @return string
-     * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
-     * @codeCoverageIgnore
-     */
-    public function getIdentifier()
-    {
-        return $this->getId();
-    }
-
-    /**
-     * Returns the PHP class name of the object.
-     * @return string
-     * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
-     * @codeCoverageIgnore
-     */
-    public function getType()
-    {
-        return ClassUtils::getRealClass($this);
-    }
-
-    /**
-     * Checks for an explicit objects equality.
-     * @param \BackBuilder\Security\Acl\Domain\IObjectIdentifiable $identity
-     * @return Boolean
-     * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
-     * @codeCoverageIgnore
-     */
-    public function equals(IObjectIdentifiable $identity)
-    {
-        return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }
 
     /**

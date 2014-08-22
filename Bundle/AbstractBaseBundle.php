@@ -23,55 +23,85 @@ namespace BackBuilder\Bundle;
 use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Config\Config;
 use BackBuilder\IApplication as ApplicationInterface;
+use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
 
 /**
- * Abstract class for bundle in BackBuilder5 application
+ * Abstract base class for BackBee's bundle
  *
  * @category    BackBuilder
  * @package     BackBuilder\Bundle
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class AbstractBaseBundle implements BundleInterface
+abstract class AbstractBaseBundle implements BundleInterface
 {
+    /**
+     * [$application description]
+     *
+     * @var BackBuilder\IApplication
+     */
     private $application;
 
     /**
      * [$base_directory description]
-     * @var [type]
+     *
+     * @var string
      */
     private $base_directory;
 
     /**
      * [$base_directory description]
-     * @var [type]
+     *
+     * @var string
      */
     private $id;
 
     /**
      * [$base_directory description]
-     * @var [type]
+     *
+     * @var BackBuilder\Config\Config
      */
     private $config;
 
     /**
      * [$config_id description]
-     * @var [type]
+     *
+     * @var string
      */
     private $config_id;
 
     /**
-     * [__construct description]
+     * [$started description]
+     *
+     * @var boolean
+     */
+    private $started;
+
+    /**
+     * AbstractBaseBundle's constructor
+     *
      * @param ApplicationInterface $application [description]
      */
     public function __construct(ApplicationInterface $application)
     {
         $this->application = $application;
+        $this->started = false;
     }
 
     /**
-     * [getBaseDirectory description]
-     * @return [type] [description]
+     * @see BackBuilder\Bundle\BundleInterface::getId
+     */
+    public function getId()
+    {
+        if (null === $this->id) {
+            $this->defineBaseDirectoryAndId();
+        }
+
+        return $this->id;
+    }
+
+    /**
+     * @see BackBuilder\Bundle\BundleInterface::getBaseDirectory
      */
     public function getBaseDirectory()
     {
@@ -79,8 +109,7 @@ class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * [setBaseDirectory description]
-     * @param [type] $base_directory [description]
+     * @see BackBuilder\Bundle\BundleInterface::setBaseDirectory
      */
     public function setBaseDirectory($base_directory)
     {
@@ -91,8 +120,7 @@ class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * [getConfig description]
-     * @return [type] [description]
+     * @see BackBuilder\Bundle\BundleInterface::getConfig
      */
     public function getConfig()
     {
@@ -105,6 +133,7 @@ class AbstractBaseBundle implements BundleInterface
 
     /**
      * [getConfigServiceId description]
+     *
      * @return [type] [description]
      */
     public function getConfigServiceId()
@@ -119,6 +148,7 @@ class AbstractBaseBundle implements BundleInterface
 
     /**
      * [getConfigDirectory description]
+     *
      * @return [type] [description]
      */
     public function getConfigDirectory()
@@ -136,8 +166,67 @@ class AbstractBaseBundle implements BundleInterface
     }
 
     /**
+     * @see BackBuilder\Bundle\BundleInterface::getApplication
+     */
+    public function getApplication()
+    {
+        return $this->application;
+    }
+
+    /**
+     * @see BackBuilder\Bundle\BundleInterface::isStarted
+     */
+    public function isStarted()
+    {
+        return $this->started;
+    }
+
+    /**
+     * @see BackBuilder\Bundle\BundleInterface::started
+     */
+    public function started()
+    {
+        $this->started = true;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @see Symfony\Component\Security\Acl\Model\DomainObjectInterface::getObjectIdentifier
+     */
+    public function getObjectIdentifier()
+    {
+        return $this->getType() . '(' . $this->getIdentifier() . ')';
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @see BackBuilder\Security\Acl\Domain\IObjectIdentifiable::getIdentifier
+     */
+    public function getIdentifier()
+    {
+        return $this->getId();
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @see BackBuilder\Security\Acl\Domain\IObjectIdentifiable::getType
+     */
+    public function getType()
+    {
+        return ClassUtils::getRealClass($this);
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @see BackBuilder\Security\Acl\Domain\IObjectIdentifiable::equals
+     */
+    public function equals(IObjectIdentifiable $identity)
+    {
+        return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
+    }
+
+    /**
      * [initConfig description]
-     * @return [type] [description]
      */
     private function initConfig()
     {
@@ -160,7 +249,6 @@ class AbstractBaseBundle implements BundleInterface
 
     /**
      * [defineBaseDirectoryAndId description]
-     * @return [type] [description]
      */
     private function defineBaseDirectoryAndId()
     {

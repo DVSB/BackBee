@@ -20,6 +20,8 @@ namespace BackBuilder\Bundle;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
+
 /**
  * BundleInterface which define somes methods to implements for BackBee bundles; it also define some constants
  *
@@ -28,7 +30,7 @@ namespace BackBuilder\Bundle;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-interface BundleInterface
+interface BundleInterface extends IObjectIdentifiable
 {
     /**
      * service id pattern (for bundle and bundle's config)
@@ -45,6 +47,13 @@ interface BundleInterface
     const OLD_CONFIG_DIRECTORY_NAME = 'Ressources';
 
     /**
+     * [getId description]
+     *
+     * @return [type] [description]
+     */
+    public function getId();
+
+    /**
      * [getBaseDirectory description]
      *
      * @return [type] [description]
@@ -57,4 +66,39 @@ interface BundleInterface
      * @param [type] $base_directory [description]
      */
     public function setBaseDirectory($base_directory);
+
+    /**
+     * [start description]
+     *
+     * @return [type] [description]
+     */
+    public function start();
+
+    /**
+     * [stop description]
+     *
+     * @return [type] [description]
+     */
+    public function stop();
+
+    /**
+     * [getApplication description]
+     *
+     * @return [type] [description]
+     */
+    public function getApplication();
+
+    /**
+     * [isStarted description]
+     *
+     * @return boolean [description]
+     */
+    public function isStarted();
+
+    /**
+     * [started description]
+     *
+     * @return [type] [description]
+     */
+    public function started();
 }
