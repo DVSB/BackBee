@@ -2,10 +2,12 @@
 <div class="form-group">
     <label class="sr-only" for="">{{ number.getLabel() }}</label>
     <input type="number" 
-        {% if number.getValue() is not null%}value="{{ number.getValue() }}"{% endif %} 
-        class="form-control" 
-        {% if number.getMax() is not null %}max="{{ number.getMax() }}"{% endif %}
-        {% if number.getMin() is not null %}min="{{ number.getMin() }}"{% endif %}
-        {% if number.getStep() is not null %}step="{{ number.getStep() }}"{% endif %}
+           name="{{ number.getUid() }}"
+           {% if nmmber.isDisabled() %}disabled{% endif %}
+           {% if number.getValue() is not null%}value="{{ number.getValue() }}"{% endif %} 
+           class="form-control" 
+           {% if number.getMax() is not null %}max="{{ number.getMax() }}"{% endif %}
+           {% if number.getMin() is not null %}min="{{ number.getMin() }}"{% endif %}
+           {% if number.getStep() is not null %}step="{{ number.getStep() }}"{% endif %}
     >
 </div>

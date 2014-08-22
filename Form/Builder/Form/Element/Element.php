@@ -34,9 +34,10 @@ use BackBuilder\Renderer\IRenderable;
 class Element implements IRenderable 
 {
 
-    const PLACEHOLDER = 'placeholder';
-    const VALUE = 'value';
-    const LABEL = 'label';
+    const PLACEHOLDER_PARAMETER = 'placeholder';
+    const VALUE_PARAMETER = 'value';
+    const LABEL_PARAMETER = 'label';
+    const DISABLED_PARAMETER = 'disabled';
 
     protected $uid;
     protected $type = null;
@@ -44,6 +45,7 @@ class Element implements IRenderable
     protected $placeholder = null;
     protected $value = null;
     protected $template;
+    protected $disabled = false;
 
     public function __construct($key, array $config = array()) 
     {
@@ -54,20 +56,23 @@ class Element implements IRenderable
 
     private function buildConfig(array $config = array()) 
     {
-        if (true === isset($config[self::PLACEHOLDER])) {
-            $this->placeholder = $config[self::PLACEHOLDER];
+        if (true === isset($config[self::PLACEHOLDER_PARAMETER])) {
+            $this->placeholder = $config[self::PLACEHOLDER_PARAMETER];
         }
-        if (true === isset($config[self::VALUE])) {
-            $this->value = $config[self::VALUE];
+        if (true === isset($config[self::VALUE_PARAMETER])) {
+            $this->value = $config[self::VALUE_PARAMETER];
         }
-        if (true === isset($config[self::LABEL])) {
-            $this->label = $config[self::LABEL];
+        if (true === isset($config[self::LABEL_PARAMETER])) {
+            $this->label = $config[self::LABEL_PARAMETER];
+        }
+        if (true === isset($config[self::DISABLED_PARAMETER]) && true == $config[self::DISABLED_PARAMETER]) {
+            $this->disabled = true;
         }
     }
 
     public function getUid() 
     {
-        $this->uid;
+        return $this->uid;
     }
 
     public function getType() 
@@ -88,6 +93,11 @@ class Element implements IRenderable
     public function getValue() 
     {
         return $this->value;
+    }
+    
+    public function isDisabled()
+    {
+        return $this->disabled;
     }
 
     public function setType($type) 
@@ -117,6 +127,11 @@ class Element implements IRenderable
     public function setTemplate($template) 
     {
         $this->template = $template;
+    }
+    
+    public function setDisabled($disabled)
+    {
+        $this->disabled = $disabled;
     }
     
     /*     * ******************************************* */

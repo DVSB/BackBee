@@ -2,8 +2,10 @@
 <div class="form-group">
     <label class="sr-only" for="">{{ tel.getLabel() }}</label>
     <input type="tel" 
-        {% if tel.getValue() is not null%}value="{{ tel.getValue() }}"{% endif %} 
-        class="form-control" 
-        {% if tel.getPlaceholder() is not null %}placeholder="{{ tel.getPlaceholder() }}"{% endif %}
+           name="{{ tel.getUid() }}" 
+           {% if tel.isDisabled() %}disabled{% endif %}
+           {% if tel.getValue() is not null%}value="{{ tel.getValue() }}"{% endif %} 
+           class="form-control" 
+           {% if tel.getPlaceholder() is not null %}placeholder="{{ tel.getPlaceholder() }}"{% endif %}
     >
 </div>

@@ -29,21 +29,21 @@ namespace BackBuilder\Form\Builder\Form\Element;
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
-class Select extends Element
+class Checkbox extends Element
 {
     const OPTION_PARAMETER = 'options';
-    const SELECTED_PARAMETER = 'selected';
-    const MULTIPLE_PARAMETER = 'multiple';
+    const CHECKED_PARAMETER = 'checked';
+    const INLINE_PARAMETER = 'inline';
     
     protected $options = array();
-    protected $multiple = false;
+    protected $inline = false;
     
     public function __construct($key, array $config = array())
     {
         parent::__construct($key, $config);
         $this->buildCustomConfig($config);
-        $this->type = 'select';
-        $this->template =  'form/select';
+        $this->type = 'checkbox';
+        $this->template =  'form/checkbox';
     }
     
     public function buildCustomConfig(array $config = array())
@@ -51,12 +51,14 @@ class Select extends Element
         if (true === isset($config[self::OPTION_PARAMETER])) {
             $this->options = $config[self::OPTION_PARAMETER];
         }
-        if (true === isset($config[self::SELECTED_PARAMETER])) {
-            $this->setValue($config[self::SELECTED_PARAMETER]);
+        if (true === isset($config[self::CHECKED_PARAMETER])) {
+            $this->setValue($config[self::CHECKED_PARAMETER]);
         }
-        if (true === isset($config[self::MULTIPLE_PARAMETER]) && true === $config[self::MULTIPLE_PARAMETER]) {
-            $this->multiple = true;
+        
+        if (true === isset($config[self::INLINE_PARAMETER]) && true === $config[self::INLINE_PARAMETER]) {
+            $this->inline = true;
         }
+        
     }
     
     public function getOptions()
@@ -64,9 +66,9 @@ class Select extends Element
         return $this->options;
     }
     
-    public function isMultiple()
+    public function isInline()
     {
-        return $this->multiple;
+        return $this->inline;
     }
     
     public function setOptions(array $options = array())
@@ -74,9 +76,9 @@ class Select extends Element
         $this->options = $options;
     }
     
-    public function setMultiple($multiple)
+    public function setInline($inline)
     {
-        $this->multiple = (bool) $multiple;
+        $this->inline = (bool) $inline;
     }
     
     public function setValue($value = array())

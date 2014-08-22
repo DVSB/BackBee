@@ -2,7 +2,9 @@
 <div class="form-group">
     <label class="sr-only" for="">{{ month.getLabel() }}</label>
     <input type="month" 
-        {% if month.getValue() is not null%}value="{{ month.getValue() }}"{% endif %} 
-        class="form-control" 
+           name="{{ month.getUid() }}"
+           {% if month.isDisabled() %}disabled{% endif %}
+           {% if month.getValue() is not null%}value="{{ month.getValue() }}"{% endif %} 
+           class="form-control" 
     >
 </div>

@@ -2,7 +2,9 @@
 <div class="form-group">
     <label class="sr-only" for="">{{ datetime.getLabel() }}</label>
     <input type="datetime-local" 
-        {% if datetime.getValue() is not null%}value="{{ datetime.getValue() }}"{% endif %} 
-        class="form-control" 
+           name="{{ datetime.getUid() }}"
+           {% if datetime.isDisabled() %}disabled{% endif %}
+           {% if datetime.getValue() is not null%}value="{{ datetime.getValue() }}"{% endif %} 
+           class="form-control" 
     >
 </div>
