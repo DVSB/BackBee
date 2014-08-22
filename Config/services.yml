@@ -86,6 +86,7 @@ parameters:
     config.yml_files_to_ignore: ['services', 'bootstrap']
 
     bbapp.config.configurator.class: BackBuilder\Config\Configurator
+    bbapp.config.persistor.class: BackBuilder\Config\Persistor
     bbapp.bundle.loader.class: BackBuilder\Bundle\BundleLoader
 
 services:
@@ -170,6 +171,10 @@ services:
         class:      %bbapp.config.configurator.class%
         arguments:  ["@bbapp"]
         public:     false
+
+    config.persistor:
+        class:      %bbapp.config.persistor.class%
+        arguments:  ["@bbapp", "@config.configurator"]
 
     analytics:
         class: BackBuilder\Application\Analytics

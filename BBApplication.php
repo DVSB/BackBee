@@ -70,8 +70,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 {
 
     const VERSION = '0.10.0';
-    const DEFAULT_CONTEXT = 'default';
-    const DEFAULT_ENVIRONMENT = '';
 
     /**
      * application's service container
