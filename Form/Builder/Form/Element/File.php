@@ -22,19 +22,19 @@
 namespace BackBuilder\Form\Builder\Form\Element;
 
 /**
- * Validator
+ * File
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder\Form\Element
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
-class Month extends Text
+class File extends Element
 {
     public function __construct($key, array $config = array(), $value = null)
     {
         parent::__construct($key, $config, $value);
-        $this->type = 'month';
-        $this->template =  'form/month';
+        $this->type = 'file';
+        $this->template =  'form/file';
     }
 }

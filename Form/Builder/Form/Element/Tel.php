@@ -31,9 +31,9 @@ namespace BackBuilder\Form\Builder\Form\Element;
  */
 class Tel extends Text
 {
-    public function __construct($key, array $config = array())
+    public function __construct($key, array $config = array(), $value = null)
     {
-        parent::__construct($key, $config);
+        parent::__construct($key, $config, $value);
         $this->type = 'tel';
         $this->template =  'form/tel';
     }

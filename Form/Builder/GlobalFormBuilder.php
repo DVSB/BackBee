@@ -45,18 +45,23 @@ class GlobalFormBuilder extends AFormBuilder
     
     public function createForm() 
     {
+        $request = $this->renderer->getApplication()->getRequest();
+        $data_request = $request->request->all();
         $form = new Form($this->renderer, $this->config);
         foreach ($this->config as $key => $data) {
             if (true === isset($data[self::FORM_PARAMETER])) {
                 $cConfig = $data[self::FORM_PARAMETER];
                 if (null !== $classname = $this->getElementClassname($cConfig[self::TYPE_PARAMETER])) {
-                    $item = new $classname($key, $cConfig);
+                    $value = null;
+                    if (true === isset($data_request[$key])) {
+                        $value = $data_request[$key];
+                    }
+                    $item = new $classname($key, $cConfig, $value);
                     $form->setItem($key, $item);
                 }
             }
         }
-
-        return $this->renderer->assign('form', $form)
-                              ->partial($form->getTemplate());
+       
+        return $this->renderer->assign('form', $form)->partial($form->getTemplate());
     }
 }

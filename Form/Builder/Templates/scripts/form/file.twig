@@ -1,0 +1,9 @@
+{% set file = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ file.getLabel() }}</label>
+    <input type="file" 
+           name="{{ file.getUid() }}" 
+           {% if file.isDisabled() %}disabled{% endif %}
+           class="form-control" 
+    >
+</div>

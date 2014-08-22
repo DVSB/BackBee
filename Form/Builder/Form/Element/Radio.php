@@ -38,9 +38,9 @@ class Radio extends Element
     protected $options = array();
     protected $inline = false;
     
-    public function __construct($key, array $config = array())
+    public function __construct($key, array $config = array(), $value = null)
     {
-        parent::__construct($key, $config);
+        parent::__construct($key, $config, $value);
         $this->buildCustomConfig($config);
         $this->type = 'radio';
         $this->template =  'form/radio';

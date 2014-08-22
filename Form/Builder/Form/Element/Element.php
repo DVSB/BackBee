@@ -47,11 +47,14 @@ class Element implements IRenderable
     protected $template;
     protected $disabled = false;
 
-    public function __construct($key, array $config = array()) 
+    public function __construct($key, array $config = array(), $value = null) 
     {
         $this->uid = $key;
         $this->label = ucfirst($key);
         $this->buildConfig($config);
+        if (null !== $value) {
+            $this->value = $value;
+        }
     }
 
     private function buildConfig(array $config = array()) 

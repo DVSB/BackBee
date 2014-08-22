@@ -39,9 +39,9 @@ class Number extends Text
     protected $max = null;
     protected $step = null;
     
-    public function __construct($key, array $config = array())
+    public function __construct($key, array $config = array(), $value = null)
     {
-        parent::__construct($key, $config);
+        parent::__construct($key, $config, $value);
         $this->buildCustomConfig($config);
         $this->type = 'number';
         $this->template =  'form/number';
