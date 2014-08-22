@@ -38,7 +38,7 @@ use Doctrine\ORM\EntityManager;
  * @category    BackBuilder
  * @package     BackBuilder\Bundle
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 abstract class ABundle extends AbstractBaseBundle
 {
@@ -99,9 +99,9 @@ abstract class ABundle extends AbstractBaseBundle
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Bundle\Exception\BundleException Occure on database connection error
      */
-    private function _initEntityManager($doctrine_config = NULL)
+    private function _initEntityManager($doctrine_config = null)
     {
-        if (NULL === $doctrine_config || false === array_key_exists('dbal', $doctrine_config)) {
+        if (null === $doctrine_config || false === array_key_exists('dbal', $doctrine_config)) {
             return $this->getApplication()->getEntityManager();
         }
 
@@ -303,8 +303,9 @@ abstract class ABundle extends AbstractBaseBundle
      */
     public function getRouting()
     {
-        if (NULL === $this->_routing)
+        if (null === $this->_routing) {
             $this->_initRouting();
+        }
 
         return $this->_routing;
     }
@@ -316,8 +317,9 @@ abstract class ABundle extends AbstractBaseBundle
      */
     public function getRequest()
     {
-        if (NULL === $this->_request)
+        if (null === $this->_request) {
             $this->_request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+        }
 
         return $this->_request;
     }
@@ -372,27 +374,10 @@ abstract class ABundle extends AbstractBaseBundle
         $this->getApplication()->getEntityManager()->flush($registry);
     }
 
-    public function getProperty($key = null)
-    {
-        if (NULL === $this->_properties) {
-            $this->_properties = $this->getConfig()->getSection('bundle');
-            if (NULL === $this->_properties) {
-                $this->_properties = array();
-            }
-        }
-
-        if (NULL === $key)
-            return $this->_properties;
-
-        if (array_key_exists($key, $this->_properties))
-            return $this->_properties[$key];
-
-        return NULL;
-    }
-
     public function setLogger(Logger $logger)
     {
         $this->_logger = $logger;
+
         return $this;
     }
 

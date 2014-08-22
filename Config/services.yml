@@ -85,6 +85,7 @@ parameters:
 
     config.yml_files_to_ignore: ['services', 'bootstrap']
 
+    bbapp.bundle.loader.class: BackBuilder\Bundle\BundleLoader
     bundle_config_configurator.class: BackBuilder\Bundle\BundleConfigConfigurator
 
 services:
@@ -159,6 +160,10 @@ services:
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]
+
+    bundle.loader:
+        class:      %bbapp.bundle.loader.class%
+        arguments:  ["@bbapp"]
 
     bundle_config_configurator:
         class:      %bundle_config_configurator.class%

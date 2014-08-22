@@ -103,21 +103,11 @@ class BundleLoader
     }
 
     /**
-     * [generateBundleKey description]
-     * @param  [type] $id [description]
-     * @return [type]       [description]
-     */
-    private function generateBundleServiceId($id)
-    {
-        return str_replace('%bundle_name%', strtolower($id), BundleInterface::BUNDLE_SERVICE_ID_PATTERN);
-    }
-
-    /**
      * [buildBundleBaseDirectoryFromClassname description]
      * @param  [type] $classname [description]
      * @return [type]            [description]
      */
-    private function buildBundleBaseDirectoryFromClassname($classname)
+    public function buildBundleBaseDirectoryFromClassname($classname)
     {
         preg_match('#([a-zA-Z]+Bundle)#', $classname, $matches);
 
@@ -135,6 +125,29 @@ class BundleLoader
         }
 
         return $base_directory;
+    }
+
+    /**
+     * [loadConfigDefinition description]
+     *
+     * @param  [type] $config_id      [description]
+     * @param  [type] $base_directory [description]
+     */
+    public function loadConfigDefinition($config_id, $base_directory)
+    {
+        if (false === $this->container->hasDefinition($config_id)) {
+            $this->container->setDefinition($config_id, $this->buildConfigDefinition($base_directory));
+        }
+    }
+
+    /**
+     * [generateBundleKey description]
+     * @param  [type] $id [description]
+     * @return [type]       [description]
+     */
+    private function generateBundleServiceId($id)
+    {
+        return str_replace('%bundle_name%', strtolower($id), BundleInterface::BUNDLE_SERVICE_ID_PATTERN);
     }
 
     /**
@@ -203,7 +216,7 @@ class BundleLoader
     private function loadAndGetBundleConfigByBaseDirectory($base_directory)
     {
         $config_id = str_replace('%bundle_id%', basename($base_directory), BundleInterface::CONFIG_SERVICE_ID_PATTERN);
-        $this->container->setDefinition($config_id, $this->buildConfigDefinition($base_directory));
+        $this->loadConfigDefinition($config_id, $base_directory);
 
         return $this->container->get($config_id);
 

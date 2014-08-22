@@ -61,11 +61,13 @@ interface BundleInterface extends IObjectIdentifiable
     public function getBaseDirectory();
 
     /**
-     * [setBaseDirectory description]
+     * [getProperty description]
      *
-     * @param [type] $base_directory [description]
+     * @param  [type] $key [description]
+     *
+     * @return [type]      [description]
      */
-    public function setBaseDirectory($base_directory);
+    public function getProperty($key = null);
 
     /**
      * [start description]

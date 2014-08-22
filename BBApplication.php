@@ -1171,12 +1171,13 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * [_initBundles description]
+     *
      * @return [type] [description]
      */
     private function _initBundles()
     {
-        if (!is_null($this->getConfig()->getBundlesConfig())) {
-            (new BundleLoader($this))->load($this->getConfig()->getBundlesConfig());
+        if (null !== $this->getConfig()->getBundlesConfig()) {
+            $this->getContainer()->get('bundle.loader')->load($this->getConfig()->getBundlesConfig());
         }
 
         return $this;

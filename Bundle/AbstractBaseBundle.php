@@ -43,6 +43,13 @@ abstract class AbstractBaseBundle implements BundleInterface
     private $application;
 
     /**
+     * [$bundle_loader description]
+     *
+     * @var [type]
+     */
+    private $bundle_loader;
+
+    /**
      * [$base_directory description]
      *
      * @var string
@@ -55,13 +62,6 @@ abstract class AbstractBaseBundle implements BundleInterface
      * @var string
      */
     private $id;
-
-    /**
-     * [$base_directory description]
-     *
-     * @var BackBuilder\Config\Config
-     */
-    private $config;
 
     /**
      * [$config_id description]
@@ -85,6 +85,13 @@ abstract class AbstractBaseBundle implements BundleInterface
     public function __construct(ApplicationInterface $application)
     {
         $this->application = $application;
+        $this->bundle_loader = $this->application->getContainer()->get('bundle.loader');
+
+        $this->base_directory = $this->bundle_loader->buildBundleBaseDirectoryFromClassname(get_class($this));
+        $this->id = basename($this->base_directory);
+
+        $this->bundle_loader->loadConfigDefinition($this->getConfigServiceId(), $this->base_directory);
+
         $this->started = false;
     }
 
@@ -93,10 +100,6 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getId()
     {
-        if (null === $this->id) {
-            $this->defineBaseDirectoryAndId();
-        }
-
         return $this->id;
     }
 
@@ -109,14 +112,25 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::setBaseDirectory
+     * @see BackBuilder\Bundle\BundleInterface::getProperty
      */
-    public function setBaseDirectory($base_directory)
+    public function getProperty($key = null)
     {
-        $this->base_directory = $base_directory;
-        $this->id = basename($base_directory);
+        $properties = null;
+        if (null !== $this->getConfig()) {
+            $properties = $this->getConfig()->getSection('bundle') ?: array();
+        }
 
-        return $this;
+        if (null === $key) {
+            return $properties;
+        }
+
+        $property = null;
+        if (true === array_key_exists($key, $properties)) {
+            $property = $properties[$key];
+        }
+
+        return $property;
     }
 
     /**
@@ -124,10 +138,6 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getConfig()
     {
-        if (null === $this->application->getContainer()->hasDefinition($this->getConfigServiceId())) {
-            $this->initConfig();
-        }
-
         return $this->application->getContainer()->get($this->getConfigServiceId());
     }
 
@@ -153,10 +163,6 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getConfigDirectory()
     {
-        if (null === $this->base_directory) {
-            $this->defineBaseDirectoryAndId();
-        }
-
         $directory = $this->base_directory . DIRECTORY_SEPARATOR . BundleInterface::CONFIG_DIRECTORY_NAME;
         if (false === is_dir($directory)) {
             $directory = $this->base_directory . DIRECTORY_SEPARATOR . BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
@@ -223,37 +229,5 @@ abstract class AbstractBaseBundle implements BundleInterface
     public function equals(IObjectIdentifiable $identity)
     {
         return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
-    }
-
-    /**
-     * [initConfig description]
-     */
-    private function initConfig()
-    {
-        if (false === $this->application->getContainer()->hasDefinition($this->getConfigServiceId())) {
-            $definition = new Definition('BackBuilder\Config\Config', array(
-                $this->getConfigDirectory(),
-                new Reference('cache.bootstrap'),
-                null,
-                '%debug%',
-                '%config.yml_files_to_ignore%'
-            ));
-            // $definition->addTag('dumpable');
-            $definition->addMethodCall('setContainer', array(new Reference('service_container')));
-            $definition->addMethodCall('setEnvironment', array('%bbapp.environment%'));
-            $definition->setConfigurator(array(new Reference('bundle_config_configurator'), 'configure'));
-
-            $this->application->getContainer()->setDefinition($this->getConfigServiceId());
-        }
-    }
-
-    /**
-     * [defineBaseDirectoryAndId description]
-     */
-    private function defineBaseDirectoryAndId()
-    {
-        $reflection = new \ReflectionObject($this);
-        $this->base_directory = dirname($reflection->getFileName());
-        $this->id = basename($this->base_directory);
     }
 }
