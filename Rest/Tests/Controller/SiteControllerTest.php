@@ -186,7 +186,7 @@ class SiteControllerTest extends TestCase
 
     protected function tearDown()
     {
-        $this->dropDb();
+        $this->dropDb($this->getBBApp());
         $this->bbapp->stop();
     }
 
