@@ -49,13 +49,8 @@ class GroupController extends ARestController
      * @Rest\QueryParam(name = "site_uid", description="Site")
      * 
      */
-    public function getCollectionAction(Request $request, ConstraintViolationList $violations = null) 
+    public function getCollectionAction(Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        
-
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('g')
             ->from('BackBuilder\Security\Group', 'g')
@@ -131,12 +126,8 @@ class GroupController extends ARestController
      * 
      * @param int $id
      */
-    public function putAction($id, Request $request, ConstraintViolationList $violations = null) 
+    public function putAction($id, Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        
         $group = $this->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($id);
         
         if(!$group) {
@@ -168,12 +159,8 @@ class GroupController extends ARestController
      * })
      * 
      */
-    public function postAction(Request $request, ConstraintViolationList $violations = null)
+    public function postAction(Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        
         $groupExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\Group')->findBy(array('_identifier' => $request->request->get('identifier')));
         
         if($groupExists) {
