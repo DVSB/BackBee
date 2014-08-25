@@ -183,8 +183,6 @@ class AclManager
      * 
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface $objectIdentity
      * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $sid
-     * @param int $mask
-     * @param mixed $strategy
      */
     public function deleteClassAce(ObjectIdentityInterface $objectIdentity, SecurityIdentityInterface $sid)
     {
@@ -213,8 +211,6 @@ class AclManager
      * 
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface $objectIdentity
      * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $sid
-     * @param int $mask
-     * @param mixed $strategy
      */
     public function deleteObjectAce(ObjectIdentityInterface $objectIdentity, SecurityIdentityInterface $sid)
     {
@@ -236,6 +232,48 @@ class AclManager
         }
         
         $this->securityContext->getACLProvider()->updateAcl($acl);
+    }
+    
+    
+    /**
+     * Get a class-scope ACE
+     * 
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $sid
+     */
+    public function getClassAce(ObjectIdentityInterface $objectIdentity, SecurityIdentityInterface $sid)
+    {
+        $acl = $this->getAcl($objectIdentity);
+        
+        $found = false;
+        
+        foreach($acl->getClassAces() as $index => $ace) {
+            if ($ace->getSecurityIdentity()->equals($sid)) {
+                return $ace;
+            }
+        }
+        
+        throw new \InvalidArgumentException('ACE not found for the supplied combination of ObjectIdentity and SecurityIdentity');
+    }
+    
+    /**
+     * Get an object-scope ACE
+     * 
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $sid
+     */
+    public function getObjectAce(ObjectIdentityInterface $objectIdentity, SecurityIdentityInterface $sid)
+    {
+        $acl = $this->getAcl($objectIdentity);
+        
+        $found = false;
+
+        foreach($acl->getObjectAces() as $index => $ace) {
+            if ($ace->getSecurityIdentity()->equals($sid)) {
+                return $ace;
+            }
+        }
+        throw new \InvalidArgumentException('ACE not found for the supplied combination of ObjectIdentity and SecurityIdentity');
     }
     
     /**
@@ -260,6 +298,30 @@ class AclManager
         }
         
         return $maskBuilder->get();
+    }
+    
+    /**
+     * Get a list of all available permission codes
+     * 
+     * @return array
+     */
+    public function getPermissionCodes()
+    {
+        $permissions = [
+            'view' => MaskBuilder::MASK_VIEW,
+            'create' => MaskBuilder::MASK_CREATE,
+            'edit' => MaskBuilder::MASK_EDIT,
+            'delete' => MaskBuilder::MASK_DELETE,
+            'undelete' => MaskBuilder::MASK_UNDELETE,
+            'operator' => MaskBuilder::MASK_OPERATOR,
+            'master' => MaskBuilder::MASK_MASTER,
+            'owner' => MaskBuilder::MASK_OWNER,
+            'iddqd' => MaskBuilder::MASK_IDDQD,
+            'commit' => MaskBuilder::MASK_COMMIT,
+            'publish' => MaskBuilder::MASK_PUBLISH
+        ];
+        
+        return $permissions;
     }
     
 }

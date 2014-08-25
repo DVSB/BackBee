@@ -69,6 +69,16 @@ bb.rest.security_session_delete:
         version: \d
         _method: DELETE
 
+bb.rest.acl.permissions:
+    pattern: /rest/{version}/acl/permissions/
+    defaults:
+        _action: getMaskCollectionAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: GET
+
+
 # BackBuilder rss
 bb.rss:
     pattern: /rss/{uri}

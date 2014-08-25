@@ -95,7 +95,65 @@ class AclControllerTest extends TestCase
         
         return $controller;
     }
+    
+    /**
+     * @covers ::getEntryCollectionAction
+     */
+    public function test_getMaskCollectionAction()
+    {
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/permissions/'));
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertCount(11, $res);
+        
+        $this->assertArrayHasKey('view', $res);
+        $this->assertEquals(1, $res['view']);
+        
+        $this->assertInternalType('array', $res);
+    }
 
+    /**
+     * @covers ::postPermissionMapAction
+     */
+    public function test_postPermissionMapAction_missingFields() 
+    {
+        $data = [[
+            'object_id' => $this->site->getObjectIdentifier(),
+            'object_class' => get_class($this->site),
+            'permissions' => ['view' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey('0[sid]', $res['errors']);
+        
+        
+        $data = [[
+            'sid' => $this->groupEditor->getId(),
+            'permissions' => ['view' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey('0[object_class]', $res['errors']);
+    }
+    
     /**
      * @covers ::postPermissionMapAction
      */
@@ -103,7 +161,9 @@ class AclControllerTest extends TestCase
     {
         $data = [
             [
+                // object scope
                 'sid' => $this->groupEditor->getId(),
+                'object_id' => $this->site->getObjectIdentifier(),
                 'object_class' => get_class($this->site),
                 'permissions' => [
                     'view' => 1,
@@ -119,23 +179,7 @@ class AclControllerTest extends TestCase
                 ]
             ], 
             [
-                'sid' => $this->groupEditor->getId(),
-                'object_class' => get_class($this->site),
-                'object_id' => $this->site->getUid(),
-                'permissions' => [
-                    'view' => 1,
-                    'create' => 1,
-                    'edit' => 1,
-                    'delete' => 1,
-                    'undelete' => 'off',
-                    'commit' => '0',
-                    'publish' => 1,
-                    'operator' => 1,
-                    'master' => 'false',
-                    'owner' => 1
-                ]
-            ], 
-            [
+                // class scope
                 'sid' => $this->groupEditor->getId(),
                 'object_class' => 'BackBuilder\Site\Layout',
                 'permissions' => [
@@ -154,7 +198,23 @@ class AclControllerTest extends TestCase
         ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
         
         $this->assertEquals(204, $response->getStatusCode());
+        
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+
+        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
+        
+        $objectIdentity = new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site));
+        $ace = $aclManager->getObjectAce($objectIdentity, $securityIdentity);
+        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $ace);
+        $this->assertEquals(687, $ace->getMask());
+        
+        $objectIdentity = new ObjectIdentity('class', 'BackBuilder\Site\Layout');
+        $ace = $aclManager->getClassAce($objectIdentity, $securityIdentity);
+        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $ace);
+        $this->assertEquals(7, $ace->getMask());
     }
+
+    
     
     /**
      * @covers ::postPermissionMapAction
@@ -332,5 +392,5 @@ class AclControllerTest extends TestCase
         $this->assertCount(1, $res);
         $this->assertEquals('BackBuilder\Site\Site', $res[0]['class_type']);
     }
-    
+
 }

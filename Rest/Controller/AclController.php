@@ -27,8 +27,7 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\ConstraintViolation;
 
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
-    Symfony\Component\Security\Acl\Model\DomainObjectInterface;
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -37,8 +36,6 @@ use BackBuilder\Security\Group;
 
 use BackBuilder\Rest\Exception\ValidationException;
 
-
-use BackBuilder\Util\String;
 
 /**
  * User Controller
@@ -74,7 +71,6 @@ class AclController extends ARestController
         if(null !== $violations && count($violations) > 0) {
             throw new ValidationException($violations);
         }
-        return new Response();
 
         $aclProvider = $this->getBBapp()->getSecurityContext()->getACLProvider();
         
@@ -238,6 +234,21 @@ class AclController extends ARestController
         
         foreach($permissionMap as $i => $objectMap) {
             $permissions = $objectMap['permissions'];
+            
+            if(!isset($objectMap['object_class'])) {
+                $violations->add(
+                    new ConstraintViolation(
+                        "Object class not supllied", 
+                        "Object class not supllied", 
+                        [], 
+                        sprintf('%s[object_class]', $i), 
+                        sprintf('%s[object_class]', $i), 
+                        null
+                    )
+                );
+                continue;
+            }
+            
             $objectClass = $objectMap['object_class'];
             $objectId = null;
             
@@ -264,6 +275,20 @@ class AclController extends ARestController
             } else {
                 // class scope
                 $objectIdentity = new ObjectIdentity('class', $objectClass);
+            }
+            
+            if(!isset($objectMap['sid'])) {
+                $violations->add(
+                    new ConstraintViolation(
+                        "Security ID not supllied", 
+                        "Security ID not supllied", 
+                        [], 
+                        sprintf('%s[sid]', $i), 
+                        sprintf('%s[sid]', $i), 
+                        null
+                    )
+                );
+                continue;
             }
             
             $sid = $objectMap['sid'];
@@ -332,5 +357,18 @@ class AclController extends ARestController
         
         
         return new Response('', 204);
+    }
+    
+    
+    /**
+     * 
+     */
+    public function getMaskCollectionAction()
+    {
+        $aclManager = $this->getContainer()->get("security.acl_manager");
+        
+        $data = $aclManager->getPermissionCodes();
+        
+        return new Response(json_encode($data), 200);
     }
 }
