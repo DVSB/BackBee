@@ -22,7 +22,7 @@
 namespace BackBuilder\Form\Builder\Form\Element;
 
 /**
- * Validator
+ * Select
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder\Form\Element
@@ -38,6 +38,13 @@ class Select extends Element
     protected $options = array();
     protected $multiple = false;
     
+    /**
+     * Select's constructor
+     * 
+     * @param string $key
+     * @param array $config
+     * @param string $value
+     */
     public function __construct($key, array $config = array(), $value = null)
     {
         parent::__construct($key, $config, $value);
@@ -46,6 +53,11 @@ class Select extends Element
         $this->template =  'form/select';
     }
     
+    /**
+     * Build config with different parameters
+     * 
+     * @param array $config
+     */
     public function buildCustomConfig(array $config = array())
     {
         if (true === isset($config[self::OPTION_PARAMETER])) {
@@ -59,26 +71,56 @@ class Select extends Element
         }
     }
     
+    /**
+     * Get options
+     * 
+     * @return array
+     */
     public function getOptions()
     {
         return $this->options;
     }
     
+    /**
+     * Get multiple
+     * 
+     * @return boolean
+     */
     public function isMultiple()
     {
         return $this->multiple;
     }
     
+    /**
+     * Set options
+     * 
+     * @param array $options
+     * @return \BackBuilder\Form\Builder\Form\Element\Select
+     */
     public function setOptions(array $options = array())
     {
         $this->options = $options;
+        return $this;
     }
     
+    /**
+     * Set multiple
+     * 
+     * @param boolean $multiple
+     * @return \BackBuilder\Form\Builder\Form\Element\Select
+     */
     public function setMultiple($multiple)
     {
         $this->multiple = (bool) $multiple;
+        return $this;
     }
     
+    /**
+     * Set value
+     * 
+     * @param mixed $value
+     * @return \BackBuilder\Form\Builder\Form\Element\Select
+     */
     public function setValue($value = array())
     {
         if (false === is_array($value)) {
@@ -86,5 +128,6 @@ class Select extends Element
         }
         
         $this->value = $value;
+        return $this;
     }
 }

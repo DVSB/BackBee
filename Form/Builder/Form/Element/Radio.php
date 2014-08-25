@@ -22,7 +22,7 @@
 namespace BackBuilder\Form\Builder\Form\Element;
 
 /**
- * Validator
+ * Radio
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder\Form\Element
@@ -38,6 +38,13 @@ class Radio extends Element
     protected $options = array();
     protected $inline = false;
     
+    /**
+     * Password's constructor
+     * 
+     * @param string $key
+     * @param array $config
+     * @param string $value
+     */
     public function __construct($key, array $config = array(), $value = null)
     {
         parent::__construct($key, $config, $value);
@@ -46,6 +53,11 @@ class Radio extends Element
         $this->template =  'form/radio';
     }
     
+    /**
+     * Build config with different parameters
+     * 
+     * @param array $config
+     */
     public function buildCustomConfig(array $config = array())
     {
         if (true === isset($config[self::OPTION_PARAMETER])) {
@@ -60,23 +72,47 @@ class Radio extends Element
         }
     }
     
+    /**
+     * Get options
+     * 
+     * @return array
+     */
     public function getOptions()
     {
         return $this->options;
     }
     
+    /**
+     * Get inline
+     * 
+     * @return boolean
+     */
     public function isInline()
     {
         return $this->inline;
     }
     
+    /**
+     * Set options
+     * 
+     * @param array $options
+     * @return \BackBuilder\Form\Builder\Form\Element\Radio
+     */
     public function setOptions(array $options = array())
     {
         $this->options = $options;
+        return $this;
     }
     
+    /**
+     * Set inline
+     * 
+     * @param boolean $inline
+     * @return \BackBuilder\Form\Builder\Form\Element\Radio
+     */
     public function setInline($inline)
     {
         $this->inline = (bool) $inline;
+        return $this;
     }
 }

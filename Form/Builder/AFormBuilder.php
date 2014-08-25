@@ -24,7 +24,7 @@ namespace BackBuilder\Form\Builder;
 use BackBuilder\Renderer\Renderer;
 
 /**
- * Validator
+ * AFormBuilder
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder
@@ -38,15 +38,29 @@ abstract class AFormBuilder
     protected $config;
     protected $renderer;
     
+    /**
+     * AFormBuilder's contructor
+     * 
+     * @param \BackBuilder\Renderer\Renderer $renderer
+     */
     public function __construct(Renderer $renderer)
     {
         $this->renderer = $renderer;
         $renderer->addScriptDir(__DIR__ . '/Templates/scripts');
     }
     
+    /**
+     * Create form with config and return html
+     */
     public abstract function createForm();
 
-    public function build($config)
+    /**
+     * Set the config to form builder
+     * 
+     * @param array $config
+     * @throws \InvalidArgumentException
+     */
+    public function build(array $config = array())
     {
         if (true === empty($config)) {
             throw new \InvalidArgumentException(sprintf('config must be set'));
@@ -54,6 +68,12 @@ abstract class AFormBuilder
         $this->config = $config;
     }
     
+    /**
+     * Return the classname of element, null otherwise
+     * 
+     * @param string $element
+     * @return string|null
+     */
     public function getElementClassname($element)
     {
         $classname = self::PREFIX_ELEMENT_CLASSNAME . ucfirst($element);

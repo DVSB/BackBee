@@ -26,7 +26,7 @@ use BackBuilder\Renderer\Renderer;
 use BackBuilder\Form\Builder\Form\Form;
 
 /**
- * Validator
+ * GlobalFormBuilder
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder
@@ -38,11 +38,20 @@ class GlobalFormBuilder extends AFormBuilder
     const FORM_PARAMETER = 'form';
     const TYPE_PARAMETER = 'type';
     
+    /**
+     * Global form builder constructor
+     * 
+     * @param \BackBuilder\Renderer\Renderer $renderer
+     */
     public function __construct(Renderer $renderer) 
     {
         parent::__construct($renderer);
     }
     
+    /**
+     * Create form with config and value if in request
+     * and return html
+     */
     public function createForm() 
     {
         $request = $this->renderer->getApplication()->getRequest();

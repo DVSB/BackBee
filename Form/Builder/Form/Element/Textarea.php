@@ -22,7 +22,7 @@
 namespace BackBuilder\Form\Builder\Form\Element;
 
 /**
- * Validator
+ * Textarea
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder\Form\Element
@@ -35,6 +35,13 @@ class Textarea extends Element
     
     protected $rows = 5;
     
+    /**
+     * Textarea's constructor
+     * 
+     * @param string $key
+     * @param array $config
+     * @param string $value
+     */
     public function __construct($key, array $config = array(), $value = null)
     {
         parent::__construct($key, $config, $value);
@@ -43,6 +50,11 @@ class Textarea extends Element
         $this->template =  'form/textarea';
     }
     
+    /**
+     * Build config with different parameters
+     * 
+     * @param array $config
+     */
     public function buildCustomConfig(array $config = array())
     {
         if (true === isset($config[self::ROWS_PARAMETER])) {
@@ -50,13 +62,24 @@ class Textarea extends Element
         }
     }
     
+    /**
+     * Get rows
+     * @return integer
+     */
     public function getRows()
     {
         return $this->rows;
     }
     
+    /**
+     * Set rows
+     * 
+     * @param integer $rows
+     * @return \BackBuilder\Form\Builder\Form\Element\Textarea
+     */
     public function setRows($rows)
     {
         $this->rows = $rows;
+        return $this;
     }
 }

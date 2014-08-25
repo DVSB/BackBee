@@ -31,6 +31,13 @@ namespace BackBuilder\Form\Builder\Form\Element;
  */
 class File extends Element
 {
+    /**
+     * File's constructor
+     * 
+     * @param string $key
+     * @param array $config
+     * @param string $value
+     */
     public function __construct($key, array $config = array(), $value = null)
     {
         parent::__construct($key, $config, $value);

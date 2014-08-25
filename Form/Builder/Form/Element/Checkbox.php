@@ -22,7 +22,7 @@
 namespace BackBuilder\Form\Builder\Form\Element;
 
 /**
- * Validator
+ * Checkbox
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder\Form\Element
@@ -38,6 +38,12 @@ class Checkbox extends Element
     protected $options = array();
     protected $inline = false;
     
+    /**
+     * Checkbox's constructor
+     * @param string $key
+     * @param array $config
+     * @param string $value
+     */
     public function __construct($key, array $config = array(), $value = null)
     {
         parent::__construct($key, $config, $value);
@@ -46,6 +52,11 @@ class Checkbox extends Element
         $this->template =  'form/checkbox';
     }
     
+    /**
+     * Build config with different parameters
+     * 
+     * @param array $config
+     */
     public function buildCustomConfig(array $config = array())
     {
         if (true === isset($config[self::OPTION_PARAMETER])) {
@@ -61,26 +72,55 @@ class Checkbox extends Element
         
     }
     
+    /**
+     * Get options
+     * 
+     * @return array
+     */
     public function getOptions()
     {
         return $this->options;
     }
     
+    /**
+     * Get inline
+     * 
+     * @return boolean
+     */
     public function isInline()
     {
         return $this->inline;
     }
     
+    /**
+     * Set options
+     * 
+     * @param array $options
+     * @return \BackBuilder\Form\Builder\Form\Element\Checkbox
+     */
     public function setOptions(array $options = array())
     {
         $this->options = $options;
+        return $this;
     }
     
+    /**
+     * Set inline
+     * @param boolean $inline
+     * @return \BackBuilder\Form\Builder\Form\Element\Checkbox
+     */
     public function setInline($inline)
     {
         $this->inline = (bool) $inline;
+        return $this;
     }
     
+    /**
+     * Set value
+     * 
+     * @param mixed $value
+     * @return \BackBuilder\Form\Builder\Form\Element\Checkbox
+     */
     public function setValue($value = array())
     {
         if (false === is_array($value)) {
@@ -88,5 +128,6 @@ class Checkbox extends Element
         }
         
         $this->value = $value;
+        return $this;
     }
 }

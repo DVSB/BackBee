@@ -24,7 +24,7 @@ namespace BackBuilder\Form\Builder\Form\Element;
 use BackBuilder\Renderer\IRenderable;
 
 /**
- * Validator
+ * Element
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder\Form\Element
@@ -47,6 +47,13 @@ class Element implements IRenderable
     protected $template;
     protected $disabled = false;
 
+    /**
+     * Form's constructor
+     * 
+     * @param string $key
+     * @param array $config
+     * @param mixed $value
+     */
     public function __construct($key, array $config = array(), $value = null) 
     {
         $this->uid = $key;
@@ -57,6 +64,11 @@ class Element implements IRenderable
         }
     }
 
+    /**
+     * Build config with different parameters
+     * 
+     * @param array $config
+     */
     private function buildConfig(array $config = array()) 
     {
         if (true === isset($config[self::PLACEHOLDER_PARAMETER])) {
@@ -73,36 +85,73 @@ class Element implements IRenderable
         }
     }
 
+    /**
+     * Get uid
+     * 
+     * @return string
+     */
     public function getUid() 
     {
         return $this->uid;
     }
 
+    /**
+     * Get type
+     * 
+     * @return string
+     */
     public function getType() 
     {
         return $this->type;
     }
 
+    /**
+     * Get label
+     * 
+     * @return string
+     */
     public function getLabel()
     {
         return $this->label;
     }
     
+    /**
+     * Get placeholder
+     * 
+     * @return string
+     */
     public function getPlaceholder() 
     {
         return $this->placeholder;
     }
 
+    /**
+     * Get value
+     * 
+     * @return string
+     */
     public function getValue() 
     {
         return $this->value;
     }
     
+    /**
+     * Get if disabled or not
+     * 
+     * @return boolean
+     */
     public function isDisabled()
     {
         return $this->disabled;
     }
 
+    /**
+     * Set type
+     * 
+     * @param string $type
+     * @throws \InvalidArgumentException
+     * @return \BackBuilder\Form\Builder\Form\Element\Checkbox
+     */
     public function setType($type) 
     {
         if (true === class_exists("BackBuilder\\Form\\Builder\\Form\\Element\\" . $type)) {
@@ -110,31 +159,68 @@ class Element implements IRenderable
         } else {
             throw new \InvalidArgumentException(sprintf('type %s not found', $type));
         }
+        
+        return $this;
     }
     
+    /**
+     * Set label
+     * 
+     * @param string $label
+     * @return \BackBuilder\Form\Builder\Form\Element\Element
+     */
     public function setLabel($label)
     {
         $this->label = $label;
+        return $this;
     }
 
+    /**
+     * Set placeholder
+     * 
+     * @param string $placeholder
+     * @return \BackBuilder\Form\Builder\Form\Element\Element
+     */
     public function setPlaceholder($placeholder) 
     {
         $this->placeholder = $placeholder;
+        return $this;
     }
     
+    /**
+     * Set value
+     * 
+     * @param string $value
+     * @return \BackBuilder\Form\Builder\Form\Element\Element
+     */
     public function setValue($value) 
     {
         $this->value = $value;
+        return $this;
     }
 
+    /**
+     * Set template
+     * 
+     * @param string $template
+     * @return \BackBuilder\Form\Builder\Form\Element\Element
+     */
     public function setTemplate($template) 
     {
         $this->template = $template;
+        return $this;
     }
     
+    /**
+     * Set disabled
+     * 
+     * @param boolean $disabled
+     * @return \BackBuilder\Form\Builder\Form\Element\Element
+     */
     public function setDisabled($disabled)
     {
         $this->disabled = $disabled;
+        return $this;
     }
     
     /*     * ******************************************* */
@@ -179,11 +265,21 @@ class Element implements IRenderable
         return $this->template;
     }
 
+    /**
+     * Get mode
+     * 
+     * @return string
+     */
     public function getMode() 
     {
         return null;
     }
     
+    /**
+     * Get draft
+     * 
+     * @return string
+     */
     public function getDraft()
     {
         return null;

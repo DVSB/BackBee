@@ -22,7 +22,7 @@
 namespace BackBuilder\Form\Builder\Form\Element;
 
 /**
- * Validator
+ * Number
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder\Form\Element
@@ -39,6 +39,13 @@ class Number extends Text
     protected $max = null;
     protected $step = null;
     
+    /**
+     * Number's constructor
+     * 
+     * @param string $key
+     * @param array $config
+     * @param string $value
+     */
     public function __construct($key, array $config = array(), $value = null)
     {
         parent::__construct($key, $config, $value);
@@ -47,7 +54,12 @@ class Number extends Text
         $this->template =  'form/number';
     }
     
-    private function buildCustomConfig($config)
+    /**
+     * Build config with different parameters
+     * 
+     * @param array $config
+     */
+    private function buildCustomConfig(array $config = array())
     {
         if (true === isset($config[self::MIN_PARAMETER])) {
             $this->min = $config[self::MIN_PARAMETER];
@@ -60,33 +72,69 @@ class Number extends Text
         }
     }
     
+    /**
+     * Get min
+     * 
+     * @return integer
+     */
     public function getMin()
     {
         return $this->min;
     }
     
+    /**
+     * Get max
+     * 
+     * @return integer
+     */
     public function getMax()
     {
         return $this->max;
     }
     
+    /**
+     * Get step
+     * 
+     * @return integer
+     */
     public function getStep()
     {
         return $this->step;
     }
     
+    /**
+     * Set min
+     * 
+     * @param integer $min
+     * @return \BackBuilder\Form\Builder\Form\Element\Number
+     */
     public function setMin($min)
     {
         $this->min = (int) $min;
+        return $this;
     }
     
+    /**
+     * Set max
+     * 
+     * @param integer $max
+     * @return \BackBuilder\Form\Builder\Form\Element\Number
+     */
     public function setMax($max)
     {
         $this->max = (int) $max;
+        return $this;
     }
     
+    /**
+     * Set step
+     * 
+     * @param integer $step
+     * @return \BackBuilder\Form\Builder\Form\Element\Number
+     */
     public function setStep($step)
     {
         $this->step = $step;
+        return $this;
     }
 }

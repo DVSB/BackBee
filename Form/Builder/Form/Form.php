@@ -25,7 +25,7 @@ use BackBuilder\Form\Builder\Form\Element\Element;
 use BackBuilder\Renderer\Renderer;
 
 /**
- * Validator
+ * Form
  *
  * @category    BackBuilder
  * @package     BackBuilder\Form\Builder\Form
@@ -50,12 +50,23 @@ class Form
     protected $template;
     protected $submit_label = 'Submit';
     
+    /**
+     * Form's constructor
+     * 
+     * @param \BackBuilder\Renderer\Renderer $renderer
+     * @param array $config
+     */
     public function __construct(Renderer $renderer, array $config = array())
     {
         $this->renderer = $renderer;
         $this->buildConfig($config);
     }
     
+    /**
+     * Build config with different parameters (Method, action, etc)
+     * 
+     * @param array $config
+     */
     private function buildConfig(array $config = array())
     {
         if (true === isset($config[self::FORM_PARAMETER])) {
@@ -76,16 +87,32 @@ class Form
         }
     }
     
+    /**
+     * Get the method of request
+     * 
+     * @return string
+     */
     public function getMethod()
     {
         return $this->method;
     }
     
+    /**
+     * Get the action of form (url)
+     * 
+     * @return string
+     */
     public function getAction()
     {
         return $this->action;
     }
     
+    /**
+     * Find element of form with id
+     * 
+     * @param string $id
+     * @return null|Element
+     */
     public function getItem($id)
     {
         if (true === isset($this->items[$id])) {
@@ -95,21 +122,42 @@ class Form
         return null;
     }
     
+    /**
+     * Get all element of form
+     * 
+     * @return array
+     */
     public function getItems()
     {
         return $this->items;
     }
     
+    /**
+     * Get template file
+     * 
+     * @return string
+     */
     public function getTemplate()
     {
         return __DIR__ . '/../Templates/scripts/form/form.twig';
     }
     
+    /**
+     * Get submit label
+     * 
+     * @return string
+     */
     public function getSubmitLabel()
     {
         return $this->submit_label;
     }
     
+    /**
+     * Set method of form
+     * 
+     * @param string $method
+     * @throws \InvalidArgumentException
+     */
     public function setMethod($method)
     {
         if (true === in_array($method, $this->available_method)) {
@@ -119,6 +167,11 @@ class Form
         throw new \InvalidArgumentException(sprintf('Method %s not supported', $method));
     }
     
+    /**
+     * Set action of form
+     * 
+     * @param string $action
+     */
     public function setAction($action)
     {
         if (false === empty($action)) {
@@ -126,16 +179,31 @@ class Form
         }
     }
     
+    /**
+     * Put the element into items of form
+     * 
+     * @param string $id
+     * @param \BackBuilder\Form\Builder\Form\Element\Element $element
+     */
     public function setItem($id, Element $element)
     {
         $this->items[$id] = $element;
     }
     
+    /**
+     * Set the template
+     * @param string $template
+     */
     public function setTemplate($template)
     {
         $this->template = $template;
     }
     
+    /**
+     * Set the submit label
+     * 
+     * @param string $submit_label
+     */
     public function setSubmitLabel($submit_label)
     {
         $this->submit_label = $submit_label;
