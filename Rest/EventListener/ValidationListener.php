@@ -29,8 +29,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\Validator,
     Symfony\Component\Validator\ConstraintViolationList,
+    Symfony\Component\Validator\ConstraintViolationListInterface,
     Symfony\Component\Validator\ConstraintViolation;
 use BackBuilder\Event\Listener\APathEnabledListener;
+
+use BackBuilder\Rest\Exception\ValidationException;
 
 /**
  * Request validation listener
@@ -90,10 +93,34 @@ class ValidationListener extends APathEnabledListener
                 $violations->addAll($requestViolations);
             }
             
-            if(count($violations) > 0) {
-                $request->attributes->set('violations', $violations);
+            $violationParam = $this->getViolationsParameterName($metadata);
+            
+            if(null !== $violationParam) {
+                // if action has an argument for violations, pass it
+                $request->attributes->set($violationParam, $violations);
+            } elseif(count($violations) > 0) {
+                // if action has no arg for violations and there is at least one, throw an exception
+                throw new ValidationException($violations);
+            }
+            
+            
+        }
+    }
+    
+    /**
+     * 
+     * @param \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata $metadata
+     * @return string|null
+     */
+    protected function getViolationsParameterName($metadata)
+    {
+        foreach ($metadata->reflection->getParameters() as $param) {
+            if ($param->getClass() && $param->getClass()->implementsInterface('Symfony\Component\Validator\ConstraintViolationListInterface')) {
+                return $param->getName();
             }
         }
+
+        return null;
     }
     
     /**
