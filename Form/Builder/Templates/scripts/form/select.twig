@@ -1,0 +1,16 @@
+{% set select = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ select.getLabel() }}</label>
+    <select name="{{ select.getUid() }}" 
+            {% if select.isDisabled() %}disabled{% endif %}
+            {% if select.isMultiple() %}multiple{% endif %} 
+            class="form-control"
+    >
+        {% for key, item in select.getOptions() %}
+            <option {% if key in select.getValue() %}selected{% endif %}
+                    value="{{ key }}">
+                {{ item }}
+            </option>
+        {% endfor %}
+    </select>
+</div>

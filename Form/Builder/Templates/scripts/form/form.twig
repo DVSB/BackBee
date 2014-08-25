@@ -1,0 +1,6 @@
+<form role="form" method="{{ form.getMethod() }}" {% if form.getAction() is not null %}action="{{ form.getAction() }}"{% endif %}>
+  {% for item in form.items %}
+      {{ this.render(item)|raw }}
+  {% endfor %}
+  <button type="submit" class="btn btn-default">{{ form.getSubmitLabel() }}</button>
+</form>

@@ -1036,7 +1036,8 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
             ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
             ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
-            ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')));
+            ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')))
+            ->registerNamespace('Respect\Validation\Rules', implode(DIRECTORY_SEPARATOR, array($this->getBBDir(),'Validator','Rules')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()

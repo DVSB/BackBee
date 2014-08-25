@@ -1,0 +1,10 @@
+{% set text = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ text.getLabel() }}</label>
+    <input type="text" 
+           name="{{ text.getUid() }}" 
+           {% if text.isDisabled() %}disabled{% endif %}
+           {% if text.getValue() is not null%}value="{{ text.getValue() }}"{% endif %} 
+           class="form-control" 
+    >
+</div>

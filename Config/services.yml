@@ -348,7 +348,19 @@ services:
 
     validator.factory:
         class: Symfony\Component\Validator\ConstraintValidatorFactory
+        
+    array.validator:
+        class: BackBuilder\Validator\ArrayValidator
+        
+    entity.validator:
+        class: BackBuilder\Validator\EntityValidator
+        arguments:  ["@em"]
 
+    #form
+    form.builder:
+        class: BackBuilder\Form\Builder\GlobalFormBuilder
+        arguments: ["@renderer"]
+        
     nestednode.page_listener:
         arguments:  [@bbapp]
         class: BackBuilder\Event\Listener\PageListener

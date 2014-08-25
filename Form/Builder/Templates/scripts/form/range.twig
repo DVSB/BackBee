@@ -1,0 +1,13 @@
+{% set range = this.getObject() %}
+<div class="form-group">
+    <label class="sr-only" for="">{{ range.getLabel() }}</label>
+    <input type="range" 
+           name="{{ range.getUid() }}"
+           {% if range.isDisabled() %}disabled{% endif %}
+           {% if range.getValue() is not null%}value="{{ range.getValue() }}"{% endif %} 
+           class="form-control" 
+           {% if range.getMax() is not null %}max="{{ range.getMax() }}"{% endif %}
+           {% if range.getMin() is not null %}min="{{ range.getMin() }}"{% endif %}
+           {% if range.getStep() is not null %}step="{{ range.getStep() }}"{% endif %}
+    >
+</div>
