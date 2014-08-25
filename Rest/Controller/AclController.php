@@ -235,6 +235,21 @@ class AclController extends ARestController
         
         foreach($permissionMap as $i => $objectMap) {
             $permissions = $objectMap['permissions'];
+            
+            if(!isset($objectMap['object_class'])) {
+                $violations->add(
+                    new ConstraintViolation(
+                        "Object class not supllied", 
+                        "Object class not supllied", 
+                        [], 
+                        sprintf('%s[object_class]', $i), 
+                        sprintf('%s[object_class]', $i), 
+                        null
+                    )
+                );
+                continue;
+            }
+            
             $objectClass = $objectMap['object_class'];
             $objectId = null;
             
@@ -261,6 +276,20 @@ class AclController extends ARestController
             } else {
                 // class scope
                 $objectIdentity = new ObjectIdentity('class', $objectClass);
+            }
+            
+            if(!isset($objectMap['sid'])) {
+                $violations->add(
+                    new ConstraintViolation(
+                        "Security ID not supllied", 
+                        "Security ID not supllied", 
+                        [], 
+                        sprintf('%s[sid]', $i), 
+                        sprintf('%s[sid]', $i), 
+                        null
+                    )
+                );
+                continue;
             }
             
             $sid = $objectMap['sid'];
