@@ -103,7 +103,9 @@ class AclControllerTest extends TestCase
     {
         $data = [
             [
+                // object scope
                 'sid' => $this->groupEditor->getId(),
+                'object_id' => $this->site->getObjectIdentifier(),
                 'object_class' => get_class($this->site),
                 'permissions' => [
                     'view' => 1,
@@ -119,23 +121,7 @@ class AclControllerTest extends TestCase
                 ]
             ], 
             [
-                'sid' => $this->groupEditor->getId(),
-                'object_class' => get_class($this->site),
-                'object_id' => $this->site->getUid(),
-                'permissions' => [
-                    'view' => 1,
-                    'create' => 1,
-                    'edit' => 1,
-                    'delete' => 1,
-                    'undelete' => 'off',
-                    'commit' => '0',
-                    'publish' => 1,
-                    'operator' => 1,
-                    'master' => 'false',
-                    'owner' => 1
-                ]
-            ], 
-            [
+                // class scope
                 'sid' => $this->groupEditor->getId(),
                 'object_class' => 'BackBuilder\Site\Layout',
                 'permissions' => [
@@ -154,6 +140,20 @@ class AclControllerTest extends TestCase
         ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
         
         $this->assertEquals(204, $response->getStatusCode());
+        
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+
+        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
+        
+        $objectIdentity = new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site));
+        $ace = $aclManager->getObjectAce($objectIdentity, $securityIdentity);
+        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $ace);
+        $this->assertEquals(687, $ace->getMask());
+        
+        $objectIdentity = new ObjectIdentity('class', 'BackBuilder\Site\Layout');
+        $ace = $aclManager->getClassAce($objectIdentity, $securityIdentity);
+        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $ace);
+        $this->assertEquals(7, $ace->getMask());
     }
     
     /**

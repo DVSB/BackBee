@@ -27,8 +27,7 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\ConstraintViolation;
 
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
-    Symfony\Component\Security\Acl\Model\DomainObjectInterface;
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -37,8 +36,6 @@ use BackBuilder\Security\Group;
 
 use BackBuilder\Rest\Exception\ValidationException;
 
-
-use BackBuilder\Util\String;
 
 /**
  * User Controller
