@@ -95,6 +95,7 @@ class Persistor
     {
         foreach ($this->persistors as $persistor) {
             if (true === $persistor->persist($config, $config_to_persist)) {
+                $this->application->getContainer()->get('container.builder')->removeContainerDump();
                 break;
             }
         }

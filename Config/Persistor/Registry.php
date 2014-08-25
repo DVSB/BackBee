@@ -78,6 +78,13 @@ class Registry implements PersistorInterface
         }
 
         $registry->setValue(serialize($config_to_persist));
-        $this->application->getEntityManager()->flush($registry);
+        $success = true;
+        try {
+            $this->application->getEntityManager()->flush($registry);
+        } catch (\Exception $e) {
+            $success = false;
+        }
+
+        return $success;
     }
 }

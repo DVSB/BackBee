@@ -81,7 +81,7 @@ class File implements PersistorInterface
         }
 
         if (1 === preg_match('#(bundle/[a-zA-Z]+Bundle)#', $base_directory, $matches)) {
-            $config_dump_directory .= DIRECTORY_SEPARATOR . 'bundle';
+            $config_dump_directory .= DIRECTORY_SEPARATOR . $matches[1];
         }
 
         if (false === is_dir($config_dump_directory) && false === @mkdir($config_dump_directory, 0755, true)) {

@@ -142,8 +142,6 @@ class BundleLoader
 
     /**
      * [loadBundlesRoutes description]
-     *
-     * @return [type] [description]
      */
     public function loadBundlesRoutes()
     {
@@ -257,7 +255,11 @@ class BundleLoader
             '%debug%',
             '%config.yml_files_to_ignore%'
         ));
-        // $definition->addTag('dumpable');
+
+        if (true === $this->application->getContainer()->getParameter('container.autogenerate')) {
+            $definition->addTag('dumpable', array('dispatch_event' => false));
+        }
+
         $definition->addMethodCall('setContainer', array(new Reference('service_container')));
         $definition->addMethodCall('setEnvironment', array('%bbapp.environment%'));
         $definition->setConfigurator(array(new Reference('config.configurator'), 'configureBundleConfig'));
@@ -418,6 +420,12 @@ class BundleLoader
         }
     }
 
+    /**
+     * [loadRoutes description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     */
     private function loadRoutes(Config $config, callable $recipe = null)
     {
         if (false === $this->runRecipe($config, $recipe)) {

@@ -464,6 +464,8 @@ services:
         synthetic: true
         tags:
             - { name: "dumpable", dispatch_event: false }
+    container.builder:
+        synthetic: true
     service_container:
         synthetic: true
     site:

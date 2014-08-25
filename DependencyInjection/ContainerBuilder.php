@@ -135,6 +135,26 @@ class ContainerBuilder
     }
 
     /**
+     * [removeContainerDump description]
+     *
+     * @return [type] [description]
+     */
+    public function removeContainerDump()
+    {
+        $success = false;
+        if (true === $this->container->getParameter('container.autogenerate')) {
+            $dump_filepath = $this->container->getParameter('container.dump_directory');
+            $dump_filepath .= DIRECTORY_SEPARATOR . $this->container->getParameter('container.filename');
+
+            if (true === is_file($dump_filepath) && true === is_readable($dump_filepath)) {
+                $success = false !== @unlink($dump_filepath);
+            }
+        }
+
+        return $success;
+    }
+
+    /**
      * Hydrate container with bootstrap.yml parameter
      *
      * @throws MissingBootstrapParametersException raises if we are not able to find bootstrap.yml file
@@ -224,6 +244,8 @@ class ContainerBuilder
 
             // Add current application into container
             $this->container->set('bbapp', $this->application);
+            // Add container builder into container
+            $this->container->set('container.builder', $this);
 
             $success = true;
         } else {
@@ -253,6 +275,7 @@ class ContainerBuilder
     {
         // setting default services
         $this->container->set('bbapp', $this->application);
+        $this->container->set('container.builder', $this);
 
         // define in which directory we have to looking for services yml or xml
         $directories = ConfigDirectory::getDirectories(
