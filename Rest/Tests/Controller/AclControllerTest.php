@@ -135,7 +135,8 @@ class AclControllerTest extends TestCase
         $res = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $res);
         $this->assertArrayHasKey('errors', $res);
-        $this->assertArrayHasKey('0[sid]', $res['errors']);
+        $this->assertArrayHasKey(0, $res['errors']);
+        $this->assertArrayHasKey('sid', $res['errors'][0]);
         
         
         $data = [[
@@ -151,7 +152,8 @@ class AclControllerTest extends TestCase
         $this->assertEquals(400, $response->getStatusCode());
         $res = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('errors', $res);
-        $this->assertArrayHasKey('0[object_class]', $res['errors']);
+        $this->assertArrayHasKey(0, $res['errors']);
+        $this->assertArrayHasKey('object_class', $res['errors'][0]);
     }
     
     /**
@@ -240,8 +242,8 @@ class AclControllerTest extends TestCase
         
         $this->assertInternalType('array', $res);
         $this->assertArrayHasKey('errors', $res);
-        // TODO - would be better to use proper php array for 0[permissions]
-        $this->assertEquals('Invalid permission mask: permissionThatDoesnExist', $res['errors']['0[permissions]'][0]);
+
+        $this->assertEquals('Invalid permission mask: permissionThatDoesnExist', $res['errors'][0]['permissions'][0]);
     }
     
     
