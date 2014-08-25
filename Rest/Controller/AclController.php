@@ -66,17 +66,12 @@ class AclController extends ARestController
      * })
      * 
      */
-    public function getEntryCollectionAction(Request $request, ConstraintViolationList $violations = null) 
+    public function getEntryCollectionAction(Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         $aclProvider = $this->getBBapp()->getSecurityContext()->getACLProvider();
         
         /* @var $aclProvider \Symfony\Component\Security\Acl\Dbal\AclProvider */
         $aclProvider->findAcls();
-        //
         
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('g')
@@ -126,12 +121,8 @@ class AclController extends ARestController
      *  @Assert\Type(type="integer", message="Mask must be an integer"), 
      * })
      */
-    public function postClassAceAction(Request $request, ConstraintViolationList $violations = null) 
+    public function postClassAceAction(Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         $objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
 
         $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
@@ -181,12 +172,8 @@ class AclController extends ARestController
      *  @Assert\Type(type="integer", message="Mask must be an integer"), 
      * })
      */
-    public function postObjectAceAction(Request $request, ConstraintViolationList $violations = null) 
+    public function postObjectAceAction(Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         $objectIdentity = new ObjectIdentity($request->request->get('object_id'), $request->request->get('object_class'));
         $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
         
@@ -323,7 +310,7 @@ class AclController extends ARestController
                 $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, $mask);
             }
         }
-        
+
         if(count($violations) > 0) {
             throw new ValidationException($violations);
         }
@@ -339,12 +326,8 @@ class AclController extends ARestController
      * 
      * @param string|int $sid
      */
-    public function deleteClassAceAction($sid, Request $request, ConstraintViolationList $violations = null)
+    public function deleteClassAceAction($sid, Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         $aclManager = $this->getContainer()->get("security.acl_manager");
         $securityIdentity = new UserSecurityIdentity($sid, 'BackBuilder\Security\Group');
         $objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
@@ -374,12 +357,8 @@ class AclController extends ARestController
      * 
      * @param string|int $sid
      */
-    public function deleteObjectAceAction($sid, Request $request, ConstraintViolationList $violations = null)
+    public function deleteObjectAceAction($sid, Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        
         $aclManager = $this->getContainer()->get("security.acl_manager");
         $securityIdentity = new UserSecurityIdentity($sid, 'BackBuilder\Security\Group');
         $objectClass = $request->request->get('object_class');
