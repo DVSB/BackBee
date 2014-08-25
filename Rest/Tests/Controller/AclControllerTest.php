@@ -244,7 +244,50 @@ class AclControllerTest extends TestCase
         $this->assertEquals('Invalid permission mask: permissionThatDoesnExist', $res['errors']['0[permissions]'][0]);
     }
     
-            
+    
+    /**
+     * @covers ::deleteObjectAceAction
+     */
+    public function test_deleteObjectAceAction()
+    {
+        // save the ACE
+        $objectIdentity = new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site));
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
+        $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, MaskBuilder::MASK_VIEW);
+        
+        // valid request
+        $data = [
+            'object_class' => get_class($this->site),
+            'object_id' => $this->site->getUid()
+        ];
+
+        $response = $this->getBBApp()->getController()->handle(Request::create(
+            sprintf('/rest/1/acl/ace/object/%s/', $this->groupEditor->getId()),
+            'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
+        ));
+
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        
+        // invalid requests
+        $data = [
+            'object_class' => 'Class\That\Doenst\Exist',
+            'object_id' => 'invalidObjectId_1234567890'
+        ];
+        $response = $this->getBBApp()->getController()->handle(Request::create(
+            sprintf('/rest/1/acl/ace/object/%s/', $this->groupEditor->getId()),
+            'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
+        ));
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey('object', $res['errors']);
+    }
+     
     /**
      * @covers ::deleteClassAceAction
      */
@@ -257,17 +300,29 @@ class AclControllerTest extends TestCase
         $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, MaskBuilder::MASK_VIEW);
         
         $data = [
-            'object_class' => get_class($this->site),
-            'object_id' => $this->site->getUid(),
-            'mask' => MaskBuilder::MASK_VIEW
+            'object_class' => get_class($this->site)
         ];
-        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
-            'sid' => $this->groupEditor->getId(),
-            '_action' => 'deleteClassAceAction',
-            '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'DELETE'] ));
-
+        $response = $this->getBBApp()->getController()->handle(Request::create(
+            sprintf('/rest/1/acl/ace/class/%s/', $this->groupEditor->getId()),
+            'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
+        ));
         $this->assertEquals(204, $response->getStatusCode());
+        
+        // invalid requests
+        $data = [
+            'object_class' => 'Class\That\Doenst\Exist',
+        ];
+        $response = $this->getBBApp()->getController()->handle(Request::create(
+            sprintf('/rest/1/acl/ace/class/%s/', $this->groupEditor->getId()),
+            'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
+        ));
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey('object_class', $res['errors']);
     }
     
     /**

@@ -847,7 +847,11 @@ class FrontController implements HttpKernelInterface
             $container = $this->getApplication()->getContainer();
             if (true === ($container->hasParameter('bbapp.script.command') && $container->hasParameter('bbapp.console.command'))) {
                 $this->getApplication()->debug('Launching NestedNode jobs: '.sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $container->getParameter('bbapp.console.command')));
-                exec(sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $this->getApplication()->getBaseDir(). '/' . $container->getParameter('bbapp.console.command')));
+                $env = $this->getApplication()->getEnvironment();
+                if (true === empty($env)) {
+                    $env = 'dev';
+                }
+                exec(sprintf('%s %s nestednode:jobs:process --env=%s &', $container->getParameter('bbapp.script.command'), $this->getApplication()->getBaseDir(). '/' . $container->getParameter('bbapp.console.command'), $env));
             }
         }
 
