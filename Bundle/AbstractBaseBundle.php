@@ -172,6 +172,17 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
+     * @see BackBuilder\Bundle\BundleInterface::isConfigPerSite
+     */
+    public function isConfigPerSite()
+    {
+        return null !== $this->getProperty('config_per_site')
+            ? $this->getProperty('config_per_site')
+            : BundleInterface::DEFAULT_CONFIG_PER_SITE_VALUE
+        ;
+    }
+
+    /**
      * @see BackBuilder\Bundle\BundleInterface::getApplication
      */
     public function getApplication()

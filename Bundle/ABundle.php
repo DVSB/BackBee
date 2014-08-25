@@ -48,21 +48,6 @@ abstract class ABundle extends AbstractBaseBundle
     private $_request;
 
     /**
-     * @var array
-     */
-    private $config_default_sections;
-
-    /**
-     * @var boolean
-     */
-    private $manage_multisite_config = true;
-
-    /**
-     * @var boolean
-     */
-    private $isConfigFullyInit = false;
-
-    /**
      *
      * @var \ReflectionObject
      */
@@ -211,26 +196,6 @@ abstract class ABundle extends AbstractBaseBundle
         $sqls = $schema->getCreateSchemaSql($metadatas);
 
         return $sqls;
-    }
-
-
-    private function completeConfigInit()
-    {
-        $overrideSection = $this->getConfig()->getSection('override_site');
-
-        if (null !== $overrideSection) {
-            $site = $this->getApplication()->getSite();
-            if (null !== $site && true === isset($overrideSection[$site->getUid()])) {
-                $siteConfig = $overrideSection[$site->getUid()];
-                foreach ($siteConfig as $section => $datas) {
-                    $this->getConfig()->setSection($section, Arrays::array_merge_assoc_recursive(
-                                    $this->getConfig()->getSection($section), $siteConfig[$section]
-                            ), true);
-                }
-            }
-        }
-
-        $this->isConfigFullyInit = true;
     }
 
     private function _initRouting()

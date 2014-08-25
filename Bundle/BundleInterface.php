@@ -46,6 +46,8 @@ interface BundleInterface extends IObjectIdentifiable
     const CONFIG_DIRECTORY_NAME = 'Config';
     const OLD_CONFIG_DIRECTORY_NAME = 'Ressources';
 
+    const DEFAULT_CONFIG_PER_SITE_VALUE = true;
+
     /**
      * [getId description]
      *
@@ -103,4 +105,11 @@ interface BundleInterface extends IObjectIdentifiable
      * @return [type] [description]
      */
     public function started();
+
+    /**
+     * [isConfigPerSite description]
+     *
+     * @return boolean [description]
+     */
+    public function isConfigPerSite();
 }

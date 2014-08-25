@@ -141,6 +141,22 @@ class BundleLoader
     }
 
     /**
+     * [loadBundlesRoutes description]
+     *
+     * @return [type] [description]
+     */
+    public function loadBundlesRoutes()
+    {
+        $loaded_bundles = array_keys($this->container->findTaggedServiceIds('bundle.config'));
+        foreach ($loaded_bundles as $service_id) {
+            $config = $this->container->get($service_id);
+            $recipes = $this->getLoaderRecipesByConfig($config);
+
+            $this->loadRoutes($config, $this->getCallableByRecipesAndKey($recipes, self::ROUTE_RECIPE_KEY));
+        }
+    }
+
+    /**
      * [generateBundleKey description]
      * @param  [type] $id [description]
      * @return [type]       [description]
@@ -158,7 +174,6 @@ class BundleLoader
     private function buildBundleDefinition($classname, $base_directory)
     {
         $definition = new Definition($classname, array(new Reference('bbapp')));
-        $definition->addMethodCall('setBaseDirectory', array($base_directory));
         $definition->addTag('bundle');
 
         return $definition;
@@ -217,9 +232,13 @@ class BundleLoader
     {
         $config_id = str_replace('%bundle_id%', basename($base_directory), BundleInterface::CONFIG_SERVICE_ID_PATTERN);
         $this->loadConfigDefinition($config_id, $base_directory);
+        $bundle_config = $this->container->get($config_id)->getBundleConfig();
+        if (false === array_key_exists('config_per_site', $bundle_config) || $bundle_config['config_per_site']) {
+            $definition = $this->container->getDefinition($config_id);
+            $definition->addTag('config_per_site');
+        }
 
         return $this->container->get($config_id);
-
     }
 
     /**
@@ -242,6 +261,7 @@ class BundleLoader
         $definition->addMethodCall('setContainer', array(new Reference('service_container')));
         $definition->addMethodCall('setEnvironment', array('%bbapp.environment%'));
         $definition->setConfigurator(array(new Reference('config.configurator'), 'configureBundleConfig'));
+        $definition->addTag('bundle.config', array('dispatch_event' => false));
 
         return $definition;
     }
@@ -394,6 +414,19 @@ class BundleLoader
 
             if (false !== $directory) {
                 $this->application->getRenderer()->addHelperDir($directory);
+            }
+        }
+    }
+
+    private function loadRoutes(Config $config, callable $recipe = null)
+    {
+        if (false === $this->runRecipe($config, $recipe)) {
+            $route = $config->getRouteConfig();
+            if (true === is_array($route) && 0 < count($route)) {
+                $this->application->getController()->registerRoutes(
+                    $this->generateBundleServiceId(basename(dirname($config->getBaseDir()))),
+                    $route
+                );
             }
         }
     }

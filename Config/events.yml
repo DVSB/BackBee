@@ -116,6 +116,10 @@ service.tagged.bundle:
   listeners:
     - [BackBuilder\Bundle\Listener\BundleListener, onGetBundleService]
 
+service.tagged.config_per_site:
+  listeners:
+    - ["@config.configurator", onGetServiceConfig]
+
 bbapplication.stop:
   listeners:
     - [BackBuilder\Bundle\Listener\BundleListener, onApplicationStop]

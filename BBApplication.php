@@ -311,7 +311,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
         $this->getTheme()->init(); // 30 ms
 
-
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
 
@@ -329,9 +328,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function stop()
     {
         if (true === $this->isStarted()) {
-            // @todo
-            // stop services
-
             // trigger bbapplication.stop
             $this->getEventDispatcher()->dispatch('bbapplication.stop', new Event($this));
             $this->info('BackBuilder application ended');

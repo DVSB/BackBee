@@ -25,6 +25,7 @@ use BackBuilder\Bundle\Registry;
 use BackBuilder\Config\Config;
 use BackBuilder\Config\Exception\InvalidConfigTypeException;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\Event\Event;
 use BackBuilder\Util\Resolver\BundleConfigDirectory;
 use BackBuilder\Util\Resolver\ConfigDirectory;
 
@@ -168,6 +169,27 @@ class Configurator
         }
 
         return $default_sections;
+    }
+
+    /**
+     * [onGetServiceConfig description]
+     *
+     * @param  Event  $event [description]
+     */
+    public function onGetServiceConfig(Event $event)
+    {
+        if (true === $this->application->isStarted()) {
+            $config = $event->getTarget();
+            if (null !== $override_site = $config->getRawSection('override_site')) {
+                if (true === array_key_exists($this->application->getSite()->getUid(), $override_site)) {
+                    foreach ($override_site[$this->application->getSite()->getUid()] as $section => $data) {
+                        $config->setSection($section, $data, true);
+                    }
+                }
+            }
+
+            $this->application->getContainer()->getDefinition($event->getArgument('id'))->clearTag('config_per_site');
+        }
     }
 
     /**

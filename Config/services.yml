@@ -100,7 +100,7 @@ services:
         class:      %bbapp.config.class%
         arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, "%debug%", "%config.yml_files_to_ignore%"]
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
         calls:
             - [setContainer, ['@service_container']]
             - [setEnvironment, ['%bbapp.environment%']]
@@ -109,7 +109,7 @@ services:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
     ed:
         alias: event.dispatcher
     security.context:
@@ -131,7 +131,7 @@ services:
         class:      %bbapp.renderer.class%
         arguments:  ["@bbapp"]
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
     rpcserver:
         class:      %bbapp.rpcserver.class%
         arguments:  ["@bbapp"]
@@ -158,7 +158,7 @@ services:
         class:      %bbapp.autoloader.class%
         arguments:  ["@bbapp"]
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]
@@ -463,7 +463,7 @@ services:
     bbapp:
         synthetic: true
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
     service_container:
         synthetic: true
     site:
