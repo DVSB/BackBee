@@ -197,7 +197,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST'] ));
         
         $this->assertEquals(204, $response->getStatusCode());
         
@@ -232,7 +232,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST'] ));
         
         $res = json_decode($response->getContent(), true);
 
@@ -437,11 +437,7 @@ class AclControllerTest extends TestCase
      */
     public function testGetClassCollectionAction()
     {
-        $response = $this->getBBApp()->getController()->handle(new Request([], [
-        ], [
-            '_action' => 'getClassCollectionAction',
-            '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/'] ));
+        $response = $this->getController()->getClassCollectionAction(new Request());
         
         $res = json_decode($response->getContent(), true);
         

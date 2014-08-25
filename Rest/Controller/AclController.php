@@ -76,7 +76,6 @@ class AclController extends ARestController
         
         /* @var $aclProvider \Symfony\Component\Security\Acl\Dbal\AclProvider */
         $aclProvider->findAcls();
-        //
         
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('g')
