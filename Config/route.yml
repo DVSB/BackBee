@@ -61,7 +61,7 @@ bb.rest.test:
         version: \d
 
 bb.rest.security_session_delete:
-    pattern: /rest/{version}/security/session
+    pattern: /rest/{version}/security/session/
     defaults:
         _action: deleteSessionAction
         _controller: BackBuilder\Rest\Controller\SecurityController
@@ -77,7 +77,24 @@ bb.rest.acl.permissions:
     requirements:
         version: \d
         _method: GET
+        
+bb.rest.acl.ace_class_delete:
+    pattern: /rest/{version}/acl/ace/class/{sid}/
+    defaults:
+        _action: deleteClassAceAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: DELETE
 
+bb.rest.acl.ace_object_delete:
+    pattern: /rest/{version}/acl/ace/object/{sid}/
+    defaults:
+        _action: deleteObjectAceAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: DELETE
 
 # BackBuilder rss
 bb.rss:

@@ -339,8 +339,12 @@ class AclController extends ARestController
      * 
      * @param string|int $sid
      */
-    public function deleteClassAceAction($sid, Request $request)
+    public function deleteClassAceAction($sid, Request $request, ConstraintViolationList $violations = null)
     {
+        if(null !== $violations && count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+
         $aclManager = $this->getContainer()->get("security.acl_manager");
         $securityIdentity = new UserSecurityIdentity($sid, 'BackBuilder\Security\Group');
         $objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
@@ -355,6 +359,42 @@ class AclController extends ARestController
             );
         }
         
+        return new Response('', 204);
+    }
+    
+    
+    /**
+     * @Rest\RequestParam(name = "object_class", description="Object Class name", requirements = {
+     *  @Assert\NotBlank(message="Object Class cannot be empty")
+     * })
+     * 
+     * @Rest\RequestParam(name = "object_id", description="Object Identifier", requirements = {
+     *  @Assert\NotBlank(message="Object Identifier cannot be empty")
+     * })
+     * 
+     * @param string|int $sid
+     */
+    public function deleteObjectAceAction($sid, Request $request, ConstraintViolationList $violations = null)
+    {
+        if(null !== $violations && count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+        
+        $aclManager = $this->getContainer()->get("security.acl_manager");
+        $securityIdentity = new UserSecurityIdentity($sid, 'BackBuilder\Security\Group');
+        $objectClass = $request->request->get('object_class');
+        
+        $objectIdentity = new ObjectIdentity($request->request->get('object_id'), $objectClass);
+
+        try {
+            $aclManager->deleteClassAce($objectIdentity, $securityIdentity);
+        } catch (\InvalidArgumentException $ex) {
+            throw $this->createValidationException(
+                'object', 
+                $request->request->get('object_class'), 
+                sprintf("Object ace doesn't exist for %s::%s", $objectClass, $request->request->get('object_id'))
+            );
+        }
         
         return new Response('', 204);
     }
