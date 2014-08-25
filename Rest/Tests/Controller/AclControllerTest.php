@@ -96,8 +96,21 @@ class AclControllerTest extends TestCase
         return $controller;
     }
     
+    
     /**
-     * @covers ::getEntryCollectionAction
+     * @covers ::getClassCollectionAction
+     */
+    public function test_getClassCollectionAction()
+    {
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/class/'));
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+    }
+    
+    /**
+     * @covers ::getMaskCollectionAction
      */
     public function test_getMaskCollectionAction()
     {
