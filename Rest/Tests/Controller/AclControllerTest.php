@@ -95,6 +95,25 @@ class AclControllerTest extends TestCase
         
         return $controller;
     }
+    
+    /**
+     * @covers ::getEntryCollectionAction
+     */
+    public function test_getMaskCollectionAction()
+    {
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/permissions/'));
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertCount(11, $res);
+        
+        $this->assertArrayHasKey('view', $res);
+        $this->assertEquals(1, $res['view']);
+        
+        $this->assertInternalType('array', $res);
+    }
 
     /**
      * @covers ::postPermissionMapAction

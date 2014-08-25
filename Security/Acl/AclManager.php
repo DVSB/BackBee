@@ -300,4 +300,28 @@ class AclManager
         return $maskBuilder->get();
     }
     
+    /**
+     * Get a list of all available permission codes
+     * 
+     * @return array
+     */
+    public function getPermissionCodes()
+    {
+        $permissions = [
+            'view' => MaskBuilder::MASK_VIEW,
+            'create' => MaskBuilder::MASK_CREATE,
+            'edit' => MaskBuilder::MASK_EDIT,
+            'delete' => MaskBuilder::MASK_DELETE,
+            'undelete' => MaskBuilder::MASK_UNDELETE,
+            'operator' => MaskBuilder::MASK_OPERATOR,
+            'master' => MaskBuilder::MASK_MASTER,
+            'owner' => MaskBuilder::MASK_OWNER,
+            'iddqd' => MaskBuilder::MASK_IDDQD,
+            'commit' => MaskBuilder::MASK_COMMIT,
+            'publish' => MaskBuilder::MASK_PUBLISH
+        ];
+        
+        return $permissions;
+    }
+    
 }

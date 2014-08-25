@@ -71,7 +71,6 @@ class AclController extends ARestController
         if(null !== $violations && count($violations) > 0) {
             throw new ValidationException($violations);
         }
-        return new Response();
 
         $aclProvider = $this->getBBapp()->getSecurityContext()->getACLProvider();
         
@@ -358,5 +357,18 @@ class AclController extends ARestController
         
         
         return new Response('', 204);
+    }
+    
+    
+    /**
+     * 
+     */
+    public function getMaskCollectionAction()
+    {
+        $aclManager = $this->getContainer()->get("security.acl_manager");
+        
+        $data = $aclManager->getPermissionCodes();
+        
+        return new Response(json_encode($data), 200);
     }
 }
