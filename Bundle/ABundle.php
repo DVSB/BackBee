@@ -44,7 +44,6 @@ abstract class ABundle extends AbstractBaseBundle
 {
     private $_em;
     private $_logger;
-    private $_properties;
     private $_routing;
     private $_request;
 
@@ -322,56 +321,6 @@ abstract class ABundle extends AbstractBaseBundle
         }
 
         return $this->_request;
-    }
-
-    /**
-     * Do save of bundle new config, allow and manage multisite config
-     */
-    public function saveConfig()
-    {
-        if (false === $this->manage_multisite_config) {
-            $this->doSaveConfig($this->getConfig()->getAllSections());
-
-            return;
-        }
-
-        $wipConfig = $this->getConfig()->getAllSections();
-        $updatedSections = Arrays::array_diff_assoc_recursive($wipConfig, $this->config_default_sections);
-
-        if (0 < count($updatedSections)) {
-            $overrideSection = array();
-            if (true === isset($this->config_default_sections['override_site'])) {
-                $overrideSection = $this->config_default_sections['override_site'];
-            }
-
-            $overrideSection[$this->getApplication()->getSite()->getUid()] = $updatedSections;
-            $this->config_default_sections['override_site'] = $overrideSection;
-
-            $this->doSaveConfig($this->config_default_sections);
-        } else {
-            $registry = self::_getRegistryConfig($this->getApplication(), $this->getId());
-            if ($this->getApplication()->getEntityManager()->contains($registry)) {
-                $this->getApplication()->getEntityManager()->remove($registry);
-                $this->getApplication()->getEntityManager()->flush($registry);
-            }
-        }
-    }
-
-    /**
-     * Puts new settings into config files
-     *
-     * @param  array  $config
-     */
-    private function doSaveConfig(array $config)
-    {
-        $registry = self::_getRegistryConfig($this->getApplication(), $this->getId());
-        $registry->setValue(serialize($config));
-
-        if (false === $this->getApplication()->getEntityManager()->contains($registry)) {
-            $this->getApplication()->getEntityManager()->persist($registry);
-        }
-
-        $this->getApplication()->getEntityManager()->flush($registry);
     }
 
     public function setLogger(Logger $logger)

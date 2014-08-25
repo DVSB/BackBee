@@ -247,7 +247,7 @@ class Configurator
     private function overrideConfigByRegistry(Config $config, $bundle_id)
     {
         $registry = $this->getRegistryConfig($bundle_id);
-        if (null !== $registry && null !== $serialized = $registry->getValue()) {
+        if (null !== $registry) {
             $registry_config = @unserialize($serialized);
 
             if (true === is_array($registry_config)) {
@@ -269,23 +269,10 @@ class Configurator
     {
         $registry = null;
         if(null !== $em = $this->application->getEntityManager()) {
-            try {
-                $registry = $em->getRepository('BackBuilder\Bundle\Registry')
-                    ->findRegistryEntityByIdAndScope($bundle_id, 'BUNDLE.CONFIG')
-                ;
-
-                if (null === $registry) {
-                    $registry = new Registry();
-                    $registry->setKey($bundle_id)
-                             ->setScope('BUNDLE.CONFIG')
-                    ;
-                }
-            } catch (\Exception $e) {
-                die($e->getMessage());
-                // if (true === $this->application->isStarted()) {
-                //     $this->application->warning('Unable to load registry table');
-                // }
-            }
+            $registry = $em->getRepository('BackBuilder\Bundle\Registry')->findOneBy(array(
+                'key' => $bundle_id,
+                'scope' => 'BUNDLE_CONFIG.' . $this->context . '.' . $this->environment
+            ));
         }
 
         return $registry;

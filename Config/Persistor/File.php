@@ -60,11 +60,14 @@ class File implements PersistorInterface
             Yaml::dump($config_to_persist)
         );
 
-        var_dump($success); die;
-
         return false !== $success;
     }
 
+    /**
+     * [getConfigDumpRightDirectory description]
+     * @param  [type] $base_directory [description]
+     * @return [type]                 [description]
+     */
     private function getConfigDumpRightDirectory($base_directory)
     {
         $config_dump_directory = $this->application->getRepository();
@@ -73,7 +76,6 @@ class File implements PersistorInterface
         }
 
         $config_dump_directory .= DIRECTORY_SEPARATOR . 'Config';
-
         if (ApplicationInterface::DEFAULT_ENVIRONMENT !== $this->application->getEnvironment()) {
             $config_dump_directory .= DIRECTORY_SEPARATOR . $this->application->getEnvironment();
         }

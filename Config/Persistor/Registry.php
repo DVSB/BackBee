@@ -20,6 +20,7 @@ namespace BackBuilder\Config\Persistor;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use BackBuilder\Bundle\Registry as RegistryEntity;
 use BackBuilder\Config\Config;
 use BackBuilder\Config\Persistor\PersistorInterface;
 use BackBuilder\IApplication as ApplicationInterface;
@@ -53,6 +54,30 @@ class Registry implements PersistorInterface
      */
     public function persist(Config $config, array $config_to_persist)
     {
+        if (true === array_key_exists('override_site', $config_to_persist)) {
+            $config_to_persist = array(
+                'override_site' => $config_to_persist['override_site']
+            );
+        }
 
+        $key = basename(dirname($config->getBaseDir()));
+        $scope = 'BUNDLE_CONFIG.' . $this->application->getContext() . '.' . $this->application->getEnvironment();
+
+        $registry = $this->application->getEntityManager()
+            ->getRepository('BackBuilder\Bundle\Registry')->findOneBy(array(
+                'key'   => $key,
+                'scope' => $scope
+            ))
+        ;
+
+        if (null === $registry) {
+            $registry = new RegistryEntity();
+            $registry->setKey($key);
+            $registry->setScope($scope);
+            $this->application->getEntityManager()->persist($registry);
+        }
+
+        $registry->setValue(serialize($config_to_persist));
+        $this->application->getEntityManager()->flush($registry);
     }
 }

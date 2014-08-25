@@ -78,20 +78,11 @@ class Persistor
      */
     public function persist(Config $config, $enable_config_per_site = self::DEFAULT_CONFIG_PER_SITE_VALUE)
     {
-        if (false === $enable_config_per_site) {
-            $this->doPersist($config, $config->getAllRawSections());
-        } else {
-            $default_sections = $this->configurator->getConfigDefaultSections($config);
-            $current_sections = $config->getAllRawSections();
-
-            $sections_to_update = array_keys(Arrays::array_diff_assoc_recursive($default_sections, $current_sections));
-            $sections_to_update = array_unique(array_merge(
-                $sections_to_update,
-                array_keys(Arrays::array_diff_assoc_recursive($current_sections, $default_sections))
-            ));
-
+        if (true === $enable_config_per_site) {
+            $this->updateConfigOverridedSectionsForSite($config);
         }
-        die;
+
+        $this->doPersist($config, $config->getAllRawSections());
     }
 
     /**
@@ -131,5 +122,43 @@ class Persistor
                 $this->persistors[] = $persistor;
             }
         }
+    }
+
+    /**
+     * [updateConfigOverridedSectionsForSite description]
+     *
+     * @param  Config $config [description]
+     */
+    private function updateConfigOverridedSectionsForSite(Config $config)
+    {
+        if (false === $this->application->isStarted()) {
+            throw new \Exception('Application is not started, we are not able to persist multiple site config.');
+        }
+
+        $default_sections = $this->configurator->getConfigDefaultSections($config);
+        $current_sections = $config->getAllRawSections();
+
+        $sections_to_update = array_keys(Arrays::array_diff_assoc_recursive($default_sections, $current_sections));
+        $sections_to_update = array_unique(array_merge(
+            $sections_to_update,
+            array_keys(Arrays::array_diff_assoc_recursive($current_sections, $default_sections))
+        ));
+
+        $override_site = $config->getRawSection('override_site') ?: array();
+        $site_uid = $this->application->getSite()->getUid();
+        if (false === array_key_exists($site_uid, $override_site)) {
+            $override_site[$site_uid] = array();
+        }
+
+        $override_sections_site = &$override_site[$site_uid];
+
+        foreach ($sections_to_update as $section) {
+            if ('override_site' !== $section) {
+                $override_sections_site[$section] = $config->getRawSection($section);
+                $config->setSection($section, $default_sections[$section], true);
+            }
+        }
+
+        $config->setSection('override_site', $override_site, true);
     }
 }
