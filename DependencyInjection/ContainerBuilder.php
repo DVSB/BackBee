@@ -142,7 +142,10 @@ class ContainerBuilder
     public function removeContainerDump()
     {
         $success = false;
-        if (true === $this->container->getParameter('container.autogenerate')) {
+        if (
+            false === $this->container->getParameter('debug')
+            && true === $this->container->getParameter('container.autogenerate')
+        ) {
             $dump_filepath = $this->container->getParameter('container.dump_directory');
             $dump_filepath .= DIRECTORY_SEPARATOR . $this->container->getParameter('container.filename');
 

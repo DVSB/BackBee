@@ -136,6 +136,11 @@ class Configurator
         }
     }
 
+    /**
+     * [configureApplicationConfig description]
+     *
+     * @param  Config $config [description]
+     */
     public function configureApplicationConfig(Config $config)
     {
         $this->extend(self::APPLICATION_CONFIG, $config);
