@@ -79,7 +79,6 @@ class ContainerProxy extends Container
         $this->getParameterBag()->add($container_dump['parameters']);
         $this->raw_definitions_id = array_keys($this->raw_definitions);
         $this->addAliases($container_dump['aliases']);
-        $this->services_dump = $container_dump['services_dump'];
         $this->already_compiled = $container_dump['is_compiled'];
     }
 
@@ -98,17 +97,7 @@ class ContainerProxy extends Container
      */
     public function get($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
     {
-        if (null !== $definition = $this->tryLoadDefinitionFromRaw($id)) {
-            $service = null;
-            if (true === $this->isLoaded($id)) {
-                $service = parent::get($id, $invalid_behavior);
-            }
-
-            $service_proxy = $this->tryRestoreDumpableService($id, $service, $definition);
-            if (null !== $service_proxy) {
-                $this->set($id, $service_proxy);
-            }
-        }
+        $this->tryLoadDefinitionFromRaw($id);
 
         return parent::get($id, $invalid_behavior);
     }
@@ -118,20 +107,27 @@ class ContainerProxy extends Container
      */
     public function set($id, $service, $scope = self::SCOPE_CONTAINER)
     {
-        $definition = null;
-        if (true === $this->hasDefinition($id)) {
-            $definition = $this->getDefinition($id);
-            $restored_service = $this->tryRestoreDumpableService($id, $service, $definition);
-            if (null !== $restored_service) {
-                $service = $restored_service;
+        $definition = true === $this->hasDefinition($id) ? $this->getDefinition($id) : null;
+        if (null !== $definition && true === $definition->isSynthetic()) {
+            foreach ($definition->getMethodCalls() as $method) {
+                $arguments = array();
+                foreach ($method[1] as $argument) {
+                    if (true === is_object($argument) && true === ($argument instanceof Reference)) {
+                        if (false === $this->has($argument->__toString())) {
+                            continue;
+                        }
+
+                        $argument = $this->get($argument->__toString());
+                    }
+
+                    $arguments[] = $argument;
+                }
+
+                call_user_func_array(array($service, $method[0]), $arguments);
             }
         }
 
         parent::set($id, $service, $scope);
-
-        if (null !== $definition) {
-            $this->setDefinition($id, $definition);
-        }
     }
 
     /**
@@ -175,53 +171,6 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Try to restore a service if we have its dump
-     *
-     * @param  string     $id         the id of the service we try to restore
-     * @param  mixed      $service    the service we try to restore
-     * @param  Definition $definition the definition of the service we try to restore
-     *
-     * @return mixed object if we succeed to restore the service, otherwise null
-     */
-    private function tryRestoreDumpableService($id, $service, Definition $definition)
-    {
-        if (false === $definition->hasTag('dumpable')) {
-            return null;
-        }
-
-        if (null !== $service && ($service instanceof DumpableServiceProxyInterface) && $service->isRestored()) {
-            return null;
-        }
-
-        if (false === array_key_exists($id, $this->services_dump)) {
-            return null;
-        }
-
-        $service_dump = $this->services_dump[$id];
-        $service_proxy = null;
-        $proxy_classname = $service_dump['class_proxy'];
-
-        if (true === empty($proxy_classname)) {
-            if (null === $service) {
-                $service = parent::get($id);
-            }
-
-            $service_proxy = $service;
-            if (false === ($service_proxy instanceof DumpableServiceProxyInterface)) {
-                throw new InvalidServiceProxyException(get_class($service_proxy));
-            }
-        }
-
-        if (null === $service_proxy) {
-            $service_proxy = new $proxy_classname();
-        }
-
-        $service_proxy->restore($this, $service_dump['dump']);
-
-        return $service_proxy;
-    }
-
-    /**
      * Try to load definition by looking for its raw definition with the provided $id
      *
      * @param  string $id the id of the service we try to load its definition
@@ -237,7 +186,6 @@ class ContainerProxy extends Container
             $this->raw_definitions_id = array_flip($this->raw_definitions_id);
             unset($this->raw_definitions_id[$id]);
             $this->raw_definitions_id = array_flip($this->raw_definitions_id);
-            $found = true;
         }
 
         return $definition;

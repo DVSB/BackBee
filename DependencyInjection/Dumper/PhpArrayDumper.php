@@ -39,6 +39,8 @@ use Symfony\Component\DependencyInjection\Dumper\DumperInterface;
  */
 class PhpArrayDumper implements DumperInterface
 {
+    const RESTORABLE_SERVICE_INTERFACE = 'BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface';
+
     /**
      * container we want to dump to php array format
      *
@@ -75,7 +77,6 @@ class PhpArrayDumper implements DumperInterface
             'parameters'    => $this->dumpContainerParameters($options),
             'services'      => $this->dumpContainerDefinitions($options),
             'aliases'       => $this->dumpContainerAliases($options),
-            'services_dump' => $this->dumpDumpableServices($options),
             'is_compiled'   => $compiled
         );
 
@@ -106,6 +107,7 @@ class PhpArrayDumper implements DumperInterface
         $definitions = array();
         foreach ($this->container->getDefinitions() as $key => $definition) {
             $definitions[$key] = $this->convertDefinitionToPhpArray($definition);
+            $this->tryHydrateDefinitionForRestoration($key, $definition, $definitions[$key]);
         }
 
         return $definitions;
@@ -386,38 +388,49 @@ class PhpArrayDumper implements DumperInterface
     }
 
     /**
-     * Looking for every services with `dumpable` tag and calls DumpableServiceInterface::dump()
-     * Only loaded services are dumped
+     * [tryHydrateDefinitionForRestoration description]
      *
-     * @param  array  $options
+     * @param  [type]     $id               [description]
+     * @param  Definition $definition       [description]
+     * @param  array      $definition_array [description]
      *
-     * @return array contains the dump of every dumpable services indexed by the service id
-     *
-     * @throws ServiceNotDumpableException raises if you declare a service as dumpable but it did not
-     *                                     implement DumpableServiceInterface
+     * @return [type]                       [description]
      */
-    private function dumpDumpableServices(array $options)
+    private function tryHydrateDefinitionForRestoration($id, Definition $definition, array &$definition_array)
     {
-        $services_dump = array();
-        foreach ($this->container->findTaggedServiceIds('dumpable') as $service_id => $data) {
-            if (false === $this->container->isLoaded($service_id)) {
-                continue;
-            }
-
-            $service = $this->container->get($service_id);
-            if ($service instanceof DumpableServiceInterface) {
-                $services_dump[$service_id] = array(
-                    'dump'        => $service->dump(),
-                    'class_proxy' => $service->getClassProxy()
-                );
-            } else {
+        if (true === $this->container->isLoaded($id) && true === $definition->hasTag('dumpable')) {
+            $service = $this->container->get($id);
+            if (false === ($service instanceof DumpableServiceInterface)) {
                 throw new ServiceNotDumpableException(
                     $service_id,
-                    true === isset($data['class']) ? $data['class'] : null
+                    get_class($service)
                 );
             }
-        }
 
-        return $services_dump;
+            $class_proxy = $service->getClassProxy() ?: get_class($service);
+            if (false === in_array(self::RESTORABLE_SERVICE_INTERFACE, class_implements($class_proxy))) {
+                throw new \Exception('Invalid class proxy, it must implements DumpableServiceProxyInterface.');
+            }
+
+            if (true === array_key_exists('class', $definition_array)) {
+                $definition_array['class'] = $class_proxy;
+            }
+
+            if (false === array_key_exists('calls', $definition_array)) {
+                $definition_array['calls'] = array();
+            }
+
+            if (true === $definition->isSynthetic()) {
+                $definition_array['tags'][] = array(
+                    'name'           => 'synthetic_calls',
+                    'dispatch_event' => false
+                );
+            }
+
+            $definition_array['calls'][] = array('restore', array(
+                '@service_container',
+                $service->dump()
+            ));
+        }
     }
 }
