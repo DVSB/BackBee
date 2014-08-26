@@ -204,6 +204,27 @@ class UserControllerTest extends TestCase
         return $userId;
     }
     
+    
+    /**
+     * @covers ::putAction
+     */
+    public function test_putAction_userDoesntExist()
+    {
+        $controller = $this->getController();
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], [
+            'firstname' => 'firstname',
+            'lastname' => 'lastname',
+            'login' => 'user_login',
+        ], [
+            'id' => '12024582905729',
+            '_action' => 'putAction',
+            '_controller' => 'BackBuilder\Rest\Controller\UserController'
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/'] ));
+
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+    
     /**
      * @covers ::putAction
      */

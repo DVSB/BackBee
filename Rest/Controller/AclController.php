@@ -27,8 +27,7 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\ConstraintViolation;
 
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
-    Symfony\Component\Security\Acl\Model\DomainObjectInterface;
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -37,8 +36,6 @@ use BackBuilder\Security\Group;
 
 use BackBuilder\Rest\Exception\ValidationException;
 
-
-use BackBuilder\Util\String;
 
 /**
  * User Controller
@@ -69,18 +66,12 @@ class AclController extends ARestController
      * })
      * 
      */
-    public function getEntryCollectionAction(Request $request, ConstraintViolationList $violations = null) 
+    public function getEntryCollectionAction(Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        return new Response();
-
         $aclProvider = $this->getBBapp()->getSecurityContext()->getACLProvider();
         
         /* @var $aclProvider \Symfony\Component\Security\Acl\Dbal\AclProvider */
         $aclProvider->findAcls();
-        //
         
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('g')
@@ -130,12 +121,8 @@ class AclController extends ARestController
      *  @Assert\Type(type="integer", message="Mask must be an integer"), 
      * })
      */
-    public function postClassAceAction(Request $request, ConstraintViolationList $violations = null) 
+    public function postClassAceAction(Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         $objectIdentity = new ObjectIdentity('class', $request->request->get('object_class'));
 
         $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
@@ -185,12 +172,8 @@ class AclController extends ARestController
      *  @Assert\Type(type="integer", message="Mask must be an integer"), 
      * })
      */
-    public function postObjectAceAction(Request $request, ConstraintViolationList $violations = null) 
+    public function postObjectAceAction(Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         $objectIdentity = new ObjectIdentity($request->request->get('object_id'), $request->request->get('object_class'));
         $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
         
@@ -238,6 +221,21 @@ class AclController extends ARestController
         
         foreach($permissionMap as $i => $objectMap) {
             $permissions = $objectMap['permissions'];
+            
+            if(!isset($objectMap['object_class'])) {
+                $violations->add(
+                    new ConstraintViolation(
+                        "Object class not supllied", 
+                        "Object class not supllied", 
+                        [], 
+                        sprintf('%s[object_class]', $i), 
+                        sprintf('%s[object_class]', $i), 
+                        null
+                    )
+                );
+                continue;
+            }
+            
             $objectClass = $objectMap['object_class'];
             $objectId = null;
             
@@ -264,6 +262,20 @@ class AclController extends ARestController
             } else {
                 // class scope
                 $objectIdentity = new ObjectIdentity('class', $objectClass);
+            }
+            
+            if(!isset($objectMap['sid'])) {
+                $violations->add(
+                    new ConstraintViolation(
+                        "Security ID not supllied", 
+                        "Security ID not supllied", 
+                        [], 
+                        sprintf('%s[sid]', $i), 
+                        sprintf('%s[sid]', $i), 
+                        null
+                    )
+                );
+                continue;
             }
             
             $sid = $objectMap['sid'];
@@ -298,7 +310,7 @@ class AclController extends ARestController
                 $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, $mask);
             }
         }
-        
+
         if(count($violations) > 0) {
             throw new ValidationException($violations);
         }
@@ -330,7 +342,52 @@ class AclController extends ARestController
             );
         }
         
+        return new Response('', 204);
+    }
+    
+    
+    /**
+     * @Rest\RequestParam(name = "object_class", description="Object Class name", requirements = {
+     *  @Assert\NotBlank(message="Object Class cannot be empty")
+     * })
+     * 
+     * @Rest\RequestParam(name = "object_id", description="Object Identifier", requirements = {
+     *  @Assert\NotBlank(message="Object Identifier cannot be empty")
+     * })
+     * 
+     * @param string|int $sid
+     */
+    public function deleteObjectAceAction($sid, Request $request)
+    {
+        $aclManager = $this->getContainer()->get("security.acl_manager");
+        $securityIdentity = new UserSecurityIdentity($sid, 'BackBuilder\Security\Group');
+        $objectClass = $request->request->get('object_class');
+        
+        $objectIdentity = new ObjectIdentity($request->request->get('object_id'), $objectClass);
+
+        try {
+            $aclManager->deleteClassAce($objectIdentity, $securityIdentity);
+        } catch (\InvalidArgumentException $ex) {
+            throw $this->createValidationException(
+                'object', 
+                $request->request->get('object_class'), 
+                sprintf("Object ace doesn't exist for %s::%s", $objectClass, $request->request->get('object_id'))
+            );
+        }
         
         return new Response('', 204);
+    }
+    
+    
+    /**
+     * 
+     */
+    public function getMaskCollectionAction()
+    {
+        $aclManager = $this->getContainer()->get("security.acl_manager");
+        
+        $data = $aclManager->getPermissionCodes();
+        
+        return new Response(json_encode($data), 200);
     }
 }

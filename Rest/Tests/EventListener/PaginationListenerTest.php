@@ -43,9 +43,20 @@ use BackBuilder\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
  */
 class PaginationListenerTest extends \PHPUnit_Framework_TestCase
 {
+    
+    /**
+     * @covers ::__construct
+     * @covers ::getControllerActionMetadata
+     */
+    public function test__construct()
+    {
+        $listener = $this->getListener();
+        $this->assertInstanceOf('BackBuilder\Rest\EventListener\PaginationListener', $listener);
+    }
 
     /**
      * @covers ::onKernelController
+     * @covers ::getControllerActionMetadata
      */
     public function testDefaultParams()
     {

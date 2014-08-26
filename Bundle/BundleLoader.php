@@ -1,351 +1,493 @@
 <?php
 namespace BackBuilder\Bundle;
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-use BackBuilder\BBApplication;
+use BackBuilder\IApplication;
+use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Config\Config;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\DependencyInjection\Loader\ContainerProxy;
+use BackBuilder\Util\Resolver\BundleConfigDirectory;
 
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\Yaml\Yaml;
 
+/**
+ * BundleLoader allows us to hydrate bundle into IApplication and its service container
+ *
+ * @category    BackBuilder
+ * @package     BackBuilder/Bundle
+ * @copyright   Lp digital system
+ * @author      eric.chau <eric.chau@lp-digital.fr>
+ */
 class BundleLoader
 {
-    const BUNDLE_SERVICE_KEY_PATTERN = 'bundle.%sbundle';
-
     const EVENT_RECIPE_KEY = 'event';
     const SERVICE_RECIPE_KEY = 'service';
     const CLASSCONTENT_RECIPE_KEY = 'classcontent';
-    const RESOURCE_RECIPE_KEY = 'resource';
     const TEMPLATE_RECIPE_KEY = 'template';
     const HELPER_RECIPE_KEY = 'helper';
+    const RESOURCE_RECIPE_KEY = 'resource';
+    const NAMESPACE_RECIPE_KEY = 'namespace';
+    const CUSTOM_RECIPE_KEY = 'custom';
     const ROUTE_RECIPE_KEY = 'route';
 
-    private static $bundles_base_dir = array();
-
-    private static $bundles_config = array();
-
-    private static $application = null;
+    /**
+     * [$application description]
+     * @var [type]
+     */
+    private $application;
 
     /**
-     * [loadBundlesIntoApplication description]
-     * @param  BBApplication $application  [description]
-     * @param  array         $bundles_config [description]
-     * @return [type]                      [description]
+     * [$container description]
+     * @var [type]
      */
-    public static function loadBundlesIntoApplication(BBApplication $application, array $bundles_config)
+    private $container;
+
+    /**
+     * [$bundles_base_directory description]
+     * @var [type]
+     */
+    private $bundles_base_directory;
+
+    /**
+     * [__construct description]
+     * @param IApplication $application [description]
+     */
+    public function __construct(IApplication $application)
     {
-        self::$application = $application;
-        $container = $application->getContainer();
-        self::$bundles_base_dir = true === $container->hasParameter('bundles.base_dir')
-            ? $container->getParameter('bundles.base_dir')
-            : array()
-        ;
+        $this->application = $application;
+        $this->container = $application->getContainer();
+        $this->bundles_base_directory = array();
+    }
 
-        $do_get_base_dir = !(0 < count(self::$bundles_base_dir)) ?: true;
+    /**
+     * [load description]
+     * @param  array  $bundles_config [description]
+     * @return [type]                 [description]
+     */
+    public function load(array $bundles_config)
+    {
+        foreach ($bundles_config as $id => $classname) {
+            $service_id = $this->generateBundleServiceId($id);
 
-        foreach ($bundles_config as $name => $classname) {
-            $key = sprintf(self::BUNDLE_SERVICE_KEY_PATTERN, strtolower($name));
-
-            if (false === $container->hasDefinition($key)) {
-                $r = new \ReflectionClass($classname);
-                self::$bundles_base_dir[$key] = dirname($r->getFileName());
-
-                $definition = new Definition($classname, array(new Reference('bbapp')));
-                $definition->addTag('bundle');
-                $container->setDefinition($key, $definition);
+            if (false === $this->container->hasDefinition($service_id)) {
+                $base_directory = $this->buildBundleBaseDirectoryFromClassname($classname);
+                $this->bundles_base_directory[$service_id] = $base_directory;
+                $this->container->setDefinition(
+                    $service_id,
+                    $this->buildBundleDefinition($classname, $base_directory)
+                );
             }
-
-
         }
 
-        $container->setParameter('bundles.base_dir', self::$bundles_base_dir);
+        if (0 < count($this->bundles_base_directory)) {
+            $this->loadFullBundles();
+        }
+    }
 
-        self::loadBundlesConfig();
-        self::loadBundlesServices();
-        // services must be available before events are loaded
-        self::loadBundleEvents();
+    /**
+     * [buildBundleBaseDirectoryFromClassname description]
+     * @param  [type] $classname [description]
+     * @return [type]            [description]
+     */
+    public function buildBundleBaseDirectoryFromClassname($classname)
+    {
+        preg_match('#([a-zA-Z]+Bundle)#', $classname, $matches);
 
-        self::registerBundleClassContentDir();
-        self::registerBundleResourceDir();
-        self::registerBundleScriptDir();
-        self::registerBundleHelperDir();
-
-        // add BundleListener event (service.tagged.bundle)
-        $event_dispatcher = $application->getContainer()->get('event.dispatcher');
-        if (
-            false === ($event_dispatcher instanceof DumpableServiceProxyInterface)
-            || false === $event_dispatcher->isRestored()
-        ) {
-            $event_dispatcher->addListeners(array(
-                'bbapplication.start' => array(
-                    'listeners' => array(
-                        array(
-                            'BackBuilder\Bundle\Listener\BundleListener',
-                            'onApplicationStart'
-                        )
-                    )
-                ),
-                'service.tagged.bundle' => array(
-                    'listeners' => array(
-                        array(
-                            'BackBuilder\Bundle\Listener\BundleListener',
-                            'onGetBundleService'
-                        )
-                    )
-                ),
-                'bbapplication.stop' => array(
-                    'listeners' => array(
-                        array(
-                            'BackBuilder\Bundle\Listener\BundleListener',
-                            'onApplicationStop'
-                        )
-                    )
-                )
-            ));
+        if (0 === count($matches)) {
+            throw new \Exception();
         }
 
-        // Cleaning memory
-        self::$bundles_base_dir = array();
-        self::$bundles_config = array();
-        self::$application = null;
+        $base_directory = implode(DIRECTORY_SEPARATOR, array(
+            $this->application->getBaseDir(),
+            BundleInterface::BACKBEE_BUNDLE_DIRECTORY_NAME,
+            $matches[0]
+        ));
+        if (false === is_dir($base_directory)) {
+            throw new \Exception();
+        }
+
+        return $base_directory;
+    }
+
+    /**
+     * [loadConfigDefinition description]
+     *
+     * @param  [type] $config_id      [description]
+     * @param  [type] $base_directory [description]
+     */
+    public function loadConfigDefinition($config_id, $base_directory)
+    {
+        if (false === $this->container->hasDefinition($config_id)) {
+            $this->container->setDefinition($config_id, $this->buildConfigDefinition($base_directory));
+        }
+    }
+
+    /**
+     * [loadBundlesRoutes description]
+     */
+    public function loadBundlesRoutes()
+    {
+        $loaded_bundles = array_keys($this->container->findTaggedServiceIds('bundle.config'));
+        foreach ($loaded_bundles as $service_id) {
+            $config = $this->container->get($service_id);
+            $recipes = $this->getLoaderRecipesByConfig($config);
+
+            $this->loadRoutes($config, $this->getCallableByRecipesAndKey($recipes, self::ROUTE_RECIPE_KEY));
+        }
+    }
+
+    /**
+     * [generateBundleKey description]
+     * @param  [type] $id [description]
+     * @return [type]       [description]
+     */
+    private function generateBundleServiceId($id)
+    {
+        return str_replace('%bundle_name%', strtolower($id), BundleInterface::BUNDLE_SERVICE_ID_PATTERN);
+    }
+
+    /**
+     * [buildBundleDefinition description]
+     * @param  [type] $classname [description]
+     * @return [type]            [description]
+     */
+    private function buildBundleDefinition($classname, $base_directory)
+    {
+        $definition = new Definition($classname, array(new Reference('bbapp')));
+        $definition->addTag('bundle');
+
+        return $definition;
+    }
+
+    /**
+     * [areBundlesAlreadyRestored description]
+     */
+    private function loadFullBundles()
+    {
+        foreach ($this->bundles_base_directory as $base_directory) {
+            $config = $this->loadAndGetBundleConfigByBaseDirectory($base_directory);
+            $recipes = $this->getLoaderRecipesByConfig($config);
+
+            $this->loadServices($config, $this->getCallableByRecipesAndKey($recipes, self::SERVICE_RECIPE_KEY));
+
+            $this->loadEvents($config, $this->getCallableByRecipesAndKey($recipes, self::EVENT_RECIPE_KEY));
+
+            $this->registerClassContentDirectory(
+                $config,
+                $this->getCallableByRecipesAndKey($recipes, self::CLASSCONTENT_RECIPE_KEY)
+            );
+
+            $this->registerTemplatesDirectory(
+                $config,
+                $this->getCallableByRecipesAndKey($recipes, self::TEMPLATE_RECIPE_KEY)
+            );
+
+            $this->registerHelpersDirectory(
+                $config,
+                $this->getCallableByRecipesAndKey($recipes, self::HELPER_RECIPE_KEY)
+            );
+
+            $this->registerResourcesDirectory(
+                $config,
+                $this->getCallableByRecipesAndKey($recipes, self::RESOURCE_RECIPE_KEY)
+            );
+
+            $this->registerNamespaces(
+                $config,
+                $this->getCallableByRecipesAndKey($recipes, self::NAMESPACE_RECIPE_KEY)
+            );
+
+            $this->runRecipe(
+                $config,
+                $this->getCallableByRecipesAndKey($recipes, self::CUSTOM_RECIPE_KEY)
+            );
+        }
     }
 
     /**
      * [loadBundlesConfig description]
+     * @return [type] [description]
      */
-    private static function loadBundlesConfig()
+    private function loadAndGetBundleConfigByBaseDirectory($base_directory)
     {
-        $services_id = array();
-        $container = self::$application->getContainer();
-        foreach (self::$bundles_base_dir as $key => $base_dir) {
-            $config = null;
-            $config_service_id = \BackBuilder\Bundle\ABundle::getBundleConfigServiceId($base_dir);
-            if (false === $container->hasDefinition($config_service_id)) {
-                $definition = new Definition('BackBuilder\Config\Config', array(
-                    $base_dir . DIRECTORY_SEPARATOR . 'Ressources',
-                    new Reference('cache.bootstrap'),
-                    null,
-                    '%debug%',
-                    '%config.yml_files_to_ignore%'
-                ));
-                $definition->addTag('dumpable');
-                $definition->addMethodCall('setContainer', array(new Reference('service_container')));
-                $definition->addMethodCall('setEnvironment', array('%bbapp.environment%'));
-                $config = \BackBuilder\Bundle\ABundle::initBundleConfig(self::$application, $base_dir);
-                $container->set($config_service_id, $config);
-                $container->setDefinition($config_service_id, $definition);
-            } else {
-                $config = $container->get($config_service_id);
-            }
-
-            self::$bundles_config[$key] = $config;
-            $services_id[] = $config_service_id;
+        $config_id = str_replace('%bundle_id%', basename($base_directory), BundleInterface::CONFIG_SERVICE_ID_PATTERN);
+        $this->loadConfigDefinition($config_id, $base_directory);
+        $bundle_config = $this->container->get($config_id)->getBundleConfig();
+        if (false === array_key_exists('config_per_site', $bundle_config) || $bundle_config['config_per_site']) {
+            $definition = $this->container->getDefinition($config_id);
+            $definition->addTag('config_per_site');
         }
 
-        self::$application->getContainer()->get('registry')->set('bundle.config_services_id', $services_id);
+        return $this->container->get($config_id);
     }
 
-    private static function loadBundleEvents()
+    /**
+     * [buildConfigDefinition description]
+     *
+     * @param  [type] $base_directory [description]
+     *
+     * @return [type]                 [description]
+     */
+    private function buildConfigDefinition($base_directory)
     {
-        $event_dispatcher = self::$application->getContainer()->get('event.dispatcher');
+        $definition = new Definition('BackBuilder\Config\Config', array(
+            $this->getConfigDirectoryByBaseDirectory($base_directory),
+            new Reference('cache.bootstrap'),
+            null,
+            '%debug%',
+            '%config.yml_files_to_ignore%'
+        ));
 
-        if (($event_dispatcher instanceof DumpableServiceProxyInterface) && $event_dispatcher->isRestored()) {
-            return;
+        if (true === $this->application->getContainer()->getParameter('container.autogenerate')) {
+            $definition->addTag('dumpable', array('dispatch_event' => false));
         }
 
-        foreach (self::$bundles_config as $key => $config) {
-            $recipe = self::getBundleLoaderRecipeFor($config, self::EVENT_RECIPE_KEY);
-            if (null === $recipe) {
-                $events = $config->getRawSection('events');
-                if (false === is_array($events) || 0 === count($events)) {
-                    continue;
-                }
+        $definition->addMethodCall('setContainer', array(new Reference('service_container')));
+        $definition->addMethodCall('setEnvironment', array('%bbapp.environment%'));
+        $definition->setConfigurator(array(new Reference('config.configurator'), 'configureBundleConfig'));
+        $definition->addTag('bundle.config', array('dispatch_event' => false));
 
-                $event_dispatcher->addListeners($events);
-            } else {
-                if (true === is_callable($recipe)) {
-                    call_user_func_array($recipe, array(self::$application, $config));
+        return $definition;
+    }
+
+    /**
+     * [getConfigDirectoryByBaseDirectory description]
+     *
+     * @param  [type] $base_directory [description]
+     *
+     * @return [type]                 [description]
+     */
+    private function getConfigDirectoryByBaseDirectory($base_directory)
+    {
+        $directory = $base_directory . DIRECTORY_SEPARATOR . BundleInterface::CONFIG_DIRECTORY_NAME;
+        if (false === is_dir($directory)) {
+            $directory = $base_directory . DIRECTORY_SEPARATOR . BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
+        }
+
+        return $directory;
+    }
+
+    /**
+     * [getLoaderRecipesByConfig description]
+     *
+     * @param  Config $config [description]
+     * @return [type]         [description]
+     */
+    private function getLoaderRecipesByConfig(Config $config)
+    {
+        $recipes = null;
+        $bundle_config = $config->getBundleConfig();
+        if (null !== $bundle_config && true === array_key_exists('bundle_loader_recipes', $bundle_config)) {
+            $recipes = $bundle_config['bundle_loader_recipes'];
+        }
+
+        return $recipes;
+    }
+
+    /**
+     * [getCallableByRecipesAndKey description]
+     * @param  [type] $recipes [description]
+     * @param  [type] $key     [description]
+     * @return [type]          [description]
+     */
+    private function getCallableByRecipesAndKey(array $recipes = null, $key)
+    {
+        $recipe = null;
+        if (null !== $recipes && true === array_key_exists($key, $recipes) && true === is_callable($recipes[$key])) {
+            $recipe = $recipes[$key];
+        }
+
+        return $recipe;
+    }
+
+    /**
+     * [loadServices description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     */
+    private function loadServices(Config $config, callable $recipe = null)
+    {
+        if (false === $this->runRecipe($config, $recipe)) {
+            $directories = BundleConfigDirectory::getDirectories(
+                $this->application->getBaseRepository(),
+                $this->application->getContext(),
+                $this->application->getEnvironment(),
+                basename(dirname($config->getBaseDir()))
+            );
+
+            array_unshift($directories, $this->getConfigDirectoryByBaseDirectory(dirname($config->getBaseDir())));
+
+            foreach ($directories as $directory) {
+                $filepath = $directory . DIRECTORY_SEPARATOR . 'services.xml';
+                if (true === is_file($filepath) && true === is_readable($filepath)) {
+                    try {
+                        ServiceLoader::loadServicesFromXmlFile($this->container, $directory);
+                    } catch (\Exception $e) { /* nothing to do, just ignore it */ }
                 }
             }
         }
     }
 
     /**
-     * Load every service definition defined in bundle
+     * [loadEvents description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
      */
-    private static function loadBundlesServices()
+    private function loadEvents(Config $config, callable $recipe = null)
     {
-        $container = self::$application->getContainer();
-        if (true === ($container instanceof ContainerProxy)) {
-            return;
-        }
-
-        $bundle_env_directory = null;
-        if (BBApplication::DEFAULT_ENVIRONMENT !== self::$application->getEnvironment()) {
-            $bundle_env_directory = implode(DIRECTORY_SEPARATOR, array(
-                self::$application->getRepository(), 'Config', self::$application->getEnvironment(), 'bundle'
-            ));
-        }
-
-        $container = self::$application->getContainer();
-        foreach (self::$bundles_base_dir as $key => $dir) {
-            $config = self::$application->getContainer()->get($key . '.config');
-            $recipe = null;
-            if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::SERVICE_RECIPE_KEY);
-            }
-
-            if (null === $recipe) {
-                $services_directory = array($dir . DIRECTORY_SEPARATOR . 'Ressources');
-                if (null !== $bundle_env_directory) {
-                    $services_directory[] = $bundle_env_directory . DIRECTORY_SEPARATOR . basename($dir);
-                }
-
-                foreach ($services_directory as $sd) {
-                    $filepath = $sd . DIRECTORY_SEPARATOR . 'services.xml';
-                    if (true === is_file($filepath) && true === is_readable($filepath)) {
-                        try {
-                            ServiceLoader::loadServicesFromXmlFile($container, $sd);
-                        } catch (Exception $e) { /* nothing to do, just ignore it */ }
-                    }
-                }
-            } else {
-                if (null !== $config && true === is_callable($recipe)) {
-                    call_user_func_array($recipe, array(self::$application, $config));
-                }
+       if (false === $this->runRecipe($config, $recipe)) {
+            $events = $config->getRawSection('events');
+            if (true === is_array($events) || 0 < count($events)) {
+                $this->application->getEventDispatcher()->addListeners($events);
             }
         }
     }
 
-    private static function registerBundleClassContentDir()
+    /**
+     * [registerClassContentDirectory description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     */
+    private function registerClassContentDirectory(Config $config, callable $recipe = null)
     {
-        if (true === self::$application->isRestored()) {
-            return;
-        }
-
-        foreach (self::$bundles_base_dir as $key => $dir) {
-            $config = self::$application->getContainer()->get($key . '.config');
-            $recipe = null;
-            if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::CLASSCONTENT_RECIPE_KEY);
-            }
-
-            if (null === $recipe) {
-                $classcontent_dir = realpath($dir . DIRECTORY_SEPARATOR . 'ClassContent');
-                if (false === $classcontent_dir) {
-                    continue;
-                }
-
-                self::$application->pushClassContentDir($classcontent_dir);
-            } else {
-                if (null !== $config && true === is_callable($recipe)) {
-                    call_user_func_array($recipe, array(self::$application, $config));
-                }
+        if (null !== $recipe) {
+            $this->runRecipe($config, $recipe);
+        } else {
+            $directory = realpath(dirname($config->getBaseDir()) . DIRECTORY_SEPARATOR . 'ClassContent');
+            if (false !== $directory) {
+                $this->application->pushClassContentDir($directory);
             }
         }
     }
 
-    private static function registerBundleResourceDir()
+    /**
+     * [registerTemplatesDirectory description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     */
+    private function registerTemplatesDirectory(Config $config, callable $recipe = null)
     {
-        if (true === self::$application->isRestored()) {
-            return;
-        }
-
-        foreach (self::$bundles_base_dir as $key => $dir) {
-            $config = self::$application->getContainer()->get($key . '.config');
-            $recipe = null;
-            if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::RESOURCE_RECIPE_KEY);
-            }
-
-            if (null === $recipe) {
-                $resources_dir = realpath($dir . DIRECTORY_SEPARATOR . 'Ressources');
-                if (false === $resources_dir) {
-                    continue;
-                }
-
-                self::$application->pushResourceDir($resources_dir);
-            } else {
-                if (null !== $config && true === is_callable($recipe)) {
-                    call_user_func_array($recipe, array(self::$application, $config));
-                }
+        if (false === $this->runRecipe($config, $recipe)) {
+            $directory = realpath(
+                dirname($config->getBaseDir()) . DIRECTORY_SEPARATOR
+                . 'Templates' . DIRECTORY_SEPARATOR . 'scripts'
+            );
+            if (false !== $directory) {
+                $this->application->getRenderer()->addScriptDir($directory);
             }
         }
     }
 
-    private static function registerBundleScriptDir()
+    /**
+     * [registerHelpersDirectory description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     */
+    private function registerHelpersDirectory(Config $config, callable $recipe = null)
     {
-        $renderer = self::$application->getRenderer();
-        if (true === $renderer->isRestored()) {
-            return;
-        }
+        if (false === $this->runRecipe($config, $recipe)) {
+            $directory = realpath(
+                dirname($config->getBaseDir()) . DIRECTORY_SEPARATOR
+                . 'Templates' . DIRECTORY_SEPARATOR . 'helpers'
+            );
 
-        foreach (self::$bundles_base_dir as $key => $dir) {
-            $config = self::$application->getContainer()->get($key . '.config');
-            $recipe = null;
-            if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::TEMPLATE_RECIPE_KEY);
-            }
-
-            if (null === $recipe) {
-                $scripts_dir = realpath($dir . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'scripts');
-                if (false === $scripts_dir) {
-                    continue;
-                }
-
-                $renderer->addScriptDir($scripts_dir);
-            } else {
-                if (null !== $config && true === is_callable($recipe)) {
-                    call_user_func_array($recipe, array(self::$application, $config));
-                }
+            if (false !== $directory) {
+                $this->application->getRenderer()->addHelperDir($directory);
             }
         }
     }
 
-    private static function registerBundleHelperDir()
+    /**
+     * [loadRoutes description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     */
+    private function loadRoutes(Config $config, callable $recipe = null)
     {
-        if (true === self::$application->getAutoloader()->isRestored()) {
-            return;
-        }
-
-        $renderer = self::$application->getRenderer();
-        foreach (self::$bundles_base_dir as $key => $dir) {
-            $config = self::$application->getContainer()->get($key . '.config');
-            $recipe = null;
-            if (null !== $config) {
-                $recipe = self::getBundleLoaderRecipeFor($config, self::HELPER_RECIPE_KEY);
-            }
-
-            if (null === $recipe) {
-                $helper_dir = realpath($dir . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'helpers');
-                if (false === $helper_dir) {
-                    continue;
-                }
-
-                $renderer->addHelperDir($helper_dir);
-            } else {
-                if (null !== $config && true === is_callable($recipe)) {
-                    call_user_func_array($recipe, array(self::$application, $config));
-                }
+        if (false === $this->runRecipe($config, $recipe)) {
+            $route = $config->getRouteConfig();
+            if (true === is_array($route) && 0 < count($route)) {
+                $this->application->getController()->registerRoutes(
+                    $this->generateBundleServiceId(basename(dirname($config->getBaseDir()))),
+                    $route
+                );
             }
         }
     }
 
-    public static function getBundleLoaderRecipeFor(Config $config, $key)
+    /**
+     * [registerResourcesDirectory description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     */
+    private function registerResourcesDirectory(Config $config, callable $recipe = null)
     {
-        $recipe = null;
-        $bundle_config = $config->getBundleConfig();
-        if (true === isset($bundle_config['bundle_loader_recipes'])) {
-            $recipe = true === isset($bundle_config['bundle_loader_recipes'][$key])
-                ? $bundle_config['bundle_loader_recipes'][$key]
-                : null
-            ;
+        if (false === $this->runRecipe($config, $recipe)) {
+            $base_directory = dirname($config->getBaseDir()) . DIRECTORY_SEPARATOR;
+            $directory = realpath($base_directory . DIRECTORY_SEPARATOR . 'Resources');
+            if (false === $directory) {
+                $directory = realpath($base_directory . DIRECTORY_SEPARATOR . 'Ressources');
+            }
+
+            if (false !== $directory) {
+                $this->application->pushResourceDir($directory);
+            }
+        }
+    }
+
+    /**
+     * [registerNamespaces description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     */
+    private function registerNamespaces(Config $config, callable $recipe = null)
+    {
+        $this->runRecipe($config, $recipe);
+    }
+
+    /**
+     * [runRecipe description]
+     *
+     * @param  Config $config [description]
+     * @param  [type] $recipe [description]
+     *
+     * @return [type]         [description]
+     */
+    private function runRecipe(Config $config, callable $recipe = null)
+    {
+        $done = false;
+        if (null !== $recipe) {
+            call_user_func_array($recipe, array($this->application, $config));
+            $done = true;
         }
 
-        return $recipe;
+        return $done;
     }
 }

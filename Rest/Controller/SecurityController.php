@@ -60,12 +60,8 @@ class SecurityController extends ARestController
      * })
      * 
      */
-    public function authenticateAction($firewall, Request $request, ConstraintViolationList $violations = null) 
+    public function authenticateAction($firewall, Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        
         $contexts = $this->getSecurityContextConfig($firewall);
         
         if(0 === count($contexts)) {
