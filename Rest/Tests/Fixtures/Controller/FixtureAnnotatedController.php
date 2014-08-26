@@ -73,8 +73,24 @@ class FixtureAnnotatedController
      *  @Assert\NotBlank(message="Name not provided"),
      *  @Assert\Length(min = "2", max = "50")
      * })
+     * 
+     * @Rest\RequestParam(name = "nameDefault", default = "DefaultName", requirements = {
+     *  @Assert\NotBlank(message="Name not provided"),
+     *  @Assert\Length(min = "2", max = "50")
+     * })
+     * @Rest\RequestParam(name = "fieldWithoutRequirements")
+     * 
      */
     public function requestParamsWithoutViolationsArgumentAction()
+    {} 
+    
+    
+    
+    /**
+     * @Rest\QueryParam(name = "queryParamField")
+     * 
+     */
+    public function queryParamsAction()
     {} 
     
     /**

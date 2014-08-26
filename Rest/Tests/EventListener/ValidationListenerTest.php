@@ -63,6 +63,7 @@ class ValidationListenerTest extends TestCase
      * @covers ::setDefaultValues
      * @covers ::validateParams
      * @covers ::getControllerActionMetadata
+     * @covers ::getViolationsParameterName
      * @expectedException BackBuilder\Rest\Exception\ValidationException
      */
     public function test_onKernelController_invalidInputWithoutViolationsActionArgument()
@@ -82,8 +83,9 @@ class ValidationListenerTest extends TestCase
      * @covers ::setDefaultValues
      * @covers ::validateParams
      * @covers ::getControllerActionMetadata
+     * @covers ::getViolationsParameterName
      */
-    public function test_onKernelController_invalidInputWithViolationsActionArgument()
+    public function test_onKernelController_invalidInputWithViolationsActionArgument_RequestParam()
     {
         $listener = new ValidationListener($this->getBBApp()->getContainer());
         $data = ['name' => 'NameThatIsVeryLong_Exceeds50CharactersLimitDeginedInTheController_blablablablabla'];
@@ -101,8 +103,9 @@ class ValidationListenerTest extends TestCase
      * @covers ::setDefaultValues
      * @covers ::validateParams
      * @covers ::getControllerActionMetadata
+     * @covers ::getViolationsParameterName
      */
-    public function test_onKernelController_validInput()
+    public function test_onKernelController_validInput_RequestParam()
     {
         $listener = new ValidationListener($this->getBBApp()->getContainer());
         $data = ['name' => 'NameValid'];
@@ -112,6 +115,28 @@ class ValidationListenerTest extends TestCase
         $event = new FilterControllerEvent(new FrontController(), $controller, $request, FrontController::MASTER_REQUEST);
         $listener->onKernelController($event);
         $this->assertEquals($data['name'], $request->request->get('name'));
+        $this->assertEquals('DefaultName', $request->request->get('nameDefault'));
+        $this->assertEquals(null, $request->request->get('fieldWithoutRequirements'));
+        
+    }
+    
+     /**
+     * @covers ::onKernelController
+     * @covers ::setDefaultValues
+     * @covers ::validateParams
+     * @covers ::getControllerActionMetadata
+     * @covers ::getViolationsParameterName
+     */
+    public function test_onKernelController_validInput_QueryParam()
+    {
+        $listener = new ValidationListener($this->getBBApp()->getContainer());
+        $data = ['queryParamField' => 'value'];
+        $request = new Request($data);
+        $controller = array(new FixtureAnnotatedController(), 'queryParamsAction');
+        
+        $event = new FilterControllerEvent(new FrontController(), $controller, $request, FrontController::MASTER_REQUEST);
+        $listener->onKernelController($event);
+        $this->assertEquals($data['queryParamField'], $request->query->get('queryParamField'));
     }
     
 

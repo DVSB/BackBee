@@ -66,8 +66,6 @@ class AnnotationDriverTest extends TestCase
         $reflectionClass = new \ReflectionClass($controller);
         $classMetadata = $driver->loadMetadataForClass($reflectionClass);
         
-        $this->assertEquals(3, count($classMetadata->methodMetadata));
-        
         $this->assertArrayHasKey('defaultPaginationAction', $classMetadata->methodMetadata);
         $this->assertArrayHasKey('customPaginationAction', $classMetadata->methodMetadata);
         $this->assertArrayHasKey('requestParamsAction', $classMetadata->methodMetadata);
