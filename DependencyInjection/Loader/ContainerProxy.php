@@ -22,9 +22,11 @@ namespace BackBuilder\DependencyInjection\Loader;
 
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -37,28 +39,37 @@ use Symfony\Component\DependencyInjection\Reference;
 class ContainerProxy extends Container
 {
     /**
-     * [$raw_definitions description]
+     * raw definitions provided by container dump array (key: services)
      *
      * @var array
      */
     private $raw_definitions;
 
     /**
-     * [$raw_definitions_id description]
+     * raw definitions id provided by container dump array (keys of container dump array services)
      *
      * @var array
      */
     private $raw_definitions_id;
 
     /**
-     * [$services_dump description]
+     * raw service dump provided by container dump (key: services_dump)
      *
      * @var array
      */
     private $services_dump;
 
     /**
-     * [__construct description]
+     * shows if the container has been compiled before being dump or not
+     *
+     * @var boolean
+     */
+    private $already_compiled;
+
+    /**
+     * ContainerProxy's constructor;
+     *
+     * @param array $container_dump the container dump from where we can restore entirely the container
      */
     public function __construct(array $container_dump)
     {
@@ -68,60 +79,59 @@ class ContainerProxy extends Container
         $this->getParameterBag()->add($container_dump['parameters']);
         $this->raw_definitions_id = array_keys($this->raw_definitions);
         $this->addAliases($container_dump['aliases']);
-        $this->services_dump = $container_dump['services_dump'];
+        $this->already_compiled = $container_dump['is_compiled'];
     }
 
     /**
-     * [get description]
-     * @param  [type] $id               [description]
-     * @param  [type] $invalid_behavior [description]
-     * @return [type]                   [description]
+     * Returns boolean that determine if container has been compiled before the dump or not
+     *
+     * @return boolean true if the container has been compiled before the dump, otherwise false
+     */
+    public function isCompiled()
+    {
+        return $this->already_compiled;
+    }
+
+    /**
+     * @see Symfony\Component\DependencyInjection\ContainerBuilder::get
      */
     public function get($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
     {
-        if (null !== $definition = $this->tryLoadDefinitionFromRaw($id)) {
-            $service = null;
-            if (true === $this->isLoaded($id)) {
-                $service = parent::get($id, $invalid_behavior);
-            }
-
-            $service_proxy = $this->tryRestoreDumpableService($id, $service, $definition);
-            if (null !== $service_proxy) {
-                $this->set($id, $service_proxy);
-            }
-        }
+        $this->tryLoadDefinitionFromRaw($id);
 
         return parent::get($id, $invalid_behavior);
     }
 
     /**
-     * [set description]
-     * @param [type] $id      [description]
-     * @param [type] $service [description]
-     * @param [type] $scope   [description]
+     * @see Symfony\Component\DependencyInjection\ContainerBuilder::set
      */
     public function set($id, $service, $scope = self::SCOPE_CONTAINER)
     {
-        $definition = null;
-        if (true === $this->hasDefinition($id)) {
-            $definition = $this->getDefinition($id);
-            $restored_service = $this->tryRestoreDumpableService($id, $service, $definition);
-            if (null !== $restored_service) {
-                $service = $restored_service;
+        $definition = true === $this->hasDefinition($id) ? $this->getDefinition($id) : null;
+        if (null !== $definition && true === $definition->isSynthetic()) {
+            foreach ($definition->getMethodCalls() as $method) {
+                $arguments = array();
+                foreach ($method[1] as $argument) {
+                    if (true === is_object($argument) && true === ($argument instanceof Reference)) {
+                        if (false === $this->has($argument->__toString())) {
+                            continue;
+                        }
+
+                        $argument = $this->get($argument->__toString());
+                    }
+
+                    $arguments[] = $argument;
+                }
+
+                call_user_func_array(array($service, $method[0]), $arguments);
             }
         }
 
         parent::set($id, $service, $scope);
-
-        if (null !== $definition) {
-            $this->setDefinition($id, $definition);
-        }
     }
 
     /**
-     * [has description]
-     * @param  [type]  $id [description]
-     * @return boolean     [description]
+     * @see Symfony\Component\DependencyInjection\ContainerBuilder::has
      */
     public function has($id)
     {
@@ -131,9 +141,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [getDefinition description]
-     * @param  [type] $id [description]
-     * @return [type]     [description]
+     * @see Symfony\Component\DependencyInjection\ContainerBuilder::getDefinition
      */
     public function getDefinition($id)
     {
@@ -143,9 +151,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [hasDefinition description]
-     * @param  [type]  $id [description]
-     * @return boolean     [description]
+     * @see Symfony\Component\DependencyInjection\ContainerBuilder::hasDefinition
      */
     public function hasDefinition($id)
     {
@@ -155,8 +161,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [getDefinitions description]
-     * @return [type] [description]
+     * @see Symfony\Component\DependencyInjection\ContainerBuilder::getDefinitions
      */
     public function getDefinitions()
     {
@@ -166,52 +171,12 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [restoreDumpableService description]
-     * @param  Definition $definition [description]
-     * @return [type]                 [description]
-     */
-    private function tryRestoreDumpableService($id, $service, Definition $definition)
-    {
-        if (false === $definition->hasTag('dumpable')) {
-            return null;
-        }
-
-        if (null !== $service && ($service instanceof DumpableServiceProxyInterface) && $service->isRestored()) {
-            return null;
-        }
-
-        if (false === array_key_exists($id, $this->services_dump)) {
-            return null;
-        }
-
-        $service_dump = $this->services_dump[$id];
-        $service_proxy = null;
-        $proxy_classname = $service_dump['class_proxy'];
-
-        if (true === empty($proxy_classname)) {
-            if (null === $service) {
-                $service = parent::get($id);
-            }
-
-            $service_proxy = $service;
-            if (false === ($service_proxy instanceof DumpableServiceProxyInterface)) {
-                throw new \Exception('Service proxy must implements DumpableServiceProxyInterface!');
-            }
-        }
-
-        if (null === $service_proxy) {
-            $service_proxy = new $proxy_classname();
-        }
-
-        $service_proxy->restore($this, $service_dump['dump']);
-
-        return $service_proxy;
-    }
-
-    /**
-     * [tryLoadDefinitionFromRaw description]
-     * @param  [type] $id [description]
-     * @return [type]     [description]
+     * Try to load definition by looking for its raw definition with the provided $id
+     *
+     * @param  string $id the id of the service we try to load its definition
+     *
+     * @return null|Symfony\Component\DependencyInjection\Definition return null if no definition has been found
+     *         in raw definitions, else the Definition object newly build
      */
     private function tryLoadDefinitionFromRaw($id)
     {
@@ -221,15 +186,13 @@ class ContainerProxy extends Container
             $this->raw_definitions_id = array_flip($this->raw_definitions_id);
             unset($this->raw_definitions_id[$id]);
             $this->raw_definitions_id = array_flip($this->raw_definitions_id);
-            $found = true;
         }
 
         return $definition;
     }
 
     /**
-     * [loadRawDefinitions description]
-     * @return [type] [description]
+     * Load every raw definitions and convert them into definition object
      */
     private function loadRawDefinitions()
     {
@@ -239,13 +202,21 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [buildDefinition description]
-     * @param  array  $definition_array [description]
-     * @return [type]                   [description]
+     * Build a definition from the definition's array provided as current method parameter
+     *
+     * @param  array  $array the raw definition's array
+     *
+     * @return Symfony\Component\DependencyInjection\Definition the definition object
      */
     private function buildDefinition(array $array)
     {
-        $definition = new Definition();
+        $definition = null;
+        if (true === array_key_exists('parent', $array)) {
+            $definition = new DefinitionDecorator($array['parent']);
+        } else {
+            $definition = new Definition();
+        }
+
         if (true === array_key_exists('synthetic', $array)) {
             $definition->setSynthetic($array['synthetic']);
         }
@@ -264,9 +235,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionClass description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition class into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionClass(Definition $definition, array $array)
     {
@@ -276,9 +248,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionArguments description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition arguments into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionArguments(Definition $definition, array $array)
     {
@@ -290,9 +263,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionFactoryClass description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition factory class into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionFactoryClass(Definition $definition, array $array)
     {
@@ -302,9 +276,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionFactoryService description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition factory service into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionFactoryService(Definition $definition, array $array)
     {
@@ -314,9 +289,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionFactoryMethod description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition factory method into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionFactoryMethod(Definition $definition, array $array)
     {
@@ -326,9 +302,11 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [convertArguement description]
-     * @param  [type] $argument [description]
-     * @return [type]           [description]
+     * Converts a service string id into Reference if needed
+     *
+     * @param  mixed $argument the argument we may convert
+     *
+     * @return mixed the argument which may be converted
      */
     private function convertArgument($argument)
     {
@@ -340,9 +318,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionTags description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition tags into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionTags(Definition $definition, array $array)
     {
@@ -378,9 +357,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionMethodCalls description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition method calls into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionMethodCalls(Definition $definition, array $array)
     {
@@ -399,9 +379,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionProperties description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition configurator into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionConfigurator(Definition $definition, array $array)
     {
@@ -416,9 +397,10 @@ class ContainerProxy extends Container
     }
 
     /**
-     * [setDefinitionProperties description]
-     * @param Definition $definition [description]
-     * @param array      $array      [description]
+     * Set the definition property (public/abstract/scope/file) into definition object if it exists
+     *
+     * @param Definition $definition definition object to hydrate
+     * @param array      $array      raw definition datas
      */
     private function setDefinitionProperties(Definition $definition, array $array)
     {
@@ -427,7 +409,7 @@ class ContainerProxy extends Container
         }
 
         if (true === array_key_exists('abstract', $array)) {
-            $definition->setScope($array['abstract']);
+            $definition->setAbstract($array['abstract']);
         }
 
         if (true === array_key_exists('scope', $array)) {

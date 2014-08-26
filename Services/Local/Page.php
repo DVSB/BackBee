@@ -229,6 +229,8 @@ class Page extends AbstractServiceLocal
      * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
+     *
+     * @todo strange call to this service with another site
      */
     public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
@@ -237,9 +239,6 @@ class Page extends AbstractServiceLocal
         }
         $tree = array();
         if (null === $page = $this->_repo->find(strval($page_uid))) {
-            //var_dump("Let em tell you this... radical blaze");
-// @todo strange call to this service with another site
-//$this->isGranted('VIEW', $site);
             $page = $this->_repo->getRoot($site);
             if (!is_null($page)) {
                 $leaf = new \stdClass();
@@ -252,7 +251,7 @@ class Page extends AbstractServiceLocal
         } else {
             try {
                 $this->isGranted('VIEW', $page);
-                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult, $having_child);
+                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array('_leftnode' => 'asc'), true, $firstresult, $maxresult, $having_child);
                 $tree['numresults'] = $children->count();
                 $tree['firstresult'] = $firstresult;
                 $tree['maxresult'] = $maxresult;
@@ -481,7 +480,7 @@ class Page extends AbstractServiceLocal
         } else {
             $page = new NestedPage();
 
-            $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
+            $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle, $parent);
 
             $this->getEntityManager()->persist($page);
 
@@ -501,7 +500,7 @@ class Page extends AbstractServiceLocal
             }
         }
 
-        $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
+        $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle, $parent);
 
         if (false === $this->getEntityManager()->contains($page)) {
             $this->getEntityManager()->persist($page);
@@ -524,11 +523,16 @@ class Page extends AbstractServiceLocal
      * @param  string     $redirect
      * @param  Layout     $layout
      */
-    private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout, $alttitle)
+    private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout, $alttitle, NestedPage $parent = null)
     {
         $page->setTitle($title);
         $page->setTarget($target);
         $page->setRedirect('' === $redirect ? null : $redirect);
+        
+        if (null !== $parent) {
+            $page->setParent($parent);
+        }
+        
         $page->setLayout($layout);
         $page->setAltTitle($alttitle);
         ;

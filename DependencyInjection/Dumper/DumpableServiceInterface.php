@@ -20,8 +20,6 @@ namespace BackBuilder\DependencyInjection\Dumper;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\DependencyInjection\ContainerInterface;
-
 /**
  * This interface define every methods a service should implements to be dumpable by the container
  *

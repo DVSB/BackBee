@@ -33,7 +33,7 @@ use BackBuilder\Rest\EventListener\BodyListener,
 
 
 /**
- * Test for AuthController class
+ * Test for BodyListener class
  *
  * @category    BackBuilder
  * @package     BackBuilder\Security
@@ -45,6 +45,20 @@ use BackBuilder\Rest\EventListener\BodyListener,
 class BodyListenerTest extends TestCase
 {
 
+    /**
+     * @covers ::__construct
+     */
+    public function test__construct()
+    {
+        $provider = new ContainerEncoderProvider([
+            'json' => 'rest.encoder.json', 'xml' => 'rest.encoder.xml'
+        ]);
+        $provider->setContainer($this->getBBApp()->getContainer());
+        $listener = new BodyListener($provider, true);
+        
+        $this->assertInstanceOf('BackBuilder\Rest\EventListener\BodyListener', $listener);
+    }
+    
     /**
      * @covers ::onRequest
      */
@@ -64,7 +78,7 @@ class BodyListenerTest extends TestCase
     public function testOnRequest_wrongContent()
     {
         $request = Request::create('test', "POST", [], [], [], ['CONTENT_TYPE' => 'application/json'], '<xml></xml>');
-        $this->invokeOnRequest($request);
+        $this->invokeOnRequest($request, true);
     }
     
     /**
@@ -87,7 +101,32 @@ class BodyListenerTest extends TestCase
     {
         $data = ['param' => 'value'];
         $request = Request::create('test', "POST", [], [], [], [], json_encode($data));
-        $this->invokeOnRequest($request);
+        $this->invokeOnRequest($request, true);
+    }
+    
+    /**
+     * @expectedException \Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException
+     * @expectedExceptionMessage Request body format 'html' not supported
+     * 
+     * @covers ::onRequest
+     */
+    public function testOnRequest_unsupportedContentType()
+    {
+        $data = ['param' => 'value'];
+        $request = Request::create('test', "POST", [], [], [], ['CONTENT_TYPE' => 'text/html'], json_encode($data));
+        $this->invokeOnRequest($request, true);
+    }
+    
+    /**
+     * @covers ::onRequest
+     */
+    public function test_onRequest_noContentType_noException()
+    {
+        $data = ['param' => 'value'];
+        $request = Request::create('test', "POST", [], [], [], [], json_encode($data));
+        $this->invokeOnRequest($request, false);
+        
+        $this->assertEquals([], $request->request->all());
     }
     
     /**
@@ -102,15 +141,14 @@ class BodyListenerTest extends TestCase
     
     /**
      * 
-     * @return \BackBuilder\Rest\EventListener\BodyListener
      */
-    private function invokeOnRequest(Request $request)
+    private function invokeOnRequest(Request $request, $throwExceptionOnUnsupportedContentType = false)
     {
         $provider = new ContainerEncoderProvider([
             'json' => 'rest.encoder.json', 'xml' => 'rest.encoder.xml'
         ]);
         $provider->setContainer($this->getBBApp()->getContainer());
-        $listener = new BodyListener($provider, true);
+        $listener = new BodyListener($provider, $throwExceptionOnUnsupportedContentType);
         
         $event = new GetResponseEvent($this->getBBApp()->getController(), $request, FrontController::MASTER_REQUEST);
         $listener->onRequest($event);

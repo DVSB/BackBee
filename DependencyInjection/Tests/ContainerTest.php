@@ -78,7 +78,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         // from the container
         $event_dispatcher = new Dispatcher();
         $event_dispatcher->setContainer($container);
-        $event_dispatcher->addListener('service.tagged.test',array('@listener', 'onGetServiceTaggedTestEvent'));
+        $event_dispatcher->addListener('service.tagged.test', array('@listener', 'onGetServiceTaggedTestEvent'));
         $container->set('event.dispatcher', $event_dispatcher);
 
         // basic test for the listener
@@ -110,5 +110,16 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             $container->get('listener')->getFoo(),
             $container->getContainerValues($service_string_id)->getFoo()
         );
+
+        // Test that there is no events to dispatch if the tag name is `dumpable`
+        $container->set('listener', new TestListener());
+        $event_dispatcher->addListener('service.tagged.dumpable', array('@listener', 'onGetServiceTaggedTestEvent'));
+
+        $definition = new Definition('DateTime');
+        $definition->addTag('dumpable', array('dispatch_event' => false));
+        $container->setDefinition('dumpable_date', $definition);
+
+        $container->get('dumpable_date');
+        $this->assertEquals('bar', $container->get('listener')->getFoo());
     }
 }

@@ -31,17 +31,17 @@ class InvalidConfigTypeException extends \BackBuilder\Exception\BBException
     /**
      * InvalidConfigTypeException's constructor
      *
-     * @param string $method       method of ConfigBuilder which raise this exception
+     * @param string $method       method of Configurator which raise this exception
      * @param string $invalid_type the invalid type provided by user
      */
     public function __construct($method, $invalid_type)
     {
         parent::__construct(sprintf(
-            'You provided invalid type (:%s) for Config\ConfigBuilder::%s(). Only %s and %s are supported.',
+            'You provided invalid type (:%s) for Config\Configurator::%s(). Only %s and %s are supported.',
             $invalid_type,
             $method,
-            '0 (=Config\ConfigBuilder::APPLICATION_CONFIG)',
-            '1 (=Config\ConfigBuilder::BUNDLE_CONFIG)'
+            '0 (=Config\Configurator::APPLICATION_CONFIG)',
+            '1 (=Config\Configurator::BUNDLE_CONFIG)'
         ));
     }
 }

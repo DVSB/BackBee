@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -32,8 +32,7 @@ use BackBuilder\Exception\BBException,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class File
-{
+class File {
 
     /**
      * Acceptable prefices of SI
@@ -46,8 +45,8 @@ class File
      * @param string $path
      * @return boolean|string
      */
-    public static function realpath($path)
-    {
+    public static function realpath($path) {
+        $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
         if (false === $parse_url = parse_url($path)) {
             return false;
         }
@@ -56,7 +55,7 @@ class File
             return realpath($path);
         }
 
-        if (false === array_key_exists('path', $parse_url)) {
+        if (false === array_key_exists('scheme', $parse_url)) {
             return false;
         }
 
@@ -93,8 +92,7 @@ class File
      * @param boolean $removeTrailing Removing trailing separators to the end of path
      * @return string The normalize file path
      */
-    public static function normalizePath($filepath, $separator = DIRECTORY_SEPARATOR, $removeTrailing = TRUE)
-    {
+    public static function normalizePath($filepath, $separator = DIRECTORY_SEPARATOR, $removeTrailing = TRUE) {
         $patterns = array('/\//', '/\\\\/', '/' . str_replace('/', '\/', $separator) . '+/');
         $replacements = array_fill(0, 3, $separator);
 
@@ -112,8 +110,7 @@ class File
      * @param  int $precision Presicion of result (default 2)
      * @return string Transformed size
      */
-    public static function readableFilesize($size, $precision = 2)
-    {
+    public static function readableFilesize($size, $precision = 2) {
         $result = $size;
         $index = 0;
         while ($result > 1024 && $index < count(self::$_prefixes)) {
@@ -133,8 +130,7 @@ class File
      * 				  - include_path The path to include directories
      * 				  - base_dir The base directory
      */
-    public static function resolveFilepath(&$filename, $key = NULL, $options = array())
-    {
+    public static function resolveFilepath(&$filename, $key = NULL, $options = array()) {
         $filename = self::normalizePath($filename);
         $realname = self::realpath($filename);
 
@@ -161,8 +157,7 @@ class File
             $filename = $realname;
     }
 
-    public static function resolveMediapath(&$filename, $key = NULL, $options = array())
-    {
+    public static function resolveMediapath(&$filename, $key = NULL, $options = array()) {
         $matches = array();
         if (preg_match('/^(.*)([a-z0-9]{32})\.(.*)$/i', $filename, $matches)) {
             $filename = $matches[1] . implode(DIRECTORY_SEPARATOR, str_split($matches[2], 4)) . '.' . $matches[3];
@@ -177,8 +172,7 @@ class File
      * @param Boolean $withDot
      * @return string
      */
-    public static function getExtension($filename, $withDot = true)
-    {
+    public static function getExtension($filename, $withDot = true) {
         $filename = basename($filename);
         if (false === strrpos($filename, '.')) {
             return '';
@@ -186,30 +180,28 @@ class File
 
         return substr($filename, strrpos($filename, '.') - strlen($filename) + ($withDot ? 0 : 1));
     }
-    
+
     /**
      * Removes the extension file from its name
      * @param string $filename
      * @return string
      */
-    public static function removeExtension($filename)
-    {
+    public static function removeExtension($filename) {
         if (false === strrpos($filename, '.')) {
             return $filename;
         }
 
         return substr($filename, 0, strrpos($filename, '.'));
     }
-    
+
     /**
      * Makes directory
      * @param string $path The directory path
      * @return boolean Returns TRUE on success
-     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if directory already 
+     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if directory already
      *                                                         exists or cannot be made
      */
-    public static function mkdir($path)
-    {
+    public static function mkdir($path) {
         if (true === is_dir($path)) {
             throw new InvalidArgumentsException(sprintf('Directory `%s` already exists.', $path));
         }
@@ -229,8 +221,7 @@ class File
      * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if either $from or $to is invalid
      * @throws \BackBuilder\Exception\BBException Occurs if the copy can not be done
      */
-    public static function copy($from, $to)
-    {
+    public static function copy($from, $to) {
         if (false === $frompath = self::realpath($from)) {
             throw new InvalidArgumentsException(sprintf('The file `%s` cannot be accessed', $from));
         }
@@ -259,8 +250,7 @@ class File
      * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if either $from or $to is invalid
      * @throws \BackBuilder\Exception\BBException Occurs if $from can not be deleted
      */
-    public static function move($from, $to)
-    {
+    public static function move($from, $to) {
         if (false === $frompath = self::realpath($from)) {
             throw new InvalidArgumentsException(sprintf('The file `%s` cannot be accessed', $from));
         }
@@ -285,31 +275,30 @@ class File
      * @return array
      * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
      */
-    public static function getFilesRecursivelyByExtension($basedir, $extension)
-    {
+    public static function getFilesRecursivelyByExtension($basedir, $extension) {
         if (false === is_readable($basedir)) {
             throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
         }
 
         $files = array();
         $parse_url = parse_url($basedir);
-       /* if (false !== $parse_url && isset($parse_url['scheme'])) {*/
-            $directory = new \RecursiveDirectoryIterator($basedir);
-            $iterator = new \RecursiveIteratorIterator($directory);
-            $regex = new \RegexIterator($iterator, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::GET_MATCH);
+        /* if (false !== $parse_url && isset($parse_url['scheme'])) { */
+        $directory = new \RecursiveDirectoryIterator($basedir);
+        $iterator = new \RecursiveIteratorIterator($directory);
+        $regex = new \RegexIterator($iterator, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::GET_MATCH);
 
-            foreach ($regex as $file) {
-                $files[] = $file[0];
-            }
-       /* } else {
-            $pattern = '';
-            foreach (str_split($extension) as $letter) {
-                $pattern .= '[' . strtolower($letter) . strtoupper($letter) . ']';
-            }
+        foreach ($regex as $file) {
+            $files[] = $file[0];
+        }
+        /* } else {
+          $pattern = '';
+          foreach (str_split($extension) as $letter) {
+          $pattern .= '[' . strtolower($letter) . strtoupper($letter) . ']';
+          }
 
-            $pattern = $basedir . DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.' . $pattern;
-            $files = glob($pattern, GLOB_BRACE);
-        }*/
+          $pattern = $basedir . DIRECTORY_SEPARATOR . '{*,*' . DIRECTORY_SEPARATOR . '*}.' . $pattern;
+          $files = glob($pattern, GLOB_BRACE);
+          } */
 
         return $files;
     }
@@ -321,8 +310,7 @@ class File
      * @return array
      * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
      */
-    public static function getFilesByExtension($basedir, $extension)
-    {
+    public static function getFilesByExtension($basedir, $extension) {
         if (false === is_readable($basedir)) {
             throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
         }
@@ -331,9 +319,9 @@ class File
         $parse_url = parse_url($basedir);
 
         if (false !== $parse_url && isset($parse_url['scheme'])) {
-            foreach(Dir::getContent($basedir) as $file) {
-                if (false === is_dir($file) && $extension === substr($file, -1*strlen($extension))) {
-                    $files[] = $basedir.'/'.$file;
+            foreach (Dir::getContent($basedir) as $file) {
+                if (false === is_dir($file) && $extension === substr($file, -1 * strlen($extension))) {
+                    $files[] = $basedir . '/' . $file;
                 }
             }
 // @TODO to be refactor
@@ -351,47 +339,46 @@ class File
             $pattern = $basedir . DIRECTORY_SEPARATOR . '*.' . $pattern;
             $files = glob($pattern);
         }
-        
+
         return $files;
     }
-    
+
     /**
      * Extracts a zip archive into a specified directory
-     * 
+     *
      * @param $file - zip archive file
      * @param type $destinationDir - where the files will be extracted to
      * @param bool $createDir - should destination dir be created if it doesn't exist
      * @throws \Exception
      */
-    public static function extractZipArchive($file, $destinationDir, $createDir = false)
-    {
-        if(!file_exists($destinationDir)) {
-            if(false == $createDir) {
+    public static function extractZipArchive($file, $destinationDir, $createDir = false) {
+        if (!file_exists($destinationDir)) {
+            if (false == $createDir) {
                 throw new \Exception('Destination directory does not exist: ' . $destinationDir);
             }
-            
+
             $res = mkdir($destinationDir, 0777, true);
-            if(false === $res) {
+            if (false === $res) {
                 throw new \Exception('Destination directory cannot be created: ' . $destinationDir);
             }
-            
-            if(!is_readable($destinationDir)) {
+
+            if (!is_readable($destinationDir)) {
                 throw new \Exception('Destination directory is not readable: ' . $destinationDir);
             }
-        } elseif(!is_dir($destinationDir)) {
+        } elseif (!is_dir($destinationDir)) {
             throw new \Exception('Destination directory cannot be created as a file with that name already exists: ' . $destinationDir);
         }
-        
+
         $archive = new \ZipArchive();
-        
-        if(false === $archive->open($file)) {
+
+        if (false === $archive->open($file)) {
             throw new \Exception('Could not open archive: ' . $archive);
         }
-        
-        if(false === $archive->extractTo($destinationDir) ) {
+
+        if (false === $archive->extractTo($destinationDir)) {
             throw new \Exception('Could not extract archive: ' . $archive);
         }
-        
+
         $archive->close();
     }
 

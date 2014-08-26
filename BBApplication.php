@@ -26,7 +26,6 @@ namespace BackBuilder;
 use BackBuilder\AutoLoader\AutoLoader;
 use BackBuilder\Bundle\BundleLoader;
 use BackBuilder\Config\Config;
-use BackBuilder\Config\ConfigBuilder;
 use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
@@ -71,8 +70,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 {
 
     const VERSION = '0.10.0';
-    const DEFAULT_CONTEXT = 'default';
-    const DEFAULT_ENVIRONMENT = '';
 
     /**
      * application's service container
@@ -134,6 +131,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
+        $this->_is_restored = false;
 
         $this->_environment = null !== $environment && true === is_string($environment)
             ? $environment
@@ -142,7 +140,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
         $this->_initAnnotationReader();
         $this->_initContainer();
-        $this->_initApplicationConfig();
         $this->_initEnvVariables();
         $this->_initAutoloader();
         $this->_initContentWrapper();
@@ -314,8 +311,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
         $this->getTheme()->init(); // 30 ms
-
-
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
 
@@ -333,9 +328,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function stop()
     {
         if (true === $this->isStarted()) {
-            // @todo
-            // stop services
-
             // trigger bbapplication.stop
             $this->getEventDispatcher()->dispatch('bbapplication.stop', new Event($this));
             $this->info('BackBuilder application ended');
@@ -994,11 +986,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         return $this;
     }
 
-    private function _initApplicationConfig()
-    {
-        (new ConfigBuilder($this))->extend(ConfigBuilder::APPLICATION_CONFIG, $this->getConfig());
-    }
-
     private function _initEnvVariables()
     {
         $date_config = $this->getConfig()->getDateConfig();
@@ -1141,7 +1128,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
 
-
         try {
             $logger = $this->getLogging();
 
@@ -1153,7 +1139,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
             $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
             $this->getContainer()->set('em', $em);
-            
+
             $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
             $this->getContainer()->set('doctrine', $registry);
 
@@ -1172,12 +1158,13 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * [_initBundles description]
+     *
      * @return [type] [description]
      */
     private function _initBundles()
     {
-        if (!is_null($this->getConfig()->getBundlesConfig())) {
-            BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
+        if (null !== $this->getConfig()->getBundlesConfig()) {
+            $this->getContainer()->get('bundle.loader')->load($this->getConfig()->getBundlesConfig());
         }
 
         return $this;

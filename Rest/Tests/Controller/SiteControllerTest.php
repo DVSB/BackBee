@@ -183,10 +183,24 @@ class SiteControllerTest extends TestCase
         $this->assertCount(0, $content);
     }
     
+    /**
+     * @covers ::getLayoutsAction
+     */
+    public function test_getLayoutsAction_invalideSite()
+    {
+        // authenticate a user with super admin authority
+        $this->createAuthUser('editor_layout1', array('ROLE_API_USER'));
+        
+        $controller = $this->getController();
+        $response = $controller->getLayoutsAction('siteThatDoesntExist', new Request());
+        
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+    
 
     protected function tearDown()
     {
-        $this->dropDb();
+        $this->dropDb($this->getBBApp());
         $this->bbapp->stop();
     }
 

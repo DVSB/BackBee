@@ -682,10 +682,15 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     {
         $layoutFile = parent::updateLayout($layout);
         $adapter = $this->determineWhichAdapterToUse($layoutFile);
+
+        if (false === is_array($this->_layoutdir) || 0 === count($this->_layoutdir)) {
+            throw new RendererException('None layout directory defined', RendererException::SCRIPTFILE_ERROR);
+        }
+
         if (null === $adapter) {
             throw new RendererException(sprintf(
-                            'Unable to manage file \'%s\' in path (%s)', $layoutFile, $this->_layoutdir[0]
-                    ), RendererException::SCRIPTFILE_ERROR);
+                    'Unable to manage file \'%s\' in path (%s)', $layoutFile, $this->_layoutdir[0]
+            ), RendererException::SCRIPTFILE_ERROR);
         }
 
         return $adapter->updateLayout($layout, $layoutFile);

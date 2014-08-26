@@ -49,13 +49,8 @@ class GroupController extends ARestController
      * @Rest\QueryParam(name = "site_uid", description="Site")
      * 
      */
-    public function getCollectionAction(Request $request, ConstraintViolationList $violations = null) 
+    public function getCollectionAction(Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        
-
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('g')
             ->from('BackBuilder\Security\Group', 'g')
@@ -118,29 +113,25 @@ class GroupController extends ARestController
      * UPDATE 
      * 
      * @Rest\RequestParam(name = "name", requirements = {
-     *  @Assert\NotBlank(message="Name is required"),
-     *  @Assert\Length(max=50, minMessage="Maximum length of name is 50 characters")
+     *   @Assert\NotBlank(message="Name is required"),
+     *   @Assert\Length(max=50, minMessage="Maximum length of name is 50 characters")
      * })
      * @Rest\RequestParam(name = "identifier", requirements = {
-     *  @Assert\NotBlank(message="Identifier is required"),
-     *  @Assert\Length(max=50, minMessage="Maximum length of identifier is 50 characters")
+     *   @Assert\NotBlank(message="Identifier is required"),
+     *   @Assert\Length(max=50, minMessage="Maximum length of identifier is 50 characters")
      * })
      * @Rest\RequestParam(name = "site_uid", requirements = {
-     *  @Assert\Length(max=50)
+     *   @Assert\Length(max=50)
      * })
      * 
      * @param int $id
      */
-    public function putAction($id, Request $request, ConstraintViolationList $violations = null) 
+    public function putAction($id, Request $request) 
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        
         $group = $this->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($id);
         
         if(!$group) {
-            return $this->create404Response(sprintf('User not found with id %d', $id));
+            return $this->create404Response(sprintf('Group not found with id %d', $id));
         }
 
         $this->deserializeEntity($request->request->all(), $group);
@@ -168,18 +159,20 @@ class GroupController extends ARestController
      * })
      * 
      */
-    public function postAction(Request $request, ConstraintViolationList $violations = null)
+    public function postAction(Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-        
-        $groupExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\Group')->findBy(array('_identifier' => $request->request->get('identifier')));
+        $groupExists = $this->getApplication()
+            ->getEntityManager()
+            ->getRepository('BackBuilder\Security\Group')
+            ->findBy(['_identifier' => $request->request->get('identifier')])
+        ;
         
         if($groupExists) {
-            throw new ValidationException(new ConstraintViolationList(array(
-                new ConstraintViolation('Group with that identifier already exists', 'Group with that identifier already exists', array(), 'identifier', 'identifier', $request->request->get('identifier'))
-            )));
+            $response = $this->createResponse()
+                ->setStatusCode(409, sprintf('Group with that identifier already exists: %s', $request->request->get('identifier')))
+            ;
+            
+            return $response;
         }
         
         $group = new Group();

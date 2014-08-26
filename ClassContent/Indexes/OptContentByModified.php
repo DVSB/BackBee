@@ -33,9 +33,9 @@ namespace BackBuilder\ClassContent\Indexes;
  * @Table(
  *   name="opt_content_modified",
  *   indexes={
- *     @index(name="IDX_CLASSNAME", columns={"classname"}), 
+ *     @index(name="IDX_CLASSNAMEO", columns={"classname"}), 
  *     @index(name="IDX_NODE", columns={"node_uid"}), 
- *     @index(name="IDX_MODIFIED", columns={"modified"})
+ *     @index(name="IDX_MODIFIEDO", columns={"modified"})
  *   }
  * )
  */

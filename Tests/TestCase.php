@@ -28,7 +28,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     private $backbuilder_folder;
     private $repository_folder;
     private $mock_container = array();
-    
+
     protected $bbapp;
 
     /**
@@ -42,7 +42,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $backbuilder_autoloader = new AutoLoader();
 
-        $backbuilder_autoloader->register()
+        $backbuilder_autoloader->setApplication($this->getBBAppStub())
+                ->register()
                 ->registerNamespace('BackBuilder\Bundle\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Tests')))
                 ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
                 ->registerNamespace('BackBuilder\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
@@ -51,6 +52,17 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Listeners')))
                 ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Services', 'Public')))
                 ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'vendor', 'doctrine', 'orm', 'tests', 'Doctrine', 'Tests')));
+
+        $backbuilder_autoloader->registerStreamWrapper('BackBuilder\ClassContent', 'bb.class', '\BackBuilder\Stream\ClassWrapper\Adapter\Yaml');
+
+    }
+
+    public function getClassContentDir()
+    {
+        return array(
+            $this->repository_folder . DIRECTORY_SEPARATOR . 'ClassContent',
+            $this->backbuilder_folder . DIRECTORY_SEPARATOR . 'ClassContent'
+        );
     }
 
     /**
@@ -59,7 +71,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param type $namespace
      * @throws \Exception
      */
-    public function load($namespace) 
+    public function load($namespace)
     {
         try {
             if (!file_exists($this->root_folder.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $namespace).'.php')) {
@@ -146,6 +158,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
               ->will($this->returnValue($this->getMockObjectContainer('entityManager')));
 
         $BBApp->expects($this->any())
+              ->method('getClassContentDir')
+              ->will($this->returnValue($this->getClassContentDir()));
+
+        $BBApp->expects($this->any())
               ->method('getEventDispatcher')
               ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
 
@@ -159,10 +175,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
               ->method('getBaseDir')
               ->will($this->returnValue(vfsStream::url('')));
 
-//        $controller = $this->getMockBuilder('BackBuilder\FrontController\FrontController')
-//                ->setConstructorArgs(array($BBApp))
-//                ->setMethods(array())
-//                ->getMock();
         $controller = new \BackBuilder\FrontController\FrontController($BBApp);
 
         $BBApp->expects($this->any())
@@ -175,17 +187,14 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function initDb($bbapp)
     {
-        $em = $this->getBBApp()->getEntityManager();
 
-        $conn = $em->getConnection();
-        
+        $em = $bbapp->getContainer()->get('em');
 
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
-            // the following 2 classes are throwing an exception: index IDX_CLASSNAME already exists
-//            $bbapp->getBBDir() . '/ClassContent',
-//            $bbapp->getBBDir() . '/ClassContent/Indexes',
+            $bbapp->getBBDir() . '/ClassContent',
+            $bbapp->getBBDir() . '/ClassContent/Indexes',
             $bbapp->getBBDir() . '/Logging',
             $bbapp->getBBDir() . '/NestedNode',
             $bbapp->getBBDir() . '/Security',
@@ -201,15 +210,15 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         //$schema->updateSchema($metadata, true);
-        
+
         $classes = $em->getMetadataFactory()->getAllMetadata();
         $schema->createSchema($classes);
     }
-    
+
     public function initAcl()
     {
         $conn = $this->getBBApp()->getEntityManager()->getConnection();
-        
+
         $schema = new \Symfony\Component\Security\Acl\Dbal\Schema(array(
             'class_table_name'         => 'acl_classes',
             'entry_table_name'         => 'acl_entries',
@@ -217,25 +226,16 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
             'sid_table_name'           => 'acl_security_identities',
         ));
-        
+
         $platform = $conn->getDatabasePlatform();
-        
+
         foreach($schema->toSql($platform) as $query) {
             $conn->executeQuery($query);
         }
     }
 
-    public function dropDb()
-    {
-        $connection = $this->getBBApp()->getEntityManager()->getConnection();
-        $params = $connection->getParams();
-        $name = isset($params['path']) ? $params['path'] : (isset($params['dbname']) ? $params['dbname'] : false);
-        $name = $connection->getDatabasePlatform()->quoteSingleIdentifier($name);
-        $connection->getSchemaManager()->dropDatabase($name);
-    }
-
     /**
-     * 
+     *
      * @param type $config
      * @return \BackBuilder\BBApplication
      */
@@ -244,11 +244,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
         if(null === $this->bbapp) {
             $this->bbapp = new MockBBApplication(null, 'test', false, $config);
         }
-        
+
         return $this->bbapp;
     }
 
-        
+
 
     /**
      * Creates a user for the specified group, and authenticates a BBUserToken
@@ -263,7 +263,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             ->setLogin(uniqid('login'))
             ->setPassword('pass')
         ;
-        
+
         $group = $this->getBBApp()->getEntityManager()
                 ->getRepository('BackBuilder\Security\Group')
                 ->findOneBy(array('_identifier' => $groupId))
@@ -272,9 +272,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         if(!$group) {
             throw new \RuntimeException('Group not found: ' . $groupId);
         }
-        
+
         $user->addGroup($group);
-        
+
         $token->setUser($user);
         $token->setAuthenticated(true);
 
@@ -282,22 +282,47 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         return $token;
     }
-    
+
     /**
-     * 
+     *
      * @return \BackBuilder\Security\SecurityContext
      */
     protected function getSecurityContext()
     {
         return $this->getBBApp()->getSecurityContext();
     }
-    
+
     /**
-     * 
+     *
      * @return \Doctrine\ORM\EntityManager
      */
     protected function getEntityManager($name = 'default')
     {
         return $this->getBBApp()->getEntityManager($name);
+    }
+
+    public function dropDb($bbapp)
+    {
+        $em = $bbapp->getContainer()->get('em');
+
+        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
+            $bbapp->getBBDir() . '/Bundle',
+            $bbapp->getBBDir() . '/Cache/DAO',
+            $bbapp->getBBDir() . '/ClassContent',
+            $bbapp->getBBDir() . '/ClassContent/Indexes',
+            $bbapp->getBBDir() . '/Logging',
+            $bbapp->getBBDir() . '/NestedNode',
+            $bbapp->getBBDir() . '/Security',
+            $bbapp->getBBDir() . '/Site',
+            $bbapp->getBBDir() . '/Site/Metadata',
+            $bbapp->getBBDir() . '/Stream/ClassWrapper',
+            $bbapp->getBBDir() . '/Theme',
+            $bbapp->getBBDir() . '/Util/Sequence/Entity',
+            $bbapp->getBBDir() . '/Workflow',
+        ));
+
+        $metadata = $em->getMetadataFactory()->getAllMetadata();
+        $schema = new SchemaTool($em);
+        $schema->dropSchema($metadata);
     }
 }

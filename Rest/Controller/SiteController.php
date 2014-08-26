@@ -51,14 +51,10 @@ class SiteController extends ARestController
      * 
      * 
      */
-    public function getLayoutsAction($uid, Request $request, ConstraintViolationList $violations = null) 
+    public function getLayoutsAction($uid, Request $request) 
     {
         if(!$this->isGranted("ROLE_API_USER")) {
             throw new AccessDeniedHttpException('You have no permissions to access ' . $request->getPathInfo());
-        }
-                
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
         }
 
         $em = $this->getEntityManager();

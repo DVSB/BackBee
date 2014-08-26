@@ -63,10 +63,13 @@ class Container extends sfContainerBuilder implements ContainerInterface
                 $definition = $this->getDefinition($id);
                 if (0 < count($tags = $definition->getTags())) {
                     foreach ($tags as $tag => $datas) {
-                        $this->services['event.dispatcher']->dispatch(
-                            'service.tagged.' . $tag,
-                            new Event($service)
-                        );
+                        $datas = array_shift($datas);
+                        if (false === array_key_exists('dispatch_event', $datas) || true === $datas['dispatch_event']) {
+                            $this->services['event.dispatcher']->dispatch(
+                                'service.tagged.' . $tag,
+                                new Event($service, array('id' => $id))
+                            );
+                        }
                     }
                 }
             }
