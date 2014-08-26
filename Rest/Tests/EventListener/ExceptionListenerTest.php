@@ -30,6 +30,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use BackBuilder\Rest\EventListener\ExceptionListener,
     BackBuilder\FrontController\FrontController;
 
+use BackBuilder\Security\Exception\SecurityException;
 
 /**
  * Test for ExceptionListener class
@@ -96,6 +97,81 @@ class ExceptionListenerTest extends TestCase
         $listener->onKernelException($event);
         
         $this->assertEquals($exception->getStatusCode(), $event->getResponse()->getStatusCode());
+        
+        
+        // ValidationException
+        $exception = new \BackBuilder\Rest\Exception\ValidationException(
+            new \Symfony\Component\Validator\ConstraintViolationList([
+                new \Symfony\Component\Validator\ConstraintViolation(
+                    'Validation Error','Validation Error', [], 'root', 'property', 'valueInvalid'
+                )
+            ])
+        );
+        $event = new GetResponseForExceptionEvent(
+            $this->getBBApp()->getController(), 
+            new Request(), 
+            FrontController::MASTER_REQUEST, 
+            $exception
+        );
+        $listener->onKernelException($event);
+        $this->assertEquals($exception->getStatusCode(), $event->getResponse()->getStatusCode());
+        $response = json_decode($event->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('errors', $response);
+        $this->assertArrayHasKey('property', $response['errors']);
+    }
+    
+     /**
+     * @covers ::onKernelException
+     */
+    public function test_onKernelException_SecurityException()
+    {
+        $listener = new ExceptionListener();
+        
+        $exception = new SecurityException("", SecurityException::EXPIRED_AUTH);
+        $event = new GetResponseForExceptionEvent(
+            $this->getBBApp()->getController(), 
+            new Request(), 
+            FrontController::MASTER_REQUEST, 
+            $exception
+        );
+        $listener->onKernelException($event);
+        
+        $this->assertEquals(401, $event->getResponse()->getStatusCode());
+        
+        
+        $exception = new SecurityException("", SecurityException::EXPIRED_TOKEN);
+        $event = new GetResponseForExceptionEvent(
+            $this->getBBApp()->getController(), 
+            new Request(), 
+            FrontController::MASTER_REQUEST, 
+            $exception
+        );
+        $listener->onKernelException($event);
+        
+        $this->assertEquals(401, $event->getResponse()->getStatusCode());
+        
+        
+        $exception = new SecurityException("", SecurityException::UNKNOWN_USER);
+        $event = new GetResponseForExceptionEvent(
+            $this->getBBApp()->getController(), 
+            new Request(), 
+            FrontController::MASTER_REQUEST, 
+            $exception
+        );
+        $listener->onKernelException($event);
+        
+        $this->assertEquals(404, $event->getResponse()->getStatusCode());
+        
+        $exception = new SecurityException("", SecurityException::INVALID_CREDENTIALS);
+        $event = new GetResponseForExceptionEvent(
+            $this->getBBApp()->getController(), 
+            new Request(), 
+            FrontController::MASTER_REQUEST, 
+            $exception
+        );
+        $listener->onKernelException($event);
+        
+        $this->assertEquals(401, $event->getResponse()->getStatusCode());
     }
     
 }

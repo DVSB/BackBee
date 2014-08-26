@@ -70,8 +70,11 @@ class ARestControllerTest extends TestCase
         return $controller;
     }
     
+    
+    
     /**
      * @covers ::formatCollection
+     * @covers ::getSerializer()
      */
     public function test_formatCollection()
     {
@@ -87,6 +90,7 @@ class ARestControllerTest extends TestCase
     
     /**
      * @covers ::formatItem
+     * @covers ::getSerializer()
      */
     public function test_formatItem()
     {
@@ -100,6 +104,7 @@ class ARestControllerTest extends TestCase
     
     /**
      * @covers ::deserializeEntity
+     * @covers ::getSerializer()
      */
     public function test_deserializeEntity()
     {

@@ -127,6 +127,31 @@ class AclControllerTest extends TestCase
         
         $this->assertInternalType('array', $res);
     }
+    
+    /**
+     * @covers ::postPermissionMapAction
+     */
+    public function test_postPermissionMapAction_invalidObjectClass() 
+    {
+        $data = [[
+            'object_id' => $this->site->getObjectIdentifier(),
+            'object_class' => 'Class\That\Doesnt\Exist',
+            'permissions' => ['view' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey(0, $res['errors']);
+        $this->assertArrayHasKey('object_class', $res['errors'][0]);
+    }
+    
 
     /**
      * @covers ::postPermissionMapAction
