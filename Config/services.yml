@@ -85,6 +85,10 @@ parameters:
 
     config.yml_files_to_ignore: ['services', 'bootstrap']
 
+    bbapp.config.configurator.class: BackBuilder\Config\Configurator
+    bbapp.config.persistor.class: BackBuilder\Config\Persistor
+    bbapp.bundle.loader.class: BackBuilder\Bundle\BundleLoader
+
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
@@ -96,15 +100,16 @@ services:
         class:      %bbapp.config.class%
         arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, "%debug%", "%config.yml_files_to_ignore%"]
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
         calls:
             - [setContainer, ['@service_container']]
             - [setEnvironment, ['%bbapp.environment%']]
+        configurator: ["@config.configurator", configureApplicationConfig]
     event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
     ed:
         alias: event.dispatcher
     security.context:
@@ -118,8 +123,7 @@ services:
     security.acl_manager:
         class:      BackBuilder\Security\Acl\AclManager
         arguments:  ["@security.context"]
-            
-            
+
     controller:
         class:      %bbapp.controller.class%
         arguments:  ["@bbapp"]
@@ -127,7 +131,7 @@ services:
         class:      %bbapp.renderer.class%
         arguments:  ["@bbapp"]
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
     rpcserver:
         class:      %bbapp.rpcserver.class%
         arguments:  ["@bbapp"]
@@ -154,10 +158,23 @@ services:
         class:      %bbapp.autoloader.class%
         arguments:  ["@bbapp"]
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]
+
+    bundle.loader:
+        class:      %bbapp.bundle.loader.class%
+        arguments:  ["@bbapp"]
+
+    config.configurator:
+        class:      %bbapp.config.configurator.class%
+        arguments:  ["@bbapp"]
+        public:     false
+
+    config.persistor:
+        class:      %bbapp.config.persistor.class%
+        arguments:  ["@bbapp", "@config.configurator"]
 
     analytics:
         class: BackBuilder\Application\Analytics
@@ -458,7 +475,9 @@ services:
     bbapp:
         synthetic: true
         tags:
-            - { name: "dumpable" }
+            - { name: "dumpable", dispatch_event: false }
+    container.builder:
+        synthetic: true
     service_container:
         synthetic: true
     site:

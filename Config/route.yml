@@ -77,6 +77,15 @@ bb.rest.acl.permissions:
     requirements:
         version: \d
         _method: GET
+
+bb.rest.acl.permissions_map:
+    pattern: /rest/{version}/acl/
+    defaults:
+        _action: postPermissionMapAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: POST
         
 bb.rest.acl.ace_class_delete:
     pattern: /rest/{version}/acl/ace/class/{sid}/
@@ -95,6 +104,16 @@ bb.rest.acl.ace_object_delete:
     requirements:
         version: \d
         _method: DELETE
+        
+bb.rest.acl.get_classes:
+    pattern: /rest/{version}/acl/class/
+    defaults:
+        _action: getClassCollectionAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: GET
+        
 
 # BackBuilder rss
 bb.rss:

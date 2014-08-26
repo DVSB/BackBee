@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\Config\Exception;
+namespace BackBuilder\Config\Persistor;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,28 +20,32 @@ namespace BackBuilder\Config\Exception;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use BackBuilder\Config\Config;
+use BackBuilder\IApplication as ApplicationInterface;
+
 /**
+ *
  * @category    BackBuilder
- * @package     BackBuilder\Event
+ * @package     BackBuilder\Config
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class InvalidConfigTypeException extends \BackBuilder\Exception\BBException
+interface PersistorInterface
 {
     /**
-     * InvalidConfigTypeException's constructor
+     * [__construct description]
      *
-     * @param string $method       method of Configurator which raise this exception
-     * @param string $invalid_type the invalid type provided by user
+     * @param ApplicationInterface $application [description]
      */
-    public function __construct($method, $invalid_type)
-    {
-        parent::__construct(sprintf(
-            'You provided invalid type (:%s) for Config\Configurator::%s(). Only %s and %s are supported.',
-            $invalid_type,
-            $method,
-            '0 (=Config\Configurator::APPLICATION_CONFIG)',
-            '1 (=Config\Configurator::BUNDLE_CONFIG)'
-        ));
-    }
+    public function __construct(ApplicationInterface $application);
+
+    /**
+     * [persist description]
+     *
+     * @param  [type] $key    [description]
+     * @param  array  $config [description]
+     *
+     * @return [type]         [description]
+     */
+    public function persist(Config $config, array $config_to_persist);
 }

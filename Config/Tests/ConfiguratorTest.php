@@ -21,20 +21,20 @@ namespace BackBuilder\Config\Tests;
  */
 
 use BackBuilder\Config\Config;
-use BackBuilder\Config\ConfigBuilder;
+use BackBuilder\Config\Configurator;
 use BackBuilder\Tests\Mock\ManualBBApplication;
 
 /**
- * Set of tests for BackBuilder\Config\ConfigBuilder
+ * Set of tests for BackBuilder\Config\Configurator
  *
  * @category    BackBuilder
  * @package     BackBuilder\Config
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\Config\ConfigBuilder
+ * @coversDefaultClass \BackBuilder\Config\Configurator
  */
-class ConfigBuilderTest extends \PHPUnit_Framework_TestCase
+class ConfiguratorTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * mocked application with minimalist properties setted
@@ -44,9 +44,9 @@ class ConfigBuilderTest extends \PHPUnit_Framework_TestCase
     private $application;
 
     /**
-     * the ConfigBuilder we want to test
+     * the Configurator we want to test
      *
-     * @var BackBuilder\Config\ConfigBuilder
+     * @var BackBuilder\Config\Configurator
      */
     private $config_builder;
 
@@ -67,8 +67,8 @@ class ConfigBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testExtendApplicationConfig()
     {
-        $this->application->setBB_Dir(__DIR__ . '/ConfigBuilderTest_Resources/bbdir');
-        $this->application->setBase_Repository(__DIR__ . '/ConfigBuilderTest_Resources/repository');
+        $this->application->setBB_Dir(__DIR__ . '/ConfiguratorTest_Resources/bbdir');
+        $this->application->setBase_Repository(__DIR__ . '/ConfiguratorTest_Resources/repository');
         $this->application->setOverrided_Config(false);
 
         // Test without context and without environment
@@ -84,8 +84,8 @@ class ConfigBuilderTest extends \PHPUnit_Framework_TestCase
             $config->getAllSections()
         );
 
-        $config_builder = new ConfigBuilder($this->application);
-        $config_builder->extend(ConfigBuilder::APPLICATION_CONFIG, $config);
+        $config_builder = new Configurator($this->application);
+        $config_builder->extend(Configurator::APPLICATION_CONFIG, $config);
         $this->assertEquals(
             array(
                 'parameters' => array(
@@ -101,8 +101,8 @@ class ConfigBuilderTest extends \PHPUnit_Framework_TestCase
         // Test with context and without environment
         $this->application->setContext('api');
         $config = new Config($this->application->getBBDir());
-        $config_builder = new ConfigBuilder($this->application);
-        $config_builder->extend(ConfigBuilder::APPLICATION_CONFIG, $config);
+        $config_builder = new Configurator($this->application);
+        $config_builder->extend(Configurator::APPLICATION_CONFIG, $config);
         $this->assertEquals(
             array(
                 'parameters' => array(
@@ -121,8 +121,8 @@ class ConfigBuilderTest extends \PHPUnit_Framework_TestCase
         $this->application->setEnvironment('preprod');
         $this->application->setOverrided_Config(true);
         $config = new Config($this->application->getBBDir());
-        $config_builder = new ConfigBuilder($this->application);
-        $config_builder->extend(ConfigBuilder::APPLICATION_CONFIG, $config);
+        $config_builder = new Configurator($this->application);
+        $config_builder->extend(Configurator::APPLICATION_CONFIG, $config);
         $this->assertEquals(
             array(
                 'parameters' => array(

@@ -59,7 +59,16 @@ class ValidationException extends BadRequestHttpException
         
         //Symfony\Component\Validator\ConstraintViolation;
         foreach($this->violations as $violation) {
-            $errors[$violation->getPropertyPath()][] = $violation->getMessage();
+            if(0 < strpos($violation->getPropertyPath(), '[')) {
+                //parse into proper php array
+                $parsedPath = [];
+                parse_str($violation->getPropertyPath() . '[]=' . urlencode($violation->getMessage()), $parsedPath);
+                $errors = array_merge_recursive($errors, $parsedPath);
+            } else {
+                $errors[$violation->getPropertyPath()][] = $violation->getMessage();
+            }
+            
+            
         }
         
         return $errors;

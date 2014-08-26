@@ -116,7 +116,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $event_dispatcher->addListener('service.tagged.dumpable', array('@listener', 'onGetServiceTaggedTestEvent'));
 
         $definition = new Definition('DateTime');
-        $definition->addTag('dumpable');
+        $definition->addTag('dumpable', array('dispatch_event' => false));
         $container->setDefinition('dumpable_date', $definition);
 
         $container->get('dumpable_date');

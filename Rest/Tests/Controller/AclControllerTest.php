@@ -96,8 +96,21 @@ class AclControllerTest extends TestCase
         return $controller;
     }
     
+    
     /**
-     * @covers ::getEntryCollectionAction
+     * @covers ::getClassCollectionAction
+     */
+    public function test_getClassCollectionAction()
+    {
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/class/'));
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+    }
+    
+    /**
+     * @covers ::getMaskCollectionAction
      */
     public function test_getMaskCollectionAction()
     {
@@ -135,7 +148,8 @@ class AclControllerTest extends TestCase
         $res = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $res);
         $this->assertArrayHasKey('errors', $res);
-        $this->assertArrayHasKey('0[sid]', $res['errors']);
+        $this->assertArrayHasKey(0, $res['errors']);
+        $this->assertArrayHasKey('sid', $res['errors'][0]);
         
         
         $data = [[
@@ -151,7 +165,8 @@ class AclControllerTest extends TestCase
         $this->assertEquals(400, $response->getStatusCode());
         $res = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('errors', $res);
-        $this->assertArrayHasKey('0[object_class]', $res['errors']);
+        $this->assertArrayHasKey(0, $res['errors']);
+        $this->assertArrayHasKey('object_class', $res['errors'][0]);
     }
     
     /**
@@ -195,7 +210,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST'] ));
         
         $this->assertEquals(204, $response->getStatusCode());
         
@@ -230,7 +245,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST'] ));
         
         $res = json_decode($response->getContent(), true);
 
@@ -240,8 +255,8 @@ class AclControllerTest extends TestCase
         
         $this->assertInternalType('array', $res);
         $this->assertArrayHasKey('errors', $res);
-        // TODO - would be better to use proper php array for 0[permissions]
-        $this->assertEquals('Invalid permission mask: permissionThatDoesnExist', $res['errors']['0[permissions]'][0]);
+
+        $this->assertEquals('Invalid permission mask: permissionThatDoesnExist', $res['errors'][0]['permissions'][0]);
     }
     
     
@@ -435,11 +450,7 @@ class AclControllerTest extends TestCase
      */
     public function testGetClassCollectionAction()
     {
-        $response = $this->getBBApp()->getController()->handle(new Request([], [
-        ], [
-            '_action' => 'getClassCollectionAction',
-            '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/'] ));
+        $response = $this->getController()->getClassCollectionAction(new Request());
         
         $res = json_decode($response->getContent(), true);
         

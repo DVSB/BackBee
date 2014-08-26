@@ -62,12 +62,8 @@ class UserController extends ARestController
      *
      *
      */
-    public function getCollectionAction(Request $request, ConstraintViolationList $violations = null)
+    public function getCollectionAction(Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         // TODO
 
         return array();
@@ -124,12 +120,8 @@ class UserController extends ARestController
      *
      * @param int $id User ID
      */
-    public function putAction($id, Request $request, ConstraintViolationList $violations = null)
+    public function putAction($id, Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
         if(!$user) {
@@ -164,12 +156,8 @@ class UserController extends ARestController
      * })
      *
      */
-    public function postAction(Request $request, ConstraintViolationList $violations = null)
+    public function postAction(Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\User')->findBy(array('_login' => $request->request->get('login')));
 
         if($userExists) {
@@ -199,26 +187,4 @@ class UserController extends ARestController
         return new Response($this->formatItem($user), 200, array('Content-Type' => 'application/json'));
     }
 
-
-
-    /**
-     * GET User Permissions
-     *
-     * @param int $id User ID
-     * @param \Symfony\Component\Validator\ConstraintViolationList $violations
-     * @return type
-     * @throws ValidationException
-     */
-    public function getPermissionsAction($id, ConstraintViolationList $violations = null)
-    {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
-
-
-        // TODO
-
-        return new Response();
-    }
 }
