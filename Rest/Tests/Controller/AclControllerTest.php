@@ -446,7 +446,7 @@ class AclControllerTest extends TestCase
     }
     
     /**
-     * @covers ::getEntryCollectionAction
+     * @covers ::getClassCollectionAction
      */
     public function testGetClassCollectionAction()
     {
