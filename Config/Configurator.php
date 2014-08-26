@@ -240,7 +240,11 @@ class Configurator
     {
         $this->overrideConfigByFile($config, $options['bundle_id']);
         $config_config = $this->application->getConfig()->getConfigConfig();
-        if (!array_key_exists('save_in_registry', $config_config) || true === $config_config['save_in_registry']) {
+        if (
+            null === $config_config
+            || false === array_key_exists('save_in_registry', $config_config)
+            || true === $config_config['save_in_registry']
+        ) {
             $this->overrideConfigByRegistry($config, $options['bundle_id']);
         }
     }

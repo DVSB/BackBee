@@ -23,6 +23,7 @@ namespace BackBuilder\Bundle;
 use BackBuilder\IApplication;
 use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Config\Config;
+use BackBuilder\DependencyInjection\Util\ServiceLoader;
 use BackBuilder\Util\Resolver\BundleConfigDirectory;
 
 use Symfony\Component\DependencyInjection\Definition;
