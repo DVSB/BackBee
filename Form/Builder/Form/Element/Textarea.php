@@ -42,9 +42,9 @@ class Textarea extends Element
      * @param array $config
      * @param string $value
      */
-    public function __construct($key, array $config = array(), $value = null)
+    public function __construct($key, array $config = array(), $value = null, $error = null)
     {
-        parent::__construct($key, $config, $value);
+        parent::__construct($key, $config, $value, $error);
         $this->buildCustomConfig($config);
         $this->type = 'text';
         $this->template =  'form/textarea';

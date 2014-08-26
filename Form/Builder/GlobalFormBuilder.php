@@ -65,7 +65,11 @@ class GlobalFormBuilder extends AFormBuilder
                     if (true === isset($data_request[$key])) {
                         $value = $data_request[$key];
                     }
-                    $item = new $classname($key, $cConfig, $value);
+                    $error = null;
+                    if (true === isset($data_request[$key . self::PREFIX_ERROR])) {
+                        $error = $data_request[$key . self::PREFIX_ERROR];
+                    }
+                    $item = new $classname($key, $cConfig, $value, $error);
                     $form->setItem($key, $item);
                 }
             }

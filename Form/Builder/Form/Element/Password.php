@@ -38,9 +38,9 @@ class Password extends Text
      * @param array $config
      * @param string $value
      */
-    public function __construct($key, array $config = array(), $value = null)
+    public function __construct($key, array $config = array(), $value = null, $error = null)
     {
-        parent::__construct($key, $config, null);
+        parent::__construct($key, $config, null, $error);
         $this->type = 'password';
         $this->template =  'form/password';
     }

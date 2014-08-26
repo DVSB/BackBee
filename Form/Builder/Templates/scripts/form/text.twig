@@ -1,5 +1,6 @@
 {% set text = this.getObject() %}
-<div class="form-group">
+{% set error = text.getError() %}
+<div class="form-group {% if error is not null %}has-error{% endif %}">
     <label class="sr-only" for="">{{ text.getLabel() }}</label>
     <input type="text" 
            name="{{ text.getUid() }}" 
@@ -7,4 +8,7 @@
            {% if text.getValue() is not null%}value="{{ text.getValue() }}"{% endif %} 
            class="form-control" 
     >
+    {% if error is not null %}
+        <span class="help-block">{{ error }}</span>
+    {% endif %}
 </div>

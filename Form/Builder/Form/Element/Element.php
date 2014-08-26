@@ -46,6 +46,8 @@ class Element implements IRenderable
     protected $value = null;
     protected $template;
     protected $disabled = false;
+    
+    protected $error = null;
 
     /**
      * Form's constructor
@@ -54,11 +56,12 @@ class Element implements IRenderable
      * @param array $config
      * @param mixed $value
      */
-    public function __construct($key, array $config = array(), $value = null) 
+    public function __construct($key, array $config = array(), $value = null, $error = null) 
     {
         $this->uid = $key;
         $this->label = ucfirst($key);
         $this->buildConfig($config);
+        $this->error = $error;
         if (null !== $value) {
             $this->value = $value;
         }
@@ -144,6 +147,16 @@ class Element implements IRenderable
     {
         return $this->disabled;
     }
+    
+    /**
+     * Get error
+     * 
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
 
     /**
      * Set type
@@ -221,6 +234,15 @@ class Element implements IRenderable
     {
         $this->disabled = $disabled;
         return $this;
+    }
+    
+    /**
+     * Set error
+     * @param string $error
+     */
+    public function setError($error)
+    {
+        $this->error = $error;
     }
     
     /*     * ******************************************* */

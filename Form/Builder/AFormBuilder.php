@@ -35,6 +35,7 @@ use BackBuilder\Validator\AValidator;
 abstract class AFormBuilder 
 {
     const PREFIX_ELEMENT_CLASSNAME = 'BackBuilder\\Form\\Builder\\Form\\Element\\';
+    const PREFIX_ERROR = 'error';
     
     protected $config;
     protected $renderer;
@@ -85,9 +86,17 @@ abstract class AFormBuilder
         return null;
     }
     
-    public function validate($owner, $data, AValidator $validator, $prefix)
+    public function validate($owner, AValidator $validator, $prefix = null)
     {
         $request = $this->renderer->getApplication()->getRequest();
         $errors = array();
+        
+        $owner = $validator->validate($owner, $request->request->all(), $errors, $this->config, $prefix);
+      
+        if (false === empty($errors)) {
+            foreach ($errors as $key => $error) {
+                $request->request->set($key . self::PREFIX_ERROR, $error);
+            }
+        }
     }
 }
