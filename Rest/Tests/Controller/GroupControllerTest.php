@@ -80,7 +80,7 @@ class GroupControllerTest extends TestCase
 
     
     /**
-     * @covers ::getAction
+     * @covers ::getCollectionAction
      */
     public function testGetCollectionAction()
     {
@@ -137,7 +137,7 @@ class GroupControllerTest extends TestCase
     }
     
     /**
-     * @covers ::getAction
+     * @covers ::getCollectionAction
      */
     public function testGetCollectionAction_invalidFilters()
     {
@@ -159,7 +159,7 @@ class GroupControllerTest extends TestCase
     /**
      * @covers ::getAction
      */
-    public function testGetAction()
+    public function test_getAction()
     {
         $controller = $this->getController();
         
@@ -275,13 +275,39 @@ class GroupControllerTest extends TestCase
         
         $group = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($res['id']);
         $this->assertInstanceOf('BackBuilder\Security\Group', $group);
+        
+        
+        // duplicate identifier
+        $data = array(
+            'identifier' => 'NEW_GROUP_ID',
+            'name' => 'newGroupName',
+            'site_uid' => $this->site->getUid()
+        );
+        
+        $response = $controller->postAction(new Request(array(), $data));
+        $this->assertEquals(409, $response->getStatusCode());
     }
     
+    /**
+     * @covers ::postAction
+     * @expectedException \BackBuilder\Rest\Exception\ValidationException
+     */
+    public function test_postAction_invalidStie()
+    {
+        // invalide site
+        $data = array(
+            'identifier' => 'NEW_GROUP_ID',
+            'name' => 'newGroupName',
+            'site_uid' => 'SiteUidThatDoesntExist'
+        );
+        
+        $response = $this->getController()->postAction(new Request(array(), $data));
+    }
     
     /**
      * @covers ::postAction
      */
-    public function testPostAction_missing_required_fields()
+    public function test_postAction_missing_required_fields()
     {
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(), array(
             '_action' => 'postAction',
