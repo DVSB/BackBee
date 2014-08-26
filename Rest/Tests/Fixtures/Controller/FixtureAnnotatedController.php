@@ -66,6 +66,25 @@ class FixtureAnnotatedController
      */
     public function requestParamsAction()
     {} 
+    
+    
+    /**
+     * @Rest\RequestParam(name = "name", requirements = {
+     *  @Assert\NotBlank(message="Name not provided"),
+     *  @Assert\Length(min = "2", max = "50")
+     * })
+     */
+    public function requestParamsWithoutViolationsArgumentAction()
+    {} 
+    
+    /**
+     * @Rest\RequestParam(name = "name", requirements = {
+     *  @Assert\NotBlank(message="Name not provided"),
+     *  @Assert\Length(min = "2", max = "50")
+     * })
+     */
+    public function requestParamsWithViolationsArgumentAction(\Symfony\Component\Validator\ConstraintViolationList $violations)
+    {} 
 
     /**
      * this is not a controller action

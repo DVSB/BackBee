@@ -188,6 +188,9 @@ class SiteControllerTest extends TestCase
      */
     public function test_getLayoutsAction_invalideSite()
     {
+        // authenticate a user with super admin authority
+        $this->createAuthUser('editor_layout1', array('ROLE_API_USER'));
+        
         $controller = $this->getController();
         $response = $controller->getLayoutsAction('siteThatDoesntExist', new Request());
         
