@@ -116,6 +116,7 @@ class SecurityControllerTest extends TestCase
      * @expectedExceptionMessage Request expired
      * 
      * @covers ::authenticateAction
+     * @covers ::getSecurityContextConfig
      */
     public function testAuthenticateAction_bb_area_expired()
     {
@@ -142,6 +143,7 @@ class SecurityControllerTest extends TestCase
      * @expectedExceptionMessage Unknown user
      * 
      * @covers ::authenticateAction
+     * @covers ::getSecurityContextConfig
      */
     public function testAuthenticateAction_bb_area_userDoesntExist()
     {
@@ -161,6 +163,7 @@ class SecurityControllerTest extends TestCase
      * @expectedExceptionMessage Invalid authentication informations
      * 
      * @covers ::authenticateAction
+     * @covers ::getSecurityContextConfig
      */
     public function testAuthenticateAction_bb_area_invalidPassword()
     {
@@ -184,6 +187,7 @@ class SecurityControllerTest extends TestCase
     
     /**
      * @covers ::authenticateAction
+     * @covers ::getSecurityContextConfig
      */
     public function testAuthenticateAction_invalidFirewall()
     {
@@ -196,6 +200,7 @@ class SecurityControllerTest extends TestCase
     
     /**
      * @covers ::authenticateAction
+     * @covers ::getSecurityContextConfig
      */
     public function testAuthenticateAction_firewallWithoutSupportedContexts()
     {
@@ -216,6 +221,13 @@ class SecurityControllerTest extends TestCase
         $controller = $this->getController();
         
         // session doesnt exist
+        $response = $controller->deleteSessionAction(new Request());
+        $this->assertTrue($response instanceof Response);
+        $this->assertEquals(401, $response->getStatusCode());
+        
+        // authenticated anonymously 
+        $token = new \BackBuilder\Security\Token\AnonymousToken('test', 'test');
+        $this->getSecurityContext()->setToken($token);
         $response = $controller->deleteSessionAction(new Request());
         $this->assertTrue($response instanceof Response);
         $this->assertEquals(401, $response->getStatusCode());
