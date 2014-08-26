@@ -60,7 +60,7 @@ class ExceptionListener extends APathEnabledListener
         
         $exception = $event->getException();
         $exceptionClass = get_class($exception);
-        
+
         if(isset($this->mapping[$exceptionClass])) {
             $code = isset($this->mapping[$exceptionClass]['code']) ? $this->mapping[$exceptionClass]['code'] : 500;
             $message = isset($this->mapping[$exceptionClass]['message']) ? $this->mapping[$exceptionClass]['message'] : Response::$statusTexts[$code];
@@ -93,15 +93,15 @@ class ExceptionListener extends APathEnabledListener
             $event->setResponse(new Response());
             
             if(SecurityException::UNKNOWN_USER === $e->getCode()) {
-                $response->setStatusCode(404, $e->getMessage());
+                $event->getResponse()->setStatusCode(404, $e->getMessage());
             } elseif(SecurityException::INVALID_CREDENTIALS === $e->getCode()) {
-                $response->setStatusCode(401, $e->getMessage());
+                $event->getResponse()->setStatusCode(401, $e->getMessage());
             } elseif(SecurityException::EXPIRED_AUTH === $e->getCode()) {
-                $response->setStatusCode(401, $e->getMessage());
+                $event->getResponse()->setStatusCode(401, $e->getMessage());
             } elseif(SecurityException::EXPIRED_TOKEN === $e->getCode()) {
-                $response->setStatusCode(401, $e->getMessage());
+                $event->getResponse()->setStatusCode(401, $e->getMessage());
             } else {
-                $response->setStatusCode(403, $e->getMessage());
+                $event->getResponse()->setStatusCode(403, $e->getMessage());
             }
         }
     }

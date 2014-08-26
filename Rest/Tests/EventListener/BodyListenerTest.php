@@ -33,7 +33,7 @@ use BackBuilder\Rest\EventListener\BodyListener,
 
 
 /**
- * Test for AuthController class
+ * Test for BodyListener class
  *
  * @category    BackBuilder
  * @package     BackBuilder\Security
