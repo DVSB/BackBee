@@ -131,6 +131,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
+        $this->_is_restored = false;
 
         $this->_environment = null !== $environment && true === is_string($environment)
             ? $environment
@@ -310,7 +311,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
         $this->getTheme()->init(); // 30 ms
-
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
 

@@ -139,5 +139,25 @@ class ValidationListenerTest extends TestCase
         $this->assertEquals($data['queryParamField'], $request->query->get('queryParamField'));
     }
     
+    
+    /**
+     * @covers ::onKernelController
+     * @covers ::setDefaultValues
+     * @covers ::validateParams
+     * @covers ::getControllerActionMetadata
+     * @covers ::getViolationsParameterName
+     */
+    public function test_onKernelController_noMetadata()
+    {
+        $listener = new ValidationListener($this->getBBApp()->getContainer());
+        $data = ['param' => 'value'];
+        $request = new Request([], $data);
+        $controller = array(new FixtureAnnotatedController(), 'noMetadataAction');
+        $event = new FilterControllerEvent(new FrontController(), $controller, $request, FrontController::MASTER_REQUEST);
+        $listener->onKernelController($event);
+        
+        $this->assertEquals($data['param'], $request->request->get('param'));
+    }
+    
 
 }
