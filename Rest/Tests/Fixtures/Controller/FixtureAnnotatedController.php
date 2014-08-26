@@ -117,4 +117,11 @@ class FixtureAnnotatedController
     {
         return 'privateMethodInvalidAction';
     }
+    
+    /**
+     * 
+     * 
+     */
+    public function noMetadataAction()
+    {} 
 }
