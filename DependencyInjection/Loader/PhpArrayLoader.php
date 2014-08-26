@@ -24,6 +24,7 @@ use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Exception\ContainerDumpInvalidFormatException;
 use BackBuilder\DependencyInjection\Exception\InvalidContainerDumpFilePathException;
 use BackBuilder\DependencyInjection\Exception\MissingParametersContainerDumpException;
+use BackBuilder\DependencyInjection\Loader\ContainerProxy;
 
 /**
  *
@@ -79,12 +80,11 @@ class PhpArrayLoader
             false === array_key_exists('parameters', $dump)
             || false === array_key_exists('services', $dump)
             || false === array_key_exists('aliases', $dump)
-            || false === array_key_exists('services_dump', $dump)
             || false === array_key_exists('is_compiled', $dump)
         ) {
             throw new MissingParametersContainerDumpException();
         }
 
-        $this->container = new \BackBuilder\DependencyInjection\Loader\ContainerProxy($dump);
+        $this->container = new ContainerProxy($dump);
     }
 }
