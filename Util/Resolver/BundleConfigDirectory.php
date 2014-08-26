@@ -20,7 +20,7 @@ namespace BackBuilder\Util\Resolver;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\BBApplication;
+use BackBuilder\Util\Resolver\BootstrapDirectory;
 
 /**
  * This bootstrap directory resolver allows to get every folders in which we can find bootstrap.yml
@@ -31,36 +31,29 @@ use BackBuilder\BBApplication;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class BootstrapDirectory
+class BundleConfigDirectory
 {
+    const OVERRIDE_BUNDLE_CONFIG_DIRECTORY_NAME = 'bundle';
+
     /**
-     * Returns ordered directory (from specific to global) which can contains the bootstrap.yml file
+     * Returns ordered directory (from global to specific) which can contains the bundle config files
      * according to context and environment
      *
-     * @return array which contains every directory (string) where we can find the bootstrap.yml
+     * @return array which contains every directory (string) where we can find the bundle config files
      */
-    public static function getDirectories($base_directory, $context, $environment)
+    public static function getDirectories($base_directory, $context, $environment, $bundle_id)
     {
-        $bootstrap_directories = array();
+        $directories = array();
+        foreach (BootstrapDirectory::getDirectories($base_directory, $context, $environment) as $directory) {
+            $directory .= DIRECTORY_SEPARATOR . self::OVERRIDE_BUNDLE_CONFIG_DIRECTORY_NAME
+                . DIRECTORY_SEPARATOR . $bundle_id
+            ;
 
-        if (BBApplication::DEFAULT_CONTEXT !== $context) {
-            if (BBApplication::DEFAULT_ENVIRONMENT !== $environment) {
-                $bootstrap_directories[] = implode(DIRECTORY_SEPARATOR, array(
-                    $base_directory, $context, 'Config', $environment
-                ));
+            if (true === is_dir($directory)) {
+                array_unshift($directories, $directory);
             }
-
-            $bootstrap_directories[] = implode(DIRECTORY_SEPARATOR, array($base_directory, $context, 'Config'));
         }
 
-        if (BBApplication::DEFAULT_ENVIRONMENT !== $environment) {
-            $bootstrap_directories[] = implode(DIRECTORY_SEPARATOR, array(
-                $base_directory, 'Config', $environment
-            ));
-        }
-
-        $bootstrap_directories[] = $base_directory . DIRECTORY_SEPARATOR . 'Config';
-
-        return $bootstrap_directories;
+        return $directories;
     }
 }
