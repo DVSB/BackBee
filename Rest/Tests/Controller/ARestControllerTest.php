@@ -113,7 +113,7 @@ class ARestControllerTest extends TestCase
     }
     
     /**
-     * @covers ::create404ResponseAction
+     * @covers ::create404Response
      */
     public function test_create404Response()
     {

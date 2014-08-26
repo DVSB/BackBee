@@ -113,15 +113,15 @@ class GroupController extends ARestController
      * UPDATE 
      * 
      * @Rest\RequestParam(name = "name", requirements = {
-     *  @Assert\NotBlank(message="Name is required"),
-     *  @Assert\Length(max=50, minMessage="Maximum length of name is 50 characters")
+     *   @Assert\NotBlank(message="Name is required"),
+     *   @Assert\Length(max=50, minMessage="Maximum length of name is 50 characters")
      * })
      * @Rest\RequestParam(name = "identifier", requirements = {
-     *  @Assert\NotBlank(message="Identifier is required"),
-     *  @Assert\Length(max=50, minMessage="Maximum length of identifier is 50 characters")
+     *   @Assert\NotBlank(message="Identifier is required"),
+     *   @Assert\Length(max=50, minMessage="Maximum length of identifier is 50 characters")
      * })
      * @Rest\RequestParam(name = "site_uid", requirements = {
-     *  @Assert\Length(max=50)
+     *   @Assert\Length(max=50)
      * })
      * 
      * @param int $id
@@ -131,7 +131,7 @@ class GroupController extends ARestController
         $group = $this->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($id);
         
         if(!$group) {
-            return $this->create404Response(sprintf('User not found with id %d', $id));
+            return $this->create404Response(sprintf('Group not found with id %d', $id));
         }
 
         $this->deserializeEntity($request->request->all(), $group);
@@ -161,12 +161,18 @@ class GroupController extends ARestController
      */
     public function postAction(Request $request)
     {
-        $groupExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\Group')->findBy(array('_identifier' => $request->request->get('identifier')));
+        $groupExists = $this->getApplication()
+            ->getEntityManager()
+            ->getRepository('BackBuilder\Security\Group')
+            ->findBy(['_identifier' => $request->request->get('identifier')])
+        ;
         
         if($groupExists) {
-            throw new ValidationException(new ConstraintViolationList(array(
-                new ConstraintViolation('Group with that identifier already exists', 'Group with that identifier already exists', array(), 'identifier', 'identifier', $request->request->get('identifier'))
-            )));
+            $response = $this->createResponse()
+                ->setStatusCode(409, sprintf('Group with that identifier already exists: %s', $request->request->get('identifier')))
+            ;
+            
+            return $response;
         }
         
         $group = new Group();

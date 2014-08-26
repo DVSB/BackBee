@@ -46,6 +46,7 @@ class PaginationListenerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers ::onKernelController
+     * @covers ::getControllerActionMetadata
      */
     public function testDefaultParams()
     {

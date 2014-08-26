@@ -82,6 +82,8 @@ class SecurityControllerTest extends TestCase
 
     /**
      * @covers ::authenticateAction
+     * @covers ::getSecurityContextConfig
+     * 
      */
     public function testAuthenticateAction_bb_area()
     {

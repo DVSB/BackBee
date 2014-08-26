@@ -183,6 +183,17 @@ class SiteControllerTest extends TestCase
         $this->assertCount(0, $content);
     }
     
+    /**
+     * @covers ::getLayoutsAction
+     */
+    public function test_getLayoutsAction_invalideSite()
+    {
+        $controller = $this->getController();
+        $response = $controller->getLayoutsAction('siteThatDoesntExist', new Request());
+        
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+    
 
     protected function tearDown()
     {
