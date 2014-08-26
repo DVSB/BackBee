@@ -46,7 +46,8 @@ use BackBuilder\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
 class AnnotationDriverTest extends TestCase
 {
 
-    protected function setUp() {
+    protected function setUp() 
+    {
         
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces([
@@ -54,6 +55,16 @@ class AnnotationDriverTest extends TestCase
             'JMS\Serializer\Annotation' => $this->getBBApp()->getVendorDir() . '/jms/serializer/src/',
             'BackBuilder' => $this->getBBApp()->getBaseDir(),
         ]);
+    }
+    
+    
+    /**
+     * @covers ::__construct
+     */
+    public function test__construct()
+    {
+        $driver = new AnnotationDriver(new AnnotationReader());
+        $this->assertInstanceOf('BackBuilder\Rest\Mapping\Driver\AnnotationDriver', $driver);
     }
     
     /**
