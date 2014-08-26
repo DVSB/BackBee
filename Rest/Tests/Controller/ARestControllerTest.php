@@ -124,7 +124,7 @@ class ARestControllerTest extends TestCase
     }
     
     /**
-     * @covers ::createValidationExceptionAction
+     * @covers ::createValidationException
      */
     public function test_create404createValidationExceptionAction()
     {
