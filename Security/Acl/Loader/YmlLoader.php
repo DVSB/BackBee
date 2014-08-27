@@ -53,6 +53,10 @@ class YmlLoader extends ContainerAware
     {
         $aclProvider = $this->container->get('bbapp')->getSecurityContext()->getACLProvider();
         
+        if(null === $aclProvider) {
+            throw new \RuntimeException('ACL configuration missing');
+        }
+        
         $this->em = $this->container->get('bbapp')->getEntityManager();
         $this->bbapp = $this->container->get('bbapp');
         
