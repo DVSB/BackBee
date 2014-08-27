@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- *
+ * 
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,9 +29,9 @@ use Symfony\Component\Security\Core\User\UserInterface,
 
 /**
  * Revision of a content in BackBuilder.
- *
+ * 
  * A revision is owned by a valid user and has several states :
- *
+ * 
  * * STATE_ADDED : new content, revision number to 0
  * * STATE_MODIFIED : new draft of an already revisionned content
  * * STATE_COMMITTED : one of the committed revision of a content
@@ -125,7 +125,7 @@ class Revision extends AContent implements \Iterator, \Countable
     private $_index = 0;
 
     /**
-     * @param \Doctrine\ORM\EntityManager $em
+     * @param \Doctrine\ORM\EntityManager $em 
      */
     private $_em;
 
@@ -253,23 +253,10 @@ class Revision extends AContent implements \Iterator, \Countable
         $this->_content = $content;
 
         if (null !== $this->_content) {
-            $this->_setUpRevision();
+            $this->setClassname(ClassUtils::getRealClass($this->_content));
         }
 
         return $this->_getContentInstance();
-    }
-
-    private function _setUpRevision()
-    {
-        $this->setClassname(ClassUtils::getRealClass($this->_content));
-        $this->setAccept($this->_content->getAccept());
-        $this->setData($this->_content->getDataToObject());
-        $this->setLabel($this->_content->getLabel());
-        $this->setMaxEntry((array)$this->_content->getMaxEntry());
-        $this->setMinEntry((array)$this->_content->getMinEntry());
-        $this->setParam(NULL, $this->_content->getParam());
-        $this->setRevision($this->_content->getRevision() ? $this->_content->getRevision() : 0);
-        $this->setState($this->_content->getRevision() ? Revision::STATE_MODIFIED : Revision::STATE_ADDED);
     }
 
     /**
@@ -320,7 +307,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets options at the construction of a new revision
-     * @param mixed $options
+     * @param mixed $options 
      * @return \BackBuilder\ClassContent\AContent
      */
     protected function _setOptions($options = null)
