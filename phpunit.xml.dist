@@ -9,7 +9,7 @@
          processIsolation="false"
          stopOnFailure="false"
          syntaxCheck="false"
-         bootstrap="./bootstrap.php"
+         bootstrap="./bootstrap.php.dist"
 >
     <testsuites>
         <testsuite name="BackBee Test Suite">
