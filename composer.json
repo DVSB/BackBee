@@ -5,6 +5,12 @@
     "extra": {
         "installer-name": "BackBuilder"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "http://gitlab.lp-digital.fr/backbuilder/backbuilderapiclient.git"
+        }
+    ],
     "require": {
         "php": ">=5.4.0",
         "symfony/symfony": "2.2.11",
@@ -15,7 +21,8 @@
         "swiftmailer/swiftmailer": "5.1.0",
         "jms/serializer": "0.15.0",
         "jms/metadata": "1.5.0",
-        "respect/validation": "0.7.*@dev"
+        "respect/validation": "0.7.*@dev",
+        "backbuilder/api-client": "*"
     },
     "autoload": {
         "psr-4": {
