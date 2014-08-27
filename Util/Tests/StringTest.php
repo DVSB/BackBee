@@ -121,14 +121,9 @@ class StringTest extends \PHPUnit_Framework_TestCase {
                     'spacereplace' => '_',
         )));
 
-        $this->assertEquals('tests_url.com', String::urlize('test`s url', array(
-                    'extension' => '.com',
-                    'spacereplace' => '_',
-        )));
-
         $this->assertEquals('tests+u.com', String::urlize('test`s url', array(
                     'extension' => '.com',
-                    'spacereplace' => '+',
+                    'spacereplace' => '/+/',
                     'lengthlimit' => 7
         )));
 
