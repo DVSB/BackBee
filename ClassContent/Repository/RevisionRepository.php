@@ -66,8 +66,20 @@ class RevisionRepository extends EntityRepository
     public function checkout(AClassContent $content, \BackBuilder\Security\Token\BBUserToken $token)
     {
         $revision = new Revision();
+        $revision->setAccept($content->getAccept());
         $revision->setContent($content);
+        $revision->setData($content->getDataToObject());
+        $revision->setLabel($content->getLabel());
+        
+        $maxEntry = (array) $content->getMaxEntry();
+        $minEntry = (array) $content->getMinEntry();   
+        $revision->setMaxEntry($maxEntry);
+        $revision->setMinEntry($minEntry);
+
         $revision->setOwner($token->getUser());
+        $revision->setParam(NULL, $content->getParam());
+        $revision->setRevision($content->getRevision() ? $content->getRevision() : 0 );
+        $revision->setState($content->getRevision() ? Revision::STATE_MODIFIED : Revision::STATE_ADDED );
 
         return $revision;
     }
