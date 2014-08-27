@@ -17,23 +17,23 @@ class FileTest extends \PHPUnit_Framework_TestCase {
         $vfs_dir = vfsStream::setup('dircopy', 0777, array('copyfile' => 'copy data'));
         $path = vfsStream::url('dircopy');
 
-        $this->assertEquals(__DIR__ . "/FileTest.php", File::realpath(__DIR__ . "/FileTest.php"));
-        $this->assertEquals(false, File::realpath("/FileTest.php"));
+        $this->assertEquals(__DIR__ . DIRECTORY_SEPARATOR . "FileTest.php", File::realpath(__DIR__ . DIRECTORY_SEPARATOR . "/FileTest.php"));
+        $this->assertEquals(false, File::realpath(DIRECTORY_SEPARATOR . "FileTest.php"));
         $this->assertEquals("vfs://dircopy", File::realpath($path));
 
-        $path1 = vfsStream::url('dircopy\copyfile');
-        $this->assertEquals("vfs://dircopy\copyfile", File::realpath($path1));
+        $path1 = vfsStream::url('dircopy' . DIRECTORY_SEPARATOR . 'copyfile');
+        $this->assertEquals("vfs://dircopy" . DIRECTORY_SEPARATOR . "copyfile", File::realpath($path1));
 
 
         $vfs_dir = vfsStream::setup('dircopy', 0000, array('copyfile' => 'copy data'));
         $path = vfsStream::url('dircopy');
 
-        $this->assertEquals(__DIR__ . "/FileTest.php", File::realpath(__DIR__ . "/FileTest.php"));
-        $this->assertEquals(false, File::realpath("/FileTest.php"));
+        $this->assertEquals(__DIR__ . DIRECTORY_SEPARATOR . "FileTest.php", File::realpath(__DIR__ . DIRECTORY_SEPARATOR . "FileTest.php"));
+        $this->assertEquals(false, File::realpath(DIRECTORY_SEPARATOR . "FileTest.php"));
         $this->assertEquals("vfs://dircopy", File::realpath($path));
 
-        $path1 = vfsStream::url('dircopy\copyfile');
-        $this->assertEquals("vfs://dircopy\copyfile", File::realpath($path1));
+        $path1 = vfsStream::url('dircopy' . DIRECTORY_SEPARATOR . 'copyfile');
+        $this->assertEquals("vfs://dircopy" . DIRECTORY_SEPARATOR . "copyfile", File::realpath($path1));
     }
 
     /**
@@ -44,11 +44,11 @@ class FileTest extends \PHPUnit_Framework_TestCase {
         $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
         $path = vfsStream::url('dircopy');
 
-        $this->assertEquals('vfs:/dircopy', File::normalizePath($path));
-        $this->assertEquals('vfs:/dircopy/copyfile', File::normalizePath(vfsStream::url('dircopy/copyfile')));
-        $this->assertEquals('vfs:/dircopy/copyfile', File::normalizePath(vfsStream::url('dircopy//copyfile'), DIRECTORY_SEPARATOR, false));
-        $this->assertEquals('vfs:////dircopy////copyfile', File::normalizePath(vfsStream::url('dircopy/copyfile'), '////', false));
-        $this->assertEquals('vfs:////dircopy////copyfile', File::normalizePath(vfsStream::url('dircopy/copyfile'), '////'));
+        $this->assertEquals('vfs:' . DIRECTORY_SEPARATOR . 'dircopy', File::normalizePath($path));
+        $this->assertEquals('vfs:' . DIRECTORY_SEPARATOR . 'dircopy' . DIRECTORY_SEPARATOR . 'copyfile', File::normalizePath(vfsStream::url('dircopy' . DIRECTORY_SEPARATOR . 'copyfile')));
+        $this->assertEquals('vfs:' . DIRECTORY_SEPARATOR . 'dircopy' . DIRECTORY_SEPARATOR . 'copyfile', File::normalizePath(vfsStream::url('dircopy//copyfile'), DIRECTORY_SEPARATOR, false));
+        $this->assertEquals('vfs:////dircopy////copyfile', File::normalizePath(vfsStream::url('dircopy' . DIRECTORY_SEPARATOR . 'copyfile'), '////', false));
+        $this->assertEquals('vfs:////dircopy////copyfile', File::normalizePath(vfsStream::url('dircopy' . DIRECTORY_SEPARATOR . 'copyfile'), '////'));
         $this->assertEquals('vfs:\\\dircopy', File::normalizePath(vfsStream::url('dircopy'), '\\'));
     }
 
@@ -63,7 +63,6 @@ class FileTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('553.71 kB', File::readableFilesize(567000));
         $this->assertEquals('5.28 GB', File::readableFilesize(5670008902));
         $this->assertEquals('0.00 B', File::readableFilesize(0));
-        $this->assertEquals('0.00 B', File::readableFilesize());
     }
 
     /**
@@ -150,9 +149,9 @@ class FileTest extends \PHPUnit_Framework_TestCase {
         $vfs_dir = vfsStream::setup('dircopy', 0775, array('copyfile.txt' => 'copy data', 'file2.txt' => 'copy data', 'file3.php' => 'copy data', 'file4.yml' => 'copy data'));
         $path = vfsStream::url('dircopy');
 
-        $this->assertEquals(array('vfs://dircopy\copyfile.txt', 'vfs://dircopy\file2.txt'), File::getFilesRecursivelyByExtension($path, 'txt'));
-        $this->assertEquals(array('vfs://dircopy\file3.php'), File::getFilesRecursivelyByExtension($path, 'php'));
-        $this->assertEquals(array('vfs://dircopy\file4.yml'), File::getFilesRecursivelyByExtension($path, 'yml'));
+        $this->assertEquals(array('vfs://dircopy' . DIRECTORY_SEPARATOR . 'copyfile.txt', 'vfs://dircopy' . DIRECTORY_SEPARATOR . 'file2.txt'), File::getFilesRecursivelyByExtension($path, 'txt'));
+        $this->assertEquals(array('vfs://dircopy' . DIRECTORY_SEPARATOR . 'file3.php'), File::getFilesRecursivelyByExtension($path, 'php'));
+        $this->assertEquals(array('vfs://dircopy' . DIRECTORY_SEPARATOR . 'file4.yml'), File::getFilesRecursivelyByExtension($path, 'yml'));
         $this->assertEquals(array(), File::getFilesRecursivelyByExtension($path, ''));
         $this->assertEquals(array(), File::getFilesRecursivelyByExtension($path, 'aaa'));
     }
@@ -177,9 +176,9 @@ class FileTest extends \PHPUnit_Framework_TestCase {
         $vfs_dir = vfsStream::setup('dircopy', 0775, array('copyfile.txt' => 'copy data', 'file2.txt' => 'copy data', 'file3.php' => 'copy data', 'file4.yml' => 'copy data'));
         $path = vfsStream::url('dircopy');
 
-        $this->assertEquals(array('vfs://dircopy/copyfile.txt', 'vfs://dircopy\file2.txt'), File::getFilesByExtension($path, 'txt'));
-        $this->assertEquals(array('vfs://dircopy\file3.php'), File::getFilesByExtension($path, 'php'));
-        $this->assertEquals(array('vfs://dircopy\file4.yml'), File::getFilesByExtension($path, 'yml'));
+        $this->assertEquals(array('vfs://dircopy' . DIRECTORY_SEPARATOR . 'copyfile.txt', 'vfs://dircopy' . DIRECTORY_SEPARATOR . 'file2.txt'), File::getFilesByExtension($path, 'txt'));
+        $this->assertEquals(array('vfs://dircopy' . DIRECTORY_SEPARATOR . 'file3.php'), File::getFilesByExtension($path, 'php'));
+        $this->assertEquals(array('vfs://dircopy' . DIRECTORY_SEPARATOR . 'file4.yml'), File::getFilesByExtension($path, 'yml'));
         $this->assertEquals(array(), File::getFilesByExtension($path, ''));
         $this->assertEquals(array(), File::getFilesByExtension($path, 'aaa'));
     }
