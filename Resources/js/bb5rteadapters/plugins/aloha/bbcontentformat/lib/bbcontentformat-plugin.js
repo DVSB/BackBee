@@ -12,12 +12,13 @@ var jQuery = bb.jquery;
 var htmlClean = bb.baseurl+bb.resourcesdir+'js/libs/jquery.htmlclean/jquery.htmlClean.min.js';  
 define("bbcontentformat/bb5contenthandler", ['aloha','jquery',htmlClean,'aloha/contenthandlermanager'],
     function(Aloha, $, htmlClean, ContentHandlerManager){
+        
         var Bb5contentPasteHandler = ContentHandlerManager.createHandler({
             enabled : false,
             handleContent: function(content){
                 content = bb.jquery.htmlClean(content,{
                     allowedAttributes: [["style"]],
-                    removeAttrs:["data-bbcontentref","aloha-editable-active","aloha-ed_itable","contentAloha","data-minentry","data-forbidenactions",
+                    removeAttrs:["data-bbcontentref","aloha-editable-active","aloha-editable","contentAloha","data-minentry","data-forbidenactions",
                     "data-parent","data-uid", "data-isloaded", "data-rendermode",
                     "data-maxentry", "data-refparent", "data-type", "data-accept",
                     "data-contentplugins", "data-element","data-rteconf", "data-parent",
@@ -33,19 +34,24 @@ define("bbcontentformat/bb5contenthandler", ['aloha','jquery',htmlClean,'aloha/c
 /**
     *
     *  new paragraph content handler
-    *  this content handler allows us to control what can be pasted inside a p tag
+    *  this content handler allows us to control what can be pasted inside a p or div tag
     *  */
 define("bbcontentformat/bb5ParagraphCleaner",["aloha","jquery",htmlClean,'aloha/contenthandlermanager'],
     function(Aloha, $, htmlClean, ContentHandlerManager){
+        
+        
         var paragraphContentHandler = ContentHandlerManager.createHandler({
             enabled: true,
             defaultSettings: {
-                removeTags: ['p','ol','ul','li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'div', 'pre']
+                removeTags: []
             },
             handleContent: function(content){
                 var currentObject = Aloha.getActiveEditable();
+                if(!currentObject || !("obj" in currentObject)) return content;
                 currentObject = currentObject.obj;
-                if($(currentObject).is("p")){
+                var isP = $(currentObject).is("p");
+                var isDiv = $(currentObject).is("div");
+                if(isP || isDiv){
                     var htmlCleanerConfig = Aloha.settings.contentHandler.handler.bb5ParagraphCleaner.config;
                     if( Aloha.settings.contentHandler &&
                         Aloha.settings.contentHandler.handler &&
@@ -54,6 +60,14 @@ define("bbcontentformat/bb5ParagraphCleaner",["aloha","jquery",htmlClean,'aloha/
                         ){
                         var cleaningSettings = $.extend(true,this.defaultSettings,htmlCleanerConfig);
                         content = bb.jquery.htmlClean(content,cleaningSettings); 
+                        /* Replace <p>-->"" and </p> by something else */
+                        if(isP){
+                            var startPpattern = /<p>/g; 
+                            var endPpattern =/<\/p>/g;
+                            content = content.replace(startPpattern,""); 
+                            content = content.replace(endPpattern,"<br>"); 
+                        }
+                        
                     }                
                 }
                 return content;
@@ -72,7 +86,8 @@ define([
     'aloha/plugin',
     'aloha/contenthandlermanager',
     "bbcontentformat/bb5contenthandler",
-    'jquery'],function(Aloha, Plugin, ContentHandlerManager, BbContentHandler,$){
+    "bbcontentformat/bb5ParagraphCleaner",
+    'jquery'],function(Aloha, Plugin, ContentHandlerManager, BbContentHandler,paragraphContentHandler,$){
         /* create contentHandler */
         return Plugin.create('bbcontentformat', {
             init: function(){
