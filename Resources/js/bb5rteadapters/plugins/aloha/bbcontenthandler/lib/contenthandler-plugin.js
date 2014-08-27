@@ -2,8 +2,8 @@ define(
 ['aloha', 'aloha/jquery', 'aloha/contenthandlermanager'],
 function(Aloha, jQuery, ContentHandlerManager) {
     "use strict";
- 
     var MyContentHandler = ContentHandlerManager.createHandler({
+        enabled: true,
         handleContent: function( content ) {
              alert("icic");
              console.log(content);
@@ -12,6 +12,6 @@ function(Aloha, jQuery, ContentHandlerManager) {
             return $(content).get(0); // return as HTML text not jQuery/DOM object
         }
     });
- 
-    return MyContentHandler;
+    ContentHandlerManager.register('radicalContent', MyContentHandler);
+  
 });
