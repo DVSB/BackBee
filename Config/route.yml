@@ -115,7 +115,7 @@ bb.rest.acl.get_classes:
         _method: GET
 
 bb.rest.page.get_available_status:
-    pattern: /rest/{version}/page/status
+    pattern: /rest/{version}/pages/status
     defaults:
         _action:     getAvailableStatusAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -123,7 +123,7 @@ bb.rest.page.get_available_status:
         _method: GET
 
 bb.rest.page.get:
-    pattern: /rest/{version}/page/{uid}
+    pattern: /rest/{version}/pages/{uid}
     defaults:
         _action:     getAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -132,7 +132,7 @@ bb.rest.page.get:
         _method: GET
 
 bb.rest.page.move_node:
-    pattern: /rest/{version}/page/{uid}/node/move
+    pattern: /rest/{version}/pages/{uid}/node/move
     defaults:
         _action:     movePageNodeAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -140,8 +140,16 @@ bb.rest.page.move_node:
         uid: \w{32}
         _method: PUT
 
+bb.rest.page.post:
+    pattern: /rest/{version}/pages
+    defaults:
+        _action:     postAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        _method: POST
+
 bb.rest.page.patch:
-    pattern: /rest/{version}/page/{uid}
+    pattern: /rest/{version}/pages/{uid}
     defaults:
         _action:     patchAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -150,7 +158,7 @@ bb.rest.page.patch:
         _method: PATCH
 
 bb.rest.page.delete:
-    pattern: /rest/{version}/page/{uid}
+    pattern: /rest/{version}/pages/{uid}
     defaults:
         _action: deleteAction
         _controller: BackBuilder\Rest\Controller\PageController

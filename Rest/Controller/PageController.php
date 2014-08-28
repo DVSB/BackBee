@@ -88,10 +88,10 @@ class PageController extends ARestController
      *
      * @Rest\RequestParam(name="parent_uid", description="new parent node uid", requirements={
      *     @Assert\NotBlank(message="parent_uid is required"),
-     *     @Assert\Length(min=32, max=32, exactMessage="parent_uid must containts 32 characters")
+     *     @Assert\Length(min=32, max=32, exactMessage="parent_uid must contains 32 characters")
      * })
      * @Rest\RequestParam(name="next_uid", description="next node uid", requirements={
-     *     @Assert\Length(min=32, max=32, exactMessage="next_uid must containts 32 characters")
+     *     @Assert\Length(min=32, max=32, exactMessage="next_uid must contains 32 characters")
      * })
      */
     public function movePageNodeAction($uid)
@@ -132,12 +132,76 @@ class PageController extends ARestController
 
         $this->getEntityManager()->flush($page);
 
+        return $this->createResponse($this->buildLeafJSON($page, 'folder'));
+    }
+
+    /**
+     * Create or clone a page entity
+     *
+     * Clone action requirements:
+     *
+     * @Rest\QueryParam(name="source_uid", description="Source uid for cloning", requirements={
+     *     @Assert\Length(min=32, max=32, exactMessage="source_uid must contains 32 characters")
+     * })
+     * @Rest\QueryParam(name="title", description="Cloning page new title", requirements={
+     *     @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
+     * })
+     */
+    public function postAction()
+    {
+        if (0 === count($this->getRequest()->request->all())) {
+            return $this->clonePageAction();
+        }
+
+        $layout_uid = $this->getRequest()->request->get('layout_uid');
+        if (null === $layout = $this->getLayoutByUid($layout_uid)) {
+            return $this->create404Response("None layout exists with uid `$layout_uid`.");
+        }
+
+        $parent_uid = $this->getRequest()->request->get('parent_uid');
+        if (null === $parent = $this->getPageByUid($parent_uid)) {
+            return $this->create404Response("None page exists with uid `$parent_uid`.");
+        }
+
+        if (0 === strlen($title = $this->getRequest()->request->get('title', null))) {
+            return $this->create404Response('Page\'s title cannot be empty.');
+        }
+
+        $builder = $this->getApplication()->getContainer()->get('pagebuilder');
+        $builder->setLayout($layout);
+        $builder->setParent($parent);
+        $builder->setRoot($parent->getRoot());
+        $builder->setSite($parent->getSite());
+        $builder->setTitle($title);
+        $page = $builder->getPage();
+
+        if (0 < strlen($target = $this->getRequest()->request->get('target', null))) {
+            $page->setTarget($target);
+        }
+
+        if (0 < strlen($redirect = $this->getRequest()->request->get('redirect', null))) {
+            $page->setRedirect($redirect);
+        }
+
+        if (0 < strlen($url = $this->getRequest()->request->get('url', null))) {
+            $page->setUrl($url);
+        }
+
+        if (0 < strlen($alt_title = $this->getRequest()->request->get('alt_title', null))) {
+            $page->setAltTitle($alt_title);
+        }
+
+        $this->getEntityManager()->persist($page);
+        try {
+            $this->getEntityManager()->flush($page);
+            $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
+        } catch (\Exception $e) {
+            return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
+        }
+
         return $this->createResponse(json_encode(array(
-            'attr'  => array(
-                'rel' => 'folder',
-                'id'  => $this->getPageId($page)
-            ),
-            'data'  => $page->getTitle(),
+            'attr'  => json_decode($page->serialize(), true),
+            'data'  => html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8'),
             'state' => 'closed'
         )));
     }
@@ -208,6 +272,47 @@ class PageController extends ARestController
     }
 
     /**
+     * [clonePageAction description]
+     *
+     * @return [type] [description]
+     */
+    private function clonePageAction()
+    {
+        $source_uid = $this->getRequest()->query->get('source_uid', null);
+        if (null === $source_uid) {
+            return $this->createResponse('`source_uid` query parameter is missing.', 400);
+        }
+
+        $title = $this->getRequest()->query->get('title', null);
+        if (null === $title) {
+            return $this->createResponse('`title` query parameter is missing.', 400);
+        }
+
+        if (null === $page = $this->getPageByUid($source_uid)) {
+            return $this->create404Response("None page exists with uid `$uid`.");
+        }
+
+        $this->isGranted('VIEW', $page->getLayout()); // user must have view permission on choosen layout
+        $this->isGranted('CREATE', $page); // user must have create permission on page
+
+        if (null !== $page->getParent()) {
+            $this->isGranted('EDIT', $page->getParent());
+        } else {
+            $this->isGranted('EDIT', $this->getApplication()->getSite());
+        }
+
+        try {
+            $new_page = $this->getPageRepository()->duplicate(
+                $page, $title, $page->getParent(), true, $this->getApplication()->getBBUserToken()
+            );
+        } catch (\Exception $e) {
+            return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
+        }
+
+        return $this->createResponse($this->buildLeafJSON($new_page, 'leaf'));
+    }
+
+    /**
      * Getter of page entity by its uid
      *
      * @param  string $uid the uid of the requested page
@@ -220,6 +325,18 @@ class PageController extends ARestController
     }
 
     /**
+     * Getter of layout entity by its uid
+     *
+     * @param  string $uid the uid of the requested layout
+     *
+     * @return null|BackBuilder\Site\Layout null if none layout exists for the provided uid or the entity layout
+     */
+    private function getLayoutByUid($uid)
+    {
+        return $this->getEntityManager()->find('BackBuilder\Site\Layout', $uid);
+    }
+
+    /**
      * Getter for page entity repository
      *
      * @return BackBuilder\NestedNode\Repository\PageRepository
@@ -229,8 +346,33 @@ class PageController extends ARestController
         return $this->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
     }
 
+    /**
+     * [getPageId description]
+     * @param  Page   $page [description]
+     * @return [type]       [description]
+     */
     private function getPageId(Page $page)
     {
         return 'node_' . $page->getUid();
+    }
+
+    /**
+     * [buildLeafJSON description]
+     *
+     * @param  [type] $page [description]
+     * @param  [type] $rel  [description]
+     *
+     * @return [type]       [description]
+     */
+    private function buildLeafJSON($page, $rel)
+    {
+        return json_encode(array(
+            'attr'  => array(
+                'rel' => $rel,
+                'id'  => $this->getPageId($page)
+            ),
+            'data'  => $page->getTitle(),
+            'state' => 'closed'
+        ));
     }
 }
