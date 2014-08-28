@@ -32,7 +32,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
         $dir_path = Dir::copy($start_path, $copy_path);
 
         $this->assertEquals(true, $dir_path);
-        $this->assertFileEquals($copy_path, $start_path);
+
+        $this->assertEquals(array_values(Dir::getContent($copy_path)), array_values(Dir::getContent($start_path)));
     }
 
     /**
@@ -87,6 +88,7 @@ class DirTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * @covers \BackBuilder\Util\Dir::getContent
+     * @expectedException \Exception
      *
      */
     public function testModeFilesGetContent() {
@@ -177,7 +179,6 @@ class DirTest extends \PHPUnit_Framework_TestCase {
                     unlink($this->copy_path . DIRECTORY_SEPARATOR . $file);
                 }
             }
-            closedir($this->copy_path);
 
             rmdir($this->copy_path);
         }
