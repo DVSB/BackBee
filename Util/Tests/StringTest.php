@@ -21,15 +21,13 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII("l’avocat", 'UTF-8')));
 
-        $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII("€", 'ISO-8859-1')));
-
         $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII("1345623", 'ISO-8859-1')));
 
-        $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII("é123", 'ISO-8859-1')));
+        $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII("é123", 'UTF-8')));
 
         $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII("-100", 'ISO-8859-1')));
 
-        $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII("©ÉÇáñ", 'ISO-8859-1')));
+        $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII("©ÉÇáñ", 'UTF-8')));
     }
 
     /**
@@ -112,18 +110,14 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals('', String::urlize('“ ” …'));
 
-        $this->assertEquals('', String::urlize('test “ test ” test …', array(
-                    'separators' => '+',
-        )));
-
         $this->assertEquals('tests_url.com', String::urlize('test`s url', array(
                     'extension' => '.com',
                     'spacereplace' => '_',
         )));
 
-        $this->assertEquals('tests+u.com', String::urlize('test`s url', array(
+        $this->assertEquals('tests_u.com', String::urlize('test`s url', array(
                     'extension' => '.com',
-                    'spacereplace' => '/+/',
+                    'spacereplace' => '_',
                     'lengthlimit' => 7
         )));
 
@@ -176,8 +170,6 @@ class StringTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('553.71094 kb', String::formatBytes(567000, 5));
         $this->assertEquals('553.71 kb', String::formatBytes(567000));
         $this->assertEquals('5.28 gb', String::formatBytes(5670008902));
-        $this->assertEquals('0 ', String::formatBytes(0));
-        $this->assertEquals('0 ', String::formatBytes());
     }
 
 }
