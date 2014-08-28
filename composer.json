@@ -21,7 +21,7 @@
         "swiftmailer/swiftmailer": "5.1.0",
         "jms/serializer": "0.15.0",
         "jms/metadata": "1.5.0",
-        "backbuilder/api-client": "*@dev"
+        "backbuilder/api-client": "dev-master"
     },
     "autoload": {
         "psr-4": {
