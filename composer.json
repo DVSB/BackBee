@@ -1,7 +1,7 @@
 {
     "name": "backbee",
     "description": "BackBuilder",
-    "type": "backbuilder-package",
+    "type": "backbee-package",
     "extra": {
         "installer-name": "BackBuilder"
     },
@@ -9,6 +9,10 @@
         {
             "type": "vcs",
             "url": "http://gitlab.lp-digital.fr/backbuilder/backbuilderapiclient.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/eric-chau/backbee-composer-installer.git"
         }
     ],
     "require": {
@@ -21,7 +25,8 @@
         "swiftmailer/swiftmailer": "5.1.0",
         "jms/serializer": "0.15.0",
         "jms/metadata": "1.5.0",
-        "backbuilder/api-client": "dev-master"
+        "backbuilder/api-client": "dev-master",
+        "eric-chau/backbee-composer-installer": "dev-master"
     },
     "autoload": {
         "psr-4": {
