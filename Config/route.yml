@@ -86,7 +86,7 @@ bb.rest.acl.permissions_map:
     requirements:
         version: \d
         _method: POST
-        
+
 bb.rest.acl.ace_class_delete:
     pattern: /rest/{version}/acl/ace/class/{sid}/
     defaults:
@@ -104,7 +104,7 @@ bb.rest.acl.ace_object_delete:
     requirements:
         version: \d
         _method: DELETE
-        
+
 bb.rest.acl.get_classes:
     pattern: /rest/{version}/acl/class/
     defaults:
@@ -113,7 +113,50 @@ bb.rest.acl.get_classes:
     requirements:
         version: \d
         _method: GET
-        
+
+bb.rest.page.get_available_status:
+    pattern: /rest/{version}/page/status
+    defaults:
+        _action:     getAvailableStatusAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        _method: GET
+
+bb.rest.page.get:
+    pattern: /rest/{version}/page/{uid}
+    defaults:
+        _action:     getAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: GET
+
+bb.rest.page.move_node:
+    pattern: /rest/{version}/page/{uid}/node/move
+    defaults:
+        _action:     movePageNodeAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: PUT
+
+bb.rest.page.patch:
+    pattern: /rest/{version}/page/{uid}
+    defaults:
+        _action:     patchAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: PATCH
+
+bb.rest.page.delete:
+    pattern: /rest/{version}/page/{uid}
+    defaults:
+        _action: deleteAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: DELETE
 
 # BackBuilder rss
 bb.rss:
