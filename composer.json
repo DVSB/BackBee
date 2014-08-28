@@ -12,7 +12,7 @@
         },
         {
             "type": "vcs",
-            "url": "https://github.com/eric-chau/backbee-composer-installer.git"
+            "url": "https://github.com/eric-chau/installers.git"
         }
     ],
     "require": {
@@ -26,7 +26,7 @@
         "jms/serializer": "0.15.0",
         "jms/metadata": "1.5.0",
         "backbuilder/api-client": "dev-master",
-        "eric-chau/backbee-composer-installer": "dev-master"
+        "eric-chau/installers": "dev-master"
     },
     "autoload": {
         "psr-4": {
