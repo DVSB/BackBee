@@ -60,7 +60,6 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @fixtures(qty=1)
  *
  * @Serializer\ExclusionPolicy("all")
- * @Serializer\AccessorOrder("custom", custom = {"uid","title","url","LayoutUid","LayoutLabel","SiteUid","SiteLabel"})
  */
 class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 {
@@ -166,6 +165,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var string
      * @Column(type="string", name="alttitle", nullable=true)
      * @fixture(type="sentence", value=6)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_alttitle;
 
@@ -183,6 +185,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Target of this page if redirect defined.
      * @var string
      * @column(type="string", name="target", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_target;
 
@@ -190,6 +195,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Permanent redirect.
      * @var string
      * @column(type="string", name="redirect", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_redirect;
 
@@ -213,6 +221,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var \DateTime
      * @Column(type="datetime", name="date", nullable=true)
      * @fixture(type="dateTime")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_date;
 
@@ -231,6 +242,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The auto publishing datetime
      * @var \DateTime
      * @Column(type="datetime", name="publishing", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_publishing;
 
@@ -238,6 +252,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The auto-archiving datetime
      * @var \DateTime
      * @Column(type="datetime", name="archiving", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_archiving;
 
@@ -1331,5 +1348,23 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         }
 
         return $label;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("workflow_uid")
+     */
+    public function getWorkflowStateUid()
+    {
+        return null !== $this->_workflow_state ? $this->_workflow_state->getUid() : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("workflow_label")
+     */
+    public function getWorkflowStateLabel()
+    {
+        return null !== $this->_workflow_state ? $this->_workflow_state->getLabel() : null;
     }
 }

@@ -55,10 +55,53 @@ class PageController extends ARestController
     }
 
     /**
+     * Get collection of page entity filtering by source_uid (or not), limit and start
      *
-     * @param  [type] $uid [description]
+     * @Rest\QueryParam(name="source_uid", description="the page we want to get its children", requirements={
+     *      @Assert\Length(min=32, max=32, exactMessage="source_uid must contains 32 characters")
+     * })
+     * @Rest\QueryParam(name="limit", default="25", description="Max results", requirements={
+     *     @Assert\Range(
+     *         max=100, maxMessage="The value should be between 1 and 100",
+     *         min=1, minMessage="The value should be between 1 and 100"
+     *     )
+     * })
+     * @Rest\QueryParam(name="start", default="0", description="Offset", requirements={
+     *      @Assert\Type(type="digit", message="The value should be a positive number")
+     * })
+     */
+    public function getCollectionAction()
+    {
+        $source_uid = $this->getRequest()->query->get('source_uid', null);
+        $source = null;
+        if (null !== $source_uid && null === $source = $this->getPageByUid($source_uid)) {
+            return $this->create404Response("None source page exists with uid `$source_uid`.");
+        }
+
+        $source = null === $source
+            ? $this->getPageRepository()->getRoot($this->getApplication()->getSite())
+            : $source
+        ;
+
+        $this->isGranted('VIEW', $source);
+
+        $children = $this->getPageRepository()->getNotDeletedDescendants(
+            $source,
+            1,
+            false,
+            array('_leftnode' => 'asc'),
+            true,
+            $this->getRequest()->query->get('start'),
+            $this->getRequest()->query->get('limit')
+        );
+
+        return $this->createResponse($this->formatCollection($children));
+    }
+
+    /**
+     * Get page entity by uid
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @param string $uid the unique identifier of the page we want to retrieve
      */
     public function getAction($uid)
     {
@@ -68,19 +111,196 @@ class PageController extends ARestController
 
         $this->isGranted('VIEW', $page);
 
-        $serialized_page = json_decode($page->serialize());
-        $serialized_page->url = $this->getApplication()->getRenderer()->getUri($serialized_page->url);
-        if (null !== $serialized_page->redirect) {
-            $serialized_page->redirect = $this->getApplication()->getRenderer()->getUri($serialized_page->redirect);
+        return $this->createResponse($this->formatItem($page));
+    }
+
+    /**
+     * Create or clone a page entity
+     *
+     * Clone action requirements:
+     *
+     * @Rest\QueryParam(name="source_uid", description="Source uid for cloning", requirements={
+     *     @Assert\Length(min=32, max=32, exactMessage="source_uid must contains 32 characters")
+     * })
+     * @Rest\QueryParam(name="title", description="Cloning page new title", requirements={
+     *     @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
+     * })
+     */
+    public function postAction()
+    {
+        if (0 === count($this->getRequest()->request->all())) {
+            return $this->clonePageAction();
         }
 
-        $defaultmeta = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
-        $serialized_page->metadata = null === $serialized_page->metadata
-            ? $defaultmeta->toArray()
-            : array_merge($defaultmeta->toArray(), $page->getMetadata()->toArray())
-        ;
+        $layout_uid = $this->getRequest()->request->get('layout_uid');
+        if (null === $layout = $this->getLayoutByUid($layout_uid)) {
+            return $this->create404Response("None layout exists with uid `$layout_uid`.");
+        }
 
-        return $this->createResponse(json_encode($serialized_page));
+        $this->isGranted('VIEW', $layout);
+
+        $parent_uid = $this->getRequest()->request->get('parent_uid');
+        if (null === $parent = $this->getPageByUid($parent_uid)) {
+            return $this->create404Response("None page exists with uid `$parent_uid`.");
+        }
+
+        $this->isGranted('EDIT', $parent);
+
+        if (0 === strlen($title = $this->getRequest()->request->get('title', null))) {
+            return $this->create404Response('Page\'s title cannot be empty.');
+        }
+
+        $builder = $this->getApplication()->getContainer()->get('pagebuilder');
+        $builder->setLayout($layout);
+        $builder->setParent($parent);
+        $builder->setRoot($parent->getRoot());
+        $builder->setSite($parent->getSite());
+        $builder->setTitle($title);
+        $builder->setUrl($this->getRequest()->request->get('url'));
+        $builder->setState($this->getRequest()->request->get('state'));
+        $builder->setPublishing(
+            null !== $this->getRequest()->request->get('publishing')
+                ? new \DateTime(date('c', $this->getRequest()->request->get('publishing')))
+                : null
+
+        );
+        $page = $builder->getPage();
+
+        $this->isGranted('CREATE', $page);
+
+        $page->setTarget($this->getRequest()->request->get('target'), $page->getTarget());
+        $page->setRedirect($this->getRequest()->request->get('redirect', null));
+        $page->setAltTitle($this->getRequest()->request->get('alt_title', null));
+        $page->setArchiving(
+            null !== $this->getRequest()->request->get('archiving')
+                ? new \DateTime(date('c', $this->getRequest()->request->get('archiving')))
+                : null
+        );
+
+        $this->getEntityManager()->persist($page);
+        try {
+            $this->getEntityManager()->flush($page);
+            $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
+        } catch (\Exception $e) {
+            return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
+        }
+
+        $response = $this->createResponse('', 201);
+        $response->headers->set(
+            'Location', $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite())
+        );
+
+        return $response;
+    }
+
+    /**
+     * Update page entity with $uid
+     *
+     * @Rest\RequestParam(name="title", description="page new title", requirements={
+     *     @Assert\NotBlank(message="title is required"),
+     *     @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
+     * })
+     * @Rest\RequestParam(name="url", description="page new url", requirements={
+     *     @Assert\NotBlank(message="url is required")
+     * })
+     * @Rest\RequestParam(name="target", description="page new target", requirements={
+     *     @Assert\NotBlank(message="target is required")
+     * })
+     * @Rest\RequestParam(name="layout_uid", description="page new layout", requirements={
+     *     @Assert\NotBlank(message="layout_uid is required")
+     * })
+     * @Rest\RequestParam(name="state", description="page new state", requirements={
+     *     @Assert\NotBlank(message="state is required")
+     * })
+     * @Rest\RequestParam(name="publishing", description="page new publishing", requirements={
+     *     @Assert\Type(type="digit", message="The value should be a positive number")
+     * })
+     * @Rest\RequestParam(name="archiving", description="page new archiving", requirements={
+     *     @Assert\Type(type="digit", message="The value should be a positive number")
+     * })
+     */
+    public function putAction($uid)
+    {
+        if (null === $page = $this->getPageByUid($uid)) {
+            return $this->create404Response("None page exists with uid `$uid`.");
+        }
+
+        $this->isGranted('EDIT', $page);
+
+        $layout_uid = $this->getRequest()->request->get('layout_uid');
+        if (null === $layout = $this->getLayoutByUid($layout_uid)) {
+            return $this->create404Response("None layout exists with uid `$layout_uid`.");
+        }
+
+        $this->isGranted('VIEW', $layout);
+
+        $workflow_uid = $this->getRequest()->request->get('workflow_uid');
+        if (null !== $workflow_uid && null === $workflow = $this->getWorkflowStateByUid($workflow_uid)) {
+            return $this->create404Response("None workflow exists with uid `$workflow_uid`.");
+        }
+        if (null !== $workflow && $workflow->getLayout()->getUid() === $layout->getUid()) {
+            $page->setWorkflowState($workflow);
+        } else {
+            $page->setWorkflowState(null);
+        }
+
+        $page->setLayout($layout);
+        $page->setTitle($this->getRequest()->request->get('title'));
+        $page->setUrl($this->getRequest()->request->get('url'));
+        $page->setTarget($this->getRequest()->request->get('target'));
+        $page->setState($this->getRequest()->request->get('state'));
+        $page->setRedirect($this->getRequest()->request->get('redirect', null));
+        $page->setAltTitle($this->getRequest()->request->get('alt_title', null));
+
+        $publishing = $this->getRequest()->request->get('publishing');
+        $page->setPublishing(null !== $publishing ? new \DateTime(date('c', $publishing)) : null);
+
+        $archiving = $this->getRequest()->request->get('archiving');
+        $page->setArchiving(null !== $archiving ? new \DateTime(date('c', $archiving)) : null);
+
+        if (true === $page->isOnline(true)) {
+            $this->isGranted('PUBLISH', $page);
+        }
+        $this->getEntityManager()->flush($page);
+
+        return $this->createResponse('', 204);
+    }
+
+    /**
+     * Patch of a page entity
+     *
+     * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
+     *     @Assert\NotBlank(message="operations is required")
+     * })
+     */
+    public function patchAction($uid)
+    {
+        if (null === $page = $this->getPageByUid($uid)) {
+            return $this->create404Response("None page exists with uid `$uid`.");
+        }
+
+        $this->isGranted('EDIT', $page);
+
+        $operations = $this->getRequest()->request->get('operations');
+        try {
+            (new OperationSyntaxValidator())->validate($operations);
+        } catch (InvalidOperationSyntaxException $e) {
+            return $this->createResponse('operation invalid syntax: ' . $e->getMessage(), 400);
+        }
+
+        $rest_config = $this->getApplication()->getConfig()->getRestConfig();
+        $entity_patcher = new EntityPatcher(new RightManager(
+            null !== $rest_config ? $rest_config['patcher']['rights'] : array()
+        ));
+        try {
+            $entity_patcher->patch($page, $operations);
+        } catch (UnauthorizedPatchOperationException $e) {
+            return $this->createResponse('Invalid patch operation: ' . $e->getMessage(), 403);
+        }
+
+        $this->getEntityManager()->flush($page);
+
+        return $this->createResponse('', 204);
     }
 
     /**
@@ -132,115 +352,7 @@ class PageController extends ARestController
 
         $this->getEntityManager()->flush($page);
 
-        return $this->createResponse($this->buildLeafJSON($page, 'folder'));
-    }
-
-    /**
-     * Create or clone a page entity
-     *
-     * Clone action requirements:
-     *
-     * @Rest\QueryParam(name="source_uid", description="Source uid for cloning", requirements={
-     *     @Assert\Length(min=32, max=32, exactMessage="source_uid must contains 32 characters")
-     * })
-     * @Rest\QueryParam(name="title", description="Cloning page new title", requirements={
-     *     @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
-     * })
-     */
-    public function postAction()
-    {
-        if (0 === count($this->getRequest()->request->all())) {
-            return $this->clonePageAction();
-        }
-
-        $layout_uid = $this->getRequest()->request->get('layout_uid');
-        if (null === $layout = $this->getLayoutByUid($layout_uid)) {
-            return $this->create404Response("None layout exists with uid `$layout_uid`.");
-        }
-
-        $parent_uid = $this->getRequest()->request->get('parent_uid');
-        if (null === $parent = $this->getPageByUid($parent_uid)) {
-            return $this->create404Response("None page exists with uid `$parent_uid`.");
-        }
-
-        if (0 === strlen($title = $this->getRequest()->request->get('title', null))) {
-            return $this->create404Response('Page\'s title cannot be empty.');
-        }
-
-        $builder = $this->getApplication()->getContainer()->get('pagebuilder');
-        $builder->setLayout($layout);
-        $builder->setParent($parent);
-        $builder->setRoot($parent->getRoot());
-        $builder->setSite($parent->getSite());
-        $builder->setTitle($title);
-        $page = $builder->getPage();
-
-        if (0 < strlen($target = $this->getRequest()->request->get('target', null))) {
-            $page->setTarget($target);
-        }
-
-        if (0 < strlen($redirect = $this->getRequest()->request->get('redirect', null))) {
-            $page->setRedirect($redirect);
-        }
-
-        if (0 < strlen($url = $this->getRequest()->request->get('url', null))) {
-            $page->setUrl($url);
-        }
-
-        if (0 < strlen($alt_title = $this->getRequest()->request->get('alt_title', null))) {
-            $page->setAltTitle($alt_title);
-        }
-
-        $this->getEntityManager()->persist($page);
-        try {
-            $this->getEntityManager()->flush($page);
-            $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
-        } catch (\Exception $e) {
-            return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
-        }
-
-        return $this->createResponse(json_encode(array(
-            'attr'  => json_decode($page->serialize(), true),
-            'data'  => html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8'),
-            'state' => 'closed'
-        )));
-    }
-
-    /**
-     * Patch of a page entity
-     *
-     * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
-     *     @Assert\NotBlank(message="operations is required")
-     * })
-     */
-    public function patchAction($uid)
-    {
-        if (null === $page = $this->getPageByUid($uid)) {
-            return $this->create404Response("None page exists with uid `$uid`.");
-        }
-
-        $this->isGranted('EDIT', $page);
-
-        $operations = $this->getRequest()->request->get('operations');
-        try {
-            (new OperationSyntaxValidator())->validate($operations);
-        } catch (InvalidOperationSyntaxException $e) {
-            return $this->createResponse('operation invalid syntax: ' . $e->getMessage(), 400);
-        }
-
-        $rest_config = $this->getApplication()->getConfig()->getRestConfig();
-        $entity_patcher = new EntityPatcher(new RightManager(
-            null !== $rest_config ? $rest_config['patcher']['rights'] : array()
-        ));
-        try {
-            $entity_patcher->patch($page, $operations);
-        } catch (UnauthorizedPatchOperationException $e) {
-            return $this->createResponse('Invalid patch operation: ' . $e->getMessage(), 403);
-        }
-
-        $this->getEntityManager()->flush($page);
-
-        return $this->createResponse(json_encode(true));
+        return $this->createResponse('', 204);
     }
 
     /**
@@ -309,7 +421,12 @@ class PageController extends ARestController
             return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
         }
 
-        return $this->createResponse($this->buildLeafJSON($new_page, 'leaf'));
+        $response = $this->createResponse('', 201);
+        $response->headers->set(
+            'Location', $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite())
+        );
+
+        return $response;
     }
 
     /**
@@ -337,6 +454,19 @@ class PageController extends ARestController
     }
 
     /**
+     * Getter of workflow state entity by its uid
+     *
+     * @param  string $uid the uid of the requested workflow state
+     *
+     * @return null|BackBuilder\Workflow\State null if none workflow state exists for the provided uid
+     *                                      or the entity workflow state
+     */
+    private function getWorkflowStateByUid($uid)
+    {
+        return $this->getEntityManager()->find('BackBuilder\Workflow\State', $uid);
+    }
+
+    /**
      * Getter for page entity repository
      *
      * @return BackBuilder\NestedNode\Repository\PageRepository
@@ -344,35 +474,5 @@ class PageController extends ARestController
     private function getPageRepository()
     {
         return $this->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
-    }
-
-    /**
-     * [getPageId description]
-     * @param  Page   $page [description]
-     * @return [type]       [description]
-     */
-    private function getPageId(Page $page)
-    {
-        return 'node_' . $page->getUid();
-    }
-
-    /**
-     * [buildLeafJSON description]
-     *
-     * @param  [type] $page [description]
-     * @param  [type] $rel  [description]
-     *
-     * @return [type]       [description]
-     */
-    private function buildLeafJSON($page, $rel)
-    {
-        return json_encode(array(
-            'attr'  => array(
-                'rel' => $rel,
-                'id'  => $this->getPageId($page)
-            ),
-            'data'  => $page->getTitle(),
-            'state' => 'closed'
-        ));
     }
 }

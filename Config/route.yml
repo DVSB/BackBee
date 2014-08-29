@@ -122,6 +122,14 @@ bb.rest.page.get_available_status:
     requirements:
         _method: GET
 
+bb.rest.page.get_collection:
+    pattern: /rest/{version}/pages
+    defaults:
+        _action:     getCollectionAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        _method: GET
+
 bb.rest.page.get:
     pattern: /rest/{version}/pages/{uid}
     defaults:
@@ -131,15 +139,6 @@ bb.rest.page.get:
         uid: \w{32}
         _method: GET
 
-bb.rest.page.move_node:
-    pattern: /rest/{version}/pages/{uid}/node/move
-    defaults:
-        _action:     movePageNodeAction
-        _controller: BackBuilder\Rest\Controller\PageController
-    requirements:
-        uid: \w{32}
-        _method: PUT
-
 bb.rest.page.post:
     pattern: /rest/{version}/pages
     defaults:
@@ -147,6 +146,15 @@ bb.rest.page.post:
         _controller: BackBuilder\Rest\Controller\PageController
     requirements:
         _method: POST
+
+bb.rest.page.put:
+    pattern: /rest/{version}/pages/{uid}
+    defaults:
+        _action:     putAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: PUT
 
 bb.rest.page.patch:
     pattern: /rest/{version}/pages/{uid}
@@ -156,6 +164,15 @@ bb.rest.page.patch:
     requirements:
         uid: \w{32}
         _method: PATCH
+
+bb.rest.page.move_node:
+    pattern: /rest/{version}/pages/{uid}/node/move
+    defaults:
+        _action:     movePageNodeAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: PUT
 
 bb.rest.page.delete:
     pattern: /rest/{version}/pages/{uid}
