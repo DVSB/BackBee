@@ -68,6 +68,12 @@ class BundleLoader
     private $bundles_base_directory;
 
     /**
+     * [$reflection_classes description]
+     * @var [type]
+     */
+    private $reflection_classes;
+
+    /**
      * [__construct description]
      * @param IApplication $application [description]
      */
@@ -76,6 +82,7 @@ class BundleLoader
         $this->application = $application;
         $this->container = $application->getContainer();
         $this->bundles_base_directory = array();
+        $this->reflection_classes = array();
     }
 
     /**
@@ -105,22 +112,19 @@ class BundleLoader
 
     /**
      * [buildBundleBaseDirectoryFromClassname description]
+     *
      * @param  [type] $classname [description]
+     *
      * @return [type]            [description]
      */
     public function buildBundleBaseDirectoryFromClassname($classname)
     {
-        preg_match('#([a-zA-Z]+Bundle)#', $classname, $matches);
-
-        if (0 === count($matches)) {
-            throw new \Exception();
+        if (false === array_key_exists($classname, $this->reflection_classes)) {
+            $this->reflection_classes[$classname] = new \ReflectionClass($classname);
         }
 
-        $base_directory = implode(DIRECTORY_SEPARATOR, array(
-            $this->application->getBaseDir(),
-            BundleInterface::BACKBEE_BUNDLE_DIRECTORY_NAME,
-            $matches[0]
-        ));
+        $base_directory = dirname($this->reflection_classes[$classname]->getFileName());
+
         if (false === is_dir($base_directory)) {
             throw new \Exception();
         }
