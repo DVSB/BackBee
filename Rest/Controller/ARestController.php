@@ -33,6 +33,8 @@ use JMS\Serializer\Serializer,
 
 use BackBuilder\Rest\Exception\ValidationException;
 
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+
 use Symfony\Component\Validator\ConstraintViolationList,
     Symfony\Component\Validator\ConstraintViolation;
 
@@ -70,7 +72,7 @@ abstract class ARestController extends Controller implements IRestController, IF
      * 
      * Implements BackBuilder\Rest\Formatter\IFormatter::formatCollection($collection)
      */
-    public function formatCollection($collection) 
+    public function formatCollection($collection, $format = 'json') 
     {
         $items = array();
         
@@ -88,13 +90,39 @@ abstract class ARestController extends Controller implements IRestController, IF
      * @param mixed $item
      * @return array
      */
-    public function formatItem($item)
+    public function formatItem($item, $format = 'json')
     {
-        // serialize properties with null values
-        $context = new SerializationContext();
-        $context->setSerializeNull(true);
+        $formatted = null;
+        
+        switch ($format) {
+            case 'json':
+                // serialize properties with null values
+                $context = new SerializationContext();
+                $context->setSerializeNull(true);
+                $formatted = $this->getSerializer()->serialize($item, 'json', $context);
+                break;
+            case 'jsonp':
+                $callback = $this->getRequest()->query->get('jsonp.callback', 'JSONP.callback');
+                
+                // validate against XSS
+                $validator = new \JsonpCallbackValidator();
+                if (!$validator->validate($callback)) {
+                    throw new BadRequestHttpException('Invalid JSONP callback value');
+                }
+                
+                
+                $context = new SerializationContext();
+                $context->setSerializeNull(true);
+                $json = $this->getSerializer()->serialize($item, 'json', $context);
+                
+                $formatted = sprintf('/**/%s(%s)', $callback, $json);
+                break;
+            default:
+                // any other format is not supported
+                throw new \InvalidArgumentException(sprintf('Format not supported: %s', $format));
+        }
 
-        return $this->getSerializer()->serialize($item, 'json', $context);
+        return $formatted;
     }
     
     /**
