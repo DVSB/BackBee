@@ -222,7 +222,7 @@ class MetaData implements \IteratorAggregate, \Countable
 
                                 $newcontent = $content;
                                 $m = array();
-                                if (preg_match('/\$([a-z_\/]+)(\[([0-9]+)\]){0,1}/i', $scheme, $m)) {
+                                if (preg_match('/\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}/i', $scheme, $m)) {
                                     if (3 < count($m) && $content instanceof ContentSet && 'ContentSet' === $m[1]) {
                                         $newcontent = $content->item($m[3]);
                                     } elseif (3 < count($m) && $content instanceof ContentSet) {
@@ -239,7 +239,11 @@ class MetaData implements \IteratorAggregate, \Countable
                                         }
                                     } elseif (true === is_object($content) && 1 < count($m)) {
                                         $property = $m[1];
-                                        $newcontent = $content->$property;
+                                        try {
+                                            $newcontent = $content->$property;
+                                        } catch(\Exception $e) {
+                                            $newcontent = new \BackBuilder\ClassContent\Element\text();
+                                        }
                                     }
                                 }
 
