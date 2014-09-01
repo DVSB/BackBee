@@ -81,11 +81,11 @@ class SecurityControllerTest extends TestCase
     }
 
     /**
-     * @covers ::authenticateAction
+     * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      * 
      */
-    public function testAuthenticateAction_bb_area()
+    public function test_firewallAuthenticateAction_bb_area()
     {
         $controller = $this->getController();
         
@@ -95,14 +95,14 @@ class SecurityControllerTest extends TestCase
         $password = 'password123';
         $digest = md5($nonce . $created . md5($password));
         
-        $request = new Request(array(), array(
+        $request = new Request([], array(
             'username' => $username,
             'created' => $created,
             'digest' => $digest,
             'nonce' => $nonce
         ));
         
-        $response = $controller->authenticateAction('bb_area', $request);
+        $response = $controller->firewallAuthenticateAction('bb_area', $request);
         
         $this->assertEquals(200, $response->getStatusCode());
         
@@ -115,10 +115,10 @@ class SecurityControllerTest extends TestCase
      * @expectedException \BackBuilder\Security\Exception\SecurityException
      * @expectedExceptionMessage Request expired
      * 
-     * @covers ::authenticateAction
+     * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function testAuthenticateAction_bb_area_expired()
+    public function test_firewallAuthenticateAction_bb_area_expired()
     {
         $controller = $this->getController();
         
@@ -128,44 +128,44 @@ class SecurityControllerTest extends TestCase
         $password = 'password123';
         $digest = md5($nonce . $created . md5($password));
         
-        $request = new Request(array(), array(
+        $request = new Request([], array(
             'username' => $username,
             'created' => $created,
             'digest' => $digest,
             'nonce' => $nonce
         ));
         
-        $controller->authenticateAction('bb_area', $request);
+        $controller->firewallAuthenticateAction('bb_area', $request);
     }
     
     /**
      * @expectedException \BackBuilder\Security\Exception\SecurityException
      * @expectedExceptionMessage Unknown user
      * 
-     * @covers ::authenticateAction
+     * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function testAuthenticateAction_bb_area_userDoesntExist()
+    public function test_firewallAuthenticateAction_bb_area_userDoesntExist()
     {
         $controller = $this->getController();
         
-        $request = new Request(array(), array(
+        $request = new Request([], array(
             'username' => 'userThatDoesntExist',
             'created' => 'test',
             'digest' => 'test',
             'nonce' => 'test'
         ));
-        $controller->authenticateAction('bb_area', $request);
+        $controller->firewallAuthenticateAction('bb_area', $request);
     }
     
     /**
      * @expectedException \BackBuilder\Security\Exception\SecurityException
      * @expectedExceptionMessage Invalid authentication informations
      * 
-     * @covers ::authenticateAction
+     * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function testAuthenticateAction_bb_area_invalidPassword()
+    public function test_firewallAuthenticateAction_bb_area_invalidPassword()
     {
         $controller = $this->getController();
         
@@ -175,38 +175,38 @@ class SecurityControllerTest extends TestCase
         $password = 'passwordInvalid';
         $digest = md5($nonce . $created . md5($password));
         
-        $request = new Request(array(), array(
+        $request = new Request([], array(
             'username' => $username,
             'created' => $created,
             'digest' => $digest,
             'nonce' => $nonce
         ));
         
-        $controller->authenticateAction('bb_area', $request);
+        $controller->firewallAuthenticateAction('bb_area', $request);
     }
     
     /**
-     * @covers ::authenticateAction
+     * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function testAuthenticateAction_invalidFirewall()
+    public function test_firewallAuthenticateAction_invalidFirewall()
     {
         $controller = $this->getController();
         
-        $response = $controller->authenticateAction('invalidFirewallName', new Request());
+        $response = $controller->firewallAuthenticateAction('invalidFirewallName', new Request());
         
         $this->assertEquals(400, $response->getStatusCode());
     }
     
     /**
-     * @covers ::authenticateAction
+     * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function testAuthenticateAction_firewallWithoutSupportedContexts()
+    public function test_firewallAuthenticateAction_firewallWithoutSupportedContexts()
     {
         $controller = $this->getController();
         
-        $response = $controller->authenticateAction('rest_api_area_test', new Request());
+        $response = $controller->firewallAuthenticateAction('rest_api_area_test', new Request());
         
         $this->assertEquals(400, $response->getStatusCode());
     }

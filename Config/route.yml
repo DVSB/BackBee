@@ -60,6 +60,36 @@ bb.rest.test:
     requirements:
         version: \d
 
+bb.rest.user_get:
+    pattern: /rest/{version}/user/{id}
+    defaults:
+        _action: getAction
+        _controller: BackBuilder\Rest\Controller\UserController
+    requirements:
+        version: \d
+        id: \d
+        _method: GET
+
+bb.rest.security_firewall_autenticate:
+    pattern: /rest/{version}/security/auth/{firewall}
+    defaults:
+        _action: firewallAuthenticateAction
+        _controller: BackBuilder\Rest\Controller\SecurityController
+    requirements:
+        version: \d
+        firewall: "[a-z_-]+"
+        _method: POST
+        
+bb.rest.security_firewall_status:
+    pattern: /rest/{version}/security/auth/{firewall}
+    defaults:
+        _action: firewallStatusAction
+        _controller: BackBuilder\Rest\Controller\SecurityController
+    requirements:
+        version: \d
+        firewall: "[a-z_-]+"
+        _method: GET
+        
 bb.rest.security_session_delete:
     pattern: /rest/{version}/security/session/
     defaults:
