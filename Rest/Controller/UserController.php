@@ -26,8 +26,7 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\ConstraintViolationList,
     Symfony\Component\Validator\ConstraintViolation,
     Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
-    Symfony\Component\Security\Http\SecurityEvents,
-    Symfony\Component\HttpFoundation\JsonResponse;
+    Symfony\Component\Security\Http\SecurityEvents;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -91,7 +90,7 @@ class UserController extends ARestController
             return $this->create404Response(sprintf('User not found with id %d', $id));
         }
 
-        return new Response($this->formatItem($user));
+        return new Response($this->formatItem($user), 200, ['Content-Type' => 'application/json']);
     }
 
     /**
