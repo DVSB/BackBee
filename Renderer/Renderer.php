@@ -136,7 +136,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     private function getRendererAdapterKey(IRendererAdapter $rendererAdapter)
     {
-        $key = explode(DIRECTORY_SEPARATOR, get_class($rendererAdapter));
+        $key = explode(NAMESPACE_SEPARATOR, get_class($rendererAdapter));
 
         return strtolower($key[count($key) - 1]);
     }
@@ -246,6 +246,26 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
+     * Getters of renderer adapter by $key
+     *
+     * @return BackBuilder\Renderer\IRendererAdapter
+     */
+    public function getAdapter($key)
+    {
+        return $this->rendererAdapters->get($key);
+    }
+
+    /**
+     * Getters of renderer adapters
+     *
+     * @return array<BackBuilder\Renderer\IRendererAdapter>
+     */
+    public function getAdapters()
+    {
+        return $this->rendererAdapters->all();
+    }
+
+    /**
      * @see BackBuilder\Renderer\IRenderer::render()
      */
     public function render(IRenderable $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = false)
@@ -253,7 +273,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         if (null === $obj) {
             return null;
         }
-        
+
         $bbapp = $this->getApplication();
         if (false === $obj->isRenderable() && null === $bbapp->getBBUserToken()) {
             return null;
