@@ -29,6 +29,7 @@ use BackBuilder\Event\Event;
 use BackBuilder\Util\Resolver\BundleConfigDirectory;
 use BackBuilder\Util\Resolver\ConfigDirectory;
 
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 
 /**
@@ -299,11 +300,23 @@ class Configurator
     private function getRegistryConfig($bundle_id)
     {
         $registry = null;
-        if(null !== $em = $this->application->getEntityManager()) {
-            $registry = $em->getRepository('BackBuilder\Bundle\Registry')->findOneBy(array(
-                'key' => $bundle_id,
-                'scope' => 'BUNDLE_CONFIG.' . $this->context . '.' . $this->environment
-            ));
+
+        try {
+            if (null !== $em = $this->application->getEntityManager()) {
+                $registry = $em->getRepository('BackBuilder\Bundle\Registry')->findOneBy(array(
+                    'key' => $bundle_id,
+                    'scope' => 'BUNDLE_CONFIG.' . $this->context . '.' . $this->environment
+                ));
+            }
+        } catch (DBALException $e) {
+            $expected_error = 1 === preg_match(
+                '#SQLSTATE\[42S02\]: Base table or view not found: 1146 Table \'(\w+).registry\' doesn\'t exist#',
+                $e->getMessage()
+            ); // expected error is if we try to get overrided config in registry on application installation process
+
+            if (false === $expected_error) {
+                throw $e;
+            }
         }
 
         return $registry;
