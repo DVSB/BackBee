@@ -32,10 +32,11 @@ use Symfony\Component\HttpFoundation\Response,
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
-use BackBuilder\Security\Token\UsernamePasswordToken;
-
+use BackBuilder\Security\Acl\Permission\MaskBuilder;
 use BackBuilder\Security\User;
 use BackBuilder\Rest\Exception\ValidationException;
+
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * User Controller
@@ -65,6 +66,10 @@ class UserController extends ARestController
     public function getCollectionAction(Request $request)
     {
         // TODO
+        
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to view users');
+        }
 
         return array();
     }
@@ -76,6 +81,10 @@ class UserController extends ARestController
      */
     public function getAction($id)
     {
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to view users');
+        }
+        
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
         if(!$user) {
@@ -92,10 +101,18 @@ class UserController extends ARestController
      */
     public function deleteAction($id)
     {
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to view users');
+        }
+        
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
         if(!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
+        }
+        
+        if(!$this->isGranted(MaskBuilder::MASK_DELETE, $user)) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
         $this->getEntityManager()->remove($user);
@@ -122,10 +139,18 @@ class UserController extends ARestController
      */
     public function putAction($id, Request $request)
     {
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to view users');
+        }
+        
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
         if(!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
+        }
+        
+        if(!$this->isGranted(MaskBuilder::MASK_EDIT, $user)) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
         $this->deserializeEntity($request->request->all(), $user);
@@ -154,10 +179,15 @@ class UserController extends ARestController
      * @Rest\RequestParam(name = "lastname", requirements = {
      *  @Assert\NotBlank(message="Last Name is required")
      * })
+     * 
      *
      */
     public function postAction(Request $request)
     {
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to view users');
+        }
+        
         $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\User')->findBy(array('_login' => $request->request->get('login')));
 
         if($userExists) {
@@ -165,8 +195,13 @@ class UserController extends ARestController
                 new ConstraintViolation('User with that login already exists', 'User with that login already exists', array(), 'login', 'login', $request->request->get('login'))
             )));
         }
-
+        
         $user = new User();
+        
+        if(!$this->isGranted(MaskBuilder::MASK_CREATE, $user)) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
+        }
+        
         $user = $this->deserializeEntity($request->request->all(), $user);
 
         // handle the password
