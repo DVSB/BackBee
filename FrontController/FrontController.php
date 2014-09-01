@@ -646,7 +646,6 @@ class FrontController implements HttpKernelInterface
                     $matches['_controller'] = $this;
                 }
 
-
                 $this->getRequest()->attributes->add($matches);
             }
 

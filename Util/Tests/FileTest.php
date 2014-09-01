@@ -15,22 +15,18 @@ class FileTest extends \PHPUnit_Framework_TestCase {
      */
     public function testRealpath() {
         $vfs_dir = vfsStream::setup('dircopy', 0777, array('copyfile' => 'copy data'));
-        $path = vfsStream::url('dircopy');
 
         $this->assertEquals(__DIR__ . DIRECTORY_SEPARATOR . "FileTest.php", File::realpath(__DIR__ . DIRECTORY_SEPARATOR . "/FileTest.php"));
         $this->assertEquals(false, File::realpath(DIRECTORY_SEPARATOR . "FileTest.php"));
-        $this->assertEquals("vfs://dircopy", File::realpath($path));
 
         $path1 = vfsStream::url('dircopy' . DIRECTORY_SEPARATOR . 'copyfile');
         $this->assertEquals("vfs://dircopy" . DIRECTORY_SEPARATOR . "copyfile", File::realpath($path1));
 
 
         $vfs_dir = vfsStream::setup('dircopy', 0000, array('copyfile' => 'copy data'));
-        $path = vfsStream::url('dircopy');
 
         $this->assertEquals(__DIR__ . DIRECTORY_SEPARATOR . "FileTest.php", File::realpath(__DIR__ . DIRECTORY_SEPARATOR . "FileTest.php"));
         $this->assertEquals(false, File::realpath(DIRECTORY_SEPARATOR . "FileTest.php"));
-        $this->assertEquals("vfs://dircopy", File::realpath($path));
 
         $path1 = vfsStream::url('dircopy' . DIRECTORY_SEPARATOR . 'copyfile');
         $this->assertEquals("vfs://dircopy" . DIRECTORY_SEPARATOR . "copyfile", File::realpath($path1));

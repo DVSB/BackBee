@@ -21,14 +21,14 @@
 
 namespace BackBuilder\NestedNode\Repository;
 
-use BackBuilder\NestedNode\Page,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\ContentSet,
-    BackBuilder\NestedNode\ANestedNode,
-    BackBuilder\Security\Token\BBUserToken,
-    BackBuilder\Site\Layout,
-    BackBuilder\Site\Site,
-    BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Security\Token\BBUserToken;
+use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -355,7 +355,7 @@ class PageRepository extends NestedNodeRepository
                 ->andSiteIs($site)
                 ->andParentIs(null)
                 ->setMaxResults(1);
-        
+
         if (0 < count($restrictedStates)) {
             $q->andStateIsIn($restrictedStates);
         }
@@ -446,11 +446,12 @@ class PageRepository extends NestedNodeRepository
     public function toTrash(Page $page)
     {
         return $this->createQueryBuilder('p')
-                        ->update()
-                        ->set('p._state', Page::STATE_DELETED)
-                        ->andIsDescendantOf($page)
-                        ->getQuery()
-                        ->execute();
+            ->update()
+            ->set('p._state', Page::STATE_DELETED)
+            ->andIsDescendantOf($page)
+            ->getQuery()
+            ->execute()
+        ;
     }
 
     /**
@@ -462,11 +463,11 @@ class PageRepository extends NestedNodeRepository
     public function likeAPage($wordsSearch = "", array $limit = array(0, 10))
     {
         $limit = array_replace(array(0, 10), $limit);
-        
+
         if ("" === $wordsSearch) {
             return null;
         }
-        
+
         return $this->createQueryBuilder('p')
                 ->andTitleIsLike($wordsSearch)
                 ->setFirstResult($limit[0])
