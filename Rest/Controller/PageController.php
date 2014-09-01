@@ -31,6 +31,9 @@ use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
 use BackBuilder\Rest\Patcher\RightManager;
 
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\ConstraintViolationList;
 
@@ -74,14 +77,11 @@ class PageController extends ARestController
     {
         $source_uid = $this->getRequest()->query->get('source_uid', null);
         $source = null;
-        if (null !== $source_uid && null === $source = $this->getPageByUid($source_uid)) {
-            return $this->create404Response("None source page exists with uid `$source_uid`.");
+        if (null !== $source_uid) {
+            $source = $this->getPageByUid($source_uid);
+        } else {
+            $source = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
         }
-
-        $source = null === $source
-            ? $this->getPageRepository()->getRoot($this->getApplication()->getSite())
-            : $source
-        ;
 
         $this->isGranted('VIEW', $source);
 
@@ -105,10 +105,7 @@ class PageController extends ARestController
      */
     public function getAction($uid)
     {
-        if (null === $page = $this->getPageByUid($uid)) {
-            return $this->create404Response("None page exists with uid `$uid`.");
-        }
-
+        $page = $this->getPageByUid($uid);
         $this->isGranted('VIEW', $page);
 
         return $this->createResponse($this->formatItem($page));
@@ -132,22 +129,14 @@ class PageController extends ARestController
             return $this->clonePageAction();
         }
 
-        $layout_uid = $this->getRequest()->request->get('layout_uid');
-        if (null === $layout = $this->getLayoutByUid($layout_uid)) {
-            return $this->create404Response("None layout exists with uid `$layout_uid`.");
-        }
-
+        $layout = $this->getLayoutByUid($this->getRequest()->request->get('layout_uid'));
         $this->isGranted('VIEW', $layout);
 
-        $parent_uid = $this->getRequest()->request->get('parent_uid');
-        if (null === $parent = $this->getPageByUid($parent_uid)) {
-            return $this->create404Response("None page exists with uid `$parent_uid`.");
-        }
-
+        $parent = $this->getPageByUid($this->getRequest()->request->get('parent_uid'));
         $this->isGranted('EDIT', $parent);
 
         if (0 === strlen($title = $this->getRequest()->request->get('title', null))) {
-            return $this->create404Response('Page\'s title cannot be empty.');
+            throw new NotFoundHttpException('Page\'s title cannot be empty.');
         }
 
         $builder = $this->getApplication()->getContainer()->get('pagebuilder');
@@ -156,26 +145,24 @@ class PageController extends ARestController
         $builder->setRoot($parent->getRoot());
         $builder->setSite($parent->getSite());
         $builder->setTitle($title);
-        $builder->setUrl($this->getRequest()->request->get('url'));
+        $builder->setUrl($this->getRequest()->request->get('url', null));
         $builder->setState($this->getRequest()->request->get('state'));
+        $builder->setTarget($this->getRequest()->request->get('target'));
+        $builder->setRedirect($this->getRequest()->request->get('redirect'));
+        $builder->setAltTitle($this->getRequest()->request->get('alt_title'));
         $builder->setPublishing(
             null !== $this->getRequest()->request->get('publishing')
                 ? new \DateTime(date('c', $this->getRequest()->request->get('publishing')))
                 : null
-
         );
-        $page = $builder->getPage();
-
-        $this->isGranted('CREATE', $page);
-
-        $page->setTarget($this->getRequest()->request->get('target'), $page->getTarget());
-        $page->setRedirect($this->getRequest()->request->get('redirect', null));
-        $page->setAltTitle($this->getRequest()->request->get('alt_title', null));
-        $page->setArchiving(
+        $builder->setArchiving(
             null !== $this->getRequest()->request->get('archiving')
                 ? new \DateTime(date('c', $this->getRequest()->request->get('archiving')))
                 : null
         );
+
+        $page = $builder->getPage();
+        $this->isGranted('CREATE', $page);
 
         $this->getEntityManager()->persist($page);
         try {
@@ -221,17 +208,10 @@ class PageController extends ARestController
      */
     public function putAction($uid)
     {
-        if (null === $page = $this->getPageByUid($uid)) {
-            return $this->create404Response("None page exists with uid `$uid`.");
-        }
-
+        $page = $this->getPageByUid($uid);
         $this->isGranted('EDIT', $page);
 
-        $layout_uid = $this->getRequest()->request->get('layout_uid');
-        if (null === $layout = $this->getLayoutByUid($layout_uid)) {
-            return $this->create404Response("None layout exists with uid `$layout_uid`.");
-        }
-
+        $layout = $this->getLayoutByUid($this->getRequest()->request->get('layout_uid'));
         $this->isGranted('VIEW', $layout);
 
         $workflow_uid = $this->getRequest()->request->get('workflow_uid');
@@ -275,17 +255,14 @@ class PageController extends ARestController
      */
     public function patchAction($uid)
     {
-        if (null === $page = $this->getPageByUid($uid)) {
-            return $this->create404Response("None page exists with uid `$uid`.");
-        }
-
+        $page = $this->getPageByUid($uid);
         $this->isGranted('EDIT', $page);
 
         $operations = $this->getRequest()->request->get('operations');
         try {
             (new OperationSyntaxValidator())->validate($operations);
         } catch (InvalidOperationSyntaxException $e) {
-            return $this->createResponse('operation invalid syntax: ' . $e->getMessage(), 400);
+            throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
         }
 
         $rest_config = $this->getApplication()->getConfig()->getRestConfig();
@@ -295,7 +272,7 @@ class PageController extends ARestController
         try {
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
-            return $this->createResponse('Invalid patch operation: ' . $e->getMessage(), 403);
+            throw new AccessDeniedHttpException('Invalid patch operation: ' . $e->getMessage());
         }
 
         $this->getEntityManager()->flush($page);
@@ -316,38 +293,33 @@ class PageController extends ARestController
      */
     public function movePageNodeAction($uid)
     {
-        if (null === $page = $this->getPageByUid($uid)) {
-            return $this->create404Response("None page exists with uid `$uid`.");
-        }
+        $page = $this->getPageByUid($uid);
 
         if (true === $page->isRoot()) {
-            return $this->createResponse('Cannot move root node of a site.', 403);
+            throw new AccessDeniedHttpException('Cannot move root node of a site.');
         }
 
-        $parent_uid = $this->getRequest()->request->get('parent_uid');
-        if (null === $parent = $this->getPageByUid($parent_uid)) {
-            return $this->create404Response("None page exists with uid (parent_uid: `$parent_uid`).");
-        }
+        $parent = $this->getPageByUid($this->getRequest()->request->get('parent_uid'));
 
         $this->isGranted('EDIT', $page); // user must have edit permission on page
-        $this->isGranted('EDIT', $page->getParent()); // user must have edit permission on new parent page
+        $this->isGranted('EDIT', $parent); // user must have edit permission on new parent page
 
         if (true === $page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page); // user must have publish permission on the page
         }
 
         try {
-            if (null === $next = $this->getPageByUid($this->getRequest()->request->get('next_uid', ''))) {
+            if (null === $next = $this->getPageByUid($this->getRequest()->request->get('next_uid', ''), false)) {
                 $this->getPageRepository()->moveAsLastChildOf($page, $parent);
             } else {
                 if (false === $next->getParent()->equals($parent)) {
-                    return $this->createResponse('Next node must have the same parent node.', 403);
+                    throw new AccessDeniedHttpException('Next node must have the same parent node.');
                 }
 
                 $this->getPageRepository()->moveAsPrevSiblingOf($page, $next);
             }
         } catch (InvalidArgumentException $e) {
-            return $this->createResponse('Invalid node move action: ' . $e->getMessage(), 403);
+            throw new AccessDeniedHttpException('Invalid node move action: ' . $e->getMessage());
         }
 
         $this->getEntityManager()->flush($page);
@@ -364,12 +336,10 @@ class PageController extends ARestController
      */
     public function deleteAction($uid)
     {
-        if (null === $page = $this->getPageByUid($uid)) {
-            return $this->create404Response("None page exists with uid `$uid`.");
-        }
+        $page = $this->getPageByUid($uid);
 
         if (true === $page->isRoot()) {
-            return $this->createResponse('Cannot remove root page of a site.', 403);
+            throw new AccessDeniedHttpException('Cannot remove root page of a site.');
         }
 
         $this->isGranted('EDIT', $page->getParent()); // user must have edit permission on parent
@@ -392,17 +362,15 @@ class PageController extends ARestController
     {
         $source_uid = $this->getRequest()->query->get('source_uid', null);
         if (null === $source_uid) {
-            return $this->createResponse('`source_uid` query parameter is missing.', 400);
+            throw new BadRequestHttpException('`source_uid` query parameter is missing.');
         }
 
         $title = $this->getRequest()->query->get('title', null);
         if (null === $title) {
-            return $this->createResponse('`title` query parameter is missing.', 400);
+            throw new BadRequestHttpException('`title` query parameter is missing.');
         }
 
-        if (null === $page = $this->getPageByUid($source_uid)) {
-            return $this->create404Response("None page exists with uid `$uid`.");
-        }
+        $page = $this->getPageByUid($source_uid);
 
         $this->isGranted('VIEW', $page->getLayout()); // user must have view permission on choosen layout
         $this->isGranted('CREATE', $page); // user must have create permission on page
@@ -436,9 +404,16 @@ class PageController extends ARestController
      *
      * @return null|BackBuilder\NestedNode\Page null if none page exists for the provided uid or the entity page
      */
-    private function getPageByUid($uid)
+    private function getPageByUid($uid, $throw_exception = true)
     {
-        return $this->getEntityManager()->find('BackBuilder\NestedNode\Page', $uid);
+        if (
+            null === ($page = $this->getEntityManager()->find('BackBuilder\NestedNode\Page', $uid))
+            && true === $throw_exception
+        ) {
+            throw new NotFoundHttpException("None page exists with uid `$uid`.");
+        }
+
+        return $page;
     }
 
     /**
@@ -450,7 +425,11 @@ class PageController extends ARestController
      */
     private function getLayoutByUid($uid)
     {
-        return $this->getEntityManager()->find('BackBuilder\Site\Layout', $uid);
+        if (null === $layout = $this->getEntityManager()->find('BackBuilder\Site\Layout', $uid)) {
+            throw new NotFoundHttpException("None layout exists with uid `$uid`.");
+        }
+
+        return $layout;
     }
 
     /**
