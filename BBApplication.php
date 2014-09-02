@@ -20,38 +20,28 @@ namespace BackBuilder;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\AutoLoader\AutoLoader;
-use BackBuilder\Bundle\BundleLoader;
-use BackBuilder\Config\Config;
+use BackBuilder\Console\Console;
 use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\Doctrine\Registry as DoctrineRegistry;
 use BackBuilder\Event\Event;
 use BackBuilder\Event\Listener\DoctrineListener;
 use BackBuilder\Exception\BBException;
 use BackBuilder\Exception\UnknownContextException;
+use BackBuilder\NestedNode\Repository\NestedNodeRepository;
 use BackBuilder\Site\Site;
 use BackBuilder\Theme\Theme;
 use BackBuilder\Util\File;
-use BackBuilder\Bundle\ABundle;
-use BackBuilder\Console\Console;
-use BackBuilder\NestedNode\Repository\NestedNodeRepository;
-use BackBuilder\Doctrine\Registry as DoctrineRegistry;
 
 use Doctrine\Common\EventManager;
-use Doctrine\ORM\Configuration;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\AnnotationReader;
 
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\Validation;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -314,6 +304,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
         $this->getTheme()->init(); // 30 ms
+
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
 
