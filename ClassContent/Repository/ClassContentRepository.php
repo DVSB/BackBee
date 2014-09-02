@@ -638,17 +638,19 @@ class ClassContentRepository extends EntityRepository
         try {
             $q = $this->createQueryBuilder('c');
 
-            foreach ($classnames as $classname)
+            foreach ($classnames as $classname) {
                 $q->orWhere('c INSTANCE OF ' . $classname);
+            }
 
             $q->andWhere('c._mainnode = :node')
-                    ->orderby('c._modified', 'desc')
-                    ->setMaxResults(1)
-                    ->setParameters(array('node' => $page));
+                ->orderby('c._modified', 'desc')
+                ->setMaxResults(1)
+                ->setParameters(array('node' => $page))
+            ;
 
             $entity = $q->getQuery()->getSingleResult();
         } catch (\Exception $e) {
-            $entity = NULL;
+            $entity = null;
         }
 
         return $entity;
