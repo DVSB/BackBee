@@ -20,9 +20,6 @@ namespace BackBuilder;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder;
-
-
 use BackBuilder\AutoLoader\AutoLoader;
 use BackBuilder\Bundle\BundleLoader;
 use BackBuilder\Config\Config;
@@ -56,7 +53,6 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Finder\Finder;
-
 
 /**
  * The main BackBuilder5 application
@@ -120,6 +116,13 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     private $_is_restored;
 
     /**
+     * [$dump_datas description]
+     *
+     * @var array
+     */
+    private $dump_datas;
+
+    /**
      * @param string $context
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
@@ -132,11 +135,11 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
         $this->_is_restored = false;
-
         $this->_environment = null !== $environment && true === is_string($environment)
             ? $environment
             : self::DEFAULT_ENVIRONMENT
         ;
+        $this->dump_datas = array();
 
         $this->_initAnnotationReader();
         $this->_initContainer();
@@ -404,7 +407,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function hasContext()
     {
-        return (null !== $this->_context && 'default' != $this->_context);
+        return (null !== $this->_context && self::DEFAULT_CONTEXT !== $this->_context);
     }
 
     /**
@@ -947,10 +950,10 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function dump(array $options = array())
     {
-        return array(
+        return array_merge($this->dump_datas, array(
             'classcontent_directories' => $this->_classcontentdir,
             'resources_directories'    => $this->_resourcedir
-        );
+        ));
     }
 
     /**
@@ -963,6 +966,15 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     {
         $this->_classcontentdir = $dump['classcontent_directories'];
         $this->_resourcedir = $dump['resources_directories'];
+
+        if (true === isset($dump['date_timezone'])) {
+            date_default_timezone_set($dump['date_timezone']);
+        }
+
+        if (true === isset($dump['locale'])) {
+            setLocale(LC_ALL, $dump['locale']);
+        }
+
         $this->_is_restored = true;
     }
 
@@ -986,13 +998,24 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         return $this;
     }
 
+    /**
+     * [_initEnvVariables description]
+     *
+     * @return [type] [description]
+     */
     private function _initEnvVariables()
     {
+        if (true === $this->isRestored()) {
+            return $this;
+        }
+
         $date_config = $this->getConfig()->getDateConfig();
         if (false !== $date_config && true === isset($date_config['timezone'])) {
             if (false === date_default_timezone_set($date_config['timezone'])) {
                 throw new \Exception(sprintf('Unabled to set default timezone (:%s)', $date_config['timezone']));
             }
+
+            $this->dump_datas['date_timezone'] = $date_config['timezone'];
         }
 
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
@@ -1000,8 +1023,12 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 if (false === setLocale(LC_ALL, $encoding['locale'])) {
                     throw new \Exception(sprintf('Unabled to setLocal with locale %s', $encoding['locale']));
                 }
+
+                $this->dump_datas['locale'] = $encoding['locale'];
             }
         }
+
+        return $this;
     }
 
     /**
@@ -1009,8 +1036,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     private function _initAutoloader()
     {
-        $this->getLogging();
-        $this->getAutoloader()->setEventDispatcher($this->getEventDispatcher());
         if (true === $this->getAutoloader()->isRestored()) {
             return $this;
         }
@@ -1149,7 +1174,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         }
 
         // init NestedNode config
-        if($this->getConfig()->getSection('nestednode')) {
+        if ($this->getConfig()->getSection('nestednode')) {
             NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));
         }
 
