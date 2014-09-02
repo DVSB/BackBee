@@ -213,7 +213,11 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function getAdapterByExt($ext)
     {
-        return $this->determineWhichAdapterToUse('.' . $ext);
+        if (null === $adapter = $this->determineWhichAdapterToUse('.' . $ext)) {
+            throw new RendererException("Unable to find adapter for '.$ext'.", RendererException::SCRIPTFILE_ERROR);
+        }
+
+        return $adapter;
     }
 
     /**
