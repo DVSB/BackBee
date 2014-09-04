@@ -80,7 +80,7 @@ class ARestControllerTest extends TestCase
     {
         $arrayCollection = [new MockUser()];
         
-        $serialized = $this->getController()->formatCollection($arrayCollection);
+        $serialized = $this->getController()->formatCollection($arrayCollection, 'json');
         
         $this->assertEquals([[
             'id' => 1,
@@ -94,12 +94,27 @@ class ARestControllerTest extends TestCase
      */
     public function test_formatItem()
     {
-        $serialized = $this->getController()->formatItem(new MockUser());
-
+        $json = $this->getController()->formatItem(new MockUser(), 'json');
         $this->assertEquals([
             'id' => 1,
             'login' => 'userLogin'
-        ], json_decode($serialized, true));
+        ], json_decode($json, true));
+        
+        $this->getController()->getRequest()->query->set('jsonp.callback', 'JSONP.callback');
+        $jsonp = $this->getController()->formatItem(new MockUser(), 'jsonp');
+        
+        $this->assertEquals('/**/JSONP.callback(' . json_encode(['id' => 1,'login' => 'userLogin']) . ')', $jsonp);
+    }
+    
+    /**
+     * @covers ::formatItem
+     * @covers ::getSerializer()
+     * @expectedException \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
+     */
+    public function test_formatItem_jsonpXssAttack()
+    {
+        $this->getController()->getRequest()->query->set('jsonp.callback', '(function xss(x){evil()})');
+        $this->getController()->formatItem(new MockUser(), 'jsonp');
     }
     
     /**

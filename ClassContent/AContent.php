@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\ClassContent;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,12 +20,13 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent;
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\Renderer\IRenderable;
+use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
+use BackBuilder\Util\Parameter;
 
-use BackBuilder\Util\Parameter,
-    BackBuilder\Renderer\IRenderable,
-    BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
 use Symfony\Component\Security\Core\Util\ClassUtils;
+
 
 /**
  * Abstract class for every content and its revisions in BackBuilder
@@ -374,23 +376,58 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
         if (null === $var) {
             $this->_parameters = $values;
         } else {
-            if (null !== $values) {
-                if (null !== $type) {
-                    $values = array($type => $values);
-                } elseif (false === is_array($values)) {
-                    $values = array($values);
+            $paths = explode(':', $var);
+            if (1 < count($paths)) {
+                $this->setParameterRecursively($paths, $values, $type);
+            } else {
+                if (null !== $values) {
+                    if (null !== $type) {
+                        $values = array($type => $values);
+                    } elseif (false === is_array($values)) {
+                        $values = array($values);
+                    }
+
+                    // A surveiller cette partie pour les revisions
+                    if (true === is_array($this->_parameters) && true === array_key_exists($var, $this->_parameters) && true === is_array($this->_parameters[$var])) {
+                        $values = array_replace_recursive($this->_parameters[$var], $values);
+                    }
                 }
 
-                // A surveiller cette partie pour les revisions
-                if (true === is_array($this->_parameters) && true === array_key_exists($var, $this->_parameters) && true === is_array($this->_parameters[$var])) {
-                    $values = array_replace_recursive($this->_parameters[$var], $values);
-                }
+                $this->_parameters[$var] = $values;
             }
-
-            $this->_parameters[$var] = $values;
         }
 
         return $this->_getContentInstance();
+    }
+
+    /**
+     * Setters of parameters with the ':' syntax
+     *
+     * @param array  $paths
+     * @param mixed  $values new value to set
+     * @param string $type   type of the parameter, can be null
+     */
+    private function setParameterRecursively(array $paths, $value, $type)
+    {
+        if (null !== $type) {
+            $path = array_shift($paths);
+            array_unshift($paths, $type);
+            array_unshift($paths, $path);
+            unset($path);
+        }
+
+        $target = &$this->_parameters;
+        foreach ($paths as $path) {
+            if (false === array_key_exists($path, $target)) {
+                throw new InvalidArgumentException(
+                    'Invalid path provided for setting parameter value: ' . implode(':', $paths)
+                );
+            }
+
+            $target = &$target[$path];
+        }
+
+        $target = $value;
     }
 
     /**

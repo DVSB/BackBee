@@ -162,6 +162,7 @@ class PageController extends ARestController
         );
 
         $page = $builder->getPage();
+        $this->trySetPageWorkflowState($page, $this->getRequest()->request->get('workflow_uid'));
         $this->isGranted('CREATE', $page);
 
         $this->getEntityManager()->persist($page);
@@ -214,17 +215,8 @@ class PageController extends ARestController
         $layout = $this->getLayoutByUid($this->getRequest()->request->get('layout_uid'));
         $this->isGranted('VIEW', $layout);
 
-        $workflow_uid = $this->getRequest()->request->get('workflow_uid');
-        if (null !== $workflow_uid && null === $workflow = $this->getWorkflowStateByUid($workflow_uid)) {
-            return $this->create404Response("None workflow exists with uid `$workflow_uid`.");
-        }
-        if (null !== $workflow && $workflow->getLayout()->getUid() === $layout->getUid()) {
-            $page->setWorkflowState($workflow);
-        } else {
-            $page->setWorkflowState(null);
-        }
-
         $page->setLayout($layout);
+        $this->trySetPageWorkflowState($page, $this->getRequest()->request->get('workflow_uid'));
         $page->setTitle($this->getRequest()->request->get('title'));
         $page->setUrl($this->getRequest()->request->get('url'));
         $page->setTarget($this->getRequest()->request->get('target'));
@@ -241,6 +233,7 @@ class PageController extends ARestController
         if (true === $page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page);
         }
+
         $this->getEntityManager()->flush($page);
 
         return $this->createResponse('', 204);
@@ -453,5 +446,25 @@ class PageController extends ARestController
     private function getPageRepository()
     {
         return $this->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
+    }
+
+    /**
+     * [trySetPageWorkflowState description]
+     * @param  Page   $page               [description]
+     * @param  [type] $workflow_state_uid [description]
+     * @return [type]                     [description]
+     */
+    private function trySetPageWorkflowState(Page $page, $workflow_uid)
+    {
+        $page->setWorkflowState(null);
+        if (null !== $workflow_uid) {
+            if (null === $workflow = $this->getWorkflowStateByUid($workflow_uid)) {
+                return $this->create404Response("None workflow exists with uid `$workflow_uid`.");
+            }
+
+            if (null === $workflow->getLayout() || $workflow->getLayout()->getUid() === $page->getLayout()->getUid()) {
+                $page->setWorkflowState($workflow);
+            }
+        }
     }
 }

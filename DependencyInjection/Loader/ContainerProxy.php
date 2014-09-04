@@ -53,13 +53,6 @@ class ContainerProxy extends Container
     private $raw_definitions_id;
 
     /**
-     * raw service dump provided by container dump (key: services_dump)
-     *
-     * @var array
-     */
-    private $services_dump;
-
-    /**
      * shows if the container has been compiled before being dump or not
      *
      * @var boolean
@@ -71,14 +64,20 @@ class ContainerProxy extends Container
      *
      * @param array $container_dump the container dump from where we can restore entirely the container
      */
-    public function __construct(array $container_dump)
+    public function init(array $container_dump)
     {
-        parent::__construct();
-
         $this->raw_definitions = $container_dump['services'];
-        $this->getParameterBag()->add($container_dump['parameters']);
+
+        if (true === isset($container_dump['parameters'])) {
+            $this->getParameterBag()->add($container_dump['parameters']);
+        }
+
         $this->raw_definitions_id = array_keys($this->raw_definitions);
-        $this->addAliases($container_dump['aliases']);
+
+        if (true === isset($container_dump['aliases'])) {
+            $this->addAliases($container_dump['aliases']);
+        }
+
         $this->already_compiled = $container_dump['is_compiled'];
     }
 
@@ -90,16 +89,6 @@ class ContainerProxy extends Container
     public function isCompiled()
     {
         return $this->already_compiled;
-    }
-
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::get
-     */
-    public function get($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)
-    {
-        $this->tryLoadDefinitionFromRaw($id);
-
-        return parent::get($id, $invalid_behavior);
     }
 
     /**
@@ -128,16 +117,6 @@ class ContainerProxy extends Container
         }
 
         parent::set($id, $service, $scope);
-    }
-
-    /**
-     * @see Symfony\Component\DependencyInjection\ContainerBuilder::has
-     */
-    public function has($id)
-    {
-        $this->tryLoadDefinitionFromRaw($id);
-
-        return parent::has($id);
     }
 
     /**
