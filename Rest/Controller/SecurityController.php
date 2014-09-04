@@ -22,6 +22,7 @@
 namespace BackBuilder\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Response,
+    Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Validator\ConstraintViolationList;
 
@@ -60,7 +61,7 @@ class SecurityController extends ARestController
      * })
      * 
      */
-    public function authenticateAction($firewall, Request $request) 
+    public function firewallAuthenticateAction($firewall, Request $request) 
     {
         $contexts = $this->getSecurityContextConfig($firewall);
         
@@ -78,7 +79,7 @@ class SecurityController extends ARestController
             return $response;
         }
         
-        $response = new Response();
+        $response = new JsonResponse();
         
         if(in_array('bb_auth', $contexts)) {
             $username = $request->request->get('username');
@@ -95,11 +96,14 @@ class SecurityController extends ARestController
             $authProvider = $securityContext->getAuthProvider('bb_auth');
             
 
-            $authProvider->authenticate($token);
+            $tokenAuthenticated = $authProvider->authenticate($token);
 
-            $response->setContent(json_encode(array(
-                'nonce' => $nonce
-            )));
+            $response->setContent(json_encode([
+                'nonce' => $nonce,
+                'user' => [
+                    'id' => $tokenAuthenticated->getUser()->getId()
+                ]
+            ]));
             
         }
         
@@ -121,7 +125,7 @@ class SecurityController extends ARestController
         
         $firewallConfig = $securityConfig['firewalls'][$firewall];
         
-        $allowedContexts = array('bb_auth');
+        $allowedContexts = ['bb_auth'];
         $contexts = array_intersect(array_keys($firewallConfig), $allowedContexts);
         
         return $contexts;

@@ -209,7 +209,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      */
     public function getClassProxy()
     {
-        return '\BackBuilder\Event\DispatcherProxy';
+        return 'BackBuilder\Event\DispatcherProxy';
     }
 
     /**

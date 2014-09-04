@@ -38,8 +38,6 @@ interface BundleInterface extends IObjectIdentifiable
     const BUNDLE_SERVICE_ID_PATTERN = 'bundle.%bundle_name%bundle';
     const CONFIG_SERVICE_ID_PATTERN = 'bundle.%bundle_id%.config';
 
-    const BACKBEE_BUNDLE_DIRECTORY_NAME = 'bundle';
-
     /**
      * Config directories names
      */

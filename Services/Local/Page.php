@@ -21,11 +21,11 @@
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Exception\InvalidArgumentException,
-    BackBuilder\MetaData\MetaDataBag,
-    BackBuilder\NestedNode\Page as NestedPage,
-    BackBuilder\Site\Layout as SiteLayout;
+use BackBuilder\BBApplication;
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\MetaData\MetaDataBag;
+use BackBuilder\NestedNode\Page as NestedPage;
+use BackBuilder\Site\Layout as SiteLayout;
 
 /**
  * RPC services for NestedNode\Page
@@ -528,11 +528,11 @@ class Page extends AbstractServiceLocal
         $page->setTitle($title);
         $page->setTarget($target);
         $page->setRedirect('' === $redirect ? null : $redirect);
-        
+
         if (null !== $parent) {
             $page->setParent($parent);
         }
-        
+
         $page->setLayout($layout);
         $page->setAltTitle($alttitle);
         ;

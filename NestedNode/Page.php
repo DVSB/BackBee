@@ -2,35 +2,39 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode;
 
-use BackBuilder\Exception\BBException,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\ContentSet,
-    BackBuilder\NestedNode\ANestedNode,
-    BackBuilder\Renderer\IRenderable,
-    BackBuilder\Site\Layout,
-    BackBuilder\Site\Site,
-    BackBuilder\MetaData\MetaDataBag,
-    BackBuilder\Workflow\State;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\Exception\BBException;
+use BackBuilder\MetaData\MetaDataBag;
+use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\Renderer\IRenderable;
+use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
+use BackBuilder\Workflow\State;
+
 use Doctrine\Common\Collections\ArrayCollection;
+
+use JMS\Serializer\Annotation as Serializer;
+
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
@@ -38,9 +42,9 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  *
  * A page basically is an URI an a set of content defined for a website.
  * A page must have a layout defined to be displayed.
- * 
+ *
  * State of a page is bit operation on one or several following values:
- * 
+ *
  * * STATE_OFFLINE
  * * STATE_ONLINE
  * * STATE_HIDDEN
@@ -54,6 +58,8 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @Table(name="page",indexes={@index(name="IDX_STATE", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "state", "publishing", "archiving", "modified"}), @index(name="IDX_URL", columns={"site_uid", "url"}), @index(name="IDX_ROOT_RIGHT", columns={"root_uid", "rightnode"})})
  * @HasLifecycleCallbacks
  * @fixtures(qty=1)
+ *
+ * @Serializer\ExclusionPolicy("all")
  */
 class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 {
@@ -105,6 +111,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var string
      * @Id @Column(type="string", name="uid")
      * @fixture(type="md5")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_uid;
 
@@ -145,13 +154,20 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var string
      * @Column(type="string", name="title", nullable=false)
      * @fixture(type="sentence", value=6)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_title;
+
     /**
      * The alternate title of this page
      * @var string
      * @Column(type="string", name="alttitle", nullable=true)
      * @fixture(type="sentence", value=6)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_alttitle;
 
@@ -159,6 +175,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The URI of this page
      * @var string
      * @Column(type="string", name="url", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_url;
 
@@ -166,6 +185,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Target of this page if redirect defined.
      * @var string
      * @column(type="string", name="target", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_target;
 
@@ -173,6 +195,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Permanent redirect.
      * @var string
      * @column(type="string", name="redirect", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_redirect;
 
@@ -196,6 +221,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var \DateTime
      * @Column(type="datetime", name="date", nullable=true)
      * @fixture(type="dateTime")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_date;
 
@@ -204,6 +232,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var int
      * @Column(type="smallint", name="state", nullable=false)
      * @fixture(type="boolean")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("integer")
      */
     protected $_state;
 
@@ -211,6 +242,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The auto publishing datetime
      * @var \DateTime
      * @Column(type="datetime", name="publishing", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_publishing;
 
@@ -218,6 +252,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The auto-archiving datetime
      * @var \DateTime
      * @Column(type="datetime", name="archiving", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_archiving;
 
@@ -285,10 +322,10 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var integer
      */
     public $old_state;
-    
+
     /**
      * Whether redirect url should be returned by getUrl() method
-     * 
+     *
      * @var bool
      */
     private $_use_url_redirect = true;
@@ -298,7 +335,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var array
      */
     protected $_unserialized_ignored = array('_created', '_modified', '_date', '_publishing', '_archiving', '_metadata', '_workflow_state');
-    
+
     /**
      * Class constructor
      * @param string $uid The unique identifier of the page
@@ -345,7 +382,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
             } else {
                 $this->_contentset = new ContentSet();
             }
-            
+
             $this->_uid = md5(uniqid('', true));
             $this->_leftnode = 1;
             $this->_rightnode = $this->_leftnode + 1;
@@ -428,11 +465,11 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         if(null === $doRedirect) {
             $doRedirect = $this->_use_url_redirect;
         }
-        
+
         if($this->isRedirect() && $doRedirect) {
             return $this->getRedirect();
         }
-        
+
         return $this->_url;
     }
 
@@ -467,7 +504,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     {
         return $this->_redirect;
     }
-    
+
     /**
      * Determines if page is a redirect
      * @return bool
@@ -627,7 +664,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function isOnline($ignoreSchedule = false)
     {
         $onlineByState = ($this->getState() & self::STATE_ONLINE) && !($this->getState() & self::STATE_DELETED);
-        
+
         if (true === $ignoreSchedule) {
             return $onlineByState;
         } else {
@@ -957,7 +994,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Tells which "rootContentset" is inherited from currentpage's parent
-     * @param type $uidOnly 
+     * @param type $uidOnly
      * @return array Array of contentset uids
      */
     public function getInheritedZones($uidOnly = false)
@@ -1079,7 +1116,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Constructs the node from a string or object
      * @param mixed $serialized The string representation of the object.
      * @return \BackBuilder\NestedNode\ANestedNode
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or, 
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
      *                                                         with strict mode, if a property does not exists
      */
     public function unserialize($serialized, $strict = false)
@@ -1089,13 +1126,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
                 throw new InvalidArgumentException('The serialized value can not be unserialized to node object.');
             }
         }
-        
+
         parent::unserialize($serialized, $strict);
 
         if (true === property_exists($serialized, 'date')) {
             $this->_setDateTimeValue('_date', $serialized->date);
         }
-        
+
         if (true === property_exists($serialized, 'publishing')) {
             $this->_setDateTimeValue('_publishing', $serialized->publishing);
         }
@@ -1253,5 +1290,81 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function getTemplateName()
     {
         return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("layout_uid")
+     */
+    public function getLayoutUid()
+    {
+        return null !== $this->getlayout() ? $this->getlayout()->getUid() : '';
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("layout_label")
+     */
+    public function getLayoutLabel()
+    {
+        return null !== $this->getlayout() ? $this->getlayout()->getLabel() : '';
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("site_uid")
+     */
+    public function getSiteUid()
+    {
+        return null !== $this->_site ? $this->_site->getUid() : '';
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("site_label")
+     */
+    public function getSiteLabel()
+    {
+        return null !== $this->_site ? $this->_site->getLabel() : '';
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("state_label")
+     */
+    public function getStateLabel()
+    {
+        $states = array_flip(self::$STATES);
+        $label = true === isset($states[$this->_state]) ? $states[$this->_state] : null;
+        if (null === $label) {
+            $labels = array();
+            foreach ($states as $value => $label) {
+                if (0 !== ($this->_state & $value)) {
+                    $labels[] = $label;
+                }
+            }
+
+            $label = implode(', ', $labels);
+        }
+
+        return $label;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("workflow_uid")
+     */
+    public function getWorkflowStateUid()
+    {
+        return null !== $this->_workflow_state ? $this->_workflow_state->getUid() : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("workflow_label")
+     */
+    public function getWorkflowStateLabel()
+    {
+        return null !== $this->_workflow_state ? $this->_workflow_state->getLabel() : null;
     }
 }

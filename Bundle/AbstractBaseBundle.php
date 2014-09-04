@@ -24,6 +24,7 @@ use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Config\Config;
 use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Abstract base class for BackBee's bundle
