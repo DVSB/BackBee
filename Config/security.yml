@@ -16,15 +16,6 @@ firewalls:
         public_key: ~
         restful: ~
         anonymous: ~
-    front_area:
-        pattern: ^/
-        anonymous: ~
-        rememberme: \BackBuilder\Bundle\NextMemberBundle\Listener\RememberMeListener
-        provider: nextmember_user
-        form_login:
-            login_path: /mon-compte/s-identifier.html
-        logout:
-            handlers: [BackBuilder\Bundle\NextMemberBundle\Logout\LogoutHandler]
 
 providers:
     bb_user:
