@@ -248,6 +248,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $this->bbapp;
     }
 
+    public function getContainer()
+    {
+        return $this->getBBApp()->getContainer();
+    }
 
 
     /**
