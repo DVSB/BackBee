@@ -28,6 +28,8 @@ use BackBuilder\DependencyInjection\Loader\ContainerProxy;
 use BackBuilder\Event\Event;
 use BackBuilder\Exception\BBException;
 
+use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+
 /**
  *
  *
@@ -62,11 +64,26 @@ class ContainerListener
                 }
 
                 $dumper = new PhpArrayDumper($container);
+                $dump = $dumper->dump(array('do_compile' => true));
+
+                $container_proxy = new ContainerProxy();
+                $container_proxy->init(unserialize($dump));
+
+                file_put_contents(
+                    $container_directory . DIRECTORY_SEPARATOR . $container_filename . '.php',
+                    (new PhpDumper($container_proxy))->dump(array(
+                        'class'      => $container_filename,
+                        'base_class' => 'BackBuilder\DependencyInjection\Loader\ContainerProxy'
+                    ))
+                );
+
+                $dump = unserialize($dump);
+                unset($dump['aliases']);
+                unset($dump['parameters']);
+
                 file_put_contents(
                     $container_directory . DIRECTORY_SEPARATOR . $container_filename,
-                    $dumper->dump(array(
-                        'do_compile' => true
-                    ))
+                    serialize($dump)
                 );
             } elseif (false === $container->isCompiled()) {
                 $container->compile();

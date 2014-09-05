@@ -413,7 +413,7 @@ class FrontController implements HttpKernelInterface
             if (null !== $this->getRequest()->get('bb5-mode')) {
                 $response = new Response($this->_application->getRenderer()->render($page, $this->getRequest()->get('bb5-mode')));
             } else {
-                 $response = new Response($this->_application->getRenderer()->render($page));
+                $response = new Response($this->_application->getRenderer()->render($page));
             }
 
             if ($sendResponse) {
@@ -645,7 +645,6 @@ class FrontController implements HttpKernelInterface
                     // set default cotnroller to this
                     $matches['_controller'] = $this;
                 }
-
 
                 $this->getRequest()->attributes->add($matches);
             }

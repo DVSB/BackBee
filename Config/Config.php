@@ -41,7 +41,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Config implements DumpableServiceInterface
 {
-    const CONFIG_PROXY_CLASSNAME = '\BackBuilder\Config\ConfigProxy';
+    const CONFIG_PROXY_CLASSNAME = 'BackBuilder\Config\ConfigProxy';
 
     /**
      * Default config file to look for

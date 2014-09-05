@@ -416,17 +416,9 @@ class PhpArrayDumper implements DumperInterface
                 $definition_array['class'] = $class_proxy;
             }
 
-            if (false === array_key_exists('calls', $definition_array)) {
-                $definition_array['calls'] = array();
-            }
+            unset($definition_array['configurator']);
 
-            if (true === $definition->isSynthetic()) {
-                $definition_array['tags'][] = array(
-                    'name'           => 'synthetic_calls',
-                    'dispatch_event' => false
-                );
-            }
-
+            $definition_array['calls'] = array();
             $definition_array['calls'][] = array('restore', array(
                 '@service_container',
                 $service->dump()

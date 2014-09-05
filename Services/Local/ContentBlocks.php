@@ -347,7 +347,7 @@ class ContentBlocks extends AbstractServiceLocal
                     $contentInfos = new \stdClass();
                     $contentInfos->uid = $item->getUid();
                     $contentInfos->title = String::truncateText($currentItemTitle, 50); //truncate
-                    $contentInfos->ico = 'ressources/img/contents/' . str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass) . '.png';
+                    $contentInfos->ico = '/ressources/img/contents/' . str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass) . '.png';
                     $contentInfos->type = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->classname = $itemClass;
                     $contentInfos->created = $item->getCreated()->format("d/m/Y");

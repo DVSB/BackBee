@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,16 +29,16 @@ use BackBuilder\BBApplication,
 
 /**
  * Utility class to generate page URL according config rules
- * 
+ *
  * Available options are:
  *    * preserve-online  : if true, forbid the URL updating for online page
  *    * preserve-unicity : if true check for unique computed URL
- * 
+ *
  * Available rules are:
  *    * _root_      : scheme for root node
  *    * _default_   : default scheme
  *    * _content_   : array of schemes indexed by content classname
- * 
+ *
  * Available params are:
  *    * $parent     : page parent url
  *    * $uid        : page uid
@@ -65,7 +65,7 @@ class UrlGenerator implements IUrlGenerator
 
     /**
      * if true, forbid the URL updating for online page
-     * @var boolean 
+     * @var boolean
      */
     private $_preserveOnline = true;
 
@@ -77,7 +77,7 @@ class UrlGenerator implements IUrlGenerator
 
     /**
      * Available rewriting schemes
-     * @var array 
+     * @var array
      */
     private $_schemes = array();
 
@@ -145,8 +145,8 @@ class UrlGenerator implements IUrlGenerator
     public function generate(Page $page, AClassContent $content = null, $exceptionOnMissingScheme = true)
     {
         if (
-            null !== $page->getUrl() 
-            && $this->_preserveOnline 
+            null !== $page->getUrl()
+            && $this->_preserveOnline
             && (null === $page->getOldState() || ($page->getOldState() & Page::STATE_ONLINE))
             && $page->getState() & Page::STATE_ONLINE
         ) {
@@ -237,7 +237,7 @@ class UrlGenerator implements IUrlGenerator
      */
     private function _checkUnicity(Page $page, &$url)
     {
-        $baseurl = $url;
+        $baseurl = $url . '-%d';
         $page_repository = $this->_application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
 
         $count = 1;
@@ -250,15 +250,39 @@ class UrlGenerator implements IUrlGenerator
                 ->andWhere('p._url LIKE :url')
                 ->setParameter('url', $matches[1] . '%/')
                 ->getQuery()
-            ->getResult();
+                ->getResult()
+            ;
         } else {
-            $existings = $page_repository->findBy(array('_url' => $url, '_root' => $page->getRoot()));
+            $existings = $page_repository->findBy(array(
+                '_url' => $url,
+                '_root' => $page->getRoot()
+            ));
+            $existings = $this->_application->getEntityManager()->getConnection()->executeQuery(
+                'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
+                array(
+                    'root'  => $page->getRoot()->getUid(),
+                    'regex' => $url . '(-[0-9]+)?$'
+                )
+            )->fetchAll();
+
+            $uids = array();
+            foreach ($existings as $existing) {
+                $uids[] = $existing['uid'];
+            }
+
+            $existings = $page_repository->findBy(array('_uid' => $uids));
         }
 
+        $existings_url = array();
         foreach ($existings as $existing) {
             if (!$existing->isDeleted() && $existing->getUid() != $page->getUid()) {
+                $existings_url[] = $existing->getUrl();
                 $url = sprintf($baseurl, $count++);
             }
+        }
+
+        while (true === in_array($url, $existings_url)) {
+            $url = sprintf($baseurl, $count++);
         }
     }
 

@@ -148,6 +148,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     public function setApplication(BBApplication $application = null)
     {
         $this->_application = $application;
+
         return $this;
     }
 
@@ -159,6 +160,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     public function setEventDispatcher(Dispatcher $dispatcher = null)
     {
         $this->_dispatcher = $dispatcher;
+
         return $this;
     }
 
@@ -491,7 +493,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     {
         return array(
             'namespaces_locations' => $this->_namespaces,
-            'wrappers_namespaces'  => $this->_streamWrappers
+            'wrappers_namespaces'  => $this->_streamWrappers,
+            'has_event_dispatcher' => null !== $this->_dispatcher
         );
     }
 
@@ -503,6 +506,10 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      */
     public function restore(ContainerInterface $container, array $dump)
     {
+        if (true === $dump['has_event_dispatcher']) {
+            $this->setEventDispatcher($container->get('event.dispatcher'));
+        }
+
         $this->register();
 
         $this->_namespaces = $dump['namespaces_locations'];

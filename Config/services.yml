@@ -157,6 +157,8 @@ services:
     autoloader:
         class:      %bbapp.autoloader.class%
         arguments:  ["@bbapp"]
+        calls:
+            - [setEventDispatcher, ["@event.dispatcher"]]
         tags:
             - { name: "dumpable", dispatch_event: false }
     keywordbuilder:

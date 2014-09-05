@@ -80,12 +80,7 @@ class BundleControllerBootstrap
             }
 
             $this->sendResponse($content, $statusCode, $headers);
-        } else {
-            throw new FrontControllerException(
-                sprintf('Unable to handle URL `%s`', $this->_application->getRequest()->getPathInfo()), 
-                FrontControllerException::BAD_REQUEST
-            );
-        }
+        } 
     }
 
     /**
