@@ -60,12 +60,16 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for the given parameters.
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token A TokenInterface instance
-     * @param object $object The object to secure
+     * @param object|ObjectIdentityInterface $object The object to secure
      * @param array $attributes An array of attributes associated with the method being invoked
      * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     public function vote(TokenInterface $token, $object, array $attributes)
     {
+        if(null === $object) {
+            return self::ACCESS_ABSTAIN;
+        }
+        
         if ($object instanceof ANestedNode) {
             return $this->_voteForNestedNode($token, $object, $attributes);
         } elseif ($object instanceof AClassContent) {

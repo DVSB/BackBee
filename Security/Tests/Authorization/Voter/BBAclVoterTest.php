@@ -142,4 +142,9 @@ class BBAclVoterTest extends TestCase
         $this->assertEquals(BBAclVoter::ACCESS_GRANTED, $this->aclVoter->vote($this->token, new ObjectIdentity($this->user->getId(), get_class($this->user)), ['EDIT']));
         $this->assertEquals(BBAclVoter::ACCESS_GRANTED, $this->aclVoter->vote($this->token, new ObjectIdentity(23545866754, get_class($this->user)), ['EDIT']));
     }
+    
+    public function test_vote_nullObject() 
+    {
+        $this->assertEquals(BBAclVoter::ACCESS_ABSTAIN, $this->aclVoter->vote($this->token, null, ['EDIT']));
+    }
 }
