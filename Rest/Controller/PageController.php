@@ -58,44 +58,41 @@ class PageController extends ARestController
     }
 
     /**
-     * Get collection of page entity filtering by source_uid (or not), limit and start
+     * Get collection of page entity
      *
-     * @Rest\QueryParam(name="source_uid", description="the page we want to get its children", requirements={
-     *      @Assert\Length(min=32, max=32, exactMessage="source_uid must contains 32 characters")
-     * })
-     * @Rest\QueryParam(name="limit", default="25", description="Max results", requirements={
-     *     @Assert\Range(
-     *         max=100, maxMessage="The value should be between 1 and 100",
-     *         min=1, minMessage="The value should be between 1 and 100"
-     *     )
-     * })
-     * @Rest\QueryParam(name="start", default="0", description="Offset", requirements={
-     *      @Assert\Type(type="digit", message="The value should be a positive number")
-     * })
+     * @Rest\Pagination(default_count=25, max_count=100)
      */
-    public function getCollectionAction()
+    public function getCollectionAction($start, $count)
     {
-        $source_uid = $this->getRequest()->query->get('source_uid', null);
-        $source = null;
-        if (null !== $source_uid) {
-            $source = $this->getPageByUid($source_uid);
+        $parent_uid = $this->getRequest()->query->get('parent_uid', null);
+        $parent = null;
+        if (null !== $parent_uid) {
+            $parent = $this->getPageByUid($parent_uid);
         } else {
-            $source = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
+            $parent = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
         }
 
-        $this->isGranted('VIEW', $source);
+        $this->isGranted('VIEW', $parent);
 
         $children = $this->getPageRepository()->getNotDeletedDescendants(
-            $source,
+            $parent,
             1,
             false,
             array('_leftnode' => 'asc'),
             true,
-            $this->getRequest()->query->get('start'),
-            $this->getRequest()->query->get('limit')
+            $start,
+            $count
         );
 
-        return $this->createResponse($this->formatCollection($children));
+        $result_count = 0;
+        foreach ($children as $child) {
+            $result_count++;
+        }
+
+        $response = $this->createResponse($this->formatCollection($children));
+        $response->headers->set('Content-Range', "$start-$result_count/" . $children->count());
+
+        return $response;
     }
 
     /**
