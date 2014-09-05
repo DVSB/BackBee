@@ -35,6 +35,9 @@ use BackBuilder\Security\Token\UsernamePasswordToken,
     BackBuilder\Security\User,
     BackBuilder\Security\Group;
 
+
+use BackBuilder\ApiClient\Auth\PrivateKeyAuth;
+
 /**
  * Test for UserController class
  *
@@ -354,11 +357,11 @@ class UserControllerTest extends TestCase
     /**
      * @covers ::postAction
      */
-    public function testPostAction_duplicate_login()
+    public function test_postAction_duplicate_login()
     {
         // create user
         $user = new User();
-        $user->setLogin('usernameDulicate')
+        $user->setLogin('usernameDuplicate')
                 ->setPassword('password123')
                 ->setApiKeyEnabled(false)
                 ->setApiKeyPrivate('PRIVATE_KEY')
@@ -369,21 +372,30 @@ class UserControllerTest extends TestCase
         $this->getBBApp()->getEntityManager()->persist($user);
         $this->getBBApp()->getEntityManager()->flush();
         
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-            'login' => 'usernameDulicate',
-            'api_key_enabled' => true,
-            'api_key_public' => 'api_key_public',
-            'api_key_private' => 'api_key_private',
-            'firstname' => 'first_name',
-            'lastname' => 'last_name',
-            'activated' => false,
-            'password' => 'password',
-        ), array(
-            '_action' => 'postAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController'
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        $auth = new PrivateKeyAuth();
+        $auth->setPrivateKey($user->getApiKeyPrivate());
+        $auth->setPublicKey($user->getApiKeyPublic());
         
-        $this->assertEquals(400, $response->getStatusCode());
+        $response = $this->getBBApp()->getController()->handle(self::requestPost(
+            '/rest/1/user/',
+            [
+                'login' => 'usernameDuplicate',
+                'api_key_enabled' => true,
+                'api_key_public' => 'api_key_public',
+                'api_key_private' => 'api_key_private',
+                'firstname' => 'first_name',
+                'lastname' => 'last_name',
+                'activated' => false,
+                'password' => 'password',
+            ],
+            'application/json', [
+                PrivateKeyAuth::AUTH_PUBLIC_KEY_TOKEN => $user->getApiKeyPublic(),
+                PrivateKeyAuth::AUTH_SIGNATURE_TOKEN => $auth->getRequestSignature('POST', '/rest/1/user/')
+            ]
+        ));
+        
+        
+        $this->assertEquals(409, $response->getStatusCode());
         
         $res = \json_decode($response->getContent(), true);
 
@@ -394,5 +406,21 @@ class UserControllerTest extends TestCase
     {
         $this->dropDb($this->getBBApp());
         $this->getBBApp()->stop();
+    }
+    
+    /**
+     * 
+     * @param type $uri
+     * @param array $data
+     * @param type $contentType
+     * @param array $headers
+     * @return \Symfony\Component\HttpFoundation\Request
+     */
+    protected static function requestPost($uri, array $data = [], $contentType = 'application/json', array $headers = [])
+    {
+        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'POST'] );
+        $request->headers->add($headers);
+        
+        return $request;
     }
 }
