@@ -94,6 +94,7 @@ kernel.exception:
 kernel.controller:
   listeners:
     - [@rest.listener.validation, onKernelController]
+    - [@rest.listener.pagination, onKernelController]
 
 kernel.response:
   listeners:

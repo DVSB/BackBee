@@ -33,6 +33,7 @@ parameters:
     bbapp.rest.encoder_xml.class: Symfony\Component\Serializer\Encoder\XmlEncoder
 
     bbapp.rest.listener_validation.class: BackBuilder\Rest\EventListener\ValidationListener
+    bbapp.rest.listener_pagination.class: BackBuilder\Rest\EventListener\PaginationListener
     bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
     bbapp.rest.listener_exception.class: BackBuilder\Rest\EventListener\ExceptionListener
     bbapp.rest.listener_exception.mapping:
@@ -215,6 +216,10 @@ services:
     rest.listener.validation:
         class:      %bbapp.rest.listener_validation.class%
         arguments:  [@service_container]
+
+    rest.listener.pagination:
+        class:      %bbapp.rest.listener_pagination.class%
+        arguments:  [@rest.metadata.factory, @validator]
 
     rest.metadata.annotation_reader:
         class: Doctrine\Common\Annotations\AnnotationReader
