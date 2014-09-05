@@ -90,7 +90,7 @@ class PaginationListener extends APathEnabledListener
 
         $metadata = $this->getControllerActionMetadata($controller);
 
-        if (null === $metadata)  {
+        if (null === $metadata || null === $metadata->default_start)  {
             // no annotations defined for this controller
             return;
         }
