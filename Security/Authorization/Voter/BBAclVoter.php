@@ -31,7 +31,8 @@ use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Security\Acl\Model\AclProviderInterface,
     Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface,
     Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+    Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 /**
  * @category    BackBuilder
@@ -64,12 +65,6 @@ class BBAclVoter extends AclVoter
      */
     public function vote(TokenInterface $token, $object, array $attributes)
     {
-        if (false === ($token instanceof \BackBuilder\Security\Token\BBUserToken)
-                && (null === $this->_application
-                || null === $token = $this->_application->getBBUserToken())) {
-            return self::ACCESS_DENIED;
-        }
-
         if ($object instanceof ANestedNode) {
             return $this->_voteForNestedNode($token, $object, $attributes);
         } elseif ($object instanceof AClassContent) {
@@ -84,7 +79,7 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for the cuurent object, if denied try the vote for the general object
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param object $object
+     * @param object|ObjectIdentityInterface $object
      * @param array $attributes
      * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
@@ -92,7 +87,15 @@ class BBAclVoter extends AclVoter
     {
         if (self::ACCESS_DENIED === $result = parent::vote($token, $object, $attributes)) {
             $classname = ClassUtils::getRealClass($object);
-            $result = parent::vote($token, new $classname('*'), $attributes);
+            
+            $objectIdentity = null;
+            if($object instanceof \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface) {
+                $objectIdentity = new ObjectIdentity('class', $object->getType());
+            } else {
+                $objectIdentity = new ObjectIdentity('class', $classname);
+            }
+            
+            $result = parent::vote($token, $objectIdentity, $attributes);
         }
 
         return $result;
