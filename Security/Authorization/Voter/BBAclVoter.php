@@ -86,7 +86,7 @@ class BBAclVoter extends AclVoter
      */
     private function _vote(TokenInterface $token, $object, array $attributes)
     {
-        if (self::ACCESS_DENIED === $result = parent::vote($token, $object, $attributes)) {
+        if (self::ACCESS_GRANTED !== $result = parent::vote($token, $object, $attributes)) {
             // try class-scope ace
             $objectIdentity = null;
             
