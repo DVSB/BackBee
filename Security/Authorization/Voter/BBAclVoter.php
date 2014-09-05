@@ -32,7 +32,8 @@ use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface,
     Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface,
     Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
+    Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 
 /**
  * @category    BackBuilder
@@ -86,13 +87,13 @@ class BBAclVoter extends AclVoter
     private function _vote(TokenInterface $token, $object, array $attributes)
     {
         if (self::ACCESS_DENIED === $result = parent::vote($token, $object, $attributes)) {
-            $classname = ClassUtils::getRealClass($object);
-            
+            // try class-scope ace
             $objectIdentity = null;
-            if($object instanceof \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface) {
+            
+            if($object instanceof ObjectIdentityInterface) {
                 $objectIdentity = new ObjectIdentity('class', $object->getType());
             } else {
-                $objectIdentity = new ObjectIdentity('class', $classname);
+                $objectIdentity = new ObjectIdentity('class', ClassUtils::getRealClass($object));
             }
             
             $result = parent::vote($token, $objectIdentity, $attributes);

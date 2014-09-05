@@ -26,8 +26,13 @@ use Symfony\Component\HttpFoundation\Request;
 use BackBuilder\Rest\Controller\UserController;
 use BackBuilder\Tests\TestCase;
 
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
-use BackBuilder\Security\User,
+use BackBuilder\Security\Acl\Permission\MaskBuilder;
+
+use BackBuilder\Security\Token\UsernamePasswordToken,
+    BackBuilder\Security\User,
     BackBuilder\Security\Group;
 
 /**
@@ -50,6 +55,7 @@ class UserControllerTest extends TestCase
         $this->initAutoload();
         $bbapp = $this->getBBApp();
         $this->initDb($bbapp);
+        $this->initAcl();
         $this->getBBApp()->setIsStarted(true);
         
         // save user
@@ -76,6 +82,12 @@ class UserControllerTest extends TestCase
         
         $bbapp->getEntityManager()->flush();
         
+        // login user
+        $this->getSecurityContext()->setToken(new UsernamePasswordToken($this->user, []));
+        
+         // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_IDDQD);
     }
     
     protected function getController()
@@ -92,8 +104,12 @@ class UserControllerTest extends TestCase
      */
     public function testGetAction()
     {
-        $controller = $this->getController();
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateObjectAce(ObjectIdentity::fromDomainObject($this->user), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_IDDQD);
         
+        
+        $controller = $this->getController();
         $response = $controller->getAction($this->user->getId());
         
         $this->assertEquals(200, $response->getStatusCode());
@@ -130,6 +146,10 @@ class UserControllerTest extends TestCase
         $this->getBBApp()->getEntityManager()->persist($user);
         $this->getBBApp()->getEntityManager()->flush();
         $userId = $user->getId();
+        
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateObjectAce(ObjectIdentity::fromDomainObject($user), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_DELETE);
         
         $this->assertInstanceOf('BackBuilder\Security\User', 
                 $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId));
@@ -269,8 +289,12 @@ class UserControllerTest extends TestCase
     /**
      * @covers ::postAction
      */
-    public function testPostAction()
+    public function test_postAction()
     {
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
+        
         $controller = $this->getController();
         
         $data = array(
@@ -284,7 +308,7 @@ class UserControllerTest extends TestCase
             'password' => 'password',
         );
         
-        $response = $controller->postAction(new Request(array(), $data));
+        $response = $controller->postAction(new Request([], $data));
         
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('application/json', $response->headers->get('Content-Type'));
