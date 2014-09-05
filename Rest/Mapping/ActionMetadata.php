@@ -76,6 +76,7 @@ class ActionMetadata extends MethodMetadata
             $this->name,
             $this->queryParams,
             $this->requestParams,
+            $this->default_start,
             $this->default_count,
             $this->max_count,
             $this->min_count
@@ -94,6 +95,7 @@ class ActionMetadata extends MethodMetadata
             $this->name,
             $this->queryParams,
             $this->requestParams,
+            $this->default_start,
             $this->default_count,
             $this->max_count,
             $this->min_count

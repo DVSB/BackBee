@@ -220,6 +220,8 @@ services:
     rest.listener.pagination:
         class:      %bbapp.rest.listener_pagination.class%
         arguments:  [@rest.metadata.factory, @validator]
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
 
     rest.metadata.annotation_reader:
         class: Doctrine\Common\Annotations\AnnotationReader

@@ -76,9 +76,12 @@ class PaginationListener extends APathEnabledListener
      */
     public function onKernelController(FilterControllerEvent $event)
     {
-        $controller = $event->getController();
-        $request = $event->getRequest();
+        $request = $this->request = $event->getRequest();
+        if (false === $this->isEnabled()) {
+            return;
+        }
 
+        $controller = $event->getController();
 
         if (false === in_array($request->getMethod(), array('GET', 'HEAD', 'DELETE')))  {
             // pagination only makes sense with GET or DELETE methods
@@ -87,7 +90,7 @@ class PaginationListener extends APathEnabledListener
 
         $metadata = $this->getControllerActionMetadata($controller);
 
-        if (null === $metadata)  {
+        if (null === $metadata || null === $metadata->default_start)  {
             // no annotations defined for this controller
             return;
         }
