@@ -192,6 +192,14 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
+     * @see BackBuilder\Bundle\BundleInterface::getEntityManager
+     */
+    public function getEntityManager()
+    {
+        return $this->application->getEntityManager();
+    }
+
+    /**
      * @see BackBuilder\Bundle\BundleInterface::isStarted
      */
     public function isStarted()

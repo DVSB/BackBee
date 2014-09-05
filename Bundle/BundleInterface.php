@@ -90,6 +90,13 @@ interface BundleInterface extends IObjectIdentifiable
      */
     public function getApplication();
 
+        /**
+     * [getApplication description]
+     *
+     * @return [type] [description]
+     */
+    public function getEntityManager();
+
     /**
      * [isStarted description]
      *
