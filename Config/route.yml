@@ -56,7 +56,7 @@ bb.rest.test:
     pattern: /rest/{version}/_generateKey/
     defaults:
         _action: generateKeyAction
-        _controller: rest.controller.test
+        _controller: BackBuilder\Rest\Controller\TestController
     requirements:
         version: \d
 
@@ -69,6 +69,15 @@ bb.rest.user_get:
         version: \d
         id: \d
         _method: GET
+        
+bb.rest.user_post:
+    pattern: /rest/{version}/user/
+    defaults:
+        _action: postAction
+        _controller: BackBuilder\Rest\Controller\UserController
+    requirements:
+        version: \d
+        _method: POST
 
 bb.rest.security_firewall_autenticate:
     pattern: /rest/{version}/security/auth/{firewall}

@@ -50,8 +50,6 @@ parameters:
 
     bbapp.rest_api.path: /rest/
 
-    bbapp.rest.test_controller.class: BackBuilder\Rest\Controller\TestController
-
     bbapp.toolbar.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
     bbapp.profiler.listener.class: BackBuilder\Event\Listener\ProfilerListener
 
@@ -234,10 +232,7 @@ services:
     rest.metadata.cache:
         class: BackBuilder\Rest\Metadata\Cache\FileCache
         arguments:  ["%bbapp.cache.dir%/", %debug%]
-
-    rest.controller.test:
-        class:      %bbapp.rest.test_controller.class%
-        arguments:  ["@bbapp"]
+        
 
     annotation_reader.cache:
         class: Doctrine\Common\Cache\ArrayCache
