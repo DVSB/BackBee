@@ -233,7 +233,7 @@ services:
 
     rest.metadata.cache:
         class: BackBuilder\Rest\Metadata\Cache\FileCache
-        arguments:  ["%bbapp.cache.dir%/"]
+        arguments:  ["%bbapp.cache.dir%/", %debug%]
 
     rest.controller.test:
         class:      %bbapp.rest.test_controller.class%
