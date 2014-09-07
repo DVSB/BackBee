@@ -351,6 +351,7 @@ class ContentBlocks extends AbstractServiceLocal
                     $contentInfos->type = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->classname = $itemClass;
                     $contentInfos->created = $item->getCreated()->format("d/m/Y");
+                    $contentInfos->modified = $item->getModified()->format("d/m/Y");
                     $contentInfos->completeTitle = $currentItemTitle;
 
                     if (null !== $image = $item->getFirstElementOfType('BackBuilder\ClassContent\Media\image')) {
