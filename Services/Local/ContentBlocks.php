@@ -740,9 +740,9 @@ class ContentBlocks extends AbstractServiceLocal
                         }
                     }
                 }
-
-                $content->$key = $newvalues;
             }
+            
+            $content->$key = $newvalues;
         }
         return $content;
     }
