@@ -120,6 +120,16 @@ class ContainerProxy extends Container
     }
 
     /**
+     * @see Symfony\Component\DependencyInjection\ContainerBuilder::has
+     */
+    public function has($id)
+    {
+        $this->tryLoadDefinitionFromRaw($id);
+
+        return parent::has($id);
+    }
+
+    /**
      * @see Symfony\Component\DependencyInjection\ContainerBuilder::getDefinition
      */
     public function getDefinition($id)
