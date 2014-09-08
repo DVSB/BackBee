@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\Rest\EventListener;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,22 +20,20 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\EventListener;
+use BackBuilder\Event\Listener\APathEnabledListener;
+use BackBuilder\Rest\Exception\ValidationException;
 
+use Metadata\MetadataFactory;
+
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\Validator\Validator,
-    Symfony\Component\Validator\ConstraintViolationList,
-    Symfony\Component\Validator\ConstraintViolation;
-use BackBuilder\Event\Listener\APathEnabledListener;
-
-use BackBuilder\Rest\Exception\ValidationException;
-use Metadata\MetadataFactory;
-
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validator;
 
 /**
  * Pagination listener
