@@ -33,7 +33,7 @@ use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 class RandomService implements DumpableServiceInterface
 {
     const DEFAULT_SIZE = 100;
-    const RANDOM_SERVICE_PROXY_CLASSNAME = '\BackBuilder\DependencyInjection\Tests\Loader\RandomServiceProxy';
+    const RANDOM_SERVICE_PROXY_CLASSNAME = 'BackBuilder\DependencyInjection\Tests\Loader\RandomServiceProxy';
 
     /**
      * @var int
