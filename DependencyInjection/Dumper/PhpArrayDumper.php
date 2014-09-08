@@ -402,7 +402,7 @@ class PhpArrayDumper implements DumperInterface
             $service = $this->container->get($id);
             if (false === ($service instanceof DumpableServiceInterface)) {
                 throw new ServiceNotDumpableException(
-                    $service_id,
+                    $id,
                     get_class($service)
                 );
             }
@@ -413,11 +413,14 @@ class PhpArrayDumper implements DumperInterface
             }
 
             if (true === array_key_exists('class', $definition_array)) {
+                if ($class_proxy !== $definition_array['class']) {
+                    unset($definition_array['arguments']);
+                }
+
                 $definition_array['class'] = $class_proxy;
             }
 
             unset($definition_array['configurator']);
-
             $definition_array['calls'] = array();
             $definition_array['calls'][] = array('restore', array(
                 '@service_container',

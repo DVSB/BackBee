@@ -3,6 +3,6 @@ parameters:
 
 services:
     repository_service:
-        class: \DateTime
+        class: DateTime
     synthetic_service:
         synthetic: true
