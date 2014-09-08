@@ -23,9 +23,12 @@ namespace BackBuilder\DependencyInjection\Tests;
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
+use BackBuilder\DependencyInjection\Loader\ContainerProxy;
 use BackBuilder\Tests\Mock\ManualBBApplication;
 
 use org\bovigo\vfs\vfsStream;
+
+use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 
 /**
  * Set of tests for BackBuilder\DependencyInjection\ContainerBuilder
@@ -251,9 +254,30 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $dump_filename = $container->getParameter('container.filename');
 
         $dumper = new PhpArrayDumper($container);
-        file_put_contents($dump_directory . DIRECTORY_SEPARATOR . $dump_filename, $dumper->dump(array(
-            'do_compile' => true
-        )));
+        $dump = $dumper->dump(array('do_compile' => true));
+
+        $container_proxy = new ContainerProxy();
+        $container_proxy->init(unserialize($dump));
+
+        file_put_contents(
+            $dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php',
+            (new PhpDumper($container_proxy))->dump(array(
+                'class'      => $dump_filename,
+                'base_class' => 'BackBuilder\DependencyInjection\Loader\ContainerProxy'
+            ))
+        );
+
+        $this->assertFileExists($dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php');
+        $this->assertTrue(is_readable($dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php'));
+
+        $dump = unserialize($dump);
+        unset($dump['aliases']);
+        unset($dump['parameters']);
+
+        file_put_contents(
+            $dump_directory . DIRECTORY_SEPARATOR . $dump_filename,
+            serialize($dump)
+        );
 
         $this->assertFileExists($dump_directory . DIRECTORY_SEPARATOR . $dump_filename);
         $this->assertTrue(is_readable($dump_directory . DIRECTORY_SEPARATOR . $dump_filename));
@@ -267,6 +291,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $container_builder = new ContainerBuilder($this->application);
         $container_proxy = $container_builder->getContainer();
 
+        $this->assertInstanceOf($dump_filename, $container_proxy);
         $this->assertInstanceOf('BackBuilder\DependencyInjection\Loader\ContainerProxy', $container_proxy);
     }
 
