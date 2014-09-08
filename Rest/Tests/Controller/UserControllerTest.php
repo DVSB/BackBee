@@ -235,15 +235,7 @@ class UserControllerTest extends TestCase
     {
         $controller = $this->getController();
         
-        $response = $this->getBBApp()->getController()->handle(new Request([], [
-            'firstname' => 'firstname',
-            'lastname' => 'lastname',
-            'login' => 'user_login',
-        ], [
-            'id' => '12024582905729',
-            '_action' => 'putAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController'
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/'] ));
+        $response = $controller->putAction('12024582905729', new Request());
 
         $this->assertEquals(404, $response->getStatusCode());
     }
@@ -356,50 +348,39 @@ class UserControllerTest extends TestCase
     
     /**
      * @covers ::postAction
+     * @expectedException \Symfony\Component\HttpKernel\Exception\ConflictHttpException
+     * @expectedExceptionMessage User with that login already exists: usernameDuplicate
      */
     public function test_postAction_duplicate_login()
     {
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
+        $controller = $this->getController();
+        
         // create user
         $user = new User();
         $user->setLogin('usernameDuplicate')
-                ->setPassword('password123')
-                ->setApiKeyEnabled(false)
-                ->setApiKeyPrivate('PRIVATE_KEY')
-                ->setApiKeyPublic('PUBLIC_KEY')
-                ->setFirstname('FirstName')
-                ->setLastname('LastName')
-                ->setActivated(true);
+            ->setPassword('password123')
+            ->setApiKeyEnabled(false)
+            ->setApiKeyPrivate('PRIVATE_KEY')
+            ->setApiKeyPublic('PUBLIC_KEY')
+            ->setFirstname('FirstName')
+            ->setLastname('LastName')
+            ->setActivated(true);
         $this->getBBApp()->getEntityManager()->persist($user);
         $this->getBBApp()->getEntityManager()->flush();
         
-        $auth = new PrivateKeyAuth();
-        $auth->setPrivateKey($user->getApiKeyPrivate());
-        $auth->setPublicKey($user->getApiKeyPublic());
-        
-        $response = $this->getBBApp()->getController()->handle(self::requestPost(
-            '/rest/1/user/',
-            [
-                'login' => 'usernameDuplicate',
-                'api_key_enabled' => true,
-                'api_key_public' => 'api_key_public',
-                'api_key_private' => 'api_key_private',
-                'firstname' => 'first_name',
-                'lastname' => 'last_name',
-                'activated' => false,
-                'password' => 'password',
-            ],
-            'application/json', [
-                PrivateKeyAuth::AUTH_PUBLIC_KEY_TOKEN => $user->getApiKeyPublic(),
-                PrivateKeyAuth::AUTH_SIGNATURE_TOKEN => $auth->getRequestSignature('POST', '/rest/1/user/')
-            ]
-        ));
-        
-        
-        $this->assertEquals(409, $response->getStatusCode());
-        
-        $res = \json_decode($response->getContent(), true);
-
-        $this->assertContains('User with that login already exists', $res['errors']['login']);
+        $response = $controller->postAction(new Request([], [
+            'login' => 'usernameDuplicate',
+            'api_key_enabled' => true,
+            'api_key_public' => 'api_key_public',
+            'api_key_private' => 'api_key_private',
+            'firstname' => 'first_name',
+            'lastname' => 'last_name',
+            'activated' => false,
+            'password' => 'password',
+        ]));
     }
 
     protected function tearDown()
@@ -416,11 +397,37 @@ class UserControllerTest extends TestCase
      * @param array $headers
      * @return \Symfony\Component\HttpFoundation\Request
      */
-    protected static function requestPost($uri, array $data = [], $contentType = 'application/json', array $headers = [])
+    protected static function requestPost($uri, array $data = [], $contentType = 'application/json', $sign = false)
     {
         $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'POST'] );
-        $request->headers->add($headers);
+        
+        if($sign) {
+            self::signRequest($request);
+        }
         
         return $request;
+    }
+    
+    /**
+     * 
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param BackBuilder\Security\User $user
+     * @return self
+     */
+    protected static function signRequest(Request $request, BackBuilder\Security\User $user = null)
+    {
+        if(null === $user) {
+            $user = $this->user;
+        }
+        
+        $auth = new PrivateKeyAuth();
+        $auth->setPrivateKey($user->getApiKeyPrivate());
+        $auth->setPublicKey($user->getApiKeyPublic());
+        $request->headers->add([
+            PrivateKeyAuth::AUTH_PUBLIC_KEY_TOKEN => $user->getApiKeyPublic(),
+            PrivateKeyAuth::AUTH_SIGNATURE_TOKEN => $auth->getRequestSignature($request->getMethod(), $request->getRequestUri())
+        ]);
+
+        return self;
     }
 }

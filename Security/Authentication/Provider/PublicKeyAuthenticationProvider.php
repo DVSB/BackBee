@@ -129,9 +129,11 @@ class PublicKeyAuthenticationProvider implements AuthenticationProviderInterface
                 $token->setUser($user);
                 return $token;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
+        
+        return false;
     }
 
 }
