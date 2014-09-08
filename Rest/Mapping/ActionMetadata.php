@@ -65,6 +65,21 @@ class ActionMetadata extends MethodMetadata
     public $min_count;
 
     /**
+     * @var string
+     */
+    public $attribute_name;
+
+    /**
+     * @var string
+     */
+    public $argument_name;
+
+    /**
+     * @var string
+     */
+    public $class;
+
+    /**
      * serialize current object
      *
      * @return string

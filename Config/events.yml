@@ -95,6 +95,7 @@ kernel.controller:
   listeners:
     - [@rest.listener.validation, onKernelController]
     - [@rest.listener.pagination, onKernelController]
+    - [@rest.listener.param_converter, onKernelController]
 
 kernel.response:
   listeners:

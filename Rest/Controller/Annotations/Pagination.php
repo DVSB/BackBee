@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\Rest\Controller\Annotations;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -18,9 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
-
-namespace BackBuilder\Rest\Controller\Annotations;
-
 
 /**
  * Pagination properties annotation

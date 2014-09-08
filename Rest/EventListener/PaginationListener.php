@@ -25,13 +25,7 @@ use BackBuilder\Rest\Exception\ValidationException;
 
 use Metadata\MetadataFactory;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator;
 
@@ -41,7 +35,7 @@ use Symfony\Component\Validator\Validator;
  * @category    BackBuilder
  * @package     BackBuilder\Rest
  * @copyright   Lp digital system
- * @author      k.golovin
+ * @author      k.golovin, e.chau <eric.chau@lp-digital.fr>
  */
 class PaginationListener extends APathEnabledListener
 {
@@ -57,8 +51,6 @@ class PaginationListener extends APathEnabledListener
 
     /**
      * Constructor.
-     *
-     * @param ContainerInterface $container
      */
     public function __construct(MetadataFactory $metadataFactory, Validator $validator)
     {
@@ -69,9 +61,7 @@ class PaginationListener extends APathEnabledListener
     /**
      * Controller
      *
-     * @param GetResponseEvent $event The event
-     * @throws BadRequestHttpException
-     * @throws UnsupportedMediaTypeHttpException
+     * @param FilterControllerEvent $event The event
      */
     public function onKernelController(FilterControllerEvent $event)
     {
