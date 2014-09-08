@@ -99,10 +99,11 @@ class PageController extends ARestController
      * Get page entity by uid
      *
      * @param string $uid the unique identifier of the page we want to retrieve
+     *
+     * @Rest\ParamConverter(argument_name="page", class="BackBuilder\NestedNode\Page")
      */
-    public function getAction($uid)
+    public function getAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
         $this->isGranted('VIEW', $page);
 
         return $this->createResponse($this->formatItem($page));
@@ -203,10 +204,11 @@ class PageController extends ARestController
      * @Rest\RequestParam(name="archiving", description="page new archiving", requirements={
      *     @Assert\Type(type="digit", message="The value should be a positive number")
      * })
+     *
+     * @Rest\ParamConverter(argument_name="page", class="BackBuilder\NestedNode\Page")
      */
-    public function putAction($uid)
+    public function putAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
         $this->isGranted('EDIT', $page);
 
         $layout = $this->getLayoutByUid($this->getRequest()->request->get('layout_uid'));
@@ -242,10 +244,11 @@ class PageController extends ARestController
      * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
      *     @Assert\NotBlank(message="operations is required")
      * })
+     *
+     * @Rest\ParamConverter(argument_name="page", class="BackBuilder\NestedNode\Page")
      */
-    public function patchAction($uid)
+    public function patchAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
         $this->isGranted('EDIT', $page);
 
         $operations = $this->getRequest()->request->get('operations');
@@ -280,11 +283,11 @@ class PageController extends ARestController
      * @Rest\RequestParam(name="next_uid", description="next node uid", requirements={
      *     @Assert\Length(min=32, max=32, exactMessage="next_uid must contains 32 characters")
      * })
+     *
+     * @Rest\ParamConverter(argument_name="page", class="BackBuilder\NestedNode\Page")
      */
-    public function movePageNodeAction($uid)
+    public function movePageNodeAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
-
         if (true === $page->isRoot()) {
             throw new AccessDeniedHttpException('Cannot move root node of a site.');
         }
@@ -323,11 +326,11 @@ class PageController extends ARestController
      * @param  [type] $uid [description]
      *
      * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\ParamConverter(argument_name="page", class="BackBuilder\NestedNode\Page")
      */
-    public function deleteAction($uid)
+    public function deleteAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
-
         if (true === $page->isRoot()) {
             throw new AccessDeniedHttpException('Cannot remove root page of a site.');
         }

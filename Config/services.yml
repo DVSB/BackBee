@@ -34,6 +34,7 @@ parameters:
 
     bbapp.rest.listener_validation.class: BackBuilder\Rest\EventListener\ValidationListener
     bbapp.rest.listener_pagination.class: BackBuilder\Rest\EventListener\PaginationListener
+    bbapp.rest.listener_param_converter.class: BackBuilder\Rest\EventListener\ParamConverterListener
     bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
     bbapp.rest.listener_exception.class: BackBuilder\Rest\EventListener\ExceptionListener
     bbapp.rest.listener_exception.mapping:
@@ -223,6 +224,12 @@ services:
         calls:
             - [setPath, [%bbapp.rest_api.path%]]
 
+    rest.listener.param_converter:
+        class:      %bbapp.rest.listener_param_converter.class%
+        arguments:  [@rest.metadata.factory, @validator]
+        calls:
+            - [setPath, [%bbapp.rest_api.path%]]
+
     rest.metadata.annotation_reader:
         class: Doctrine\Common\Annotations\AnnotationReader
 
@@ -239,7 +246,7 @@ services:
     rest.metadata.cache:
         class: BackBuilder\Rest\Metadata\Cache\FileCache
         arguments:  ["%bbapp.cache.dir%/", %debug%]
-        
+
 
     annotation_reader.cache:
         class: Doctrine\Common\Cache\ArrayCache
