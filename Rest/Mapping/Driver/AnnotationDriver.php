@@ -108,9 +108,7 @@ class AnnotationDriver implements DriverInterface
                     $methodMetadata->max_count = $annotation->max_count;
                     $methodMetadata->min_count = $annotation->min_count;
                 } elseif ($annotation instanceof \BackBuilder\Rest\Controller\Annotations\ParamConverter) {
-                    $methodMetadata->attribute_name = $annotation->attribute_name;
-                    $methodMetadata->argument_name = $annotation->argument_name;
-                    $methodMetadata->class = $annotation->class;
+                    $methodMetadata->param_converter_bag[] = $annotation;
                 }
             }
 

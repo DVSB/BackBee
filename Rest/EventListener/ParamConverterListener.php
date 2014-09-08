@@ -77,25 +77,37 @@ class ParamConverterListener extends APathEnabledListener
         $controller = $event->getController();
 
         $metadata = $this->getControllerActionMetadata($controller);
-        if (null === $metadata || null === $metadata->argument_name || null === $metadata->class)  {
+        if (null === $metadata || 0 === count($metadata->param_converter_bag)) {
             // no annotations defined for this controller
             return;
         }
 
-        $class = $metadata->class;
-        $unique_identifier = $request->attributes->get($metadata->attribute_name, null);
-        if (null === $unique_identifier) {
-            throw new \InvalidArgumentException(
-                'Unable to find identifier with provided attribute: ' . $metadata->attribute_name
-            );
-        }
+        foreach ($metadata->param_converter_bag as $param_converter) {
+            $class = $param_converter->class;
+            $bag = $param_converter->id_source;
+            $unique_identifier = $request->$bag->get($param_converter->id_name, null);
+            $entity = null;
+            try {
+                if (null === $unique_identifier) {
+                    throw new \InvalidArgumentException(
+                        'Unable to find identifier with provided attribute: ' . $param_converter->id_name
+                    );
+                }
+            } catch(\InvalidArgumentException $e) {
+                if (true === $param_converter->required) {
+                    throw $e;
+                }
+            }
 
-        $entity = $event->getKernel()->getApplication()->getEntityManager()->find($class, $unique_identifier);
-        if (null === $entity) {
-            throw new NotFoundHttpException("No `$class` exists with uid `$unique_identifier`.");
-        }
+            if (null !== $unique_identifier) {
+                $entity = $event->getKernel()->getApplication()->getEntityManager()->find($class, $unique_identifier);
+                if (null === $entity) {
+                    throw new NotFoundHttpException("No `$class` exists with uid `$unique_identifier`.");
+                }
+            }
 
-        $request->attributes->set($metadata->argument_name, $entity);
+            $request->attributes->set($param_converter->name, $entity);
+        }
     }
 
     /**

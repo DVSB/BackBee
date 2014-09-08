@@ -65,19 +65,9 @@ class ActionMetadata extends MethodMetadata
     public $min_count;
 
     /**
-     * @var string
+     * @var array
      */
-    public $attribute_name;
-
-    /**
-     * @var string
-     */
-    public $argument_name;
-
-    /**
-     * @var string
-     */
-    public $class;
+    public $param_converter_bag = array();
 
     /**
      * serialize current object
@@ -94,7 +84,8 @@ class ActionMetadata extends MethodMetadata
             $this->default_start,
             $this->default_count,
             $this->max_count,
-            $this->min_count
+            $this->min_count,
+            $this->param_converter_bag
         ]);
     }
 
@@ -113,7 +104,8 @@ class ActionMetadata extends MethodMetadata
             $this->default_start,
             $this->default_count,
             $this->max_count,
-            $this->min_count
+            $this->min_count,
+            $this->param_converter_bag
         ) = \unserialize($str);
 
         $this->reflection = new \ReflectionMethod($this->class, $this->name);

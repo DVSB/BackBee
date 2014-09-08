@@ -35,15 +35,25 @@ class ParamConverter
     /**
      * @var string
      */
-    public $attribute_name = 'uid';
+    public $id_name = 'uid';
 
     /**
      * @var string
      */
-    public $argument_name;
+    public $id_source = 'attributes';
+
+    /**
+     * @var string
+     */
+    public $name;
 
     /**
      * @var string
      */
     public $class;
+
+    /**
+     * @var boolean
+     */
+    public $required = true;
 }
