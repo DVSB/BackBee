@@ -23,7 +23,7 @@ namespace BackBuilder\DependencyInjection\Tests;
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
-use BackBuilder\DependencyInjection\Loader\ContainerProxy;
+use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\Tests\Mock\ManualBBApplication;
 
 use org\bovigo\vfs\vfsStream;
@@ -263,7 +263,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
             $dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php',
             (new PhpDumper($container_proxy))->dump(array(
                 'class'      => $dump_filename,
-                'base_class' => 'BackBuilder\DependencyInjection\Loader\ContainerProxy'
+                'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy'
             ))
         );
 
@@ -292,7 +292,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $container_proxy = $container_builder->getContainer();
 
         $this->assertInstanceOf($dump_filename, $container_proxy);
-        $this->assertInstanceOf('BackBuilder\DependencyInjection\Loader\ContainerProxy', $container_proxy);
+        $this->assertInstanceOf('BackBuilder\DependencyInjection\ContainerProxy', $container_proxy);
     }
 
     /**

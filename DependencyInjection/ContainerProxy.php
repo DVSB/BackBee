@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Loader;
+namespace BackBuilder\DependencyInjection;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -24,7 +24,6 @@ use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;

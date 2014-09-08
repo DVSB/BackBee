@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests\Loader;
+namespace BackBuilder\DependencyInjection\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -23,7 +23,7 @@ namespace BackBuilder\DependencyInjection\Tests\Loader;
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
-use BackBuilder\DependencyInjection\Loader\ContainerProxy;
+use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
 
 use Symfony\Component\Yaml\Yaml;
@@ -38,7 +38,7 @@ use org\bovigo\vfs\vfsStream;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\DependencyInjection\Loader\ContainerProxy
+ * @coversDefaultClass \BackBuilder\DependencyInjection\ContainerProxy
  */
 class ContainerProxyTest extends \PHPUnit_Framework_TestCase
 {
@@ -65,7 +65,7 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     {
         $this->services_yml_array = array(
             'parameters' => array(
-                'service.class' => 'BackBuilder\DependencyInjection\Tests\Loader\RandomService',
+                'service.class' => 'BackBuilder\DependencyInjection\Tests\RandomService',
                 'size_one'      => 300,
                 'size_two'      => 8000,
                 'size_three'    => 44719
@@ -373,7 +373,7 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         $container = new ContainerProxy();
         $container->init(unserialize($dumper->dump(array('do_compile' => false))));
 
-        $this->assertInstanceOf('BackBuilder\DependencyInjection\Loader\ContainerProxy', $container);
+        $this->assertInstanceOf('BackBuilder\DependencyInjection\ContainerProxy', $container);
         $this->assertFalse($container->isCompiled());
 
         // test that ContainerProxy::isCompiled return false value
