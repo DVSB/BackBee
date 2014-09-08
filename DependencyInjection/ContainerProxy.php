@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Loader;
+namespace BackBuilder\DependencyInjection;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -24,7 +24,6 @@ use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
@@ -117,6 +116,16 @@ class ContainerProxy extends Container
         }
 
         parent::set($id, $service, $scope);
+    }
+
+    /**
+     * @see Symfony\Component\DependencyInjection\ContainerBuilder::has
+     */
+    public function has($id)
+    {
+        $this->tryLoadDefinitionFromRaw($id);
+
+        return parent::has($id);
     }
 
     /**

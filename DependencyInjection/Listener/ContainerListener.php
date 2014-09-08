@@ -24,7 +24,7 @@ use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBuilder\DependencyInjection\Exception\CannotCreateContainerDirectoryException;
 use BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException;
-use BackBuilder\DependencyInjection\Loader\ContainerProxy;
+use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\Event\Event;
 use BackBuilder\Exception\BBException;
 
@@ -73,7 +73,7 @@ class ContainerListener
                     $container_directory . DIRECTORY_SEPARATOR . $container_filename . '.php',
                     (new PhpDumper($container_proxy))->dump(array(
                         'class'      => $container_filename,
-                        'base_class' => 'BackBuilder\DependencyInjection\Loader\ContainerProxy'
+                        'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy'
                     ))
                 );
 
