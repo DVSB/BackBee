@@ -41,6 +41,12 @@ use Symfony\Component\Validator\Validation;
  */
 class PaginationListenerTest extends TestCase
 {
+    public function setUp() 
+    {
+        parent::setUp();
+        // init bbapp to enable autoloading of annotations
+        $this->getBBApp();
+    }
 
     /**
      * @covers ::__construct
