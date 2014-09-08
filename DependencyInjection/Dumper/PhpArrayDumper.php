@@ -22,6 +22,7 @@ namespace BackBuilder\DependencyInjection\Dumper;
 
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\DependencyInjection\Exception\ServiceNotDumpableException;
+use BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -409,7 +410,7 @@ class PhpArrayDumper implements DumperInterface
 
             $class_proxy = $service->getClassProxy() ?: get_class($service);
             if (false === in_array(self::RESTORABLE_SERVICE_INTERFACE, class_implements($class_proxy))) {
-                throw new \Exception('Invalid class proxy, it must implements DumpableServiceProxyInterface.');
+                throw new InvalidServiceProxyException($class_proxy);
             }
 
             if (true === array_key_exists('class', $definition_array)) {
