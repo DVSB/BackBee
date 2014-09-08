@@ -26,13 +26,15 @@ use Symfony\Component\HttpFoundation\Request;
 use BackBuilder\Rest\Controller\SiteController;
 use BackBuilder\Tests\TestCase;
 
-use BackBuilder\Security\Token\BBUserToken;
+use BackBuilder\Security\Token\BBUserToken,
+    BackBuilder\Security\Acl\Loader\YmlLoader,
+    BackBuilder\Security\Acl\Permission\MaskBuilder;
 
 use BackBuilder\Site\Site,
     BackBuilder\Site\Layout;
 
-
-use BackBuilder\Security\Acl\Loader\YmlLoader;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 
 /**
@@ -105,7 +107,7 @@ class SiteControllerTest extends TestCase
     layouts:
       resources: all
       actions: all
-  editor_layout1:
+  editor_layout:
     sites:
       resources: all
       actions: all
@@ -131,19 +133,23 @@ class SiteControllerTest extends TestCase
      */
     public function testGetLayoutsAction()
     {
-        // authenticate a user with super admin authority
-        $this->createAuthUser('super_admin', array('ROLE_API_USER'));
+        // authenticate user , set up permissions
+        $token = $this->createAuthUser('super_admin', array('ROLE_API_USER'));
         
-        $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($this->site->getUid());
-        $layout = $this->getEntityManager()->getRepository('BackBuilder\Site\layout')->find($this->layout->getUid());
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateObjectAce(
+            new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)), 
+            new UserSecurityIdentity('super_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_VIEW
+        );
         
-        $request = new Request(array(), array(
-            'id' => $this->site->getUid(),
-        ));
-        $request->headers->set('Accept', 'application/json');
+        $aclManager->insertOrUpdateObjectAce(
+            new ObjectIdentity('class', 'BackBuilder\Site\Layout'), 
+            new UserSecurityIdentity('super_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_VIEW
+        );
         
-        $controller = $this->getController();
-        $response = $controller->getLayoutsAction($this->site->getUid(), $request);
+        $response = $this->getController()->getLayoutsAction($this->site->getUid());
         
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('application/json', $response->headers->get('Content-Type'));
@@ -162,9 +168,11 @@ class SiteControllerTest extends TestCase
     public function testGetLayoutsAction_noAuthorizedLayouts()
     {
         // authenticate a user with super admin authority
-        $this->createAuthUser('editor_layout1', array('ROLE_API_USER'));
-        
-        $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($this->site->getUid());
+        $token = $this->createAuthUser('editor_layout', array('ROLE_API_USER'));
+
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity($this->site->getUid(), get_class($this->site)), UserSecurityIdentity::fromAccount($token->getUser()), MaskBuilder::MASK_VIEW);
         
         $request = new Request(array(), array(
             'id' => $this->site->getUid(),
@@ -189,7 +197,7 @@ class SiteControllerTest extends TestCase
     public function test_getLayoutsAction_invalideSite()
     {
         // authenticate a user with super admin authority
-        $this->createAuthUser('editor_layout1', array('ROLE_API_USER'));
+        $this->createAuthUser('editor_layout', array('ROLE_API_USER'));
         
         $controller = $this->getController();
         $response = $controller->getLayoutsAction('siteThatDoesntExist', new Request());
