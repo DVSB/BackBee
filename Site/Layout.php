@@ -147,6 +147,13 @@ class Layout extends AObjectIdentifiable implements IJson
      * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
+    
+    /**
+     * The content's parameters
+     * @var array
+     * @Column(type="array", name="parameters", nullable = true)
+     */
+    protected $_parameters = array();
 
     /**
      * The DOM document corresponding to the data
@@ -297,6 +304,44 @@ class Layout extends AObjectIdentifiable implements IJson
         }
 
         return $this->_zones;
+    }
+    
+    /**
+     * Returns defined parameters
+     * @param string $var The parameter to be return, if NULL, all parameters are returned
+     * @return mixed the parameter value or NULL if unfound
+     */
+    public function getParam($var = null)
+    {
+        $param = $this->_parameters;
+        if (null !== $var) {
+            if (true === isset($this->_parameters[$var])) {
+                $param = $this->_parameters[$var];
+            }
+        } 
+        
+        return $param;
+    }
+    
+    /**
+     * Goes all over the $param and keep looping until $pieces is empty to return
+     * the values user is looking for
+     * @param  mixed $param   
+     * @param  array  $pieces 
+     * @return mixed
+     */
+    private function _getRecursivelyParam($param, array $pieces)
+    {
+        if (0 === count($pieces)) {
+            return $param;
+        }
+
+        $key = array_shift($pieces);
+        if (false === isset($param[$key])) {
+            return null;
+        }
+
+        return $this->_getRecursivelyParam($param[$key], $pieces);
     }
 
     /**
@@ -491,6 +536,23 @@ class Layout extends AObjectIdentifiable implements IJson
     public function setSite(Site $site)
     {
         $this->_site = $site;
+        return $this;
+    }
+    
+    /**
+     * Sets one or all parameters
+     * @param string $var the parameter name to set, if NULL all the parameters array wil be set
+     * @param mixed $values the parameter value or all the parameters if $var is NULL
+     * @return \BackBuilder\Site\Layout
+     */
+    public function setParam($var = null, $values = null)
+    {
+        if (null === $var) {
+            $this->_parameters = $values;
+        } else {
+            $this->_parameters[$var] = $values;
+        }
+
         return $this;
     }
 
