@@ -96,27 +96,6 @@ class SiteControllerTest extends TestCase
         
         $this->getEntityManager()->flush();
         
-        // load acl
-        $loader = new YmlLoader();
-        $loader->setContainer($this->getBBApp()->getContainer());
-        $loader->load('groups:
-  super_admin:
-    sites:
-      resources: all
-      actions: all
-    layouts:
-      resources: all
-      actions: all
-  editor_layout:
-    sites:
-      resources: all
-      actions: all
-    layouts:
-      resources: [layout1]
-      actions: all
-');
-        
-        
     }
     
     protected function getController()
@@ -172,15 +151,13 @@ class SiteControllerTest extends TestCase
 
         // set up permissions
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
-        $aclManager->insertOrUpdateClassAce(new ObjectIdentity($this->site->getUid(), get_class($this->site)), UserSecurityIdentity::fromAccount($token->getUser()), MaskBuilder::MASK_VIEW);
+        $aclManager->insertOrUpdateObjectAce(
+            new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)), 
+            new UserSecurityIdentity('editor_layout', 'BackBuilder\Security\Group'),
+            MaskBuilder::MASK_VIEW
+        );
         
-        $request = new Request(array(), array(
-            'id' => $this->site->getUid(),
-        ));
-        $request->headers->set('Accept', 'application/json');
-        
-        $controller = $this->getController();
-        $response = $controller->getLayoutsAction($this->site->getUid(), $request);
+        $response = $this->getController()->getLayoutsAction($this->site->getUid());
         
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('application/json', $response->headers->get('Content-Type'));
