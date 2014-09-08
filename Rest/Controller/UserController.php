@@ -36,7 +36,8 @@ use BackBuilder\Security\Acl\Permission\MaskBuilder;
 use BackBuilder\Security\User;
 use BackBuilder\Rest\Exception\ValidationException;
 
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException,
+    Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 /**
  * User Controller
@@ -196,9 +197,7 @@ class UserController extends ARestController
         $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\User')->findBy(array('_login' => $request->request->get('login')));
 
         if($userExists) {
-            throw new ValidationException(new ConstraintViolationList(array(
-                new ConstraintViolation('User with that login already exists', 'User with that login already exists', array(), 'login', 'login', $request->request->get('login'))
-            )));
+            throw new ConflictHttpException(sprintf('User with that login already exists: %s', $request->request->get('login')));
         }
         
         $user = new User();
