@@ -78,6 +78,7 @@
             SEO: 'SEO properties',
             sitemap_search: 'Sitemap/Search',
             sitemap: 'Sitemap',
+            sitemap_move: 'Move to',
             medias: 'Media',
             keywords: 'Keywords',
             alert: 'Alert',

@@ -915,8 +915,6 @@
                             return;
                         }
 
-
-
                         bb.webserviceManager.getInstance('ws_local_page').request('postBBSelectorForm', {
                             params: {
                                 page_uid: page_uid,
@@ -927,16 +925,28 @@
                                 redirect: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-redirect').val(),
                                 layout_uid: selectedLayout,
                                 alttitle: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-alttitle').val(),
-                                flag: flag_value
+                                flag: flag_value,
+                                is_sibling: false,
+                                move_node_uid: bb.jquery(editDialog).find('#bb-ui-bbpagebrowser-form-tree').attr('data-uid')
                             },
                             success: function(result) {
+                                var self_root_uid = root_uid;
+                                if (result.result.is_sibling === true) {
+                                    self_root_uid = result.result.attr.parentuid;
+                                } else if (result.result.move_node_uid !== null) {
+                                    self_root_uid = result.result.move_node_uid; 
+                                }
                                 if (page_uid === null) {
-                                    context.treeview.jstree('create_node', bb.jquery(myself.element).find('#node_' + root_uid), 'first', result.result);
+                                    context.treeview.jstree('create_node', bb.jquery(myself.element).find('#node_' + self_root_uid), 'first', result.result);
                                     bb.jquery(myself.element).find('#' + result.result.attr.id + ' a ins').addClass('bb5-jstree-offline bb5-jstree-hidden');
                                 } else {
+                                    if (result.result.move_node_uid !== null) {
+                                        context.treeview.jstree('move_node', bb.jquery(myself.element).find('#node_' + page_uid), '#node_' + self_root_uid, "first");
+                                    }
+                                    
                                     context.treeview.jstree('rename_node', bb.jquery(myself.element).find('#node_' + page_uid), result.result.data);
                                 }
-
+                                
                                 bb.jquery(editDialog).parents('.ui-dialog:first').unmask();
                                 bb.jquery(editDialog).dialog("close");
 
@@ -966,13 +976,56 @@
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-layout').val(result.result.layout_uid);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-alttitle').val(result.result.alttitle);
                     bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-url').attr("disabled", true);
-
+                    
+                    bb.jquery(editDialog.dialog).find('.bb5-button.bb5-ico-tree').on('click', function() {
+                       myself.showPageTree(bb.jquery(editDialog.dialog).find('#bb-ui-bbpagebrowser-form-tree'));
+                    });
+                    
                     editDialog.show();
                 },
                 error: function(result) {
                     myself._showMessage(bb.i18n.__('toolbar.editing.error'), result.error.message, 'alert');
                 }
             });
+        },
+        showPageTree: function(target) {
+            var pageBrowser = bb.jquery("<div id='bb5-form-pagebrowser'><div id='browser' class='filetree'></div></div>").clone();
+            var self = this;
+            var context = this.getContext();
+            if (context.pageBrowser) {
+                /*afficher - selectionner noeud*/
+                if (context.pageBrowser.data("bbPageBrowser")) {
+                    context.pageBrowser.data("bbPageBrowser").open();
+                    return false;
+                }
+
+            } else {
+                context.pageBrowser = bb.jquery(pageBrowser).bbPageBrowser({
+                    title: this.i18n.pageBrowserTitle,
+                    popup: {
+                        width: 269,
+                        height: 500,
+                        position: [0, 60] //handle destroy on close
+                    },
+                    editMode: false,
+                    enableMultiSite: true,
+                    having_child: true,
+                    site: bb.frontApplication.getSiteUid(),
+                    breadcrumb: bb.frontApplication.getBreadcrumbIds(),
+                    select: function(e, data) {
+                        bb.jquery(context).attr("data-fieldValue", data.node_id);
+                        bb.jquery(context).val(bb.jquery("#node_" + data.node_id).find("a").get(0).textContent);
+                        
+                        bb.jquery(target).attr('data-uid', data.node_id);
+                        bb.jquery(target).val(bb.jquery("#node_" + data.node_id).find("a").get(0).textContent);
+                        
+                        bb.jquery(context).trigger("change");
+                        bb.jquery(this).bbPageBrowser("close");
+                        context.pageBrowser = false;
+                    }
+                });
+                context.pageBrowser.data("bbPageBrowser").open();
+            }
         },
         removePage: function(page) {
             var myself = this;
