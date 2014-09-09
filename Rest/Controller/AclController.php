@@ -65,6 +65,7 @@ class AclController extends ARestController
      *  @Assert\Type(type="integer", message="Mask must be an integer"), 
      * })
      * 
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getEntryCollectionAction(Request $request) 
     {
@@ -96,7 +97,9 @@ class AclController extends ARestController
         return new Response($this->formatCollection($groups));
     }
     
-    
+    /**
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
+     */
     public function getClassCollectionAction(Request $request) 
     {
         $sql = 'SELECT * FROM acl_classes';
@@ -120,6 +123,8 @@ class AclController extends ARestController
      *  @Assert\NotBlank(message="Mask must be provided"), 
      *  @Assert\Type(type="integer", message="Mask must be an integer"), 
      * })
+     * 
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function postClassAceAction(Request $request) 
     {
@@ -171,6 +176,8 @@ class AclController extends ARestController
      *  @Assert\NotBlank(message="Mask must be provided"), 
      *  @Assert\Type(type="integer", message="Mask must be an integer"), 
      * })
+     * 
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function postObjectAceAction(Request $request) 
     {
@@ -209,7 +216,7 @@ class AclController extends ARestController
      * Bulk permissions create/update 
      * 
      * 
-     * @param security object $sid 
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function postPermissionMapAction(Request $request) 
     {
@@ -325,6 +332,8 @@ class AclController extends ARestController
      * })
      * 
      * @param string|int $sid
+     * 
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function deleteClassAceAction($sid, Request $request)
     {
@@ -356,6 +365,8 @@ class AclController extends ARestController
      * })
      * 
      * @param string|int $sid
+     * 
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function deleteObjectAceAction($sid, Request $request)
     {
@@ -380,7 +391,7 @@ class AclController extends ARestController
     
     
     /**
-     * 
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getMaskCollectionAction()
     {
