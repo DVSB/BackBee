@@ -1155,6 +1155,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
             $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
             $this->getContainer()->set('em', $em);
+            $this->getContainer()->set('doctrine.connection.default', $em->getConnection());
 
             $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
             $this->getContainer()->set('doctrine', $registry);
