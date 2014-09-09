@@ -68,7 +68,7 @@
             var itemTemplate = '<li data-uid="${uid}" class="bb5-content-item">'
             +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
             +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
-            +"<p>Date de crÃ©ation: <strong>${created}</strong></p>"
+            +"<p>Date de création: <strong>${created}</strong></p>"
             +'<p>\n\
                     <button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button>\n\
                     <button class="bb5-button bb5-ico-add addClose">Ajouter et fermer</button>\n\
@@ -648,7 +648,7 @@
             var pagerParams = {
                 params : criteria,
                 site: context.site,
-                order_sort: 'modified',
+                order_sort: 'created',
                 order_dir: 'desc',
                 limit: limit,
                 start:0

@@ -326,7 +326,7 @@ class User implements UserInterface
     }
 
     /**
-     * @return string
+     * @return \BackBuilder\Security\Group[]
      * @codeCoverageIgnore
      */
     public function getGroups()

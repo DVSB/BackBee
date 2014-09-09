@@ -103,7 +103,6 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(array_key_exists('parameters', $this->dump));
         $this->assertTrue(array_key_exists('services', $this->dump));
         $this->assertTrue(array_key_exists('aliases', $this->dump));
-        $this->assertTrue(array_key_exists('services_dump', $this->dump));
         $this->assertTrue(array_key_exists('is_compiled', $this->dump));
     }
 
@@ -319,7 +318,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
 
         $dump = unserialize($this->dumper->dump());
 
-        $this->assertFalse(array_key_exists($config_service_id, $dump['services_dump']));
+        $this->assertNotEquals('BackBuilder\Config\ConfigProxy', $dump['services'][$config_service_id]['class']);
 
         $config = $this->container->get($config_service_id);
         $test = array('foo' => 'bar');
@@ -327,13 +326,26 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
 
         $dump = unserialize($this->dumper->dump());
 
-        $this->assertTrue(array_key_exists($config_service_id, $dump['services_dump']));
-        $this->assertTrue(array_key_exists('dump', $dump['services_dump'][$config_service_id]));
-        $this->assertTrue(array_key_exists('class_proxy', $dump['services_dump'][$config_service_id]));
+        $this->assertEquals('BackBuilder\Config\ConfigProxy', $dump['services'][$config_service_id]['class']);
+        $this->assertFalse(array_key_exists('arguments', $dump['services'][$config_service_id]));
+        $this->assertTrue(array_key_exists('calls', $dump['services'][$config_service_id]));
 
-        $this->assertEquals($config_class_proxy, $dump['services_dump'][$config_service_id]['class_proxy']);
+        $restore_call_args = null;
+        foreach ($dump['services'][$config_service_id]['calls'] as $call) {
+            if (true === isset($call[0]) && 'restore' === $call[0]) {
+                $restore_call_args = $call[1];
+            }
+        }
 
-        $config_dump = $dump['services_dump'][$config_service_id]['dump'];
+        $this->assertNotNull($restore_call_args);
+        $this->assertTrue(
+            2 === count($restore_call_args)
+            && true === isset($restore_call_args[0])
+            && isset($restore_call_args[1])
+        );
+
+        $config_dump = $restore_call_args[1];
+        $this->assertTrue(is_array($config_dump));
 
         $this->assertTrue(array_key_exists('basedir', $config_dump));
         $this->assertEquals($config_base_dir, $config_dump['basedir']);

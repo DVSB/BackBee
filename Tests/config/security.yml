@@ -10,15 +10,12 @@ firewalls:
             nonce_dir: security/nonces
             lifetime: 1800
             use_registry: true
-    rest_api_area_test:
-        pattern: ^/rest/1/_
-        anonymous: ~
     rest_api_area:
         pattern: ^/rest
         provider: public_key
         public_key: ~
         restful: ~
-
+        anonymous: ~
 
 providers:
     bb_user:

@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests\Loader;
+namespace BackBuilder\DependencyInjection\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -23,7 +23,7 @@ namespace BackBuilder\DependencyInjection\Tests\Loader;
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
-use BackBuilder\DependencyInjection\Loader\PhpArrayLoader;
+use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
 
 use Symfony\Component\Yaml\Yaml;
@@ -38,7 +38,7 @@ use org\bovigo\vfs\vfsStream;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\DependencyInjection\Loader\ContainerProxy
+ * @coversDefaultClass \BackBuilder\DependencyInjection\ContainerProxy
  */
 class ContainerProxyTest extends \PHPUnit_Framework_TestCase
 {
@@ -65,7 +65,7 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     {
         $this->services_yml_array = array(
             'parameters' => array(
-                'service.class' => '\BackBuilder\DependencyInjection\Tests\Loader\RandomService',
+                'service.class' => 'BackBuilder\DependencyInjection\Tests\RandomService',
                 'size_one'      => 300,
                 'size_two'      => 8000,
                 'size_three'    => 44719
@@ -145,7 +145,7 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         ServiceLoader::loadServicesFromYamlFile($this->container, vfsStream::url('directory'));
 
         $this->container->get('service_two')->setSize(self::RANDOM_SERVICE_NEW_SIZE_VALUE);
-        $this->container->get('service_three');
+        // $this->container->get('service_three');
     }
 
     /**
@@ -155,13 +155,12 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     {
         $dumper = new PhpArrayDumper($this->container);
 
-        vfsStream::setup('directory', 0777, array(
-            'dump' => $dumper->dump(array('do_compile' => false))
-        ));
+        // vfsStream::setup('directory', 0777, array(
+        //     'dump' => $dumper->dump(array('do_compile' => false))
+        // ));
 
-        $container = new Container();
-        $loader = new PhpArrayLoader($container);
-        $loader->load(vfsStream::url('directory') . '/dump');
+        $container = new ContainerProxy();
+        $container->init(unserialize($dumper->dump(array('do_compile' => false))));
 
         $this->assertEquals($this->container->getParameterBag()->all(), $container->getParameterBag()->all());
 
@@ -209,14 +208,17 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         $service = $container->get('service_two');
 
         $this->assertNotEquals(get_class($original_service), get_class($service));
-        $this->assertEquals(RandomService::RANDOM_SERVICE_PROXY_CLASSNAME, '\\' . get_class($service));
+        $this->assertEquals(RandomService::RANDOM_SERVICE_PROXY_CLASSNAME, get_class($service));
         $this->assertEquals($original_service->getSize(), $service->getSize());
         $this->assertEquals(self::RANDOM_SERVICE_NEW_SIZE_VALUE, $service->getSize());
 
         try {
-            $container->get('service_three');
+            $this->container->get('service_three');
+            $dumper = new PhpArrayDumper($this->container);
+            $dumper->dump(array('do_compile' => false));
             $this->fail('Raise of InvalidServiceProxyException expected.');
         } catch (\Exception $e) {
+
             $this->assertInstanceOf(
                 'BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException',
                 $e
@@ -349,13 +351,8 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         // Test restoration of service with parent (with compilation)
         $dumper = new PhpArrayDumper($this->container);
 
-        vfsStream::setup('directory', 0777, array(
-            'dump' => $dumper->dump(array('do_compile' => true))
-        ));
-
-        $container = new Container();
-        $loader = new PhpArrayLoader($container);
-        $loader->load(vfsStream::url('directory') . '/dump');
+        $container = new ContainerProxy();
+        $container->init(unserialize($dumper->dump(array('do_compile' => true))));
 
         $this->assertFalse($container->hasDefinition('service_ten'));
         $this->assertInstanceOf(
@@ -373,27 +370,17 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         // test that ContainerProxy::isCompiled return false value
         $dumper = new PhpArrayDumper($this->container);
 
-        vfsStream::setup('directory', 0777, array(
-            'dump' => $dumper->dump(array('do_compile' => false))
-        ));
+        $container = new ContainerProxy();
+        $container->init(unserialize($dumper->dump(array('do_compile' => false))));
 
-        $container = new Container();
-        $loader = new PhpArrayLoader($container);
-        $loader->load(vfsStream::url('directory') . '/dump');
-
-        $this->assertInstanceOf('BackBuilder\DependencyInjection\Loader\ContainerProxy', $container);
+        $this->assertInstanceOf('BackBuilder\DependencyInjection\ContainerProxy', $container);
         $this->assertFalse($container->isCompiled());
 
         // test that ContainerProxy::isCompiled return false value
         $dumper = new PhpArrayDumper($this->container);
 
-        vfsStream::setup('directory', 0777, array(
-            'dump' => $dumper->dump(array('do_compile' => true))
-        ));
-
-        $container = new Container();
-        $loader = new PhpArrayLoader($container);
-        $loader->load(vfsStream::url('directory') . '/dump');
+        $container = new ContainerProxy();
+        $container->init(unserialize($dumper->dump(array('do_compile' => true))));
 
         $this->assertTrue($container->isCompiled());
     }

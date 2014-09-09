@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests\Loader;
+namespace BackBuilder\DependencyInjection\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -22,7 +22,7 @@ namespace BackBuilder\DependencyInjection\Tests\Loader;
 
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\DependencyInjection\Tests\Loader\RandomService;
+use BackBuilder\DependencyInjection\Tests\RandomService;
 
 /**
  * RandomServiceProxy is the proxy class for RandomService when container will restore RandomService

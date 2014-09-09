@@ -72,7 +72,7 @@ class Controller implements ContainerAwareInterface
      * Returns current Backbuilder application
      *
      * @access public
-     * @return \BackBuilder\DependencyInjection\ContainerBuilder\IApplication
+     * @return \BackBuilder\IApplication
      */
     public function getApplication() 
     {
