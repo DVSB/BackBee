@@ -74,7 +74,6 @@ class PageController extends ARestController
         }
 
         $this->isGranted('VIEW', $parent);
-
         $children = $this->getPageRepository()->getNotDeletedDescendants(
             $parent,
             1,
@@ -102,6 +101,7 @@ class PageController extends ARestController
      * @param string $uid the unique identifier of the page we want to retrieve
      *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\Security(expression="is_granted('VIEW', page)")
      */
     public function getAction(Page $page)
     {
@@ -210,13 +210,12 @@ class PageController extends ARestController
      * @Rest\ParamConverter(
      *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBuilder\Workflow\State", required=false
      * )
+     * @Rest\Security(expression="is_granted('EDIT', page)")
+     * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
     public function putAction(Page $page)
     {
-        $this->isGranted('EDIT', $page);
-        $this->isGranted('VIEW', $layout = $this->getEntityFromAttributes('layout'));
-
-        $page->setLayout($layout);
+        $page->setLayout($this->getEntityFromAttributes('layout'));
         $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
         $page->setTitle($this->getRequest()->request->get('title'));
         $page->setUrl($this->getRequest()->request->get('url'));
@@ -248,11 +247,10 @@ class PageController extends ARestController
      * })
      *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\Security(expression="is_granted('EDIT', page)")
      */
     public function patchAction(Page $page)
     {
-        $this->isGranted('EDIT', $page);
-
         $operations = $this->getRequest()->request->get('operations');
         try {
             (new OperationSyntaxValidator())->validate($operations);
@@ -285,6 +283,8 @@ class PageController extends ARestController
      * @Rest\ParamConverter(
      *   name="next", id_name="next_uid", class="BackBuilder\NestedNode\Page", id_source="request", required=false
      * )
+     * @Rest\Security(expression="is_granted('EDIT', page)")
+     * @Rest\Security(expression="is_granted('EDIT', parent)")
      */
     public function movePageNodeAction(Page $page)
     {
@@ -292,14 +292,12 @@ class PageController extends ARestController
             throw new AccessDeniedHttpException('Cannot move root node of a site.');
         }
 
-        $this->isGranted('EDIT', $page); // user must have edit permission on page
-        $this->isGranted('EDIT', $parent = $this->getEntityFromAttributes('parent'));
-
         if (true === $page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page); // user must have publish permission on the page
         }
 
         try {
+            $parent = $this->getEntityFromAttributes('parent');
             if (null === $next = $this->getEntityFromAttributes('next')) {
                 $this->getPageRepository()->moveAsLastChildOf($page, $parent);
             } else {
@@ -405,17 +403,5 @@ class PageController extends ARestController
                 $page->setWorkflowState($workflow);
             }
         }
-    }
-
-    /**
-     * [getEntityFromAttributes description]
-     *
-     * @param  string $name
-     *
-     * @return object
-     */
-    private function getEntityFromAttributes($name)
-    {
-        return $this->getRequest()->attributes->get($name);
     }
 }
