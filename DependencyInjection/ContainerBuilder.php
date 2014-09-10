@@ -287,7 +287,7 @@ class ContainerBuilder
 
         // define in which directory we have to looking for services yml or xml
         $directories = ConfigDirectory::getDirectories(
-            $this->application->getBBDir(), $this->repository_directory, $this->context, $this->environment
+            null, $this->repository_directory, $this->context, $this->environment
         );
 
         // Loop into every directory where we can potentially found a services.yml or services.xml
@@ -298,6 +298,17 @@ class ContainerBuilder
 
             if (true === is_readable($directory . DIRECTORY_SEPARATOR . self::SERVICE_FILENAME . '.xml')) {
                 ServiceLoader::loadServicesFromXmlFile($this->container, $directory);
+            }
+        }
+
+        $services_directory = $this->application->getBBDir() . '/Config/services';
+        foreach (scandir($services_directory) as $file) {
+            if (1 === preg_match('#(\w+)\.(yml|xml)$#', $file, $matches)) {
+                if ('yml' === $matches[2]) {
+                    ServiceLoader::loadServicesFromYamlFile($this->container, $services_directory, $matches[1]);
+                } else {
+                    ServiceLoader::loadServicesFromXmlFile($this->container, $services_directory, $matches[1]);
+                }
             }
         }
 
