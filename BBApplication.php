@@ -656,14 +656,23 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (null === $this->_resourcedir) {
             $this->_resourcedir = array();
 
-            $this->addResourceDir($this->getBBDir() . '/Resources')
-                    ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
+            $this->addResourceDir($this->getBBDir() . '/Resources');
+
+            if (true === is_dir($this->getBaseRepository() . '/Resources')) {
+                $this->addResourceDir($this->getBaseRepository() . '/Resources');
+            }
+
+            if (true === is_dir($this->getBaseRepository() . '/Ressources')) {
+                $this->addResourceDir($this->getBaseRepository() . '/Ressources');
+            }
 
             if (true === $this->hasContext()) {
-                try {
-                    $this->addResourceDir($this->getRepository() . '/Ressources');
-                } catch (BBException $e) {
-                    // Ignore it
+                if (true === is_dir($this->getRepository() . '/Resources')) {
+                    $this->addResourceDir($this->getRepository() . '/Resources');
+                }
+
+                if (true === is_dir($this->getRepository() . '/Resources')) {
+                    $this->addResourceDir($this->getRepository() . '/Resources');
                 }
             }
 
