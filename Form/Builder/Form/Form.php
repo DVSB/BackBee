@@ -139,7 +139,7 @@ class Form
      */
     public function getTemplate()
     {
-        return __DIR__ . '/../Templates/scripts/form/form.twig';
+        return 'form/form.twig';
     }
     
     /**
