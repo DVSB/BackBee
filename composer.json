@@ -17,18 +17,6 @@
     ],
     "require": {
         "php": ">=5.4.0",
-<<<<<<< HEAD
-        "symfony/symfony": "2.2.11",
-        "doctrine/orm": "2.5.*@dev",
-        "doctrine/dbal": "2.5.*@dev",
-        "twig/twig": "1.16.*@dev",
-        "twig/extensions" : "1.0.1",
-        "swiftmailer/swiftmailer": "5.1.0",
-        "jms/serializer": "0.15.0",
-        "jms/metadata": "1.5.0",
-        "respect/validation": "0.7.*@dev",
-        "backbuilder/api-client": "*"
-=======
         "symfony/symfony": "2.3.18",
         "doctrine/orm": "2.4.4",
         "doctrine/dbal": "2.4.2",
@@ -37,10 +25,11 @@
         "swiftmailer/swiftmailer": "5.2.1",
         "jms/serializer": "0.16.0",
         "jms/metadata": "1.5.1",
+        "respect/validation": "0.7.*@dev",
         "backbuilder/api-client": "dev-master",
         "eric-chau/installers": "dev-master",
-        "willdurand/jsonp-callback-validator": "~1.0"
->>>>>>> 264d8da0c350775b995c9e6f99b10aa9a0b1fa19
+        "willdurand/jsonp-callback-validator": "~1.0",
+        "symfony/expression-language": "2.5.4"
     },
     "autoload": {
         "psr-4": {

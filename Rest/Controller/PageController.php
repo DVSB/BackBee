@@ -105,19 +105,12 @@ class PageController extends ARestController
      */
     public function getAction(Page $page)
     {
-        $this->isGranted('VIEW', $page);
-
         return $this->createResponse($this->formatItem($page));
     }
 
     /**
      * Create or clone a page entity
      *
-     * Clone action requirements:
-     *
-     * @Rest\QueryParam(name="source_uid", description="Source uid for cloning", requirements={
-     *   @Assert\Length(min=32, max=32, exactMessage="source_uid must contains 32 characters")
-     * })
      * @Rest\QueryParam(name="title", description="Cloning page new title", requirements={
      *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
      * })
@@ -202,9 +195,6 @@ class PageController extends ARestController
      * @Rest\RequestParam(name="target", description="page new target", requirements={
      *   @Assert\NotBlank(message="target is required")
      * })
-     * @Rest\RequestParam(name="layout_uid", description="page new layout", requirements={
-     *   @Assert\NotBlank(message="layout_uid is required")
-     * })
      * @Rest\RequestParam(name="state", description="page new state", requirements={
      *   @Assert\NotBlank(message="state is required")
      * })
@@ -288,14 +278,6 @@ class PageController extends ARestController
     /**
      * Update page by moving it from current parent to new one
      *
-     * @Rest\RequestParam(name="parent_uid", description="new parent node uid", requirements={
-     *   @Assert\NotBlank(message="parent_uid is required"),
-     *   @Assert\Length(min=32, max=32, exactMessage="parent_uid must contains 32 characters")
-     * })
-     * @Rest\RequestParam(name="next_uid", description="next node uid", requirements={
-     *   @Assert\Length(min=32, max=32, exactMessage="next_uid must contains 32 characters")
-     * })
-     *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", class="BackBuilder\NestedNode\Page", id_source="request"
@@ -339,10 +321,6 @@ class PageController extends ARestController
     /**
      * [deleteAction description]
      *
-     * @param  [type] $uid [description]
-     *
-     * @return Symfony\Component\HttpFoundation\Response
-     *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      */
     public function deleteAction(Page $page)
@@ -365,7 +343,7 @@ class PageController extends ARestController
     /**
      * [clonePageAction description]
      *
-     * @return [type] [description]
+     * @return [type]
      */
     private function clonePageAction()
     {
@@ -416,10 +394,8 @@ class PageController extends ARestController
     /**
      * [trySetPageWorkflowState description]
      *
-     * @param  Page   $page               [description]
-     * @param  [type] $workflow_state_uid [description]
-     *
-     * @return [type]                     [description]
+     * @param  Page   $page
+     * @param  [type] $workflow
      */
     private function trySetPageWorkflowState(Page $page, State $workflow = null)
     {
@@ -434,7 +410,7 @@ class PageController extends ARestController
     /**
      * [getEntityFromAttributes description]
      *
-     * @param  string $name [description]
+     * @param  string $name
      *
      * @return object
      */
