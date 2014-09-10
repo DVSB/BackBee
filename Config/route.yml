@@ -222,6 +222,50 @@ bb.rest.page.delete:
         uid: \w{32}
         _method: DELETE
 
+bb.rest.layout.get_collection:
+    pattern: /rest/{version}/layout
+    defaults:
+        _action: getCollectionAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        _method: GET
+
+bb.rest.layout.get:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: getAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: GET
+
+bb.rest.layout.post:
+    pattern: /rest/{version}/layout
+    defaults:
+        _action: postAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: POST
+
+bb.rest.layout.put:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: putAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: PUT
+
+bb.rest.layout.delete:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: deleteAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: DELETE
+
 # BackBuilder rss
 bb.rss:
     pattern: /rss/{uri}
