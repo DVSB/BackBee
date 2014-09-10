@@ -323,7 +323,9 @@ abstract class ARenderer implements IRenderer
             if (true === isset($renderer_config['bb_scripts_directory'])) {
                 $directories = (array) $renderer_config['bb_scripts_directory'];
                 foreach ($directories as $directory) {
-                    $this->addScriptDir($directory);
+                    if (true === is_dir($directory) && true === is_readable($directory)) {
+                        $this->_scriptdir[] = $directory;
+                    }
                 }
             }
         }
