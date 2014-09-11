@@ -50,7 +50,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
-                    'services.yml' => file_get_contents($resources_directory . '/backbee/Config/services.yml')
+                    'services' => array(
+                        'services.yml' => file_get_contents($resources_directory . '/backbee/Config/services/services.yml')
+                    )
                 )
             ),
             'repository' => array(
@@ -104,7 +106,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
-                    'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                    'services' => array(
+                        'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                    )
                 )
             ),
             'repository' => array(
@@ -157,7 +161,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
-                    'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                    'services' => array(
+                        'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                    )
                 )
             ),
             'repository' => array(

@@ -290,17 +290,6 @@ class ContainerBuilder
             null, $this->repository_directory, $this->context, $this->environment
         );
 
-        // Loop into every directory where we can potentially found a services.yml or services.xml
-        foreach ($directories as $directory) {
-            if (true === is_readable($directory . DIRECTORY_SEPARATOR . self::SERVICE_FILENAME . '.yml')) {
-                ServiceLoader::loadServicesFromYamlFile($this->container, $directory);
-            }
-
-            if (true === is_readable($directory . DIRECTORY_SEPARATOR . self::SERVICE_FILENAME . '.xml')) {
-                ServiceLoader::loadServicesFromXmlFile($this->container, $directory);
-            }
-        }
-
         $services_directory = $this->application->getBBDir() . '/Config/services';
         foreach (scandir($services_directory) as $file) {
             if (1 === preg_match('#(\w+)\.(yml|xml)$#', $file, $matches)) {
@@ -309,6 +298,17 @@ class ContainerBuilder
                 } else {
                     ServiceLoader::loadServicesFromXmlFile($this->container, $services_directory, $matches[1]);
                 }
+            }
+        }
+
+        // Loop into every directory where we can potentially found a services.yml or services.xml
+        foreach ($directories as $directory) {
+            if (true === is_readable($directory . DIRECTORY_SEPARATOR . self::SERVICE_FILENAME . '.yml')) {
+                ServiceLoader::loadServicesFromYamlFile($this->container, $directory);
+            }
+
+            if (true === is_readable($directory . DIRECTORY_SEPARATOR . self::SERVICE_FILENAME . '.xml')) {
+                ServiceLoader::loadServicesFromXmlFile($this->container, $directory);
             }
         }
 
