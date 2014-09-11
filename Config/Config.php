@@ -132,20 +132,18 @@ class Config implements DumpableServiceInterface
      */
     public function __call($name, $arguments)
     {
-        $sections = array();
-
-        $is_match = preg_match('/get([a-z]+)config/i', strtolower($name), $sections);
-        if ($is_match) {
+        $result = null;
+        if (1 === preg_match('/get([a-z]+)config/i', strtolower($name), $sections)) {
             $section = $this->getSection($sections[1]);
 
-            if (key($arguments) !== null && array_key_exists($arguments[0], $section)) {
-                return $section[$arguments[0]];
+            if (0 === count($arguments)) {
+                $result = $section;
+            } elseif (true === array_key_exists($arguments[0], $section)) {
+                $result = $section[$arguments[0]];
             }
-
-            return $section;
         }
 
-        return null;
+        return $result;
     }
 
     /**
