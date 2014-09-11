@@ -66,7 +66,7 @@ class SecurityListener
         $request = $event->getRequest();
         $controller = $event->getController();
         $metadata = $this->getControllerActionMetadata($controller);
-        if (0 === count($metadata->security)) {
+        if (null === $metadata || 0 === count($metadata->security)) {
             return;
         }
 

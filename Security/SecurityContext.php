@@ -74,14 +74,11 @@ class SecurityContext extends sfSecurityContext
      */
     private $_encoderfactory;
 
-    public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager = null, AccessDecisionManagerInterface $accessDecisionManager = null)
+    public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager, AccessDecisionManagerInterface $accessDecisionManager)
     {
         $this->_application = $application;
-
-        if (null !== $this->_application) {
-            $this->_logger = $this->_application->getLogging();
-            $this->_dispatcher = $this->_application->getEventDispatcher();
-        }
+        $this->_logger = $this->_application->getLogging();
+        $this->_dispatcher = $this->_application->getEventDispatcher();
 
         if (null === $securityConfig = $this->_application->getConfig()->getSecurityConfig()) {
             trigger_error('None security configuration found', E_USER_NOTICE);
@@ -100,10 +97,14 @@ class SecurityContext extends sfSecurityContext
              ->createProviders($securityConfig)
              ->_createACLProvider($securityConfig)
              ->_createFirewallMap($securityConfig)
-             ->_registerFirewall();
+             ->_registerFirewall()
+        ;
 
         if (null === $accessDecisionManager) {
-            $trustResolver = new TrustResolver('BackBuilder\Security\Token\AnonymousToken', 'BackBuilder\Security\Token\RememberMeToken');
+            $trustResolver = new TrustResolver(
+                'BackBuilder\Security\Token\AnonymousToken',
+                'BackBuilder\Security\Token\RememberMeToken'
+            );
 
             $voters = array();
             $voters[] = new SudoVoter($this->getApplication());
@@ -113,16 +114,16 @@ class SecurityContext extends sfSecurityContext
 
             if (null !== $this->_aclprovider) {
                 $voters[] = new Authorization\Voter\BBAclVoter(
-                                $this->_aclprovider,
-                                new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
-                                new \BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
-                                        new RoleHierarchy(array()),
-                                        $trustResolver
-                                ),
-                                new Acl\Permission\PermissionMap(),
-                                $this->getApplication()->getLogging(),
-                                false,
-                                $this->getApplication()
+                    $this->_aclprovider,
+                    new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
+                    new \BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
+                            new RoleHierarchy(array()),
+                            $trustResolver
+                    ),
+                    new Acl\Permission\PermissionMap(),
+                    $this->getApplication()->getLogging(),
+                    false,
+                    $this->getApplication()
                 );
             }
 
@@ -258,16 +259,21 @@ class SecurityContext extends sfSecurityContext
     {
         if (true === array_key_exists('acl', $config)) {
             if (true === array_key_exists('connection', $config['acl']) && 'default' === $config['acl']['connection']) {
-                $this->_aclprovider = new \Symfony\Component\Security\Acl\Dbal\MutableAclProvider(
-                    $this->getApplication()->getEntityManager()->getConnection(),
-                    new \Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy(),
-                    array(
-                        'class_table_name'         => 'acl_classes',
-                        'entry_table_name'         => 'acl_entries',
-                        'oid_table_name'           => 'acl_object_identities',
-                        'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
-                        'sid_table_name'           => 'acl_security_identities'
-                ));
+                if (false === $this->_application->getContainer()->has('security.acl_provider')) {
+                    $this->_aclprovider = new \Symfony\Component\Security\Acl\Dbal\MutableAclProvider(
+                        $this->getApplication()->getEntityManager()->getConnection(),
+                        new \Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy(),
+                        array(
+                            'class_table_name'         => 'acl_classes',
+                            'entry_table_name'         => 'acl_entries',
+                            'oid_table_name'           => 'acl_object_identities',
+                            'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
+                            'sid_table_name'           => 'acl_security_identities'
+                    ));
+                } else {
+                    $this->_aclprovider = $this->_application->getContainer()->has('security.acl_provider');
+                }
+
             }
         }
 
