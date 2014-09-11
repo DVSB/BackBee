@@ -48,7 +48,7 @@ class SudoVoter implements VoterInterface
     public function __construct(BBApplication $application)
     {
         $this->_application = $application;
-        $this->_sudoers = $this->_application->getConfig()->getSecurityConfig('sudoers');
+        $this->_sudoers = $this->_application->getConfig()->getSecurityConfig('sudoers') ?: array();
     }
 
     /**
@@ -57,7 +57,7 @@ class SudoVoter implements VoterInterface
      */
     public function supportsAttribute($attribute)
     {
-        return $attribute === 'sudo';
+        return true;
     }
 
     /**
@@ -78,23 +78,13 @@ class SudoVoter implements VoterInterface
     {
         $result = VoterInterface::ACCESS_ABSTAIN;
 
-        if (false === ($token instanceof BBUserToken) && false === ($token instanceof PublicKeyToken)) {
-            return self::ACCESS_DENIED;
-        }
-
-        foreach ($attributes as $attribute) {
-            if (false === $this->supportsAttribute($attribute)) {
-                continue;
-            }
-
+        if (true === $this->supportsClass(get_class($token))) {
             if (
-                array_key_exists($token->getUser()->getUsername(), $this->_sudoers)
+                true === array_key_exists($token->getUser()->getUsername(), $this->_sudoers)
                 && $token->getUser()->getId() === $this->_sudoers[$token->getUser()->getUsername()]
             ) {
                 $result = VoterInterface::ACCESS_GRANTED;
             }
-
-            break;
         }
 
         return $result;
