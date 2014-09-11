@@ -39,6 +39,7 @@ abstract class AFormBuilder
     
     protected $config;
     protected $renderer;
+    protected $has_error;
     
     /**
      * AFormBuilder's contructor
@@ -92,11 +93,17 @@ abstract class AFormBuilder
         $errors = array();
         
         $owner = $validator->validate($owner, $request->request->all(), $errors, $this->config, $prefix);
-      
+        
         if (false === empty($errors)) {
+            $this->has_error = true;
             foreach ($errors as $key => $error) {
                 $request->request->set($key . self::PREFIX_ERROR, $error);
             }
         }
+    }
+    
+    public function hasError()
+    {
+        return $this->has_error;
     }
 }
