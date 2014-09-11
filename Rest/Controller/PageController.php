@@ -73,7 +73,7 @@ class PageController extends ARestController
             $parent = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
         }
 
-        $this->isGranted('VIEW', $parent);
+        $this->granted('VIEW', $parent);
         $children = $this->getPageRepository()->getNotDeletedDescendants(
             $parent,
             1,
@@ -134,8 +134,8 @@ class PageController extends ARestController
             return $this->clonePageAction();
         }
 
-        $this->isGranted('VIEW', $layout = $this->getEntityFromAttributes('layout'));
-        $this->isGranted('EDIT', $parent = $this->getEntityFromAttributes('parent'));
+        $this->granted('VIEW', $layout = $this->getEntityFromAttributes('layout'));
+        $this->granted('EDIT', $parent = $this->getEntityFromAttributes('parent'));
 
         if (0 === strlen($title = $this->getRequest()->request->get('title', null))) {
             throw new NotFoundHttpException('Page\'s title cannot be empty.');
@@ -165,7 +165,7 @@ class PageController extends ARestController
 
         $page = $builder->getPage();
         $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
-        $this->isGranted('CREATE', $page);
+        $this->granted('CREATE', $page);
 
         $this->getEntityManager()->persist($page);
         try {
@@ -231,7 +231,7 @@ class PageController extends ARestController
         $page->setArchiving(null !== $archiving ? new \DateTime(date('c', $archiving)) : null);
 
         if (true === $page->isOnline(true)) {
-            $this->isGranted('PUBLISH', $page);
+            $this->granted('PUBLISH', $page);
         }
 
         $this->getEntityManager()->flush($page);
@@ -293,7 +293,7 @@ class PageController extends ARestController
         }
 
         if (true === $page->isOnline(true)) {
-            $this->isGranted('PUBLISH', $page); // user must have publish permission on the page
+            $this->granted('PUBLISH', $page); // user must have publish permission on the page
         }
 
         try {
@@ -327,10 +327,10 @@ class PageController extends ARestController
             throw new AccessDeniedHttpException('Cannot remove root page of a site.');
         }
 
-        $this->isGranted('EDIT', $page->getParent()); // user must have edit permission on parent
+        $this->granted('EDIT', $page->getParent()); // user must have edit permission on parent
 
         if (true === $page->isOnline()) {
-            $this->isGranted('PUBLISH', $page); // user must have publish permission on the page
+            $this->granted('PUBLISH', $page); // user must have publish permission on the page
         }
 
         $this->getPageRepository()->toTrash($page);
@@ -354,13 +354,13 @@ class PageController extends ARestController
             throw new BadRequestHttpException('`title` query parameter is missing.');
         }
 
-        $this->isGranted('VIEW', $page->getLayout()); // user must have view permission on choosen layout
-        $this->isGranted('CREATE', $page); // user must have create permission on page
+        $this->granted('VIEW', $page->getLayout()); // user must have view permission on choosen layout
+        $this->granted('CREATE', $page); // user must have create permission on page
 
         if (null !== $page->getParent()) {
-            $this->isGranted('EDIT', $page->getParent());
+            $this->granted('EDIT', $page->getParent());
         } else {
-            $this->isGranted('EDIT', $this->getApplication()->getSite());
+            $this->granted('EDIT', $this->getApplication()->getSite());
         }
 
         try {

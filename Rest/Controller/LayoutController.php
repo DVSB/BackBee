@@ -87,7 +87,7 @@ class LayoutController extends ARestController
         $layout->setPath($this->getRequest()->request->get('path'));
         $layout->setPicPath('img/layouts/' . $layout->getUid() . '.png');
 
-        $this->isGranted('CREATE', $layout);
+        $this->granted('CREATE', $layout);
 
         $this->getEntityManager()->persist($layout);
         $this->getEntityManager()->flush($layout);

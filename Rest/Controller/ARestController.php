@@ -195,21 +195,19 @@ abstract class ARestController extends Controller implements IRestController, IF
     }
 
     /**
-     *
+     * Same as isGranted() but throw exception if it is not instead of return false
      *
      * @param  string  $attributes
      * @param  mixed   $object
      *
      * @return boolean
      */
-    protected function isGranted($attributes, $object = null)
+    protected function granted($attributes, $object = null)
     {
         $security_context = $this->getApplication()->getSecurityContext();
 
-        if (false === $security_context->isGranted('sudo')) {
-            if (null !== $security_context->getACLProvider() && false === parent::isGranted($attributes, $object)) {
-                throw new AccessDeniedHttpException('Access denied');
-            }
+        if (null !== $security_context->getACLProvider() && false === parent::isGranted($attributes, $object)) {
+            throw new AccessDeniedHttpException('Access denied');
         }
 
         return true;
