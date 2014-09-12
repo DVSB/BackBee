@@ -12,10 +12,6 @@ services:
         synthetic: true
     em:
         synthetic: true
-    doctrine.connection.default:
-        synthetic: true
-    doctrine:
-        synthetic: true
     bb_session:
         synthetic: true
     mailer:

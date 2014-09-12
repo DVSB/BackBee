@@ -160,6 +160,10 @@ services:
         class: BackBuilder\Application\Analytics
         arguments:  [@bbapp]
 
+    doctrine.listener:
+        class: BackBuilder\Event\Listener\DoctrineListener
+        arguments: [@bbapp]
+
     controller_resolver:
         class:      %bbapp.controller_resolver.class%
         arguments:  [@bbapp]
@@ -240,6 +244,20 @@ services:
         arguments:  ["NESTED_NODE"]
         calls:
             - [setEntityManager, [@em]]
+
+    doctrine.connection.default:
+        class: Doctrine\DBAL\Connection
+        factory_service: em
+        factory_method: getConnection
+
+    doctrine:
+        class: BackBuilder\Doctrine\Registry
+        arguments:
+            - @service_container
+            - {default: @doctrine.connection.default}
+            - {default: em}
+            - default
+            - default
 
     # validator
     validator:
