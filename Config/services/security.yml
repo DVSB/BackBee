@@ -88,6 +88,8 @@ services:
             - affirmative
             - false
             - true
+        calls:
+            - [setApplication, [@bbapp]]
 
     security.acl_loader_yml:
         class:      BackBuilder\Security\Acl\Loader\YmlLoader
