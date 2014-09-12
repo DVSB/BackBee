@@ -22,7 +22,6 @@
 namespace BackBuilder\Security;
 
 use BackBuilder\BBApplication;
-use BackBuilder\Event\DispatcherProxy;
 use BackBuilder\Routing\Matcher\RequestMatcher;
 use BackBuilder\Security\Access\DecisionManager;
 use BackBuilder\Security\Authentication\AuthenticationManager;
@@ -40,11 +39,11 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterfac
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleVoter;
+use Symfony\Component\Security\Core\Encoder\EncoderFactory;
 use Symfony\Component\Security\Core\SecurityContext as sfSecurityContext;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Firewall;
 use Symfony\Component\Security\Http\FirewallMap;
-
 
 /**
  * @category    BackBuilder
@@ -76,6 +75,7 @@ class SecurityContext extends sfSecurityContext
 
     public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager, AccessDecisionManagerInterface $accessDecisionManager)
     {
+
         $this->_application = $application;
         $this->_logger = $this->_application->getLogging();
         $this->_dispatcher = $this->_application->getEventDispatcher();
@@ -141,8 +141,9 @@ class SecurityContext extends sfSecurityContext
     public function _createEncoderFactory(array $config)
     {
         if (true === array_key_exists('encoders', $config)) {
-            $this->_encoderfactory = new \Symfony\Component\Security\Core\Encoder\EncoderFactory($config['encoders']);
+            $this->_encoderfactory = new EncoderFactory($config['encoders']);
         }
+
         return $this;
     }
 
@@ -195,7 +196,7 @@ class SecurityContext extends sfSecurityContext
 
         if (null !== $this->_logout_listener && false === $this->_logout_listener_added) {
             $this->_application->getContainer()->set('security.logout_listener', $this->_logout_listener);
-            if (false === ($this->_dispatcher instanceof DispatcherProxy) || !$this->_dispatcher->isRestored()) {
+            if (false === $this->_dispatcher->isRestored()) {
                 $this->_dispatcher->addListener(
                     'frontcontroller.request.logout',
                     array('@security.logout_listener', 'handle')
@@ -371,7 +372,7 @@ class SecurityContext extends sfSecurityContext
     {
         $this->_firewall = new Firewall($this->_firewallmap, $this->_dispatcher);
         $this->_application->getContainer()->set('security.firewall', $this->_firewall);
-        if (false === ($this->_dispatcher instanceof DispatcherProxy) || false === $this->_dispatcher->isRestored()) {
+        if (false === $this->_dispatcher->isRestored()) {
             $this->_dispatcher->addListener(
                 'frontcontroller.request',
                 array('@security.firewall', 'onKernelRequest')

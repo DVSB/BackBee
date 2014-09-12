@@ -78,6 +78,8 @@ class ContainerProxy extends Container
         }
 
         $this->already_compiled = $container_dump['is_compiled'];
+
+        $this->is_restored = true;
     }
 
     /**

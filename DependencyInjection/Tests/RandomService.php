@@ -46,6 +46,13 @@ class RandomService implements DumpableServiceInterface
     private $class_proxy;
 
     /**
+     * represents if current service has been already restored or not
+     *
+     * @var boolean
+     */
+    protected $is_restored;
+
+    /**
      * RandomService
      *
      * @param int $size the new size's value
@@ -101,5 +108,14 @@ class RandomService implements DumpableServiceInterface
     public function dump(array $options = array())
     {
         return array('size' => $this->size);
+    }
+
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->is_restored;
     }
 }
