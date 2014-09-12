@@ -285,11 +285,6 @@ class ContainerBuilder
         $this->container->set('bbapp', $this->application);
         $this->container->set('container.builder', $this);
 
-        // define in which directory we have to looking for services yml or xml
-        $directories = ConfigDirectory::getDirectories(
-            null, $this->repository_directory, $this->context, $this->environment
-        );
-
         $services_directory = $this->application->getBBDir() . '/Config/services';
         foreach (scandir($services_directory) as $file) {
             if (1 === preg_match('#(\w+)\.(yml|xml)$#', $file, $matches)) {
@@ -300,6 +295,11 @@ class ContainerBuilder
                 }
             }
         }
+
+        // define in which directory we have to looking for services yml or xml
+        $directories = ConfigDirectory::getDirectories(
+            null, $this->repository_directory, $this->context, $this->environment
+        );
 
         // Loop into every directory where we can potentially found a services.yml or services.xml
         foreach ($directories as $directory) {
