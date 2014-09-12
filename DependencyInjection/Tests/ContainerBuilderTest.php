@@ -257,7 +257,10 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $dump = $dumper->dump(array('do_compile' => true));
 
         $container_proxy = new ContainerProxy();
-        $container_proxy->init(unserialize($dump));
+        $dump = unserialize($dump);
+        $container_proxy->init($dump);
+        $container_proxy->setParameter('services_dump', serialize($dump['services']));
+        $container_proxy->setParameter('is_compiled', $dump['is_compiled']);
 
         file_put_contents(
             $dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php',
@@ -269,18 +272,6 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFileExists($dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php');
         $this->assertTrue(is_readable($dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php'));
-
-        $dump = unserialize($dump);
-        unset($dump['aliases']);
-        unset($dump['parameters']);
-
-        file_put_contents(
-            $dump_directory . DIRECTORY_SEPARATOR . $dump_filename,
-            serialize($dump)
-        );
-
-        $this->assertFileExists($dump_directory . DIRECTORY_SEPARATOR . $dump_filename);
-        $this->assertTrue(is_readable($dump_directory . DIRECTORY_SEPARATOR . $dump_filename));
 
         $this->application->setContext('test');
         $this->application->setEnvironment('test');
