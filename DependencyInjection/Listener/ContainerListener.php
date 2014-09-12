@@ -66,7 +66,10 @@ class ContainerListener
             $dump = $dumper->dump(array('do_compile' => true));
 
             $container_proxy = new ContainerProxy();
-            $container_proxy->init(unserialize($dump));
+            $dump = unserialize($dump);
+            $container_proxy->init($dump);
+            $container_proxy->setParameter('services_dump', serialize($dump['services']));
+            $container_proxy->setParameter('is_compiled', $dump['is_compiled']);
 
             file_put_contents(
                 $container_directory . DIRECTORY_SEPARATOR . $container_filename . '.php',
@@ -74,15 +77,6 @@ class ContainerListener
                     'class'      => $container_filename,
                     'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy'
                 ))
-            );
-
-            $dump = unserialize($dump);
-            unset($dump['aliases']);
-            unset($dump['parameters']);
-
-            file_put_contents(
-                $container_directory . DIRECTORY_SEPARATOR . $container_filename,
-                serialize($dump)
             );
         } elseif (true === $application->isDebugMode() && false === $container->isRestored()) {
             $container->compile();

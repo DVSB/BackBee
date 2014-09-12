@@ -21,8 +21,6 @@ namespace BackBuilder\DependencyInjection;
  */
 
 use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException;
 
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
@@ -63,22 +61,32 @@ class ContainerProxy extends Container
      *
      * @param array $container_dump the container dump from where we can restore entirely the container
      */
-    public function init(array $container_dump)
+    public function init(array $container_dump = array())
     {
-        $this->raw_definitions = $container_dump['services'];
+        if (0 < count($container_dump)) {
+            $this->raw_definitions = $container_dump['services'];
 
-        if (true === isset($container_dump['parameters'])) {
-            $this->getParameterBag()->add($container_dump['parameters']);
+            if (true === isset($container_dump['parameters'])) {
+                $this->getParameterBag()->add($container_dump['parameters']);
+            }
+
+            if (true === isset($container_dump['aliases'])) {
+                $this->addAliases($container_dump['aliases']);
+            }
+
+            $this->already_compiled = $container_dump['is_compiled'];
+        } elseif (true === $this->hasParameter('services_dump') && true === $this->hasParameter('is_compiled')) {
+            $this->raw_definitions = unserialize($this->getParameter('services_dump'));
+            $this->getParameterBag()->remove('services_dump');
+            $this->already_compiled = $this->getParameter('is_compiled');
+            $this->getParameterBag()->remove('is_compiled');
+        } else {
+            throw new \InvalidArgumentException(
+                'Unable to find services definitions in provided parameters or in current container'
+            );
         }
 
         $this->raw_definitions_id = array_keys($this->raw_definitions);
-
-        if (true === isset($container_dump['aliases'])) {
-            $this->addAliases($container_dump['aliases']);
-        }
-
-        $this->already_compiled = $container_dump['is_compiled'];
-
         $this->is_restored = true;
     }
 

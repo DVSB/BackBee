@@ -241,14 +241,10 @@ class ContainerBuilder
         $container_filename = $this->getContainerDumpFilename($this->container->getParameter('bootstrap_filepath'));
         $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_filename;
 
-        if (
-            false === $this->container->getParameter('debug')
-            && true === is_readable($container_filepath)
-            && true === is_readable($container_filepath . '.php')
-        ) {
+        if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath . '.php')) {
             require_once $container_filepath . '.php';
             $this->container = new $container_filename();
-            $this->container->init(unserialize(file_get_contents($container_filepath)));
+            $this->container->init();
 
             // Add current application into container
             $this->container->set('bbapp', $this->application);
