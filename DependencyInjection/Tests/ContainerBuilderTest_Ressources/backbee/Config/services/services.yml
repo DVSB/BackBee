@@ -6,4 +6,4 @@ parameters:
 
 services:
     core_service:
-        class: \DateTime
+        class: DateTime

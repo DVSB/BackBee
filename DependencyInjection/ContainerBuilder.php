@@ -241,14 +241,10 @@ class ContainerBuilder
         $container_filename = $this->getContainerDumpFilename($this->container->getParameter('bootstrap_filepath'));
         $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_filename;
 
-        if (
-            false === $this->container->getParameter('debug')
-            && true === is_readable($container_filepath)
-            && true === is_readable($container_filepath . '.php')
-        ) {
+        if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath . '.php')) {
             require_once $container_filepath . '.php';
             $this->container = new $container_filename();
-            $this->container->init(unserialize(file_get_contents($container_filepath)));
+            $this->container->init();
 
             // Add current application into container
             $this->container->set('bbapp', $this->application);
@@ -285,9 +281,20 @@ class ContainerBuilder
         $this->container->set('bbapp', $this->application);
         $this->container->set('container.builder', $this);
 
+        $services_directory = $this->application->getBBDir() . '/Config/services';
+        foreach (scandir($services_directory) as $file) {
+            if (1 === preg_match('#(\w+)\.(yml|xml)$#', $file, $matches)) {
+                if ('yml' === $matches[2]) {
+                    ServiceLoader::loadServicesFromYamlFile($this->container, $services_directory, $matches[1]);
+                } else {
+                    ServiceLoader::loadServicesFromXmlFile($this->container, $services_directory, $matches[1]);
+                }
+            }
+        }
+
         // define in which directory we have to looking for services yml or xml
         $directories = ConfigDirectory::getDirectories(
-            $this->application->getBBDir(), $this->repository_directory, $this->context, $this->environment
+            null, $this->repository_directory, $this->context, $this->environment
         );
 
         // Loop into every directory where we can potentially found a services.yml or services.xml

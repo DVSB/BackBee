@@ -37,6 +37,8 @@ use Symfony\Component\DependencyInjection\Exception\RuntimeException;
  */
 class Container extends sfContainerBuilder implements ContainerInterface
 {
+    protected $is_restored = false;
+
     /**
      * Change current method default behavior: if we try to get a synthetic service it will return
      * null instead of throwing an exception;
@@ -151,5 +153,15 @@ class Container extends sfContainerBuilder implements ContainerInterface
         $id = strtolower($id);
 
         return isset($this->services[$id]) || method_exists($this, 'get' . strtr($id, array('_' => '', '.' => '_')) . 'Service');
+    }
+
+    /**
+     * Returns true if this container has been restored from dump
+     *
+     * @return boolean true if is restored, else false
+     */
+    public function isRestored()
+    {
+        return $this->is_restored;
     }
 }

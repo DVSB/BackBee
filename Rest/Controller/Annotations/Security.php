@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\DependencyInjection\Dumper;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,23 +19,22 @@ namespace BackBuilder\DependencyInjection\Dumper;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\DependencyInjection\ContainerInterface;
+namespace BackBuilder\Rest\Controller\Annotations;
 
 /**
- * This interface must be implemented if you want to use a proxy class instead of your service real class
+ * The Security class handles the Security annotation.
+ *
+ * @Annotation
  *
  * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @package     BackBuilder\Rest
  * @copyright   Lp digital system
- * @author      e.chau <eric.chau@lp-digital.fr>
+ * @author      k.golovin, e.chau <eric.chau@lp-digital.fr>
  */
-interface DumpableServiceProxyInterface
+class Security
 {
     /**
-     * Restore current service to the dump's state
-     *
-     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
-     *                     restore current service
+     * @var string
      */
-    public function restore(ContainerInterface $container, array $dump);
+    public $expression;
 }

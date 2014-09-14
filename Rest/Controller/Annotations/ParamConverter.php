@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Dumper;
+namespace BackBuilder\Rest\Controller\Annotations;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -21,32 +21,39 @@ namespace BackBuilder\DependencyInjection\Dumper;
  */
 
 /**
- * This interface define every methods a service should implements to be dumpable by the container
+ * Pagination properties annotation
+ *
+ * @Annotation
  *
  * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @package     BackBuilder\Rest
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-interface DumpableServiceInterface
+class ParamConverter
 {
     /**
-     * Returns the namespace of the class proxy to use or null if no proxy is required
-     *
-     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     * @var string
      */
-    public function getClassProxy();
+    public $id_name = 'uid';
 
     /**
-     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
-     * with the dump array produced by this method
-     *
-     * @return array contains every datas required by this service to be restored at the same state
+     * @var string
      */
-    public function dump(array $options = array());
+    public $id_source = 'attributes';
 
     /**
-     * @return boolean true if current service is already restored, otherwise false
+     * @var string
      */
-    public function isRestored();
+    public $name;
+
+    /**
+     * @var string
+     */
+    public $class;
+
+    /**
+     * @var boolean
+     */
+    public $required = true;
 }

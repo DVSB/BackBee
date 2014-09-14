@@ -25,9 +25,7 @@ use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\Doctrine\Registry as DoctrineRegistry;
 use BackBuilder\Event\Event;
-use BackBuilder\Event\Listener\DoctrineListener;
 use BackBuilder\Exception\BBException;
 use BackBuilder\Exception\UnknownContextException;
 use BackBuilder\NestedNode\Repository\NestedNodeRepository;
@@ -35,10 +33,11 @@ use BackBuilder\Site\Site;
 use BackBuilder\Theme\Theme;
 use BackBuilder\Util\File;
 
-use Doctrine\Common\EventManager;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\AnnotationReader;
 
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\HttpFoundation\Response;
@@ -656,14 +655,23 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (null === $this->_resourcedir) {
             $this->_resourcedir = array();
 
-            $this->addResourceDir($this->getBBDir() . '/Resources')
-                    ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
+            $this->addResourceDir($this->getBBDir() . '/Resources');
+
+            if (true === is_dir($this->getBaseRepository() . '/Resources')) {
+                $this->addResourceDir($this->getBaseRepository() . '/Resources');
+            }
+
+            if (true === is_dir($this->getBaseRepository() . '/Ressources')) {
+                $this->addResourceDir($this->getBaseRepository() . '/Ressources');
+            }
 
             if (true === $this->hasContext()) {
-                try {
-                    $this->addResourceDir($this->getRepository() . '/Ressources');
-                } catch (BBException $e) {
-                    // Ignore it
+                if (true === is_dir($this->getRepository() . '/Resources')) {
+                    $this->addResourceDir($this->getRepository() . '/Resources');
+                }
+
+                if (true === is_dir($this->getRepository() . '/Resources')) {
+                    $this->addResourceDir($this->getRepository() . '/Resources');
                 }
             }
 
@@ -1119,6 +1127,15 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     private function _initEntityManager()
     {
+        // init NestedNode config
+        if ($this->getConfig()->getSection('nestednode')) {
+            NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));
+        }
+
+        if (false === $this->_container->getDefinition('em')->isSynthetic()) {
+            return;
+        }
+
         if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
             throw new BBException('None database configuration found');
         }
@@ -1140,33 +1157,36 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         }
 
         // Init ORM event
-        $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
-        $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
+        $definition = new Definition('Doctrine\Common\EventManager');
+        $definition->addMethodCall('addEventListener', array($r->getConstants(), new Reference('doctrine.listener')));
+        $this->_container->setDefinition('doctrine.event_manager', $definition);
+        $evm = $this->_container->get('doctrine.event_manager');
 
         try {
-            $logger = $this->getLogging();
+            $logger_id = 'logging';
 
-            if ($this->isDebugMode()) {
+            if (true === $this->isDebugMode()) {
                 // doctrine data collector
-                $this->getContainer()->get('data_collector.doctrine')->addLogger('default', $this->getContainer()->get('doctrine.dbal.logger.profiling'));
-                $logger = $this->getContainer()->get('doctrine.dbal.logger.profiling');
+                $this->getContainer()->get('data_collector.doctrine')->addLogger(
+                    'default',
+                    $this->getContainer()->get('doctrine.dbal.logger.profiling')
+                );
+                $logger_id = 'doctrine.dbal.logger.profiling';
             }
 
-            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
-            $this->getContainer()->set('em', $em);
-
-            $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
-            $this->getContainer()->set('doctrine', $registry);
+            $definition = new Definition('Doctrine\ORM\EntityManager', array(
+                $doctrine_config['dbal'],
+                new Reference($logger_id),
+                new Reference('doctrine.event_manager')
+            ));
+            $definition->setFactoryClass('BackBuilder\Util\Doctrine\EntityManagerCreator');
+            $definition->setFactoryMethod('create');
+            $this->_container->setDefinition('em', $definition);
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
         } catch (\Exception $e) {
             $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
-        }
-
-        // init NestedNode config
-        if ($this->getConfig()->getSection('nestednode')) {
-            NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));
         }
 
         return $this;

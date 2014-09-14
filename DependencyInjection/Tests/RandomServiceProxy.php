@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests\Loader;
+namespace BackBuilder\DependencyInjection\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -22,7 +22,7 @@ namespace BackBuilder\DependencyInjection\Tests\Loader;
 
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\DependencyInjection\Tests\Loader\RandomService;
+use BackBuilder\DependencyInjection\Tests\RandomService;
 
 /**
  * RandomServiceProxy is the proxy class for RandomService when container will restore RandomService
@@ -34,13 +34,6 @@ use BackBuilder\DependencyInjection\Tests\Loader\RandomService;
  */
 class RandomServiceProxy extends RandomService implements DumpableServiceProxyInterface
 {
-    /**
-     * represents if current service has been already restored or not
-     *
-     * @var boolean
-     */
-    protected $is_restored;
-
     /**
      * ConfigProxy's constructor
      *
@@ -62,14 +55,5 @@ class RandomServiceProxy extends RandomService implements DumpableServiceProxyIn
         $this->setSize($dump['size']);
 
         $this->is_restored = true;
-    }
-
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored()
-    {
-        return $this->is_restored;
     }
 }

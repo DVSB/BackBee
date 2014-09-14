@@ -9,7 +9,6 @@ parameters:
     bbapp.config.class: BackBuilder\Config\Config
     bbapp.logger.class: BackBuilder\Logging\Logger
     bbapp.logger_debug.class: BackBuilder\Logging\DebugStackLogger
-    bbapp.securitycontext.class: BackBuilder\Security\SecurityContext
     bbapp.controller.class: BackBuilder\FrontController\FrontController
     bbapp.renderer.class: BackBuilder\Renderer\Renderer
     bbapp.ed.class: BackBuilder\Event\Dispatcher
@@ -27,32 +26,7 @@ parameters:
     bbapp.script.command: php
     bbapp.console.command: bin/console.php
 
-    bbapp.rest.hydrator.class: BackBuilder\Rest\Hydration\RestHydrator
-    bbapp.rest.encoder_provider.class: BackBuilder\Rest\Encoder\ContainerEncoderProvider
-    bbapp.rest.encoder_json.class: Symfony\Component\Serializer\Encoder\JsonEncoder
-    bbapp.rest.encoder_xml.class: Symfony\Component\Serializer\Encoder\XmlEncoder
-
-    bbapp.rest.listener_validation.class: BackBuilder\Rest\EventListener\ValidationListener
-    bbapp.rest.listener_pagination.class: BackBuilder\Rest\EventListener\PaginationListener
-    bbapp.rest.listener_body.class: BackBuilder\Rest\EventListener\BodyListener
-    bbapp.rest.listener_exception.class: BackBuilder\Rest\EventListener\ExceptionListener
-    bbapp.rest.listener_exception.mapping:
-        Exception:
-            code: 500
-        Symfony\Component\Security\Core\Exception\ProviderNotFoundException:
-            code: 401
-            message: Authentication failed - supplied public key or signature is incorrect
-        Doctrine\ORM\ORMException:
-            code: 500
-        Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException:
-            code: 401
-            message: Authenticaton failed - public key not provided
-
-
     bbapp.rest_api.path: /rest/
-
-    bbapp.toolbar.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
-    bbapp.profiler.listener.class: BackBuilder\Event\Listener\ProfilerListener
 
     bbapp.dbal.logger.profiling.class: BackBuilder\Logging\DebugStackLogger
 
@@ -88,13 +62,17 @@ parameters:
     bbapp.config.persistor.class: BackBuilder\Config\Persistor
     bbapp.bundle.loader.class: BackBuilder\Bundle\BundleLoader
 
+    bbapp.expression_language.class: BackBuilder\Security\Authorization\ExpressionLanguage
+
 services:
     cache.bootstrap:
         class:      %bbapp.cachebootstrap.class%
         arguments:  [{cachedir: "%bbapp.cache.dir%", cacheautogenerate: "%bbapp.cache.autogenerate%"}, "%bbapp.context%"]
+
     cache.control:
         class:      %bbapp.cachecontrol.class%
         arguments:  [{em: "@em"}, "%bbapp.context%", "@logging"]
+
     config:
         class:      %bbapp.config.class%
         arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, "%debug%", "%config.yml_files_to_ignore%"]
@@ -104,6 +82,7 @@ services:
             - [setContainer, ['@service_container']]
             - [setEnvironment, ['%bbapp.environment%']]
         configurator: ["@config.configurator", configureApplicationConfig]
+
     event.dispatcher:
         class:      %bbapp.ed.class%
         arguments:  ["@bbapp", "@config"]
@@ -111,21 +90,11 @@ services:
             - { name: "dumpable", dispatch_event: false }
     ed:
         alias: event.dispatcher
-    security.context:
-        class:      %bbapp.securitycontext.class%
-        arguments:  ["@bbapp"]
-
-    security.acl_loader_yml:
-        class:      BackBuilder\Security\Acl\Loader\YmlLoader
-        calls:
-            - [setContainer, ['@service_container']]
-    security.acl_manager:
-        class:      BackBuilder\Security\Acl\AclManager
-        arguments:  ["@security.context"]
 
     controller:
         class:      %bbapp.controller.class%
         arguments:  ["@bbapp"]
+
     renderer:
         class:      %bbapp.renderer.class%
         arguments:  ["@bbapp"]
@@ -134,25 +103,32 @@ services:
     rpcserver:
         class:      %bbapp.rpcserver.class%
         arguments:  ["@bbapp"]
+
     uploadserver:
         class:      %bbapp.uploadserver.class%
         arguments:  ["@bbapp"]
+
     rewriting.urlgenerator:
         class:      %bbapp.urlgenerator.class%
         arguments:  ["@bbapp"]
+
     translator:
         class:      %bbapp.translator.class%
         arguments:  ["@bbapp", "%bbapp.locale%"]
         calls:
             - [setLocale, ["%bbapp.locale%"]]
+
     routing:
         class:      %bbapp.routing.class%
         arguments:  ["@bbapp"]
+
     pagebuilder:
         class:      %bbapp.pagebuilder.class%
         arguments:  ["@em"]
+
     registry:
         class:      %bbapp.registry.class%
+
     autoloader:
         class:      %bbapp.autoloader.class%
         arguments:  ["@bbapp"]
@@ -160,13 +136,16 @@ services:
             - [setEventDispatcher, ["@event.dispatcher"]]
         tags:
             - { name: "dumpable", dispatch_event: false }
+
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
         arguments:  ["@em"]
 
+
     bundle.loader:
         class:      %bbapp.bundle.loader.class%
         arguments:  ["@bbapp"]
+
 
     config.configurator:
         class:      %bbapp.config.configurator.class%
@@ -181,65 +160,16 @@ services:
         class: BackBuilder\Application\Analytics
         arguments:  [@bbapp]
 
+    doctrine.listener:
+        class: BackBuilder\Event\Listener\DoctrineListener
+        arguments: [@bbapp]
+
     controller_resolver:
         class:      %bbapp.controller_resolver.class%
         arguments:  [@bbapp]
 
-    rest.hydrator:
-        class:      %bbapp.rest.hydrator.class%
-        arguments:  ["@em"]
-
-    rest.encoder_provider:
-        class:      %bbapp.rest.encoder_provider.class%
-        calls:
-            - [setContainer, [@service_container]]
-        arguments:  [{json: "rest.encoder.json", xml: "rest.encoder.xml"}]
-
-    rest.encoder.json:
-        class:      %bbapp.rest.encoder_json.class%
-
-    rest.encoder.xml:
-        class:      %bbapp.rest.encoder_xml.class%
-
-    rest.listener.body:
-        class:      %bbapp.rest.listener_body.class%
-        arguments:  [@rest.encoder_provider, true]
-        calls:
-            - [setPath, [%bbapp.rest_api.path%]]
-
-    rest.listener.exception:
-        class:      %bbapp.rest.listener_exception.class%
-        calls:
-            - [setPath, [%bbapp.rest_api.path%]]
-            - [setMapping, [%bbapp.rest.listener_exception.mapping%]]
-
-    rest.listener.validation:
-        class:      %bbapp.rest.listener_validation.class%
-        arguments:  [@service_container]
-
-    rest.listener.pagination:
-        class:      %bbapp.rest.listener_pagination.class%
-        arguments:  [@rest.metadata.factory, @validator]
-        calls:
-            - [setPath, [%bbapp.rest_api.path%]]
-
-    rest.metadata.annotation_reader:
-        class: Doctrine\Common\Annotations\AnnotationReader
-
-    rest.metadata.annotation_driver:
-        class: BackBuilder\Rest\Mapping\Driver\AnnotationDriver
-        arguments:  [@rest.metadata.annotation_reader]
-
-    rest.metadata.factory:
-        class: Metadata\MetadataFactory
-        arguments:  [@rest.metadata.annotation_driver]
-        calls:
-            - [setCache, [@rest.metadata.cache]]
-
-    rest.metadata.cache:
-        class: BackBuilder\Rest\Metadata\Cache\FileCache
-        arguments:  ["%bbapp.cache.dir%/", %debug%]
-        
+    bb.expression_language:
+        class: %bbapp.expression_language.class%
 
     annotation_reader.cache:
         class: Doctrine\Common\Cache\ArrayCache
@@ -259,32 +189,6 @@ services:
 
     annotation_reader.full:
         class: Doctrine\Common\Annotations\AnnotationReader
-
-    profiler.listener:
-        class:      %bbapp.profiler.listener.class%
-        arguments:  [@profiler]
-        calls:
-            - [setEnabled, [%debug%]]
-        tags:
-            - { name: kernel.event_subscriber }
-
-    profiler.toolbar.listener:
-        class:      %bbapp.toolbar.listener.class%
-        arguments:  [%debug%]
-        calls:
-            - [setContainer, [@service_container]]
-
-    profiler.storage:
-        class:      BackBuilder\Profiler\FileProfilerStorage
-        arguments:  [@bbapp, "file:%bbapp.cache.dir%/_profiler/"]
-
-
-    profiler:
-        class:      Symfony\Component\HttpKernel\Profiler\Profiler
-        arguments:  [@profiler.storage, @logging]
-        calls:
-            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.routing", @data_collector.doctrine]]]
-            #"@data_collector.time",
 
     # data collectors
     data_collector.config:
@@ -341,7 +245,19 @@ services:
         calls:
             - [setEntityManager, [@em]]
 
+    doctrine.connection.default:
+        class: Doctrine\DBAL\Connection
+        factory_service: em
+        factory_method: getConnection
 
+    doctrine:
+        class: BackBuilder\Doctrine\Registry
+        arguments:
+            - @service_container
+            - {default: @doctrine.connection.default}
+            - {default: em}
+            - default
+            - default
 
     # validator
     validator:
@@ -373,112 +289,3 @@ services:
     nestednode.page_listener:
         arguments:  [@bbapp]
         class: BackBuilder\Event\Listener\PageListener
-    serializer:
-        class: JMS\Serializer\Serializer
-        arguments:
-            - @serializer.metadata_factory
-            - @serializer.handler_registry
-            - @serializer.object_constructor
-            - @serializer.serialization_visitor_map
-            - @serializer.deserialization_visitor_map
-            - @serializer.event_dispatcher
-
-    serializer.serialization_visitor_map:
-        class: PhpCollection\Map
-        calls:
-            - [set, [json, @serializer.json_serialization_visitor]]
-    serializer.deserialization_visitor_map:
-        class: PhpCollection\Map
-        calls:
-            - [set, [json, @serializer.json_deserialization_visitor]]
-
-
-    serializer.metadata_factory:
-        class: Metadata\MetadataFactory
-        arguments:
-            - @serializer.metadata.lazy_loading_driver
-            - Metadata\ClassHierarchyMetadata
-            - %debug%
-        calls:
-            - [setCache, [@serializer.metadata.cache]]
-
-    serializer.handler_registry:
-        class: JMS\Serializer\Handler\LazyHandlerRegistry
-        arguments: [@service_container]
-
-    serializer.object_constructor:
-        class: BackBuilder\Serializer\Construction\DoctrineObjectConstructor
-        arguments:
-            - @doctrine
-            - @serializer.object_fallback_constructor
-
-    serializer.object_fallback_constructor:
-        class: JMS\Serializer\Construction\UnserializeObjectConstructor
-
-    serializer.json_serialization_visitor:
-        class: JMS\Serializer\JsonSerializationVisitor
-        arguments:
-            - @serializer.naming_strategy
-        calls:
-            - [setOptions, [[]]]
-    serializer.json_deserialization_visitor:
-        class: JMS\Serializer\JsonDeserializationVisitor
-        arguments:
-            - @serializer.naming_strategy
-            - @serializer.object_constructor
-    serializer.event_dispatcher:
-        class: JMS\Serializer\EventDispatcher\LazyEventDispatcher
-        arguments: [@service_container]
-
-    serializer.metadata.lazy_loading_driver:
-        class: Metadata\Driver\LazyLoadingDriver
-        arguments: [@service_container, serializer.metadata_driver]
-
-    serializer.metadata_driver:
-        class: JMS\Serializer\Metadata\Driver\DoctrineTypeDriver
-        arguments: [@serializer.metadata_annotation_driver, @doctrine]
-
-    serializer.metadata_annotation_driver:
-        class: JMS\Serializer\Metadata\Driver\AnnotationDriver
-        arguments: [@annotation_reader]
-
-        #JMS\Serializer\Metadata\Driver
-
-    serializer.metadata.cache:
-        class: BackBuilder\Rest\Metadata\Cache\FileCache
-        arguments:  ["%bbapp.cache.dir%/"]
-
-    serializer.naming_strategy:
-        class: BackBuilder\Serializer\Naming\DoctrinePropertyNamingStrategy
-        arguments:  [@doctrine, @serializer.serialized_naming_strategy]
-
-    serializer.serialized_naming_strategy:
-        class: JMS\Serializer\Naming\SerializedNameAnnotationStrategy
-        arguments:  [@serializer.camel_case_naming_strategy]
-
-    serializer.camel_case_naming_strategy:
-        class: JMS\Serializer\Naming\CamelCaseNamingStrategy
-
-    serializer.doctrine_property_naming_strategy:
-        class: BackBuilder\Serializer\Naming\DoctrinePropertyNamingStrategy
-        arguments:  [@doctrine]
-
-    # synthetic services
-    bbapp:
-        synthetic: true
-        tags:
-            - { name: "dumpable", dispatch_event: false }
-    container.builder:
-        synthetic: true
-    service_container:
-        synthetic: true
-    site:
-        synthetic: true
-    em:
-        synthetic: true
-    doctrine:
-        synthetic: true
-    bb_session:
-        synthetic: true
-    mailer:
-        synthetic: true

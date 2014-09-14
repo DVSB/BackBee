@@ -120,6 +120,14 @@ class Config implements DumpableServiceInterface
      */
     protected $_yml_names_to_ignore;
 
+
+    /**
+     * represents if current service has been already restored or not
+     *
+     * @var boolean
+     */
+    protected $_is_restored;
+
     /**
      * Magic function to get configuration section
      * The called method has to match the pattern getSectionConfig()
@@ -132,20 +140,18 @@ class Config implements DumpableServiceInterface
      */
     public function __call($name, $arguments)
     {
-        $sections = array();
-
-        $is_match = preg_match('/get([a-z]+)config/i', strtolower($name), $sections);
-        if ($is_match) {
+        $result = null;
+        if (1 === preg_match('/get([a-z]+)config/i', strtolower($name), $sections)) {
             $section = $this->getSection($sections[1]);
 
-            if (key($arguments) !== null && array_key_exists($arguments[0], $section)) {
-                return $section[$arguments[0]];
+            if (0 === count($arguments)) {
+                $result = $section;
+            } elseif (true === array_key_exists($arguments[0], $section)) {
+                $result = $section[$arguments[0]];
             }
-
-            return $section;
         }
 
-        return null;
+        return $result;
     }
 
     /**
@@ -581,5 +587,13 @@ class Config implements DumpableServiceInterface
             'has_cache'           => null !== $this->_cache,
             'has_container'       => null !== $this->_container
         );
+    }
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->_is_restored;
     }
 }

@@ -126,7 +126,7 @@ class Configurator
      */
     public function extend($type, Config $config, $options = array())
     {
-        if (false === ($config instanceof DumpableServiceProxyInterface) || false === $config->isRestored()) {
+        if (false === $config->isRestored()) {
             if (self::APPLICATION_CONFIG === $type) {
                 $this->doApplicationConfigExtend($config);
             } elseif (self::BUNDLE_CONFIG === $type) {

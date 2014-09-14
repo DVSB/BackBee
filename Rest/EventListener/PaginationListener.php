@@ -1,4 +1,5 @@
 <?php
+namespace BackBuilder\Rest\EventListener;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,22 +20,14 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\EventListener;
-
-use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\Validator\Validator,
-    Symfony\Component\Validator\ConstraintViolationList,
-    Symfony\Component\Validator\ConstraintViolation;
 use BackBuilder\Event\Listener\APathEnabledListener;
-
 use BackBuilder\Rest\Exception\ValidationException;
+
 use Metadata\MetadataFactory;
 
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validator;
 
 /**
  * Pagination listener
@@ -42,7 +35,7 @@ use Metadata\MetadataFactory;
  * @category    BackBuilder
  * @package     BackBuilder\Rest
  * @copyright   Lp digital system
- * @author      k.golovin
+ * @author      k.golovin, e.chau <eric.chau@lp-digital.fr>
  */
 class PaginationListener extends APathEnabledListener
 {
@@ -58,8 +51,6 @@ class PaginationListener extends APathEnabledListener
 
     /**
      * Constructor.
-     *
-     * @param ContainerInterface $container
      */
     public function __construct(MetadataFactory $metadataFactory, Validator $validator)
     {
@@ -70,9 +61,7 @@ class PaginationListener extends APathEnabledListener
     /**
      * Controller
      *
-     * @param GetResponseEvent $event The event
-     * @throws BadRequestHttpException
-     * @throws UnsupportedMediaTypeHttpException
+     * @param FilterControllerEvent $event The event
      */
     public function onKernelController(FilterControllerEvent $event)
     {

@@ -414,7 +414,6 @@ class ContentBlocks extends AbstractServiceLocal
      */
     public function getContentBlocks($catName = "tous", $withCategory = true)
     {
-
         /* Content catégories */
         $response = array();
 
@@ -425,6 +424,7 @@ class ContentBlocks extends AbstractServiceLocal
         $response["contentCategories"] = $contentCatContainer;
         $response["contentList"] = $this->getContentsByCategory($catName);
         $response["selectedCategory"] = $catName;
+
         return $response;
     }
 
@@ -742,7 +742,7 @@ class ContentBlocks extends AbstractServiceLocal
                     }
                 }
             }
-            
+
             $content->$key = $newvalues;
         }
         return $content;

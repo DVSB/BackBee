@@ -216,6 +216,21 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
+     * @see BackBuilder\Bundle\BundleInterface::serialize
+     */
+    public function serialize()
+    {
+        $obj = new \stdClass();
+        $obj->id = $this->getId();
+
+        foreach ($this->getProperty() as $key => $value) {
+            $obj->$key = $value;
+        }
+
+        return json_encode($obj);
+    }
+
+    /**
      * @codeCoverageIgnore
      * @see Symfony\Component\Security\Acl\Model\DomainObjectInterface::getObjectIdentifier
      */

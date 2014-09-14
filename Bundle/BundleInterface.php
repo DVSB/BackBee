@@ -117,4 +117,11 @@ interface BundleInterface extends IObjectIdentifiable
      * @return boolean [description]
      */
     public function isConfigPerSite();
+
+    /**
+     * [serialize description]
+     *
+     * @return string json format of the result
+     */
+    public function serialize();
 }

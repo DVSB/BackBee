@@ -44,7 +44,7 @@ class RequestSignatureEncoder
    {
         $encoder = new PrivateKeyAuth();
         $encoder->setPrivateKey($privateKey);
-        $signature = $encoder->getRequestSignature($request->getMethod(), $request->getUri());
+        $signature = $encoder->getRequestSignature($request->getMethod(), $request->getRequestUri());
 
         return $signature;
    }

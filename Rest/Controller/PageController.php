@@ -30,6 +30,8 @@ use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
 use BackBuilder\Rest\Patcher\RightManager;
+use BackBuilder\Site\Layout;
+use BackBuilder\Workflow\State;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -61,30 +63,28 @@ class PageController extends ARestController
      * Get collection of page entity
      *
      * @Rest\Pagination(default_count=25, max_count=100)
+     * @Rest\ParamConverter(
+     *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
+     * )
      */
-    public function getCollectionAction($start, $count)
+    public function getCollectionAction()
     {
-        $parent_uid = $this->getRequest()->query->get('parent_uid', null);
-        $parent = null;
-        if (null !== $parent_uid) {
-            $parent = $this->getPageByUid($parent_uid);
-        } else {
+        if (null === $parent = $this->getEntityFromAttributes('parent')) {
             $parent = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
         }
 
-        $this->isGranted('VIEW', $parent);
-
+        $this->granted('VIEW', $parent);
         $children = $this->getPageRepository()->getNotDeletedDescendants(
             $parent,
             1,
             false,
             array('_leftnode' => 'asc'),
             true,
-            $start,
-            $count
+            $start = $this->getRequest()->attributes->get('start'),
+            $this->getRequest()->attributes->get('count')
         );
 
-        $result_count = 0;
+        $result_count = $start;
         foreach ($children as $child) {
             $result_count++;
         }
@@ -99,26 +99,34 @@ class PageController extends ARestController
      * Get page entity by uid
      *
      * @param string $uid the unique identifier of the page we want to retrieve
+     *
+     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\Security(expression="is_granted('VIEW', page)")
      */
-    public function getAction($uid)
+    public function getAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
-        $this->isGranted('VIEW', $page);
-
         return $this->createResponse($this->formatItem($page));
     }
 
     /**
      * Create or clone a page entity
      *
-     * Clone action requirements:
-     *
-     * @Rest\QueryParam(name="source_uid", description="Source uid for cloning", requirements={
-     *     @Assert\Length(min=32, max=32, exactMessage="source_uid must contains 32 characters")
-     * })
      * @Rest\QueryParam(name="title", description="Cloning page new title", requirements={
-     *     @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
+     *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
      * })
+     *
+     * @Rest\ParamConverter(
+     *   name="layout", id_name="layout_uid", id_source="request", class="BackBuilder\Site\Layout", required=false
+     * )
+     * @Rest\ParamConverter(
+     *   name="parent", id_name="parent_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=false
+     * )
+     * @Rest\ParamConverter(
+     *   name="source", id_name="source_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
+     * )
+     * @Rest\ParamConverter(
+     *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBuilder\Workflow\State", required=false
+     * )
      */
     public function postAction()
     {
@@ -126,11 +134,8 @@ class PageController extends ARestController
             return $this->clonePageAction();
         }
 
-        $layout = $this->getLayoutByUid($this->getRequest()->request->get('layout_uid'));
-        $this->isGranted('VIEW', $layout);
-
-        $parent = $this->getPageByUid($this->getRequest()->request->get('parent_uid'));
-        $this->isGranted('EDIT', $parent);
+        $this->granted('VIEW', $layout = $this->getEntityFromAttributes('layout'));
+        $this->granted('EDIT', $parent = $this->getEntityFromAttributes('parent'));
 
         if (0 === strlen($title = $this->getRequest()->request->get('title', null))) {
             throw new NotFoundHttpException('Page\'s title cannot be empty.');
@@ -159,8 +164,8 @@ class PageController extends ARestController
         );
 
         $page = $builder->getPage();
-        $this->trySetPageWorkflowState($page, $this->getRequest()->request->get('workflow_uid'));
-        $this->isGranted('CREATE', $page);
+        $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
+        $this->granted('CREATE', $page);
 
         $this->getEntityManager()->persist($page);
         try {
@@ -182,38 +187,36 @@ class PageController extends ARestController
      * Update page entity with $uid
      *
      * @Rest\RequestParam(name="title", description="page new title", requirements={
-     *     @Assert\NotBlank(message="title is required"),
-     *     @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
+     *   @Assert\NotBlank(message="title is required")
      * })
      * @Rest\RequestParam(name="url", description="page new url", requirements={
-     *     @Assert\NotBlank(message="url is required")
+     *   @Assert\NotBlank(message="url is required")
      * })
      * @Rest\RequestParam(name="target", description="page new target", requirements={
-     *     @Assert\NotBlank(message="target is required")
-     * })
-     * @Rest\RequestParam(name="layout_uid", description="page new layout", requirements={
-     *     @Assert\NotBlank(message="layout_uid is required")
+     *   @Assert\NotBlank(message="target is required")
      * })
      * @Rest\RequestParam(name="state", description="page new state", requirements={
-     *     @Assert\NotBlank(message="state is required")
+     *   @Assert\NotBlank(message="state is required")
      * })
      * @Rest\RequestParam(name="publishing", description="page new publishing", requirements={
-     *     @Assert\Type(type="digit", message="The value should be a positive number")
+     *   @Assert\Type(type="digit", message="The value should be a positive number")
      * })
      * @Rest\RequestParam(name="archiving", description="page new archiving", requirements={
-     *     @Assert\Type(type="digit", message="The value should be a positive number")
+     *   @Assert\Type(type="digit", message="The value should be a positive number")
      * })
+     *
+     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(name="layout", id_name="layout_uid", class="BackBuilder\Site\Layout", id_source="request")
+     * @Rest\ParamConverter(
+     *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBuilder\Workflow\State", required=false
+     * )
+     * @Rest\Security(expression="is_granted('EDIT', page)")
+     * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
-    public function putAction($uid)
+    public function putAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
-        $this->isGranted('EDIT', $page);
-
-        $layout = $this->getLayoutByUid($this->getRequest()->request->get('layout_uid'));
-        $this->isGranted('VIEW', $layout);
-
-        $page->setLayout($layout);
-        $this->trySetPageWorkflowState($page, $this->getRequest()->request->get('workflow_uid'));
+        $page->setLayout($this->getEntityFromAttributes('layout'));
+        $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
         $page->setTitle($this->getRequest()->request->get('title'));
         $page->setUrl($this->getRequest()->request->get('url'));
         $page->setTarget($this->getRequest()->request->get('target'));
@@ -228,7 +231,7 @@ class PageController extends ARestController
         $page->setArchiving(null !== $archiving ? new \DateTime(date('c', $archiving)) : null);
 
         if (true === $page->isOnline(true)) {
-            $this->isGranted('PUBLISH', $page);
+            $this->granted('PUBLISH', $page);
         }
 
         $this->getEntityManager()->flush($page);
@@ -240,14 +243,14 @@ class PageController extends ARestController
      * Patch of a page entity
      *
      * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
-     *     @Assert\NotBlank(message="operations is required")
+     *   @Assert\NotBlank(message="operations is required")
      * })
+     *
+     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\Security(expression="is_granted('EDIT', page)")
      */
-    public function patchAction($uid)
+    public function patchAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
-        $this->isGranted('EDIT', $page);
-
         $operations = $this->getRequest()->request->get('operations');
         try {
             (new OperationSyntaxValidator())->validate($operations);
@@ -273,33 +276,29 @@ class PageController extends ARestController
     /**
      * Update page by moving it from current parent to new one
      *
-     * @Rest\RequestParam(name="parent_uid", description="new parent node uid", requirements={
-     *     @Assert\NotBlank(message="parent_uid is required"),
-     *     @Assert\Length(min=32, max=32, exactMessage="parent_uid must contains 32 characters")
-     * })
-     * @Rest\RequestParam(name="next_uid", description="next node uid", requirements={
-     *     @Assert\Length(min=32, max=32, exactMessage="next_uid must contains 32 characters")
-     * })
+     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(
+     *   name="parent", id_name="parent_uid", class="BackBuilder\NestedNode\Page", id_source="request"
+     * )
+     * @Rest\ParamConverter(
+     *   name="next", id_name="next_uid", class="BackBuilder\NestedNode\Page", id_source="request", required=false
+     * )
+     * @Rest\Security(expression="is_granted('EDIT', page)")
+     * @Rest\Security(expression="is_granted('EDIT', parent)")
      */
-    public function movePageNodeAction($uid)
+    public function movePageNodeAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
-
         if (true === $page->isRoot()) {
             throw new AccessDeniedHttpException('Cannot move root node of a site.');
         }
 
-        $parent = $this->getPageByUid($this->getRequest()->request->get('parent_uid'));
-
-        $this->isGranted('EDIT', $page); // user must have edit permission on page
-        $this->isGranted('EDIT', $parent); // user must have edit permission on new parent page
-
         if (true === $page->isOnline(true)) {
-            $this->isGranted('PUBLISH', $page); // user must have publish permission on the page
+            $this->granted('PUBLISH', $page); // user must have publish permission on the page
         }
 
         try {
-            if (null === $next = $this->getPageByUid($this->getRequest()->request->get('next_uid', ''), false)) {
+            $parent = $this->getEntityFromAttributes('parent');
+            if (null === $next = $this->getEntityFromAttributes('next')) {
                 $this->getPageRepository()->moveAsLastChildOf($page, $parent);
             } else {
                 if (false === $next->getParent()->equals($parent)) {
@@ -320,22 +319,18 @@ class PageController extends ARestController
     /**
      * [deleteAction description]
      *
-     * @param  [type] $uid [description]
-     *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      */
-    public function deleteAction($uid)
+    public function deleteAction(Page $page)
     {
-        $page = $this->getPageByUid($uid);
-
         if (true === $page->isRoot()) {
             throw new AccessDeniedHttpException('Cannot remove root page of a site.');
         }
 
-        $this->isGranted('EDIT', $page->getParent()); // user must have edit permission on parent
+        $this->granted('EDIT', $page->getParent()); // user must have edit permission on parent
 
         if (true === $page->isOnline()) {
-            $this->isGranted('PUBLISH', $page); // user must have publish permission on the page
+            $this->granted('PUBLISH', $page); // user must have publish permission on the page
         }
 
         $this->getPageRepository()->toTrash($page);
@@ -346,12 +341,11 @@ class PageController extends ARestController
     /**
      * [clonePageAction description]
      *
-     * @return [type] [description]
+     * @return [type]
      */
     private function clonePageAction()
     {
-        $source_uid = $this->getRequest()->query->get('source_uid', null);
-        if (null === $source_uid) {
+        if (null === $page = $this->getEntityFromAttributes('source')) {
             throw new BadRequestHttpException('`source_uid` query parameter is missing.');
         }
 
@@ -360,15 +354,13 @@ class PageController extends ARestController
             throw new BadRequestHttpException('`title` query parameter is missing.');
         }
 
-        $page = $this->getPageByUid($source_uid);
-
-        $this->isGranted('VIEW', $page->getLayout()); // user must have view permission on choosen layout
-        $this->isGranted('CREATE', $page); // user must have create permission on page
+        $this->granted('VIEW', $page->getLayout()); // user must have view permission on choosen layout
+        $this->granted('CREATE', $page); // user must have create permission on page
 
         if (null !== $page->getParent()) {
-            $this->isGranted('EDIT', $page->getParent());
+            $this->granted('EDIT', $page->getParent());
         } else {
-            $this->isGranted('EDIT', $this->getApplication()->getSite());
+            $this->granted('EDIT', $this->getApplication()->getSite());
         }
 
         try {
@@ -388,54 +380,6 @@ class PageController extends ARestController
     }
 
     /**
-     * Getter of page entity by its uid
-     *
-     * @param  string $uid the uid of the requested page
-     *
-     * @return null|BackBuilder\NestedNode\Page null if none page exists for the provided uid or the entity page
-     */
-    private function getPageByUid($uid, $throw_exception = true)
-    {
-        if (
-            null === ($page = $this->getEntityManager()->find('BackBuilder\NestedNode\Page', $uid))
-            && true === $throw_exception
-        ) {
-            throw new NotFoundHttpException("None page exists with uid `$uid`.");
-        }
-
-        return $page;
-    }
-
-    /**
-     * Getter of layout entity by its uid
-     *
-     * @param  string $uid the uid of the requested layout
-     *
-     * @return null|BackBuilder\Site\Layout null if none layout exists for the provided uid or the entity layout
-     */
-    private function getLayoutByUid($uid)
-    {
-        if (null === $layout = $this->getEntityManager()->find('BackBuilder\Site\Layout', $uid)) {
-            throw new NotFoundHttpException("None layout exists with uid `$uid`.");
-        }
-
-        return $layout;
-    }
-
-    /**
-     * Getter of workflow state entity by its uid
-     *
-     * @param  string $uid the uid of the requested workflow state
-     *
-     * @return null|BackBuilder\Workflow\State null if none workflow state exists for the provided uid
-     *                                      or the entity workflow state
-     */
-    private function getWorkflowStateByUid($uid)
-    {
-        return $this->getEntityManager()->find('BackBuilder\Workflow\State', $uid);
-    }
-
-    /**
      * Getter for page entity repository
      *
      * @return BackBuilder\NestedNode\Repository\PageRepository
@@ -447,18 +391,14 @@ class PageController extends ARestController
 
     /**
      * [trySetPageWorkflowState description]
-     * @param  Page   $page               [description]
-     * @param  [type] $workflow_state_uid [description]
-     * @return [type]                     [description]
+     *
+     * @param  Page   $page
+     * @param  [type] $workflow
      */
-    private function trySetPageWorkflowState(Page $page, $workflow_uid)
+    private function trySetPageWorkflowState(Page $page, State $workflow = null)
     {
         $page->setWorkflowState(null);
-        if (null !== $workflow_uid) {
-            if (null === $workflow = $this->getWorkflowStateByUid($workflow_uid)) {
-                return $this->create404Response("None workflow exists with uid `$workflow_uid`.");
-            }
-
+        if (null !== $workflow) {
             if (null === $workflow->getLayout() || $workflow->getLayout()->getUid() === $page->getLayout()->getUid()) {
                 $page->setWorkflowState($workflow);
             }
