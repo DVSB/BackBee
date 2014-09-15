@@ -35,13 +35,6 @@ use BackBuilder\Event\Dispatcher;
 class DispatcherProxy extends Dispatcher implements DumpableServiceProxyInterface
 {
     /**
-     * define if dispatcher is already restored by container or not
-     *
-     * @var boolean
-     */
-    private $_is_restored;
-
-    /**
      * DispatcherProxy's constructor
      */
     public function __construct()
@@ -77,14 +70,5 @@ class DispatcherProxy extends Dispatcher implements DumpableServiceProxyInterfac
         }
 
         $this->_is_restored = true;
-    }
-
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored()
-    {
-        return $this->_is_restored;
     }
 }

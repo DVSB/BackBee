@@ -21,7 +21,8 @@
 
 namespace BackBuilder\NestedNode\Tests;
 
-use BackBuilder\NestedNode\KeyWord;
+use BackBuilder\Tests\TestCase,
+    BackBuilder\NestedNode\KeyWord;
 
 /**
  * @category    BackBuilder
@@ -29,7 +30,7 @@ use BackBuilder\NestedNode\KeyWord;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class KeyWordTest extends \PHPUnit_Framework_TestCase
+class KeyWordTest extends TestCase
 {
 
     /**
@@ -101,10 +102,22 @@ class KeyWordTest extends \PHPUnit_Framework_TestCase
             'created' => $this->current_time->getTimestamp(),
             'modified' => $this->current_time->getTimestamp(),
             'isleaf' => true,
-            'keyword' => null
+            'keyword' => 'test'
         );
 
         $this->assertEquals($expected, $this->keyword->toArray());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\MediaFolder::toStdObject
+     */
+    public function testToStdObject()
+    {
+        $obj = $this->keyword->toStdObject();
+        $this->assertEquals('test', $obj->uid);
+        $this->assertEquals(0, $obj->level);
+        $this->assertEquals('test', $obj->keyword);
+        $this->assertEquals(array(), $obj->children);
     }
 
     /**
@@ -114,6 +127,7 @@ class KeyWordTest extends \PHPUnit_Framework_TestCase
     {
         $this->current_time = new \Datetime();
         $this->keyword = new KeyWord('test');
+        $this->keyword->setKeyWord('test');
     }
 
 }

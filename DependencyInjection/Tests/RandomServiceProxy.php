@@ -35,13 +35,6 @@ use BackBuilder\DependencyInjection\Tests\RandomService;
 class RandomServiceProxy extends RandomService implements DumpableServiceProxyInterface
 {
     /**
-     * represents if current service has been already restored or not
-     *
-     * @var boolean
-     */
-    protected $is_restored;
-
-    /**
      * ConfigProxy's constructor
      *
      * @param array $dump
@@ -62,14 +55,5 @@ class RandomServiceProxy extends RandomService implements DumpableServiceProxyIn
         $this->setSize($dump['size']);
 
         $this->is_restored = true;
-    }
-
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored()
-    {
-        return $this->is_restored;
     }
 }

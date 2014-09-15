@@ -138,6 +138,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
         $this->setApplication($application);
         $this->setEventDispatcher($dispatcher);
+
+        $this->_is_restored = false;
     }
 
     /**

@@ -78,6 +78,7 @@
             SEO: 'SEO de la page',
             sitemap_search: 'Arborescence / recherche',
             sitemap: 'Arborescence',
+            sitemap_move: 'Déplacer vers',
             medias: 'Médiathèque',
             keywords: 'Mot-clés',
             alert: 'Alerte',

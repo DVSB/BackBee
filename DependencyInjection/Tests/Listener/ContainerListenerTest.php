@@ -67,6 +67,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         vfsStream::setup('full_right_base_directory', 0777, $virtual_structure);
 
         $application = $this->generateManualBBApplication(vfsStream::url('full_right_base_directory'));
+        $application->setDebug_Mode(true);
         $application->setContainer((new ContainerBuilder($application))->getContainer());
 
         $container = $application->getContainer();

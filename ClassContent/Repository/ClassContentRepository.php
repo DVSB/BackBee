@@ -171,6 +171,13 @@ class ClassContentRepository extends EntityRepository
             $where[] = str_replace('\\', '\\\\', 'c.classname IN ("' . implode('","', $classnameArr) . '")');
         }
 
+        if (true === array_key_exists('content_uid', $selector)) {
+            $uids = (array) $selector['content_uid'];
+            if (false === empty($uids)) {
+                $where[] = 'c.uid IN ("' . implode('","', $uids) . '")';
+            }
+        }
+
         if (true === array_key_exists('criteria', $selector)) {
             $criteria = (array) $selector['criteria'];
             foreach ($criteria as $field => $crit) {
@@ -181,7 +188,7 @@ class ClassContentRepository extends EntityRepository
 
                 $alias = uniqid('i' . rand());
                 $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
-                $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value ' . $crit[1] . '"' . $crit[0] . '"';
+                $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value ' . $crit[1] . ' "' . $crit[0] . '"';
             }
         }
 

@@ -21,7 +21,8 @@
 
 namespace BackBuilder\NestedNode\Tests;
 
-use BackBuilder\NestedNode\MediaFolder;
+use BackBuilder\Tests\TestCase,
+    BackBuilder\NestedNode\MediaFolder;
 
 /**
  * @category    BackBuilder
@@ -29,7 +30,7 @@ use BackBuilder\NestedNode\MediaFolder;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class MediaFolderTest extends \PHPUnit_Framework_TestCase
+class MediaFolderTest extends TestCase
 {
 
     /**
