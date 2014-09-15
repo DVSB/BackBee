@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,15 +22,18 @@
 namespace BackBuilder\Security\Authorization\Voter;
 
 use BackBuilder\BBApplication;
-use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use BackBuilder\Security\Token\BBUserToken;
+use BackBuilder\Security\Token\PublicKeyToken;
+
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Security
  * @subpackage  Authorization\Voter
  * @copyright   Lp digital system
- * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
+ * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>, Eric Chau <eric.chau@lp-digital.fr>
  */
 class SudoVoter implements VoterInterface
 {
@@ -45,7 +48,7 @@ class SudoVoter implements VoterInterface
     public function __construct(BBApplication $application)
     {
         $this->_application = $application;
-        $this->_sudoers = $this->_application->getConfig()->getSecurityConfig('sudoers');
+        $this->_sudoers = $this->_application->getConfig()->getSecurityConfig('sudoers') ?: array();
     }
 
     /**
@@ -54,7 +57,7 @@ class SudoVoter implements VoterInterface
      */
     public function supportsAttribute($attribute)
     {
-        return $attribute === 'sudo';
+        return true;
     }
 
     /**
@@ -63,7 +66,9 @@ class SudoVoter implements VoterInterface
      */
     public function supportsClass($class)
     {
-        return $class === 'BackBuilder\Security\Token\BBUserToken';
+        return $class === 'BackBuilder\Security\Token\BBUserToken'
+            || $class === 'BackBuilder\Security\Token\PublicKeyToken'
+        ;
     }
 
     /**
@@ -73,23 +78,13 @@ class SudoVoter implements VoterInterface
     {
         $result = VoterInterface::ACCESS_ABSTAIN;
 
-        if (false === ($token instanceof \BackBuilder\Security\Token\BBUserToken)
-                && null === $token = $this->_application->getBBUserToken()) {
-            return self::ACCESS_DENIED;
-        }
-
-        foreach ($attributes as $attribute) {
-            if (!$this->supportsAttribute($attribute)) {
-                continue;
-            }
-
+        if (true === $this->supportsClass(get_class($token))) {
             if (
-                    array_key_exists($token->getUsername(), $this->_sudoers) &&
-                    $token->getUser()->getId() === $this->_sudoers[$token->getUsername()]
+                true === array_key_exists($token->getUser()->getUsername(), $this->_sudoers)
+                && $token->getUser()->getId() === $this->_sudoers[$token->getUser()->getUsername()]
             ) {
                 $result = VoterInterface::ACCESS_GRANTED;
             }
-            break;
         }
 
         return $result;

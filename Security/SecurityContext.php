@@ -22,7 +22,6 @@
 namespace BackBuilder\Security;
 
 use BackBuilder\BBApplication;
-use BackBuilder\Event\DispatcherProxy;
 use BackBuilder\Routing\Matcher\RequestMatcher;
 use BackBuilder\Security\Access\DecisionManager;
 use BackBuilder\Security\Authentication\AuthenticationManager;
@@ -40,11 +39,11 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterfac
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleVoter;
+use Symfony\Component\Security\Core\Encoder\EncoderFactory;
 use Symfony\Component\Security\Core\SecurityContext as sfSecurityContext;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Firewall;
 use Symfony\Component\Security\Http\FirewallMap;
-
 
 /**
  * @category    BackBuilder
@@ -74,14 +73,12 @@ class SecurityContext extends sfSecurityContext
      */
     private $_encoderfactory;
 
-    public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager = null, AccessDecisionManagerInterface $accessDecisionManager = null)
+    public function __construct(BBApplication $application, AuthenticationManagerInterface $authenticationManager, AccessDecisionManagerInterface $accessDecisionManager)
     {
-        $this->_application = $application;
 
-        if (null !== $this->_application) {
-            $this->_logger = $this->_application->getLogging();
-            $this->_dispatcher = $this->_application->getEventDispatcher();
-        }
+        $this->_application = $application;
+        $this->_logger = $this->_application->getLogging();
+        $this->_dispatcher = $this->_application->getEventDispatcher();
 
         if (null === $securityConfig = $this->_application->getConfig()->getSecurityConfig()) {
             trigger_error('None security configuration found', E_USER_NOTICE);
@@ -100,10 +97,14 @@ class SecurityContext extends sfSecurityContext
              ->createProviders($securityConfig)
              ->_createACLProvider($securityConfig)
              ->_createFirewallMap($securityConfig)
-             ->_registerFirewall();
+             ->_registerFirewall()
+        ;
 
         if (null === $accessDecisionManager) {
-            $trustResolver = new TrustResolver('BackBuilder\Security\Token\AnonymousToken', 'BackBuilder\Security\Token\RememberMeToken');
+            $trustResolver = new TrustResolver(
+                'BackBuilder\Security\Token\AnonymousToken',
+                'BackBuilder\Security\Token\RememberMeToken'
+            );
 
             $voters = array();
             $voters[] = new SudoVoter($this->getApplication());
@@ -113,16 +114,16 @@ class SecurityContext extends sfSecurityContext
 
             if (null !== $this->_aclprovider) {
                 $voters[] = new Authorization\Voter\BBAclVoter(
-                                $this->_aclprovider,
-                                new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
-                                new \BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
-                                        new RoleHierarchy(array()),
-                                        $trustResolver
-                                ),
-                                new Acl\Permission\PermissionMap(),
-                                $this->getApplication()->getLogging(),
-                                false,
-                                $this->getApplication()
+                    $this->_aclprovider,
+                    new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
+                    new \BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
+                            new RoleHierarchy(array()),
+                            $trustResolver
+                    ),
+                    new Acl\Permission\PermissionMap(),
+                    $this->getApplication()->getLogging(),
+                    false,
+                    $this->getApplication()
                 );
             }
 
@@ -140,8 +141,9 @@ class SecurityContext extends sfSecurityContext
     public function _createEncoderFactory(array $config)
     {
         if (true === array_key_exists('encoders', $config)) {
-            $this->_encoderfactory = new \Symfony\Component\Security\Core\Encoder\EncoderFactory($config['encoders']);
+            $this->_encoderfactory = new EncoderFactory($config['encoders']);
         }
+
         return $this;
     }
 
@@ -194,7 +196,7 @@ class SecurityContext extends sfSecurityContext
 
         if (null !== $this->_logout_listener && false === $this->_logout_listener_added) {
             $this->_application->getContainer()->set('security.logout_listener', $this->_logout_listener);
-            if (false === ($this->_dispatcher instanceof DispatcherProxy) || !$this->_dispatcher->isRestored()) {
+            if (false === $this->_dispatcher->isRestored()) {
                 $this->_dispatcher->addListener(
                     'frontcontroller.request.logout',
                     array('@security.logout_listener', 'handle')
@@ -258,16 +260,21 @@ class SecurityContext extends sfSecurityContext
     {
         if (true === array_key_exists('acl', $config)) {
             if (true === array_key_exists('connection', $config['acl']) && 'default' === $config['acl']['connection']) {
-                $this->_aclprovider = new \Symfony\Component\Security\Acl\Dbal\MutableAclProvider(
-                    $this->getApplication()->getEntityManager()->getConnection(),
-                    new \Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy(),
-                    array(
-                        'class_table_name'         => 'acl_classes',
-                        'entry_table_name'         => 'acl_entries',
-                        'oid_table_name'           => 'acl_object_identities',
-                        'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
-                        'sid_table_name'           => 'acl_security_identities'
-                ));
+                if (false === $this->_application->getContainer()->has('security.acl_provider')) {
+                    $this->_aclprovider = new \Symfony\Component\Security\Acl\Dbal\MutableAclProvider(
+                        $this->getApplication()->getEntityManager()->getConnection(),
+                        new \Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy(),
+                        array(
+                            'class_table_name'         => 'acl_classes',
+                            'entry_table_name'         => 'acl_entries',
+                            'oid_table_name'           => 'acl_object_identities',
+                            'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
+                            'sid_table_name'           => 'acl_security_identities'
+                    ));
+                } else {
+                    $this->_aclprovider = $this->_application->getContainer()->has('security.acl_provider');
+                }
+
             }
         }
 
@@ -365,7 +372,7 @@ class SecurityContext extends sfSecurityContext
     {
         $this->_firewall = new Firewall($this->_firewallmap, $this->_dispatcher);
         $this->_application->getContainer()->set('security.firewall', $this->_firewall);
-        if (false === ($this->_dispatcher instanceof DispatcherProxy) || false === $this->_dispatcher->isRestored()) {
+        if (false === $this->_dispatcher->isRestored()) {
             $this->_dispatcher->addListener(
                 'frontcontroller.request',
                 array('@security.firewall', 'onKernelRequest')

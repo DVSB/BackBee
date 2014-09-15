@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests\Loader;
+namespace BackBuilder\DependencyInjection\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -33,7 +33,7 @@ use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 class RandomService implements DumpableServiceInterface
 {
     const DEFAULT_SIZE = 100;
-    const RANDOM_SERVICE_PROXY_CLASSNAME = '\BackBuilder\DependencyInjection\Tests\Loader\RandomServiceProxy';
+    const RANDOM_SERVICE_PROXY_CLASSNAME = 'BackBuilder\DependencyInjection\Tests\RandomServiceProxy';
 
     /**
      * @var int
@@ -44,6 +44,13 @@ class RandomService implements DumpableServiceInterface
      * @var string
      */
     private $class_proxy;
+
+    /**
+     * represents if current service has been already restored or not
+     *
+     * @var boolean
+     */
+    protected $is_restored;
 
     /**
      * RandomService
@@ -101,5 +108,14 @@ class RandomService implements DumpableServiceInterface
     public function dump(array $options = array())
     {
         return array('size' => $this->size);
+    }
+
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->is_restored;
     }
 }

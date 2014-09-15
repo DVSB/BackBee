@@ -39,10 +39,4 @@ interface DumpableServiceProxyInterface
      *                     restore current service
      */
     public function restore(ContainerInterface $container, array $dump);
-
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored();
 }

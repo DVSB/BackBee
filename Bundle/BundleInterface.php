@@ -90,6 +90,13 @@ interface BundleInterface extends IObjectIdentifiable
      */
     public function getApplication();
 
+        /**
+     * [getApplication description]
+     *
+     * @return [type] [description]
+     */
+    public function getEntityManager();
+
     /**
      * [isStarted description]
      *
@@ -110,4 +117,11 @@ interface BundleInterface extends IObjectIdentifiable
      * @return boolean [description]
      */
     public function isConfigPerSite();
+
+    /**
+     * [serialize description]
+     *
+     * @return string json format of the result
+     */
+    public function serialize();
 }

@@ -164,8 +164,9 @@ class UrlGenerator implements IUrlGenerator
             }
         }
 
-        if (null !== $page->getUrl()) {
-            return $page->getUrl();
+        $url = $page->getUrl();
+        if (false === empty($url)) {
+            return $url;
         }
 
         if (true == array_key_exists('_default_', $this->_schemes)) {

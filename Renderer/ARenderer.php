@@ -319,9 +319,15 @@ abstract class ARenderer implements IRenderer
         }
 
         if (null !== $this->_application) {
-            $bb5script = $this->_application->getBaseDir() . '/BackBuilder/Resources' . DIRECTORY_SEPARATOR . 'scripts';
-            File::resolveFilepath($bb5script);
-            $this->_scriptdir[] = $bb5script;
+            $renderer_config = $application->getConfig()->getRendererConfig();
+            if (true === isset($renderer_config['bb_scripts_directory'])) {
+                $directories = (array) $renderer_config['bb_scripts_directory'];
+                foreach ($directories as $directory) {
+                    if (true === is_dir($directory) && true === is_readable($directory)) {
+                        $this->_scriptdir[] = $directory;
+                    }
+                }
+            }
         }
 
         $this->helpers = new ParameterBag();

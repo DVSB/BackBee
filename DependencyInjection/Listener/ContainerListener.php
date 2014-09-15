@@ -24,7 +24,7 @@ use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBuilder\DependencyInjection\Exception\CannotCreateContainerDirectoryException;
 use BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException;
-use BackBuilder\DependencyInjection\Loader\ContainerProxy;
+use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\Event\Event;
 use BackBuilder\Exception\BBException;
 
@@ -50,45 +50,35 @@ class ContainerListener
         $application = $event->getTarget();
         $container = $application->getContainer();
 
-        if (false === $application->isDebugMode()) {
-            if (false === ($container instanceof ContainerProxy)) {
-                $container_filename = $container->getParameter('container.filename');
-                $container_directory = $container->getParameter('container.dump_directory');
+        if (false === $application->isDebugMode() && false === $container->isRestored()) {
+            $container_filename = $container->getParameter('container.filename');
+            $container_directory = $container->getParameter('container.dump_directory');
 
-                if (false === is_dir($container_directory) && false === @mkdir($container_directory, 0755)) {
-                    throw new CannotCreateContainerDirectoryException($container_directory);
-                }
-
-                if (false === is_writable($container_directory)) {
-                    throw new ContainerDirectoryNotWritableException($container_directory);
-                }
-
-                $dumper = new PhpArrayDumper($container);
-                $dump = $dumper->dump(array('do_compile' => true));
-
-                $container_proxy = new ContainerProxy();
-                $container_proxy->init(unserialize($dump));
-
-                file_put_contents(
-                    $container_directory . DIRECTORY_SEPARATOR . $container_filename . '.php',
-                    (new PhpDumper($container_proxy))->dump(array(
-                        'class'      => $container_filename,
-                        'base_class' => 'BackBuilder\DependencyInjection\Loader\ContainerProxy'
-                    ))
-                );
-
-                $dump = unserialize($dump);
-                unset($dump['aliases']);
-                unset($dump['parameters']);
-
-                file_put_contents(
-                    $container_directory . DIRECTORY_SEPARATOR . $container_filename,
-                    serialize($dump)
-                );
-            } elseif (false === $container->isCompiled()) {
-                $container->compile();
+            if (false === is_dir($container_directory) && false === @mkdir($container_directory, 0755)) {
+                throw new CannotCreateContainerDirectoryException($container_directory);
             }
-        } else {
+
+            if (false === is_writable($container_directory)) {
+                throw new ContainerDirectoryNotWritableException($container_directory);
+            }
+
+            $dumper = new PhpArrayDumper($container);
+            $dump = $dumper->dump(array('do_compile' => true));
+
+            $container_proxy = new ContainerProxy();
+            $dump = unserialize($dump);
+            $container_proxy->init($dump);
+            $container_proxy->setParameter('services_dump', serialize($dump['services']));
+            $container_proxy->setParameter('is_compiled', $dump['is_compiled']);
+
+            file_put_contents(
+                $container_directory . DIRECTORY_SEPARATOR . $container_filename . '.php',
+                (new PhpDumper($container_proxy))->dump(array(
+                    'class'      => $container_filename,
+                    'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy'
+                ))
+            );
+        } elseif (true === $application->isDebugMode() && false === $container->isRestored()) {
             $container->compile();
         }
     }

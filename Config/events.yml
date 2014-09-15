@@ -93,7 +93,10 @@ kernel.exception:
 
 kernel.controller:
   listeners:
+    - [@rest.listener.param_converter, onKernelController]
+    - [@rest.listener.security, onKernelController]
     - [@rest.listener.validation, onKernelController]
+    - [@rest.listener.pagination, onKernelController]
 
 kernel.response:
   listeners:

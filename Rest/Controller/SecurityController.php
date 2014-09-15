@@ -98,12 +98,12 @@ class SecurityController extends ARestController
 
             $tokenAuthenticated = $authProvider->authenticate($token);
 
-            $response->setContent(json_encode([
+            $response->setContent($this->formatItem([
                 'nonce' => $nonce,
                 'user' => [
                     'id' => $tokenAuthenticated->getUser()->getId()
                 ]
-            ]));
+            ]), 'json');
             
         }
         

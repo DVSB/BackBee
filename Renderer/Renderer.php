@@ -788,7 +788,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         return array(
             'template_directories' => $this->_scriptdir,
             'layout_directories'   => $this->_layoutdir,
-            'default_adapter'      => $this->defaultAdapter
+            // 'default_adapter'      => $this->defaultAdapter
         );
     }
 
@@ -800,16 +800,16 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function restore(ContainerInterface $container, array $dump)
     {
-        $this->_application = $container->get('bbapp');
-        $this->defaultAdapter = $dump['default_adapter'];
+        // $this->_application = $container->get('bbapp');
+        // $this->defaultAdapter = $dump['default_adapter'];
         $this->_scriptdir = $dump['template_directories'];
         $this->_layoutdir = $dump['layout_directories'];
 
-        $renderer_config = $container->get('config')->getRendererConfig();
-        $adapters = (array) $renderer_config['adapter'];
-        foreach ($adapters as $adapter) {
-            $this->addRendererAdapter(new $adapter($this));
-        }
+        // $renderer_config = $container->get('config')->getRendererConfig();
+        // $adapters = (array) $renderer_config['adapter'];
+        // foreach ($adapters as $adapter) {
+        //     $this->addRendererAdapter(new $adapter($this));
+        // }
 
         $this->_is_restored = true;
     }

@@ -3,4 +3,4 @@ parameters:
 
 services:
     synthetic_service:
-        class: '\stdClass'
+        class: stdClass

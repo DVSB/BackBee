@@ -351,6 +351,7 @@ class ContentBlocks extends AbstractServiceLocal
                     $contentInfos->type = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->classname = $itemClass;
                     $contentInfos->created = $item->getCreated()->format("d/m/Y");
+                    $contentInfos->modified = $item->getModified()->format("d/m/Y");
                     $contentInfos->completeTitle = $currentItemTitle;
 
                     if (null !== $image = $item->getFirstElementOfType('BackBuilder\ClassContent\Media\image')) {
@@ -413,7 +414,6 @@ class ContentBlocks extends AbstractServiceLocal
      */
     public function getContentBlocks($catName = "tous", $withCategory = true)
     {
-
         /* Content catégories */
         $response = array();
 
@@ -424,6 +424,7 @@ class ContentBlocks extends AbstractServiceLocal
         $response["contentCategories"] = $contentCatContainer;
         $response["contentList"] = $this->getContentsByCategory($catName);
         $response["selectedCategory"] = $catName;
+
         return $response;
     }
 
@@ -740,9 +741,9 @@ class ContentBlocks extends AbstractServiceLocal
                         }
                     }
                 }
-
-                $content->$key = $newvalues;
             }
+
+            $content->$key = $newvalues;
         }
         return $content;
     }

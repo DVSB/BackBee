@@ -27,7 +27,8 @@
         "jms/metadata": "1.5.1",
         "backbuilder/api-client": "dev-master",
         "eric-chau/installers": "dev-master",
-        "willdurand/jsonp-callback-validator": "~1.0"
+        "willdurand/jsonp-callback-validator": "~1.0",
+        "symfony/expression-language": "2.5.4"
     },
     "autoload": {
         "psr-4": {

@@ -56,7 +56,7 @@ bb.rest.test:
     pattern: /rest/{version}/_generateKey/
     defaults:
         _action: generateKeyAction
-        _controller: rest.controller.test
+        _controller: BackBuilder\Rest\Controller\TestController
     requirements:
         version: \d
 
@@ -70,6 +70,15 @@ bb.rest.user_get:
         id: \d
         _method: GET
 
+bb.rest.user_post:
+    pattern: /rest/{version}/user/
+    defaults:
+        _action: postAction
+        _controller: BackBuilder\Rest\Controller\UserController
+    requirements:
+        version: \d
+        _method: POST
+
 bb.rest.security_firewall_autenticate:
     pattern: /rest/{version}/security/auth/{firewall}
     defaults:
@@ -79,7 +88,7 @@ bb.rest.security_firewall_autenticate:
         version: \d
         firewall: "[a-z_-]+"
         _method: POST
-        
+
 bb.rest.security_firewall_status:
     pattern: /rest/{version}/security/auth/{firewall}
     defaults:
@@ -89,7 +98,7 @@ bb.rest.security_firewall_status:
         version: \d
         firewall: "[a-z_-]+"
         _method: GET
-        
+
 bb.rest.security_session_delete:
     pattern: /rest/{version}/security/session/
     defaults:
@@ -145,7 +154,7 @@ bb.rest.acl.get_classes:
         _method: GET
 
 bb.rest.page.get_available_status:
-    pattern: /rest/{version}/pages/status
+    pattern: /rest/{version}/page/status
     defaults:
         _action:     getAvailableStatusAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -153,7 +162,7 @@ bb.rest.page.get_available_status:
         _method: GET
 
 bb.rest.page.get_collection:
-    pattern: /rest/{version}/pages
+    pattern: /rest/{version}/page
     defaults:
         _action:     getCollectionAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -161,7 +170,7 @@ bb.rest.page.get_collection:
         _method: GET
 
 bb.rest.page.get:
-    pattern: /rest/{version}/pages/{uid}
+    pattern: /rest/{version}/page/{uid}
     defaults:
         _action:     getAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -170,7 +179,7 @@ bb.rest.page.get:
         _method: GET
 
 bb.rest.page.post:
-    pattern: /rest/{version}/pages
+    pattern: /rest/{version}/page
     defaults:
         _action:     postAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -178,7 +187,7 @@ bb.rest.page.post:
         _method: POST
 
 bb.rest.page.put:
-    pattern: /rest/{version}/pages/{uid}
+    pattern: /rest/{version}/page/{uid}
     defaults:
         _action:     putAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -187,7 +196,7 @@ bb.rest.page.put:
         _method: PUT
 
 bb.rest.page.patch:
-    pattern: /rest/{version}/pages/{uid}
+    pattern: /rest/{version}/page/{uid}
     defaults:
         _action:     patchAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -196,7 +205,7 @@ bb.rest.page.patch:
         _method: PATCH
 
 bb.rest.page.move_node:
-    pattern: /rest/{version}/pages/{uid}/node/move
+    pattern: /rest/{version}/page/{uid}/node/move
     defaults:
         _action:     movePageNodeAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -205,10 +214,54 @@ bb.rest.page.move_node:
         _method: PUT
 
 bb.rest.page.delete:
-    pattern: /rest/{version}/pages/{uid}
+    pattern: /rest/{version}/page/{uid}
     defaults:
         _action: deleteAction
         _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: DELETE
+
+bb.rest.layout.get_collection:
+    pattern: /rest/{version}/layout
+    defaults:
+        _action: getCollectionAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        _method: GET
+
+bb.rest.layout.get:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: getAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: GET
+
+bb.rest.layout.post:
+    pattern: /rest/{version}/layout
+    defaults:
+        _action: postAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: POST
+
+bb.rest.layout.put:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: putAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: PUT
+
+bb.rest.layout.delete:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: deleteAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
     requirements:
         uid: \w{32}
         _method: DELETE

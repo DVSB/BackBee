@@ -192,6 +192,14 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
+     * @see BackBuilder\Bundle\BundleInterface::getEntityManager
+     */
+    public function getEntityManager()
+    {
+        return $this->application->getEntityManager();
+    }
+
+    /**
      * @see BackBuilder\Bundle\BundleInterface::isStarted
      */
     public function isStarted()
@@ -205,6 +213,21 @@ abstract class AbstractBaseBundle implements BundleInterface
     public function started()
     {
         $this->started = true;
+    }
+
+    /**
+     * @see BackBuilder\Bundle\BundleInterface::serialize
+     */
+    public function serialize()
+    {
+        $obj = new \stdClass();
+        $obj->id = $this->getId();
+
+        foreach ($this->getProperty() as $key => $value) {
+            $obj->$key = $value;
+        }
+
+        return json_encode($obj);
     }
 
     /**
