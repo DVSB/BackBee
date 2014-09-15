@@ -19,25 +19,25 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Exception;
+namespace BackBuilder\DependencyInjection\Tests\ContainerTest_Resources;
+
+use BackBuilder\DependencyInjection\DispatchTagEventInterface;
 
 /**
+ * An extend of \DateTime for BackBuilder\DependencyInjection\Container test
+ *
  * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @package     BackBuilder
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class InvalidServiceProxyException extends \BackBuilder\Exception\BBException
+class DateTime extends \DateTime implements DispatchTagEventInterface
 {
     /**
-     * InvalidServiceProxyException's constructor
-     *
-     * @param string $classname the classname of the service which must implements DumpableServiceProxyInterface
+     * @see BackBuilder\DependencyInjection\DispatchTagEventInterface::needDispatchEvent
      */
-    public function __construct($classname)
+    public function needDispatchEvent()
     {
-        $interface = 'BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface';
-
-        parent::__construct("$classname must implements $interface to be a valid service proxy.");
+        return true;
     }
 }

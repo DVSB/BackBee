@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\DependencyInjection;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,8 +19,11 @@ namespace BackBuilder\DependencyInjection;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace BackBuilder\DependencyInjection;
+
 use BackBuilder\Event\Event;
 use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\DispatchTagEventInterface;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder as sfContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface as sfContainerInterface;
@@ -60,19 +62,18 @@ class Container extends sfContainerBuilder implements ContainerInterface
             }
         }
 
-        if (true === in_array('event.dispatcher', array_keys($this->services))) {
-            if (null !== $service && true === $this->hasDefinition($id)) {
-                $definition = $this->getDefinition($id);
-                if (0 < count($tags = $definition->getTags())) {
-                    foreach ($tags as $tag => $datas) {
-                        $datas = array_shift($datas);
-                        if (false === array_key_exists('dispatch_event', $datas) || true === $datas['dispatch_event']) {
-                            $this->services['event.dispatcher']->dispatch(
-                                'service.tagged.' . $tag,
-                                new Event($service, array('id' => $id))
-                            );
-                        }
-                    }
+        if (
+            true === ($service instanceof DispatchTagEventInterface)
+            && true === $service->needDispatchEvent()
+            && true === $this->hasDefinition($id)
+            && true === $this->has('event.dispatcher')
+        ) {
+            foreach ($this->getDefinition($id)->getTags() as $tag => $datas) {
+                if (false === isset($datas[0]['dispatch_event']) || true === $datas[0]['dispatch_event']) {
+                    $this->services['event.dispatcher']->dispatch(
+                        'service.tagged.' . $tag,
+                        new Event($service, array('id' => $id))
+                    );
                 }
             }
         }
@@ -152,7 +153,21 @@ class Container extends sfContainerBuilder implements ContainerInterface
     {
         $id = strtolower($id);
 
-        return isset($this->services[$id]) || method_exists($this, 'get' . strtr($id, array('_' => '', '.' => '_')) . 'Service');
+        return $this->hasInstanceOf($id)
+            || method_exists($this, 'get' . strtr($id, array('_' => '', '.' => '_')) . 'Service')
+        ;
+    }
+
+    /**
+     * Checks if current container has an instance of service with $id or not
+     *
+     * @param  string  $id identifier of the service we want to check for instance
+     *
+     * @return boolean true if current container has an instance of service with $id, else false
+     */
+    public function hasInstanceOf($id)
+    {
+        return isset($this->services[strtolower($id)]);
     }
 
     /**

@@ -19,25 +19,23 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Exception;
+namespace BackBuilder\DependencyInjection;
 
 /**
+ * This interface allow BackBuilder\DependencyInjection\Container to know if it needs to dispatch
+ * tags events or not
+ *
  * @category    BackBuilder
  * @package     BackBuilder\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class InvalidServiceProxyException extends \BackBuilder\Exception\BBException
+interface DispatchTagEventInterface
 {
     /**
-     * InvalidServiceProxyException's constructor
+     * Define if current service need to dispatch tag event or not
      *
-     * @param string $classname the classname of the service which must implements DumpableServiceProxyInterface
+     * @return boolean true if needed to dispatch tag event, else false
      */
-    public function __construct($classname)
-    {
-        $interface = 'BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface';
-
-        parent::__construct("$classname must implements $interface to be a valid service proxy.");
-    }
+    public function needDispatchEvent();
 }

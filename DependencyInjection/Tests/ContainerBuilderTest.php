@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,6 +18,8 @@ namespace BackBuilder\DependencyInjection\Tests;
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace BackBuilder\DependencyInjection\Tests;
 
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\ContainerBuilder;
@@ -61,7 +62,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->resources_directory = __DIR__ . '/ContainerBuilderTest_Ressources';
+        $this->resources_directory = __DIR__ . '/ContainerBuilderTest_Resources';
 
         // create basic manual application without context and environment
         $this->application = new ManualBBApplication();

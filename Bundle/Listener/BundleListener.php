@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\Bundle\Listener;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,11 +19,12 @@ namespace BackBuilder\Bundle\Listener;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Bundle\BundleInterface;
+namespace BackBuilder\Bundle\Listener;
+
 use BackBuilder\Event\Event;
 
 /**
- *
+ * BackBee core bundle listener
  *
  * @category    BackBuilder
  * @package     BackBuilder\Bundle
@@ -35,9 +35,9 @@ class BundleListener
 {
 
     /**
-     * [onApplicationStart description]
+     * Occurs on `bbapplication.start` event to load every bundles routes
      *
-     * @param  Event  $event [description]
+     * @param  Event  $event
      */
     public static function onApplicationStart(Event $event)
     {
@@ -50,34 +50,16 @@ class BundleListener
     }
 
     /**
-     * [onGetBundleService description]
+     * Occurs on `bbapplication.stop` event to stop every started bundles
      *
-     * @param  Event  $event [description]
-     */
-    public static function onGetBundleService(Event $event)
-    {
-        $bundle = $event->getTarget();
-        if (false === $bundle->isStarted()) {
-            $bundle->start();
-            $bundle->started();
-
-            $definition = $event->getApplication()->getContainer()->getDefinition($event->getArgument('id'));
-            $definition->addTag('bundle.started', array('dispatch_event' => false));
-        }
-    }
-
-    /**
-     * [onApplicationStop description]
-     *
-     * @param  Event  $event [description]
+     * @param  Event  $event
      */
     public static function onApplicationStop(Event $event)
     {
         $application = $event->getTarget();
-        foreach (array_keys($application->getContainer()->findTaggedServiceIds('bundle.started')) as $bundle_id) {
-            $bundle = $application->getContainer()->get($bundle_id);
-            if (true === ($bundle instanceof BundleInterface) && true === $bundle->isStarted()) {
-                $bundle->stop();
+        foreach (array_keys($application->getContainer()->findTaggedServiceIds('bundle')) as $bundle_id) {
+            if (true === $application->getContainer()->hasInstanceOf($bundle_id)) {
+                $application->getContainer()->get($bundle_id)->stop();
             }
         }
     }
