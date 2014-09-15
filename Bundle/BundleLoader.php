@@ -24,6 +24,7 @@ use BackBuilder\IApplication;
 use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Config\Config;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
+use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\Util\Resolver\BundleConfigDirectory;
 
 use Symfony\Component\DependencyInjection\Definition;
@@ -176,8 +177,15 @@ class BundleLoader
      */
     private function buildBundleDefinition($classname, $base_directory)
     {
+        if (false === in_array('BackBuilder\Bundle\BundleInterface', class_implements($classname))) {
+            throw new InvalidArgumentException(
+                "Bundles must implements `BackBuilder\Bundle\BundleInterface`, `$classname` does not."
+            );
+        }
+
         $definition = new Definition($classname, array(new Reference('bbapp')));
-        $definition->addTag('bundle');
+        $definition->addTag('bundle', array('dispatch_event' => false));
+        $definition->addMethodCall('start');
 
         return $definition;
     }
