@@ -21,8 +21,8 @@
 
 namespace BackBuilder\Bundle\Registry;
 
-use Doctrine\ORM\EntityRepository,
-    Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
@@ -63,8 +63,8 @@ class Repository extends EntityRepository
             $this->getEntityManager()->remove($registry);
             $this->getEntityManager()->flush($registry);
         }
-        
-        
+
+
 
         return $registry;
     }

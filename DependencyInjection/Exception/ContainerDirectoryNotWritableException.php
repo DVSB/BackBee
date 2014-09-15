@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\DependencyInjection\Exception;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,6 +18,8 @@ namespace BackBuilder\DependencyInjection\Exception;
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace BackBuilder\DependencyInjection\Exception;
 
 /**
  * @category    BackBuilder

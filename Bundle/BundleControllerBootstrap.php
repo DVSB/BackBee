@@ -1,15 +1,37 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Bundle;
 
-use BackBuilder\Bundle\ABundle,
-    BackBuilder\Bundle\Exception\RequestErrorException,
-    BackBuilder\FrontController\Exception\FrontControllerException;
+use BackBuilder\Bundle\BundleInterface;
+use BackBuilder\Bundle\Exception\RequestErrorException;
+use BackBuilder\FrontController\Exception\FrontControllerException;
 
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @author e.chau <eric.chau@lp-digital.fr>
+ * @category    BackBuilder
+ * @package     BackBuilder\Bundle
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class BundleControllerBootstrap
 {
@@ -33,10 +55,10 @@ class BundleControllerBootstrap
      *     - $_bundle
      *     - $_application
      *     - $_em
-     *     
-     * @param BackBuilder\Bundle\ABundle $bundle 
+     *
+     * @param BackBuilder\Bundle\ABundle $bundle
      */
-    public function __construct(ABundle $bundle)
+    public function __construct(BundleInterface $bundle)
     {
         $this->_bundle = $bundle;
         $this->_application = $bundle->getApplication();
@@ -46,9 +68,9 @@ class BundleControllerBootstrap
     /**
      * It will act as the main controller of current controller; it will dispatch
      * resquest to the right protected action method
-     * 
-     * @param  string $method 
-     * @param  mixed  $args   
+     *
+     * @param  string $method
+     * @param  mixed  $args
      * @throws BackBuilder\FrontController\Exception\FrontControllerException if called action is not available
      */
     public function __call($method, $args)
@@ -65,8 +87,8 @@ class BundleControllerBootstrap
                 $result = call_user_func_array(array($this, $method), $args);
 
                 if (
-                    true === is_array($result) 
-                    && true === isset($result['headers']) 
+                    true === is_array($result)
+                    && true === isset($result['headers'])
                     && true === isset($result['content'])
                 ) {
                     $headers = $result['headers'];
@@ -82,7 +104,7 @@ class BundleControllerBootstrap
             $this->sendResponse($content, $statusCode, $headers);
         } else {
             throw new FrontControllerException(
-                sprintf('Unable to handle URL `%s`', $this->_application->getRequest()->getPathInfo()), 
+                sprintf('Unable to handle URL `%s`', $this->_application->getRequest()->getPathInfo()),
                 FrontControllerException::BAD_REQUEST
             );
         }
@@ -90,7 +112,7 @@ class BundleControllerBootstrap
 
     /**
      * Throws exception and stop current action if current user is not a bbuser
-     * 
+     *
      * @throws BackBuilder\Bundle\Exception\RequestErrorException if current user is not a bbuser
      */
     protected function throwExceptionIfNotBBUser()
@@ -105,7 +127,7 @@ class BundleControllerBootstrap
 
     /**
      * Generic way to send response back to client browser
-     * 
+     *
      * @param  string  $content    the string to print on client browser screen
      * @param  integer $statusCode the request status code (default: 200)
      * @param  array   $headers    headers of the response (default: void array)
@@ -115,7 +137,7 @@ class BundleControllerBootstrap
         $response = new Response();
 
         foreach ($headers as $name => $value) {
-            $response->headers->set($name, $value);            
+            $response->headers->set($name, $value);
         }
 
         $response->setStatusCode($statusCode);

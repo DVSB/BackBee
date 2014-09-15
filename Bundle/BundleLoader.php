@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\Bundle;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,11 +19,13 @@ namespace BackBuilder\Bundle;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\IApplication;
+namespace BackBuilder\Bundle;
+
 use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Config\Config;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
 use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\IApplication;
 use BackBuilder\Util\Resolver\BundleConfigDirectory;
 
 use Symfony\Component\DependencyInjection\Definition;
