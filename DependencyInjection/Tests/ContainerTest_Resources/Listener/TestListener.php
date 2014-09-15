@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests\ContainerTest_Ressources\Listener;
+namespace BackBuilder\DependencyInjection\Tests\ContainerTest_Resources\Listener;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system

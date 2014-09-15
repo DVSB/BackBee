@@ -61,7 +61,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->resources_directory = __DIR__ . '/ContainerBuilderTest_Ressources';
+        $this->resources_directory = __DIR__ . '/ContainerBuilderTest_Resources';
 
         // create basic manual application without context and environment
         $this->application = new ManualBBApplication();

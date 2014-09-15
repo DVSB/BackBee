@@ -46,7 +46,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testOnApplicationInitWithDebugTrue()
     {
-        $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Ressources/');
+        $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Resources/');
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
