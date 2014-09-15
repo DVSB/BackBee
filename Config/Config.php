@@ -24,6 +24,7 @@ use BackBuilder\Cache\ACache;
 use BackBuilder\Config\Exception\InvalidConfigException;
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\DispatchTagEventInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -39,7 +40,7 @@ use Symfony\Component\Yaml\Yaml;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
-class Config implements DumpableServiceInterface
+class Config implements DispatchTagEventInterface, DumpableServiceInterface
 {
     const CONFIG_PROXY_CLASSNAME = 'BackBuilder\Config\ConfigProxy';
 
@@ -214,6 +215,14 @@ class Config implements DumpableServiceInterface
     public function addYamlFilenameToIgnore($filename)
     {
         $this->_yml_names_to_ignore = array_unique(array_merge($this->_yml_names_to_ignore, (array) $filename));
+    }
+
+    /**
+     * @see BackBuilder\DependencyInjection\DispatchTagEventInterface::needDispatchEvent
+     */
+    public function needDispatchEvent()
+    {
+        return true;
     }
 
     /**
