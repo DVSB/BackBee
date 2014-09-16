@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\ClassContent;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,6 +18,8 @@ namespace BackBuilder\ClassContent;
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace BackBuilder\ClassContent;
 
 use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\Renderer\IRenderable;
@@ -984,5 +985,27 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
     public function getTemplateName()
     {
         return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "ClassContent" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
+
+    /**
+     *
+     *
+     * @param  boolean $return_array define if we return an array or the json_encode of array, default setted at false
+     *
+     * @return string|array
+     */
+    public function toJson($return_array = false)
+    {
+        $datas = array(
+            'uid'       => $this->_uid,
+            'label'     => $this->_label,
+            'type'      => str_replace('BackBuilder\ClassContent\\', '', get_class($this)),
+            'state'     => $this->_state,
+            'created'   => $this->_created->getTimestamp(),
+            'modified'  => $this->_modified->getTimestamp(),
+            'revision'  => $this->_revision
+        );
+
+        return false === $return_array ? json_encode($datas) : $datas;
     }
 }

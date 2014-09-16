@@ -574,4 +574,20 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         return $this;
     }
 
+    public function toJson($return_array = false)
+    {
+        $datas = array('elements' => array());
+
+        foreach ($this->getData() as $content) {
+            $datas['elements'][] = array(
+                'uid'  => $content->getUid(),
+                'type' => str_replace('BackBuilder\ClassContent\\', '', get_class($content))
+            );
+        }
+
+        $datas = array_merge(parent::toJson(true), $datas);
+
+        return false === $return_array ? json_encode($datas) : $datas;
+    }
+
 }
