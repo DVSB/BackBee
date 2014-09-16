@@ -137,7 +137,10 @@ class EntityManagerCreator
                 $memcacheDriver->setMemcache($memcache);
 
                 $config->setMetadataCacheImpl($memcacheDriver);
-            }
+
+            }elseif($options['metadata_type'] == 'apc'){
+
+                $config->setQueryCacheImpl(new \Doctrine\Common\Cache\ApcCache());
 
             }
 
