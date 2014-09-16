@@ -21,10 +21,13 @@
 
 namespace BackBuilder\ClassContent;
 
-use BackBuilder\NestedNode\Page,
-    BackBuilder\ClassContent\Exception\ClassContentException;
-use Symfony\Component\Security\Core\Util\ClassUtils;
+use BackBuilder\ClassContent\Exception\ClassContentException;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Util\Arrays;
+
 use Doctrine\Common\Collections\ArrayCollection;
+
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Abstract class for content object in BackBuilder
@@ -46,9 +49,9 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @Table(
  *   name="content",
  *   indexes={
- *     @index(name="IDX_MODIFIED", columns={"modified"}), 
- *     @index(name="IDX_STATEC", columns={"state"}), 
- *     @index(name="IDX_NODEUID", columns={"node_uid"}), 
+ *     @index(name="IDX_MODIFIED", columns={"modified"}),
+ *     @index(name="IDX_STATEC", columns={"state"}),
+ *     @index(name="IDX_NODEUID", columns={"node_uid"}),
  *     @index(name="IDX_CLASSNAMEC", columns={"classname"})
  *   }
  * )
@@ -108,7 +111,7 @@ abstract class AClassContent extends AContent
      * The revisions of the content
      * @var \Doctrine\Common\Collections\ArrayCollection
      * @OneToMany(targetEntity="BackBuilder\ClassContent\Revision", mappedBy="_content", fetch="EXTRA_LAZY")
-     * @OrderBy({"_version" = "DESC"})
+     * @OrderBy({"_revision" = "DESC"})
      */
     protected $_revisions;
 
@@ -133,7 +136,7 @@ abstract class AClassContent extends AContent
 
     /**
      * Store the map associating content uid to subcontent index
-     * @var array;
+     * @var array
      */
     protected $_subcontentmap = array();
 
@@ -1028,6 +1031,34 @@ abstract class AClassContent extends AContent
         }
         else
             throw new ClassContentException(sprintf('Unknown element %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
+    }
+
+    /**
+     * [toJson description]
+     * @param  boolean $return_array [description]
+     * @return [type]                [description]
+     */
+    public function toJson($return_array = false)
+    {
+        $datas = array(
+            'properties'         => $this->getProperty(),
+            'main_node'          => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
+            'is_loaded'          => $this->_isloaded,
+            'parameters'         => $this->getParam()
+        );
+
+        $datas['elements'] = array();
+        foreach ($this->getData() as $name => $content) {
+            if ($content instanceof AClassContent) {
+                $datas['elements'][$name] = $content->toJson(true);
+            } elseif (is_scalar($content)) {
+                $datas['elements'][$name] = $content;
+            }
+        }
+
+        $datas = array_merge(parent::toJson(true), $datas);
+
+        return false === $return_array ? json_encode($datas) : $datas;
     }
 
 }
