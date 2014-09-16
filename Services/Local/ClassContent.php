@@ -60,13 +60,15 @@ class ClassContent extends AbstractServiceLocal
 
     private function prepareContentData($initial_content, $datas, $accept, $isParentAContentSet = false, $persist = true)
     {
+        $accept = $initial_content->getAccept();
         $result = array();
         $em = $this->getApplication()->getEntityManager();
 
         if (is_array($datas) && count($datas)) {
             foreach ($datas as $key => $contentInfo) {
-                if ($accept && is_array($accept) && count($accept) && !array_key_exists($key, $accept))
+                if ($accept && is_array($accept) && count($accept) && !array_key_exists($key, $accept)) {
                     continue;
+                }
 
                 $createDraft = true;
                 if ($isParentAContentSet) {
