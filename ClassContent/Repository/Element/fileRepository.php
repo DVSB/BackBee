@@ -96,7 +96,7 @@ class fileRepository extends ClassContentRepository
      * @return boolean|string
      * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
-    public function updateFile(AClassContent $file, $newfilename, $originalname = null)
+    public function updateFile(AClassContent $file, $newfilename, $originalname = null, $src = null)
     {
         if (false === ($file instanceof elementFile)) {
             throw new ClassContentException('Invalid content type');
@@ -116,17 +116,28 @@ class fileRepository extends ClassContentRepository
 
         $moveto = $file->path;
         File::resolveFilepath($moveto, null, array('base_dir' => $base_dir));
-        File::resolveFilepath($newfilename, null, array('base_dir' => $this->_temporarydir));
 
         try {
-            File::move($newfilename, $moveto);
+            if($src === null) {
+                File::resolveFilepath($newfilename, null, array('base_dir' => $this->_temporarydir));
+                File::move($newfilename, $moveto);
+            }else{
+
+                $dir = dirname($moveto);
+                if(!is_dir($dir)){
+                    File::mkdir($dir);
+                }
+
+                file_put_contents($moveto, base64_decode($src));
+            }
+
             $this->_dispatchPostUploadEvent($moveto, $file->path);
         } catch (\BackBuilder\Exception\BBException $e) {
             return false;
         }
 
-        $stat = stat($moveto);
-        $file->setParam('stat', $stat, 'array');
+        //$stat = stat($moveto);
+        //$file->setParam('stat', $stat, 'array');
 
         return $moveto;
     }
@@ -170,7 +181,7 @@ class fileRepository extends ClassContentRepository
         if (true === property_exists($value, 'value')) {
             $image_obj = json_decode($value->value);
             if (true === is_object($image_obj) && true === property_exists($image_obj, 'filename') && true === property_exists($image_obj, 'originalname')) {
-                $this->updateFile($content, $image_obj->filename, $image_obj->originalname);
+                $this->updateFile($content, $image_obj->filename, $image_obj->originalname, $image_obj->src);
             }
         }
 
