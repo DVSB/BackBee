@@ -245,7 +245,7 @@ class BundleLoader
         $config_id = str_replace('%bundle_id%', basename($base_directory), BundleInterface::CONFIG_SERVICE_ID_PATTERN);
         $this->loadConfigDefinition($config_id, $base_directory);
         $bundle_config = $this->container->get($config_id)->getBundleConfig();
-        if (false === array_key_exists('config_per_site', $bundle_config) || $bundle_config['config_per_site']) {
+        if (true === isset($bundle_config['config_per_site']) && true === $bundle_config['config_per_site']) {
             $definition = $this->container->getDefinition($config_id);
             $definition->addTag('config_per_site');
         }
