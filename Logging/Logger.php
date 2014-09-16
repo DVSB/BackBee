@@ -365,9 +365,11 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     public function stopQuery()
     {
-        $buffer = $this->_buffer;
-        $this->_buffer = null;
-        $this->log(self::DEBUG, $buffer . ' in ' . (microtime(true) - $this->_start) . 'ms');
+        if (self::DEBUG === $this->_level) {
+            $buffer = $this->_buffer;
+            $this->_buffer = null;
+            $this->log(self::DEBUG, $buffer . ' in ' . (microtime(true) - $this->_start) . 'ms');
+        }
     }
 
     /**
