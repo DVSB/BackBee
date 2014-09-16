@@ -146,9 +146,13 @@ class phtml extends ARendererAdapter
             throw $fe;
         } catch (Exception $e) {
             ob_end_clean();
+            $this->renderer->getApplication()->error($e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR);
+            // @Todo: realy avoid exception?
+            /*
             throw new RendererException(
-                $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
+                    $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
             );
+            */
         }
     }
 
