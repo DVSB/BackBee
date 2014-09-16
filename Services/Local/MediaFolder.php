@@ -263,6 +263,10 @@ class MediaFolder extends AbstractServiceLocal
 
                 foreach ($em->getRepository('\BackBuilder\NestedNode\Media')->getMedias($mediafolder, $params, $order_sort, $order_dir, $pagingInfos) as $media) {
                     $media_content = $media->getContent();
+                    if (null === $media_content) {
+                        continue;
+                    }
+                    
                     $row = new \stdClass();
                     $row->id = $media->getId();
                     $row->mediafolder_uid = $media->getMediaFolder()->getUid();

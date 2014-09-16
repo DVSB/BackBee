@@ -50,9 +50,9 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  *   name="content",
  *   indexes={
  *     @index(name="IDX_MODIFIED", columns={"modified"}),
- *     @index(name="IDX_STATEC", columns={"state"}),
+ *     @index(name="IDX_STATE", columns={"state"}),
  *     @index(name="IDX_NODEUID", columns={"node_uid"}),
- *     @index(name="IDX_CLASSNAMEC", columns={"classname"})
+ *     @index(name="IDX_CLASSNAME", columns={"classname"})
  *   }
  * )
  * @HasLifecycleCallbacks

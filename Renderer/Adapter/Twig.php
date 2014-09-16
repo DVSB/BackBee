@@ -181,9 +181,13 @@ class Twig extends ARendererAdapter
         } catch (\BackBuilder\FrontController\Exception\FrontControllerException $fe) {
             throw $fe;
         } catch (\Exception $e) {
+            $this->renderer->getApplication()->error($e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR);
+            // @Todo: realy avoid exception?
+            /*
             throw new RendererException(
                     $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
             );
+            */
         }
 
         return $render;
