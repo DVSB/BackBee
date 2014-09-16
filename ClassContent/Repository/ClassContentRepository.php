@@ -551,8 +551,12 @@ class ClassContentRepository extends EntityRepository
     {
         $qb = new ClassContentQueryBuilder($this->_em, $this->_em->getExpressionBuilder()->count('cc'));
         $this->addContentBySearchFilters($qb, $classnames, array(), $cond);
-        $result = $qb->getQuery()->getSingleResult();
-
+        try {
+            $result = $qb->getQuery()->getSingleResult();
+        } catch (\Exception $e) {
+            return 0;
+        }
+        
         return reset($result);
     }
 

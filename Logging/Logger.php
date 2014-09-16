@@ -253,7 +253,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             }
 
             $this->_sendErrorMail($title, '<h1>' . $httpCode . ': ' . $title . '<h1><h2>' . $message . '</h2><p>Referer : ' . $this->_application->getRequest()->server->get('HTTP_REFERER') . '</p>' . $error_trace);
-            
+
             $response = new Response($content, $httpCode);
             $response->send();
             die();
