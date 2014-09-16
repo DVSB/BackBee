@@ -555,11 +555,11 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     public function getMediaDir()
     {
-        if (null === $this->_mediadir) {
-            $this->_mediadir = implode('/', array($this->getRepository(), 'Data', 'Media'));
+        if (null === $this->_container) {
+            throw new \Exception('Application\'s container is not ready!');
         }
 
-        return $this->_mediadir;
+        return $this->getContainer()->getParameter('bbapp.media.dir');
     }
 
     /**

@@ -52,6 +52,11 @@ class ContainerBuilder
     const DEFAULT_DATA_FOLDER_NAME = 'Data';
 
     /**
+     * Define default name for media folder
+     */
+    const DEFAULT_MEDIA_FOLDER_NAME = 'Media';
+
+    /**
      * Define default name for cache folder
      */
     const DEFAULT_CACHE_FOLDER_NAME = 'cache';
@@ -218,15 +223,24 @@ class ContainerBuilder
         $this->container->setParameter('bbapp.repository.dir', $this->application->getRepository());
 
         // set default cache directory and cache autogenerate value
-        $this->container->setParameter('bbapp.cache.dir', implode(DIRECTORY_SEPARATOR, array(
-            $this->application->getBaseDir(), self::DEFAULT_CACHE_FOLDER_NAME, $this->environment
-        )));
+        $cache_directory = $this->application->getBaseDir() . DIRECTORY_SEPARATOR . self::DEFAULT_CACHE_FOLDER_NAME;
+        if (IApplication::DEFAULT_ENVIRONMENT !== $this->environment) {
+            $cache_directory .= DIRECTORY_SEPARATOR . $this->environment;
+        }
+
+        $this->container->setParameter('bbapp.cache.dir', $cache_directory);
         $this->container->setParameter('bbapp.cache.autogenerate', '%container.autogenerate%');
 
         // define data directory
         $this->container->setParameter(
             'bbapp.data.dir',
             $this->application->getRepository() . DIRECTORY_SEPARATOR . self::DEFAULT_DATA_FOLDER_NAME
+        );
+
+        // define media directory
+        $this->container->setParameter(
+            'bbapp.media.dir',
+            $this->container->getParameter('bbapp.data.dir') . DIRECTORY_SEPARATOR . self::DEFAULT_MEDIA_FOLDER_NAME
         );
     }
 
