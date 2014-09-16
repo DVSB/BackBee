@@ -199,10 +199,13 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     public function exceptionHandler(\Exception $exception)
     {
-        $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', $exception->getFile(), $exception->getLine(), $exception->getMessage()));
-
         if ($exception instanceof FrontControllerException) {
             $httpCode = $exception->getCode() - FrontControllerException::UNKNOWN_ERROR;
+
+            // Not logging when not found
+            if($httpCode !== 404){
+                $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', $exception->getFile(), $exception->getLine(), $exception->getMessage()));
+            }
 
             $r = new \ReflectionClass($exception);
             $errors = array_flip($r->getConstants());
@@ -219,8 +222,11 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 }
 
                 $previous = $exception->getPrevious();
-                while (null !== $previous) {
-                    $this->error(sprintf('Cause By : Error occurred in file `%s` at line %d with message: %s', $previous->getFile(), $previous->getLine(), $previous->getMessage()));
+                while (NULL !== $previous) {
+                    // Not logging when not found
+                    if($httpCode !== 404){
+                        $this->error(sprintf('Cause By : Error occurred in file `%s` at line %d with message: %s', $previous->getFile(), $previous->getLine(), $previous->getMessage()));
+                    }
 
                     $error_trace .= '<tr><th colspan="5">Caused by: ' . $previous->getMessage() .
                             ' in ' . $previous->getFile() . ' on line ' . $previous->getLine() . '</td></tr>';
@@ -252,8 +258,15 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $response->send();
             die();
         } else {
+
+            $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', $exception->getFile(), $exception->getLine(), $exception->getMessage()));
+
             if (false === $this->_application->isClientSAPI()) {
-                header("HTTP/1.0 500 Internal Server Error");
+                if (!headers_sent()) {
+                    header("HTTP/1.0 500 Internal Server Error");
+                }else{
+                    $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', __FILE__, __LINE__, 'This error should not happend, headers already sents'));
+                }
 
                 if (false === $this->_application->isDebugMode() && 1 != ini_get('display_errors')) {
                     exit(-1);
@@ -326,6 +339,14 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
         if ($level > $this->_level)
             return;
+
+        if(isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])){
+            $message = sprintf("http://%s%s : %s", $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'], $message);
+        }elseif(PHP_SAPI == 'cli'){
+            if(isset($argv)){
+                $message = sprintf("%s : %s", implode(" ", $argv), $message);
+            }
+        }
 
         foreach ($this->_appenders as $appender) {
             $appender->write(array('d' => @date('Y/m/d H:i:s'),

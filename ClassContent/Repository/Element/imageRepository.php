@@ -40,23 +40,25 @@ class imageRepository extends fileRepository
      * @param \BackBuilder\ClassContent\AClassContent $file
      * @param string $newfilename
      * @param string $originalname
+     * @param string $src
      * @return boolean|string
      * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
-    public function updateFile(AClassContent $file, $newfilename, $originalname = null)
+    public function updateFile(AClassContent $file, $newfilename, $originalname = null, $src = null)
     {
         if (false === ($file instanceof elementImage)) {
             throw new \BackBuilder\ClassContent\Exception\ClassContentException('Invalid content type');
         }
 
-        if (false === $newfilename = parent::updateFile($file, $newfilename, $originalname)) {
+        if (false === $newfilename = parent::updateFile($file, $newfilename, $originalname, $src)) {
             return false;
         }
 
-        $size = getimagesize($newfilename);
+        /*$size = getimagesize($newfilename);
         list($width, $height) = $size;
         $file->setParam('width', $width, 'scalar');
         $file->setParam('height', $height, 'scalar');
+        */
 
         return $newfilename;
     }

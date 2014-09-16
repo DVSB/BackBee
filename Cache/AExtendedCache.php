@@ -59,4 +59,10 @@ abstract class AExtendedCache extends ACache
      * @return int
      */
     abstract public function getMinExpireByTag($tag, $lifetime = 0);
+	
+    /**
+     * @param $id
+     * @param $tag
+     */
+    public function saveTag($id, $tag){}
 }
