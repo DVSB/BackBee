@@ -449,14 +449,14 @@ class Page extends AbstractServiceLocal
      * @param string $target The target is redirect is defined
      * @param string $redirect  The permananet redirect URL
      * @param string $layout_uid The unique identifier of the layout to use
-     *  @param string $alttitle The alternate title bb5 #366
+     * @param string $alttitle The alternate title bb5 #366
      * @return \stdClass
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the layout is undefined
      * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid, $alttitle, $flag = "", $is_sibling = false)
+    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid, $alttitle, $flag = "", $is_sibling = false, $move_node_uid = null)
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
@@ -466,6 +466,9 @@ class Page extends AbstractServiceLocal
         }
         
         $parent = $this->_repo->find(strval($parent_uid));
+        if (false === empty($move_node_uid)) {
+            $parent = $this->_repo->find(strval($move_node_uid));
+        }
         
         $is_final = $parent->getLayout()->getParam('final');
         if (true === $is_final) {
@@ -532,6 +535,7 @@ class Page extends AbstractServiceLocal
             $leaf->data = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
             $leaf->state = 'closed';
             $leaf->is_sibling = $is_sibling;
+            $leaf->move_node_uid = (false === empty($move_node_uid)) ? $move_node_uid : null;
         }
         
         return $leaf;
