@@ -60,7 +60,7 @@ class datacontent extends AHelper
      * An array of attributes
      * @var array 
      */
-    private $_attributes;
+    private $_attributes = array();
 
     /**
      * An array of attributes
