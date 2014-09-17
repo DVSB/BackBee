@@ -12,6 +12,7 @@ use BackBuilder\Renderer\Exception\RendererException;
 use BackBuilder\Renderer\IRenderable;
 use BackBuilder\Renderer\IRendererAdapter;
 use BackBuilder\Site\Layout;
+use BackBuilder\Util\File;
 use BackBuilder\Util\String;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -55,7 +56,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * define if renderer has been restored by container or not
      * @var boolean
      */
-    private $_is_restored;
+    private $is_restored;
 
     /**
      * Constructor
@@ -78,7 +79,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             }
         }
 
-        $this->_is_restored = false;
+        $this->is_restored = false;
     }
 
      /**
@@ -376,6 +377,12 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     public function partial($template = null, $params = null)
     {
         $this->templateFile = $template;
+        File::resolveFilepath($this->templateFile, null, array('include_path' => $this->_scriptdir));
+        if (false === is_file($this->templateFile) || false === is_readable($this->templateFile)) {
+            throw new RendererException(sprintf(
+                'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
+            ), RendererException::SCRIPTFILE_ERROR);
+        }
 
         // Assign parameters
         if (null !== $params) {
@@ -512,8 +519,8 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
             if (false === $this->isValidTemplateFile($this->templateFile)) {
                 throw new RendererException(sprintf(
-                                'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
-                        ), RendererException::SCRIPTFILE_ERROR);
+                        'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
+                ), RendererException::SCRIPTFILE_ERROR);
             }
         } catch (RendererException $e) {
             $render = '';
@@ -526,8 +533,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
                     foreach ($subcontents as $sc) {
                         if (true === is_a($sc, 'BackBuilder\Renderer\IRenderable')) {
                             $scRender = $this->render(
-                                    $sc, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable
+                                $sc, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable
                             );
+
                             if (false === $scRender) {
                                 throw $e;
                             }
@@ -655,7 +663,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
         if (null === $adapter) {
             throw new RendererException(sprintf(
-                    'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
+                'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
             ), RendererException::SCRIPTFILE_ERROR);
         }
 
@@ -811,7 +819,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         //     $this->addRendererAdapter(new $adapter($this));
         // }
 
-        $this->_is_restored = true;
+        $this->is_restored = true;
     }
 
 
@@ -820,6 +828,6 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function isRestored()
     {
-        return $this->_is_restored;
+        return $this->is_restored;
     }
 }
