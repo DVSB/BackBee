@@ -121,6 +121,8 @@ services:
     routing:
         class:      %bbapp.routing.class%
         arguments:  ["@bbapp"]
+        tags:
+            - { name: "dumpable", dispatch_event: false }
 
     pagebuilder:
         class:      %bbapp.pagebuilder.class%

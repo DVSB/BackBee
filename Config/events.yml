@@ -113,7 +113,6 @@ nestednode.page.postload:
 
 bbapplication.start:
   listeners:
-    - [BackBuilder\Bundle\Listener\BundleListener, onApplicationStart]
     - [BackBuilder\Renderer\Listener\TwigListener, onApplicationStart]
 
 service.tagged.bundle:

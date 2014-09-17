@@ -54,7 +54,6 @@ use Symfony\Component\HttpKernel\Event\PostResponseEvent;
  */
 class FrontController implements HttpKernelInterface
 {
-
     const DEFAULT_URL_EXTENSION = 'html';
 
     /**
@@ -99,6 +98,10 @@ class FrontController implements HttpKernelInterface
      * @var boolean
      */
     protected $force_url_extension = true;
+
+    /**
+     * @var string
+     */
     protected $url_extension;
 
     /**
@@ -118,9 +121,11 @@ class FrontController implements HttpKernelInterface
                 }
             }
 
-            $route = $application->getConfig()->getRouteConfig();
-            if (true === is_array($route) && 0 < count($route)) {
-                $this->registerRoutes($this, $route);
+            if (false === $this->getRouteCollection()->isRestored()) {
+                $route = $application->getConfig()->getRouteConfig();
+                if (true === is_array($route) && 0 < count($route)) {
+                    $this->registerRoutes('controller', $route);
+                }
             }
         }
 
@@ -650,7 +655,6 @@ class FrontController implements HttpKernelInterface
                 $this->getRequest()->attributes->add($matches);
             }
 
-
             if($this->getRequest()->attributes->has('_controller')) {
                 return $this->_invokeAction($type);
             }
@@ -796,22 +800,24 @@ class FrontController implements HttpKernelInterface
      * @param  mixed $default_controller used as default controller if a route comes without any specific controller
      * @param  array|null   $route_config
      */
-    public function registerRoutes($default_controller, array $route_config = null)
+    public function registerRoutes($default_controller, array $route_config)
     {
-        if (null === $route_config) {
-            return;
-        }
-
-        $application = $this->getApplication();
-
         foreach ($route_config as $name => &$route) {
-            if (false === array_key_exists('defaults', $route) || false === array_key_exists('_action', $route['defaults'])) {
-                $application->warning(sprintf('Unable to parse the action method for the route `%s`.', $name));
+            if (false === isset($route['defaults']) || false === isset($route['defaults']['_action'])) {
+                $this->getApplication()->warning("Unable to parse the action method for the route `$name`.");
                 continue;
             }
 
             if (false === array_key_exists('_controller', $route['defaults'])) {
                 $route['defaults']['_controller'] = $default_controller;
+            }
+
+            if (false === is_string($route['defaults']['_controller'])) {
+                throw new FrontControllerException(
+                    'Route controller must be type of string. '
+                    . 'Please provide controller namespace or controller service id instead of '
+                    . 'instance of `' . get_class($route['defaults']['_controller']) . '`.'
+                );
             }
         }
 
