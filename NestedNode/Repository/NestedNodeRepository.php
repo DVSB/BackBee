@@ -377,10 +377,14 @@ class NestedNodeRepository extends EntityRepository
             return $node;
         }
 
-        return $this->createQueryBuilder('n')
-                        ->andIsAncestorOf($node, false, $level)
-                        ->getQuery()
-                        ->getSingleResult();
+        try {
+            return $this->createQueryBuilder('n')
+                            ->andIsAncestorOf($node, false, $level)
+                            ->getQuery()
+                            ->getSingleResult();
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**

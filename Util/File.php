@@ -198,12 +198,15 @@ class File {
      * Makes directory
      * @param string $path The directory path
      * @return boolean Returns TRUE on success
-     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if directory already
-     *                                                         exists or cannot be made
+     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if directory cannot be created
      */
     public static function mkdir($path) {
         if (true === is_dir($path)) {
-            throw new InvalidArgumentsException(sprintf('Directory `%s` already exists.', $path));
+            if (true === is_writable($path)) {
+                return true;
+            }
+            
+            throw new InvalidArgumentsException(sprintf('Directory `%s` already exists and is no writable.', $path));
         }
 
         if (false === @mkdir($path, 0755, true)) {

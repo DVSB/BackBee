@@ -47,6 +47,10 @@ class Database
         }else{
             $this->_em = $em;
         }
+
+        $platform = $this->_em->getConnection()->getDatabasePlatform();
+        $platform->registerDoctrineTypeMapping('enum', 'string');
+
         $this->_schemaTool = new SchemaTool($this->_em);
         $this->_entityFinder = new EntityFinder(dirname($this->_application->getBBDir()));
     }
@@ -208,10 +212,20 @@ class Database
         return $sql;
     }
 
-    public function getUpdateSqlSchema()
+    /**
+     * @param int $type
+     *
+     * @return array
+     */
+    public function getUpdateSqlSchema($type = 3)
     {
-        $sql1 = $this->getUpdateBackBuilderSqlSchema();
-        $sql2 = $this->getUpdateBundleSqlSchema();
+        $sql1 = $sql2 = array();
+        if($type == 1 || $type & 3 == 3){
+            $sql1 = $this->getUpdateBackBuilderSqlSchema();
+        }
+        if($type == 2 || $type & 3 == 3){
+            $sql2 = $this->getUpdateBundleSqlSchema();
+        }
 
         $sql = array_merge($sql1, $sql2);
 

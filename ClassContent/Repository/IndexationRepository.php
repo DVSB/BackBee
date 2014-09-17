@@ -162,9 +162,10 @@ class IndexationRepository extends EntityRepository
         foreach ($contents as $content) {
             if (null === $content || true === $content->isElementContent()) {
                 continue;
-            }
-
-            if (false === array_key_exists($content->getUid(), $parent_uids)) {
+	    // Avoid loop if content already treated
+            }elseif (true === array_key_exists($content->getUid(), $parent_uids)) {
+                break;
+            }elseif (false === array_key_exists($content->getUid(), $parent_uids)) {
                 $parent_uids[$content->getUid()] = array($content->getUid());
             }
 
@@ -209,6 +210,36 @@ class IndexationRepository extends EntityRepository
         }
 
         return $this;
+    }
+
+    /**
+     * Returns an array of content uids owning provided contents
+     * @param array $uids
+     * @return array
+     */
+    public function getParentContentUidsByUids(array $uids)
+    {        
+        $ids = array();
+
+        $query  = 'SELECT j.parent_uid FROM content_has_subcontent j
+                   LEFT JOIN content c ON c.uid = j.content_uid
+                   WHERE classname != \'BackBuilder\ClassContent\Element\'';
+
+        $where = array();
+        foreach ($uids as $uid) {
+            $where[] = $uid;
+        }
+
+        if(count($where) > 0){
+            $query .= ' AND j.content_uid  IN ("'.implode('","', $where).'")';
+            $parents = $this->getEntityManager()
+                ->getConnection()
+                ->executeQuery($query)->fetchAll(\PDO::FETCH_COLUMN);
+            if($parents){
+                $ids = array_merge($ids, $parents, $this->getParentContentUidsByUids($parents));
+            }
+        }
+        return array_unique($ids);
     }
 
     /**
@@ -338,17 +369,10 @@ class IndexationRepository extends EntityRepository
                 ->select('c.node_uid')
                 ->from($meta->getTableName(), 'c');
 
-        $index = 0;
-        $atleastone = false;
-        foreach ($content_uids as $uid) {
-            $q->orWhere('c.' . $meta->getColumnName('_uid') . ' = :uid' . $index)
-                    ->setParameter('uid' . $index, $uid);
+	$q->andWhere('c.' . $meta->getColumnName('_uid') . ' IN (:ids)')
+              ->setParameter('ids', $content_uids);
 
-            $index++;
-            $atleastone = true;
-        }
-
-        return (true === $atleastone) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
+        return (false === empty($content_uids)) ? array_unique($q->execute()->fetchAll(\PDO::FETCH_COLUMN)) : array();
     }
 
     /**

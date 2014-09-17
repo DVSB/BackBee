@@ -39,6 +39,25 @@ class Keyword extends AbstractServiceLocal
      */
     public function getKeywordTree($root_uid)
     {
+        $tree = array();
+        $leaf = new \stdClass();
+        $leaf->attr = new \stdClass();
+        $leaf->attr->rel = 'root';
+        $leaf->attr->id = 'node_base' ;
+        $leaf->attr->state = 1;
+        $leaf->data = "root";
+        $leaf->state = 'closed';
+        $tree[] = $leaf;
+        return $tree;
+
+        # This function can"t work with our keywords
+        # There are 110K+ keywords and the recursive takes too much time
+        # The code just above is ignoring the creation of the keyword arbo
+        # The possibility to add keyword works though
+
+
+
+        /*
         $em = $this->bbapp->getEntityManager();
         $tree = array();
         if ($root_uid && $root_uid !== null) {
@@ -79,6 +98,7 @@ class Keyword extends AbstractServiceLocal
         }
 
         return $tree;
+        */
     }
 
     /**
