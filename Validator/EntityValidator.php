@@ -72,31 +72,40 @@ class EntityValidator extends AValidator
         foreach ($datas as $key => $data) {
             if (true === isset($config[$key])) {
                 $cConfig = $config[$key];
-                if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR])) {
-                    foreach ($cConfig[self::CONFIG_PARAMETER_VALIDATOR] as $validator => $validator_conf)
-                    {
-                        if (self::UNIQUE_VALIDATOR === $validator) {
-                            $this->doUniqueValidator($entity, $errors, $key, $data, $validator_conf);
-                        } elseif (self::PASSWORD_VALIDATOR === $validator) {
-                            $this->doPasswordValidator($errors, $key, $data, $datas, $validator_conf);
-                        } else {
-                            $this->doGeneralValidator($data, $key, $validator, $validator_conf, $errors);
-                        }
-                    }
+                
+                $do_treatment = true;
+                if (true === isset($cConfig[self::CONFIG_PARAMETER_MANDATORY]) && 
+                    false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && 
+                    true === empty($data)) {
+                    $do_treatment = false;
                 }
-
-                if (true === method_exists($entity, 'set' . ucfirst($key))) {
-                    $do_set = true;
-                    if (true === isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY])) {
-                        if (false === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY] && true === empty($data)) {
-                            $do_set = false;
+                
+                if (true === $do_treatment) {
+                    if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR])) {
+                        foreach ($cConfig[self::CONFIG_PARAMETER_VALIDATOR] as $validator => $validator_conf) {
+                            if (self::UNIQUE_VALIDATOR === $validator) {
+                                $this->doUniqueValidator($entity, $errors, $key, $data, $validator_conf);
+                            } elseif (self::PASSWORD_VALIDATOR === $validator) {
+                                $this->doPasswordValidator($errors, $key, $data, $datas, $validator_conf);
+                            } else {
+                                $this->doGeneralValidator($data, $key, $validator, $validator_conf, $errors);
+                            }
                         }
                     }
-                    if (true === $do_set) {
-                        if (true === isset($cConfig[self::CONFIG_PARAMETER_ENTITY])) {
-                            $data = $this->em->find($cConfig[self::CONFIG_PARAMETER_ENTITY], $data);
+
+                    if (true === method_exists($entity, 'set' . ucfirst($key))) {
+                        $do_set = true;
+                        if (true === isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY])) {
+                            if (false === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY] && true === empty($data)) {
+                                $do_set = false;
+                            }
                         }
-                        $entity->{'set' . ucfirst($key)}($data);
+                        if (true === $do_set) {
+                            if (true === isset($cConfig[self::CONFIG_PARAMETER_ENTITY])) {
+                                $data = $this->em->find($cConfig[self::CONFIG_PARAMETER_ENTITY], $data);
+                            }
+                            $entity->{'set' . ucfirst($key)}($data);
+                        }
                     }
                 }
             }

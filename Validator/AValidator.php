@@ -35,6 +35,7 @@ abstract class AValidator
     const CONFIG_PARAMETER_ERROR = 'error';
     const CONFIG_PARAMETER_PARAMETERS = 'parameters';
     const CONFIG_PARAMETER_SET_EMPTY = 'set_empty';
+    const CONFIG_PARAMETER_MANDATORY = 'mandatory';
 
     /**
      * Validate all datas with config

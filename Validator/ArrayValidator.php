@@ -49,23 +49,34 @@ class ArrayValidator extends AValidator
     {
         foreach ($datas as $key => $data) {
             if (null !== $cConfig = $this->getData($key, $form_config)) {
-                if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR])) {
-                    foreach ($cConfig[self::CONFIG_PARAMETER_VALIDATOR] as $validator => $validator_conf) {
-                        $this->doGeneralValidator($data, $key, $validator, $validator_conf, $errors);
-                    }
+                
+                $do_treatment = true;
+                if (true === isset($cConfig[self::CONFIG_PARAMETER_MANDATORY]) && 
+                    false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && 
+                    true === empty($data)) {
+                    $do_treatment = false;
                 }
+                
+                if (true === $do_treatment) {
+                    if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR])) {
+                        foreach ($cConfig[self::CONFIG_PARAMETER_VALIDATOR] as $validator => $validator_conf) {
+                            $this->doGeneralValidator($data, $key, $validator, $validator_conf, $errors);
+                        }
+                    }
 
-                $do_set = true;
-                if (true === isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY])) {
-                    if (false === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY] && true === empty($data)) {
-                        $do_set = false;
+                    $do_set = true;
+                    if (true === isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY])) {
+                        if (false === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY] && true === empty($data)) {
+                            $do_set = false;
+                        }
                     }
-                }
-                if (true === $do_set) {
-                    $this->setData($key, $data, $array);
+                    if (true === $do_set) {
+                        $this->setData($key, $data, $array);
+                    }
                 }
             }
         }
+        
         return $array;
     }
     
