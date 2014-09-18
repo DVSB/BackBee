@@ -303,3 +303,10 @@ services:
     nestednode.page_listener:
         arguments:  [@bbapp]
         class: BackBuilder\Event\Listener\PageListener
+
+    array.validator:
+        class: BackBuilder\Validator\ArrayValidator
+
+    entity.validator:
+        class: BackBuilder\Validator\EntityValidator
+        arguments: ["@em"]
