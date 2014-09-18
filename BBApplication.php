@@ -195,6 +195,10 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function getTheme($force_reload = false)
     {
+        if (null === $this->getConfig()->getSection('themes_dir') || null === $this->getConfig()->getThemeConfig()) {
+            return null;
+        }
+
         if (false === is_object($this->_theme) || true === $force_reload) {
             $this->_theme = new Theme($this);
         }
@@ -303,7 +307,9 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->_isstarted = true;
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
-        $this->getTheme()->init(); // 30 ms
+        if (null !== $this->getTheme()) {
+            $this->getTheme()->init();
+        }
 
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
