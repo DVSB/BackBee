@@ -45,6 +45,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RouteCollection extends sfRouteCollection implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
+    const DEFAULT_URL = 0;
+    const IMAGE_URL = 1;
+
+    const DEFAULT_IMAGE_URL_PREFIX = '/images/';
 
     /**
      * The current BBApplication
@@ -56,6 +60,11 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      * @var array
      */
     private $raw_routes;
+
+    /**
+     * @var string
+     */
+    private $image_url_prefix;
 
     /**
      * @var boolean
@@ -70,6 +79,13 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     {
         $this->application = $application;
         $this->raw_routes = array();
+
+        $this->image_url_prefix = self::DEFAULT_IMAGE_URL_PREFIX;
+        $config = $this->application->getConfig()->getRoutingConfig();
+        if (null !== $config && isset($config['url_prefix']['image'])) {
+            $this->image_url_prefix = $config['url_prefix']['image'];
+        }
+
         $this->is_restored = false;
     }
 
@@ -138,7 +154,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
         }
 
         $path = null !== $base_url && true === is_string($base_url)
-            ? $base_url . $uri . (false === $add_ext ? '' : $this->_getDefaultExtFromSite($site))
+            ? $base_url . $uri . (false === $add_ext ? '' : $this->getDefaultExtFromSite($site))
             : $this->getUri($uri, false === $add_ext ? '' : null, $site);
 
         if (false === empty($params_to_add) && true === $build_query) {
@@ -156,8 +172,13 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      * @param \BackBuilder\Site\Site $site
      * @return string
      */
-    public function getUri($pathinfo = null, $defaultExt = null, Site $site = null)
+    public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
     {
+        $url_type = $url_type ?: self::DEFAULT_URL;
+        if (self::IMAGE_URL === $url_type) {
+            $pathinfo = $this->image_url_prefix . $pathinfo;
+        }
+
         // If scheme already provided, return pathinfo
         if (null !== $pathinfo && preg_match('/^([a-zA-Z1-9\/_]*)http[s]?:\/\//', $pathinfo, $matches)) {
             return substr($pathinfo, strlen($matches[1]));
@@ -173,17 +194,18 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
             return $pathinfo;
         }
 
+        $pathinfo = str_replace('//', '/', $pathinfo);
         if (null === $site || $this->application->getSite() === $site) {
             // If no site or current site provided, use BaseUrl
-            $pathinfo = $this->_getUriFromBaseUrl($application->getRequest(), $pathinfo);
+            $pathinfo = $this->getUriFromBaseUrl($application->getRequest(), $pathinfo);
         } else {
-            $pathinfo = $this->_getUriForSite($application->getRequest(), $pathinfo, $site);
+            $pathinfo = $this->getUriForSite($application->getRequest(), $pathinfo, $site);
         }
 
         // If need add default extension provided or set from $site
-        if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
+        if (false === strpos(basename($pathinfo), '.') && '/' !== substr($pathinfo, -1)) {
             if (null === $defaultExt) {
-                $defaultExt = $this->_getDefaultExtFromSite($site);
+                $defaultExt = $this->getDefaultExtFromSite($site);
             }
 
             $pathinfo .= $defaultExt;
@@ -266,7 +288,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      * @param string $pathinfo
      * @return string
      */
-    private function _getUriFromBaseUrl(Request $request, $pathinfo)
+    private function getUriFromBaseUrl(Request $request, $pathinfo)
     {
         if (null === $pathinfo) {
             $pathinfo = $request->getBaseUrl();
@@ -288,30 +310,28 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      * @param \BackBuilder\Site\Site $site
      * @return string
      */
-    private function _getUriForSite(Request $request, $pathinfo, Site $site)
+    private function getUriForSite(Request $request, $pathinfo, Site $site)
     {
-        return $request->getScheme()
-                . '://'
-                . $site->getServerName()
-                . $pathinfo;
+        return $request->getScheme() . '://' . $site->getServerName() . $pathinfo;
     }
 
     /**
      * Returns the default extension for a site
      * @param \BackBuilder\Site\Site $site
-     * @return string|NULL
+     * @return string|null
      */
-    private function _getDefaultExtFromSite(Site $site = null)
+    private function getDefaultExtFromSite(Site $site = null)
     {
         if (null === $site) {
             $site = $this->application->getSite();
         }
 
-        if (null === $site) {
-            return null;
+        $extension = null;
+        if (null !== $site) {
+            $extension = $site->getDefaultExtension();
         }
 
-        return $site->getDefaultExtension();
+        return $extension;
     }
 
 }

@@ -26,6 +26,7 @@ use BackBuilder\NestedNode\ANestedNode;
 use BackBuilder\Renderer\Event\RendererEvent;
 use BackBuilder\Renderer\Exception\RendererException;
 use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
 use BackBuilder\Util\File;
 use BackBuilder\Util\String;
 
@@ -521,9 +522,9 @@ abstract class ARenderer implements IRenderer
      * @param \BackBuilder\Site\Site $site
      * @return string
      */
-    public function getUri($pathinfo = null, $defaultExt = null, \BackBuilder\Site\Site $site = null)
+    public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
     {
-        return $this->getApplication()->getRouting()->getUri($pathinfo, null, $site);
+        return $this->getApplication()->getRouting()->getUri($pathinfo, $defaultExt, $site, $url_type);
     }
 
     public function getRelativeUrl($uri)

@@ -11,6 +11,7 @@ use BackBuilder\Renderer\ARenderer;
 use BackBuilder\Renderer\Exception\RendererException;
 use BackBuilder\Renderer\IRenderable;
 use BackBuilder\Renderer\IRendererAdapter;
+use BackBuilder\Routing\RouteCollection;
 use BackBuilder\Site\Layout;
 use BackBuilder\Util\File;
 use BackBuilder\Util\String;
@@ -775,6 +776,19 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null, $build_query = false)
     {
         return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext, $site, $build_query);
+    }
+
+    /**
+     * Returns image url
+     *
+     * @param  string                $pathinfo
+     * @param  BackBuilder\Site\Site $site
+     *
+     * @return string image url
+     */
+    public function getImageUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri($pathinfo, null, $site, RouteCollection::IMAGE_URL);
     }
 
     /**
