@@ -23,6 +23,7 @@ namespace BackBuilder\Renderer;
 
 use BackBuilder\BBApplication;
 use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\Renderer\Event\RendererEvent;
 use BackBuilder\Renderer\Exception\RendererException;
 use BackBuilder\Site\Layout;
 use BackBuilder\Util\File;
@@ -404,7 +405,9 @@ abstract class ARenderer implements IRenderer
 
         $dispatcher = $this->_application->getEventDispatcher();
         if (null != $dispatcher) {
-            $dispatcher->triggerEvent($name, null != $object ? $object : $this->getObject(), null === $render ? $this : array($this, $render));
+            $object = null !== $object ? $object : $this->getObject();
+            $event = new RendererEvent($object, null === $render ? $this : array($this, $render));
+            $dispatcher->triggerEvent($name, $object, null, $event);
         }
     }
 

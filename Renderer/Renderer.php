@@ -310,7 +310,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
         if (null === $renderer->__render) {
             // Rendering a page with layout
-            if (true === is_a($obj, '\BackBuilder\NestedNode\Page')) {
+            if (true === ($obj instanceof Page)) {
                 $renderer->setCurrentPage($obj);
                 $renderer->__render = $renderer->renderPage($template, $params);
                 $renderer->insertHeaderAndFooterScript();
@@ -470,11 +470,11 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
                     $zone = $zones[$zoneIndex];
                     $isMain = null !== $zone && true === property_exists($zone, 'mainZone') && true === $zone->mainZone;
                     $this->container()->add($this->render($content, $this->getMode(), array(
-                                'class' => 'rootContentSet',
-                                'isRoot' => true,
-                                'indexZone' => $zoneIndex++,
-                                'isMainZone' => $isMain
-                                    ), null, $this->_ignoreIfRenderModeNotAvailable));
+                        'class' => 'rootContentSet',
+                        'isRoot' => true,
+                        'indexZone' => $zoneIndex++,
+                        'isMainZone' => $isMain
+                    ), null, $this->_ignoreIfRenderModeNotAvailable));
                 }
             }
         }
@@ -486,7 +486,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         }
 
         if (false === $this->isValidTemplateFile($this->templateFile, true)) {
-            throw new RendererException(sprintf('Unable to read layout %s.', $this->templateFile), RendererException::LAYOUT_ERROR);
+            throw new RendererException(
+                sprintf('Unable to read layout %s.', $this->templateFile), RendererException::LAYOUT_ERROR
+            );
         }
 
         $bbapp->info(sprintf('Rendering page `%s`.', $this->getObject()->getNormalizeUri()));

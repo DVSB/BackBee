@@ -143,9 +143,12 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      * @param Object    $entity    The entity instance
      * @param EventArgs $eventArgs The doctrine event arguments
      */
-    public function triggerEvent($eventName, $entity, $eventArgs = null)
+    public function triggerEvent($eventName, $entity, $eventArgs = null, Event $event = null)
     {
-        $event = new Event($entity, $eventArgs);
+        if (null === $event) {
+            $event = new Event($entity, $eventArgs);
+        }
+
         if (is_a($entity, 'BackBuilder\ClassContent\AClassContent')) {
             $this->dispatch(strtolower('classcontent.' . $eventName), $event);
 
