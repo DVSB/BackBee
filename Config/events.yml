@@ -1,128 +1,124 @@
 classcontent.include:
-  listeners:
-    - [BackBuilder\Event\Listener\ClassContentListener, onInclude]
+    listeners:
+        - [BackBuilder\Event\Listener\ClassContentListener, onInclude]
 
 classcontent.update:
-  listeners:
-    - [BackBuilder\Event\Listener\ClassContentListener, onUpdate]
+    listeners:
+        - [BackBuilder\Event\Listener\ClassContentListener, onUpdate]
 
 classcontent.commit:
-  listeners:
-    - [BackBuilder\Event\Listener\ClassContentListener, onCommit]
+    listeners:
+        - [BackBuilder\Event\Listener\ClassContentListener, onCommit]
 
 classcontent.revert:
-  listeners:
-    - [BackBuilder\Event\Listener\ClassContentListener, onRevert]
+    listeners:
+        - [BackBuilder\Event\Listener\ClassContentListener, onRevert]
 
 classcontent.onflush:
-  listeners:
-    - [BackBuilder\Event\Listener\ClassContentListener, onFlushContent]
-    - [BackBuilder\Event\Listener\RevisionListener, onFlushContent]
-    - [BackBuilder\Event\Listener\IndexationListener, onFlushContent]
-    - [BackBuilder\Event\Listener\CacheListener, onFlushContent]
-    - [BackBuilder\Event\Listener\MetaDataListener, onFlushContent]
-    - [BackBuilder\Event\Listener\RewritingListener, onFlushContent]
+    listeners:
+        - [BackBuilder\Event\Listener\ClassContentListener, onFlushContent]
+        - [BackBuilder\Event\Listener\RevisionListener, onFlushContent]
+        - [BackBuilder\Event\Listener\IndexationListener, onFlushContent]
+        - [BackBuilder\Event\Listener\CacheListener, onFlushContent]
+        - [BackBuilder\Event\Listener\MetaDataListener, onFlushContent]
+        - [BackBuilder\Event\Listener\RewritingListener, onFlushContent]
 
 classcontent.preremove:
-  listeners:
-    - [BackBuilder\Event\Listener\ClassContentListener, onPreRemove]
+    listeners:
+        - [BackBuilder\Event\Listener\ClassContentListener, onPreRemove]
 
 classcontent.prerender:
-  listeners:
-    - [BackBuilder\Event\Listener\RevisionListener, onPrerenderContent]
-    - [BackBuilder\Event\Listener\CacheListener, onPreRenderContent]
+    listeners:
+        - [BackBuilder\Event\Listener\RevisionListener, onPrerenderContent]
+        - [BackBuilder\Event\Listener\CacheListener, onPreRenderContent]
 
 classcontent.postrender:
-  listeners:
-    - [BackBuilder\Event\Listener\CacheListener, onPostRenderContent]
+    listeners:
+        - [BackBuilder\Event\Listener\CacheListener, onPostRenderContent]
 
 element.file.postremove:
-  listeners:
-    - [BackBuilder\Event\Listener\ClassContentListener, onRemoveElementFile]
+    listeners:
+        - [BackBuilder\Event\Listener\ClassContentListener, onRemoveElementFile]
 
 nestednode.page.prerender:
-  listeners:
-    - [BackBuilder\Event\Listener\CacheListener, onPreRenderPage]
+    listeners:
+        - [BackBuilder\Event\Listener\CacheListener, onPreRenderPage]
 
 nestednode.page.preupdate:
-  listeners:
-    - [BackBuilder\Workflow\Listener\pageListener, onPreUpdate]
+    listeners:
+        - [BackBuilder\Workflow\Listener\pageListener, onPreUpdate]
 
 nestednode.page.postrender:
-  listeners:
-    - [BackBuilder\Event\Listener\CacheListener, onPostRenderPage]
+    listeners:
+        - [BackBuilder\Event\Listener\CacheListener, onPostRenderPage]
 
 nestednode.page.onflush:
-  listeners:
-    - [BackBuilder\Event\Listener\MetaDataListener, onFlushPage]
-    - [BackBuilder\Event\Listener\IndexationListener, onFlushPage]
-    - [BackBuilder\Event\Listener\RewritingListener, onFlushPage]
-    - [BackBuilder\Event\Listener\CacheListener, onFlushPage]
+    listeners:
+        - [BackBuilder\Event\Listener\MetaDataListener, onFlushPage]
+        - [BackBuilder\Event\Listener\IndexationListener, onFlushPage]
+        - [BackBuilder\Event\Listener\RewritingListener, onFlushPage]
+        - [BackBuilder\Event\Listener\CacheListener, onFlushPage]
 
 site.layout.prepersist:
-  listeners:
-    - [BackBuilder\Event\Listener\LayoutListener, onBeforeSave]
+    listeners:
+        - [BackBuilder\Event\Listener\LayoutListener, onBeforeSave]
 
 site.layout.preupdate:
-  listeners:
-    - [BackBuilder\Event\Listener\LayoutListener, onBeforeSave]
+    listeners:
+        - [BackBuilder\Event\Listener\LayoutListener, onBeforeSave]
 
 site.layout.postremove:
-  listeners:
-    - [BackBuilder\Event\Listener\LayoutListener, onAfterRemove]
+    listeners:
+        - [BackBuilder\Event\Listener\LayoutListener, onAfterRemove]
 
 revision.postload:
-  listeners:
-    - [BackBuilder\Event\Listener\RevisionListener, onPostLoad]
+    listeners:
+        - [BackBuilder\Event\Listener\RevisionListener, onPostLoad]
 
 element.keyword.render:
-  listeners:
-    - [BackBuilder\Event\Listener\elementListener, onRender]
+    listeners:
+        - [BackBuilder\Event\Listener\elementListener, onRender]
 
 frontcontroller.request:
-  listeners:
-    - [@rest.listener.body, onRequest]
+    listeners:
+        - [@rest.listener.body, onRequest]
 
 kernel.request:
-  listeners:
-    - [@profiler.listener, onKernelRequest]
+    listeners:
+        - [@profiler.listener, onKernelRequest]
 
 kernel.exception:
-  listeners:
-    - [@rest.listener.exception, onKernelException]
+    listeners:
+        - [@rest.listener.exception, onKernelException]
 
 kernel.controller:
-  listeners:
-    - [@rest.listener.param_converter, onKernelController]
-    - [@rest.listener.security, onKernelController]
-    - [@rest.listener.validation, onKernelController]
-    - [@rest.listener.pagination, onKernelController]
+    listeners:
+        - [@rest.listener.param_converter, onKernelController]
+        - [@rest.listener.security, onKernelController]
+        - [@rest.listener.validation, onKernelController]
+        - [@rest.listener.pagination, onKernelController]
 
 kernel.response:
-  listeners:
-    - [@profiler.toolbar.listener, onKernelResponse]
-    - [@profiler.listener, onKernelResponse]
+    listeners:
+        - [@profiler.toolbar.listener, onKernelResponse]
+        - [@profiler.listener, onKernelResponse]
 
 bbapplication.init:
-  listeners:
-    - [BackBuilder\DependencyInjection\Listener\ContainerListener, onApplicationInit]
+    listeners:
+        - [BackBuilder\DependencyInjection\Listener\ContainerListener, onApplicationInit]
 
 nestednode.page.postload:
-  listeners:
-    - [@nestednode.page_listener, onPostLoad]
+    listeners:
+        - [@nestednode.page_listener, onPostLoad]
 
 bbapplication.start:
-  listeners:
-    - [BackBuilder\Renderer\Listener\TwigListener, onApplicationStart]
-
-service.tagged.bundle:
-  listeners:
-    - [BackBuilder\Bundle\Listener\BundleListener, onGetBundleService]
+    listeners:
+        - [BackBuilder\Renderer\Listener\TwigListener, onApplicationStart]
 
 service.tagged.config_per_site:
-  listeners:
-    - ["@config.configurator", onGetServiceConfig]
+    listeners:
+        - ["@config.configurator", onGetServiceConfig]
 
 bbapplication.stop:
-  listeners:
-    - [BackBuilder\Bundle\Listener\BundleListener, onApplicationStop]
+    listeners:
+        - [BackBuilder\Bundle\Listener\BundleListener, onApplicationStop]
