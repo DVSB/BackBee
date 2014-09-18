@@ -33,22 +33,6 @@ use BackBuilder\Event\Event;
  */
 class BundleListener
 {
-
-    /**
-     * Occurs on `bbapplication.start` event to load every bundles routes
-     *
-     * @param  Event  $event
-     */
-    public static function onApplicationStart(Event $event)
-    {
-        $application = $event->getTarget();
-        if (false === $application->isStarted()) {
-            return;
-        }
-
-        $application->getContainer()->get('bundle.loader')->loadBundlesRoutes();
-    }
-
     /**
      * Occurs on `bbapplication.stop` event to stop every started bundles
      *

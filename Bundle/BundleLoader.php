@@ -204,6 +204,8 @@ class BundleLoader
 
             $this->loadEvents($config, $this->getCallableByRecipesAndKey($recipes, self::EVENT_RECIPE_KEY));
 
+            $this->loadRoutes($config, $this->getCallableByRecipesAndKey($recipes, self::ROUTE_RECIPE_KEY));
+
             $this->registerClassContentDirectory(
                 $config,
                 $this->getCallableByRecipesAndKey($recipes, self::CLASSCONTENT_RECIPE_KEY)

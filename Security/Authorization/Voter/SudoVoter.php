@@ -57,7 +57,7 @@ class SudoVoter implements VoterInterface
      */
     public function supportsAttribute($attribute)
     {
-        return true;
+        return 0 === preg_match('#^ROLE#', $attribute);
     }
 
     /**
@@ -79,11 +79,17 @@ class SudoVoter implements VoterInterface
         $result = VoterInterface::ACCESS_ABSTAIN;
 
         if (true === $this->supportsClass(get_class($token))) {
-            if (
-                true === array_key_exists($token->getUser()->getUsername(), $this->_sudoers)
-                && $token->getUser()->getId() === $this->_sudoers[$token->getUser()->getUsername()]
-            ) {
-                $result = VoterInterface::ACCESS_GRANTED;
+            foreach ($attributes as $attribute) {
+                if (false === $this->supportsAttribute($attribute)) {
+                    continue;
+                }
+
+                if (
+                    true === array_key_exists($token->getUser()->getUsername(), $this->_sudoers)
+                    && $token->getUser()->getId() === $this->_sudoers[$token->getUser()->getUsername()]
+                ) {
+                    $result = VoterInterface::ACCESS_GRANTED;
+                }
             }
         }
 

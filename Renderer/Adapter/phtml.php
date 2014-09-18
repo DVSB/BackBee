@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -146,13 +146,11 @@ class phtml extends ARendererAdapter
             throw $fe;
         } catch (Exception $e) {
             ob_end_clean();
-            $this->renderer->getApplication()->error($e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR);
-            // @Todo: realy avoid exception?
-            /*
+
             throw new RendererException(
-                    $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
+                $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
             );
-            */
+
         }
     }
 
@@ -220,12 +218,12 @@ class phtml extends ARendererAdapter
     public function updateLayout(Layout $layout, $layoutFile)
     {
         if (false === $layoutFile) {
-            return false;            
+            return false;
         }
 
         $mainLayoutRow = $layout->getDomDocument();
         if (false === $layout->isValid() || null === $mainLayoutRow) {
-            throw new RendererException('Malformed data for the layout layout.');            
+            throw new RendererException('Malformed data for the layout layout.');
         }
 
         // Add an php instruction to each final droppable zone found
@@ -275,7 +273,7 @@ class phtml extends ARendererAdapter
      * @see BackBuilder\Renderer\IRendererAdapter::onRestorePreviousRenderer()
      */
     public function onRestorePreviousRenderer(ARenderer $renderer)
-    { 
+    {
         parent::onRestorePreviousRenderer($renderer);
 
         $this->vars = $renderer->getAssignedVars();

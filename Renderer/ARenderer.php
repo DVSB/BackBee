@@ -21,13 +21,13 @@
 
 namespace BackBuilder\Renderer;
 
-use BackBuilder\BBApplication,
-    BackBuilder\NestedNode\ANestedNode,
-    BackBuilder\Renderer\Exception\RendererException,
-    BackBuilder\Renderer\Helper\HelperManager,
-    BackBuilder\Site\Layout,
-    BackBuilder\Util\File,
-    BackBuilder\Util\String;
+use BackBuilder\BBApplication;
+use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\Renderer\Exception\RendererException;
+use BackBuilder\Site\Layout;
+use BackBuilder\Util\File;
+use BackBuilder\Util\String;
+
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
