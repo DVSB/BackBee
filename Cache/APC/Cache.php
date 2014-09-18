@@ -71,17 +71,6 @@ class Cache extends AExtendedCache
         }
 
         parent::__construct($options, $context, $logger);
-    }
-
-    /**
-     * Sets the memcache adapter instance options
-     * @param array $options
-     * @return \BackBuilder\Cache\APC\Cache
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
-     */
-    protected function setInstanceOptions(array $options = array())
-    {
-        parent::setInstanceOptions($options);
 
         $this->_hashmapId = self::HASHMAP_PREFIX . '_' . md5($this->getContext());
         $this->_hashmap = $this->loadHashmap();
@@ -201,7 +190,7 @@ class Cache extends AExtendedCache
     {
         return $lifetime;
     }
-    
+
     /**
      * Updates TTL for all cache records associated to provided tag(s)
      * @param mixed $tag

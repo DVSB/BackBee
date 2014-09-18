@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,7 +26,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * MemCached cache adapter
- * 
+ *
  * It supports tag and expire features
  *
  * @category    BackBuilder
@@ -61,28 +61,6 @@ class Memcached extends AMemcache
         }
 
         parent::__construct($options, $context, $logger);
-    }
-
-    /**
-     * Closes all the memcached server connections if not persistent
-     * @codeCoverageIgnore
-     */
-    public function __destruct()
-    {
-        if (null !== $this->_instance_options['persistent_id']) {
-            $this->_cache->quit();
-        }
-    }
-
-    /**
-     * Sets the memcache adapter instance options
-     * @param array $options
-     * @return \BackBuilder\Cache\MemCache\Memcached
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
-     */
-    protected function setInstanceOptions(array $options = array())
-    {
-        parent::setInstanceOptions($options);
 
         if (null !== $this->getContext()) {
             $this->setOption(\Memcached::OPT_PREFIX_KEY, md5($this->getContext()));
@@ -106,8 +84,17 @@ class Memcached extends AMemcache
         }
 
         $this->addServers($this->_instance_options['servers']);
+    }
 
-        return $this;
+    /**
+     * Closes all the memcached server connections if not persistent
+     * @codeCoverageIgnore
+     */
+    public function __destruct()
+    {
+        if (null !== $this->_instance_options['persistent_id']) {
+            $this->_cache->quit();
+        }
     }
 
     /**

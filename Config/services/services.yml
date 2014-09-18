@@ -6,6 +6,8 @@ parameters:
     # bbapp classes
     bbapp.cachebootstrap.class: BackBuilder\Cache\File\Cache
     bbapp.cachecontrol.class: BackBuilder\Cache\DAO\Cache
+    bbapp.cache_listener.class: BackBuilder\Event\Listener\CacheListener
+    bbapp.cache.query_params_strategy.manager.class: BackBuilder\Cache\QueryParamStrategyManager
     bbapp.config.class: BackBuilder\Config\Config
     bbapp.logger.class: BackBuilder\Logging\Logger
     bbapp.logger_debug.class: BackBuilder\Logging\DebugStackLogger
@@ -71,7 +73,17 @@ services:
 
     cache.control:
         class:      %bbapp.cachecontrol.class%
-        arguments:  [{em: "@em"}, "%bbapp.context%", "@logging"]
+        arguments:  [{em: @em}, %bbapp.context%, @logging]
+
+    cache.listener:
+        class:      %bbapp.cache_listener.class%
+        arguments:  [@bbapp]
+        calls:
+            - [setQParamsStrategyManager, [@cache.query_params_strategy.manager]]
+
+    cache.query_params_strategy.manager:
+        class:      %bbapp.cache.query_params_strategy.manager.class%
+        public:     false
 
     config:
         class:      %bbapp.config.class%

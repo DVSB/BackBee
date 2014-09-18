@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -74,8 +74,6 @@ abstract class AMemcache extends AExtendedCache
      */
     protected $_instance_options = array(
         'type' => 'memcache',
-        'min_cache_lifetime' => null,
-        'max_cache_lifetime' => null,
         'persistent_id' => null,
         'compression' => false,
         'servers' => array(),
@@ -253,8 +251,8 @@ abstract class AMemcache extends AExtendedCache
             $lifetime = 0;
         }
 
-        $min_lifetime = $this->_instance_options['min_cache_lifetime'];
-        $max_lifetime = $this->_instance_options['max_cache_lifetime'];
+        $min_lifetime = $this->_instance_options['min_lifetime'];
+        $max_lifetime = $this->_instance_options['max_lifetime'];
 
         if($lifetime == 0 && false === empty($max_lifetime)){
             $lifetime = $max_lifetime;

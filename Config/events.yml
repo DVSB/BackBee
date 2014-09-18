@@ -19,7 +19,7 @@ classcontent.onflush:
         - [BackBuilder\Event\Listener\ClassContentListener, onFlushContent]
         - [BackBuilder\Event\Listener\RevisionListener, onFlushContent]
         - [BackBuilder\Event\Listener\IndexationListener, onFlushContent]
-        - [BackBuilder\Event\Listener\CacheListener, onFlushContent]
+        - [@cache.listener, onFlushContent]
         - [BackBuilder\Event\Listener\MetaDataListener, onFlushContent]
         - [BackBuilder\Event\Listener\RewritingListener, onFlushContent]
 
@@ -30,11 +30,11 @@ classcontent.preremove:
 classcontent.prerender:
     listeners:
         - [BackBuilder\Event\Listener\RevisionListener, onPrerenderContent]
-        - [BackBuilder\Event\Listener\CacheListener, onPreRenderContent]
+        - [@cache.listener, onPreRenderContent]
 
 classcontent.postrender:
     listeners:
-        - [BackBuilder\Event\Listener\CacheListener, onPostRenderContent]
+        - [@cache.listener, onPostRenderContent]
 
 element.file.postremove:
     listeners:
@@ -42,7 +42,7 @@ element.file.postremove:
 
 nestednode.page.prerender:
     listeners:
-        - [BackBuilder\Event\Listener\CacheListener, onPreRenderPage]
+        - [@cache.listener, onPreRenderPage]
 
 nestednode.page.preupdate:
     listeners:
@@ -50,14 +50,14 @@ nestednode.page.preupdate:
 
 nestednode.page.postrender:
     listeners:
-        - [BackBuilder\Event\Listener\CacheListener, onPostRenderPage]
+        - [@cache.listener, onPostRenderPage]
 
 nestednode.page.onflush:
     listeners:
         - [BackBuilder\Event\Listener\MetaDataListener, onFlushPage]
         - [BackBuilder\Event\Listener\IndexationListener, onFlushPage]
         - [BackBuilder\Event\Listener\RewritingListener, onFlushPage]
-        - [BackBuilder\Event\Listener\CacheListener, onFlushPage]
+        - [@cache.listener, onFlushPage]
 
 site.layout.prepersist:
     listeners:
@@ -117,7 +117,7 @@ bbapplication.start:
 
 service.tagged.config_per_site:
     listeners:
-        - ["@config.configurator", onGetServiceConfig]
+        - [@config.configurator, onGetServiceConfig]
 
 bbapplication.stop:
     listeners:

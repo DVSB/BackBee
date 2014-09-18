@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,6 +22,8 @@
 namespace BackBuilder\Cache;
 
 use BackBuilder\Cache\Exception\CacheException;
+use BackBuilder\Cache\QueryParamStrategyManagerInterface;
+
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,12 +36,23 @@ use Psr\Log\LoggerInterface;
  */
 abstract class ACache
 {
-
     /**
      * Cache adapter options
      * @var array
      */
     protected $_instance_options = array();
+
+    /**
+     * Default cache apdater options
+     *
+     * @var array
+     */
+    private $_default_instance_options = array(
+        'pattern_to_exclude' => null,
+        'min_lifetime'       => null,
+        'max_lifetime'       => null,
+        'qparams_strategy'   => QueryParamStrategyManagerInterface::INCLUDE_CLASSCONTENT_QPARAMS_STRATEGY
+    );
 
     /**
      * A logger
@@ -63,9 +76,11 @@ abstract class ACache
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
-        $this->setContext($context)
-                ->setLogger($logger)
-                ->setInstanceOptions($options);
+        $this->_instance_options = array_merge($this->_default_instance_options, $this->_instance_options);
+
+        $this->setContext($context);
+        $this->setLogger($logger);
+        $this->setInstanceOptions($options);
     }
 
     /**
@@ -88,7 +103,7 @@ abstract class ACache
      * Saves some string datas into a cache record
      * @param string $id Cache id
      * @param string $data Datas to cache
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default null, infinite lifetime)
      * @param string $tag Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
@@ -141,6 +156,26 @@ abstract class ACache
     }
 
     /**
+     * Returns query params strategy
+     *
+     * @return integer
+     */
+    public function getQueryParamsStrategy()
+    {
+        return (int) $this->_instance_options['qparams_strategy'];
+    }
+
+    /**
+     * Returns pattern to exclude option from instance options
+     *
+     * @return null|array|string
+     */
+    public function getPatternToExclude()
+    {
+        return $this->_instance_options['pattern_to_exclude'];
+    }
+
+    /**
      * Sets the cache coontext
      * @param string $context
      * @return \BackBuilder\Cache\ACache
@@ -158,7 +193,7 @@ abstract class ACache
      * @return \BackBuilder\Cache\ACache
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */
-    protected function setInstanceOptions(array $options = array())
+    private function setInstanceOptions(array $options = array())
     {
         foreach ($options as $key => $value) {
             if (true === array_key_exists($key, $this->_instance_options)) {
@@ -221,14 +256,16 @@ abstract class ACache
      */
     protected function getControledLifetime($lifetime)
     {
-        if (true === array_key_exists('min_cache_lifetime', $this->_instance_options) &&
-                null !== $this->_instance_options['min_cache_lifetime'] &&
-                $this->_instance_options['min_cache_lifetime'] > $lifetime) {
-            $lifetime = $this->_instance_options['min_cache_lifetime'];
-        } elseif (true === array_key_exists('max_cache_lifetime', $this->_instance_options) &&
-                null !== $this->_instance_options['max_cache_lifetime'] &&
-                $this->_instance_options['max_cache_lifetime'] < $lifetime) {
-            $lifetime = $this->_instance_options['max_cache_lifetime'];
+        if (
+            null !== $this->_instance_options['min_lifetime']
+            && $this->_instance_options['min_lifetime'] > $lifetime
+        ) {
+            $lifetime = $this->_instance_options['min_lifetime'];
+        } elseif (
+            null !== $this->_instance_options['max_lifetime']
+            && $this->_instance_options['max_lifetime'] < $lifetime
+        ) {
+            $lifetime = $this->_instance_options['max_lifetime'];
         }
 
         return $lifetime;
