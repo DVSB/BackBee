@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -45,7 +45,7 @@ class Less extends AbstractServiceLocal
     {
         parent::__construct($bbapp);
 
-        if (NULL !== $bbapp) {
+        if (null !== $bbapp) {
             $this->lessPathRoot = $bbapp->getCurrentResourceDir() . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR . 'default' . DIRECTORY_SEPARATOR . 'less';
             $this->lessPathTheme = $bbapp->getCurrentResourceDir() . DIRECTORY_SEPARATOR . 'themes';
         }
@@ -55,10 +55,11 @@ class Less extends AbstractServiceLocal
     {
         if (file_exists($filename)) {
             $lessParser = new LessParser($filename);
+
             return $lessParser;
-        }
-        else
+        } else {
             throw new \Exception("file: " . $filename . " not found !");
+        }
     }
 
     /**
@@ -69,6 +70,7 @@ class Less extends AbstractServiceLocal
         $lessParser = $this->getLessParserObject($this->lessPathRoot . DIRECTORY_SEPARATOR . "variables.less");
         $lessParser->loadData($params);
         $lessParser->save();
+
         return "variable saved";
     }
 
@@ -79,14 +81,16 @@ class Less extends AbstractServiceLocal
     {
         $lessConfig = $this->bbapp->getConfig()->getSection('less');
 
-        if (isset($lessConfig['dirname']) && isset($lessConfig['gridconstant']))
+        if (isset($lessConfig['dirname']) && isset($lessConfig['gridconstant'])) {
             $filename = $this->bbapp->getCurrentResourceDir() . DIRECTORY_SEPARATOR . $lessConfig['dirname'] . DIRECTORY_SEPARATOR . $lessConfig['gridconstant'];
-        else
+        } else {
             throw new BBException("Please check config file: dirname and gridconstant value");
+        }
 
-        if (FALSE === ($handler = @fopen($filename, 'w'))) {
-            if (!is_writable($filename))
+        if (false === ($handler = @fopen($filename, 'w'))) {
+            if (!is_writable($filename)) {
                 throw new \Exception("File is not writable!");
+            }
         }
 
         $gridColumns = $lessConfig['gridcolumn'];
@@ -111,6 +115,7 @@ class Less extends AbstractServiceLocal
     public function getLessVariables($params = null)
     {
         $lessParser = $this->getLessParserObject($this->lessPathRoot . DIRECTORY_SEPARATOR . "variables.less");
+
         return $lessParser->getLessVariables();
     }
 
@@ -119,14 +124,15 @@ class Less extends AbstractServiceLocal
      */
     public function getLessVariablesBB4($theme = null)
     {
-        if ($theme !== null)
+        if ($theme !== null) {
             $lessParser = $this->getLessParserObject($this->lessPathTheme . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR . 'less' . DIRECTORY_SEPARATOR . "admin-variables.less");
-        else if (null !== $this->bbapp->getTheme()->getIncludePath('less_dir')) {
+        } else if (null !== $this->bbapp->getTheme()->getIncludePath('less_dir')) {
             $lessfile = 'admin-variables.less';
             \BackBuilder\Util\File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
             $lessParser = $this->getLessParserObject($lessfile);
-        } else
+        } else {
             $lessParser = $this->getLessParserObject($this->lessPathRoot . DIRECTORY_SEPARATOR . "admin-variables.less");
+        }
 
         return $lessParser->getLessVariables();
     }
@@ -136,14 +142,15 @@ class Less extends AbstractServiceLocal
      */
     public function sendLessVariablesBB4($params, $theme = null)
     {
-        if ($theme != null)
+        if ($theme != null){
             $lessParser = $this->getLessParserObject($this->lessPathTheme . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR . 'less' . DIRECTORY_SEPARATOR . "admin-variables.less");
-        else if (null !== $this->bbapp->getTheme()->getIncludePath('less_dir')) {
+        } else if (null !== $this->bbapp->getTheme()->getIncludePath('less_dir')) {
             $lessfile = 'admin-variables.less';
             \BackBuilder\Util\File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
             $lessParser = $this->getLessParserObject($lessfile);
-        } else
+        } else {
             $lessParser = $this->getLessParserObject($this->lessPathRoot . DIRECTORY_SEPARATOR . "admin-variables.less");
+        }
 
         $lessParser->loadData($params);
         $lessParser->save();
@@ -159,8 +166,9 @@ class Less extends AbstractServiceLocal
             $lessfile = 'grid_constant.less';
             \BackBuilder\Util\File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
             $lessParser = $this->getLessParserObject($lessfile);
-        } else
+        } else {
             $lessParser = $this->getLessParserObject($this->lessPathRoot . DIRECTORY_SEPARATOR . "grid_constant.less");
+        }
 
         return $lessParser->getLessVariables();
     }
@@ -179,8 +187,9 @@ class Less extends AbstractServiceLocal
      */
     public function changeTheme($theme = "")
     {
-        if ($theme == "")
+        if ($theme == "") {
             return "please select theme";
+        }
 
         return LessTheme::getInstance($this->bbapp)->loadTheme($theme);
     }
@@ -190,7 +199,12 @@ class Less extends AbstractServiceLocal
      */
     public function getThemes()
     {
-        return LessTheme::getInstance($this->bbapp)->getAllThemes();
+        $themes = array();
+        if (null !== $this->bbapp->getTheme()) {
+            $themes = LessTheme::getInstance($this->bbapp)->getAllThemes();
+        }
+
+        return $themes;
     }
 
     /**
@@ -216,6 +230,7 @@ class Less extends AbstractServiceLocal
     {
         $cfgLess = $this->bbapp->getConfig()->getSection('less');
         $fonts = $cfgLess['fonts'];
+
         return $fonts;
     }
 
