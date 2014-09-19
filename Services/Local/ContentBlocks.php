@@ -743,8 +743,11 @@ class ContentBlocks extends AbstractServiceLocal
                 }
             }
 
-            $content->$key = $newvalues;
+            if (0 < count($newvalues)) {
+                $content->$key = $newvalues;
+            }
         }
+
         return $content;
     }
 
