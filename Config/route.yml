@@ -26,20 +26,11 @@ bb.internal.services:
 
 # BackBuilder resources
 bb.resources:
+    # pattern: /%bbapp.routing.resource_uri_prefix%/{filename}
     pattern: /ressources/{filename}
     defaults:
         _action: resourcesAction
     requirements:
-        filename: .+
-
-# BackBuilder resources
-bb.bundles.ressources:
-    pattern: /bundle/{bundleName}/{type}/{filename}
-    defaults:
-        _action: bundleResourcesAction
-    requirements:
-        bundleName: .+
-        type: (css|less|js|img)
         filename: .+
 
 # BackBuilder media files
@@ -48,7 +39,7 @@ bb.images:
     defaults:
         _action: mediaAction
     requirements:
-        type: (images|media)
+        type: (%bbapp.routing.image_uri_prefix%|%bbapp.routing.media_uri_prefix%)
         filename: .+
 
 # BackBuilder REST API test page

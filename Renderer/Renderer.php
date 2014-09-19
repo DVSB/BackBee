@@ -792,6 +792,33 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
+     * Returns image url
+     *
+     * @param  string                $pathinfo
+     * @param  BackBuilder\Site\Site $site
+     *
+     * @return string image url
+     */
+    public function getMediaUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri($pathinfo, null, $site, RouteCollection::MEDIA_URL);
+    }
+
+    /**
+     * Returns resource url
+     *
+     * @param  string                $pathinfo
+     * @param  BackBuilder\Site\Site $site
+     *
+     * @return string resource url
+     */
+    public function getResourceUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri('ressources/' . $pathinfo, null, $site);
+        // return $this->getUri($pathinfo, null, $site, RouteCollection::RESOURCE_URL);
+    }
+
+    /**
      * Returns the namespace of the class proxy to use or null if no proxy is required
      *
      * @return string|null the namespace of the class proxy to use on restore or null if no proxy required

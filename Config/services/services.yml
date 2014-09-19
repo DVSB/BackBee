@@ -18,7 +18,6 @@ parameters:
     bbapp.uploadserver.class: BackBuilder\Services\Upload\UploadServer
     bbapp.urlgenerator.class: BackBuilder\Rewriting\UrlGenerator
     bbapp.translator.class: BackBuilder\Translation\Translator
-    bbapp.routing.class: BackBuilder\Routing\RouteCollection
     bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
     bbapp.registry.class: Symfony\Component\HttpFoundation\ParameterBag
     bbapp.autoloader.class: BackBuilder\AutoLoader\AutoLoader
@@ -129,12 +128,6 @@ services:
         arguments:  ["@bbapp", "%bbapp.locale%"]
         calls:
             - [setLocale, ["%bbapp.locale%"]]
-
-    routing:
-        class:      %bbapp.routing.class%
-        arguments:  ["@bbapp"]
-        tags:
-            - { name: "dumpable", dispatch_event: false }
 
     pagebuilder:
         class:      %bbapp.pagebuilder.class%

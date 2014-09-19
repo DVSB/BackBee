@@ -47,6 +47,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 {
     const DEFAULT_URL = 0;
     const IMAGE_URL = 1;
+    const MEDIA_URL = 2;
+    const RESOURCE_URL = 3;
 
     const DEFAULT_IMAGE_URL_PREFIX = '/images/';
 
@@ -64,7 +66,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     /**
      * @var string
      */
-    private $image_url_prefix;
+    private $uri_prefixes;
 
     /**
      * @var boolean
@@ -80,22 +82,29 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
         $this->application = $application;
         $this->raw_routes = array();
 
-        $this->image_url_prefix = self::DEFAULT_IMAGE_URL_PREFIX;
-        $config = $this->application->getConfig()->getRoutingConfig();
-        if (null !== $config && isset($config['url_prefix']['image'])) {
-            $this->image_url_prefix = $config['url_prefix']['image'];
+        $uri_prefixes = array();
+        $container = $application->getContainer();
+        if (true === $container->hasParameter('bbapp.routing.image_uri_prefix')) {
+            $this->uri_prefixes[self::IMAGE_URL] = $container->getParameter('bbapp.routing.image_uri_prefix');
         }
+
+        if (true === $container->hasParameter('bbapp.routing.media_uri_prefix')) {
+            $this->uri_prefixes[self::MEDIA_URL] = $container->getParameter('bbapp.routing.media_uri_prefix');
+        }
+
+        // Can't enable it at moment, too much hard dependency in BackBuilder JS core
+        // if (true === $container->hasParameter('bbapp.routing.resource_uri_prefix')) {
+        //     $this->uri_prefixes[self::RESOURCE_URL] = $container->getParameter('bbapp.routing.resource_uri_prefix');
+        // }
 
         $this->is_restored = false;
     }
 
-    public function addBundleRouting(BundleInterface $bundle)
-    {
-        if (null !== $route_config = $bundle->getConfig()->getRouteConfig()) {
-            $this->pushRouteCollection($route_config);
-        }
-    }
-
+    /**
+     * [pushRouteCollection description]
+     * @param  array  $routes [description]
+     * @return [type]         [description]
+     */
     public function pushRouteCollection(array $routes)
     {
         foreach ($routes as $name => $route) {
@@ -174,9 +183,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      */
     public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
     {
-        $url_type = $url_type ?: self::DEFAULT_URL;
-        if (self::IMAGE_URL === $url_type) {
-            $pathinfo = $this->image_url_prefix . $pathinfo;
+        if (true === array_key_exists((int) $url_type, $this->uri_prefixes)) {
+            $pathinfo = '/' . $this->uri_prefixes[(int) $url_type] . '/' . $pathinfo;
         }
 
         // If scheme already provided, return pathinfo
