@@ -131,7 +131,6 @@ class PageBuilder
         $page = new Page($this->uid);
         $page->setTitle($this->title);
         $page->setSite($this->site);
-        $page->setLayout($this->layout, $this->itemToPushInMainZone);
 
         if (null !== $this->root) {
             $page->setRoot($this->root);
@@ -140,6 +139,7 @@ class PageBuilder
         if (null !== $this->parent) {
             $page->setParent($this->parent);
         }
+        $page->setLayout($this->layout, $this->itemToPushInMainZone);
 
         if (null !== $this->url) {
             $page->setUrl($this->url);
