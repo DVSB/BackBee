@@ -56,7 +56,7 @@ class Media extends AbstractServiceLocal
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
         $uploaded_file->filename = basename($request->files->get('image')->getRealPath()) . '.' . $uploaded_file->extension;
         $uploaded_file->src = base64_encode(file_get_contents($request->files->get('image')->getRealPath()));
-
+        
         #move_uploaded_file($request->files->get('image')->getRealPath(), $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $uploaded_file->filename);
         return $uploaded_file;
     }
@@ -130,7 +130,7 @@ class Media extends AbstractServiceLocal
         foreach ($content_values as $content_value) {
             $content_values_array[$content_value->name] = $content_value->value;
         }
-
+        
         if (NULL === $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid))
             throw new ServicesException('None folder provided');
 
@@ -172,7 +172,7 @@ class Media extends AbstractServiceLocal
                         $subcontent->originalname = \BackBuilder\Util\String::toPath($content_image_obj->originalname);
                         $subcontent->path = \BackBuilder\Util\Media::getPathFromContent($subcontent);
 
-                        $src_image = $content_image_obj->src;
+                        $src_image = base64_decode($content_image_obj->src);
 
                         #$filename = $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $content_image_obj->filename;
                         $moveto = $subcontent->path;
@@ -180,7 +180,7 @@ class Media extends AbstractServiceLocal
 
                         if (FALSE === is_dir(dirname($moveto)))
                             mkdir(dirname($moveto), 0755, TRUE);
-
+                        
                         file_put_contents($moveto, $src_image);
                         #copy($filename, $moveto);
 
