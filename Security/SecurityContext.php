@@ -232,7 +232,7 @@ class SecurityContext extends sfSecurityContext
      */
     public function getACLProvider()
     {
-        return $this->_aclprovider;
+        return $this->aclprovider;
     }
 
     public function createProviders($config)
