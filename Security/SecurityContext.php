@@ -388,7 +388,7 @@ class SecurityContext extends sfSecurityContext
 
     private function createACLProvider($config)
     {
-        if (true === array_key_exists('acl', $config)) {
+        if (true === array_key_exists('acl', $config) && null !== $this->getApplication()->getEntityManager()) {
             if (true === isset($config['acl']['connection']) && 'default' === $config['acl']['connection']) {
                 if (false === $this->application->getContainer()->has('security.acl_provider')) {
                     $this->aclprovider = new \Symfony\Component\Security\Acl\Dbal\MutableAclProvider(
