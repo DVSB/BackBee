@@ -68,7 +68,7 @@ class EntityValidator extends AValidator
         if (false === empty($prefix)) {
             $datas = $this->truncatePrefix($datas, $prefix);
         }
-
+        
         foreach ($datas as $key => $data) {
             if (true === isset($config[$key])) {
                 $cConfig = $config[$key];
@@ -92,7 +92,10 @@ class EntityValidator extends AValidator
                             }
                         }
                     }
-
+                    
+                    if (false === empty($prefix)) {
+                        $key = str_replace($prefix, '', $key);
+                    }
                     if (true === method_exists($entity, 'set' . ucfirst($key))) {
                         $do_set = true;
                         if (true === isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY])) {
