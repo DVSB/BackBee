@@ -145,12 +145,12 @@ class UrlGenerator implements IUrlGenerator
     public function generate(Page $page, AClassContent $content = null, $exceptionOnMissingScheme = true)
     {
         if (
-            null !== $page->getUrl()
+            null !== $page->getUrl(false)
             && $this->_preserveOnline
             && (null === $page->getOldState() || ($page->getOldState() & Page::STATE_ONLINE))
             && $page->getState() & Page::STATE_ONLINE
         ) {
-            return $page->getUrl();
+            return $page->getUrl(false);
         }
 
         if ($page->isRoot() && true == array_key_exists('_root_', $this->_schemes)) {
@@ -164,7 +164,7 @@ class UrlGenerator implements IUrlGenerator
             }
         }
 
-        $url = $page->getUrl();
+        $url = $page->getUrl(false);
         if (false === empty($url)) {
             return $url;
         }
@@ -190,7 +190,7 @@ class UrlGenerator implements IUrlGenerator
     private function _generate($scheme, Page $page, AClassContent $content = null)
     {
         $replacement = array(
-            '$parent' => ($page->isRoot()) ? '' : $page->getParent()->getUrl(),
+            '$parent' => ($page->isRoot()) ? '' : $page->getParent()->getUrl(false),
             '$title' => String::urlize($page->getTitle(), array('lengthlimit' => 30)),
             '$datetime' => $page->getCreated()->format('ymdHis'),
             '$date' => $page->getCreated()->format('ymd'),
@@ -216,7 +216,7 @@ class UrlGenerator implements IUrlGenerator
                         ->getRepository('BackBuilder\NestedNode\Page')
                         ->getAncestor($page, $level);
                 if (null !== $ancestor && $page->getLevel() > $level) {
-                    $replacement['$ancestor[' . $level . ']'] = $ancestor->getUrl();
+                    $replacement['$ancestor[' . $level . ']'] = $ancestor->getUrl(false);
                 } else {
                     $replacement['$ancestor[' . $level . ']'] = '';
                 }
@@ -277,7 +277,7 @@ class UrlGenerator implements IUrlGenerator
         $existings_url = array();
         foreach ($existings as $existing) {
             if (!$existing->isDeleted() && $existing->getUid() != $page->getUid()) {
-                $existings_url[] = $existing->getUrl();
+                $existings_url[] = $existing->getUrl(false);
                 $url = sprintf($baseurl, $count++);
             }
         }

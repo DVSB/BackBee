@@ -98,7 +98,7 @@ class RewritingListener
         if (false === ($url_generator instanceof IUrlGenerator)) {
             return;
         }
-
+        
         $em = $application->getEntityManager();
         if (null === $maincontent && 0 < count($url_generator->getDescriminators())) {
             $maincontent = $em->getRepository('BackBuilder\ClassContent\AClassContent')
@@ -113,7 +113,7 @@ class RewritingListener
         }
 
         $new_url = $url_generator->generate($page, $maincontent);
-        if ($new_url !== $page->getUrl()) {
+        if ($new_url !== $page->getUrl(false)) {
             $page->setUrl($new_url);
 
             if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {
