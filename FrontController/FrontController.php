@@ -301,7 +301,11 @@ class FrontController implements HttpKernelInterface
      */
     public function getRequest()
     {
-        return $this->getApplication()->getContainer()->get('request');
+        if (null === $this->_request) {
+            $this->_request = $this->getApplication()->getContainer()->get('request');
+        }
+
+        return $this->_request;
     }
 
     /**
