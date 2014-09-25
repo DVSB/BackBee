@@ -774,7 +774,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             throw new BBException('The BackBuilder application has to be started before to access request');
         }
 
-        return $this->getController()->getRequest();
+        return $this->_container->get('request');
     }
 
     /**
@@ -916,7 +916,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         }
 
         foreach ($this->getBundles() as $bundle) {
-            if (!is_dir($dir = $bundle->getBaseDir() . '/Command')) {
+            if (!is_dir($dir = $bundle->getBaseDirectory() . '/Command')) {
                 continue;
             }
 
@@ -1137,7 +1137,20 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     {
         // init NestedNode config
         if ($this->getConfig()->getSection('nestednode')) {
-            NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));
+            NestedNodeRepository::$config = array_merge(
+                NestedNodeRepository::$config,
+                $this->getConfig()->getSection('nestednode')
+            );
+
+            $console_command = $this->_container->getParameter('bbapp.console.command');
+            if ('/' !== $console_command[0]) {
+                $console_command = $this->getBaseDir() . '/' . $console_command;
+                $this->_container->setParameter('bbapp.console.command', $console_command);
+            }
+
+            NestedNodeRepository::$config['script_command'] = $this->_container->getParameter('bbapp.script.command');
+            NestedNodeRepository::$config['console_command'] = $console_command;
+            NestedNodeRepository::$config['environment'] = $this->getEnvironment();
         }
 
         if (false === $this->_container->getDefinition('em')->isSynthetic()) {

@@ -301,10 +301,7 @@ class FrontController implements HttpKernelInterface
      */
     public function getRequest()
     {
-        if (null === $this->_request)
-            $this->_request = Request::createFromGlobals();
-
-        return $this->_request;
+        return $this->getApplication()->getContainer()->get('request');
     }
 
     /**
@@ -848,18 +845,18 @@ class FrontController implements HttpKernelInterface
             return;
         }
 
-        if (null !== $this->getApplication()->getBBUserToken()) {
-            // Launch NestedNode jobs
-            $container = $this->getApplication()->getContainer();
-            if (true === ($container->hasParameter('bbapp.script.command') && $container->hasParameter('bbapp.console.command'))) {
-                $this->getApplication()->debug('Launching NestedNode jobs: '.sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $container->getParameter('bbapp.console.command')));
-                $env = $this->getApplication()->getEnvironment();
-                if (true === empty($env)) {
-                    $env = 'dev';
-                }
-                exec(sprintf('%s %s nestednode:jobs:process --env=%s &', $container->getParameter('bbapp.script.command'), $this->getApplication()->getBaseDir(). '/' . $container->getParameter('bbapp.console.command'), $env));
-            }
-        }
+        // if (null !== $this->getApplication()->getBBUserToken()) {
+        //     // Launch NestedNode jobs
+        //     $container = $this->getApplication()->getContainer();
+        //     if (true === ($container->hasParameter('bbapp.script.command') && $container->hasParameter('bbapp.console.command'))) {
+        //         $this->getApplication()->debug('Launching NestedNode jobs: '.sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $container->getParameter('bbapp.console.command')));
+        //         $env = $this->getApplication()->getEnvironment();
+        //         if (true === empty($env)) {
+        //             $env = 'dev';
+        //         }
+        //         exec(sprintf('%s %s nestednode:jobs:process --env=%s &', $container->getParameter('bbapp.script.command'), $this->getApplication()->getBaseDir(). '/' . $container->getParameter('bbapp.console.command'), $env));
+        //     }
+        // }
 
         // force content output
 //        @ini_set('zlib.output_compression', 0); // 2014-06-23: comment by c.rouillon

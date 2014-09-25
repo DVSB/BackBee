@@ -697,6 +697,21 @@ class NestedNodeRepository extends EntityRepository
         $queue->enqueue($job);
     }
 
+    private function startDetachedRLValuesJob(ANestedNode $target, $first, $delta)
+    {
+        $this->_em->flush($target);
+        exec(sprintf(
+            '%s %s nestednode:job:lrcalculate --nodeId="%s" --nodeClass="%s" --first="%s" --delta="%s" %s &',
+            self::$config['script_command'],
+            self::$config['console_command'],
+            $target->getUid(),
+            get_class($target),
+            $first,
+            $delta,
+            false === empty(self::$config['environment']) ? '--env=' . self::$config['environment'] : ''
+        ));
+    }
+
     /**
      * Shift part of a tree
      * @param \BackBuilder\NestedNode\ANestedNode $node
@@ -705,10 +720,11 @@ class NestedNodeRepository extends EntityRepository
      * @param \BackBuilder\NestedNode\ANestedNode $target
      * @return \BackBuilder\NestedNode\Repository\NestedNodeRepository
      */
-    private function shiftRlValues(ANestedNode $node, $first, $delta, ANestedNode $target = null)
+    private function shiftRlValues(ANestedNode $node, $first, $delta)
     {
-        if (null !== $target && self::$config['nestedNodeCalculateAsync']) {
-            $this->shiftRlValuesByJob($target, $first, $delta);
+        if (self::$config['nestedNodeCalculateAsync']) {
+            // $this->shiftRlValuesByJob($target, $first, $delta);
+            $this->startDetachedRLValuesJob($node, $first, $delta);
         } else {
             $this->createQueryBuilder('n')
                     ->set('n._leftnode', 'n._leftnode + :delta')
