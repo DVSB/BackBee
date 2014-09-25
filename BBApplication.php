@@ -774,7 +774,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             throw new BBException('The BackBuilder application has to be started before to access request');
         }
 
-        return $this->getController()->getRequest();
+        return $this->_container->get('request');
     }
 
     /**

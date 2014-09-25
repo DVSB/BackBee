@@ -301,10 +301,7 @@ class FrontController implements HttpKernelInterface
      */
     public function getRequest()
     {
-        if (null === $this->_request)
-            $this->_request = Request::createFromGlobals();
-
-        return $this->_request;
+        return $this->getApplication()->getContainer()->get('request');
     }
 
     /**

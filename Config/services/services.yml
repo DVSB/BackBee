@@ -23,6 +23,7 @@ parameters:
     bbapp.autoloader.class: BackBuilder\AutoLoader\AutoLoader
     bbapp.keywordbuilder.class: BackBuilder\NestedNode\Builder\KeywordBuilder
     bbapp.controller_resolver.class: BackBuilder\Controller\ControllerResolver
+    bbapp.request.class: Symfony\Component\HttpFoundation\Request
 
     bbapp.script.command: php
     bbapp.console.command: bin/console.php
@@ -101,6 +102,11 @@ services:
             - { name: "dumpable", dispatch_event: false }
     ed:
         alias: event.dispatcher
+
+    request:
+        class: %bbapp.request.class%
+        factory_class: %bbapp.request.class%
+        factory_method: createFromGlobals
 
     controller:
         class:      %bbapp.controller.class%
