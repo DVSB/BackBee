@@ -286,37 +286,6 @@ class IndexationRepository extends EntityRepository
     }
     
     /**
-     * Returns an uid if parent with this classname found, false otherwise
-     * @param string $child_uid
-     * @param string $class_name
-     * @return string|false
-     */
-    public function getParentByClassName($child_uid, $class_name)
-    {        
-        $q = $this->_em->getConnection()
-                ->createQueryBuilder()
-                ->select('j.parent_uid, c.classname')
-                ->from('content_has_subcontent', 'j')
-                ->from('content', 'c')
-                ->andWhere('c.uid = j.parent_uid')
-                ->andWhere('j.content_uid = :uid')
-                ->setParameter('uid', $child_uid);
-        
-        $result = $q->execute()->fetch();
-        if (false !== $result) {
-            if ($result['classname'] == $class_name) {
-                return $result['parent_uid'];
-            } else {
-                $result = $this->getParentByClassName($result['parent_uid'], $class_name);
-            }
-        } else {
-            return null;
-        }
-        
-        return $result;
-    }
-
-    /**
      * Returns an array of content uids owned by provided contents
      * @param mixed $contents
      * @return array
