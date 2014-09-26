@@ -21,9 +21,10 @@
 
 namespace BackBuilder\Cache\IdentifierAppender;
 
-use BackBuilder\BBApplication;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\Renderer\IRenderer;
+
+use Doctrine\ORM\EntityManager;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Util\ClassUtils;
@@ -51,11 +52,18 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     const CLASSCONTENT_PARAMS_STRATEGY = 2;
 
     /**
-     * Application from where we would retrieve request, entity manager, etc.
+     * Request we will use to find query parameters
      *
-     * @var BackBuilder\BBApplication
+     * @var Symfony\Component\HttpFoundation\Request
      */
-    private $application;
+    private $request;
+
+    /**
+     * Application main entity manager
+     *
+     * @var Doctrine\ORM\EntityManager
+     */
+    private $em;
 
     /**
      * The strategy to use
@@ -74,13 +82,15 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     /**
      * constructor
      *
-     * @param BBApplication $application application which will provide request, entity manager, etc.
-     * @param integer $strategy the strategy to apply when we need to compute identifier
-     * @param array   $group    list of groups this appender belongs to
+     * @param Request       $request  request in which we will looking for query parameter
+     * @param EntityManager $em       application main entity manager
+     * @param integer       $strategy the strategy to apply when we need to compute identifier
+     * @param array         $group    list of groups this appender belongs to
      */
-    public function __construct(BBApplication $application, $strategy = self::NO_PARAMS_STRATEGY, $groups = array())
+    public function __construct(Request $request, EntityManager $em, $strategy = self::NO_PARAMS_STRATEGY, $groups = array())
     {
-        $this->application = $application;
+        $this->request = $request;
+        $this->em = $em;
         $this->strategy = (int) $strategy;
         $this->groups = (array) $groups;
     }
@@ -94,10 +104,9 @@ class QueryParameterAppender implements IdentifierAppenderInterface
             return $identifier;
         }
 
-        $request = $this->application->getContainer()->get('request');
         switch ($this->strategy) {
             case self::ALL_PARAMS_STRATEGY:
-                foreach ($request->query->all() as $name => $value) {
+                foreach ($this->request->query->all() as $name => $value) {
                     if (true === is_scalar($value)) {
                         $identifier .= "-$name=$value";
                     }
@@ -109,7 +118,7 @@ class QueryParameterAppender implements IdentifierAppenderInterface
                     $object = $renderer->getObject();
                     foreach ($this->getClassContentCacheQueryParameters($object) as $query) {
                         $query = str_replace('#uid#', $object->getUid(), $query);
-                        if (null !== $value = $request->get($query)) {
+                        if (null !== $value = $this->request->query->get($query)) {
                             $identifier .= "-$query=$value";
                         }
                     }
@@ -141,14 +150,14 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     {
         $classnames = array(ClassUtils::getRealClass($content));
 
-        $content_uids = $this->application->getEntityManager()
-            ->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
+        $content_uids = $this->em->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
             ->getDescendantsContentUids($content)
         ;
 
         if (0 < count($content_uids)) {
-            $classnames = array_merge($classnames, $this->application->getEntityManager()
-                ->getRepository('\BackBuilder\ClassContent\AClassContent')->getClassnames($content_uids)
+            $classnames = array_merge(
+                $classnames,
+                $this->em->getRepository('\BackBuilder\ClassContent\AClassContent')->getClassnames($content_uids)
             );
         }
 

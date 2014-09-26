@@ -21,11 +21,11 @@
 
 namespace BackBuilder\Cache\IdentifierAppender;
 
-use BackBuilder\BBApplication;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\Renderer\IRenderer;
 
-use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManager;
+
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
@@ -47,11 +47,11 @@ class NodeAppender implements IdentifierAppenderInterface
     const ROOT_NODE = 'root';
 
     /**
-     * Application from where we would retrieve request, entity manager, etc.
+     * Application main entity manager
      *
-     * @var BackBuilder\BBApplication
+     * @var Doctrine\ORM\EntityManager
      */
-    private $application;
+    private $em;
 
     /**
      * list of group name this validator belong to
@@ -63,12 +63,12 @@ class NodeAppender implements IdentifierAppenderInterface
     /**
      * constructor
      *
-     * @param BBApplication $application application which will provide entity manager, etc.
-     * @param array   $group    list of groups this appender belongs to
+     * @param EntityManager $em    application main entity manager
+     * @param array         $group list of groups this appender belongs to
      */
-    public function __construct(BBApplication $application, $groups = array())
+    public function __construct(EntityManager $em, $groups = array())
     {
-        $this->application = $application;
+        $this->em = $em;
         $this->groups = (array) $groups;
     }
 
@@ -123,14 +123,14 @@ class NodeAppender implements IdentifierAppenderInterface
     {
         $classnames = array(ClassUtils::getRealClass($content));
 
-        $content_uids = $this->application->getEntityManager()
-            ->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
+        $content_uids = $this->em->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
             ->getDescendantsContentUids($content)
         ;
 
         if (0 < count($content_uids)) {
-            $classnames = array_merge($classnames, $this->application->getEntityManager()
-                ->getRepository('\BackBuilder\ClassContent\AClassContent')->getClassnames($content_uids)
+            $classnames = array_merge(
+                $classnames,
+                $this->em->getRepository('\BackBuilder\ClassContent\AClassContent')->getClassnames($content_uids)
             );
         }
 
