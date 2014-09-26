@@ -48,10 +48,8 @@ abstract class ACache
      * @var array
      */
     private $_default_instance_options = array(
-        'pattern_to_exclude' => null,
         'min_lifetime'       => null,
-        'max_lifetime'       => null,
-        'qparams_strategy'   => QueryParamStrategyManagerInterface::INCLUDE_CLASSCONTENT_QPARAMS_STRATEGY
+        'max_lifetime'       => null
     );
 
     /**
@@ -153,26 +151,6 @@ abstract class ACache
     public function getContext()
     {
         return $this->_context;
-    }
-
-    /**
-     * Returns query params strategy
-     *
-     * @return integer
-     */
-    public function getQueryParamsStrategy()
-    {
-        return (int) $this->_instance_options['qparams_strategy'];
-    }
-
-    /**
-     * Returns pattern to exclude option from instance options
-     *
-     * @return null|array|string
-     */
-    public function getPatternToExclude()
-    {
-        return $this->_instance_options['pattern_to_exclude'];
     }
 
     /**

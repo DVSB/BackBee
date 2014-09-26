@@ -78,12 +78,6 @@ services:
     cache.listener:
         class:      %bbapp.cache_listener.class%
         arguments:  [@bbapp]
-        calls:
-            - [setQParamsStrategyManager, [@cache.query_params_strategy.manager]]
-
-    cache.query_params_strategy.manager:
-        class:      %bbapp.cache.query_params_strategy.manager.class%
-        public:     false
 
     config:
         class:      %bbapp.config.class%
