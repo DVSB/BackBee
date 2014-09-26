@@ -25,18 +25,14 @@ use BackBuilder\Cache\Validator\ValidatorInterface;
 use BackBuilder\NestedNode\Page;
 
 /**
- * This cache validator checks requirements on application instance:
- *   - application debug value must be false
- *   - AND application isClientSAPI() must return false
- *   - AND current user must be not BBUser
- *   - AND application must be started
+ * PatternValidator will invalid string that match with pattern to exclude
  *
  * @category    BackBuilder
  * @package     BackBuilder\Cache
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class PageUrlValidator implements ValidatorInterface
+class PatternValidator implements ValidatorInterface
 {
     /**
      * List of url pattern to exclude from cache candidates
@@ -67,12 +63,12 @@ class PageUrlValidator implements ValidatorInterface
     /**
      * @see BackBuilder\Cache\Validator\ValidatorInterface::isValid
      */
-    public function isValid($object = null)
+    public function isValid($string = null)
     {
         $is_valid = true;
-        if (null !== $object && true === ($object instanceof Page)) {
+        if (true === is_string($string)) {
             foreach ($this->patterns_to_exclude as $pattern) {
-                if (1 === preg_match("#$pattern#", $object->getUrl())) {
+                if (1 === preg_match("#$pattern#", $string)) {
                     $is_valid = false;
                     break;
                 }
