@@ -50,8 +50,6 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     const MEDIA_URL = 2;
     const RESOURCE_URL = 3;
 
-    const DEFAULT_IMAGE_URL_PREFIX = '/images/';
-
     /**
      * The current BBApplication
      * @var \BackBuilder\BBApplication
