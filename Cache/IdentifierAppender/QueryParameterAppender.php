@@ -141,7 +141,6 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     {
         $classnames = array(ClassUtils::getRealClass($content));
 
-        // ?? why dont we use class_parents() ?
         $content_uids = $this->application->getEntityManager()
             ->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
             ->getDescendantsContentUids($content)

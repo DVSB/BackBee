@@ -87,13 +87,13 @@ class NodeAppender implements IdentifierAppenderInterface
                     $identifier .= '-' . $renderer->getCurrentPage()->getUid();
 
                     break;
-                case 'parent':
+                case self::PARENT_NODE:
                     if (null !== $renderer->getCurrentPage()->getParent()) {
                         $identifier .= '-' . $renderer->getCurrentPage()->getParent()->getUid();
                     }
 
                     break;
-                case 'root':
+                case self::ROOT_NODE:
                     $identifier .= '-' . $renderer->getCurrentRoot()->getUid();
 
                 default:
@@ -123,7 +123,6 @@ class NodeAppender implements IdentifierAppenderInterface
     {
         $classnames = array(ClassUtils::getRealClass($content));
 
-        // ?? why dont we use class_parents() ?
         $content_uids = $this->application->getEntityManager()
             ->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
             ->getDescendantsContentUids($content)
