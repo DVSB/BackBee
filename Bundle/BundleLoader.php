@@ -359,6 +359,13 @@ class BundleLoader
                         ServiceLoader::loadServicesFromXmlFile($this->container, $directory);
                     } catch (\Exception $e) { /* nothing to do, just ignore it */ }
                 }
+
+                $filepath = $directory . DIRECTORY_SEPARATOR . 'services.yml';
+                if (true === is_file($filepath) && true === is_readable($filepath)) {
+                    try {
+                        ServiceLoader::loadServicesFromYamlFile($this->container, $directory);
+                    } catch (\Exception $e) { /* nothing to do, just ignore it */ }
+                }
             }
         }
     }
