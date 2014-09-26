@@ -23,7 +23,8 @@ namespace BackBuilder\Event\Listener;
 
 use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Cache\AExtendedCache;
-use BackBuilder\Cache\QueryParamStrategyManagerInterface;
+use BackBuilder\Cache\CacheIdentifierGenerator;
+use BackBuilder\Cache\CacheValidator;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\ClassContent\ContentSet;
 use BackBuilder\Event\Event;
@@ -48,49 +49,63 @@ class CacheListener implements EventSubscriberInterface
 {
     /**
      * The current application instance
+     *
      * @var \BackBuilder\BBApplication
      */
     private $application;
 
     /**
-     * A query parameters strategy manager
+     * cache validator
      *
-     * @var
+     * @var BackBuilder\Cache\CacheValidator
      */
-    private $qparams_strategy_manager;
+    private $validator;
+
+    /**
+     * cache identifier generator
+     *
+     * @var BackBuilder\Cache\CacheIdentifierGenerator
+     */
+    private $identifier_generator;
 
     /**
      * The page cache system
+     *
      * @var \BackBuilder\Cache\AExtendedCache
      */
     private $cache_page;
 
     /**
      * The content cache system
+     *
      * @var \BackBuilder\Cache\AExtendedCache
      */
     private $cache_content;
 
     /**
      * The object to be rendered
+     *
      * @var \BackBuilder\Renderer\IRenderable
      */
     private $object;
 
     /**
      * Is the deletion of cached page is done
+     *
      * @var boolean
      */
     private $page_cache_deletion_done = false;
 
     /**
      * Cached contents already deleted
+     *
      * @var boolean
      */
     private $content_cache_deletion_done = array();
 
     /**
      * Returns an array of event names this subscriber wants to listen to.
+     *
      * @return array The event names to listen to
      */
     public static function getSubscribedEvents()
@@ -105,9 +120,18 @@ class CacheListener implements EventSubscriberInterface
         );
     }
 
-    public function __construct(ApplicationInterface $application)
+    /**
+     * constructor
+     *
+     * @param ApplicationInterface     $application
+     * @param CacheValidator           $validator
+     * @param CacheIdentifierGenerator $generator
+     */
+    public function __construct(ApplicationInterface $application, CacheValidator $validator, CacheIdentifierGenerator $generator)
     {
         $this->application = $application;
+        $this->validator = $validator;
+        $this->identifier_generator = $generator;
 
         if (true === $this->application->getContainer()->has('cache.control')) {
             $cache_content = $this->application->getContainer()->get('cache.control');
@@ -122,11 +146,6 @@ class CacheListener implements EventSubscriberInterface
                 $this->cache_page = $cache_page;
             }
         }
-    }
-
-    public function setQParamsStrategyManager(QueryParamStrategyManagerInterface $manager)
-    {
-        $this->qparams_strategy_manager = $manager;
     }
 
     /**
@@ -216,7 +235,7 @@ class CacheListener implements EventSubscriberInterface
 
         $parent_uids = $this->application->getEntityManager()
             ->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
-            ->getParentContentUids(array($this->object))
+            ->getParentContentUidsByUids(array($this->object->getUid()))
         ;
 
         $content_uids = array_diff($parent_uids, $this->content_cache_deletion_done);
@@ -360,6 +379,11 @@ class CacheListener implements EventSubscriberInterface
      */
     private function checkCacheContentEvent($check_status = true)
     {
+        // Checks if a service cache-control exists
+        if (null === $this->cache_content) {
+            return false;
+        }
+
         // Checks if the target event is not a main contentset
         if (
             $this->object instanceof ContentSet
@@ -369,12 +393,7 @@ class CacheListener implements EventSubscriberInterface
             return false;
         }
 
-        // Checks if a service cache-control exists
-        if (null === $this->cache_content) {
-            return false;
-        }
-
-        return (true === $check_status) ? $this->checkCacheStatus() : true;
+        return true === $check_status ? $this->validator->isValid('cache_status', $this->object) : true;
     }
 
     /**
@@ -385,36 +404,14 @@ class CacheListener implements EventSubscriberInterface
      */
     private function checkCachePageEvent($check_status = true)
     {
-        // Checks if the service cache.page exists
-        if (null === $this->cache_page) {
-            return false;
-        }
-
-        return (true === $check_status) ? $this->checkCacheStatus() : true;
-    }
-
-    /**
-     * Return FALSE if debug mode is activated or a BBUser is connected
-     * @return boolean
-     */
-    private function checkCacheStatus()
-    {
-        if (true === $this->application->isStarted() && false === $this->application->isClientSAPI()) {
-            $request = $this->application->getRequest();
-            if ('GET' !== $request->getMethod()) {
-                return false;
-            }
-        }
-
-        if (true === $this->application->isDebugMode()) {
-            return false;
-        }
-
-        if (null !== $this->application->getBBUserToken()) {
-            return false;
-        }
-
-        return true;
+        return null !== $this->cache_page
+            && true === $this->validator->isValid('page', $this->application->getRequest()->getUri())
+            && (
+                true === $check_status
+                    ? $this->validator->isValid('cache_status', $this->object)
+                    : true
+            )
+        ;
     }
 
     /**
@@ -423,96 +420,12 @@ class CacheListener implements EventSubscriberInterface
      */
     private function getContentCacheId(ARenderer $renderer)
     {
-        $cache_id = $this->object->getUid() . '-' . $renderer->getMode();
-
-        $request = $this->application->getRequest();
-        if (
-            true === $this->application->isStarted()
-            && false === $this->application->isClientSAPI()
-            && 'GET' === $request->getMethod()
-        ) {
-            $cache_params = $this->getCacheParam($this->getDescendantsClassname());
-
-            if (null !== $this->qparams_strategy_manager) {
-                $cache_id .= $this->qparams_strategy_manager->process(
-                    $request,
-                    $this->cache_content->getQueryParamsStrategy(),
-                    array(
-                        'object_uid'   => $this->object->getUid(),
-                        'query_params' => true === isset($cache_params['query'])
-                            ? $cache_params['query']
-                            : array()
-                    )
-                );
-            }
-
-            if (is_array($cache_params) && isset($cache_params['node']) && null !== $renderer->getCurrentPage()) {
-                switch ($cache_params['node']) {
-                    case 'self':
-                        $cache_id .= '-' . $renderer->getCurrentPage()->getUid();
-                        break;
-                    case 'parent':
-                        if (null !== $renderer->getCurrentPage()->getParent()) {
-                        $cache_id .= '-' . $renderer->getCurrentPage()->getParent()->getUid();
-                        }
-                        break;
-                    case 'root':
-                        $cache_id .= '-' . $renderer->getCurrentRoot()->getUid();
-                        break;
-                }
-            }
-        }
+        $cache_id = $this->identifier_generator->compute(
+            'content', $this->object->getUid() . '-' . $renderer->getMode(),
+            $renderer
+        );
 
         return md5('_content_' . $cache_id);
-    }
-
-    /**
-     * Returns the classnames of descendants
-     * @return array
-     */
-    private function getDescendantsClassname()
-    {
-        $classnames = array(ClassUtils::getRealClass($this->object));
-
-        $content_uids = $this->application->getEntityManager()
-            ->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
-            ->getDescendantsContentUids($this->object)
-        ;
-
-        if (0 === count($content_uids)) {
-            return $classnames;
-        }
-
-        return array_merge($classnames, $this->application->getEntityManager()
-            ->getRepository('\BackBuilder\ClassContent\AClassContent')->getClassnames($content_uids)
-        );
-    }
-
-    /**
-     * Returns the merged cache params
-     * @param array $classnames
-     * @return array
-     */
-    private function getCacheParam(array $classnames)
-    {
-        $cache_param = array('query' => array());
-        foreach ($classnames as $classname) {
-            if (false === class_exists($classname)) {
-                continue;
-            }
-
-            $o = new $classname();
-            if (null !== $op = $o->getProperty('cache-param')) {
-                if (isset($op['query'])) {
-                    $cache_param['query'] = array_merge($cache_param['query'], $op['query']);
-                }
-                if (isset($op['node'])) {
-                    $cache_param['node'] = $op['node'];
-                }
-            }
-        }
-
-        return $cache_param;
     }
 
     /**
@@ -521,23 +434,6 @@ class CacheListener implements EventSubscriberInterface
      */
     private function getPageCacheId()
     {
-        if (false === $this->application->isStarted() || true === $this->application->isClientSAPI()) {
-            return false;
-        }
-
-        $request = $this->application->getRequest();
-        if ('GET' !== $request->getMethod()) {
-            return false;
-        }
-
-        $uri = $request->getUri();
-        $pattern_to_exclude = $this->cache_content->getPatternToExclude() ?: array();
-        foreach ((array) $pattern_to_exclude as $pattern) {
-            if (1 === preg_match("#$pattern#", $uri)) {
-                return false;
-            }
-        }
-
-        return $uri;
+        return $this->application->getRequest()->getUri();
     }
 }

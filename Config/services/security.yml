@@ -2,6 +2,7 @@
 
 parameters:
     bbapp.securitycontext.class: BackBuilder\Security\SecurityContext
+    bbapp.expression_language.class: BackBuilder\Security\Authorization\ExpressionLanguage
 
 services:
     security.context:
@@ -99,3 +100,6 @@ services:
     security.acl_manager:
         class:      BackBuilder\Security\Acl\AclManager
         arguments:  [@security.context]
+
+    bb.expression_language:
+        class: %bbapp.expression_language.class%

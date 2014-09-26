@@ -26,11 +26,7 @@ use BackBuilder\Cache\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * This cache validator checks requirements on application instance:
- *   - application debug value must be false
- *   - AND application isClientSAPI() must return false
- *   - AND current user must be not BBUser
- *   - AND application must be started
+ * This cache validator checks requirements on request method
  *
  * @category    BackBuilder
  * @package     BackBuilder\Cache
