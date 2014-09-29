@@ -98,7 +98,7 @@ class RewritingListener
         if (false === ($url_generator instanceof IUrlGenerator)) {
             return;
         }
-        
+
         $em = $application->getEntityManager();
         if (null === $maincontent && 0 < count($url_generator->getDescriminators())) {
             $maincontent = $em->getRepository('BackBuilder\ClassContent\AClassContent')

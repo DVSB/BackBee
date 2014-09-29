@@ -104,7 +104,7 @@ class UrlGenerator implements IUrlGenerator
                 $this->_preserveUnicity = (true === $rewritingConfig['preserve-unicity']);
             }
 
-            if (true === array_key_exists('scheme', $rewritingConfig) && true === is_array($rewritingConfig['scheme'])) {
+            if (true === isset($rewritingConfig['scheme']) && true === is_array($rewritingConfig['scheme'])) {
                 $this->_schemes = $rewritingConfig['scheme'];
             }
         }
@@ -155,6 +155,12 @@ class UrlGenerator implements IUrlGenerator
 
         if ($page->isRoot() && true == array_key_exists('_root_', $this->_schemes)) {
             return $this->_generate($this->_schemes['_root_'], $page, $content);
+        }
+
+        if (true === isset($this->_schemes['_layout_']) && true === is_array($this->_schemes['_layout_'])) {
+            if (true === array_key_exists($page->getlayout()->getUid(), $this->_schemes['_layout_'])) {
+                return $this->_generate($this->_schemes['_layout_'][$page->getlayout()->getUid()], $page);
+            }
         }
 
         if (null !== $content && true === array_key_exists('_content_', $this->_schemes)) {
