@@ -238,6 +238,10 @@ abstract class AbstractBaseBundle implements BundleInterface
             $obj->config_per_site = false;
         }
 
+        if (false === property_exists($obj, 'category')) {
+            $obj->category = array();
+        }
+
         return $obj;
     }
 
