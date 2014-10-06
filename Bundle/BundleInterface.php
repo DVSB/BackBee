@@ -31,7 +31,7 @@ use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-interface BundleInterface extends IObjectIdentifiable
+interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
 {
     /**
      * service id pattern (for bundle and bundle's config)
@@ -118,11 +118,4 @@ interface BundleInterface extends IObjectIdentifiable
      * @return boolean [description]
      */
     public function isConfigPerSite();
-
-    /**
-     * [serialize description]
-     *
-     * @return string json format of the result
-     */
-    public function serialize();
 }

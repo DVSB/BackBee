@@ -217,18 +217,28 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::serialize
+     * @see Serializable::jsonSerialize
      */
-    public function serialize()
+    public function jsonSerialize()
     {
         $obj = new \stdClass();
         $obj->id = $this->getId();
 
         foreach ($this->getProperty() as $key => $value) {
-            $obj->$key = $value;
+            if ('bundle_loader_recipes' !== $key) {
+                $obj->$key = $value;
+            }
         }
 
-        return json_encode($obj);
+        if (false === property_exists($obj, 'enable')) {
+            $obj->enable = true;
+        }
+
+        if (false === property_exists($obj, 'config_per_site')) {
+            $obj->config_per_site = false;
+        }
+
+        return $obj;
     }
 
     /**
