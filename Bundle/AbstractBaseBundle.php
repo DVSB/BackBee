@@ -217,7 +217,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see Serializable::jsonSerialize
+     * @see JsonSerializable::jsonSerialize
      */
     public function jsonSerialize()
     {
