@@ -118,4 +118,12 @@ interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
      * @return boolean [description]
      */
     public function isConfigPerSite();
+
+    /**
+     * Checks if current bundle is enabled or not (it also defines if it is
+     * loaded by BundleLoader into application)
+     *
+     * @return boolean true if the bundle is enabled, else false
+     */
+    public function isEnabled();
 }
