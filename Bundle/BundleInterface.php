@@ -48,74 +48,69 @@ interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
     const DEFAULT_CONFIG_PER_SITE_VALUE = true;
 
     /**
-     * [getId description]
+     * Returns the bundle id
      *
-     * @return [type] [description]
+     * @return string bundle id
      */
     public function getId();
 
     /**
-     * [getBaseDirectory description]
+     * Returns bundle base directory
      *
-     * @return [type] [description]
+     * @return string bundle base directory
      */
     public function getBaseDirectory();
 
     /**
-     * [getProperty description]
+     * Returns bundle property if you provide key, else every properties; a bundle
+     * property is any key/value defined in 'bundle'section in config.yml
      *
-     * @param  [type] $key [description]
+     * @param  string $key name of the property
      *
-     * @return [type]      [description]
+     * @return string|array value of the property if key is not null, else an array which contains every properties
      */
     public function getProperty($key = null);
 
     /**
-     * [start description]
-     *
-     * @return [type] [description]
+     * Method to call when we get the bundle for the first time
      */
     public function start();
 
     /**
-     * [stop description]
-     *
-     * @return [type] [description]
+     * Method to call before stop or destroy of current bundle
      */
     public function stop();
 
     /**
-     * [getApplication description]
+     * Returns the application current bundle is registered into
      *
-     * @return [type] [description]
+     * @return BackBuilder\BBApplication application that own current bundle
      */
     public function getApplication();
 
-        /**
-     * [getApplication description]
+    /**
+     * Current bundle entity manager
      *
-     * @return [type] [description]
+     * @return Doctrine\ORM\EntityManager
      */
     public function getEntityManager();
 
     /**
-     * [isStarted description]
+     * Defines if current bundle is started or not
      *
-     * @return boolean [description]
+     * @return boolean true if the bundle is started, else false
      */
     public function isStarted();
 
     /**
-     * [started description]
-     *
-     * @return [type] [description]
+     * Switch current bundle as started (so self::isStarted() will return true)
      */
     public function started();
 
     /**
-     * [isConfigPerSite description]
+     * Defines if current bundle require different config per site or not
      *
-     * @return boolean [description]
+     * @return boolean true if current bundle require a different config per site, else false
      */
     public function isConfigPerSite();
 
