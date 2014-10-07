@@ -217,6 +217,14 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
+     * @see BackBuilder\Bundle\BundleInterface::isEnabled
+     */
+    public function isEnabled()
+    {
+        return true === $this->getProperty('enable');
+    }
+
+    /**
      * @see JsonSerializable::jsonSerialize
      */
     public function jsonSerialize()
