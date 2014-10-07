@@ -198,6 +198,11 @@ class BundleLoader
     {
         foreach ($this->bundles_base_directory as $base_directory) {
             $config = $this->loadAndGetBundleConfigByBaseDirectory($base_directory);
+            $bundle_config = $config->getSection('bundle');
+            if (isset($bundle_config['enable']) && false === (boolean) $bundle_config['enable']) {
+                continue;
+            }
+
             $recipes = $this->getLoaderRecipesByConfig($config);
 
             $this->loadServices($config, $this->getCallableByRecipesAndKey($recipes, self::SERVICE_RECIPE_KEY));
