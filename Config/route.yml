@@ -277,6 +277,30 @@ bb.rest.classcontent.delete:
         type: .+
         _method: DELETE
 
+bb.rest.bundle.get_collection:
+    pattern: /rest/{version}/bundle
+    defaults:
+        _action: getCollectionAction
+        _controller: BackBuilder\Rest\Controller\BundleController
+    requirements:
+        _method: GET
+
+bb.rest.bundle.get:
+    pattern: /rest/{version}/bundle/{id}
+    defaults:
+        _action: getAction
+        _controller: BackBuilder\Rest\Controller\BundleController
+    requirements:
+        _method: GET
+
+bb.rest.bundle.patch:
+    pattern: /rest/{version}/bundle/{id}
+    defaults:
+        _action: patchAction
+        _controller: BackBuilder\Rest\Controller\BundleController
+    requirements:
+        _method: PATCH
+
 # BackBuilder rss
 bb.rss:
     pattern: /rss/{uri}
