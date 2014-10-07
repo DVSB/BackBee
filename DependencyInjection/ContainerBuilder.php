@@ -153,7 +153,7 @@ class ContainerBuilder
             && true === $this->container->getParameter('container.autogenerate')
         ) {
             $dump_filepath = $this->container->getParameter('container.dump_directory');
-            $dump_filepath .= DIRECTORY_SEPARATOR . $this->container->getParameter('container.filename');
+            $dump_filepath .= DIRECTORY_SEPARATOR . $this->container->getParameter('container.filename') . '.php';
 
             if (true === is_file($dump_filepath) && true === is_readable($dump_filepath)) {
                 $success = false !== @unlink($dump_filepath);
