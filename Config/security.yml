@@ -12,6 +12,9 @@ firewalls:
             use_registry: true
     rest_api_area:
         pattern: ^/rest
+        requirements:
+            HTTP-X-API-SIGNATURE: \w+
+            HTTP-X-API-KEY: \w+
         provider: public_key
         public_key: ~
         restful: ~
@@ -30,9 +33,9 @@ contexts:
     BackBuilder\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext, RestfulContext]
 
 encoders:
-    BackBuilder\Security\User: 
+    BackBuilder\Security\User:
         class: Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder
-        arguments: 
+        arguments:
             algorithm: md5
             encode_as_base64: false
             iterations: 1
