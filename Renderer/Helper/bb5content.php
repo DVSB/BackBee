@@ -79,6 +79,12 @@ class bb5content extends AHelper
     private $_parent;
 
     /**
+     * Parent content already checked to avoid loop
+     * @var type @var array
+     */
+    private $already_checked;
+    
+    /**
      * Returns the HTML formated attributes for content
      * @param array $datacontent Optional attributes to add
      * @param array $params Optional parameters
@@ -104,6 +110,7 @@ class bb5content extends AHelper
             } else {
                 $this->_element_name = null;
                 if (null !== $this->_parent = $this->_renderer->getObject()) {
+                    $this->already_checked = array();
                     $this->_setElementName($this->_parent, $element);
                     $this->_parent_uid = $this->_parent->getUid();
                 }
@@ -123,31 +130,36 @@ class bb5content extends AHelper
         return implode(' ', array_map(array($this, '_formatAttributes'), array_keys($this->_attributes), array_values($this->_attributes)));
     }
 
+    /**
+     * Try to find element name of the content
+     * @param AClassContent $parent
+     * @param AClassContent $element
+     */
     private function _setElementName(AClassContent $parent, AClassContent $element)
     {
+        $this->already_checked[] = array($parent->getUid());
+
         foreach ($parent->getData() as $key => $values) {
             if (false === is_array($values)) {
                 $values = array($values);
             }
 
             foreach ($values as $value) {
-                if ($value instanceof AClassContent) {
-                    if (false === $value->isLoaded()) {
-                        // try to load subcontent
-                        if (null !== $subcontent = $this->getRenderer()
-                                ->getApplication()
-                                ->getEntityManager()
-                                ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($value))
-                                ->load($value, $this->getRenderer()->getApplication()->getBBUserToken())) {
-                            $value = $subcontent;
-                        }
-                    }
-                    if (true === $element->equals($value)) {
-                        $this->_element_name = $key;
-                        $this->_parent = $parent;
-                    } else {
-                        $this->_setElementName($value, $element);
-                    }
+                if (false === ($value instanceof AClassContent)) {
+                    // Not a AClassContent cannot be an element
+                    continue;
+                }
+
+                if (true === in_array($value->getUid(), $this->already_checked)) {
+                    // This content was already checked without success, skip it
+                    continue;
+                }
+
+                if (true === $element->equals($value)) {
+                    $this->_element_name = $key;
+                    $this->_parent = $parent;
+                } else {
+                    $this->_setElementName($this->getLoadedContent($value), $element);
                 }
 
                 if (null !== $this->_element_name) {
@@ -159,6 +171,26 @@ class bb5content extends AHelper
                 break;
             }
         }
+    }
+
+    /**
+     * Try to load a content if it is not yet
+     * @param AClassContent $content
+     * @return AClassContent
+     */
+    private function getLoadedContent(AClassContent $content)
+    {
+        if (false === $content->isLoaded()) {
+            if (null !== $subcontent = $this->getRenderer()
+                    ->getApplication()
+                    ->getEntityManager()
+                    ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content))
+                    ->load($content, $this->getRenderer()->getApplication()->getBBUserToken())) {
+                $content = $subcontent;
+            }
+        }
+
+        return $content;
     }
 
     /**
