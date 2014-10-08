@@ -43,13 +43,13 @@ bb.images:
         filename: .+
 
 # BackBuilder REST API test page
-bb.rest.test:
-    pattern: /rest/{version}/_generateKey/
-    defaults:
-        _action: generateKeyAction
-        _controller: BackBuilder\Rest\Controller\TestController
-    requirements:
-        version: \d
+# bb.rest.test:
+#     pattern: /rest/{version}/_generateKey/
+#     defaults:
+#         _action: generateKeyAction
+#         _controller: BackBuilder\Rest\Controller\TestController
+#     requirements:
+#         version: \d
 
 bb.rest.user_get:
     pattern: /rest/{version}/user/{id}
