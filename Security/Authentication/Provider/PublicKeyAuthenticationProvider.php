@@ -2,138 +2,85 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Security\Authentication\Provider;
 
+use BackBuilder\Security\Encoder\RequestSignatureEncoder;
+use BackBuilder\Security\Exception\SecurityException;
+use BackBuilder\Security\Token\PublicKeyToken;
+
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use BackBuilder\Security\Token\PublicKeyToken,
-    BackBuilder\Security\Exception\SecurityException,
-    BackBuilder\Security\Encoder\RequestSignatureEncoder;
-
-
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Security\Core\User\UserInterface,
-    Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface,
-    Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Authentication provider for username/password firewall
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Security
  * @subpackage  Authentication\Provider
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class PublicKeyAuthenticationProvider implements AuthenticationProviderInterface
+class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
 {
-
     /**
-     * The user provider to query
-     * @var \Symfony\Component\Security\Core\User\UserProviderInterface
-     */
-    private $_userProvider;
-
-    /**
-     * The encoders factory
-     * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
-     */
-    private $_encoderFactory;
-
-    /**
-     * Class constructor
-     * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
-     */
-    public function __construct(UserProviderInterface $userProvider, EncoderFactoryInterface $encoderFactory = null)
-    {
-        $this->_userProvider = $userProvider;
-        $this->_encoderFactory = $encoderFactory;
-    }
-
-    /**
-     * Authenticate a token according to the user provider.
-     * 
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @return \Symfony\Component\Security\Core\User\UserProviderInterface
-     * @throws SecurityException Occures on invalid connection
+     * {@inheritdoc}
      */
     public function authenticate(TokenInterface $token)
     {
-        if (!$this->supports($token)) {
+        if (false === $this->supports($token)) {
             return null;
         }
 
         $publicKey = $token->getUsername();
-        
-        $user = $this->_userProvider->loadUserByPublicKey($publicKey);
 
-        if (false === is_array($user)) {
-            $user = array($user);
-        }
-        
-        $authenticatedToken = false;
-        while (false === $authenticatedToken) {
-            if (null !== $provider = array_pop($user)) {
-                $authenticatedToken = $this->_authenticateUser($token, $provider);
-            } else {
-                break;
-            }
-        }
 
-        if (false === $authenticatedToken) {
+        // test of nonce, signature and created
+        if (null === $nonce = $this->readNonceValue($token->getNonce())) {
             throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
         }
 
-        return $authenticatedToken;
+        $user = $this->user_provider->loadUserByPublicKey($publicKey);
+        $token->setUser($user);
+
+        $signature_encoder = new RequestSignatureEncoder();
+        if (false === $signature_encoder->isApiSignatureValid($token, $nonce[1])) {
+            throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
+        }
+
+        if (time() > $nonce[0] + $this->lifetime) {
+            throw new SecurityException('Prior authentication expired', SecurityException::EXPIRED_AUTH);
+        }
+
+        $authenticated_token = new PublicKeyToken($user->getRoles());
+        $authenticated_token->setUser($user);
+
+        return $authenticated_token;
     }
 
     /**
-     * Checks whether this provider supports the given token.
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @return Boolean true if the implementation supports the Token, false otherwise
+     * {@inheritdoc}
      */
     public function supports(TokenInterface $token)
     {
         return $token instanceof PublicKeyToken;
     }
-
-    /**
-     * Authenticate a token accoridng to the user provided
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user
-     * @return boolean|\BackBuilder\Security\Token\PublicKeyToken
-     */
-    private function _authenticateUser(TokenInterface $token, UserInterface $user)
-    {
-        try {
-            $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($user);
-            $encoder = new RequestSignatureEncoder();
-            if (true === $encoder->isApiSignatureValid($token->signature, $token->request, $user->getApiKeyPrivate())) {
-                $token = new PublicKeyToken($user->getRoles());
-                $token->setUser($user);
-                return $token;
-            }
-        } catch (\Exception $e) {
-            return false;
-        }
-        
-        return false;
-    }
-
 }

@@ -21,8 +21,9 @@
 
 namespace BackBuilder\Security\Token;
 
+use BackBuilder\Security\User;
+
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -32,28 +33,23 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class PublicKeyToken extends AbstractToken
+class PublicKeyToken extends BBUserToken
 {
     /**
      *
      * @var string
      */
-    public $publicKey;
+    private $publicKey;
 
     /**
      *
      * @var string
      */
-    public $signature;
-
-    /**
-     *
-     * @var Request
-     */
-    public $request;
+    private $signature;
 
     /**
      * Constructor.
+     *
      * @param array  $roles       An array of roles
      */
     public function __construct(array $roles = array())
@@ -70,7 +66,10 @@ class PublicKeyToken extends AbstractToken
      */
     public function isAuthenticated()
     {
-        return ($this->getUser() instanceof UserInterface) ? (count($this->getUser()->getRoles()) > 0) : false;
+        return ($this->getUser() instanceof UserInterface)
+            ? 0 < count($this->getUser()->getRoles())
+            : false
+        ;
     }
 
     /**
@@ -99,11 +98,63 @@ class PublicKeyToken extends AbstractToken
      */
     public function getUsername()
     {
-        if ($this->getUser() instanceof UserInterface) {
-            return $this->getUser()->getApiKeyPublic();
+        $username = '';
+        if ($this->getUser() instanceof User) {
+            $username = $this->getUser()->getApiKeyPublic();
+        } elseif ($username instanceof UserInterface) {
+            $username = $this->getUser()->getUsername();
+        } else {
+            $username = (string) $this->getUser();
         }
 
-        return (string) $this->getUser();
+        return $username;
     }
 
+    /**
+     * Public key attribute setter
+     *
+     * @param string $signature new public key value
+     *
+     * @return self
+     */
+    public function setPublicKey($publicKey)
+    {
+        $this->publicKey = $publicKey;
+
+        return $this;
+    }
+
+    /**
+     * Public key attribute getter
+     *
+     * @return string the current token public key
+     */
+    public function getPublicKey()
+    {
+        return $this->publicKey;
+    }
+
+    /**
+     * Signature attribute setter
+     *
+     * @param string $signature new signature value
+     *
+     * @return self
+     */
+    public function setSignature($signature)
+    {
+        $this->signature = $signature;
+
+        return $this;
+    }
+
+    /**
+     * Signature attribute getter
+     *
+     * @return string the current token signature
+     */
+    public function getSignature()
+    {
+        return $this->signature;
+    }
 }
