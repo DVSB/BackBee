@@ -2,35 +2,35 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Security\Authentication;
 
-use Symfony\Component\EventDispatcher\EventDispatcherInterface,
-    Symfony\Component\Security\Core\AuthenticationEvents,
-    Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
-    Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Security\Core\Event\AuthenticationEvent,
-    Symfony\Component\Security\Core\Event\AuthenticationFailureEvent,
-    Symfony\Component\Security\Core\Exception\AccountStatusException,
-    Symfony\Component\Security\Core\Exception\AuthenticationException,
-    Symfony\Component\Security\Core\Exception\ProviderNotFoundException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\AuthenticationEvents;
+use Symfony\Component\Security\Core\Event\AuthenticationEvent;
+use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
+use Symfony\Component\Security\Core\Exception\AccountStatusException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\ProviderNotFoundException;
 
 /**
  * @category    BackBuilder
