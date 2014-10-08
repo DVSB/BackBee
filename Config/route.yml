@@ -80,6 +80,15 @@ bb.rest.security_firewall_autenticate:
         firewall: "[a-z_-]+"
         _method: POST
 
+bb.rest.security.authenticate:
+    pattern: /rest/{version}/security/authentication
+    defaults:
+        _action: authenticateAction
+        _controller: BackBuilder\Rest\Controller\SecurityController
+    requirements:
+        version: \d
+        _method: POST
+
 bb.rest.security_firewall_status:
     pattern: /rest/{version}/security/auth/{firewall}
     defaults:
