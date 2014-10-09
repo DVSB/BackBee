@@ -149,7 +149,10 @@ class bb5content extends AHelper
                     // Not a AClassContent cannot be an element
                     continue;
                 }
-
+                if ($value instanceof ContentSet) {
+                    // ContentSet: break treatment
+                    continue;
+                }
                 if (true === in_array($value->getUid(), $this->already_checked)) {
                     // This content was already checked without success, skip it
                     continue;
