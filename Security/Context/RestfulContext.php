@@ -43,20 +43,11 @@ class RestfulContext extends BBAuthContext
         $listeners = array();
 
         if (array_key_exists('restful', $config)) {
-            $security_config = $this->_context->getApplication()->getCOnfig()->getSecurityConfig();
-            $config['bb_auth'] = array();
-
-            foreach ($security_config['firewalls'] as $name => $firewall_config) {
-                if ('bb_area' === $name && array_key_exists('bb_auth', $firewall_config)) {
-                    $config['bb_auth'] = $firewall_config['bb_auth'];
-                }
-            }
-
             $config = array_merge(array(
                 'nonce_dir' => 'security/nonces',
                 'lifetime' => 1200,
                 'use_registry' => false
-            ), $config['bb_auth']);
+            ), $config['restful']);
 
             if (false !== ($default_provider = $this->getDefaultProvider($config))) {
                 $this->_context->getAuthenticationManager()->addProvider(
