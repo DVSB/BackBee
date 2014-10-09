@@ -52,18 +52,21 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
 
         $publicKey = $token->getUsername();
 
-
-        // test of nonce, signature and created
         if (null === $nonce = $this->readNonceValue($token->getNonce())) {
-            throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
+            $this->onInvalidAuthentication();
         }
 
         $user = $this->user_provider->loadUserByPublicKey($publicKey);
+
+        if (null === $user) {
+            $this->onInvalidAuthentication();
+        }
+
         $token->setUser($user);
 
         $signature_encoder = new RequestSignatureEncoder();
         if (false === $signature_encoder->isApiSignatureValid($token, $nonce[1])) {
-            throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
+            $this->onInvalidAuthentication();
         }
 
         if (time() > $nonce[0] + $this->lifetime) {
@@ -82,5 +85,13 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
     public function supports(TokenInterface $token)
     {
         return $token instanceof PublicKeyToken;
+    }
+
+    /**
+     * Throw a SecurityException with Invalid authentication informations and 401 as status code
+     */
+    private function onInvalidAuthentication()
+    {
+        throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
     }
 }
