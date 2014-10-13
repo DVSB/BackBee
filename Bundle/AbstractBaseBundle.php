@@ -296,4 +296,19 @@ abstract class AbstractBaseBundle implements BundleInterface
     {
         return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }
+
+    /**
+     * @deprecated 0.10 it's still here to maintain compatibility between old and new core js
+     */
+    public function serialize()
+    {
+        $obj = new \stdClass();
+        $obj->id = $this->getId();
+
+        foreach ($this->getProperty() as $key => $value) {
+            $obj->$key = $value;
+        }
+
+        return json_encode($obj);
+    }
 }
