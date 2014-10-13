@@ -25,6 +25,8 @@ use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Config\Config;
 use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
+use BackBuilder\Routing\RouteCollection;
+
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
@@ -248,6 +250,12 @@ abstract class AbstractBaseBundle implements BundleInterface
 
         if (false === property_exists($obj, 'category')) {
             $obj->category = array();
+        }
+
+        if (false === property_exists($obj, 'thumbnail')) {
+            $obj->thumbnail = $this->getApplication()->getContainer()->get('routing')
+                ->getUri('img/extnd-x/picto-extnd.png', null, null, RouteCollection::RESOURCE_URL)
+            ;
         }
 
         return $obj;
