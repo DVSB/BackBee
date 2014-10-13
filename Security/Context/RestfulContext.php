@@ -42,12 +42,12 @@ class RestfulContext extends BBAuthContext
     {
         $listeners = array();
 
-        if (array_key_exists('restful', $config) && null !== $config['restful']) {
+        if (array_key_exists('restful', $config)) {
             $config = array_merge(array(
                 'nonce_dir' => 'security/nonces',
                 'lifetime' => 1200,
                 'use_registry' => false
-            ), $config['restful']);
+            ), (array) $config['restful']);
 
             if (false !== ($default_provider = $this->getDefaultProvider($config))) {
                 $this->_context->getAuthenticationManager()->addProvider(
