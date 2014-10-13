@@ -90,10 +90,11 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
             $this->uri_prefixes[self::MEDIA_URL] = $container->getParameter('bbapp.routing.media_uri_prefix');
         }
 
-        // Can't enable it at moment, too much hard dependency in BackBuilder JS core
-        // if (true === $container->hasParameter('bbapp.routing.resource_uri_prefix')) {
-        //     $this->uri_prefixes[self::RESOURCE_URL] = $container->getParameter('bbapp.routing.resource_uri_prefix');
-        // }
+        if (true === $container->hasParameter('bbapp.routing.resource_uri_prefix')) {
+            // Can't enable it at moment, hard dependency in BackBuilder JS core
+            // $this->uri_prefixes[self::RESOURCE_URL] = $container->getParameter('bbapp.routing.resource_uri_prefix');
+            $this->uri_prefixes[self::RESOURCE_URL] = 'ressources';
+        }
 
         $this->is_restored = false;
     }
@@ -162,7 +163,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
         $path = null !== $base_url && true === is_string($base_url)
             ? $base_url . $uri . (false === $add_ext ? '' : $this->getDefaultExtFromSite($site))
-            : $this->getUri($uri, false === $add_ext ? '' : null, $site);
+            : $this->getUri($uri, false === $add_ext ? '' : null, $site)
+        ;
 
         if (false === empty($params_to_add) && true === $build_query) {
             $path = $path . '?' . http_build_query($params_to_add);
