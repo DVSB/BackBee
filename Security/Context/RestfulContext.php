@@ -42,7 +42,7 @@ class RestfulContext extends BBAuthContext
     {
         $listeners = array();
 
-        if (array_key_exists('restful', $config)) {
+        if (array_key_exists('restful', $config) && null !== $config['restful']) {
             $config = array_merge(array(
                 'nonce_dir' => 'security/nonces',
                 'lifetime' => 1200,
