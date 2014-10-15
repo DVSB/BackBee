@@ -24,6 +24,7 @@ namespace BackBuilder\Rest\Controller;
 use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Rest\Controller\ARestController;
 
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -110,21 +111,30 @@ class BundleController extends ARestController
     }
 
     /**
-     * Returns a bundle by id
+     * This method is the front controller of every bundles exposed actions
      *
-     * @param  string $id
-     *
-     * @throws NotFoundHttpException is raise if no bundle was found with provided id
-     *
-     * @return BundleInterface
+     * @param  string $bundle_name     name of bundle we want to reach its exposed actions
+     * @param  string $controller_name controller name
+     * @param  string $action_name     name of exposed action we want to reach
+     * @param  string  $parameters     optionnal, action's parameters
      */
-    private function getBundleById($id)
+    public function accessBundleExposedRoutesAction($bundle_name, $controller_name, $action_name, $parameters)
     {
-        if (null === $bundle = $this->getApplication()->getBundle($id)) {
-            throw new NotFoundHttpException("No bundle exists with id `$id`");
+        $bundle = $this->getBundleById($bundle_name);
+        if (null === $callback = $bundle->getExposedActionCallback($controller_name, $action_name)) {
+            throw new NotFoundHttpException('Not found');
         }
 
-        return $bundle;
+        if (false === empty($parameters)) {
+            $parameters = array_filter(explode('/', $parameters));
+        }
+
+        $response = call_user_func_array($callback, $parameters);
+
+        return is_object($response) && $response instanceof Response
+            ? $response
+            : $this->createResponse($response)
+        ;
     }
 
     /**
@@ -143,5 +153,23 @@ class BundleController extends ARestController
         }
 
         return true;
+    }
+
+    /**
+     * Returns a bundle by id
+     *
+     * @param  string $id
+     *
+     * @throws NotFoundHttpException is raise if no bundle was found with provided id
+     *
+     * @return BundleInterface
+     */
+    private function getBundleById($id)
+    {
+        if (null === $bundle = $this->getApplication()->getBundle($id)) {
+            throw new NotFoundHttpException("No bundle exists with id `$id`");
+        }
+
+        return $bundle;
     }
 }

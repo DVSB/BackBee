@@ -310,6 +310,17 @@ bb.rest.bundle.patch:
     requirements:
         _method: PATCH
 
+bb.rest.bundle.exposed_actions:
+    pattern: /rest/{version}/bundle/{bundle_name}/{controller_name}/{action_name}{parameters}
+    defaults:
+        _action: accessBundleExposedRoutesAction
+        _controller: BackBuilder\Rest\Controller\BundleController
+    requirements:
+        bundle_name: "[a-z]+"
+        controller_name: "[a-z]+"
+        action_name: "[a-z]+"
+        parameters: "^\/.+|"
+
 # BackBuilder rss
 bb.rss:
     pattern: /rss/{uri}
