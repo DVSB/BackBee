@@ -98,9 +98,9 @@ class EntityManagerCreator
     private static function _getORMConfiguration(array $options = array(), LoggerInterface $logger = null)
     {
         $config = new Configuration();
-        
+
         $driverImpl = $config->newDefaultAnnotationDriver();
-        
+
         $config->setMetadataDriverImpl($driverImpl);
 
         if (true === array_key_exists('proxy_dir', $options)) {
@@ -117,9 +117,9 @@ class EntityManagerCreator
 
         if (true === array_key_exists('metadata_cache', $options) && isset($options['metadata_type'])) {
 
-            if($options['metadata_type'] == 'memcached'){
+            if ($options['metadata_type'] == 'memcached') {
                 $memcached = new \Memcached();
-                foreach($options['metadata_cache']['servers'] AS $server){
+                foreach ($options['metadata_cache']['servers'] as $server) {
                     $memcached->addServer($server['host'], $server['port']);
                 }
                 $memcacheDriver = new MemcachedCache();
@@ -127,9 +127,9 @@ class EntityManagerCreator
 
                 $config->setMetadataCacheImpl($memcacheDriver);
 
-            }elseif($options['metadata_type'] == 'memcache'){
+            } elseif ($options['metadata_type'] == 'memcache') {
                 $memcache = new \Memcache();
-                foreach($options['metadata_cache']['servers'] AS $server){
+                foreach ($options['metadata_cache']['servers'] as $server) {
                     $memcache->addServer($server['host'], $server['port']);
                 }
 
@@ -137,28 +137,33 @@ class EntityManagerCreator
                 $memcacheDriver->setMemcache($memcache);
 
                 $config->setMetadataCacheImpl($memcacheDriver);
-            }
+
+            } elseif($options['metadata_type'] == 'apc') {
+
+                $config->setQueryCacheImpl(new \Doctrine\Common\Cache\ApcCache());
 
             }
+        }
 
         if (true === array_key_exists('query_cache', $options) && isset($options['query_type'])) {
-            if($options['query_type'] == 'memcached'){
+            if ($options['query_type'] == 'memcached') {
 
                 $memcached = new \Memcached();
 
-                foreach($options['query_cache']['servers'] AS $server){
+                foreach ($options['query_cache']['servers'] as $server) {
                     $memcached->addServer($server['host'], $server['port']);
                 }
+
                 $memcachedDriver = new MemcachedCache();
                 $memcachedDriver->setMemcached($memcached);
 
                 $config->setQueryCacheImpl($memcachedDriver);
 
-            }elseif($options['query_type'] == 'memcache'){
+            } elseif ($options['query_type'] == 'memcache') {
 
                 $memcache = new \Memcache();
 
-                foreach($options['query_cache']['servers'] AS $server){
+                foreach ($options['query_cache']['servers'] as $server) {
                     $memcache->addServer($server['host'], $server['port']);
                 }
 
@@ -170,7 +175,7 @@ class EntityManagerCreator
             }
 
         }
-        
+
         if (true === array_key_exists('orm', $options)) {
             if (true === array_key_exists('proxy_namespace', $options['orm'])) {
                 $config->setProxyNamespace($options['orm']['proxy_namespace']);
@@ -204,7 +209,7 @@ class EntityManagerCreator
         if ($logger instanceof SQLLogger) {
             $config->setSQLLogger($logger);
         }
-        
+
         return self::_addCustonFunctions($config, $options);
     }
 

@@ -26,20 +26,11 @@ bb.internal.services:
 
 # BackBuilder resources
 bb.resources:
+    # pattern: /%bbapp.routing.resource_uri_prefix%/{filename}
     pattern: /ressources/{filename}
     defaults:
         _action: resourcesAction
     requirements:
-        filename: .+
-
-# BackBuilder resources
-bb.bundles.ressources:
-    pattern: /bundle/{bundleName}/{type}/{filename}
-    defaults:
-        _action: bundleResourcesAction
-    requirements:
-        bundleName: .+
-        type: (css|less|js|img)
         filename: .+
 
 # BackBuilder media files
@@ -48,26 +39,287 @@ bb.images:
     defaults:
         _action: mediaAction
     requirements:
-        type: (images|media)
+        type: (%bbapp.routing.image_uri_prefix%|%bbapp.routing.media_uri_prefix%)
         filename: .+
 
 # BackBuilder REST API test page
-bb.rest.test:
-    pattern: /rest/{version}/_generateKey/
+# bb.rest.test:
+#     pattern: /rest/{version}/_generateKey/
+#     defaults:
+#         _action: generateKeyAction
+#         _controller: BackBuilder\Rest\Controller\TestController
+#     requirements:
+#         version: \d
+
+bb.rest.user_get:
+    pattern: /rest/{version}/user/{id}
     defaults:
-        _action: generateKeyAction
-        _controller: rest.controller.test
+        _action: getAction
+        _controller: BackBuilder\Rest\Controller\UserController
     requirements:
         version: \d
+        id: \d
+        _method: GET
+
+bb.rest.user_post:
+    pattern: /rest/{version}/user/
+    defaults:
+        _action: postAction
+        _controller: BackBuilder\Rest\Controller\UserController
+    requirements:
+        version: \d
+        _method: POST
+
+bb.rest.security_firewall_autenticate:
+    pattern: /rest/{version}/security/auth/{firewall}
+    defaults:
+        _action: firewallAuthenticateAction
+        _controller: BackBuilder\Rest\Controller\SecurityController
+    requirements:
+        version: \d
+        firewall: "[a-z_-]+"
+        _method: POST
+
+bb.rest.security.authenticate:
+    pattern: /rest/{version}/security/authentication
+    defaults:
+        _action: authenticateAction
+        _controller: BackBuilder\Rest\Controller\SecurityController
+    requirements:
+        version: \d
+        _method: POST
+
+bb.rest.security_firewall_status:
+    pattern: /rest/{version}/security/auth/{firewall}
+    defaults:
+        _action: firewallStatusAction
+        _controller: BackBuilder\Rest\Controller\SecurityController
+    requirements:
+        version: \d
+        firewall: "[a-z_-]+"
+        _method: GET
 
 bb.rest.security_session_delete:
-    pattern: /rest/{version}/security/session
+    pattern: /rest/{version}/security/session/
     defaults:
         _action: deleteSessionAction
         _controller: BackBuilder\Rest\Controller\SecurityController
     requirements:
         version: \d
         _method: DELETE
+
+bb.rest.acl.permissions:
+    pattern: /rest/{version}/acl/permissions/
+    defaults:
+        _action: getMaskCollectionAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: GET
+
+bb.rest.acl.permissions_map:
+    pattern: /rest/{version}/acl/
+    defaults:
+        _action: postPermissionMapAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: POST
+
+bb.rest.acl.ace_class_delete:
+    pattern: /rest/{version}/acl/ace/class/{sid}/
+    defaults:
+        _action: deleteClassAceAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: DELETE
+
+bb.rest.acl.ace_object_delete:
+    pattern: /rest/{version}/acl/ace/object/{sid}/
+    defaults:
+        _action: deleteObjectAceAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: DELETE
+
+bb.rest.acl.get_classes:
+    pattern: /rest/{version}/acl/class/
+    defaults:
+        _action: getClassCollectionAction
+        _controller: BackBuilder\Rest\Controller\AclController
+    requirements:
+        version: \d
+        _method: GET
+
+bb.rest.page.get_available_status:
+    pattern: /rest/{version}/page/status
+    defaults:
+        _action:     getAvailableStatusAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        _method: GET
+
+bb.rest.page.get_collection:
+    pattern: /rest/{version}/page
+    defaults:
+        _action:     getCollectionAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        _method: GET
+
+bb.rest.page.get:
+    pattern: /rest/{version}/page/{uid}
+    defaults:
+        _action:     getAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: GET
+
+bb.rest.page.post:
+    pattern: /rest/{version}/page
+    defaults:
+        _action:     postAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        _method: POST
+
+bb.rest.page.put:
+    pattern: /rest/{version}/page/{uid}
+    defaults:
+        _action:     putAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: PUT
+
+bb.rest.page.patch:
+    pattern: /rest/{version}/page/{uid}
+    defaults:
+        _action:     patchAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: PATCH
+
+bb.rest.page.move_node:
+    pattern: /rest/{version}/page/{uid}/node/move
+    defaults:
+        _action:     movePageNodeAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: PUT
+
+bb.rest.page.delete:
+    pattern: /rest/{version}/page/{uid}
+    defaults:
+        _action: deleteAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: DELETE
+
+bb.rest.layout.get_collection:
+    pattern: /rest/{version}/layout
+    defaults:
+        _action: getCollectionAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        _method: GET
+
+bb.rest.layout.get:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: getAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: GET
+
+bb.rest.layout.post:
+    pattern: /rest/{version}/layout
+    defaults:
+        _action: postAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: POST
+
+bb.rest.layout.put:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: putAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: PUT
+
+bb.rest.layout.delete:
+    pattern: /rest/{version}/layout/{uid}
+    defaults:
+        _action: deleteAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        uid: \w{32}
+        _method: DELETE
+
+bb.rest.classcontent.get:
+    pattern: /rest/{version}/classcontent/{type}/{uid}
+    defaults:
+        _action: getAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: .+
+        _method: GET
+
+bb.rest.classcontent.delete:
+    pattern: /rest/{version}/classcontent/{type}/{uid}
+    defaults:
+        _action: deleteAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: .+
+        _method: DELETE
+
+bb.rest.bundle.get_collection:
+    pattern: /rest/{version}/bundle
+    defaults:
+        _action: getCollectionAction
+        _controller: BackBuilder\Rest\Controller\BundleController
+    requirements:
+        _method: GET
+
+bb.rest.bundle.get:
+    pattern: /rest/{version}/bundle/{id}
+    defaults:
+        _action: getAction
+        _controller: BackBuilder\Rest\Controller\BundleController
+    requirements:
+        _method: GET
+
+bb.rest.bundle.patch:
+    pattern: /rest/{version}/bundle/{id}
+    defaults:
+        _action: patchAction
+        _controller: BackBuilder\Rest\Controller\BundleController
+    requirements:
+        _method: PATCH
+
+bb.rest.bundle.exposed_actions:
+    pattern: /rest/{version}/bundle/{bundle_name}/{controller_name}/{action_name}{parameters}
+    defaults:
+        _action: accessBundleExposedRoutesAction
+        _controller: BackBuilder\Rest\Controller\BundleController
+    requirements:
+        bundle_name: "[a-z]+"
+        controller_name: "[a-z]+"
+        action_name: "[a-z]+"
+        parameters: "^\/.+|"
 
 # BackBuilder rss
 bb.rss:

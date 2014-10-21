@@ -31,7 +31,9 @@ use Symfony\Component\Security\Core\Util\ClassUtils,
     Symfony\Component\Security\Acl\Model\AclProviderInterface,
     Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface,
     Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+    Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
+    Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 
 /**
  * @category    BackBuilder
@@ -58,18 +60,16 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for the given parameters.
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token A TokenInterface instance
-     * @param object $object The object to secure
+     * @param object|ObjectIdentityInterface $object The object to secure
      * @param array $attributes An array of attributes associated with the method being invoked
      * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     public function vote(TokenInterface $token, $object, array $attributes)
     {
-        if (false === ($token instanceof \BackBuilder\Security\Token\BBUserToken)
-                && (null === $this->_application
-                || null === $token = $this->_application->getBBUserToken())) {
-            return self::ACCESS_DENIED;
+        if(null === $object) {
+            return self::ACCESS_ABSTAIN;
         }
-
+        
         if ($object instanceof ANestedNode) {
             return $this->_voteForNestedNode($token, $object, $attributes);
         } elseif ($object instanceof AClassContent) {
@@ -84,15 +84,23 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for the cuurent object, if denied try the vote for the general object
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param object $object
+     * @param object|ObjectIdentityInterface $object
      * @param array $attributes
      * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     private function _vote(TokenInterface $token, $object, array $attributes)
     {
-        if (self::ACCESS_DENIED === $result = parent::vote($token, $object, $attributes)) {
-            $classname = ClassUtils::getRealClass($object);
-            $result = parent::vote($token, new $classname('*'), $attributes);
+        if (self::ACCESS_GRANTED !== $result = parent::vote($token, $object, $attributes)) {
+            // try class-scope ace
+            $objectIdentity = null;
+            
+            if($object instanceof ObjectIdentityInterface) {
+                $objectIdentity = new ObjectIdentity('class', $object->getType());
+            } else {
+                $objectIdentity = new ObjectIdentity('class', ClassUtils::getRealClass($object));
+            }
+            
+            $result = parent::vote($token, $objectIdentity, $attributes);
         }
 
         return $result;

@@ -1,0 +1,21 @@
+
+parameters:
+
+    bbapp.routing.class: BackBuilder\Routing\RouteCollection
+
+    bbapp.routing.image_uri_prefix: images
+    bbapp.routing.media_uri_prefix: media
+    bbapp.routing.resource_uri_prefix: ressources
+
+    bbapp.routing.url_prefix_config:
+        image_prefix: %bbapp.routing.image_uri_prefix%
+        media_prefix: %bbapp.routing.media_uri_prefix%
+        resource_prefix: %bbapp.routing.resource_uri_prefix%
+
+services:
+
+    routing:
+        class:      %bbapp.routing.class%
+        arguments:  ["@bbapp"]
+        tags:
+            - { name: "dumpable", dispatch_event: false }

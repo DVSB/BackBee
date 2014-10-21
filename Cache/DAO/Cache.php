@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -30,7 +30,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Database cache adapter
- * 
+ *
  * It supports tag and expire features
  *
  * @category    BackBuilder
@@ -62,13 +62,13 @@ class Cache extends AExtendedCache
 
     /**
      * An entity for a store cache
-     * @var \BackBuilder\Cache\DAO\Entity 
+     * @var \BackBuilder\Cache\DAO\Entity
      */
     private $_entity;
 
     /**
      * The prefix key for cache items
-     * @var type 
+     * @var type
      */
     private $_prefix_key = '';
 
@@ -77,8 +77,6 @@ class Cache extends AExtendedCache
      * @var array
      */
     protected $_instance_options = array(
-        'min_cache_lifetime' => null,
-        'max_cache_lifetime' => null,
         'em' => null,
         'dbal' => array()
     );
@@ -101,21 +99,10 @@ class Cache extends AExtendedCache
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
         parent::__construct($options, $context, $logger);
-    }
 
-    /**
-     * Sets the cache adapter instance options
-     * @param array $options
-     * @return \BackBuilder\Cache\DAO\Cache
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
-     */
-    protected function setInstanceOptions(array $options = array())
-    {
-        parent::setInstanceOptions($options);
-
-        return $this->_setEntityManager()
-                        ->_setEntityRepository()
-                        ->_setPrefixKey();
+        $this->_setEntityManager();
+        $this->_setEntityRepository();
+        $this->_setPrefixKey();
     }
 
     /**
@@ -166,7 +153,7 @@ class Cache extends AExtendedCache
      * Save some string datas into a cache record
      * @param string $id Cache id
      * @param string $data Datas to cache
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default null, infinite lifetime)
      * @param string $tag Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
@@ -266,10 +253,10 @@ class Cache extends AExtendedCache
     }
 
     /**
-     * Updates the expire date time for all cache records 
+     * Updates the expire date time for all cache records
      * associated to one of the provided tags
      * @param  string|array $tag
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default null, infinite lifetime)
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
@@ -304,10 +291,10 @@ class Cache extends AExtendedCache
     }
 
     /**
-     * Returns the minimum expire date time for all cache records 
+     * Returns the minimum expire date time for all cache records
      * associated to one of the provided tags
      * @param  string|array $tag
-     * @param int $lifetime Optional, the specific lifetime for this record 
+     * @param int $lifetime Optional, the specific lifetime for this record
      *                      (by default 0, infinite lifetime)
      * @return int
      */
@@ -318,7 +305,7 @@ class Cache extends AExtendedCache
         if (0 == count($tags)) {
             return $lifetime;
         }
-        
+
         $now = new \DateTime();
         $expire = $this->getExpireTime($lifetime);
 

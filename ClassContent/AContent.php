@@ -21,10 +21,13 @@
 
 namespace BackBuilder\ClassContent;
 
-use BackBuilder\Util\Parameter,
-    BackBuilder\Renderer\IRenderable,
-    BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\Renderer\IRenderable;
+use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
+use BackBuilder\Util\Parameter;
+
 use Symfony\Component\Security\Core\Util\ClassUtils;
+
 
 /**
  * Abstract class for every content and its revisions in BackBuilder
@@ -374,23 +377,58 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
         if (null === $var) {
             $this->_parameters = $values;
         } else {
-            if (null !== $values) {
-                if (null !== $type) {
-                    $values = array($type => $values);
-                } elseif (false === is_array($values)) {
-                    $values = array($values);
+            $paths = explode(':', $var);
+            if (1 < count($paths)) {
+                $this->setParameterRecursively($paths, $values, $type);
+            } else {
+                if (null !== $values) {
+                    if (null !== $type) {
+                        $values = array($type => $values);
+                    } elseif (false === is_array($values)) {
+                        $values = array($values);
+                    }
+
+                    // A surveiller cette partie pour les revisions
+                    if (true === is_array($this->_parameters) && true === array_key_exists($var, $this->_parameters) && true === is_array($this->_parameters[$var])) {
+                        $values = array_replace_recursive($this->_parameters[$var], $values);
+                    }
                 }
 
-                // A surveiller cette partie pour les revisions
-                if (true === is_array($this->_parameters) && true === array_key_exists($var, $this->_parameters) && true === is_array($this->_parameters[$var])) {
-                    $values = array_replace_recursive($this->_parameters[$var], $values);
-                }
+                $this->_parameters[$var] = $values;
             }
-
-            $this->_parameters[$var] = $values;
         }
 
         return $this->_getContentInstance();
+    }
+
+    /**
+     * Setters of parameters with the ':' syntax
+     *
+     * @param array  $paths
+     * @param mixed  $values new value to set
+     * @param string $type   type of the parameter, can be null
+     */
+    private function setParameterRecursively(array $paths, $value, $type)
+    {
+        if (null !== $type) {
+            $path = array_shift($paths);
+            array_unshift($paths, $type);
+            array_unshift($paths, $path);
+            unset($path);
+        }
+
+        $target = &$this->_parameters;
+        foreach ($paths as $path) {
+            if (false === array_key_exists($path, $target)) {
+                throw new InvalidArgumentException(
+                    'Invalid path provided for setting parameter value: ' . implode(':', $paths)
+                );
+            }
+
+            $target = &$target[$path];
+        }
+
+        $target = $value;
     }
 
     /**
@@ -947,5 +985,27 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
     public function getTemplateName()
     {
         return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "ClassContent" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
+
+    /**
+     *
+     *
+     * @param  boolean $return_array define if we return an array or the json_encode of array, default setted at false
+     *
+     * @return string|array
+     */
+    public function toJson($return_array = false)
+    {
+        $datas = array(
+            'uid'       => $this->_uid,
+            'label'     => $this->_label,
+            'type'      => str_replace('BackBuilder\ClassContent\\', '', get_class($this)),
+            'state'     => $this->_state,
+            'created'   => $this->_created->getTimestamp(),
+            'modified'  => $this->_modified->getTimestamp(),
+            'revision'  => $this->_revision
+        );
+
+        return false === $return_array ? json_encode($datas) : $datas;
     }
 }

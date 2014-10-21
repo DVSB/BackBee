@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\FrontController;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,6 +18,8 @@ namespace BackBuilder\FrontController;
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace BackBuilder\FrontController;
 
 use BackBuilder\BBApplication;
 use BackBuilder\FrontController\Exception\FrontControllerException;
@@ -53,7 +54,6 @@ use Symfony\Component\HttpKernel\Event\PostResponseEvent;
  */
 class FrontController implements HttpKernelInterface
 {
-
     const DEFAULT_URL_EXTENSION = 'html';
 
     /**
@@ -98,6 +98,10 @@ class FrontController implements HttpKernelInterface
      * @var boolean
      */
     protected $force_url_extension = true;
+
+    /**
+     * @var string
+     */
     protected $url_extension;
 
     /**
@@ -117,9 +121,11 @@ class FrontController implements HttpKernelInterface
                 }
             }
 
-            $route = $application->getConfig()->getRouteConfig();
-            if (true === is_array($route) && 0 < count($route)) {
-                $this->registerRoutes($this, $route);
+            if (false === $this->getRouteCollection()->isRestored()) {
+                $route = $application->getConfig()->getRouteConfig();
+                if (true === is_array($route) && 0 < count($route)) {
+                    $this->registerRoutes('controller', $route);
+                }
             }
         }
 
@@ -295,8 +301,9 @@ class FrontController implements HttpKernelInterface
      */
     public function getRequest()
     {
-        if (null === $this->_request)
-            $this->_request = Request::createFromGlobals();
+        if (null === $this->_request) {
+            $this->_request = $this->getApplication()->getContainer()->get('request');
+        }
 
         return $this->_request;
     }
@@ -413,7 +420,7 @@ class FrontController implements HttpKernelInterface
             if (null !== $this->getRequest()->get('bb5-mode')) {
                 $response = new Response($this->_application->getRenderer()->render($page, $this->getRequest()->get('bb5-mode')));
             } else {
-                 $response = new Response($this->_application->getRenderer()->render($page));
+                $response = new Response($this->_application->getRenderer()->render($page));
             }
 
             if ($sendResponse) {
@@ -646,10 +653,8 @@ class FrontController implements HttpKernelInterface
                     $matches['_controller'] = $this;
                 }
 
-
                 $this->getRequest()->attributes->add($matches);
             }
-
 
             if($this->getRequest()->attributes->has('_controller')) {
                 return $this->_invokeAction($type);
@@ -796,22 +801,24 @@ class FrontController implements HttpKernelInterface
      * @param  mixed $default_controller used as default controller if a route comes without any specific controller
      * @param  array|null   $route_config
      */
-    public function registerRoutes($default_controller, array $route_config = null)
+    public function registerRoutes($default_controller, array $route_config)
     {
-        if (null === $route_config) {
-            return;
-        }
-
-        $application = $this->getApplication();
-
         foreach ($route_config as $name => &$route) {
-            if (false === array_key_exists('defaults', $route) || false === array_key_exists('_action', $route['defaults'])) {
-                $application->warning(sprintf('Unable to parse the action method for the route `%s`.', $name));
+            if (false === isset($route['defaults']) || false === isset($route['defaults']['_action'])) {
+                $this->getApplication()->warning("Unable to parse the action method for the route `$name`.");
                 continue;
             }
 
             if (false === array_key_exists('_controller', $route['defaults'])) {
                 $route['defaults']['_controller'] = $default_controller;
+            }
+
+            if (false === is_string($route['defaults']['_controller'])) {
+                throw new FrontControllerException(
+                    'Route controller must be type of string. '
+                    . 'Please provide controller namespace or controller service id instead of '
+                    . 'instance of `' . get_class($route['defaults']['_controller']) . '`.'
+                );
             }
         }
 
@@ -842,14 +849,18 @@ class FrontController implements HttpKernelInterface
             return;
         }
 
-        if (null !== $this->getApplication()->getBBUserToken()) {
-            // Launch NestedNode jobs
-            $container = $this->getApplication()->getContainer();
-            if (true === ($container->hasParameter('bbapp.script.command') && $container->hasParameter('bbapp.console.command'))) {
-                $this->getApplication()->debug('Launching NestedNode jobs: '.sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $container->getParameter('bbapp.console.command')));
-                exec(sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $this->getApplication()->getBaseDir(). '/' . $container->getParameter('bbapp.console.command')));
-            }
-        }
+        // if (null !== $this->getApplication()->getBBUserToken()) {
+        //     // Launch NestedNode jobs
+        //     $container = $this->getApplication()->getContainer();
+        //     if (true === ($container->hasParameter('bbapp.script.command') && $container->hasParameter('bbapp.console.command'))) {
+        //         $this->getApplication()->debug('Launching NestedNode jobs: '.sprintf('%s %s nestednode:jobs:process &', $container->getParameter('bbapp.script.command'), $container->getParameter('bbapp.console.command')));
+        //         $env = $this->getApplication()->getEnvironment();
+        //         if (true === empty($env)) {
+        //             $env = 'dev';
+        //         }
+        //         exec(sprintf('%s %s nestednode:jobs:process --env=%s &', $container->getParameter('bbapp.script.command'), $this->getApplication()->getBaseDir(). '/' . $container->getParameter('bbapp.console.command'), $env));
+        //     }
+        // }
 
         // force content output
 //        @ini_set('zlib.output_compression', 0); // 2014-06-23: comment by c.rouillon

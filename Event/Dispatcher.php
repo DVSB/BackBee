@@ -63,6 +63,13 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     protected $raw_listeners;
 
     /**
+     * define if dispatcher is already restored by container or not
+     *
+     * @var boolean
+     */
+    protected $_is_restored;
+
+    /**
      * Dispatcher constructor
      *
      * @param \BackBuilder\BBApplication $application The current instance of BB application
@@ -84,6 +91,8 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
         if (null !== $application) {
             $this->container = $this->application->getContainer();
         }
+
+        $this->_is_restored = false;
     }
 
     /**
@@ -134,9 +143,12 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      * @param Object    $entity    The entity instance
      * @param EventArgs $eventArgs The doctrine event arguments
      */
-    public function triggerEvent($eventName, $entity, $eventArgs = null)
+    public function triggerEvent($eventName, $entity, $eventArgs = null, Event $event = null)
     {
-        $event = new Event($entity, $eventArgs);
+        if (null === $event) {
+            $event = new Event($entity, $eventArgs);
+        }
+
         if (is_a($entity, 'BackBuilder\ClassContent\AClassContent')) {
             $this->dispatch(strtolower('classcontent.' . $eventName), $event);
 
@@ -209,7 +221,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      */
     public function getClassProxy()
     {
-        return '\BackBuilder\Event\DispatcherProxy';
+        return 'BackBuilder\Event\DispatcherProxy';
     }
 
     /**
@@ -225,6 +237,14 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             'has_application' => null !== $this->application,
             'has_container'   => null !== $this->container
         );
+    }
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->_is_restored;
     }
 
     /**

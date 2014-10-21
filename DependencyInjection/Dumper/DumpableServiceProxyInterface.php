@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\DependencyInjection\Dumper;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,6 +19,8 @@ namespace BackBuilder\DependencyInjection\Dumper;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace BackBuilder\DependencyInjection\Dumper;
+
 use BackBuilder\DependencyInjection\ContainerInterface;
 
 /**
@@ -39,10 +40,4 @@ interface DumpableServiceProxyInterface
      *                     restore current service
      */
     public function restore(ContainerInterface $container, array $dump);
-
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored();
 }

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -56,7 +56,7 @@ class BBAuthenticationListener implements ListenerInterface
         $request = $event->getRequest();
 
         $username = '';
-        $nonce = md5(uniqid('', TRUE));
+        $nonce = md5(uniqid('', true));
         $ecode = 0;
         $emsg = '';
 
@@ -64,7 +64,7 @@ class BBAuthenticationListener implements ListenerInterface
             if (false === \BackBuilder\Services\Rpc\JsonRPCServer::isRPCInvokedMethodSecured($request))
                 return;
         } catch (\Exception $e) {
-            
+
         }
 
         if ($request->headers->has('X_BB_AUTH')) {
@@ -91,11 +91,13 @@ class BBAuthenticationListener implements ListenerInterface
                     $ecode = $e->getCode();
                     $emsg = $e->getMessage();
 
-                    if ($ecode == SecurityException::EXPIRED_AUTH)
-                        $nonce = md5(uniqid('', TRUE));
+                    if ($ecode == SecurityException::EXPIRED_AUTH) {
+                        $nonce = md5(uniqid('', true));
+                    }
 
-                    if (null !== $this->_logger)
+                    if (null !== $this->_logger) {
                         $this->_logger->info(sprintf('BB Authentication request failed for user "%s": %s', $username, $e->getMessage()));
+                    }
                 } catch (\Exception $e) {
                     $ecode = -1;
                     $emsg = $e->getMessage();
@@ -107,7 +109,7 @@ class BBAuthenticationListener implements ListenerInterface
 
             $response = new Response();
             $response->setStatusCode(401);
-            
+
             // remove new line characters as php will drop the header if the exception message contains a new line character
             $emsgSanitized = str_replace(array("\n"), " ", $emsg);
             $response->headers->set('X-BB-AUTH', sprintf('UsernameToken Nonce="%s", ErrorCode="%d", ErrorMessage="%s"', $nonce, $ecode, $emsgSanitized), true);

@@ -46,11 +46,13 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testOnApplicationInitWithDebugTrue()
     {
-        $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Ressources/');
+        $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Resources/');
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
-                    'services.yml' => file_get_contents($resources_directory . '/backbee/Config/services.yml')
+                    'services' => array(
+                        'services.yml' => file_get_contents($resources_directory . '/backbee/Config/services/services.yml')
+                    )
                 )
             ),
             'repository' => array(
@@ -65,6 +67,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         vfsStream::setup('full_right_base_directory', 0777, $virtual_structure);
 
         $application = $this->generateManualBBApplication(vfsStream::url('full_right_base_directory'));
+        $application->setDebug_Mode(true);
         $application->setContainer((new ContainerBuilder($application))->getContainer());
 
         $container = $application->getContainer();
@@ -104,7 +107,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
-                    'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                    'services' => array(
+                        'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                    )
                 )
             ),
             'repository' => array(
@@ -157,7 +162,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
-                    'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                    'services' => array(
+                        'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
+                    )
                 )
             ),
             'repository' => array(

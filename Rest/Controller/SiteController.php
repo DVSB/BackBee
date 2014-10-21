@@ -23,17 +23,13 @@ namespace BackBuilder\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\Validator\ConstraintViolationList,
-    Symfony\Component\HttpFoundation\JsonResponse;
+    Symfony\Component\Validator\ConstraintViolationList;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-use BackBuilder\Security\Token\UsernamePasswordToken;
-
-use BackBuilder\Rest\Exception\ValidationException;
 
 /**
  * Site Controller
@@ -51,19 +47,13 @@ class SiteController extends ARestController
      * 
      * 
      */
-    public function getLayoutsAction($uid, Request $request, ConstraintViolationList $violations = null) 
+    public function getLayoutsAction($uid) 
     {
         if(!$this->isGranted("ROLE_API_USER")) {
-            throw new AccessDeniedHttpException('You have no permissions to access ' . $request->getPathInfo());
-        }
-                
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
+            throw new AccessDeniedHttpException("Your account's api access is disabled");
         }
 
-        $em = $this->getEntityManager();
-
-        $site = $em->getRepository('BackBuilder\Site\Site')->find($uid);
+        $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($uid);
         
         if(!$site) {
             return $this->create404Response(sprintf('Site not found: %s', $uid));
@@ -77,21 +67,21 @@ class SiteController extends ARestController
 
         foreach($site->getLayouts() as $layout) {
             if($this->isGranted('VIEW', $layout)) {
-                $layouts[] = array(
+                $layouts[] = [
                     'uid' => $layout->getUid(),
-                    'site' => array(
+                    'site' => [
                         'uid' => $layout->getSite()->getUid()
-                    ),
+                    ],
                     'label' => $layout->getLabel(),
                     'path' => $layout->getPath(),
                     'data' => json_decode($layout->getData(), true),
                     'picpath' => $layout->getPicpath()
-                );
+                ];
             }
             
         }
         
-        return new Response($this->formatCollection($layouts), 200, array('Content-Type' => 'application/json'));
+        return new Response($this->formatCollection($layouts), 200, ['Content-Type' => 'application/json']);
     }
     
 }

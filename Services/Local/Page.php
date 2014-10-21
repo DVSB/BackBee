@@ -176,8 +176,8 @@ class Page extends AbstractServiceLocal
         // Updating URL of the page is needed
         if (true === property_exists($object, 'url') && null !== $this->getApplication()->getRenderer()) {
             $object->url = $this->getApplication()
-                    ->getRenderer()
-                    ->getRelativeUrl($object->url)
+                ->getRenderer()
+                ->getRelativeUrl($object->url)
             ;
 
             if ('/' === $redirect = $this->getApplication()->getRenderer()->getRelativeUrl($object->redirect)) {
@@ -211,9 +211,11 @@ class Page extends AbstractServiceLocal
         $this->getEntityManager()->flush();
 
         return array(
-            'url' => $page->getUrl() . (
-            true === $this->getApplication()->getController()->isUrlExtensionRequired()
-            && '/' !== substr($page->getUrl(), -1) ? '.' . $this->getApplication()->getController()->getUrlExtension() : ''
+            'url'   => $page->getUrl() . (
+                true === $this->getApplication()->getController()->isUrlExtensionRequired()
+                && '/' !== substr($page->getUrl(), -1)
+                ? '.' . $this->getApplication()->getController()->getUrlExtension()
+                : ''
             ),
             'state' => $page->getState()
         );
@@ -229,8 +231,6 @@ class Page extends AbstractServiceLocal
      * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
-     *
-     * @todo strange call to this service with another site
      */
     public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
@@ -239,15 +239,15 @@ class Page extends AbstractServiceLocal
         }
         $tree = array();
         if (null === $page = $this->_repo->find(strval($page_uid))) {
+// @todo strange call to this service with another site
+//$this->isGranted('VIEW', $site);
             $page = $this->_repo->getRoot($site);
-            if (!is_null($page)) {
-                $leaf = new \stdClass();
-                $leaf->attr = json_decode($page->serialize());
-                $leaf->data = $page->getTitle();
-                $leaf->state = $page->isLeaf() ? 'leaf' : 'open';
-                $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult, $having_child);
-                $tree[] = $leaf;
-            }
+            $leaf = new \stdClass();
+            $leaf->attr = json_decode($page->serialize());
+            $leaf->data = $page->getTitle();
+            $leaf->state = $page->isLeaf() ? 'leaf' : 'open';
+            $leaf->children = $this->getBBBrowserTree($site_uid, $page->getUid(), $current_uid, $firstresult, $maxresult, $having_child);
+            $tree[] = $leaf;
         } else {
             try {
                 $this->isGranted('VIEW', $page);
@@ -348,6 +348,9 @@ class Page extends AbstractServiceLocal
 // User must have edit permission on both page and parent
         $this->isGranted('EDIT', $page);
         $this->isGranted('EDIT', $parent);
+        
+        //User must have view permission on layout for move page
+        $this->isGranted('VIEW', $page->getLayout());
 
 // If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
@@ -398,6 +401,8 @@ class Page extends AbstractServiceLocal
 
 // User must have edit permission on parent
         $this->isGranted('EDIT', $page->getParent());
+// Add delete permission on parent to
+        $this->isGranted('DELETE', $page->getParent());
 
 // If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
@@ -444,14 +449,14 @@ class Page extends AbstractServiceLocal
      * @param string $target The target is redirect is defined
      * @param string $redirect  The permananet redirect URL
      * @param string $layout_uid The unique identifier of the layout to use
-     *  @param string $alttitle The alternate title bb5 #366
+     * @param string $alttitle The alternate title bb5 #366
      * @return \stdClass
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the layout is undefined
      * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
-    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid, $alttitle)
+    public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid, $alttitle, $flag = "", $is_sibling = false, $move_node_uid = null)
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
@@ -459,60 +464,80 @@ class Page extends AbstractServiceLocal
         if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', strval($layout_uid))) {
             throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
         }
-
-        // User must have view permission on choosen layout
-        $this->isGranted('VIEW', $layout);
-
+        
         $parent = $this->_repo->find(strval($parent_uid));
-        if (null !== $page = $this->_repo->find(strval($page_uid))) {
-            $this->isGranted('EDIT', $page);
+        if (false === empty($move_node_uid)) {
+            $parent = $this->_repo->find(strval($move_node_uid));
+        }
+        
+        $is_final = $parent->getLayout()->getParam('final');
+        if (true === $is_final) {
+            if (null === $parent->getParent()) {
+                throw new ServicesException('Impossible to create or move a child page for this layout.');
+            } 
 
-            // If the page is online, user must have publish permission on it
-            if ($page->isOnline(true)) {
-                $this->isGranted('PUBLISH', $page);
-            }
-
-            if (null !== $parent && false === $page->getParent()->equals($parent)) {
-                // User must have edit permission on parent
-                $this->isGranted('EDIT', $parent);
-                $this->_repo->moveAsFirstChildOf($page, $parent);
-            }
+            $leaf = $this->postBBSelectorForm($page_uid, $parent->getParent()->getUid(), $title, $url, $target, $redirect, $layout_uid, $alttitle, "", true);
         } else {
-            $page = new NestedPage();
+
+            // User must have view permission on choosen layout
+            $this->isGranted('VIEW', $layout);
+
+
+            if (null !== $page = $this->_repo->find(strval($page_uid))) {
+                $this->isGranted('EDIT', $page);
+
+                // If the page is online, user must have publish permission on it
+                if ($page->isOnline(true)) {
+                    $this->isGranted('PUBLISH', $page);
+                }
+
+                //User must have permision of current layout for change this
+                $this->isGranted('VIEW', $page->getLayout());
+
+                if (null !== $parent && false === $page->getParent()->equals($parent)) {
+                    // User must have edit permission on parent
+                    $this->isGranted('EDIT', $parent);
+                    $this->_repo->moveAsFirstChildOf($page, $parent);
+                }
+            } else {
+                $page = new NestedPage();
+
+                $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
+
+                $this->getEntityManager()->persist($page);
+
+                if (null !== $parent) {
+                    // User must have edit permission on parent
+                    $page->setParent($parent);
+                    $this->isGranted('CREATE', $page);
+                    $this->isGranted('EDIT', $parent);
+              
+                    $this->_repo->insertNodeAsFirstChildOf($page, $parent);
+                } else {
+                    // User must have edit permission on site to add a new root
+                    $this->isGranted('CREATE', $page);
+                    $this->isGranted('EDIT', $this->getApplication()->getSite());
+
+                    $page->setSite($this->getApplication()->getSite());
+                }
+            }
 
             $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
 
-            $this->getEntityManager()->persist($page);
-
-            if (null !== $parent) {
-                // User must have edit permission on parent
-                $page->setParent($parent);
-                $this->isGranted('CREATE', $page);
-                $this->isGranted('EDIT', $parent);
-
-                $this->_repo->insertNodeAsFirstChildOf($page, $parent);
-            } else {
-                // User must have edit permission on site to add a new root
-                $this->isGranted('CREATE', $page);
-                $this->isGranted('EDIT', $this->getApplication()->getSite());
-
-                $page->setSite($this->getApplication()->getSite());
+            if (false === $this->getEntityManager()->contains($page)) {
+                $this->getEntityManager()->persist($page);
             }
+
+            $this->getEntityManager()->flush($page);
+
+            $leaf = new \stdClass();
+            $leaf->attr = json_decode($page->serialize());
+            $leaf->data = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
+            $leaf->state = 'closed';
+            $leaf->is_sibling = $is_sibling;
+            $leaf->move_node_uid = (false === empty($move_node_uid)) ? $move_node_uid : null;
         }
-
-        $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
-
-        if (false === $this->getEntityManager()->contains($page)) {
-            $this->getEntityManager()->persist($page);
-        }
-
-        $this->getEntityManager()->flush($page);
-
-        $leaf = new \stdClass();
-        $leaf->attr = json_decode($page->serialize());
-        $leaf->data = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
-        $leaf->state = 'closed';
-
+        
         return $leaf;
     }
 
@@ -530,7 +555,6 @@ class Page extends AbstractServiceLocal
         $page->setRedirect('' === $redirect ? null : $redirect);
         $page->setLayout($layout);
         $page->setAltTitle($alttitle);
-        ;
     }
 
     /**

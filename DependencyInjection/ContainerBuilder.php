@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\DependencyInjection;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,6 +18,8 @@ namespace BackBuilder\DependencyInjection;
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace BackBuilder\DependencyInjection;
 
 use BackBuilder\IApplication;
 use BackBuilder\DependencyInjection\BootstrapResolver;
@@ -49,6 +50,11 @@ class ContainerBuilder
      * Define default name for data folder
      */
     const DEFAULT_DATA_FOLDER_NAME = 'Data';
+
+    /**
+     * Define default name for media folder
+     */
+    const DEFAULT_MEDIA_FOLDER_NAME = 'Media';
 
     /**
      * Define default name for cache folder
@@ -135,6 +141,29 @@ class ContainerBuilder
     }
 
     /**
+     * [removeContainerDump description]
+     *
+     * @return [type] [description]
+     */
+    public function removeContainerDump()
+    {
+        $success = false;
+        if (
+            false === $this->container->getParameter('debug')
+            && true === $this->container->getParameter('container.autogenerate')
+        ) {
+            $dump_filepath = $this->container->getParameter('container.dump_directory');
+            $dump_filepath .= DIRECTORY_SEPARATOR . $this->container->getParameter('container.filename') . '.php';
+
+            if (true === is_file($dump_filepath) && true === is_readable($dump_filepath)) {
+                $success = false !== @unlink($dump_filepath);
+            }
+        }
+
+        return $success;
+    }
+
+    /**
      * Hydrate container with bootstrap.yml parameter
      *
      * @throws MissingBootstrapParametersException raises if we are not able to find bootstrap.yml file
@@ -194,15 +223,24 @@ class ContainerBuilder
         $this->container->setParameter('bbapp.repository.dir', $this->application->getRepository());
 
         // set default cache directory and cache autogenerate value
-        $this->container->setParameter('bbapp.cache.dir', implode(DIRECTORY_SEPARATOR, array(
-            $this->application->getBaseDir(), self::DEFAULT_CACHE_FOLDER_NAME, $this->environment
-        )));
+        $cache_directory = $this->application->getBaseDir() . DIRECTORY_SEPARATOR . self::DEFAULT_CACHE_FOLDER_NAME;
+        if (IApplication::DEFAULT_ENVIRONMENT !== $this->environment) {
+            $cache_directory .= DIRECTORY_SEPARATOR . $this->environment;
+        }
+
+        $this->container->setParameter('bbapp.cache.dir', $cache_directory);
         $this->container->setParameter('bbapp.cache.autogenerate', '%container.autogenerate%');
 
         // define data directory
         $this->container->setParameter(
             'bbapp.data.dir',
             $this->application->getRepository() . DIRECTORY_SEPARATOR . self::DEFAULT_DATA_FOLDER_NAME
+        );
+
+        // define media directory
+        $this->container->setParameter(
+            'bbapp.media.dir',
+            $this->container->getParameter('bbapp.data.dir') . DIRECTORY_SEPARATOR . self::DEFAULT_MEDIA_FOLDER_NAME
         );
     }
 
@@ -218,12 +256,15 @@ class ContainerBuilder
         $container_filename = $this->getContainerDumpFilename($this->container->getParameter('bootstrap_filepath'));
         $container_filepath = $container_directory . DIRECTORY_SEPARATOR . $container_filename;
 
-        if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath)) {
-            $loader = new \BackBuilder\DependencyInjection\Loader\PhpArrayLoader($this->container);
-            $loader->load($container_filepath);
+        if (false === $this->container->getParameter('debug') && true === is_readable($container_filepath . '.php')) {
+            require_once $container_filepath . '.php';
+            $this->container = new $container_filename();
+            $this->container->init();
 
             // Add current application into container
             $this->container->set('bbapp', $this->application);
+            // Add container builder into container
+            $this->container->set('container.builder', $this);
 
             $success = true;
         } else {
@@ -253,10 +294,22 @@ class ContainerBuilder
     {
         // setting default services
         $this->container->set('bbapp', $this->application);
+        $this->container->set('container.builder', $this);
+
+        $services_directory = $this->application->getBBDir() . '/Config/services';
+        foreach (scandir($services_directory) as $file) {
+            if (1 === preg_match('#(\w+)\.(yml|xml)$#', $file, $matches)) {
+                if ('yml' === $matches[2]) {
+                    ServiceLoader::loadServicesFromYamlFile($this->container, $services_directory, $matches[1]);
+                } else {
+                    ServiceLoader::loadServicesFromXmlFile($this->container, $services_directory, $matches[1]);
+                }
+            }
+        }
 
         // define in which directory we have to looking for services yml or xml
         $directories = ConfigDirectory::getDirectories(
-            $this->application->getBBDir(), $this->repository_directory, $this->context, $this->environment
+            null, $this->repository_directory, $this->context, $this->environment
         );
 
         // Loop into every directory where we can potentially found a services.yml or services.xml

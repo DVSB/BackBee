@@ -26,9 +26,17 @@ use Symfony\Component\HttpFoundation\Request;
 use BackBuilder\Rest\Controller\UserController;
 use BackBuilder\Tests\TestCase;
 
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
-use BackBuilder\Security\User,
+use BackBuilder\Security\Acl\Permission\MaskBuilder;
+
+use BackBuilder\Security\Token\UsernamePasswordToken,
+    BackBuilder\Security\User,
     BackBuilder\Security\Group;
+
+
+use BackBuilder\ApiClient\Auth\PrivateKeyAuth;
 
 /**
  * Test for UserController class
@@ -50,6 +58,7 @@ class UserControllerTest extends TestCase
         $this->initAutoload();
         $bbapp = $this->getBBApp();
         $this->initDb($bbapp);
+        $this->initAcl();
         $this->getBBApp()->setIsStarted(true);
         
         // save user
@@ -76,6 +85,12 @@ class UserControllerTest extends TestCase
         
         $bbapp->getEntityManager()->flush();
         
+        // login user
+        $this->getSecurityContext()->setToken(new UsernamePasswordToken($this->user, []));
+        
+         // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_IDDQD);
     }
     
     protected function getController()
@@ -92,8 +107,12 @@ class UserControllerTest extends TestCase
      */
     public function testGetAction()
     {
-        $controller = $this->getController();
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateObjectAce(ObjectIdentity::fromDomainObject($this->user), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_IDDQD);
         
+        
+        $controller = $this->getController();
         $response = $controller->getAction($this->user->getId());
         
         $this->assertEquals(200, $response->getStatusCode());
@@ -130,6 +149,10 @@ class UserControllerTest extends TestCase
         $this->getBBApp()->getEntityManager()->persist($user);
         $this->getBBApp()->getEntityManager()->flush();
         $userId = $user->getId();
+        
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateObjectAce(ObjectIdentity::fromDomainObject($user), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_DELETE);
         
         $this->assertInstanceOf('BackBuilder\Security\User', 
                 $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId));
@@ -204,6 +227,19 @@ class UserControllerTest extends TestCase
         return $userId;
     }
     
+    
+    /**
+     * @covers ::putAction
+     */
+    public function test_putAction_userDoesntExist()
+    {
+        $controller = $this->getController();
+        
+        $response = $controller->putAction('12024582905729', new Request());
+
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+    
     /**
      * @covers ::putAction
      */
@@ -248,8 +284,12 @@ class UserControllerTest extends TestCase
     /**
      * @covers ::postAction
      */
-    public function testPostAction()
+    public function test_postAction()
     {
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
+        
         $controller = $this->getController();
         
         $data = array(
@@ -263,7 +303,7 @@ class UserControllerTest extends TestCase
             'password' => 'password',
         );
         
-        $response = $controller->postAction(new Request(array(), $data));
+        $response = $controller->postAction(new Request([], $data));
         
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('application/json', $response->headers->get('Content-Type'));
@@ -308,24 +348,31 @@ class UserControllerTest extends TestCase
     
     /**
      * @covers ::postAction
+     * @expectedException \Symfony\Component\HttpKernel\Exception\ConflictHttpException
+     * @expectedExceptionMessage User with that login already exists: usernameDuplicate
      */
-    public function testPostAction_duplicate_login()
+    public function test_postAction_duplicate_login()
     {
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
+        $controller = $this->getController();
+        
         // create user
         $user = new User();
-        $user->setLogin('usernameDulicate')
-                ->setPassword('password123')
-                ->setApiKeyEnabled(false)
-                ->setApiKeyPrivate('PRIVATE_KEY')
-                ->setApiKeyPublic('PUBLIC_KEY')
-                ->setFirstname('FirstName')
-                ->setLastname('LastName')
-                ->setActivated(true);
+        $user->setLogin('usernameDuplicate')
+            ->setPassword('password123')
+            ->setApiKeyEnabled(false)
+            ->setApiKeyPrivate('PRIVATE_KEY')
+            ->setApiKeyPublic('PUBLIC_KEY')
+            ->setFirstname('FirstName')
+            ->setLastname('LastName')
+            ->setActivated(true);
         $this->getBBApp()->getEntityManager()->persist($user);
         $this->getBBApp()->getEntityManager()->flush();
         
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-            'login' => 'usernameDulicate',
+        $response = $controller->postAction(new Request([], [
+            'login' => 'usernameDuplicate',
             'api_key_enabled' => true,
             'api_key_public' => 'api_key_public',
             'api_key_private' => 'api_key_private',
@@ -333,21 +380,54 @@ class UserControllerTest extends TestCase
             'lastname' => 'last_name',
             'activated' => false,
             'password' => 'password',
-        ), array(
-            '_action' => 'postAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController'
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
-        
-        $this->assertEquals(400, $response->getStatusCode());
-        
-        $res = \json_decode($response->getContent(), true);
-
-        $this->assertContains('User with that login already exists', $res['errors']['login']);
+        ]));
     }
 
     protected function tearDown()
     {
         $this->dropDb($this->getBBApp());
         $this->getBBApp()->stop();
+    }
+    
+    /**
+     * 
+     * @param type $uri
+     * @param array $data
+     * @param type $contentType
+     * @param array $headers
+     * @return \Symfony\Component\HttpFoundation\Request
+     */
+    protected static function requestPost($uri, array $data = [], $contentType = 'application/json', $sign = false)
+    {
+        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'POST'] );
+        
+        if($sign) {
+            self::signRequest($request);
+        }
+        
+        return $request;
+    }
+    
+    /**
+     * 
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param BackBuilder\Security\User $user
+     * @return self
+     */
+    protected static function signRequest(Request $request, BackBuilder\Security\User $user = null)
+    {
+        if(null === $user) {
+            $user = $this->user;
+        }
+        
+        $auth = new PrivateKeyAuth();
+        $auth->setPrivateKey($user->getApiKeyPrivate());
+        $auth->setPublicKey($user->getApiKeyPublic());
+        $request->headers->add([
+            PrivateKeyAuth::AUTH_PUBLIC_KEY_TOKEN => $user->getApiKeyPublic(),
+            PrivateKeyAuth::AUTH_SIGNATURE_TOKEN => $auth->getRequestSignature($request->getMethod(), $request->getRequestUri())
+        ]);
+
+        return self;
     }
 }

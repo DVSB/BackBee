@@ -44,21 +44,20 @@ class Media extends AbstractServiceLocal
 
     private $_availableMedias;
 
+
     /**
      * @exposed(secured=true)
      */
     public function uploadImage(\Symfony\Component\HttpFoundation\Request $request)
     {
+
         $uploaded_file = new \stdClass();
-        $uploaded_file->originalname = $request->files->get('image')->getClientOriginalName();
+        $uploaded_file->originalname = \BackBuilder\Util\String::toPath($request->files->get('image')->getClientOriginalName());
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
         $uploaded_file->filename = basename($request->files->get('image')->getRealPath()) . '.' . $uploaded_file->extension;
-
-        if (FALSE === is_dir($this->bbapp->getTemporaryDir()))
-            mkdir($this->bbapp->getTemporaryDir(), 0755, TRUE);
-
-        move_uploaded_file($request->files->get('image')->getRealPath(), $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $uploaded_file->filename);
-
+        $uploaded_file->src = base64_encode(file_get_contents($request->files->get('image')->getRealPath()));
+        
+        #move_uploaded_file($request->files->get('image')->getRealPath(), $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $uploaded_file->filename);
         return $uploaded_file;
     }
 
@@ -67,10 +66,13 @@ class Media extends AbstractServiceLocal
      */
     public function uploadMedia(\Symfony\Component\HttpFoundation\Request $request)
     {
-        //ini_set("upload_max_filesize","15M");
-        //ini_set("post_max_size","15M");
+        $request->files->set('image', $request->files->get('uploadedmedia'));
+        if(is_array(@getimagesize($request->files->get('uploadedmedia')->getRealPath()))){
+            return $this->uploadImage($request);
+        }
+
         $uploaded_file = new \stdClass();
-        $uploaded_file->originalname = $request->files->get('uploadedmedia')->getClientOriginalName();
+        $uploaded_file->originalname = \BackBuilder\Util\String::toPath($request->files->get('uploadedmedia')->getClientOriginalName());
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
         $uploaded_file->filename = basename($request->files->get('uploadedmedia')->getRealPath()) . '.' . $uploaded_file->extension;
         if (FALSE === is_dir($this->bbapp->getTemporaryDir()))
@@ -128,7 +130,7 @@ class Media extends AbstractServiceLocal
         foreach ($content_values as $content_value) {
             $content_values_array[$content_value->name] = $content_value->value;
         }
-
+        
         if (NULL === $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid))
             throw new ServicesException('None folder provided');
 
@@ -167,23 +169,27 @@ class Media extends AbstractServiceLocal
                     $content_image_obj = json_decode($value);
                     if (isset($content_image_obj->filename)) {
 
-                        $subcontent->originalname = $content_image_obj->originalname;
+                        $subcontent->originalname = \BackBuilder\Util\String::toPath($content_image_obj->originalname);
                         $subcontent->path = \BackBuilder\Util\Media::getPathFromContent($subcontent);
 
-                        $filename = $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $content_image_obj->filename;
+                        $src_image = base64_decode($content_image_obj->src);
+
+                        #$filename = $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $content_image_obj->filename;
                         $moveto = $subcontent->path;
                         File::resolveFilepath($moveto, NULL, array('base_dir' => $this->bbapp->getMediaDir()));
+
                         if (FALSE === is_dir(dirname($moveto)))
                             mkdir(dirname($moveto), 0755, TRUE);
-
-                        copy($filename, $moveto);
+                        
+                        file_put_contents($moveto, $src_image);
+                        #copy($filename, $moveto);
 
                         if (null !== $this->getApplication()->getEventDispatcher()) {
-                            $event = new \BackBuilder\Event\PostUploadEvent($moveto, $subcontent->path);
+                            $event = new \BackBuilder\Event\PostUploadEvent($moveto, $moveto);
                             $this->getApplication()->getEventDispatcher()->dispatch('file.postupload', $event);
                         }
 
-                        unlink($filename);
+                        #unlink($filename);
 
                         $stat = stat($moveto);
                         $subcontent->setParam('stat', $stat, 'array');
@@ -404,7 +410,7 @@ class Media extends AbstractServiceLocal
             }
 
             if (false === $newfilename = $repository->setDirectories($this->bbapp)
-                    ->updateFile($content, $content_obj->filename, $content_obj->originalname)) {
+                    ->updateFile($content, $content_obj->filename, $content_obj->originalname, $content_obj->src)) {
                 throw new ServicesException('Unable to change the file');
             }
 

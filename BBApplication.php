@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -22,42 +21,28 @@ namespace BackBuilder;
 
 namespace BackBuilder;
 
-
-use BackBuilder\AutoLoader\AutoLoader;
-use BackBuilder\Bundle\BundleLoader;
-use BackBuilder\Config\Config;
-use BackBuilder\Config\ConfigBuilder;
+use BackBuilder\Console\Console;
 use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBuilder\Event\Event;
-use BackBuilder\Event\Listener\DoctrineListener;
 use BackBuilder\Exception\BBException;
 use BackBuilder\Exception\UnknownContextException;
+use BackBuilder\NestedNode\Repository\NestedNodeRepository;
 use BackBuilder\Site\Site;
 use BackBuilder\Theme\Theme;
 use BackBuilder\Util\File;
-use BackBuilder\Bundle\ABundle;
-use BackBuilder\Console\Console;
-use BackBuilder\NestedNode\Repository\NestedNodeRepository;
-use BackBuilder\Doctrine\Registry as DoctrineRegistry;
 
-use Doctrine\Common\EventManager;
-use Doctrine\ORM\Configuration;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\AnnotationReader;
 
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\Validation;
 use Symfony\Component\Finder\Finder;
-
 
 /**
  * The main BackBuilder5 application
@@ -71,8 +56,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 {
 
     const VERSION = '0.10.0';
-    const DEFAULT_CONTEXT = 'default';
-    const DEFAULT_ENVIRONMENT = '';
 
     /**
      * application's service container
@@ -123,6 +106,13 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     private $_is_restored;
 
     /**
+     * [$dump_datas description]
+     *
+     * @var array
+     */
+    private $dump_datas;
+
+    /**
      * @param string $context
      * @param true $debug
      * @param true $overwrite_config set true if you need overide base config with the context config
@@ -134,15 +124,15 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->_isinitialized = false;
         $this->_isstarted = false;
         $this->_overwrite_config = $overwrite_config;
-
+        $this->_is_restored = false;
         $this->_environment = null !== $environment && true === is_string($environment)
             ? $environment
             : self::DEFAULT_ENVIRONMENT
         ;
+        $this->dump_datas = array();
 
         $this->_initAnnotationReader();
         $this->_initContainer();
-        $this->_initApplicationConfig();
         $this->_initEnvVariables();
         $this->_initAutoloader();
         $this->_initContentWrapper();
@@ -205,6 +195,10 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function getTheme($force_reload = false)
     {
+        if (null === $this->getConfig()->getSection('themes_dir') || null === $this->getConfig()->getThemeConfig()) {
+            return null;
+        }
+
         if (false === is_object($this->_theme) || true === $force_reload) {
             $this->_theme = new Theme($this);
         }
@@ -313,8 +307,9 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $this->_isstarted = true;
         $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
-        $this->getTheme()->init(); // 30 ms
-
+        if (null !== $this->getTheme()) {
+            $this->getTheme()->init();
+        }
 
         // trigger bbapplication.start
         $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
@@ -333,9 +328,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function stop()
     {
         if (true === $this->isStarted()) {
-            // @todo
-            // stop services
-
             // trigger bbapplication.stop
             $this->getEventDispatcher()->dispatch('bbapplication.stop', new Event($this));
             $this->info('BackBuilder application ended');
@@ -412,7 +404,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function hasContext()
     {
-        return (null !== $this->_context && 'default' != $this->_context);
+        return (null !== $this->_context && self::DEFAULT_CONTEXT !== $this->_context);
     }
 
     /**
@@ -569,11 +561,11 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     public function getMediaDir()
     {
-        if (null === $this->_mediadir) {
-            $this->_mediadir = implode('/', array($this->getRepository(), 'Data', 'Media'));
+        if (null === $this->_container) {
+            throw new \Exception('Application\'s container is not ready!');
         }
 
-        return $this->_mediadir;
+        return $this->getContainer()->getParameter('bbapp.media.dir');
     }
 
     /**
@@ -670,14 +662,23 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (null === $this->_resourcedir) {
             $this->_resourcedir = array();
 
-            $this->addResourceDir($this->getBBDir() . '/Resources')
-                    ->addResourceDir($this->getBaseDir() . '/repository/Ressources');
+            $this->addResourceDir($this->getBBDir() . '/Resources');
+
+            if (true === is_dir($this->getBaseRepository() . '/Resources')) {
+                $this->addResourceDir($this->getBaseRepository() . '/Resources');
+            }
+
+            if (true === is_dir($this->getBaseRepository() . '/Ressources')) {
+                $this->addResourceDir($this->getBaseRepository() . '/Ressources');
+            }
 
             if (true === $this->hasContext()) {
-                try {
-                    $this->addResourceDir($this->getRepository() . '/Ressources');
-                } catch (BBException $e) {
-                    // Ignore it
+                if (true === is_dir($this->getRepository() . '/Resources')) {
+                    $this->addResourceDir($this->getRepository() . '/Resources');
+                }
+
+                if (true === is_dir($this->getRepository() . '/Resources')) {
+                    $this->addResourceDir($this->getRepository() . '/Resources');
                 }
             }
 
@@ -773,7 +774,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             throw new BBException('The BackBuilder application has to be started before to access request');
         }
 
-        return $this->getController()->getRequest();
+        return $this->_container->get('request');
     }
 
     /**
@@ -915,7 +916,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         }
 
         foreach ($this->getBundles() as $bundle) {
-            if (!is_dir($dir = $bundle->getBaseDir() . '/Command')) {
+            if (!is_dir($dir = $bundle->getBaseDirectory() . '/Command')) {
                 continue;
             }
 
@@ -955,10 +956,10 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function dump(array $options = array())
     {
-        return array(
+        return array_merge($this->dump_datas, array(
             'classcontent_directories' => $this->_classcontentdir,
             'resources_directories'    => $this->_resourcedir
-        );
+        ));
     }
 
     /**
@@ -971,6 +972,15 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     {
         $this->_classcontentdir = $dump['classcontent_directories'];
         $this->_resourcedir = $dump['resources_directories'];
+
+        if (true === isset($dump['date_timezone'])) {
+            date_default_timezone_set($dump['date_timezone']);
+        }
+
+        if (true === isset($dump['locale'])) {
+            setLocale(LC_ALL, $dump['locale']);
+        }
+
         $this->_is_restored = true;
     }
 
@@ -994,18 +1004,24 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         return $this;
     }
 
-    private function _initApplicationConfig()
-    {
-        (new ConfigBuilder($this))->extend(ConfigBuilder::APPLICATION_CONFIG, $this->getConfig());
-    }
-
+    /**
+     * [_initEnvVariables description]
+     *
+     * @return [type] [description]
+     */
     private function _initEnvVariables()
     {
+        if (true === $this->isRestored()) {
+            return $this;
+        }
+
         $date_config = $this->getConfig()->getDateConfig();
         if (false !== $date_config && true === isset($date_config['timezone'])) {
             if (false === date_default_timezone_set($date_config['timezone'])) {
                 throw new \Exception(sprintf('Unabled to set default timezone (:%s)', $date_config['timezone']));
             }
+
+            $this->dump_datas['date_timezone'] = $date_config['timezone'];
         }
 
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
@@ -1013,8 +1029,12 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 if (false === setLocale(LC_ALL, $encoding['locale'])) {
                     throw new \Exception(sprintf('Unabled to setLocal with locale %s', $encoding['locale']));
                 }
+
+                $this->dump_datas['locale'] = $encoding['locale'];
             }
         }
+
+        return $this;
     }
 
     /**
@@ -1022,8 +1042,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     private function _initAutoloader()
     {
-        $this->getLogging();
-        $this->getAutoloader()->setEventDispatcher($this->getEventDispatcher());
         if (true === $this->getAutoloader()->isRestored()) {
             return $this;
         }
@@ -1036,7 +1054,8 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
             ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
             ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
-            ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')));
+            ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')))
+            ->registerNamespace('Respect\Validation\Rules', implode(DIRECTORY_SEPARATOR, array($this->getBBDir(),'Validator','Rules')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
@@ -1116,6 +1135,28 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     private function _initEntityManager()
     {
+        // init NestedNode config
+        if ($this->getConfig()->getSection('nestednode')) {
+            NestedNodeRepository::$config = array_merge(
+                NestedNodeRepository::$config,
+                $this->getConfig()->getSection('nestednode')
+            );
+
+            $console_command = $this->_container->getParameter('bbapp.console.command');
+            if ('/' !== $console_command[0]) {
+                $console_command = $this->getBaseDir() . '/' . $console_command;
+                $this->_container->setParameter('bbapp.console.command', $console_command);
+            }
+
+            NestedNodeRepository::$config['script_command'] = $this->_container->getParameter('bbapp.script.command');
+            NestedNodeRepository::$config['console_command'] = $console_command;
+            NestedNodeRepository::$config['environment'] = $this->getEnvironment();
+        }
+
+        if (false === $this->_container->getDefinition('em')->isSynthetic()) {
+            return;
+        }
+
         if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
             throw new BBException('None database configuration found');
         }
@@ -1137,34 +1178,36 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         }
 
         // Init ORM event
-        $evm = new EventManager();
         $r = new \ReflectionClass('Doctrine\ORM\Events');
-        $evm->addEventListener($r->getConstants(), new DoctrineListener($this));
-
+        $definition = new Definition('Doctrine\Common\EventManager');
+        $definition->addMethodCall('addEventListener', array($r->getConstants(), new Reference('doctrine.listener')));
+        $this->_container->setDefinition('doctrine.event_manager', $definition);
+        $evm = $this->_container->get('doctrine.event_manager');
 
         try {
-            $logger = $this->getLogging();
+            $logger_id = 'logging';
 
-            if ($this->isDebugMode()) {
+            if (true === $this->isDebugMode()) {
                 // doctrine data collector
-                $this->getContainer()->get('data_collector.doctrine')->addLogger('default', $this->getContainer()->get('doctrine.dbal.logger.profiling'));
-                $logger = $this->getContainer()->get('doctrine.dbal.logger.profiling');
+                $this->getContainer()->get('data_collector.doctrine')->addLogger(
+                    'default',
+                    $this->getContainer()->get('doctrine.dbal.logger.profiling')
+                );
+                $logger_id = 'doctrine.dbal.logger.profiling';
             }
 
-            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $logger, $evm);
-            $this->getContainer()->set('em', $em);
-            
-            $registry = new DoctrineRegistry($this->getContainer(), array('default' => $em->getConnection()), array('default' => 'em'), 'default', 'default');
-            $this->getContainer()->set('doctrine', $registry);
+            $definition = new Definition('Doctrine\ORM\EntityManager', array(
+                $doctrine_config['dbal'],
+                new Reference($logger_id),
+                new Reference('doctrine.event_manager')
+            ));
+            $definition->setFactoryClass('BackBuilder\Util\Doctrine\EntityManagerCreator');
+            $definition->setFactoryMethod('create');
+            $this->_container->setDefinition('em', $definition);
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
         } catch (\Exception $e) {
             $this->warning(sprintf('%s(): Cannot initialize Doctrine EntityManager', __METHOD__));
-        }
-
-        // init NestedNode config
-        if($this->getConfig()->getSection('nestednode')) {
-            NestedNodeRepository::$config = array_merge(NestedNodeRepository::$config, $this->getConfig()->getSection('nestednode'));
         }
 
         return $this;
@@ -1172,12 +1215,13 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * [_initBundles description]
+     *
      * @return [type] [description]
      */
     private function _initBundles()
     {
-        if (!is_null($this->getConfig()->getBundlesConfig())) {
-            BundleLoader::loadBundlesIntoApplication($this, $this->getConfig()->getBundlesConfig());
+        if (null !== $this->getConfig()->getBundlesConfig()) {
+            $this->getContainer()->get('bundle.loader')->load($this->getConfig()->getBundlesConfig());
         }
 
         return $this;

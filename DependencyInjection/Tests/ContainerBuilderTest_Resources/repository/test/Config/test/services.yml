@@ -1,0 +1,6 @@
+parameters:
+    hello: 'world'
+
+services:
+    synthetic_service:
+        class: stdClass

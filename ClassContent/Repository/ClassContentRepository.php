@@ -171,6 +171,13 @@ class ClassContentRepository extends EntityRepository
             $where[] = str_replace('\\', '\\\\', 'c.classname IN ("' . implode('","', $classnameArr) . '")');
         }
 
+        if (true === array_key_exists('content_uid', $selector)) {
+            $uids = (array) $selector['content_uid'];
+            if (false === empty($uids)) {
+                $where[] = 'c.uid IN ("' . implode('","', $uids) . '")';
+            }
+        }
+
         if (true === array_key_exists('criteria', $selector)) {
             $criteria = (array) $selector['criteria'];
             foreach ($criteria as $field => $crit) {
@@ -181,7 +188,7 @@ class ClassContentRepository extends EntityRepository
 
                 $alias = uniqid('i' . rand());
                 $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
-                $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value ' . $crit[1] . '"' . $crit[0] . '"';
+                $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value ' . $crit[1] . ' "' . $crit[0] . '"';
             }
         }
 
@@ -544,8 +551,12 @@ class ClassContentRepository extends EntityRepository
     {
         $qb = new ClassContentQueryBuilder($this->_em, $this->_em->getExpressionBuilder()->count('cc'));
         $this->addContentBySearchFilters($qb, $classnames, array(), $cond);
-        $result = $qb->getQuery()->getSingleResult();
-
+        try {
+            $result = $qb->getQuery()->getSingleResult();
+        } catch (\Exception $e) {
+            return 0;
+        }
+        
         return reset($result);
     }
 
@@ -638,17 +649,19 @@ class ClassContentRepository extends EntityRepository
         try {
             $q = $this->createQueryBuilder('c');
 
-            foreach ($classnames as $classname)
+            foreach ($classnames as $classname) {
                 $q->orWhere('c INSTANCE OF ' . $classname);
+            }
 
             $q->andWhere('c._mainnode = :node')
-                    ->orderby('c._modified', 'desc')
-                    ->setMaxResults(1)
-                    ->setParameters(array('node' => $page));
+                ->orderby('c._modified', 'desc')
+                ->setMaxResults(1)
+                ->setParameters(array('node' => $page))
+            ;
 
             $entity = $q->getQuery()->getSingleResult();
         } catch (\Exception $e) {
-            $entity = NULL;
+            $entity = null;
         }
 
         return $entity;
@@ -856,6 +869,37 @@ class ClassContentRepository extends EntityRepository
             }
         }
         return $rootContainer;
+    }
+    
+    /**
+     * Returns an uid if parent with this classname found, false otherwise
+     * @param string $child_uid
+     * @param string $class_name
+     * @return string|false
+     */
+    public function getParentByClassName($child_uid, $class_name)
+    {        
+        $q = $this->_em->getConnection()
+                ->createQueryBuilder()
+                ->select('j.parent_uid, c.classname')
+                ->from('content_has_subcontent', 'j')
+                ->from('content', 'c')
+                ->andWhere('c.uid = j.parent_uid')
+                ->andWhere('j.content_uid = :uid')
+                ->setParameter('uid', $child_uid);
+        
+        $result = $q->execute()->fetch();
+        if (false !== $result) {
+            if ($result['classname'] == $class_name) {
+                return $this->_em->find($class_name, $result['parent_uid']);
+            } else {
+                $result = $this->getParentByClassName($result['parent_uid'], $class_name);
+            }
+        } else {
+            return null;
+        }
+        
+        return $result;
     }
 
     /**

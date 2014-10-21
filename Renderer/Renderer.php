@@ -11,7 +11,9 @@ use BackBuilder\Renderer\ARenderer;
 use BackBuilder\Renderer\Exception\RendererException;
 use BackBuilder\Renderer\IRenderable;
 use BackBuilder\Renderer\IRendererAdapter;
+use BackBuilder\Routing\RouteCollection;
 use BackBuilder\Site\Layout;
+use BackBuilder\Util\File;
 use BackBuilder\Util\String;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -55,7 +57,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * define if renderer has been restored by container or not
      * @var boolean
      */
-    private $_is_restored;
+    private $is_restored;
 
     /**
      * Constructor
@@ -78,7 +80,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             }
         }
 
-        $this->_is_restored = false;
+        $this->is_restored = false;
     }
 
      /**
@@ -136,7 +138,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     private function getRendererAdapterKey(IRendererAdapter $rendererAdapter)
     {
-        $key = explode(DIRECTORY_SEPARATOR, get_class($rendererAdapter));
+        $key = explode(NAMESPACE_SEPARATOR, get_class($rendererAdapter));
 
         return strtolower($key[count($key) - 1]);
     }
@@ -213,7 +215,11 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function getAdapterByExt($ext)
     {
-        return $this->determineWhichAdapterToUse('.' . $ext);
+        if (null === $adapter = $this->determineWhichAdapterToUse('.' . $ext)) {
+            throw new RendererException("Unable to find adapter for '.$ext'.", RendererException::SCRIPTFILE_ERROR);
+        }
+
+        return $adapter;
     }
 
     /**
@@ -246,6 +252,26 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
+     * Getters of renderer adapter by $key
+     *
+     * @return BackBuilder\Renderer\IRendererAdapter
+     */
+    public function getAdapter($key)
+    {
+        return $this->rendererAdapters->get($key);
+    }
+
+    /**
+     * Getters of renderer adapters
+     *
+     * @return array<BackBuilder\Renderer\IRendererAdapter>
+     */
+    public function getAdapters()
+    {
+        return $this->rendererAdapters->all();
+    }
+
+    /**
      * @see BackBuilder\Renderer\IRenderer::render()
      */
     public function render(IRenderable $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = false)
@@ -253,7 +279,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         if (null === $obj) {
             return null;
         }
-        
+
         $bbapp = $this->getApplication();
         if (false === $obj->isRenderable() && null === $bbapp->getBBUserToken()) {
             return null;
@@ -285,7 +311,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
         if (null === $renderer->__render) {
             // Rendering a page with layout
-            if (true === is_a($obj, '\BackBuilder\NestedNode\Page')) {
+            if (true === ($obj instanceof Page)) {
                 $renderer->setCurrentPage($obj);
                 $renderer->__render = $renderer->renderPage($template, $params);
                 $renderer->insertHeaderAndFooterScript();
@@ -352,6 +378,12 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     public function partial($template = null, $params = null)
     {
         $this->templateFile = $template;
+        File::resolveFilepath($this->templateFile, null, array('include_path' => $this->_scriptdir));
+        if (false === is_file($this->templateFile) || false === is_readable($this->templateFile)) {
+            throw new RendererException(sprintf(
+                'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
+            ), RendererException::SCRIPTFILE_ERROR);
+        }
 
         // Assign parameters
         if (null !== $params) {
@@ -439,11 +471,11 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
                     $zone = $zones[$zoneIndex];
                     $isMain = null !== $zone && true === property_exists($zone, 'mainZone') && true === $zone->mainZone;
                     $this->container()->add($this->render($content, $this->getMode(), array(
-                                'class' => 'rootContentSet',
-                                'isRoot' => true,
-                                'indexZone' => $zoneIndex++,
-                                'isMainZone' => $isMain
-                                    ), null, $this->_ignoreIfRenderModeNotAvailable));
+                        'class' => 'rootContentSet',
+                        'isRoot' => true,
+                        'indexZone' => $zoneIndex++,
+                        'isMainZone' => $isMain
+                    ), null, $this->_ignoreIfRenderModeNotAvailable));
                 }
             }
         }
@@ -455,7 +487,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         }
 
         if (false === $this->isValidTemplateFile($this->templateFile, true)) {
-            throw new RendererException(sprintf('Unable to read layout %s.', $this->templateFile), RendererException::LAYOUT_ERROR);
+            throw new RendererException(
+                sprintf('Unable to read layout %s.', $this->templateFile), RendererException::LAYOUT_ERROR
+            );
         }
 
         $bbapp->info(sprintf('Rendering page `%s`.', $this->getObject()->getNormalizeUri()));
@@ -488,8 +522,8 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
             if (false === $this->isValidTemplateFile($this->templateFile)) {
                 throw new RendererException(sprintf(
-                                'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
-                        ), RendererException::SCRIPTFILE_ERROR);
+                        'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
+                ), RendererException::SCRIPTFILE_ERROR);
             }
         } catch (RendererException $e) {
             $render = '';
@@ -502,8 +536,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
                     foreach ($subcontents as $sc) {
                         if (true === is_a($sc, 'BackBuilder\Renderer\IRenderable')) {
                             $scRender = $this->render(
-                                    $sc, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable
+                                $sc, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable
                             );
+
                             if (false === $scRender) {
                                 throw $e;
                             }
@@ -631,7 +666,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
         if (null === $adapter) {
             throw new RendererException(sprintf(
-                    'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
+                'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
             ), RendererException::SCRIPTFILE_ERROR);
         }
 
@@ -682,10 +717,15 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     {
         $layoutFile = parent::updateLayout($layout);
         $adapter = $this->determineWhichAdapterToUse($layoutFile);
+
+        if (false === is_array($this->_layoutdir) || 0 === count($this->_layoutdir)) {
+            throw new RendererException('None layout directory defined', RendererException::SCRIPTFILE_ERROR);
+        }
+
         if (null === $adapter) {
             throw new RendererException(sprintf(
-                            'Unable to manage file \'%s\' in path (%s)', $layoutFile, $this->_layoutdir[0]
-                    ), RendererException::SCRIPTFILE_ERROR);
+                    'Unable to manage file \'%s\' in path (%s)', $layoutFile, $this->_layoutdir[0]
+            ), RendererException::SCRIPTFILE_ERROR);
         }
 
         return $adapter->updateLayout($layout, $layoutFile);
@@ -739,6 +779,46 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
+     * Returns image url
+     *
+     * @param  string                $pathinfo
+     * @param  BackBuilder\Site\Site $site
+     *
+     * @return string image url
+     */
+    public function getImageUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri($pathinfo, null, $site, RouteCollection::IMAGE_URL);
+    }
+
+    /**
+     * Returns image url
+     *
+     * @param  string                $pathinfo
+     * @param  BackBuilder\Site\Site $site
+     *
+     * @return string image url
+     */
+    public function getMediaUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri($pathinfo, null, $site, RouteCollection::MEDIA_URL);
+    }
+
+    /**
+     * Returns resource url
+     *
+     * @param  string                $pathinfo
+     * @param  BackBuilder\Site\Site $site
+     *
+     * @return string resource url
+     */
+    public function getResourceUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri('ressources/' . $pathinfo, null, $site);
+        // return $this->getUri($pathinfo, null, $site, RouteCollection::RESOURCE_URL);
+    }
+
+    /**
      * Returns the namespace of the class proxy to use or null if no proxy is required
      *
      * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
@@ -759,7 +839,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         return array(
             'template_directories' => $this->_scriptdir,
             'layout_directories'   => $this->_layoutdir,
-            'default_adapter'      => $this->defaultAdapter
+            // 'default_adapter'      => $this->defaultAdapter
         );
     }
 
@@ -771,18 +851,18 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function restore(ContainerInterface $container, array $dump)
     {
-        $this->_application = $container->get('bbapp');
-        $this->defaultAdapter = $dump['default_adapter'];
+        // $this->_application = $container->get('bbapp');
+        // $this->defaultAdapter = $dump['default_adapter'];
         $this->_scriptdir = $dump['template_directories'];
         $this->_layoutdir = $dump['layout_directories'];
 
-        $renderer_config = $container->get('config')->getRendererConfig();
-        $adapters = (array) $renderer_config['adapter'];
-        foreach ($adapters as $adapter) {
-            $this->addRendererAdapter(new $adapter($this));
-        }
+        // $renderer_config = $container->get('config')->getRendererConfig();
+        // $adapters = (array) $renderer_config['adapter'];
+        // foreach ($adapters as $adapter) {
+        //     $this->addRendererAdapter(new $adapter($this));
+        // }
 
-        $this->_is_restored = true;
+        $this->is_restored = true;
     }
 
 
@@ -791,6 +871,6 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function isRestored()
     {
-        return $this->_is_restored;
+        return $this->is_restored;
     }
 }

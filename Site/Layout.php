@@ -2,41 +2,44 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Site;
 
-use BackBuilder\Util\Numeric,
-    BackBuilder\Services\Local\IJson,
-    BackBuilder\Site\Site,
-    BackBuilder\Exception\InvalidArgumentException,
-    BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
+use BackBuilder\Services\Local\IJson;
+use BackBuilder\Site\Site;
+use BackBuilder\Util\Numeric;
+
 use Doctrine\Common\Collections\ArrayCollection;
+
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * A website layout
  *
  * If the layout is not associated to a website, it is proposed as layout template
  * to webmasters
- * 
+ *
  * The stored data is a serialized standard object. The object must have the
  * folowing structure :
- * 
+ *
  * layout: {
  *   templateLayouts: [      // Array of final dropable zones
  *     zone1: {
@@ -49,7 +52,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  *     ...
  *   ]
  * }
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Site
  * @copyright   Lp digital system
@@ -57,6 +60,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @Entity(repositoryClass="BackBuilder\Site\Repository\LayoutRepository")
  * @Table(name="layout",indexes={@index(name="IDX_SITE", columns={"site_uid"})})
  * @HasLifecycleCallbacks
+ *
+ * @Serializer\ExclusionPolicy("all")
  */
 class Layout extends AObjectIdentifiable implements IJson
 {
@@ -65,6 +70,9 @@ class Layout extends AObjectIdentifiable implements IJson
      * The unique identifier.
      * @var string
      * @Id @Column(type="string", name="uid")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_uid;
 
@@ -72,6 +80,9 @@ class Layout extends AObjectIdentifiable implements IJson
      * The label of this layout.
      * @var string
      * @Column(type="string", name="label", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_label;
 
@@ -79,6 +90,9 @@ class Layout extends AObjectIdentifiable implements IJson
      * The file name of the layout.
      * @var string
      * @Column(type="string", name="path", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_path;
 
@@ -93,6 +107,9 @@ class Layout extends AObjectIdentifiable implements IJson
      * The creation datetime
      * @var \DateTime
      * @Column(type="datetime", name="created", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_created;
 
@@ -100,6 +117,9 @@ class Layout extends AObjectIdentifiable implements IJson
      * The last modification datetime
      * @var \DateTime
      * @Column(type="datetime", name="modified", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_modified;
 
@@ -107,6 +127,9 @@ class Layout extends AObjectIdentifiable implements IJson
      * The optional path to the layout icon
      * @var string
      * @Column(type="string", name="picpath", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_picpath;
 
@@ -124,6 +147,13 @@ class Layout extends AObjectIdentifiable implements IJson
      * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
+    
+    /**
+     * The content's parameters
+     * @var array
+     * @Column(type="array", name="parameters", nullable = true)
+     */
+    protected $_parameters = array();
 
     /**
      * The DOM document corresponding to the data
@@ -274,6 +304,44 @@ class Layout extends AObjectIdentifiable implements IJson
         }
 
         return $this->_zones;
+    }
+    
+    /**
+     * Returns defined parameters
+     * @param string $var The parameter to be return, if NULL, all parameters are returned
+     * @return mixed the parameter value or NULL if unfound
+     */
+    public function getParam($var = null)
+    {
+        $param = $this->_parameters;
+        if (null !== $var) {
+            if (true === isset($this->_parameters[$var])) {
+                $param = $this->_parameters[$var];
+            }
+        } 
+        
+        return $param;
+    }
+    
+    /**
+     * Goes all over the $param and keep looping until $pieces is empty to return
+     * the values user is looking for
+     * @param  mixed $param   
+     * @param  array  $pieces 
+     * @return mixed
+     */
+    private function _getRecursivelyParam($param, array $pieces)
+    {
+        if (0 === count($pieces)) {
+            return $param;
+        }
+
+        $key = array_shift($pieces);
+        if (false === isset($param[$key])) {
+            return null;
+        }
+
+        return $this->_getRecursivelyParam($param[$key], $pieces);
     }
 
     /**
@@ -470,6 +538,23 @@ class Layout extends AObjectIdentifiable implements IJson
         $this->_site = $site;
         return $this;
     }
+    
+    /**
+     * Sets one or all parameters
+     * @param string $var the parameter name to set, if NULL all the parameters array wil be set
+     * @param mixed $values the parameter value or all the parameters if $var is NULL
+     * @return \BackBuilder\Site\Layout
+     */
+    public function setParam($var = null, $values = null)
+    {
+        if (null === $var) {
+            $this->_parameters = $values;
+        } else {
+            $this->_parameters[$var] = $values;
+        }
+
+        return $this;
+    }
 
     /**
      * @see BackBuilder\Services\Local\IJson::__toJson()
@@ -524,4 +609,30 @@ class Layout extends AObjectIdentifiable implements IJson
         return $options;
     }
 
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("site_uid")
+     */
+    public function getSiteUid()
+    {
+        return null !== $this->_site ? $this->_site->getUid() : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("site_label")
+     */
+    public function getSiteLabel()
+    {
+        return null !== $this->_site ? $this->_site->getLabel() : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("data")
+     */
+    public function virtualGetData()
+    {
+        return json_decode($this->getData(), true);
+    }
 }

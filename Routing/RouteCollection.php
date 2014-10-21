@@ -21,12 +21,15 @@
 
 namespace BackBuilder\Routing;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Bundle\ABundle,
-    BackBuilder\Site\Site;
+use BackBuilder\BBApplication;
+use BackBuilder\Bundle\BundleInterface;
+use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBuilder\Site\Site;
 
-use Symfony\Component\Routing\RouteCollection as sfRouteCollection,
-    Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RouteCollection as sfRouteCollection;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * A RouteCollection represents a set of Route instances.
@@ -40,14 +43,33 @@ use Symfony\Component\Routing\RouteCollection as sfRouteCollection,
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class RouteCollection extends sfRouteCollection
+class RouteCollection extends sfRouteCollection implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
+    const DEFAULT_URL = 0;
+    const IMAGE_URL = 1;
+    const MEDIA_URL = 2;
+    const RESOURCE_URL = 3;
 
     /**
      * The current BBApplication
      * @var \BackBuilder\BBApplication
      */
-    private $_application;
+    private $application;
+
+    /**
+     * @var array
+     */
+    private $raw_routes;
+
+    /**
+     * @var string
+     */
+    private $uri_prefixes;
+
+    /**
+     * @var boolean
+     */
+    private $is_restored;
 
     /**
      * Class constructor
@@ -55,54 +77,45 @@ class RouteCollection extends sfRouteCollection
      */
     public function __construct(BBApplication $application = null)
     {
-        if (true === method_exists('Symfony\Component\Routing\RouteCollection', '__construct')) {
-            parent::__construct();
+        $this->application = $application;
+        $this->raw_routes = array();
+
+        $uri_prefixes = array();
+        $container = $application->getContainer();
+        if (true === $container->hasParameter('bbapp.routing.image_uri_prefix')) {
+            $this->uri_prefixes[self::IMAGE_URL] = $container->getParameter('bbapp.routing.image_uri_prefix');
         }
 
-        $this->_application = $application;
-    }
-
-    public function addBundleRouting(ABundle $bundle)
-    {
-        $router = $this->_application->getController()->getRouteCollection();
-
-        if (null !== $routeConfig = $bundle->getConfig()->getRouteConfig()) {
-            $this->pushRouteCollection($router, $routeConfig);
-            $this->moveDefaultRoute();
+        if (true === $container->hasParameter('bbapp.routing.media_uri_prefix')) {
+            $this->uri_prefixes[self::MEDIA_URL] = $container->getParameter('bbapp.routing.media_uri_prefix');
         }
+
+        if (true === $container->hasParameter('bbapp.routing.resource_uri_prefix')) {
+            // Can't enable it at moment, hard dependency in BackBuilder JS core
+            // $this->uri_prefixes[self::RESOURCE_URL] = $container->getParameter('bbapp.routing.resource_uri_prefix');
+            $this->uri_prefixes[self::RESOURCE_URL] = 'ressources';
+        }
+
+        $this->is_restored = false;
     }
 
-    public function pushRouteCollection($routeCollection)
+    /**
+     * [pushRouteCollection description]
+     * @param  array  $routes [description]
+     * @return [type]         [description]
+     */
+    public function pushRouteCollection(array $routes)
     {
-        foreach ($routeCollection as $name => $route) {
+        foreach ($routes as $name => $route) {
             if (false === array_key_exists('pattern', $route) || false === array_key_exists('defaults', $route)) {
-                $this->_application->warning(sprintf('Unable to parse the route definition `%s`.', $name));
+                $this->application->warning(sprintf('Unable to parse the route definition `%s`.', $name));
                 continue;
             }
 
-            $this->add(
-                    $name, new Route(
-                        $route['pattern'], 
-                        $route['defaults'], 
-                        true === array_key_exists('requirements', $route) 
-                            ? $route['requirements'] 
-                            : array()
-                    )
-            );
-
-            $this->_application->debug(sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
+            $this->addRoute($name, $route);
         }
 
         $this->moveDefaultRoute();
-    }
-
-    private function moveDefaultRoute()
-    {
-        $default_route = $this->get('default');
-        if (null !== $default_route) {
-            $this->remove('default');
-            $this->add('default', $default_route);
-        }
     }
 
     /**
@@ -122,11 +135,11 @@ class RouteCollection extends sfRouteCollection
     /**
      * Return complete url which match with routeName and routeParams; you can also customize
      * the base url; by default it use current site base url
-     * @param  string      $route_name   
-     * @param  array|null  $route_params 
-     * @param  string|null $base_url     
+     * @param  string      $route_name
+     * @param  array|null  $route_params
+     * @param  string|null $base_url
      * @param  boolean     $add_ext
-     * @return string              
+     * @return string
      */
     public function getUrlByRouteName(
         $route_name,
@@ -148,14 +161,15 @@ class RouteCollection extends sfRouteCollection
             }
         }
 
-        $path = null !== $base_url && true === is_string($base_url) 
-            ? $base_url . $uri . (false === $add_ext ? '' : $this->_getDefaultExtFromSite($site))
-            : $this->getUri($uri, false === $add_ext ? '' : null, $site);
-        
+        $path = null !== $base_url && true === is_string($base_url)
+            ? $base_url . $uri . (false === $add_ext ? '' : $this->getDefaultExtFromSite($site))
+            : $this->getUri($uri, false === $add_ext ? '' : null, $site)
+        ;
+
         if (false === empty($params_to_add) && true === $build_query) {
             $path = $path . '?' . http_build_query($params_to_add);
         }
-        
+
         return $path;
     }
 
@@ -165,10 +179,14 @@ class RouteCollection extends sfRouteCollection
      * @param string $pathinfo
      * @param string $defaultExt
      * @param \BackBuilder\Site\Site $site
-     * @return string         
+     * @return string
      */
-    public function getUri($pathinfo = null, $defaultExt = null, Site $site = null)
+    public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
     {
+        if (true === array_key_exists((int) $url_type, $this->uri_prefixes)) {
+            $pathinfo = '/' . $this->uri_prefixes[(int) $url_type] . '/' . $pathinfo;
+        }
+
         // If scheme already provided, return pathinfo
         if (null !== $pathinfo && preg_match('/^([a-zA-Z1-9\/_]*)http[s]?:\/\//', $pathinfo, $matches)) {
             return substr($pathinfo, strlen($matches[1]));
@@ -179,22 +197,23 @@ class RouteCollection extends sfRouteCollection
         }
 
         // If no BBApplication or no Request, return pathinfo
-        $application = $this->_application;
+        $application = $this->application;
         if (null === $application || false === $application->isStarted() || null === $application->getRequest()) {
             return $pathinfo;
         }
 
-        if (null === $site || $this->_application->getSite() === $site) {
+        $pathinfo = str_replace('//', '/', $pathinfo);
+        if (null === $site || $this->application->getSite() === $site) {
             // If no site or current site provided, use BaseUrl
-            $pathinfo = $this->_getUriFromBaseUrl($application->getRequest(), $pathinfo);
+            $pathinfo = $this->getUriFromBaseUrl($application->getRequest(), $pathinfo);
         } else {
-            $pathinfo = $this->_getUriForSite($application->getRequest(), $pathinfo, $site);
+            $pathinfo = $this->getUriForSite($application->getRequest(), $pathinfo, $site);
         }
 
         // If need add default extension provided or set from $site
-        if (false === strpos(basename($pathinfo), '.') && '/' != substr($pathinfo, -1)) {
+        if (false === strpos(basename($pathinfo), '.') && '/' !== substr($pathinfo, -1)) {
             if (null === $defaultExt) {
-                $defaultExt = $this->_getDefaultExtFromSite($site);
+                $defaultExt = $this->getDefaultExtFromSite($site);
             }
 
             $pathinfo .= $defaultExt;
@@ -204,12 +223,80 @@ class RouteCollection extends sfRouteCollection
     }
 
     /**
+     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::getClassProxy
+     */
+    public function getClassProxy()
+    {
+        return null;
+    }
+
+    /**
+     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::dump
+     */
+    public function dump(array $options = array())
+    {
+        return array('routes' => $this->raw_routes);
+    }
+
+    /**
+     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface::restore
+     */
+    public function restore(ContainerInterface $container, array $dump)
+    {
+        foreach ($dump['routes'] as $name => $route) {
+            $this->addRoute($name, $route);
+        }
+
+        $this->moveDefaultRoute();
+
+        $this->is_restored = true;
+    }
+
+
+    /**
+     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::isRestored
+     */
+    public function isRestored()
+    {
+        return $this->is_restored;
+    }
+
+    /**
+     * [addRoute description]
+     * @param [type] $name  [description]
+     * @param array  $route [description]
+     */
+    private function addRoute($name, array $route)
+    {
+        $this->raw_routes[$name] = $route;
+
+        $this->add($name, new Route(
+            $route['pattern'],
+            $route['defaults'],
+            true === array_key_exists('requirements', $route)
+                ? $route['requirements']
+                : array()
+        ));
+
+        $this->application->debug(sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
+    }
+
+    private function moveDefaultRoute()
+    {
+        $default_route = $this->get('default');
+        if (null !== $default_route) {
+            $this->remove('default');
+            $this->add('default', $default_route);
+        }
+    }
+
+    /**
      * Returns uri from pathinfo according to current request BaseUrl()
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @param string $pathinfo
      * @return string
      */
-    private function _getUriFromBaseUrl(Request $request, $pathinfo)
+    private function getUriFromBaseUrl(Request $request, $pathinfo)
     {
         if (null === $pathinfo) {
             $pathinfo = $request->getBaseUrl();
@@ -231,30 +318,28 @@ class RouteCollection extends sfRouteCollection
      * @param \BackBuilder\Site\Site $site
      * @return string
      */
-    private function _getUriForSite(Request $request, $pathinfo, Site $site)
+    private function getUriForSite(Request $request, $pathinfo, Site $site)
     {
-        return $request->getScheme()
-                . '://'
-                . $site->getServerName()
-                . $pathinfo;
+        return $request->getScheme() . '://' . $site->getServerName() . $pathinfo;
     }
 
     /**
      * Returns the default extension for a site
      * @param \BackBuilder\Site\Site $site
-     * @return string|NULL
+     * @return string|null
      */
-    private function _getDefaultExtFromSite(Site $site = null)
+    private function getDefaultExtFromSite(Site $site = null)
     {
         if (null === $site) {
-            $site = $this->_application->getSite();
+            $site = $this->application->getSite();
         }
 
-        if (null === $site) {
-            return null;
+        $extension = null;
+        if (null !== $site) {
+            $extension = $site->getDefaultExtension();
         }
 
-        return $site->getDefaultExtension();
+        return $extension;
     }
 
 }

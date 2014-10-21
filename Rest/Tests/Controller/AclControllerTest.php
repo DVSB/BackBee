@@ -95,7 +95,276 @@ class AclControllerTest extends TestCase
         
         return $controller;
     }
+    
+    
+    /**
+     * @covers ::getClassCollectionAction
+     */
+    public function test_getClassCollectionAction()
+    {
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/class/'));
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+    }
+    
+    /**
+     * @covers ::getMaskCollectionAction
+     */
+    public function test_getMaskCollectionAction()
+    {
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/permissions/'));
+        
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertCount(11, $res);
+        
+        $this->assertArrayHasKey('view', $res);
+        $this->assertEquals(1, $res['view']);
+        
+        $this->assertInternalType('array', $res);
+    }
+    
+    /**
+     * @covers ::postPermissionMapAction
+     */
+    public function test_postPermissionMapAction_invalidObjectClass() 
+    {
+        $data = [[
+            'object_id' => $this->site->getObjectIdentifier(),
+            'object_class' => 'Class\That\Doesnt\Exist',
+            'permissions' => ['view' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey(0, $res['errors']);
+        $this->assertArrayHasKey('object_class', $res['errors'][0]);
+    }
+    
 
+    /**
+     * @covers ::postPermissionMapAction
+     */
+    public function test_postPermissionMapAction_missingFields() 
+    {
+        $data = [[
+            'object_id' => $this->site->getObjectIdentifier(),
+            'object_class' => get_class($this->site),
+            'permissions' => ['view' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey(0, $res['errors']);
+        $this->assertArrayHasKey('sid', $res['errors'][0]);
+        
+        
+        $data = [[
+            'sid' => $this->groupEditor->getId(),
+            'permissions' => ['view' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey(0, $res['errors']);
+        $this->assertArrayHasKey('object_class', $res['errors'][0]);
+    }
+    
+    /**
+     * @covers ::postPermissionMapAction
+     */
+    public function test_postPermissionMapAction() 
+    {
+        $data = [
+            [
+                // object scope
+                'sid' => $this->groupEditor->getId(),
+                'object_id' => $this->site->getObjectIdentifier(),
+                'object_class' => get_class($this->site),
+                'permissions' => [
+                    'view' => 1,
+                    'create' => 1,
+                    'edit' => 1,
+                    'delete' => 1,
+                    'undelete' => 'off',
+                    'commit' => '0',
+                    'publish' => 1,
+                    'operator' => 1,
+                    'master' => 'false',
+                    'owner' => 1
+                ]
+            ], 
+            [
+                // class scope
+                'sid' => $this->groupEditor->getId(),
+                'object_class' => 'BackBuilder\Site\Layout',
+                'permissions' => [
+                    'view' => 'true',
+                    'create' => '1',
+                    'edit' => 1,
+                    'commit' => '0',
+                    'publish' => 'off'
+                ]
+            ]
+        ];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+
+        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
+        
+        $objectIdentity = new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site));
+        $ace = $aclManager->getObjectAce($objectIdentity, $securityIdentity);
+        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $ace);
+        $this->assertEquals(687, $ace->getMask());
+        
+        $objectIdentity = new ObjectIdentity('class', 'BackBuilder\Site\Layout');
+        $ace = $aclManager->getClassAce($objectIdentity, $securityIdentity);
+        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $ace);
+        $this->assertEquals(7, $ace->getMask());
+    }
+
+    
+    
+    /**
+     * @covers ::postPermissionMapAction
+     */
+    public function test_postPermissionMapAction_invalidPermission() 
+    {
+        $data = [[
+            'sid' => $this->groupEditor->getId(),
+            'object_class' => get_class($this->site),
+            'permissions' => ['permissionThatDoesnExist' => 1]
+        ]];
+        
+        $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
+            '_action' => 'postPermissionMapAction',
+            '_controller' =>  $this->getController()
+        ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST'] ));
+        
+        $res = json_decode($response->getContent(), true);
+
+        $this->assertEquals(400, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+
+        $this->assertEquals('Invalid permission mask: permissionThatDoesnExist', $res['errors'][0]['permissions'][0]);
+    }
+    
+    
+    /**
+     * @covers ::deleteObjectAceAction
+     */
+    public function test_deleteObjectAceAction()
+    {
+        // save the ACE
+        $objectIdentity = new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site));
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
+        $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, MaskBuilder::MASK_VIEW);
+        
+        // valid request
+        $data = [
+            'object_class' => get_class($this->site),
+            'object_id' => $this->site->getUid()
+        ];
+
+        $response = $this->getBBApp()->getController()->handle(Request::create(
+            sprintf('/rest/1/acl/ace/object/%s/', $this->groupEditor->getId()),
+            'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
+        ));
+
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        
+        // invalid requests
+        $data = [
+            'object_class' => 'Class\That\Doenst\Exist',
+            'object_id' => 'invalidObjectId_1234567890'
+        ];
+        $response = $this->getBBApp()->getController()->handle(Request::create(
+            sprintf('/rest/1/acl/ace/object/%s/', $this->groupEditor->getId()),
+            'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
+        ));
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey('object', $res['errors']);
+    }
+     
+    /**
+     * @covers ::deleteClassAceAction
+     */
+    public function test_deleteClassAceAction()
+    {
+        // save the ACE
+        $objectIdentity = new ObjectIdentity('class', get_class($this->site));
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
+        $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, MaskBuilder::MASK_VIEW);
+        
+        $data = [
+            'object_class' => get_class($this->site)
+        ];
+        $response = $this->getBBApp()->getController()->handle(Request::create(
+            sprintf('/rest/1/acl/ace/class/%s/', $this->groupEditor->getId()),
+            'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
+        ));
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        // invalid requests
+        $data = [
+            'object_class' => 'Class\That\Doenst\Exist',
+        ];
+        $response = $this->getBBApp()->getController()->handle(Request::create(
+            sprintf('/rest/1/acl/ace/class/%s/', $this->groupEditor->getId()),
+            'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
+        ));
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        
+        $this->assertInternalType('array', $res);
+        $this->assertArrayHasKey('errors', $res);
+        $this->assertArrayHasKey('object_class', $res['errors']);
+    }
+    
     /**
      * @covers ::postObjectAceAction
      */
@@ -114,7 +383,7 @@ class AclControllerTest extends TestCase
         
         $res = json_decode($response->getContent(), true);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
         
         $this->assertInternalType('array', $res);
         $this->assertInternalType('int', $res['id']);
@@ -166,7 +435,7 @@ class AclControllerTest extends TestCase
         
         $res = json_decode($response->getContent(), true);
         
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
         
         $this->assertInternalType('array', $res);
         $this->assertInternalType('int', $res['id']);
@@ -202,15 +471,11 @@ class AclControllerTest extends TestCase
     }
     
     /**
-     * @covers ::getEntryCollectionAction
+     * @covers ::getClassCollectionAction
      */
     public function testGetClassCollectionAction()
     {
-        $response = $this->getBBApp()->getController()->handle(new Request([], [
-        ], [
-            '_action' => 'getClassCollectionAction',
-            '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/'] ));
+        $response = $this->getController()->getClassCollectionAction(new Request());
         
         $res = json_decode($response->getContent(), true);
         
@@ -218,5 +483,5 @@ class AclControllerTest extends TestCase
         $this->assertCount(1, $res);
         $this->assertEquals('BackBuilder\Site\Site', $res[0]['class_type']);
     }
-    
+
 }

@@ -21,9 +21,9 @@
 
 namespace BackBuilder\Cache\File;
 
-use BackBuilder\Cache\ACache,
-    BackBuilder\Cache\Exception\CacheException,
-    BackBuilder\Util\String;
+use BackBuilder\Cache\ACache;
+use BackBuilder\Cache\Exception\CacheException;
+use BackBuilder\Util\String;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -67,20 +67,6 @@ class Cache extends ACache
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
         parent::__construct($options, $context, $logger);
-        $this->log('info', sprintf('File cache system initialized with directory set to `%s`.', $this->_cachedir));
-    }
-
-    /**
-     * Sets the memcache adapter instance options
-     * @param array $options
-     * @return \BackBuilder\Cache\File\Cache
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache directory doesn't exist and it cannot
-     *                                                     be created or if it is not writable.
-     */
-    protected function setInstanceOptions(array $options = array())
-    {
-
-        parent::setInstanceOptions($options);
 
         $this->_cachedir = $this->_instance_options['cachedir'];
 
@@ -97,7 +83,7 @@ class Cache extends ACache
             throw new CacheException(sprintf('Unable to write in the cache directory `%s`.', $this->_cachedir));
         }
 
-        return $this;
+        $this->log('info', sprintf('File cache system initialized with directory set to `%s`.', $this->_cachedir));
     }
 
     /**
@@ -220,5 +206,4 @@ class Cache extends ACache
         $cachefile = $this->_cachedir . DIRECTORY_SEPARATOR . $id;
         return $cachefile;
     }
-
 }

@@ -22,7 +22,6 @@ define([
         ) {
 		
         
-        
         var currentEditable = null;  
 		
         /**
@@ -381,7 +380,6 @@ define([
                 content = content.substring(6);
             }
 
-            //range.insertNode($("<p>Let me tell you what I think</p>").get(0));
             if (Aloha.queryCommandSupported('insertHTML')) {
                 showConfirmDialog(content,$clipboard,range);
             // Aloha.execCommand('insertHTML', false, content);

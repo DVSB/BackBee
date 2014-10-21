@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,8 +29,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\Validator,
     Symfony\Component\Validator\ConstraintViolationList,
+    Symfony\Component\Validator\ConstraintViolationListInterface,
     Symfony\Component\Validator\ConstraintViolation;
 use BackBuilder\Event\Listener\APathEnabledListener;
+
+use BackBuilder\Rest\Exception\ValidationException;
 
 /**
  * Request validation listener
@@ -42,12 +45,12 @@ use BackBuilder\Event\Listener\APathEnabledListener;
  */
 class ValidationListener extends APathEnabledListener
 {
-    
+
     /**
      * @var ContainerInterface
      */
     private $container;
-    
+
     /**
      * Constructor.
      *
@@ -70,35 +73,57 @@ class ValidationListener extends APathEnabledListener
         $controller = $event->getController();
         $request = $event->getRequest();
         $metadata = $this->getControllerActionMetadata($controller);
-        
+
         if(null !== $metadata) {
             $violations = new ConstraintViolationList();
 
-            if(count($metadata->queryParams)) {
+            if (0 < count($metadata->queryParams)) {
                 // set defaults
                 $this->setDefaultValues($metadata->queryParams, $request->query);
-                
+
                 $queryViolations = $this->validateParams($this->container->get('validator'), $metadata->queryParams, $request->query);
                 $violations->addAll($queryViolations);
-            } 
-            
-            if(count($metadata->requestParams)) {
+            }
+
+            if (0 < count($metadata->requestParams)) {
                 // set defaults
                 $this->setDefaultValues($metadata->requestParams, $request->request);
-                
+
                 $requestViolations = $this->validateParams($this->container->get('validator'), $metadata->requestParams, $request->request);
                 $violations->addAll($requestViolations);
             }
-            
-            if(count($violations) > 0) {
-                $request->attributes->set('violations', $violations);
+
+            $violationParam = $this->getViolationsParameterName($metadata);
+
+            if(null !== $violationParam) {
+                // if action has an argument for violations, pass it
+                $request->attributes->set($violationParam, $violations);
+            } elseif (0 < count($violations)) {
+                // if action has no arg for violations and there is at least one, throw an exception
+                throw new ValidationException($violations);
             }
         }
     }
-    
+
+    /**
+     *
+     * @param \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata $metadata
+     * @return string|null
+     */
+    protected function getViolationsParameterName($metadata)
+    {
+        foreach ($metadata->reflection->getParameters() as $param) {
+            if ($param->getClass() && $param->getClass()->implementsInterface('Symfony\Component\Validator\ConstraintViolationListInterface')) {
+                return $param->getName();
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Set default values
-     * 
+     *
      * @param array $params
      * @param \Symfony\Component\HttpFoundation\ParameterBag $values
      */
@@ -114,10 +139,10 @@ class ValidationListener extends APathEnabledListener
             }
         }
     }
-    
+
     /**
      * Validate params
-     * 
+     *
      * @param \Symfony\Component\Validator\Validator $validator
      * @param array $params
      * @param \Symfony\Component\HttpFoundation\ParameterBag $values
@@ -130,48 +155,49 @@ class ValidationListener extends APathEnabledListener
             if(empty($param['requirements'])) {
                 continue;
             }
-            
+
             $value = $values->get($param['name']);
-            
+
             $paramViolations = $validator->validateValue($value, $param['requirements']);
-            
+
             // add missing data
             foreach($paramViolations as $violation) {
                 $extendedViolation = new ConstraintViolation(
-                    $violation->getMessage(), 
-                    $violation->getMessageTemplate(), 
-                    $violation->getMessageParameters(), 
-                    $violation->getRoot(), 
-                    $param['name'], 
-                    $violation->getInvalidValue(), 
-                    $violation->getMessagePluralization(), 
+                    $violation->getMessage(),
+                    $violation->getMessageTemplate(),
+                    $violation->getMessageParameters(),
+                    $violation->getRoot(),
+                    $param['name'] . $violation->getPropertyPath(),
+                    $violation->getInvalidValue(),
+                    $violation->getMessagePluralization(),
                     $violation->getCode()
                 );
-                
+
                 $violations->add($extendedViolation);
             }
         }
-        
+
         return $violations;
     }
-    
+
     /**
-     * 
+     *
      * @param mixed $controller
      * @return \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata
      */
     protected function getControllerActionMetadata($controller)
     {
         $controllerClass = get_class($controller[0]);
-        
+
         $metadata = $this->container->get('rest.metadata.factory')->getMetadataForClass($controllerClass);
-        
+
         $controllerMetadata = $metadata->getOutsideClassMetadata();
-        
+
+        $action_metadatas = null;
         if(array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
-            return $controllerMetadata->methodMetadata[$controller[1]];
+            $action_metadatas = $controllerMetadata->methodMetadata[$controller[1]];
         }
-        
-        return null;
+
+        return $action_metadatas;
     }
 }

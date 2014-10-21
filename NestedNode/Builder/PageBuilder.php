@@ -39,6 +39,21 @@ class PageBuilder
     private $url;
 
     /**
+     * @var string
+     */
+    private $redirect;
+
+    /**
+     * @var string
+     */
+    private $target;
+
+    /**
+     * @var string
+     */
+    private $alt_title;
+
+    /**
      * @var BackBuilder\Site\Site
      */
     private $site;
@@ -79,6 +94,11 @@ class PageBuilder
     private $createdAt;
 
     /**
+     * @var \DateTime
+     */
+    private $archiving;
+
+    /**
      * @var integer
      */
     private $state;
@@ -111,7 +131,6 @@ class PageBuilder
         $page = new Page($this->uid);
         $page->setTitle($this->title);
         $page->setSite($this->site);
-        $page->setLayout($this->layout, $this->itemToPushInMainZone);
 
         if (null !== $this->root) {
             $page->setRoot($this->root);
@@ -120,9 +139,22 @@ class PageBuilder
         if (null !== $this->parent) {
             $page->setParent($this->parent);
         }
+        $page->setLayout($this->layout, $this->itemToPushInMainZone);
 
         if (null !== $this->url) {
             $page->setUrl($this->url);
+        }
+
+        if (null !== $this->redirect) {
+            $page->setUrl($this->redirect);
+        }
+
+        if (null !== $this->target) {
+            $page->setUrl($this->target);
+        }
+
+        if (null !== $this->alt_title) {
+            $page->setUrl($this->alt_title);
         }
 
         if (null !== $this->state) {
@@ -135,6 +167,10 @@ class PageBuilder
 
         if (null !== $this->createdAt) {
             $page->setCreated($this->createdAt);
+        }
+
+        if (null !== $this->archiving) {
+            $page->setArchiving($this->archiving);
         }
 
         $pageContentSet = $page->getContentSet();
@@ -436,7 +472,7 @@ class PageBuilder
     {
         return $this->publishedAt;
     }
-    
+
     /**
      * Sets the value of publishedAt.
      *
@@ -444,11 +480,21 @@ class PageBuilder
      *
      * @return self
      */
-    public function publishedAt(\DateTime $publishedAt)
+    public function publishedAt(\DateTime $publishedAt = null)
     {
         $this->publishedAt = $publishedAt;
 
         return $this;
+    }
+
+    /**
+     * Alias of publishedAt
+     *
+     * @see self::publishedAt
+     */
+    public function setPublishing(\DateTime $publishing = null)
+    {
+        return $this->publishedAt($publishing);
     }
 
     /**
@@ -460,7 +506,7 @@ class PageBuilder
     {
         return $this->createdAt;
     }
-    
+
     /**
      * Sets the value of createdAt.
      *
@@ -476,11 +522,107 @@ class PageBuilder
     }
 
     /**
+     * Gets the value of archiving.
+     *
+     * @return \DateTime
+     */
+    public function getArchiving()
+    {
+        return $this->archiving;
+    }
+
+    /**
+     * Sets the value of archiving.
+     *
+     * @param \DateTime $archiving the created at
+     *
+     * @return self
+     */
+    public function setArchiving(\DateTime $archiving = null)
+    {
+        $this->archiving = $archiving;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of target.
+     *
+     * @return string
+     */
+    public function getTarget()
+    {
+        return $this->target;
+    }
+
+    /**
+     * Sets the value of target.
+     *
+     * @param string $target the target
+     *
+     * @return self
+     */
+    public function setTarget($target)
+    {
+        $this->target = $target;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of redirect.
+     *
+     * @return string
+     */
+    public function getRedirect()
+    {
+        return $this->redirect;
+    }
+
+    /**
+     * Sets the value of redirect.
+     *
+     * @param string $redirect the redirect
+     *
+     * @return self
+     */
+    public function setRedirect($redirect)
+    {
+        $this->redirect = $redirect;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of alt_title.
+     *
+     * @return string
+     */
+    public function getAltTitle()
+    {
+        return $this->alt_title;
+    }
+
+    /**
+     * Sets the value of alt_title.
+     *
+     * @param string $alt_title the alt_title
+     *
+     * @return self
+     */
+    public function setAltTitle($alt_title)
+    {
+        $this->alt_title = $alt_title;
+
+        return $this;
+    }
+
+    /**
      * Sets the persist mode;
      * /!\ if you set a valid persist mode (SELF::INSERT_AS_FIRST_CHILD or SELF::INSERT_AS_LAST_CHILD),
      * this page will be persist for you, it also modified the left and right node of the tree
-     * 
-     * @param integer $mode 
+     *
+     * @param integer $mode
      */
     public function setPersistMode($mode)
     {
@@ -488,7 +630,7 @@ class PageBuilder
     }
 
     /**
-     * Call 
+     * Call
      * @param  Page   $page [description]
      * @return [type]       [description]
      */

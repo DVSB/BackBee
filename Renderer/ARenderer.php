@@ -21,13 +21,15 @@
 
 namespace BackBuilder\Renderer;
 
-use BackBuilder\BBApplication,
-    BackBuilder\NestedNode\ANestedNode,
-    BackBuilder\Renderer\Exception\RendererException,
-    BackBuilder\Renderer\Helper\HelperManager,
-    BackBuilder\Site\Layout,
-    BackBuilder\Util\File,
-    BackBuilder\Util\String;
+use BackBuilder\BBApplication;
+use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\Renderer\Event\RendererEvent;
+use BackBuilder\Renderer\Exception\RendererException;
+use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
+use BackBuilder\Util\File;
+use BackBuilder\Util\String;
+
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -319,9 +321,15 @@ abstract class ARenderer implements IRenderer
         }
 
         if (null !== $this->_application) {
-            $bb5script = $this->_application->getBaseDir() . '/BackBuilder/Resources' . DIRECTORY_SEPARATOR . 'scripts';
-            File::resolveFilepath($bb5script);
-            $this->_scriptdir[] = $bb5script;
+            $renderer_config = $application->getConfig()->getRendererConfig();
+            if (true === isset($renderer_config['bb_scripts_directory'])) {
+                $directories = (array) $renderer_config['bb_scripts_directory'];
+                foreach ($directories as $directory) {
+                    if (true === is_dir($directory) && true === is_readable($directory)) {
+                        $this->_scriptdir[] = $directory;
+                    }
+                }
+            }
         }
 
         $this->helpers = new ParameterBag();
@@ -398,7 +406,9 @@ abstract class ARenderer implements IRenderer
 
         $dispatcher = $this->_application->getEventDispatcher();
         if (null != $dispatcher) {
-            $dispatcher->triggerEvent($name, null != $object ? $object : $this->getObject(), null === $render ? $this : array($this, $render));
+            $object = null !== $object ? $object : $this->getObject();
+            $event = new RendererEvent($object, null === $render ? $this : array($this, $render));
+            $dispatcher->triggerEvent($name, $object, null, $event);
         }
     }
 
@@ -512,9 +522,9 @@ abstract class ARenderer implements IRenderer
      * @param \BackBuilder\Site\Site $site
      * @return string
      */
-    public function getUri($pathinfo = null, $defaultExt = null, \BackBuilder\Site\Site $site = null)
+    public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
     {
-        return $this->getApplication()->getRouting()->getUri($pathinfo, null, $site);
+        return $this->getApplication()->getRouting()->getUri($pathinfo, $defaultExt, $site, $url_type);
     }
 
     public function getRelativeUrl($uri)

@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,8 +19,10 @@ namespace BackBuilder\DependencyInjection\Tests;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace BackBuilder\DependencyInjection\Tests;
+
 use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\Tests\ContainerTest_Ressources\Listener\TestListener;
+use BackBuilder\DependencyInjection\Tests\ContainerTest_Resources\Listener\TestListener;
 use BackBuilder\Event\Dispatcher;
 
 use Symfony\Component\DependencyInjection\Definition;
@@ -62,7 +63,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->setDefinition('date_without_tag', $definition);
 
         // creating a definition with one tag, `test` (definition of service with id `date_with_tag`)
-        $definition = new Definition('DateTime');
+        $definition = new Definition('BackBuilder\DependencyInjection\Tests\ContainerTest_Resources\DateTime');
         $definition->addTag('test');
         $container->setDefinition('date_with_tag', $definition);
 
@@ -116,7 +117,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $event_dispatcher->addListener('service.tagged.dumpable', array('@listener', 'onGetServiceTaggedTestEvent'));
 
         $definition = new Definition('DateTime');
-        $definition->addTag('dumpable');
+        $definition->addTag('dumpable', array('dispatch_event' => false));
         $container->setDefinition('dumpable_date', $definition);
 
         $container->get('dumpable_date');

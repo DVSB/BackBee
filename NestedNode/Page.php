@@ -2,35 +2,39 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode;
 
-use BackBuilder\Exception\BBException,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\ContentSet,
-    BackBuilder\NestedNode\ANestedNode,
-    BackBuilder\Renderer\IRenderable,
-    BackBuilder\Site\Layout,
-    BackBuilder\Site\Site,
-    BackBuilder\MetaData\MetaDataBag,
-    BackBuilder\Workflow\State;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\Exception\BBException;
+use BackBuilder\MetaData\MetaDataBag;
+use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\Renderer\IRenderable;
+use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
+use BackBuilder\Workflow\State;
+
 use Doctrine\Common\Collections\ArrayCollection;
+
+use JMS\Serializer\Annotation as Serializer;
+
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
@@ -38,9 +42,9 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  *
  * A page basically is an URI an a set of content defined for a website.
  * A page must have a layout defined to be displayed.
- * 
+ *
  * State of a page is bit operation on one or several following values:
- * 
+ *
  * * STATE_OFFLINE
  * * STATE_ONLINE
  * * STATE_HIDDEN
@@ -51,9 +55,11 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
- * @Table(name="page",indexes={@index(name="IDX_STATE", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "state", "publishing", "archiving", "modified"}), @index(name="IDX_URL", columns={"site_uid", "url"}), @index(name="IDX_ROOT_RIGHT", columns={"root_uid", "rightnode"})})
+ * @Table(name="page",indexes={@index(name="IDX_STATEP", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "rightnode", "state", "publishing", "archiving", "modified"}), @index(name="IDX_URL", columns={"site_uid", "url"}), @index(name="IDX_ROOT_RIGHT", columns={"root_uid", "rightnode"})})
  * @HasLifecycleCallbacks
  * @fixtures(qty=1)
+ *
+ * @Serializer\ExclusionPolicy("all")
  */
 class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 {
@@ -105,6 +111,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var string
      * @Id @Column(type="string", name="uid")
      * @fixture(type="md5")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_uid;
 
@@ -145,13 +154,20 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var string
      * @Column(type="string", name="title", nullable=false)
      * @fixture(type="sentence", value=6)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_title;
+
     /**
      * The alternate title of this page
      * @var string
      * @Column(type="string", name="alttitle", nullable=true)
      * @fixture(type="sentence", value=6)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_alttitle;
 
@@ -159,6 +175,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The URI of this page
      * @var string
      * @Column(type="string", name="url", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_url;
 
@@ -166,6 +185,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Target of this page if redirect defined.
      * @var string
      * @column(type="string", name="target", nullable=false)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_target;
 
@@ -173,6 +195,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Permanent redirect.
      * @var string
      * @column(type="string", name="redirect", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_redirect;
 
@@ -196,6 +221,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var \DateTime
      * @Column(type="datetime", name="date", nullable=true)
      * @fixture(type="dateTime")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_date;
 
@@ -204,6 +232,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var int
      * @Column(type="smallint", name="state", nullable=false)
      * @fixture(type="boolean")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("integer")
      */
     protected $_state;
 
@@ -211,6 +242,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The auto publishing datetime
      * @var \DateTime
      * @Column(type="datetime", name="publishing", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_publishing;
 
@@ -218,6 +252,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The auto-archiving datetime
      * @var \DateTime
      * @Column(type="datetime", name="archiving", nullable=true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_archiving;
 
@@ -285,13 +322,19 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @var integer
      */
     public $old_state;
-    
+
     /**
      * Whether redirect url should be returned by getUrl() method
-     * 
+     *
      * @var bool
      */
     private $_use_url_redirect = true;
+
+    /**
+     * Properties ignored while unserializing object
+     * @var array
+     */
+    protected $_unserialized_ignored = array('_created', '_modified', '_date', '_publishing', '_archiving', '_metadata', '_workflow_state');
 
     /**
      * Class constructor
@@ -334,12 +377,12 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         );
 
         if ($this->_uid) {
-            if (null !== $this->_contentset) {
+            if (null !== $this->_contentset && null !== $this->getLayout()) {
                 $this->_contentset = $this->_contentset->createClone($this);
             } else {
                 $this->_contentset = new ContentSet();
             }
-            
+
             $this->_uid = md5(uniqid('', true));
             $this->_leftnode = 1;
             $this->_rightnode = $this->_leftnode + 1;
@@ -360,19 +403,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
-     * Returns the parent node, NULL if this node is root
-     * @codeCoverageIgnore
-     * @return \BackBuilder\NestedNode\Page|NULL
-     */
-    public function getParent()
-    {
-        return $this->_parent;
-    }
-
-    /**
      * Returns the owner site of this node.
-     * @codeCoverageIgnore
      * @return \Backbuilder\Site\Site
+     * @codeCoverageIgnore
      */
     public function getSite()
     {
@@ -394,8 +427,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Return sthe layout of the page.
-     * @codeCoverageIgnore
      * @return \BackBuilder\Site\Layout
+     * @codeCoverageIgnore
      */
     public function getLayout()
     {
@@ -404,17 +437,18 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the alternate title of the page.
-     * @codeCoverageIgnore
      * @return string
+     * @codeCoverageIgnore
      */
     public function getAltTitle()
     {
         return $this->_alttitle;
     }
+
     /**
      * Returns the title of the page.
-     * @codeCoverageIgnore
      * @return string
+     * @codeCoverageIgnore
      */
     public function getTitle()
     {
@@ -423,8 +457,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the URL of the page.
-     * 
-     * @codeCoverageIgnore
      * @params bool $doRedirect : if true - returns redirect url (if exists), otherwise - current page url
      * @return string
      */
@@ -433,11 +465,11 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         if(null === $doRedirect) {
             $doRedirect = $this->_use_url_redirect;
         }
-        
+
         if($this->isRedirect() && $doRedirect) {
             return $this->getRedirect();
         }
-        
+
         return $this->_url;
     }
 
@@ -456,7 +488,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the target.
-     * @codeCoverageIgnore
      * @return string
      */
     public function getTarget()
@@ -466,17 +497,16 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the premanent redirect URL if defined
-     * @codeCoverageIgnore
      * @return string|NULL
+     * @codeCoverageIgnore
      */
     public function getRedirect()
     {
         return $this->_redirect;
     }
-    
+
     /**
-     * Determine if page is a redirect
-     * 
+     * Determines if page is a redirect
      * @return bool
      */
     public function isRedirect()
@@ -486,8 +516,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the associated metadata if defined
-     * @codeCoverageIgnore
      * @return \BackBuilder\MetaData\MetaDataBag|NULL
+     * @codeCoverageIgnore
      */
     public function getMetaData()
     {
@@ -496,8 +526,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the state of the page.
-     * @codeCoverageIgnore
      * @return int
+     * @codeCoverageIgnore
      */
     public function getState()
     {
@@ -506,8 +536,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the date
-     * @codeCoverageIgnore
      * @return \DateTime
+     * @codeCoverageIgnore
      */
     public function getDate()
     {
@@ -516,8 +546,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the publishing date if defined.
-     * @codeCoverageIgnore
      * @return \DateTime|NULL
+     * @codeCoverageIgnore
      */
     public function getPublishing()
     {
@@ -526,8 +556,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the archiving date if defined.
-     * @codeCoverageIgnore
      * @return \DateTime|NULL
+     * @codeCoverageIgnore
      */
     public function getArchiving()
     {
@@ -536,7 +566,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the collection of revisions.
-     * @codeCoverageIgnore
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getRevisions()
@@ -601,6 +630,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns TRUE if the page can be rendered.
      * @return Boolean
+     * @codeCoverageIgnore
      */
     public function isRenderable()
     {
@@ -633,14 +663,14 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function isOnline($ignoreSchedule = false)
     {
+        $onlineByState = ($this->getState() & self::STATE_ONLINE) && !($this->getState() & self::STATE_DELETED);
+
         if (true === $ignoreSchedule) {
-            return (($this->getState() & self::STATE_ONLINE)
-                    && !($this->getState() & self::STATE_DELETED));
+            return $onlineByState;
         } else {
-            return (($this->getState() & self::STATE_ONLINE)
-                    && !($this->getState() & self::STATE_DELETED)
+            return $onlineByState
                     && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
-                    && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert));
+                    && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert);
         }
     }
 
@@ -650,12 +680,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function isDeleted()
     {
-        return ($this->getState() & self::STATE_DELETED);
+        return 0 < ($this->getState() & self::STATE_DELETED);
     }
 
     /**
      * Is the page is static ?
      * @return boolean
+     * @codeCoverageIgnore
      */
     public function isStatic()
     {
@@ -664,7 +695,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the associated site
-     * @codeCoverageIgnore
      * @param \BackBuilder\NestedNode\Site $site
      * @return \BackBuilder\NestedNode\Page
      */
@@ -676,7 +706,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the main contentset associated to the node.
-     * @codeCoverageIgnore
      * @param \BackBuilder\ClassContent\ContentSet $contentset
      * @return \BackBuilder\NestedNode\ANestedNode
      */
@@ -688,11 +717,10 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the date of the page
-     * @codeCoverageIgnore
      * @param \DateTime $date
      * @return \BackBuilder\NestedNode\Page
      */
-    public function setDate(\DateTime $date)
+    public function setDate(\DateTime $date = null)
     {
         $this->_date = $date;
         return $this;
@@ -709,45 +737,26 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     {
         $this->_layout = $layout;
 
-        // add as much ContentSet to the page main ContentSet than defined zones in layout
+        // Add as much ContentSet to the page main ContentSet than defined zones in layout
         for ($i = $this->getContentSet()->count(); $i < count($layout->getZones()); $i++) {
-            $contentset = new ContentSet();
+            // Do this case really exist ?
+            if (null === $zone = $layout->getZone($i)) {
+                $this->getContentSet()->push(new ContentSet());
+                continue;
+            }
 
-            if (null !== $zone = $layout->getZone($i)) {
-                $contentset = new ContentSet(null, $zone->options);
+            // Create a new column
+            $contentset = new ContentSet(null, $zone->options);
 
-                if (null !== $toPushInMainZone && true === $zone->mainZone) {
-                    // New content push in the main zone
-                    $toPushInMainZone->setMainNode($this);
-                    $contentset->push($toPushInMainZone);
-                } else if ('inherited' === $zone->defaultClassContent) {
-                    // Inherited zone => same ContentSet than parent if exist
-                    if (null !== $this->getParent() && $i < $this->getParent()->getContentSet()->count()) {
-                        if (null !== $herited = $this->getParent()->getContentSet()->item($i)) {
-                            $contentset = $herited;
-                        }
-                    }
-                } else if ($zone->defaultClassContent) {
-                    // New default content push
-                    $classname = 'BackBuilder\ClassContent\\' . $zone->defaultClassContent;
-                    if (true === class_exists($classname)) {
-                        $content = new $classname();
-
-                        if (null !== $content->getProperty('labelized-by')) {
-                            try {
-                                eval('$content->' . $content->getProperty('labelized-by') . '="' . str_replace('"', '\\"', $this->getTitle()) . '";');
-                            } catch (\Exception $e) {
-                                // Nothing to do
-                            }
-                        }
-
-                        if (true === $zone->mainZone) {
-                            $content->setMainNode($this);
-                        }
-
-                        $contentset->push($content);
-                    }
-                }
+            if (null !== $toPushInMainZone && true === $zone->mainZone) {
+                // Existing content push in the main zone
+                $contentset->push($toPushInMainZone->setMainNode($this));
+            } else if ('inherited' === $zone->defaultClassContent) {
+                // Inherited zone => same ContentSet than parent if exist
+                $contentset = $this->getInheritedContent($i, $contentset);
+            } else if ($zone->defaultClassContent) {
+                // New default content push
+                $contentset->push($this->createNewDefaultContent('BackBuilder\ClassContent\\' . $zone->defaultClassContent, $zone->mainZone));
             }
 
             $this->getContentSet()->push($contentset);
@@ -757,8 +766,50 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Returns the inherited content from parent, $default if not found
+     * @param int $index
+     * @param \BackBuilder\ClassContent\AClassContent $default
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    private function getInheritedContent($index, AClassContent $default)
+    {
+        if (
+                null !== $this->getParent() &&
+                $index < $this->getParent()->getContentSet()->count() &&
+                null !== $this->getParent()->getContentSet()->item($index)
+        ) {
+            return $this->getParent()->getContentSet()->item($index);
+        }
+
+        return $default;
+    }
+
+    /**
+     * Creates a new default content to be pushed in layout columns
+     * @param string $classname
+     * @param boolean $mainzone
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    private function createNewDefaultContent($classname, $mainzone = false)
+    {
+        $content = new $classname();
+        if (null !== $content->getProperty('labelized-by')) {
+            try {
+                eval('$content->' . $content->getProperty('labelized-by') . '="' . str_replace('"', '\\"', $this->getTitle()) . '";');
+            } catch (\Exception $e) {
+                // Nothing to do
+            }
+        }
+
+        if (true === $mainzone) {
+            $content->setMainNode($this);
+        }
+
+        return $content;
+    }
+
+    /**
      * Sets the alternate title of the page.
-     * @codeCoverageIgnore
      * @param string $alttitle
      * @return \BackBuilder\NestedNode\Page
      */
@@ -769,7 +820,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
     /**
      * Sets the title of the page.
-     * @codeCoverageIgnore
      * @param string $title
      * @return \BackBuilder\NestedNode\Page
      */
@@ -781,7 +831,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the URL of the page
-     * @codeCoverageIgnore
      * @param string $url
      * @return \BackBuilder\NestedNode\Page
      */
@@ -793,7 +842,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the target if a permanent redirect is defined
-     * @codeCoverageIgnore
      * @param string $target
      * @return \BackBuilder\NestedNode\Page
      */
@@ -805,7 +853,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets a permanent redirect
-     * @codeCoverageIgnore
      * @param string $redirect
      * @return \BackBuilder\NestedNode\Page
      */
@@ -817,7 +864,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the associated metadata
-     * @codeCoverageIgnore
      * @param \BackBuilder\MetaData\MetaDataBag $metadata
      * @return \BackBuilder\NestedNode\Page
      */
@@ -829,7 +875,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the state
-     * @codeCoverageIgnore
      * @param int $state
      * @return \BackBuilder\NestedNode\Page
      */
@@ -841,7 +886,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the publishing date
-     * @codeCoverageIgnore
      * @param \DateTime $publishing
      * @return \BackBuilder\NestedNode\Page
      */
@@ -853,7 +897,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the archiving date
-     * @codeCoverageIgnore
      * @param \DateTime $archiving
      * @return \BackBuilder\NestedNode\Page
      */
@@ -865,7 +908,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets a collection of revisions for the page
-     * @codeCoverageIgnore
      * @param \Doctrine\Common\Collections\ArrayCollection $revisions
      * @return \BackBuilder\NestedNode\Page
      */
@@ -879,7 +921,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Sets the workflow state
      * @param \BackBuilder\Workflow\State $state
      * @return \BackBuilder\NestedNode\Page
-     * @codeCoverageIgnore
      */
     public function setWorkflowState(State $state = null)
     {
@@ -890,19 +931,26 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns the inherited zone according to the provided ContentSet
      * @param \BackBuilder\ClassContent\ContentSet $contentSet
-     * @return \StdClass The inherited zone
+     * @return \StdClass|NULL The inherited zone if found
      */
     public function getInheritedContensetZoneParams(ContentSet $contentSet)
     {
         $zone = null;
-        if (null !== $layoutZones = $this->getLayout()->getZones()) {
-            $contentSetCount = $this->getContentSet()->count();
 
-            for ($i = 0; $i < count($contentSetCount); $i++) {
-                $parentContentset = $this->getParent()->getContentSet()->item($i);
-                if ($contentSet->getUid() === $parentContentset->getUid()) {
-                    $zone = $layoutZones[$i];
-                }
+        if (
+                null === $this->getLayout() ||
+                null === $this->getParent() ||
+                false === is_array($this->getLayout()->getZones())
+        ) {
+            return $zone;
+        }
+
+        $layoutZones = $this->getLayout()->getZones();
+        for ($i = 0; $i < $this->getParent()->getContentSet()->count(); $i++) {
+            $parentContentset = $this->getParent()->getContentSet()->item($i);
+
+            if ($contentSet->getUid() === $parentContentset->getUid()) {
+                $zone = $layoutZones[$i];
             }
         }
 
@@ -910,9 +958,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
-     * Returns the index of the provided ContentSet in the main ContentSet
+     * Returns the index of the provided ContentSet in the main ContentSetif found, FALSE otherwise
      * @param \BackBuilder\ClassContent\ContentSet $contentSet
-     * @return int
+     * @return int|FALSE
      */
     public function getRootContentSetPosition(ContentSet $contentSet)
     {
@@ -946,7 +994,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Tells which "rootContentset" is inherited from currentpage's parent
-     * @param type $uidOnly 
+     * @param type $uidOnly
      * @return array Array of contentset uids
      */
     public function getInheritedZones($uidOnly = false)
@@ -975,18 +1023,29 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function getPageMainZones()
     {
+        $result = array();
+
+        if (null === $this->getLayout()) {
+            return $result;
+        }
+
         $currentpageRootZones = $this->getContentSet();
         $layoutZones = $this->getLayout()->getZones();
-        $result = array();
-        for ($i = 0; $i < count($currentpageRootZones); $i++) {
+
+        for ($i = 0; $i < count($layoutZones); $i++) {
+            $zoneInfos = $layoutZones[$i];
             $currentZone = $currentpageRootZones->item($i);
-            if (count($layoutZones) > $i) {
-                $zoneInfos = $layoutZones[$i];
-                if ($zoneInfos && property_exists($zoneInfos, 'mainZone') && true === $zoneInfos->mainZone) {
-                    $result[$currentZone->getUid()] = $currentZone;
-                }
+
+            if (
+                    null !== $currentZone &&
+                    null !== $zoneInfos &&
+                    true === property_exists($zoneInfos, 'mainZone') &&
+                    true === $zoneInfos->mainZone
+            ) {
+                $result[$currentZone->getUid()] = $currentZone;
             }
         }
+
         return $result;
     }
 
@@ -995,17 +1054,16 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @param \BackBuilder\ClassContent\ContentSet $contentset
      * @return Boolean
      */
-    private function _isLinkedToHisParentBy(ContentSet $contentset = null)
+    public function isLinkedToHisParentBy(ContentSet $contentset = null)
     {
-        $contentset = (!is_null($contentset)) ? $contentset : false;
-        $result = false;
-        if (false !== $contentset) {
-            $inheritedZones = $this->getInheritedZones();
-            if (array_key_exists($contentset->getUid(), $inheritedZones)) {
-                $result = true; //$inheritedZones[$contentset->getUid()];
-            }
+        if (
+                null !== $contentset &&
+                true === array_key_exists($contentset->getUid(), $this->getInheritedZones())
+        ) {
+            return true;
         }
-        return $result;
+
+        return false;
     }
 
     /**
@@ -1017,17 +1075,15 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function replaceRootContentSet(ContentSet $contentToReplace, ContentSet $newContentSet, $checkContentsLinkToParent = true)
     {
-        /* check link with parent */
-        $result = false;
-        $checkContentsLinkToParent = (is_bool($checkContentsLinkToParent)) ? $checkContentsLinkToParent : false;
-        $contentIsLinked = ($checkContentsLinkToParent) ? $this->_isLinkedToHisParentBy($contentToReplace) : true;
+        $checkContentsLinkToParent = (true === is_bool($checkContentsLinkToParent)) ? $checkContentsLinkToParent : false;
+        $contentIsLinked = (true === $checkContentsLinkToParent) ? $this->isLinkedToHisParentBy($contentToReplace) : true;
 
-        if ($contentIsLinked) {
-            $mainContentSet = $this->getContentSet();
-            if ($mainContentSet) {
-                $result = $mainContentSet->replaceChildBy($contentToReplace, $newContentSet);
+        if (true === $contentIsLinked) {
+            if (null !== $this->getContentSet()) {
+                $this->getContentSet()->replaceChildBy($contentToReplace, $newContentSet);
             }
         }
+
         return $newContentSet;
     }
 
@@ -1039,7 +1095,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     {
         $result = parent::toArray();
 
-        $result['siteuid'] = $this->getSite()->getUid();
+        $result['siteuid'] = (null !== $this->getSite()) ? $this->getSite()->getUid() : null;
         $result['title'] = $this->getTitle();
         $result['alttitle'] = $this->getAltTitle();
         $result['url'] = $this->getUrl();
@@ -1060,44 +1116,35 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Constructs the node from a string or object
      * @param mixed $serialized The string representation of the object.
      * @return \BackBuilder\NestedNode\ANestedNode
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or, 
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
      *                                                         with strict mode, if a property does not exists
      */
     public function unserialize($serialized, $strict = false)
     {
-        if (false === is_object($serialized))
-            $serialized = json_decode($serialized);
+        if (false === is_object($serialized)) {
+            if (null === $serialized = json_decode($serialized)) {
+                throw new InvalidArgumentException('The serialized value can not be unserialized to node object.');
+            }
+        }
 
-        foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
-            if (in_array($property, array('_created', '_modified', '_publishing', '_archiving', '_metadata', '_workflow_state'))) {
-                continue;
-            } else if (TRUE === property_exists($this, $property)) {
-                $this->$property = $value;
-            } else if (TRUE === $strict)
-                throw new BBException(sprintf('Unknown property `%s` in %s.', $property, get_class($this)));
+        parent::unserialize($serialized, $strict);
+
+        if (true === property_exists($serialized, 'date')) {
+            $this->_setDateTimeValue('_date', $serialized->date);
         }
 
         if (true === property_exists($serialized, 'publishing')) {
-            $publishing = null;
-            if (0 < $serialized->publishing) {
-                $publishing = new \DateTime();
-                $publishing->setTimestamp($serialized->publishing);
-            }
-            $this->setPublishing($publishing);
+            $this->_setDateTimeValue('_publishing', $serialized->publishing);
         }
 
         if (true === property_exists($serialized, 'archiving')) {
-            $archiving = null;
-            if (0 < $serialized->archiving) {
-                $archiving = new \DateTime();
-                $archiving->setTimestamp($serialized->archiving);
-            }
-            $this->setArchiving($archiving);
+            $this->_setDateTimeValue('_archiving', $serialized->archiving);
         }
 
-        if (true === property_exists($serialized, 'metadata') && null !== $this->getMetaData()) {
-            $this->setMetaData($this->getMetaData()->fromStdClass((object)$serialized->metadata));
+        if (true === property_exists($serialized, 'metadata')) {
+            $meta = new MetaDataBag();
+            $meta->fromStdClass((object)$serialized->metadata);
+            $this->setMetaData($meta);
         }
 
         if (true === property_exists($serialized, 'workflow_state')) {
@@ -1108,6 +1155,24 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * Assign DateTime object to a property giving a time stamp
+     * @param string $property
+     * @param int $timestamp
+     * @return \BackBuilder\NestedNode\Page
+     */
+    private function _setDateTimeValue($property, $timestamp = null)
+    {
+        $date = null;
+        if (null !== $timestamp && 0 < $timestamp) {
+            $date = new \DateTime();
+            $date->setTimestamp($timestamp);
+        }
+
+        $this->$property = $date;
         return $this;
     }
 
@@ -1189,34 +1254,117 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * old_state property setter
-     * @return null|integer
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setOldState($v)
     {
         $this->old_state = $v;
+        return $this;
     }
-    
+
     /**
      * Tells whether getUrl() should return the redirect url or BB5 url
-     * 
      * @param bool $useUrlRedirect
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setUseUrlRedirect($useUrlRedirect)
     {
         $this->_use_url_redirect = $useUrlRedirect;
+        return $this;
     }
-    
+
     /**
-     * 
+     * Should getUrl() return the redirect url or bb5 url ?
      * @return bool
      */
     public function getUseUrlRedirect()
     {
         return $this->_use_url_redirect;
     }
-    
+
+    /**
+     * Returns default template name
+     * @return string
+     * @codeCoverageIgnore
+     */
     public function getTemplateName()
     {
         return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("layout_uid")
+     */
+    public function getLayoutUid()
+    {
+        return null !== $this->getlayout() ? $this->getlayout()->getUid() : '';
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("layout_label")
+     */
+    public function getLayoutLabel()
+    {
+        return null !== $this->getlayout() ? $this->getlayout()->getLabel() : '';
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("site_uid")
+     */
+    public function getSiteUid()
+    {
+        return null !== $this->_site ? $this->_site->getUid() : '';
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("site_label")
+     */
+    public function getSiteLabel()
+    {
+        return null !== $this->_site ? $this->_site->getLabel() : '';
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("state_label")
+     */
+    public function getStateLabel()
+    {
+        $states = array_flip(self::$STATES);
+        $label = true === isset($states[$this->_state]) ? $states[$this->_state] : null;
+        if (null === $label) {
+            $labels = array();
+            foreach ($states as $value => $label) {
+                if (0 !== ($this->_state & $value)) {
+                    $labels[] = $label;
+                }
+            }
+
+            $label = implode(', ', $labels);
+        }
+
+        return $label;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("workflow_uid")
+     */
+    public function getWorkflowStateUid()
+    {
+        return null !== $this->_workflow_state ? $this->_workflow_state->getUid() : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("workflow_label")
+     */
+    public function getWorkflowStateLabel()
+    {
+        return null !== $this->_workflow_state ? $this->_workflow_state->getLabel() : null;
     }
 }

@@ -27,15 +27,17 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Validator\ConstraintViolation,
     Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
     Symfony\Component\Security\Http\SecurityEvents,
-    Symfony\Component\HttpFoundation\JsonResponse;
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
 
-use BackBuilder\Security\Token\UsernamePasswordToken;
-
+use BackBuilder\Security\Acl\Permission\MaskBuilder;
 use BackBuilder\Security\User;
 use BackBuilder\Rest\Exception\ValidationException;
+
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException,
+    Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 /**
  * User Controller
@@ -62,13 +64,14 @@ class UserController extends ARestController
      *
      *
      */
-    public function getCollectionAction(Request $request, ConstraintViolationList $violations = null)
+    public function getCollectionAction(Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
         // TODO
+
+        
+        if(!$this->isGranted('VIEW', new ObjectIdentity('class', 'BackBuilder\Security\User'))) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to view users'));
+        }
 
         return array();
     }
@@ -80,13 +83,21 @@ class UserController extends ARestController
      */
     public function getAction($id)
     {
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to delete users');
+        }
+        
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
         if(!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
         }
+        
+        if(!$this->isGranted('VIEW', $user)) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
+        }
 
-        return new Response($this->formatItem($user));
+        return new Response($this->formatItem($user), 200, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -96,10 +107,18 @@ class UserController extends ARestController
      */
     public function deleteAction($id)
     {
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to delete users');
+        }
+        
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
         if(!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
+        }
+        
+        if(!$this->isGranted('DELETE', $user)) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to delete user with id %s', $id));
         }
 
         $this->getEntityManager()->remove($user);
@@ -124,16 +143,20 @@ class UserController extends ARestController
      *
      * @param int $id User ID
      */
-    public function putAction($id, Request $request, ConstraintViolationList $violations = null)
+    public function putAction($id, Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to view users');
         }
-
+        
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
         if(!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
+        }
+        
+        if(!$this->isGranted('EDIT', $user)) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
         $this->deserializeEntity($request->request->all(), $user);
@@ -162,23 +185,27 @@ class UserController extends ARestController
      * @Rest\RequestParam(name = "lastname", requirements = {
      *  @Assert\NotBlank(message="Last Name is required")
      * })
+     * 
      *
      */
-    public function postAction(Request $request, ConstraintViolationList $violations = null)
+    public function postAction(Request $request)
     {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
+        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedHttpException('You must be authenticated to view users');
         }
-
+        
         $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\User')->findBy(array('_login' => $request->request->get('login')));
 
         if($userExists) {
-            throw new ValidationException(new ConstraintViolationList(array(
-                new ConstraintViolation('User with that login already exists', 'User with that login already exists', array(), 'login', 'login', $request->request->get('login'))
-            )));
+            throw new ConflictHttpException(sprintf('User with that login already exists: %s', $request->request->get('login')));
         }
-
+        
         $user = new User();
+        
+        if(!$this->isGranted('CREATE', new ObjectIdentity('class', get_class($user)))) {
+            throw new AccessDeniedHttpException(sprintf('You are not authorized to create users'));
+        }
+        
         $user = $this->deserializeEntity($request->request->all(), $user);
 
         // handle the password
@@ -199,26 +226,4 @@ class UserController extends ARestController
         return new Response($this->formatItem($user), 200, array('Content-Type' => 'application/json'));
     }
 
-
-
-    /**
-     * GET User Permissions
-     *
-     * @param int $id User ID
-     * @param \Symfony\Component\Validator\ConstraintViolationList $violations
-     * @return type
-     * @throws ValidationException
-     */
-    public function getPermissionsAction($id, ConstraintViolationList $violations = null)
-    {
-        if(null !== $violations && count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
-
-
-        // TODO
-
-        return new Response();
-    }
 }

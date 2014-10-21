@@ -72,7 +72,7 @@ class Controller implements ContainerAwareInterface
      * Returns current Backbuilder application
      *
      * @access public
-     * @return \BackBuilder\DependencyInjection\ContainerBuilder\IApplication
+     * @return \BackBuilder\IApplication
      */
     public function getApplication() 
     {
@@ -208,5 +208,28 @@ class Controller implements ContainerAwareInterface
     
 
         
+    /**
+     * Get a user from the Security Context
+     *
+     * @return mixed
+     *
+     * @see Symfony\Component\Security\Core\Authentication\Token\TokenInterface::getUser()
+     */
+    public function getUser()
+    {
+        if (!$this->getContainer()->has('security.context')) {
+            throw new \LogicException('Security context is not defined in your application.');
+        }
+
+        if (null === $token = $this->getContainer()->get('security.context')->getToken()) {
+            return;
+        }
+
+        if (!is_object($user = $token->getUser())) {
+            return;
+        }
+
+        return $user;
+    }
  
 }

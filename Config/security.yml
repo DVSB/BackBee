@@ -1,0 +1,48 @@
+firewalls:
+    rest_api_area:
+        pattern: ^/rest
+        requirements:
+            HTTP-X-API-SIGNATURE: \w+
+            HTTP-X-API-KEY: \w+
+        provider: public_key
+        public_key: ~
+        restful:
+            provider: bb_user
+            nonce_dir: security/nonces
+            lifetime: 1800
+            use_registry: true
+        anonymous: ~
+    bb_area:
+        pattern: ^/
+        requirements:
+            HTTP-X-Requested-With: XMLHttpRequest
+            HTTP-X-BB-METHOD: (JsonRpc|Upload)
+        provider: bb_user
+        bb_auth:
+            provider: bb_user
+            nonce_dir: security/nonces
+            lifetime: 1800
+            use_registry: true
+
+providers:
+    bb_user:
+        entity:
+            class: BackBuilder\Security\User
+        secret: bb5_secret_key
+    public_key:
+        entity:
+            class: BackBuilder\Security\User
+
+contexts:
+    BackBuilder\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext, RestfulContext]
+
+encoders:
+    BackBuilder\Security\User:
+        class: Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder
+        arguments:
+            algorithm: md5
+            encode_as_base64: false
+            iterations: 1
+
+acl:
+    connection: default

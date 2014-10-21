@@ -193,6 +193,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
+            $bbapp->getBBDir() . '/ClassContent',
+            $bbapp->getBBDir() . '/ClassContent/Indexes',
             $bbapp->getBBDir() . '/Logging',
             $bbapp->getBBDir() . '/NestedNode',
             $bbapp->getBBDir() . '/Security',
@@ -246,6 +248,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $this->bbapp;
     }
 
+    public function getContainer()
+    {
+        return $this->getBBApp()->getContainer();
+    }
 
 
     /**
@@ -268,7 +274,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         ;
 
         if(!$group) {
-            throw new \RuntimeException('Group not found: ' . $groupId);
+            $group = new Group();
+            $group->setIdentifier($groupId);
+            $group->setName($groupId);
         }
 
         $user->addGroup($group);
@@ -321,6 +329,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
-        $schema->dropDatabase();
+        $schema->dropSchema($metadata);
     }
 }

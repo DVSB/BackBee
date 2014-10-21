@@ -1,31 +1,30 @@
 <?php
+namespace BackBuilder\Event\Listener;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Event\Listener;
-
-use BackBuilder\BBApplication,
-    BackBuilder\Event\Event,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\Rewriting\IUrlGenerator;
+use BackBuilder\BBApplication;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\Event\Event;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Rewriting\IUrlGenerator;
 
 /**
  * Listener to rewriting events
@@ -46,12 +45,14 @@ class RewritingListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent))
+        if (false === ($content instanceof AClassContent)) {
             return;
+        }
 
         $page = $content->getMainNode();
-        if (null === $page)
+        if (null === $page) {
             return;
+        }
 
         $newEvent = new Event($page, $content);
         $newEvent->setDispatcher($event->getDispatcher());
@@ -65,12 +66,14 @@ class RewritingListener
     public static function onFlushPage(Event $event)
     {
         $page = $event->getTarget();
-        if (!($page instanceof Page))
+        if (false === ($page instanceof Page)) {
             return;
+        }
 
         $maincontent = $event->getEventArgs();
-        if (!($maincontent instanceof AClassContent))
+        if (false === ($maincontent instanceof AClassContent)) {
             $maincontent = null;
+        }
 
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
@@ -84,7 +87,7 @@ class RewritingListener
 
     /**
      * Update URL for a page and its descendants according to the application IUrlGenerator
-     * 
+     *
      * @param \BackBuilder\BBApplication $application
      * @param \BackBuilder\NestedNode\Page $page
      * @param \BackBuilder\ClassContent\AClassContent $maincontent
@@ -92,7 +95,7 @@ class RewritingListener
     private static function _updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = null)
     {
         $url_generator = $application->getUrlGenerator();
-        if (!($url_generator instanceof IUrlGenerator)) {
+        if (false === ($url_generator instanceof IUrlGenerator)) {
             return;
         }
 
@@ -105,12 +108,12 @@ class RewritingListener
 
         $uow = $em->getUnitOfWork();
         $change_set = $uow->getEntityChangeSet($page);
-        if (true === array_key_exists('_state', $change_set)) {
+        if (true === $uow->isScheduledForUpdate($page) && true === array_key_exists('_state', $change_set)) {
             $page->setOldState($change_set['_state'][0]);
         }
 
         $new_url = $url_generator->generate($page, $maincontent);
-        if ($new_url !== $page->getUrl()) {
+        if ($new_url !== $page->getUrl(false)) {
             $page->setUrl($new_url);
 
             if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {

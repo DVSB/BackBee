@@ -1,8 +1,0 @@
-parameters:
-    foo: 'foo'
-
-services:
-    repository_service:
-        class: \DateTime
-    synthetic_service:
-        synthetic: true

@@ -33,6 +33,9 @@ use BackBuilder\Console\Console;
  */
 interface IApplication
 {
+    const DEFAULT_CONTEXT = 'default';
+    const DEFAULT_ENVIRONMENT = '';
+
     /**
      * @param \BackBuilder\Site\Site $site
      */

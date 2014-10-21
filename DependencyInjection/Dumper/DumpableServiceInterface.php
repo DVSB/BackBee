@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\DependencyInjection\Dumper;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,7 +19,7 @@ namespace BackBuilder\DependencyInjection\Dumper;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\DependencyInjection\ContainerInterface;
+namespace BackBuilder\DependencyInjection\Dumper;
 
 /**
  * This interface define every methods a service should implements to be dumpable by the container
@@ -46,4 +45,9 @@ interface DumpableServiceInterface
      * @return array contains every datas required by this service to be restored at the same state
      */
     public function dump(array $options = array());
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored();
 }

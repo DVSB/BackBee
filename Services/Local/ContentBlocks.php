@@ -347,10 +347,11 @@ class ContentBlocks extends AbstractServiceLocal
                     $contentInfos = new \stdClass();
                     $contentInfos->uid = $item->getUid();
                     $contentInfos->title = String::truncateText($currentItemTitle, 50); //truncate
-                    $contentInfos->ico = 'ressources/img/contents/' . str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass) . '.png';
+                    $contentInfos->ico = '/ressources/img/contents/' . str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass) . '.png';
                     $contentInfos->type = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->classname = $itemClass;
                     $contentInfos->created = $item->getCreated()->format("d/m/Y");
+                    $contentInfos->modified = $item->getModified()->format("d/m/Y");
                     $contentInfos->completeTitle = $currentItemTitle;
 
                     if (null !== $image = $item->getFirstElementOfType('BackBuilder\ClassContent\Media\image')) {
@@ -413,7 +414,6 @@ class ContentBlocks extends AbstractServiceLocal
      */
     public function getContentBlocks($catName = "tous", $withCategory = true)
     {
-
         /* Content catégories */
         $response = array();
 
@@ -424,6 +424,7 @@ class ContentBlocks extends AbstractServiceLocal
         $response["contentCategories"] = $contentCatContainer;
         $response["contentList"] = $this->getContentsByCategory($catName);
         $response["selectedCategory"] = $catName;
+
         return $response;
     }
 
@@ -740,10 +741,13 @@ class ContentBlocks extends AbstractServiceLocal
                         }
                     }
                 }
+            }
 
+            if (0 < count($newvalues)) {
                 $content->$key = $newvalues;
             }
         }
+
         return $content;
     }
 

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,8 +26,8 @@ use BackBuilder\ClassContent\AClassContent,
 
 /**
  * Helper providing HTML attributes to online-edited content
- * 
- * If a valid BB5 user is rendering the content and parameter bb5.editable not 
+ *
+ * If a valid BB5 user is rendering the content and parameter bb5.editable not
  * set to false following attributes would be sets :
  *   * data-uid:            The unique identifier of the content
  *   * data-parent:         The unique identifier of the content owner
@@ -41,7 +41,7 @@ use BackBuilder\ClassContent\AClassContent,
  *   * data-isloaded:       Is the content is contained by the entity manager
  *   * data-forbidenactions:The editing forbiden actions
  *   * data-contentplugins: The edting plugins to load
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Renderer
  * @subpackage  Helper
@@ -59,13 +59,13 @@ class bb5content extends AHelper
 
     /**
      * An array of attributes
-     * @var array 
+     * @var array
      */
-    private $_attributes;
+    private $_attributes = array();
 
     /**
      * An array of attributes
-     * @var array 
+     * @var array
      */
     private $_basic_attributes;
 
@@ -78,6 +78,12 @@ class bb5content extends AHelper
     private $_parent_uid;
     private $_parent;
 
+    /**
+     * Parent content already checked to avoid loop
+     * @var type @var array
+     */
+    private $already_checked;
+    
     /**
      * Returns the HTML formated attributes for content
      * @param array $datacontent Optional attributes to add
@@ -104,6 +110,7 @@ class bb5content extends AHelper
             } else {
                 $this->_element_name = null;
                 if (null !== $this->_parent = $this->_renderer->getObject()) {
+                    $this->already_checked = array();
                     $this->_setElementName($this->_parent, $element);
                     $this->_parent_uid = $this->_parent->getUid();
                 }
@@ -123,31 +130,39 @@ class bb5content extends AHelper
         return implode(' ', array_map(array($this, '_formatAttributes'), array_keys($this->_attributes), array_values($this->_attributes)));
     }
 
+    /**
+     * Try to find element name of the content
+     * @param AClassContent $parent
+     * @param AClassContent $element
+     */
     private function _setElementName(AClassContent $parent, AClassContent $element)
     {
+        $this->already_checked[] = array($parent->getUid());
+
         foreach ($parent->getData() as $key => $values) {
             if (false === is_array($values)) {
                 $values = array($values);
             }
 
             foreach ($values as $value) {
-                if ($value instanceof AClassContent) {
-                    if (false === $value->isLoaded()) {
-                        // try to load subcontent
-                        if (null !== $subcontent = $this->getRenderer()
-                                ->getApplication()
-                                ->getEntityManager()
-                                ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($value))
-                                ->load($value, $this->getRenderer()->getApplication()->getBBUserToken())) {
-                            $value = $subcontent;
-                        }
-                    }
-                    if (true === $element->equals($value)) {
-                        $this->_element_name = $key;
-                        $this->_parent = $parent;
-                    } else {
-                        $this->_setElementName($value, $element);
-                    }
+                if (false === ($value instanceof AClassContent)) {
+                    // Not a AClassContent cannot be an element
+                    continue;
+                }
+                if ($value instanceof ContentSet) {
+                    // ContentSet: break treatment
+                    continue;
+                }
+                if (true === in_array($value->getUid(), $this->already_checked)) {
+                    // This content was already checked without success, skip it
+                    continue;
+                }
+
+                if (true === $element->equals($value)) {
+                    $this->_element_name = $key;
+                    $this->_parent = $parent;
+                } else {
+                    $this->_setElementName($this->getLoadedContent($value), $element);
                 }
 
                 if (null !== $this->_element_name) {
@@ -159,6 +174,26 @@ class bb5content extends AHelper
                 break;
             }
         }
+    }
+
+    /**
+     * Try to load a content if it is not yet
+     * @param AClassContent $content
+     * @return AClassContent
+     */
+    private function getLoadedContent(AClassContent $content)
+    {
+        if (false === $content->isLoaded()) {
+            if (null !== $subcontent = $this->getRenderer()
+                    ->getApplication()
+                    ->getEntityManager()
+                    ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content))
+                    ->load($content, $this->getRenderer()->getApplication()->getBBUserToken())) {
+                $content = $subcontent;
+            }
+        }
+
+        return $content;
     }
 
     /**
@@ -201,7 +236,7 @@ class bb5content extends AHelper
             $this->_addValueToAttribute('class', 'bb5-droppable-item')
                     ->_addValueToAttribute('data-contentplugins', 'contentsetEdit');
 
-            // itemcontainer is used when items in a contentset are not directly appended to the contentset 
+            // itemcontainer is used when items in a contentset are not directly appended to the contentset
             $itemcontainer = $this->_content->getParam('itemcontainer');
             if (true === is_array($itemcontainer)) {
                 $param = array_pop($itemcontainer);
@@ -289,7 +324,7 @@ class bb5content extends AHelper
      * @params aray $params Optional parameters
      * @return \BackBuilder\Renderer\Helper\datacontent
      */
-    
+
     private function _addRteMarkup($params = array())
     {
         $contentParent = $this->_parent;
@@ -423,10 +458,14 @@ class bb5content extends AHelper
         $securityContext = $this->_renderer->getApplication()->getSecurityContext();
 
         try {
-            return (null !== $this->getRenderer()->getApplication()->getBBUserToken()
-                    && (true === $securityContext->isGranted('sudo')
+            return (
+                null !== $this->getRenderer()->getApplication()->getBBUserToken()
+                && (
+                    true === $securityContext->isGranted('sudo')
                     || null === $securityContext->getACLProvider()
-                    || true === $securityContext->isGranted('VIEW', $this->_content)));
+                    || true === $securityContext->isGranted('VIEW', $this->_content)
+                )
+            );
         } catch (\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException $e) {
             return false;
         }

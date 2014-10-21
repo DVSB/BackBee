@@ -34,7 +34,7 @@ class Registry
 {
     /**
      * @var integer
-     * 
+     *
      * @Id
      * @Column(type="integer")
      * @GeneratedValue
@@ -43,7 +43,7 @@ class Registry
 
     /**
      * @var string
-     * 
+     *
      * @Column(name="`type`", type="string", length=255, nullable=true)
      */
     protected $type;
@@ -57,14 +57,14 @@ class Registry
 
     /**
      * @var string
-     * 
+     *
      * @Column(name="`value`", type="text", nullable=true)
      */
     protected $value;
 
     /**
      * @var string
-     * 
+     *
      * @Column(name="`scope`", type="string", length=255, nullable=true)
      */
     protected $scope;
@@ -89,7 +89,7 @@ class Registry
     {
         return $this->type;
     }
-    
+
     /**
      * Sets the value of key.
      *
@@ -113,7 +113,7 @@ class Registry
     {
         return $this->key;
     }
-    
+
     /**
      * Sets the value of key.
      *
@@ -137,7 +137,7 @@ class Registry
     {
         return $this->value;
     }
-    
+
     /**
      * Sets the value of value.
      *
@@ -161,7 +161,7 @@ class Registry
     {
         return $this->scope;
     }
-    
+
     /**
      * Sets the value of scope.
      *
