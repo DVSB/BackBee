@@ -111,19 +111,31 @@ class Keyword extends AbstractServiceLocal
         $mode = $keywordInfos->mode;
         $em = $this->bbapp->getEntityManager();
         $leaf = false;
+
+        if (null !== $em->getRepository('BackBuilder\NestedNode\KeyWord')->exists($keywordInfos->keyword)) {
+            throw new \Exception('Keyword with `' . $keywordInfos->keyword . '` as value already exists!');
+        }
+
         if ($mode == "create") {
-            $keyword = new \BackBuilder\NestedNode\KeyWord();
-            $keyword->setKeyWord($keywordInfos->keyword);
-            $parent = $em->find('\BackBuilder\NestedNode\KeyWord', $keywordInfos->parentUid);
-            #$keyword->setParent($parent)
+            $keyword = $this->bbapp->getContainer()->get('keywordbuilder')->createKeywordIfNotExists(
+                $keywordInfos->keyword,
+                false
+            );
+
+            $parent = $em->find('BackBuilder\NestedNode\KeyWord', $keywordInfos->parentUid);
+
             /* add as first of parent child */
             if ($parent) {
-                $keyword = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->insertNodeAsFirstChildOf($keyword, $parent);
+                $keyword = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->insertNodeAsFirstChildOf(
+                    $keyword,
+                    $parent
+                );
             }
         } else {
-            $keyword = $em->find("\BackBuilder\NestedNode\Keyword", $keywordInfos->keywordUid);
+            $keyword = $em->find("BackBuilder\NestedNode\Keyword", $keywordInfos->keywordUid);
             $keyword->setKeyWord($keywordInfos->keyword);
         }
+
         $em->persist($keyword);
         $em->flush();
 
@@ -133,8 +145,8 @@ class Keyword extends AbstractServiceLocal
             $leaf->attr->rel = 'leaf';
             $leaf->attr->id = 'node_' . $keyword->getUid();
             $leaf->data = html_entity_decode($keyword->getKeyWord(), ENT_COMPAT, 'UTF-8');
-            return $leaf;
         }
+
         return $leaf;
     }
 
