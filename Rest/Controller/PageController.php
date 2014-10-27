@@ -66,6 +66,9 @@ class PageController extends ARestController
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
      * )
+     * @Rest\QueryParam(name="state", description="State", requirements={
+     *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid")
+     * })
      */
     public function getCollectionAction()
     {
