@@ -385,7 +385,7 @@ class PageController extends ARestController
     /**
      * Getter for page entity repository
      *
-     * @return BackBuilder\NestedNode\Repository\PageRepository
+     * @return \BackBuilder\NestedNode\Repository\PageRepository
      */
     private function getPageRepository()
     {
