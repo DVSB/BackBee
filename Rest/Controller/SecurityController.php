@@ -151,19 +151,12 @@ class SecurityController extends ARestController
 
     /**
      *
+     * @Rest\Security(expression="is_fully_authenticated()")
      */
     public function deleteSessionAction(Request $request)
     {
-        try {
-            if (false === $this->isGranted('IS_AUTHENTICATED_FULLY') ){
-                return Response::create()->setStatusCode(401, "Session doesn't exist");
-            }
-        } catch (AuthenticationCredentialsNotFoundException $e) {
-            return Response::create()->setStatusCode(401, "Session doesn't exist");
-        }
-
-        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
         $request->getSession()->invalidate();
+        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
 
         return new Response('', 204);
     }
