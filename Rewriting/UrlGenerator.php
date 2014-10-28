@@ -115,7 +115,7 @@ class UrlGenerator implements IUrlGenerator
      * Dynamically add a listener on descrimator.onflush event to RewritingListener
      * @return array
      */
-    public function getDescriminators()
+    public function getDiscriminators()
     {
         if (null === $this->_descriminators) {
             $this->_descriminators = array();
@@ -180,7 +180,7 @@ class UrlGenerator implements IUrlGenerator
         }
 
         if (true === $exceptionOnMissingScheme) {
-            throw new RewritingException(sprintf('None rewriting scheme found for Page(%s)', $page->getUid()), RewritingException::MISSING_SCHEME);
+            throw new RewritingException(sprintf('No rewriting scheme found for Page(%s)', $page->getUid()), RewritingException::MISSING_SCHEME);
         }
 
         return '/' . $page->getUid();
