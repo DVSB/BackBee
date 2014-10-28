@@ -36,6 +36,6 @@ class BootstrapFileNotFoundException extends \BackBuilder\Exception\BBException
      */
     public function __construct(array $directories)
     {
-        parent::__construct('The file `bootstrap.yml` could not be find in: ' . implode(',', $directories));
+        parent::__construct('The file `bootstrap.yml` not found in: ' . implode(',', $directories));
     }
 }
