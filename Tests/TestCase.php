@@ -2,14 +2,14 @@
 namespace BackBuilder\Tests;
 
 use BackBuilder\AutoLoader\AutoLoader;
+use BackBuilder\DependencyInjection\ContainerBuilder;
 
 use org\bovigo\vfs\vfsStream;
 
-use Doctrine\ORM\Tools\SchemaTool,
-    Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\SchemaTool;
 
 
-use  BackBuilder\Security\Token\BBUserToken;
+use BackBuilder\Security\Token\BBUserToken;
 
 use BackBuilder\Security\User,
     BackBuilder\Security\Group;
@@ -42,7 +42,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $backbuilder_autoloader = new AutoLoader();
 
-        $backbuilder_autoloader->setApplication($this->getBBAppStub())
+        $backbuilder_autoloader->setApplication($this->getBBApp())
                 ->register()
                 ->registerNamespace('BackBuilder\Bundle\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Tests')))
                 ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
@@ -52,9 +52,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Listeners')))
                 ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Services', 'Public')))
                 ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'vendor', 'doctrine', 'orm', 'tests', 'Doctrine', 'Tests')));
-
-        $backbuilder_autoloader->registerStreamWrapper('BackBuilder\ClassContent', 'bb.class', '\BackBuilder\Stream\ClassWrapper\Adapter\Yaml');
-
     }
 
     public function getClassContentDir()
@@ -129,62 +126,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $this->mock_container[$obj_name];
     }
 
-    /**
-     * get the BBApplication stub
-     *
-     * return BackBuilder\BBAplication
-     */
-    public function getBBAppStub()
-    {
-        $BBApp = $this->getMockBuilder('BackBuilder\BBApplication')->disableOriginalConstructor()->getMock();
-        $BBApp->expects($this->any())
-              ->method('getRenderer')
-              ->will($this->returnValue($this->getMockObjectContainer('renderer')));
-
-        $BBApp->expects($this->any())
-              ->method('getAutoloader')
-              ->will($this->returnValue($this->getMockObjectContainer('autoloader')));
-
-        $BBApp->expects($this->any())
-              ->method('getSite')
-              ->will($this->returnValue($this->getMockObjectContainer('site')));
-
-        $BBApp->expects($this->any())
-              ->method('getConfig')
-              ->will($this->returnValue($this->getMockObjectContainer('config')));
-
-        $BBApp->expects($this->any())
-              ->method('getEntityManager')
-              ->will($this->returnValue($this->getMockObjectContainer('entityManager')));
-
-        $BBApp->expects($this->any())
-              ->method('getClassContentDir')
-              ->will($this->returnValue($this->getClassContentDir()));
-
-        $BBApp->expects($this->any())
-              ->method('getEventDispatcher')
-              ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
-
-
-        $BBApp->expects($this->any())
-              ->method('getContainer')
-              ->will($this->returnValue(new \BackBuilder\Tests\Mock\EventDispatcher\MockNoopEventDispatcher($BBApp)));
-
-
-        $BBApp->expects($this->any())
-              ->method('getBaseDir')
-              ->will($this->returnValue(vfsStream::url('')));
-
-        $controller = new \BackBuilder\FrontController\FrontController($BBApp);
-
-        $BBApp->expects($this->any())
-              ->method('getController')
-              ->will($this->returnValue($controller));
-
-        return $BBApp;
-    }
-
-
     public function initDb($bbapp)
     {
 
@@ -209,10 +150,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
-        //$schema->updateSchema($metadata, true);
-
-        $classes = $em->getMetadataFactory()->getAllMetadata();
-        $schema->createSchema($classes);
+        $schema->createSchema($metadata);
     }
 
     public function initAcl()
