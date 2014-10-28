@@ -86,6 +86,9 @@ class AclControllerTest extends TestCase
         $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_EDIT);
         
         $aclProvider->updateAcl($acl);
+        
+        // authenticate user , set up permissions
+        $token = $this->createAuthUser('api_user', array('ROLE_API_USER'));
     }
     
     protected function getController()
