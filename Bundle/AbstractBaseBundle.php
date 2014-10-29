@@ -110,6 +110,7 @@ abstract class AbstractBaseBundle implements BundleInterface
 
         $this->bundle_loader->loadConfigDefinition($this->getConfigServiceId(), $this->base_directory);
 
+        $this->exposed_actions = array();
         $this->exposed_actions_callbacks = array();
         $this->initBundleExposedActions();
 
@@ -244,6 +245,54 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
+     * enable property setter
+     *
+     * @param boolean $enable
+     *
+     * @return self
+     */
+    public function setEnable($enable)
+    {
+        $properties = $this->getProperty();
+        $properties['enable'] = (boolean) $enable;
+        $this->getConfig()->setSection('bundle', $properties, true);
+
+        return $this;
+    }
+
+    /**
+     * category property setter
+     *
+     * @param string|array $category
+     *
+     * @return self
+     */
+    public function setCategory($category)
+    {
+        $properties = $this->getProperty();
+        $properties['category'] = (array) $category;
+        $this->getConfig()->setSection('bundle', $properties, true);
+
+        return $this;
+    }
+
+    /**
+     * config_per_site property setter
+     *
+     * @param boolean $v
+     *
+     * @return self
+     */
+    public function setConfigPerSite($v)
+    {
+        $properties = $this->getProperty();
+        $properties['config_per_site'] = (boolean) $v;
+        $this->getConfig()->setSection('bundle', $properties, true);
+
+        return $this;
+    }
+
+    /**
      * @see JsonSerializable::jsonSerialize
      */
     public function jsonSerialize()
@@ -364,13 +413,12 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     private function initBundleExposedActions()
     {
-        if (null === $this->exposed_actions) {
-            $this->exposed_actions = array();
+        if (true === $this->isEnabled()) {
             $container = $this->getApplication()->getContainer();
             foreach ((array) $this->getProperty('exposed_actions') as $controller_id => $actions) {
                 if (false === $container->has($controller_id)) {
-                    throw new InvalidArgumentException(
-                        "Exposed controller with id `$controller_id` not found for " . $this->getId
+                    throw new \InvalidArgumentException(
+                        "Exposed controller with id `$controller_id` not found for " . $this->getId()
                     );
                 }
 
