@@ -252,16 +252,15 @@ class PageController extends ARestController
     public function patchAction(Page $page)
     {
         $operations = $this->getRequest()->request->get('operations');
+
         try {
             (new OperationSyntaxValidator())->validate($operations);
         } catch (InvalidOperationSyntaxException $e) {
             throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
         }
 
-        $rest_config = $this->getApplication()->getConfig()->getRestConfig();
-        $entity_patcher = new EntityPatcher(new RightManager(
-            null !== $rest_config ? $rest_config['patcher']['rights'] : array()
-        ));
+        $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
+
         try {
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
