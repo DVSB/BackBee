@@ -1,14 +1,10 @@
 <?php
 namespace BackBuilder\Tests;
 
-use BackBuilder\AutoLoader\AutoLoader;
-use BackBuilder\DependencyInjection\ContainerBuilder;
-
-use org\bovigo\vfs\vfsStream;
-
 use Doctrine\ORM\Tools\SchemaTool;
 
-
+use BackBuilder\AutoLoader\AutoLoader;
+use BackBuilder\Installer\EntityFinder;
 use BackBuilder\Security\Token\BBUserToken;
 
 use BackBuilder\Security\User,
@@ -108,7 +104,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public static function getRepositoyFolder()
     {
-        return realpath(self::getRootFolder() . DIRECTORY_SEPARATOR . 'repository');;
+        return realpath(self::getRootFolder() . DIRECTORY_SEPARATOR . 'repository');
     }
 
     /**
@@ -128,10 +124,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function initDb($bbapp)
     {
-
         $em = $bbapp->getContainer()->get('em');
+        $entityFinder = new EntityFinder($bbapp->getBBDir());
 
-        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
+        $paths = [
             $bbapp->getBBDir() . '/Bundle',
             $bbapp->getBBDir() . '/Cache/DAO',
             $bbapp->getBBDir() . '/ClassContent',
@@ -145,8 +141,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $bbapp->getBBDir() . '/Theme',
             $bbapp->getBBDir() . '/Util/Sequence/Entity',
             $bbapp->getBBDir() . '/Workflow',
-        ));
-
+        ];
+        
+        foreach($paths as $path) {
+            $em->getConfiguration()->getMetadataDriverImpl()->addPaths([$path]);
+            $em->getConfiguration()->getMetadataDriverImpl()->addExcludePaths($entityFinder->getExcludePaths($path));
+        }
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
@@ -248,23 +248,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function dropDb($bbapp)
     {
         $em = $bbapp->getContainer()->get('em');
-
-        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
-            $bbapp->getBBDir() . '/Bundle',
-            $bbapp->getBBDir() . '/Cache/DAO',
-            $bbapp->getBBDir() . '/ClassContent',
-            $bbapp->getBBDir() . '/ClassContent/Indexes',
-            $bbapp->getBBDir() . '/Logging',
-            $bbapp->getBBDir() . '/NestedNode',
-            $bbapp->getBBDir() . '/Security',
-            $bbapp->getBBDir() . '/Site',
-            $bbapp->getBBDir() . '/Site/Metadata',
-            $bbapp->getBBDir() . '/Stream/ClassWrapper',
-            $bbapp->getBBDir() . '/Theme',
-            $bbapp->getBBDir() . '/Util/Sequence/Entity',
-            $bbapp->getBBDir() . '/Workflow',
-        ));
-
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         $schema->dropSchema($metadata);
