@@ -113,6 +113,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
+     * @Serializer\ReadOnly
      */
     protected $_uid;
 
