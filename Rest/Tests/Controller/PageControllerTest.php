@@ -29,7 +29,8 @@ use BackBuilder\Tests\TestCase;
 
 use BackBuilder\Security\User,
     BackBuilder\Security\Group,
-    BackBuilder\Site\Site;
+    BackBuilder\Site\Site,
+    BackBuilder\NestedNode\Page;
 
 /**
  * Test for PageController class
@@ -52,9 +53,10 @@ class PageControllerTest extends TestCase
     {
         $this->initAutoload();
         $bbapp = $this->getBBApp();
+        
         $this->initDb($bbapp);
         $this->getBBApp()->setIsStarted(true);
-        
+        $em = $bbapp->getEntityManager();
         $this->site = new Site();
         $this->site->setLabel('Test Site')->setServerName('test_server');
         
@@ -63,14 +65,40 @@ class PageControllerTest extends TestCase
         $this->groupEditor->setSite($this->site);
         $this->groupEditor->setIdentifier('GROUP_ID');
         
-        $bbapp->getEntityManager()->persist($this->site);
-        $bbapp->getEntityManager()->persist($this->groupEditor);
+        $em->persist($this->site);
+        $em->persist($this->groupEditor);
         
-        $bbapp->getEntityManager()->flush();
         
+        $this->deletedPage = new Page();
+        $this->deletedPage
+            ->setTitle('Deleted')
+            ->setState(Page::STATE_DELETED)
+            ->setSite($this->site)
+        ;
+        
+        $this->offlinePage = new Page();
+        $this->offlinePage
+            ->setTitle('Offline')
+            ->setState(Page::STATE_OFFLINE)
+            ->setSite($this->site)
+        ;
+        
+        $this->onlinePage = new Page();
+        $this->onlinePage
+            ->setTitle('Online')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
+        
+        $em->persist($this->deletedPage);
+        $em->persist($this->offlinePage);
+        $em->persist($this->onlinePage);
+        
+        
+        $em->flush();
     }
     
-    protected function getController()
+    private function getController()
     {
         $controller = new PageController();
         $controller->setContainer($this->getBBApp()->getContainer());
@@ -96,6 +124,7 @@ class PageControllerTest extends TestCase
         $res = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $res);
         $this->assertCount(1, $res);
+        
         
         // filter by state
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(

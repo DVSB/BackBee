@@ -21,8 +21,6 @@ namespace BackBuilder\Rest\Controller;
  */
 
 use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\IApplication as ApplicationInterface;
-use BackBuilder\MetaData\MetaDataBag;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Patcher\EntityPatcher;
@@ -61,16 +59,18 @@ class PageController extends ARestController
 
     /**
      * Get collection of page entity
+     * 
+     * By default returns online pages only
      *
      * @Rest\Pagination(default_count=25, max_count=100)
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
      * )
-     * @Rest\QueryParam(name="state", description="State", requirements={
-     *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid")
+     * @Rest\QueryParam(name="state", description="State", default="1", requirements={
+     *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid", multiple=true)
      * })
      */
-    public function getCollectionAction()
+    public function getCollectionAction($parent = null, $state = [1])
     {
         if (null === $parent = $this->getEntityFromAttributes('parent')) {
             $parent = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
