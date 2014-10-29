@@ -30,6 +30,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Auth Controller
@@ -155,6 +156,10 @@ class SecurityController extends ARestController
      */
     public function deleteSessionAction(Request $request)
     {
+        if(null === $request->getSession()) {
+            throw new NotFoundHttpException('Session doesn\'t exist');
+        }
+        
         $request->getSession()->invalidate();
         $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
 
