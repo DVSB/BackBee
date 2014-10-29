@@ -47,7 +47,6 @@ class GroupController extends ARestController
      * Get all records
      * 
      * @Rest\QueryParam(name = "site_uid", description="Site")
-     * 
      */
     public function getCollectionAction(Request $request) 
     {
@@ -77,32 +76,20 @@ class GroupController extends ARestController
     /**
      * GET Group
      * 
-     * @param int $id Group ID
+     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBuilder\Security\Group")
      */
-    public function getAction($id) 
+    public function getAction(Group $group) 
     {
-        $group = $this->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($id);
-        
-        if(!$group) {
-            return $this->create404Response(sprintf('Group not found with id %d', $id));
-        }
-        
         return new Response($this->formatItem($group));
     }
     
     /**
      * DELETE
      * 
-     * @param int $id Group ID
+     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBuilder\Security\Group")
      */
-    public function deleteAction($id) 
+    public function deleteAction(Group $group) 
     {
-        $group = $this->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($id);
-
-        if(!$group) {
-            return $this->create404Response(sprintf('Group not found with id %d', $id));
-        }
-        
         $this->getEntityManager()->remove($group);
         $this->getEntityManager()->flush();
         
@@ -124,16 +111,11 @@ class GroupController extends ARestController
      *   @Assert\Length(max=50)
      * })
      * 
-     * @param int $id
+     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBuilder\Security\Group")
+     * 
      */
-    public function putAction($id, Request $request) 
+    public function putAction(Group $group, Request $request) 
     {
-        $group = $this->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($id);
-        
-        if(!$group) {
-            return $this->create404Response(sprintf('Group not found with id %d', $id));
-        }
-
         $this->deserializeEntity($request->request->all(), $group);
         
         $this->getEntityManager()->persist($group);
