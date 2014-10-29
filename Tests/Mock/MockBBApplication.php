@@ -82,7 +82,7 @@ class MockBBApplication extends BBApplication
 
         return $this->_bbdir;
     }
-     
+
     /**
      * Get vendor dir
      *
@@ -92,7 +92,7 @@ class MockBBApplication extends BBApplication
     {
         return $this->getBBDir() . '/vendor';
     }
-    
+
     /**
      * Mock the merhod returning the base repository directory
      *
@@ -102,13 +102,13 @@ class MockBBApplication extends BBApplication
     {
         return vfsStream::url('repositorydir');
     }
-    
+
     public function getCacheDir()
     {
         return vfsStream::url('Cache');
     }
-    
-    
+
+
 
     /**
      * Initilizes the mock structure
@@ -121,12 +121,12 @@ class MockBBApplication extends BBApplication
             $mockConfig = array(
                 'ClassContent' => array(),
                 'Config' => array(
-                    'bootstrap.yml' => file_get_contents(__DIR__ . '/../config/bootstrap.yml'),
-                    'config.yml' => file_get_contents(__DIR__ . '/../config/config.yml'),
-                    'doctrine.yml' => file_get_contents(__DIR__ . '/../config/doctrine.yml'),
-                    'logging.yml' => file_get_contents(__DIR__ . '/../config/logging.yml'),
-                    'security.yml' => file_get_contents(__DIR__ . '/../config/security.yml'),
-                    'services.yml' => file_get_contents(__DIR__ . '/../config/services.yml'),
+                    'bootstrap.yml' => file_get_contents(__DIR__ . '/../Config/bootstrap.yml'),
+                    'config.yml' => file_get_contents(__DIR__ . '/../Config/config.yml'),
+                    'doctrine.yml' => file_get_contents(__DIR__ . '/../Config/doctrine.yml'),
+                    'logging.yml' => file_get_contents(__DIR__ . '/../Config/logging.yml'),
+                    'security.yml' => file_get_contents(__DIR__ . '/../Config/security.yml'),
+                    'services.yml' => file_get_contents(__DIR__ . '/../Config/services.yml'),
                 ),
                 'Data' => array(
                     'Media' => array(),
@@ -145,14 +145,14 @@ class MockBBApplication extends BBApplication
 
 
     /**
-     * 
+     *
      * @inheritDoc
      */
-    public function start(Site $site = null) 
+    public function start(Site $site = null)
     {
         $this->_isstarted = true;
     }
-    
+
     /**
      */
     public function setIsStarted($isStarted)
