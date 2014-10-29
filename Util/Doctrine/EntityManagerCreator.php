@@ -76,7 +76,7 @@ class EntityManagerCreator
             $config = self::_getORMConfiguration($options, $logger);
 
             if (true === array_key_exists('connection', $options)) {
-                // An already connection is provided
+                // An existing connection is provided
                 $em = self::_createEntityManagerWithConnection($options['connection'], $config, $evm);
             } else {
                 $em = self::_createEntityManagerWithParameters($options, $config, $evm);
@@ -85,8 +85,30 @@ class EntityManagerCreator
 
         self::_setConnectionCharset($em->getConnection(), $options);
         self::_setConnectionCollation($em->getConnection(), $options);
+        
+        if('sqlite' === $em->getConnection()->getDatabasePlatform()->getName()) {
+            self::_expandSqlite($em->getConnection());
+        }
 
         return $em;
+    }
+    
+    /**
+     * Custom SQLite logic
+     * 
+     * @param \Doctrine\DBAL\Connection $connection
+     */
+    private static function _expandSqlite(\Doctrine\DBAL\Connection $connection)
+    {
+        // add support for REGEXP operator
+        $connection->getWrappedConnection()->sqliteCreateFunction('regexp', function ($pattern, $data, $delimiter = '~', $modifiers = 'isuS') {
+                if (isset($pattern, $data) === true) {
+                    return (preg_match(sprintf('%1$s%2$s%1$s%3$s', $delimiter, $pattern, $modifiers), $data) > 0);
+                }
+
+                return null;
+            }
+        );
     }
 
     /**
@@ -209,8 +231,8 @@ class EntityManagerCreator
         if ($logger instanceof SQLLogger) {
             $config->setSQLLogger($logger);
         }
-
-        return self::_addCustonFunctions($config, $options);
+        
+        return self::_addCustomFunctions($config, $options);
     }
 
     /**
@@ -219,7 +241,7 @@ class EntityManagerCreator
      * @param array $options
      * @return \Doctrine\ORM\Configuration
      */
-    private static function _addCustonFunctions(Configuration $config, array $options = array())
+    private static function _addCustomFunctions(Configuration $config, array $options = array())
     {
         if (null !== $string_functions = \BackBuilder\Util\Arrays::get($options, 'orm:entity_managers:default:dql:string_functions')) {
             foreach ($string_functions as $name => $class) {
