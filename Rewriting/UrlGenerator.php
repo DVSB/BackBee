@@ -231,18 +231,18 @@ class UrlGenerator implements IUrlGenerator
 
         $url = preg_replace('/\/+/', '/', str_replace(array_keys($replacement), array_values($replacement), $scheme));
         if (true === $this->_preserveUnicity) {
-            $this->_checkUnicity($page, $url);
+            $this->_checkUniqueness($page, $url);
         }
 
         return $url;
     }
 
     /**
-     * Checks for the unicity of the URL and postfixe it if need
+     * Checks for the uniqueness of the URL and postfixe it if need
      * @param \BackBuilder\NestedNode\Page $page   The page
      * @param string &$url                         The reference of the generated URL
      */
-    private function _checkUnicity(Page $page, &$url)
+    private function _checkUniqueness(Page $page, &$url)
     {
         $baseurl = $url . '-%d';
         $page_repository = $this->_application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
@@ -260,10 +260,6 @@ class UrlGenerator implements IUrlGenerator
                 ->getResult()
             ;
         } else {
-            $existings = $page_repository->findBy(array(
-                '_url' => $url,
-                '_root' => $page->getRoot()
-            ));
             $existings = $this->_application->getEntityManager()->getConnection()->executeQuery(
                 'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
                 array(
