@@ -21,6 +21,7 @@
 
 namespace BackBuilder\Command;
 
+use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
 use BackBuilder\Console\ACommand;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -58,8 +59,8 @@ class CleanOrphanContentCommand extends ACommand
         $orphans = $em->getConnection()->executeQuery(
             'SELECT c.uid, c.classname FROM content c
              LEFT JOIN content_has_subcontent sc ON sc.content_uid = c.uid
-             LEFT JOIN page p ON p.contentset=c.uid
-             LEFT JOIN media m ON m.content_uid =c.uid
+             LEFT JOIN page p ON p.contentset = c.uid
+             LEFT JOIN media m ON m.content_uid = c.uid
              WHERE sc.content_uid IS NULL AND p.contentset IS NULL AND m.content_uid IS NULL'
         )->fetchAll();
 
@@ -67,13 +68,22 @@ class CleanOrphanContentCommand extends ACommand
         $before_contents_count = $contents_count[0];
         $output->writeln(
             "\nBefore cleaning, content table contains $before_contents_count row(s)"
-            . "(including " . count($orphans) . " potentials orphans).\n"
+            . " (including " . count($orphans) . " potentials orphans).\n"
         );
 
         foreach ($orphans as $orphan) {
-            $orphan_object = $em->find($orphan['classname'], $orphan['uid']);
-            $em->getRepository($orphan['classname'])->deleteContent($orphan_object);
-            $em->flush();
+            try {
+                $orphan_object = $em->find($orphan['classname'], $orphan['uid']);
+                $em->getRepository($orphan['classname'])->deleteContent($orphan_object);
+                $em->flush();
+            } catch (ClassNotFoundException $e) {
+                $uid = $orphan['uid'];
+                $em->getConnection()->executeQuery(
+                    "DELETE FROM content_has_subcontent WHERE content_uid = '$uid' OR parent_uid = '$uid'"
+                )->execute();
+                $em->getConnection()->executeQuery("DELETE FROM revision WHERE content_uid = '$uid'")->execute();
+                $em->getConnection()->executeQuery("DELETE FROM content WHERE uid = '$uid'")->execute();
+            }
         }
 
         $contents_count = $em->getConnection()->executeQuery('SELECT count(*) FROM content')->fetch(\PDO::FETCH_NUM);
