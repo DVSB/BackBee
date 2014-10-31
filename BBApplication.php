@@ -1157,7 +1157,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             return;
         }
 
-        if (null === $doctrine_config = $this->getConfig()->getDoctrineConfig()) {
+        if (null === $doctrine_config = $this->getConfig()->getRawSection('doctrine')) {
             throw new BBException('None database configuration found');
         }
 
@@ -1199,7 +1199,8 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             $definition = new Definition('Doctrine\ORM\EntityManager', array(
                 $doctrine_config['dbal'],
                 new Reference($logger_id),
-                new Reference('doctrine.event_manager')
+                new Reference('doctrine.event_manager'),
+                new Reference('service_container')
             ));
             $definition->setFactoryClass('BackBuilder\Util\Doctrine\EntityManagerCreator');
             $definition->setFactoryMethod('create');
