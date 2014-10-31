@@ -204,11 +204,14 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $user
             ->setLogin(uniqid('login'))
             ->setPassword('pass')
+            ->setApiKeyEnabled(true)
+            ->setApiKeyPrivate(uniqid("PRIVATE", true))
+            ->setApiKeyPublic(uniqid("PUBLIC", true))
         ;
 
         $group = $this->getBBApp()->getEntityManager()
-                ->getRepository('BackBuilder\Security\Group')
-                ->findOneBy(array('_identifier' => $groupId))
+            ->getRepository('BackBuilder\Security\Group')
+            ->findOneBy(array('_identifier' => $groupId))
         ;
 
         if(!$group) {
@@ -243,6 +246,15 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function getEntityManager($name = 'default')
     {
         return $this->getBBApp()->getEntityManager($name);
+    }
+    
+    /**
+     * 
+     * @return \BackBuilder\Security\Acl\AclManager
+     */
+    protected function getAclManager()
+    {
+        return $this->getBBApp()->getContainer()->get('security.acl_manager');
     }
 
     public function dropDb($bbapp)
