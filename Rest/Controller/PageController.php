@@ -28,15 +28,14 @@ use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
 use BackBuilder\Rest\Patcher\RightManager;
-use BackBuilder\Site\Layout;
 use BackBuilder\Workflow\State;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\HttpFoundation\Request;
+
 
 /**
  * Page Controller

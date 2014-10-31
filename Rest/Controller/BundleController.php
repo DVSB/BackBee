@@ -22,11 +22,19 @@
 namespace BackBuilder\Rest\Controller;
 
 use BackBuilder\Bundle\BundleInterface;
+use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Controller\ARestController;
+use BackBuilder\Rest\Patcher\EntityPatcher;
+use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
+use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
+use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
+use BackBuilder\Rest\Patcher\RightManager;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * REST API for application bundles
@@ -79,33 +87,43 @@ class BundleController extends ARestController
     /**
      * Patch the bundle
      *
+     * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
+     *   @Assert\NotBlank(message="operations is required")
+     * })
+     *
      * @param  string $id the id of the bundle we are looking for
      */
     public function patchAction($id)
     {
         $bundle = $this->getBundleById($id);
         $this->granted('EDIT', $bundle);
+        $operations = $this->getRequest()->request->get('operations');
 
-        $do_save = false;
-        $bundle_config = $bundle->getConfig()->getSection('bundle');
-        foreach ($this->getApplication()->getRequest()->request->all() as $key => $value) {
-            if ('enable' === $key || 'config_per_site' === $key) {
-                $bundle_config[$key] = (boolean) $value;
-                $do_save = true;
-            } elseif ('category' === $key) {
-                $bundle_config[$key] = (array) $value;
-            }
+        try {
+            (new OperationSyntaxValidator())->validate($operations);
+        } catch (InvalidOperationSyntaxException $e) {
+            throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
         }
 
-        if (true === $do_save) {
-            $bundle->getConfig()->setSection('bundle', $bundle_config);
-            $this->getApplication()->getContainer()->get('config.persistor')->persist(
-                $bundle->getConfig(),
-                true === array_key_exists('config_per_site', $bundle_config)
-                    ? $bundle_config['config_per_site']
-                    : false
-            );
+        $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
+        $entity_patcher->getRightManager()->addAuthorizationMapping($bundle, array(
+            'category'        => array('replace'),
+            'config_per_site' => array('replace'),
+            'enable'          => array('replace')
+        ));
+
+        try {
+            $entity_patcher->patch($bundle, $operations);
+        } catch (UnauthorizedPatchOperationException $e) {
+            throw new AccessDeniedHttpException('Invalid patch operation: ' . $e->getMessage());
         }
+
+        $this->getApplication()->getContainer()->get('config.persistor')->persist(
+            $bundle->getConfig(),
+            null !== $bundle->getConfig()->getProperty('config_per_site')
+                ? $bundle->getConfig()->getProperty('config_per_site')
+                : false
+        );
 
         return $this->createResponse('', 204);
     }

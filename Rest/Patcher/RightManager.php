@@ -88,6 +88,21 @@ class RightManager
     }
 
     /**
+     * Add authorization mapping for entity
+     *
+     * @param object $entity
+     * @param array $mapping
+     *
+     * @return self
+     */
+    public function addAuthorizationMapping($entity, $mapping)
+    {
+        $this->rights[get_class($entity)] = $mapping;
+
+        return $this;
+    }
+
+    /**
      * Builds the authtorization mapping for the given $classname
      *
      * @param  string $classname
