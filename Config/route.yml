@@ -170,7 +170,7 @@ bb.rest.page.get_collection:
         _method: GET
 
 bb.rest.page.get:
-    pattern: /rest/{version}/page/{uid}
+    pattern: /rest/{version}/page/{uid}/
     defaults:
         _action:     getAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -320,6 +320,33 @@ bb.rest.bundle.exposed_actions:
         controller_name: "[a-z]+"
         action_name: "[a-z]+"
         parameters: "^\/.+|"
+        
+        
+bb.rest.group.get:
+    pattern: /rest/{version}/group/{id}
+    defaults:
+        _action:     getAction
+        _controller: BackBuilder\Rest\Controller\GroupController
+    requirements:
+        uid: \w{32}
+        _method: GET
+
+bb.rest.group.post:
+    pattern: /rest/{version}/group
+    defaults:
+        _action:     postAction
+        _controller: BackBuilder\Rest\Controller\GroupController
+    requirements:
+        _method: POST
+
+bb.rest.group.put:
+    pattern: /rest/{version}/group/{id}
+    defaults:
+        _action:     putAction
+        _controller: BackBuilder\Rest\Controller\GroupController
+    requirements:
+        uid: \w{32}
+        _method: PUT
 
 # BackBuilder rss
 bb.rss:

@@ -36,6 +36,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Page Controller
@@ -63,37 +64,50 @@ class PageController extends ARestController
      * By default returns online pages only
      *
      * @Rest\Pagination(default_count=25, max_count=100)
+     * 
+     * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
+     * @Rest\QueryParam(name="state", description="State", default="1", requirements={
+     *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid")
+     * })
+     * @Rest\QueryParam(name="order", description="Order by field", default="leftnode", requirements={
+     *   @Assert\Choice(choices = {"leftnode", "date", "title"}, message="Order by is not valid")
+     * })
+     * @Rest\QueryParam(name="dir", description="Order direction", default="asc", requirements={
+     *   @Assert\Choice(choices = {"asc", "desc"}, message="Order direction is not valid")
+     * })
+     * 
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
      * )
-     * @Rest\QueryParam(name="state", description="State", default="1", requirements={
-     *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid", multiple=true)
-     * })
      */
-    public function getCollectionAction($parent = null, $state = [1])
+    public function getCollectionAction(Request $request, $start, $count, Page $parent = null)
     {
-        if (null === $parent = $this->getEntityFromAttributes('parent')) {
+        $qb = $this->getPageRepository()->createQueryBuilder('p')
+            ->orderByMultiple(['_' . $request->query->get('order') => $request->query->get('dir')])
+        ;
+        
+        if (null === $parent) {
+            // parent wasn't defined - retrieve the site's home page & include it in the returned results
             $parent = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
+//            $qb = $qb->andIsDescendantOf($parent, true);
+        } else {
+            // parent was defined - don't include it in the results
+            $qb = $qb->andIsDescendantOf($parent, false);
         }
 
         $this->granted('VIEW', $parent);
-        $children = $this->getPageRepository()->getNotDeletedDescendants(
-            $parent,
-            1,
-            false,
-            array('_leftnode' => 'asc'),
-            true,
-            $start = $this->getRequest()->attributes->get('start'),
-            $this->getRequest()->attributes->get('count')
-        );
+        
+        $results = $qb
+            ->andStateIsIn((array) $request->query->get('state'))
+            ->setFirstResult($start)
+            ->setMaxResults($count)
+            ->getQuery()->getResult() 
+        ;
 
-        $result_count = $start;
-        foreach ($children as $child) {
-            $result_count++;
-        }
+        $result_count = $start + count($results);
 
-        $response = $this->createResponse($this->formatCollection($children));
-        $response->headers->set('Content-Range', "$start-$result_count/" . $children->count());
+        $response = $this->createResponse($this->formatCollection($results));
+        $response->headers->set('Content-Range', "$start-$result_count/" . count($results));
 
         return $response;
     }
@@ -131,7 +145,7 @@ class PageController extends ARestController
      *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBuilder\Workflow\State", required=false
      * )
      */
-    public function postAction()
+    public function postAction(Request $request)
     {
         if (0 === count($this->getRequest()->request->all())) {
             return $this->clonePageAction();

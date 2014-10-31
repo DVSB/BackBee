@@ -24,13 +24,18 @@ namespace BackBuilder\Rest\Tests\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
 use BackBuilder\Rest\Controller\PageController;
-use BackBuilder\Tests\TestCase;
+use BackBuilder\Rest\Test\RestTestCase;
 
 
 use BackBuilder\Security\User,
     BackBuilder\Security\Group,
     BackBuilder\Site\Site,
     BackBuilder\NestedNode\Page;
+
+use BackBuilder\Security\Acl\Permission\MaskBuilder;
+
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 /**
  * Test for PageController class
@@ -42,12 +47,11 @@ use BackBuilder\Security\User,
  * 
  * @coversDefaultClass \BackBuilder\Rest\Controller\PageController
  */
-class PageControllerTest extends TestCase
+class PageControllerTest extends RestTestCase
 {
     
-    protected $user;
+    
     protected $site;
-    protected $groupEditor;
     
     protected function setUp()
     {
@@ -55,19 +59,30 @@ class PageControllerTest extends TestCase
         $bbapp = $this->getBBApp();
         
         $this->initDb($bbapp);
+        $this->initAcl();
         $this->getBBApp()->setIsStarted(true);
         $em = $bbapp->getEntityManager();
+        
         $this->site = new Site();
         $this->site->setLabel('Test Site')->setServerName('test_server');
-        
-        $this->groupEditor = new Group();
-        $this->groupEditor->setName('groupName');
-        $this->groupEditor->setSite($this->site);
-        $this->groupEditor->setIdentifier('GROUP_ID');
-        
         $em->persist($this->site);
-        $em->persist($this->groupEditor);
         
+        // create ACEs
+        $this->getContainer()->set('site', $this->site);
+        $this->restUser = $this->createAuthUser('page_admin');
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            new ObjectIdentity('class', 'BackBuilder\NestedNode\Page'), 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_OWNER
+        );
+        
+        // create pages
+        $this->homePage = new Page();
+        $this->homePage
+            ->setTitle('Home Page')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
         
         $this->deletedPage = new Page();
         $this->deletedPage
@@ -89,13 +104,18 @@ class PageControllerTest extends TestCase
             ->setState(Page::STATE_ONLINE)
             ->setSite($this->site)
         ;
-        
+        $em->persist($this->homePage);
         $em->persist($this->deletedPage);
         $em->persist($this->offlinePage);
         $em->persist($this->onlinePage);
         
+        $repo = $em->getRepository('BackBuilder\NestedNode\Page');
         
         $em->flush();
+        
+        $repo->insertNodeAsFirstChildOf($this->deletedPage, $this->homePage);
+        $repo->insertNodeAsFirstChildOf($this->offlinePage, $this->homePage);
+        $repo->insertNodeAsFirstChildOf($this->onlinePage, $this->homePage);
     }
     
     private function getController()
@@ -115,33 +135,22 @@ class PageControllerTest extends TestCase
         $controller = $this->getController();
         
         // no filters
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-        ), array(
-            '_action' => 'getCollectionAction',
-            '_controller' => 'BackBuilder\Rest\Controller\PageController'
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
-        
-        $res = json_decode($response->getContent(), true);
-        $this->assertInternalType('array', $res);
-        $this->assertCount(1, $res);
-        
-        
-        // filter by state
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-            'site_uid' => $this->site->getUid()
-        ), array(
-            'state' => 1,
-            '_action' => 'getCollectionAction',
-            '_controller' => 'BackBuilder\Rest\Controller\PageController'
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        $response = $this->sendRequest(self::requestGet('/rest/1/page'));
         
         $this->assertEquals(200, $response->getStatusCode());
         $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+        $this->assertCount(2, $res);
         
+        
+        // filter by state = offline
+        $response = $this->sendRequest(self::requestGet('/rest/1/page', ['state' => Page::STATE_OFFLINE]));
+        $this->assertEquals(200, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $res);
         $this->assertCount(1, $res);
-        $this->assertEquals($this->site->getUid(), $res[0]['site_uid']);
-        
+        $this->assertEquals($this->offlinePage->getUid(), $res[0]['uid']);
     }
+    
     
 }
