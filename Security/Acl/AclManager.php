@@ -124,12 +124,21 @@ class AclManager
     /**
      * Updates an existing Object ACE, Inserts if it doesnt exist
      * 
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBuilder\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
      * @param \BackBuilder\Security\Acl\SecurityIdentityInterface $sid
      * @param int $mask
      * @param type $strategy
      */
-    public function insertOrUpdateObjectAce(ObjectIdentityInterface $objectIdentity, SecurityIdentityInterface $sid, $mask, $strategy = null)
+    public function insertOrUpdateObjectAce($objectIdentity, SecurityIdentityInterface $sid, $mask, $strategy = null)
     {
+        if(
+            ($objectIdentity instanceof \BackBuilder\Security\Acl\Domain\IObjectIdentifiable)
+        ) {
+            $objectIdentity = new ObjectIdentity($objectIdentity->getObjectIdentifier(), get_class($objectIdentity));
+        } elseif(! ($objectIdentity instanceof \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface)) {
+            throw new \InvalidArgumentException('Object must implement IObjectIdentifiable');
+        }
+        
         $acl = $this->getAcl($objectIdentity);
         
         $found = false;
