@@ -352,17 +352,18 @@ class PageController extends ARestController
      * @Rest\RequestParam(name="title", description="Cloning page new title", requirements={
      *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
      * })
+     * 
+     * @Rest\ParamConverter(
+     *   name="source", id_name="source_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=true
+     * )
      *
      * @Rest\Security(expression="is_granted('CREATE', source)")
      * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
     public function cloneAction(Page $source, Request $request)
     {
-        if (null === $source) {
-            throw new BadRequestHttpException('`source_uid` query parameter is missing.');
-        }
-
-        $this->granted('VIEW', $source->getLayout()); // user must have view permission on choosen layout
+        // user must have view permission on chosen layout
+        $this->granted('VIEW', $source->getLayout()); 
 
         if (null !== $source->getParent()) {
             $this->granted('EDIT', $source->getParent());
@@ -370,20 +371,14 @@ class PageController extends ARestController
             $this->granted('EDIT', $this->getApplication()->getSite());
         }
 
-        try {
-            $new_page = $this->getPageRepository()->duplicate(
-                $source, $request->request->get('title'), $source->getParent(), true, $this->getApplication()->getBBUserToken()
-            );
-        } catch (\Exception $e) {
-            return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
-        }
-
-        $response = $this->createResponse('', 201);
-        $response->headers->set(
-            'Location', $this->getApplication()->getRouting()->getUri($source->getUrl(), null, $source->getSite())
+        $newPage = $this->getPageRepository()->duplicate(
+            $source, $request->request->get('title'), $source->getParent(), true, $this->getApplication()->getBBUserToken()
         );
 
-        return $response;
+        return $this->redirect(
+            $this->getApplication()->getRouting()->getUri($newPage->getUrl(), null, $newPage->getSite()),
+            201
+        );
     }
 
     /**
