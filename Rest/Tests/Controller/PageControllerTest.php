@@ -21,16 +21,13 @@
 
 namespace BackBuilder\Rest\Tests\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
-
 use BackBuilder\Rest\Controller\PageController;
 use BackBuilder\Rest\Test\RestTestCase;
 
 
-use BackBuilder\Security\User,
-    BackBuilder\Security\Group,
-    BackBuilder\Site\Site,
-    BackBuilder\NestedNode\Page;
+use BackBuilder\Site\Site,
+    BackBuilder\NestedNode\Page,
+    BackBuilder\Site\Layout;
 
 use BackBuilder\Security\Acl\Permission\MaskBuilder;
 
@@ -134,12 +131,39 @@ class PageControllerTest extends RestTestCase
         return $controller;
     }
 
+    /**
+     * @covers ::postAction
+     */
+    public function test_postAction()
+    {
+        $layout = new Layout();
+        
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass)
+        ;
+
+        $em = $this->getEntityManager();
+        $em->persist($layout);
+        $em->flush();
+        $response = $this->sendRequest(self::requestPost('/rest/1/page', [
+            'title' => 'New Page',
+            'layout_uid' => $layout->getUid()
+        ]));
+        
+        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
+        
+        $this->assertEquals(201, $response->getStatusCode());
+        
+        $res = json_decode($response->getContent(), true);
+    }
     
     /**
      * @covers ::getCollectionAction
      */
-    public function testGetCollectionAction()
+    public function test_getCollectionAction()
     {
+        return;
         $controller = $this->getController();
         
         // no filters - should return online pages by default
@@ -166,6 +190,8 @@ class PageControllerTest extends RestTestCase
         $this->assertCount(1, $res);
         $this->assertEquals($this->offlinePage2->getUid(), $res[0]['uid']);
     }
+    
+    
     
     
 }

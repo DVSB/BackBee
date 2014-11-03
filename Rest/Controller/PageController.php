@@ -134,7 +134,7 @@ class PageController extends ARestController
      * })
      *
      * @Rest\ParamConverter(
-     *   name="layout", id_name="layout_uid", id_source="request", class="BackBuilder\Site\Layout", required=false
+     *   name="layout", id_name="layout_uid", id_source="request", class="BackBuilder\Site\Layout", required=true
      * )
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=false
