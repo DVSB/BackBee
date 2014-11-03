@@ -104,10 +104,17 @@ class PageControllerTest extends RestTestCase
             ->setState(Page::STATE_ONLINE)
             ->setSite($this->site)
         ;
+        $this->onlinePage2 = new Page();
+        $this->onlinePage2
+            ->setTitle('Online2')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
         $em->persist($this->homePage);
         $em->persist($this->deletedPage);
         $em->persist($this->offlinePage);
         $em->persist($this->onlinePage);
+        $em->persist($this->onlinePage2);
         
         $repo = $em->getRepository('BackBuilder\NestedNode\Page');
         
@@ -116,6 +123,7 @@ class PageControllerTest extends RestTestCase
         $repo->insertNodeAsFirstChildOf($this->deletedPage, $this->homePage);
         $repo->insertNodeAsFirstChildOf($this->offlinePage, $this->homePage);
         $repo->insertNodeAsFirstChildOf($this->onlinePage, $this->homePage);
+        $repo->insertNodeAsFirstChildOf($this->onlinePage2, $this->onlinePage);
     }
     
     private function getController()
@@ -134,13 +142,12 @@ class PageControllerTest extends RestTestCase
     {
         $controller = $this->getController();
         
-        // no filters
+        // no filters - should return online pages by default
         $response = $this->sendRequest(self::requestGet('/rest/1/page'));
-        
         $this->assertEquals(200, $response->getStatusCode());
         $res = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $res);
-        $this->assertCount(2, $res);
+        $this->assertCount(3, $res);
         
         
         // filter by state = offline
@@ -150,6 +157,14 @@ class PageControllerTest extends RestTestCase
         $this->assertInternalType('array', $res);
         $this->assertCount(1, $res);
         $this->assertEquals($this->offlinePage->getUid(), $res[0]['uid']);
+        
+        // filter by parent
+        $response = $this->sendRequest(self::requestGet('/rest/1/page', ['parent_uid' => $this->onlinePage->getUid()]));
+        $this->assertEquals(200, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+        $this->assertCount(1, $res);
+        $this->assertEquals($this->offlinePage2->getUid(), $res[0]['uid']);
     }
     
     

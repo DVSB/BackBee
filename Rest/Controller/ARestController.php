@@ -202,12 +202,12 @@ abstract class ARestController extends Controller implements IRestController, IF
      *
      * @return boolean
      */
-    protected function granted($attributes, $object = null)
+    protected function granted($attributes, $object = null, $message = 'Access denied')
     {
         $security_context = $this->getApplication()->getSecurityContext();
 
         if (null !== $security_context->getACLProvider() && false === parent::isGranted($attributes, $object)) {
-            throw new AccessDeniedHttpException('Access denied');
+            throw new AccessDeniedHttpException($message);
         }
 
         return true;
