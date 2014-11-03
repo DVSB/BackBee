@@ -170,7 +170,7 @@ bb.rest.page.get_collection:
         _method: GET
 
 bb.rest.page.get:
-    pattern: /rest/{version}/page/{uid}/
+    pattern: /rest/{version}/page/{uid}
     defaults:
         _action:     getAction
         _controller: BackBuilder\Rest\Controller\PageController
@@ -182,6 +182,14 @@ bb.rest.page.post:
     pattern: /rest/{version}/page
     defaults:
         _action:     postAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        _method: POST
+
+bb.rest.page.clone:
+    pattern: /rest/{version}/page/{uid}/clone
+    defaults:
+        _action:     cloneAction
         _controller: BackBuilder\Rest\Controller\PageController
     requirements:
         _method: POST
@@ -207,7 +215,7 @@ bb.rest.page.patch:
 bb.rest.page.move_node:
     pattern: /rest/{version}/page/{uid}/node/move
     defaults:
-        _action:     movePageNodeAction
+        _action:     moveNodeAction
         _controller: BackBuilder\Rest\Controller\PageController
     requirements:
         uid: \w{32}
