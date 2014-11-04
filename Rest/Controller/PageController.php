@@ -104,7 +104,7 @@ class PageController extends ARestController
             ->setMaxResults($count)
             ->getQuery()->getResult() 
         ;
-
+        
         $result_count = $start + count($results);
 
         $response = $this->createResponse($this->formatCollection($results));
@@ -235,16 +235,18 @@ class PageController extends ARestController
      * @Rest\Security(expression="is_granted('EDIT', page)")
      * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
-    public function putAction(Page $page, Request $request)
+    public function putAction(Page $page, Layout $layout, Request $request)
     {
-        $page->setLayout($this->getEntityFromAttributes('layout'));
+        $page->setLayout($layout);
         $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
-        $page->setTitle($request->request->get('title'));
-        $page->setUrl($request->request->get('url'));
-        $page->setTarget($request->request->get('target'));
-        $page->setState($request->request->get('state'));
-        $page->setRedirect($request->request->get('redirect', null));
-        $page->setAltTitle($request->request->get('alt_title', null));
+        
+        $page->setTitle($request->request->get('title'))
+            ->setUrl($request->request->get('url'))
+            ->setTarget($request->request->get('target'))
+            ->setState($request->request->get('state'))
+            ->setRedirect($request->request->get('redirect', null))
+            ->setAltTitle($request->request->get('alt_title', null))
+        ;
 
         $publishing = $request->request->get('publishing');
         $page->setPublishing(null !== $publishing ? new \DateTime(date('c', $publishing)) : null);

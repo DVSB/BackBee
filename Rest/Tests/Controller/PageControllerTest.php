@@ -60,64 +60,15 @@ class PageControllerTest extends RestTestCase
         $this->initDb($bbapp);
         $this->initAcl();
         $this->getBBApp()->setIsStarted(true);
-        $em = $bbapp->getEntityManager();
+        $this->em = $bbapp->getEntityManager();
         
         $this->site = new Site();
         $this->site->setLabel('Test Site')->setServerName('test_server');
-        $em->persist($this->site);
+        $this->em->persist($this->site);
         
         // permissions
         $this->getContainer()->set('site', $this->site);
         $this->restUser = $this->createAuthUser('page_admin');
-
-        // create pages
-        $this->homePage = new Page();
-        $this->homePage
-            ->setTitle('Home Page')
-            ->setState(Page::STATE_ONLINE)
-            ->setSite($this->site)
-        ;
-        
-        $this->deletedPage = new Page();
-        $this->deletedPage
-            ->setTitle('Deleted')
-            ->setState(Page::STATE_DELETED)
-            ->setSite($this->site)
-        ;
-        
-        $this->offlinePage = new Page();
-        $this->offlinePage
-            ->setTitle('Offline')
-            ->setState(Page::STATE_OFFLINE)
-            ->setSite($this->site)
-        ;
-        
-        $this->onlinePage = new Page();
-        $this->onlinePage
-            ->setTitle('Online')
-            ->setState(Page::STATE_ONLINE)
-            ->setSite($this->site)
-        ;
-        $this->onlinePage2 = new Page();
-        $this->onlinePage2
-            ->setTitle('Online2')
-            ->setState(Page::STATE_ONLINE)
-            ->setSite($this->site)
-        ;
-        $em->persist($this->homePage);
-        $em->persist($this->deletedPage);
-        $em->persist($this->offlinePage);
-        $em->persist($this->onlinePage);
-        $em->persist($this->onlinePage2);
-        
-        $repo = $em->getRepository('BackBuilder\NestedNode\Page');
-        
-        $em->flush();
-        
-        $repo->insertNodeAsFirstChildOf($this->deletedPage, $this->homePage);
-        $repo->insertNodeAsFirstChildOf($this->offlinePage, $this->homePage);
-        $repo->insertNodeAsFirstChildOf($this->onlinePage, $this->homePage);
-        $repo->insertNodeAsFirstChildOf($this->onlinePage2, $this->onlinePage);
     }
     
     private function getController()
@@ -157,14 +108,61 @@ class PageControllerTest extends RestTestCase
         
         $response = $this->sendRequest(self::requestPost('/rest/1/page', [
             'title' => 'New Page',
+            'url' => 'url',
             'layout_uid' => $layout->getUid()
         ]));
         
-        $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
-
         $this->assertEquals(201, $response->getStatusCode());
+        $this->assertEquals('http://localhost/url', $response->headers->get('Location'));
+    }
+    
+    /**
+     * @covers ::patchAction
+     */
+    public function test_putAction()
+    {
+        $em = $this->getEntityManager();
         
-        $res = json_decode($response->getContent(), true);
+        $layout = new Layout();
+
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass)
+            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts/default.twig')
+        ;
+        $em->persist($layout);
+        
+        // create pages
+        $homePage = new Page();
+        $homePage
+            ->setTitle('Page')
+            ->setState(Page::STATE_OFFLINE)
+            ->setSite($this->site)
+        ;
+        $em->persist($homePage);
+        
+        $em->flush();
+        
+        
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $homePage, 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_PUBLISH + MaskBuilder::MASK_EDIT
+        )->insertOrUpdateObjectAce(
+            $layout,
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_VIEW
+        );
+
+        $response = $this->sendRequest(self::requestPut('/rest/1/page/' . $homePage->getUid(), [
+            'title' => 'New Page',
+            'url' => 'url',
+            'target' => Page::DEFAULT_TARGET,
+            'state' => Page::STATE_ONLINE,
+            'layout_uid' => $layout->getUid()
+        ]));
+        
+        $this->assertEquals(204, $response->getStatusCode());
     }
     
     /**
@@ -172,34 +170,84 @@ class PageControllerTest extends RestTestCase
      */
     public function test_getCollectionAction()
     {
-        $this->markTestIncomplete();
+        // create pages
+        $homePage = new Page();
+        $homePage
+            ->setTitle('Home Page')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
+        
+        $deletedPage = new Page();
+        $deletedPage
+            ->setTitle('Deleted')
+            ->setState(Page::STATE_DELETED)
+            ->setSite($this->site)
+        ;
+        
+        $offlinePage = new Page();
+        $offlinePage
+            ->setTitle('Offline')
+            ->setState(Page::STATE_OFFLINE)
+            ->setSite($this->site)
+        ;
+        
+        $onlinePage = new Page();
+        $onlinePage
+            ->setTitle('Online')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
+        $onlinePage2 = new Page();
+        $onlinePage2
+            ->setTitle('Online2')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
+        $this->em->persist($homePage);
+        $this->em->persist($deletedPage);
+        $this->em->persist($offlinePage);
+        $this->em->persist($onlinePage);
+        $this->em->persist($onlinePage2);
+        
+        $repo = $this->em->getRepository('BackBuilder\NestedNode\Page');
+        
+        $this->em->flush();
+        
+        $repo->insertNodeAsFirstChildOf($deletedPage, $homePage);
+        $repo->insertNodeAsFirstChildOf($offlinePage, $homePage);
+        $repo->insertNodeAsFirstChildOf($onlinePage, $homePage);
+        $repo->insertNodeAsFirstChildOf($onlinePage2, $onlinePage);
+        
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $homePage, 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_VIEW
+        );
         
         // no filters - should return online pages by default
-        $response = $this->sendRequest(self::requestGet('/rest/1/page'));
-        $this->assertEquals(200, $response->getStatusCode());
-        $res = json_decode($response->getContent(), true);
-        $this->assertInternalType('array', $res);
-        $this->assertCount(3, $res);
+        $response1 = $this->sendRequest(self::requestGet('/rest/1/page'));
+        $this->assertEquals(200, $response1->getStatusCode());
+        $res1 = json_decode($response1->getContent(), true);
+        $this->assertInternalType('array', $res1);
+        $this->assertCount(3, $res1);
         
         
         // filter by state = offline
-        $response = $this->sendRequest(self::requestGet('/rest/1/page', ['state' => Page::STATE_OFFLINE]));
-        $this->assertEquals(200, $response->getStatusCode());
-        $res = json_decode($response->getContent(), true);
-        $this->assertInternalType('array', $res);
-        $this->assertCount(1, $res);
-        $this->assertEquals($this->offlinePage->getUid(), $res[0]['uid']);
+        $response2 = $this->sendRequest(self::requestGet('/rest/1/page', ['state' => Page::STATE_OFFLINE]));
+        $this->assertEquals(200, $response2->getStatusCode());
+        $res2 = json_decode($response2->getContent(), true);
+        $this->assertInternalType('array', $res2);
+        $this->assertCount(1, $res2);
+        $this->assertEquals($offlinePage->getUid(), $res2[0]['uid']);
         
         // filter by parent
-        $response = $this->sendRequest(self::requestGet('/rest/1/page', ['parent_uid' => $this->onlinePage->getUid()]));
-        $this->assertEquals(200, $response->getStatusCode());
-        $res = json_decode($response->getContent(), true);
-        $this->assertInternalType('array', $res);
-        $this->assertCount(1, $res);
-        $this->assertEquals($this->offlinePage2->getUid(), $res[0]['uid']);
+        $response3 = $this->sendRequest(self::requestGet('/rest/1/page', ['parent_uid' => $onlinePage->getUid()]));
+        $this->assertEquals(200, $response3->getStatusCode());
+        $res3 = json_decode($response3->getContent(), true);
+        $this->assertInternalType('array', $res3);
+        $this->assertCount(1, $res3);
+        $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
     }
-    
-    
-    
     
 }

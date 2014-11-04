@@ -62,6 +62,26 @@ class RestTestCase extends TestCase
     }
     
     /**
+     * PUT request helper
+     * 
+     * @param type $uri
+     * @param array $data
+     * @param type $contentType
+     * @param array $headers
+     * @return \Symfony\Component\HttpFoundation\Request
+     */
+    protected static function requestPut($uri, array $data = [], $contentType = 'application/json', $sign = false)
+    {
+        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PUT'] );
+        
+        if($sign) {
+            self::signRequest($request);
+        }
+        
+        return $request;
+    }
+    
+    /**
      * Get request helper
      * 
      * @param type $uri
