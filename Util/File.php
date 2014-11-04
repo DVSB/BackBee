@@ -92,16 +92,24 @@ class File {
      * @param boolean $removeTrailing Removing trailing separators to the end of path
      * @return string The normalize file path
      */
-    public static function normalizePath($filepath, $separator = DIRECTORY_SEPARATOR, $removeTrailing = TRUE) {
+    public static function normalizePath($filepath, $separator = DIRECTORY_SEPARATOR, $removeTrailing = true) 
+    {
+        $schemeMatches = [];
+        $scheme = "";
+        if(preg_match('#^([a-z]{2,10}\:' . $separator . '{2,})(.+)$#i', $filepath, $schemeMatches)) {
+            $scheme = $schemeMatches[1];
+            $filepath = $schemeMatches[2];
+        }
+
         $patterns = array('/\//', '/\\\\/', '/' . str_replace('/', '\/', $separator) . '+/');
         $replacements = array_fill(0, 3, $separator);
 
-        if (TRUE === $removeTrailing) {
+        if (true === $removeTrailing) {
             $patterns[] = '/' . str_replace('/', '\/', $separator) . '$/';
             $replacements[] = '';
         }
 
-        return preg_replace($patterns, $replacements, $filepath);
+        return $scheme . preg_replace($patterns, $replacements, $filepath);
     }
 
     /**
@@ -130,7 +138,8 @@ class File {
      * 				  - include_path The path to include directories
      * 				  - base_dir The base directory
      */
-    public static function resolveFilepath(&$filename, $key = NULL, $options = array()) {
+    public static function resolveFilepath(&$filename, $key = NULL, $options = array()) 
+    {
         $filename = self::normalizePath($filename);
         $realname = self::realpath($filename);
 
@@ -153,8 +162,9 @@ class File {
             }
         }
 
-        if (FALSE !== $realname = self::realpath($filename))
+        if (false !== $realname = self::realpath($filename)) {
             $filename = $realname;
+        }
     }
 
     public static function resolveMediapath(&$filename, $key = NULL, $options = array()) {
@@ -278,7 +288,8 @@ class File {
      * @return array
      * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
      */
-    public static function getFilesRecursivelyByExtension($basedir, $extension) {
+    public static function getFilesRecursivelyByExtension($basedir, $extension) 
+    {
         if (false === is_readable($basedir)) {
             throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
         }
@@ -288,7 +299,15 @@ class File {
         /* if (false !== $parse_url && isset($parse_url['scheme'])) { */
         $directory = new \RecursiveDirectoryIterator($basedir);
         $iterator = new \RecursiveIteratorIterator($directory);
-        $regex = new \RegexIterator($iterator, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::GET_MATCH);
+        
+        if(empty($extension)) {
+            // extension is empty - assume user wants files without extension only
+            $regex = '#^(.*?/)?[^\.]+$#i';
+        } else {
+            $regex = '#^.+\.' . ltrim($extension, '.') . '$#i';
+        }
+        
+        $regex = new \RegexIterator($iterator, $regex, \RecursiveRegexIterator::GET_MATCH);
 
         foreach ($regex as $file) {
             $files[] = $file[0];
@@ -313,7 +332,8 @@ class File {
      * @return array
      * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
      */
-    public static function getFilesByExtension($basedir, $extension) {
+    public static function getFilesByExtension($basedir, $extension) 
+    {
         if (false === is_readable($basedir)) {
             throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
         }

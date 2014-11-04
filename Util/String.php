@@ -114,16 +114,16 @@ class String
      * @param string $charset The default charset to use
      * @return string The converted string
      */
-    public static function toPath($str, $options = NULL, $charset = 'UTF-8')
+    public static function toPath($str, $options = null, $charset = 'UTF-8')
     {
         $options = self::_getOptions($options, array(
                     'extension' => '',
-                    'spacereplace' => NULL,
+                    'spacereplace' => null,
                     'lengthlimit' => 2000
                 ));
 
         $str = trim(preg_replace('/(?:[^\w\-\.~\+% ]+|%(?![A-Fa-f0-9]{2}))/', '', self::toASCII($str, $charset)));
-        $str = preg_replace('/\s+/', NULL === $options['spacereplace'] ? '' : $options['spacereplace'], $str);
+        $str = preg_replace('/\s+/', null === $options['spacereplace'] ? '' : $options['spacereplace'], $str);
 
         return substr($str, 0, $options['lengthlimit']) . $options['extension'];
     }
