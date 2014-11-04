@@ -30,6 +30,7 @@ use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
 use BackBuilder\Rest\Patcher\RightManager;
 use BackBuilder\Workflow\State;
+use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -113,7 +114,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Get page entity by uid
+     * Get page by uid
      *
      * @param string $uid the unique identifier of the page we want to retrieve
      *
@@ -129,7 +130,7 @@ class PageController extends ARestController
      * Create a page
      *
      * @Rest\RequestParam(name="title", description="Page title", requirements={
-     *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters"),
+     *   @Assert\Length(min=3, minMessage="Title must contain at least 3 characters"),
      *   @Assert\NotBlank()
      * })
      *
@@ -147,16 +148,25 @@ class PageController extends ARestController
      * )
      * 
      * @Rest\Security(expression="is_granted('VIEW', layout)")
-     * @Rest\Security(expression="is_granted('EDIT', parent)")
      */
-    public function postAction(Page $parent, Layout $layout, Request $request)
+    public function postAction(Layout $layout, Request $request, Page $parent = null)
     {
+        if(null !== $parent) {
+            $this->granted(MaskBuilder::MASK_EDIT, $parent);
+        }
+
         $builder = $this->getApplication()->getContainer()->get('pagebuilder');
         $builder->setLayout($layout);
-        $builder->setParent($parent);
-        $builder->setRoot($parent->getRoot());
-        $builder->setSite($parent->getSite());
-        $builder->setTitle($title);
+        
+        if(null !== $parent) {
+            $builder->setParent($parent);
+            $builder->setRoot($parent->getRoot());
+            $builder->setSite($parent->getSite());
+        } else {
+            $builder->setSite($this->getApplication()->getSite());
+        }
+        
+        $builder->setTitle($request->request->get('title'));
         $builder->setUrl($request->request->get('url', null));
         $builder->setState($request->request->get('state'));
         $builder->setTarget($request->request->get('target'));
@@ -167,51 +177,53 @@ class PageController extends ARestController
                 ? new \DateTime(date('c', $request->request->get('publishing')))
                 : null
         );
+        
         $builder->setArchiving(
             null !== $request->request->get('archiving')
                 ? new \DateTime(date('c', $request->request->get('archiving')))
                 : null
         );
 
-        $page = $builder->getPage();
-        $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
-        $this->granted('CREATE', $page);
-
-        $this->getEntityManager()->persist($page);
         try {
+            $page = $builder->getPage();
+
+            $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
+            $this->granted('CREATE', $page);
+
+            $this->getEntityManager()->persist($page);
+        
             $this->getEntityManager()->flush($page);
             $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
         } catch (\Exception $e) {
             return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
         }
 
-        $response = $this->createResponse('', 201);
-        $response->headers->set(
-            'Location', $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite())
+        
+        return $this->redirect(
+            $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite()), 
+            201
         );
-
-        return $response;
     }
 
     /**
-     * Update page entity with $uid
+     * Update page
      *
-     * @Rest\RequestParam(name="title", description="Page new title", requirements={
+     * @Rest\RequestParam(name="title", description="Page title", requirements={
      *   @Assert\NotBlank(message="title is required")
      * })
-     * @Rest\RequestParam(name="url", description="page new url", requirements={
+     * @Rest\RequestParam(name="url", description="page url", requirements={
      *   @Assert\NotBlank(message="url is required")
      * })
-     * @Rest\RequestParam(name="target", description="page new target", requirements={
+     * @Rest\RequestParam(name="target", description="page target", requirements={
      *   @Assert\NotBlank(message="target is required")
      * })
-     * @Rest\RequestParam(name="state", description="page new state", requirements={
+     * @Rest\RequestParam(name="state", description="page state", requirements={
      *   @Assert\NotBlank(message="state is required")
      * })
-     * @Rest\RequestParam(name="publishing", description="page new publishing", requirements={
+     * @Rest\RequestParam(name="publishing", description="Publishing flag", requirements={
      *   @Assert\Type(type="digit", message="The value should be a positive number")
      * })
-     * @Rest\RequestParam(name="archiving", description="page new archiving", requirements={
+     * @Rest\RequestParam(name="archiving", description="Archiving flag", requirements={
      *   @Assert\Type(type="digit", message="The value should be a positive number")
      * })
      *
@@ -250,7 +262,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Patch of a page entity
+     * Patch page
      *
      * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
      *   @Assert\NotBlank(message="operations is required")
@@ -325,7 +337,7 @@ class PageController extends ARestController
     }
 
     /**
-     * [deleteAction description]
+     * Delete page
      *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      */

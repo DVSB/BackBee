@@ -22,10 +22,12 @@
 namespace BackBuilder\Security\Acl;
 
 use Symfony\Component\Security\Core\SecurityContextInterface;
-use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
-use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
+use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface,
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
+    Symfony\Component\Security\Acl\Model\SecurityIdentityInterface,
+    Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
+    Symfony\Component\Security\Acl\Model\DomainObjectInterface;
+
 
 use BackBuilder\Security\Acl\Permission\MaskBuilder,
     BackBuilder\Security\Acl\Permission\InvalidPermissionException,
@@ -163,6 +165,8 @@ class AclManager
         }
         
         $this->securityContext->getACLProvider()->updateAcl($acl);
+        
+        return $this;
     }
     
     /**
@@ -195,6 +199,8 @@ class AclManager
         }
         
         $this->securityContext->getACLProvider()->updateAcl($acl);
+        
+        return $this;
     }
     
     

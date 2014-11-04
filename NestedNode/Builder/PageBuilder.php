@@ -125,7 +125,7 @@ class PageBuilder
     public function getPage()
     {
         if (null === $this->site || null === $this->layout || null === $this->title) {
-            throw new \Exception();
+            throw new \Exception("Required data missing");
         }
 
         $page = new Page($this->uid);
@@ -281,9 +281,9 @@ class PageBuilder
      */
     public function setSite(Site $site)
     {
-            $this->site = $site;
+        $this->site = $site;
 
-            return $this;
+        return $this;
     }
 
     /**

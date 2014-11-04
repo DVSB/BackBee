@@ -119,7 +119,7 @@ class MockBBApplication extends BBApplication
     {
         if(null === $mockConfig) {
             $mockConfig = array(
-                'ClassContent' => array(),
+                'ClassContent' => [],
                 'Config' => array(
                     'bootstrap.yml' => file_get_contents(__DIR__ . '/../Config/bootstrap.yml'),
                     'config.yml' => file_get_contents(__DIR__ . '/../Config/config.yml'),
@@ -128,6 +128,7 @@ class MockBBApplication extends BBApplication
                     'security.yml' => file_get_contents(__DIR__ . '/../Config/security.yml'),
                     'services.yml' => file_get_contents(__DIR__ . '/../Config/services.yml'),
                 ),
+                'Layouts' => ['default.twig' => '<html></html>'],
                 'Data' => array(
                     'Media' => array(),
                     'Storage' => array(),

@@ -34,6 +34,8 @@ use BackBuilder\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
     Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
+use org\bovigo\vfs\vfsStream;
+
 /**
  * Test for PageController class
  *
@@ -64,15 +66,10 @@ class PageControllerTest extends RestTestCase
         $this->site->setLabel('Test Site')->setServerName('test_server');
         $em->persist($this->site);
         
-        // create ACEs
+        // permissions
         $this->getContainer()->set('site', $this->site);
         $this->restUser = $this->createAuthUser('page_admin');
-        $this->getAclManager()->insertOrUpdateObjectAce(
-            new ObjectIdentity('class', 'BackBuilder\NestedNode\Page'), 
-            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
-            MaskBuilder::MASK_OWNER
-        );
-        
+
         // create pages
         $this->homePage = new Page();
         $this->homePage
@@ -137,22 +134,34 @@ class PageControllerTest extends RestTestCase
     public function test_postAction()
     {
         $layout = new Layout();
-        
+
         $layout->setLabel('Default')
             ->setSite($this->site)
             ->setDataObject(new \stdClass)
+            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts/default.twig')
         ;
-
+        
         $em = $this->getEntityManager();
         $em->persist($layout);
         $em->flush();
+        
+        $this->getAclManager()->insertOrUpdateClassAce(
+            new ObjectIdentity('class', 'BackBuilder\NestedNode\Page'), 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_CREATE
+        )->insertOrUpdateClassAce(
+            $layout,
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_VIEW
+        );
+        
         $response = $this->sendRequest(self::requestPost('/rest/1/page', [
             'title' => 'New Page',
             'layout_uid' => $layout->getUid()
         ]));
         
         $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
-        
+
         $this->assertEquals(201, $response->getStatusCode());
         
         $res = json_decode($response->getContent(), true);
@@ -163,8 +172,7 @@ class PageControllerTest extends RestTestCase
      */
     public function test_getCollectionAction()
     {
-        return;
-        $controller = $this->getController();
+        $this->markTestIncomplete();
         
         // no filters - should return online pages by default
         $response = $this->sendRequest(self::requestGet('/rest/1/page'));
