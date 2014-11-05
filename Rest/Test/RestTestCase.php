@@ -47,7 +47,6 @@ class RestTestCase extends TestCase
      * @param type $uri
      * @param array $data
      * @param type $contentType
-     * @param array $headers
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPost($uri, array $data = [], $contentType = 'application/json', $sign = false)
@@ -67,12 +66,30 @@ class RestTestCase extends TestCase
      * @param type $uri
      * @param array $data
      * @param type $contentType
-     * @param array $headers
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPut($uri, array $data = [], $contentType = 'application/json', $sign = false)
     {
         $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PUT'] );
+        
+        if($sign) {
+            self::signRequest($request);
+        }
+        
+        return $request;
+    }
+    
+    /**
+     * PATCH request helper
+     * 
+     * @param type $uri
+     * @param array $operations an array of PATCH operations
+     * @param type $contentType
+     * @return \Symfony\Component\HttpFoundation\Request
+     */
+    protected static function requestPatch($uri, array $operations = [], $contentType = 'application/json', $sign = false)
+    {
+        $request = new Request([], $operations, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PATCH'] );
         
         if($sign) {
             self::signRequest($request);
