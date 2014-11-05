@@ -929,6 +929,9 @@ class ClassContentRepository extends EntityRepository
             }
 
             $this->_em->getConnection()->executeQuery(
+                'DELETE FROM indexation WHERE owner_uid = "' . $content->getUid() . '";'
+            )->execute();
+            $this->_em->getConnection()->executeQuery(
                 'DELETE FROM revision WHERE content_uid = "' . $content->getUid() . '";'
             )->execute();
             $this->_em->remove($content);
