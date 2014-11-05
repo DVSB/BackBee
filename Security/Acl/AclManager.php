@@ -26,7 +26,8 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface,
     Symfony\Component\Security\Acl\Domain\ObjectIdentity,
     Symfony\Component\Security\Acl\Model\SecurityIdentityInterface,
     Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Acl\Model\DomainObjectInterface;
+    Symfony\Component\Security\Acl\Model\DomainObjectInterface,
+    Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 
 
 use BackBuilder\Security\Acl\Permission\MaskBuilder,
@@ -43,12 +44,18 @@ class AclManager
     protected $securityContext;
     
     /**
+     *
+     * @var Symfony\Component\Security\Acl\Permission\PermissionMapInterface
+     */
+    protected $permissionMap;
+    /**
      * 
      * @param \Symfony\Component\Security\Core\SecurityContextInterface $securityContext
      */
-    public function __construct(SecurityContextInterface $securityContext)
+    public function __construct(SecurityContextInterface $securityContext, PermissionMapInterface $permissionMap)
     {
         $this->securityContext = $securityContext;
+        $this->permissionMap = $permissionMap;
     }
     
     /**
@@ -82,6 +89,7 @@ class AclManager
     {
         $this->enforceObjectIdentity($objectIdentity);
         $this->enforceSecurityIdentity($sid);
+        $mask = $this->resolveMask($mask, $objectIdentity);
         
         $acl = $this->getAcl($objectIdentity);
         
@@ -115,6 +123,7 @@ class AclManager
     {
         $this->enforceObjectIdentity($objectIdentity);
         $this->enforceSecurityIdentity($sid);
+        $mask = $this->resolveMask($mask, $objectIdentity);
         
         $acl = $this->getAcl($objectIdentity);
         
@@ -148,6 +157,7 @@ class AclManager
     {
         $this->enforceObjectIdentity($objectIdentity);
         $this->enforceSecurityIdentity($sid);
+        $mask = $this->resolveMask($mask, $objectIdentity);
         
         $acl = $this->getAcl($objectIdentity);
         
@@ -181,6 +191,7 @@ class AclManager
     {
         $this->enforceObjectIdentity($objectIdentity);
         $this->enforceSecurityIdentity($sid);
+        $mask = $this->resolveMask($mask, $objectIdentity);
         
         $acl = $this->getAcl($objectIdentity);
         
@@ -393,5 +404,31 @@ class AclManager
         } elseif(! ($sid instanceof SecurityIdentityInterface)) {
             throw new \InvalidArgumentException('Object must implement IObjectIdentifiable');
         }
+    }
+    
+    /**
+     * Resolves any variation of masks/permissions to an integer
+     * 
+     * @param string|int|array $masks
+     * @return type
+     */
+    private function resolveMask($masks, $object)
+    {
+        $integerMask = 0;
+        
+        if(is_integer($masks)) {
+            $integerMask = $masks;
+        } elseif (is_string($masks)) {
+            $permission = $this->permissionMap->getMasks($masks, $object);
+            $integerMask = $this->resolveMask($permission, $object);
+        } elseif(is_array($masks)) {
+            foreach($masks as $mask) {
+                $integerMask += $this->resolveMask($mask, $object);
+            }
+        } else {
+            throw new \RuntimeException('Not a valid mask type');
+        }
+
+        return $integerMask;
     }
 }
