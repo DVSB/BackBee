@@ -31,6 +31,8 @@ use BackBuilder\Site\Site,
 
 use BackBuilder\Security\Acl\Permission\MaskBuilder;
 
+use BackBuilder\Rest\Patcher\OperationBuilder;
+
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
     Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
@@ -117,7 +119,7 @@ class PageControllerTest extends RestTestCase
     }
     
     /**
-     * @covers ::patchAction
+     * @covers ::putAction
      */
     public function test_putAction()
     {
@@ -147,11 +149,11 @@ class PageControllerTest extends RestTestCase
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage, 
             new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
-            MaskBuilder::MASK_PUBLISH + MaskBuilder::MASK_EDIT
+            ['PUBLISH', 'EDIT']
         )->insertOrUpdateObjectAce(
             $layout,
             new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
-            MaskBuilder::MASK_VIEW
+            ['VIEW']
         );
 
         $response = $this->sendRequest(self::requestPut('/rest/1/page/' . $homePage->getUid(), [
@@ -163,6 +165,42 @@ class PageControllerTest extends RestTestCase
         ]));
         
         $this->assertEquals(204, $response->getStatusCode());
+    }
+    
+    /**
+     * @covers ::patchAction
+     */
+    public function test_patchAction()
+    {
+        // create page
+        $page = (new Page())
+            ->setTitle('Page Title')
+            ->setState(Page::STATE_OFFLINE)
+            ->setSite($this->site)
+        ;
+        
+        $em = $this->getEntityManager();
+        $em->persist($page);
+        $em->flush();
+        
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $page, 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            ['PUBLISH', 'EDIT']
+        );
+
+        $response = $this->sendRequest(self::requestPatch('/rest/1/page/' . $page->getUid(), (new OperationBuilder())
+            ->replace('title', 'New Page Title')
+            ->replace('state', Page::STATE_ONLINE)
+            ->getOperations()
+        ));
+        
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        $pageUpdated = $em->getRepository(get_class($page))->find($page->getUid());
+        
+        $this->assertEquals(Page::STATE_ONLINE, $pageUpdated->getState());
+        $this->assertEquals('New Page Title', $pageUpdated->getTitle());
     }
     
     /**

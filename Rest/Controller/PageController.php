@@ -266,17 +266,17 @@ class PageController extends ARestController
     /**
      * Patch page
      *
-     * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
-     *   @Assert\NotBlank(message="operations is required")
+     * @Rest\RequestParam(name="0", description="Patch operations", requirements={
+     *   @Assert\NotBlank(message="Request must contain at least one operation")
      * })
      *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      * @Rest\Security(expression="is_granted('EDIT', page)")
      */
-    public function patchAction(Page $page)
+    public function patchAction(Page $page, Request $request)
     {
-        $operations = $this->getRequest()->request->get('operations');
-
+        $operations = $request->request->all();
+        
         try {
             (new OperationSyntaxValidator())->validate($operations);
         } catch (InvalidOperationSyntaxException $e) {
@@ -289,6 +289,10 @@ class PageController extends ARestController
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
             throw new AccessDeniedHttpException('Invalid patch operation: ' . $e->getMessage());
+        }
+        
+        if (true === $page->isOnline(true)) {
+            $this->granted('PUBLISH', $page);
         }
 
         $this->getEntityManager()->flush($page);
