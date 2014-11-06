@@ -158,7 +158,7 @@ class BundleController extends ARestController
     /**
      * @see BackBuilder\Rest\Controller\ARestController::granted
      */
-    protected function granted($attributes, $object = null)
+    protected function granted($attributes, $object = null, $message = 'Access denied')
     {
         try {
             parent::granted($attributes, $object);
