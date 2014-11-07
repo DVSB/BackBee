@@ -30,6 +30,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
+ * ClassContent API Controller
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Rest
  * @copyright   Lp digital system
@@ -37,6 +39,33 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class ClassContentController extends ARestController
 {
+    /**
+     * Returns category's datas if $id is valid
+     *
+     * @param  string $id category's id
+     *
+     * @return Response
+     */
+    public function getCategoryAction($id)
+    {
+        $category = $this->getCategoryManager()->getCategory($id);
+        if (null === $category) {
+            throw new NotFoundHttpException("No classcontent category exists for id `$id`.");
+        }
+
+        return $this->createResponse(json_encode($category));
+    }
+
+    /**
+     * Returns every availables categories datas
+     *
+     * @return Response
+     */
+    public function getCategoryCollectionAction()
+    {
+        return $this->createResponse(json_encode($this->getCategoryManager()->getCategories()));
+    }
+
     /**
      * Get classcontent
      *
@@ -87,9 +116,20 @@ class ClassContentController extends ARestController
     }
 
     /**
+     * Getter of classcontent category manager
      *
+     * @return BackBuilder\ClassContent\CategoryManager
+     */
+    private function getCategoryManager()
+    {
+        return $this->getApplication()->getContainer()->get('classcontent.category_manager');
+    }
+
+    /**
+     * Returns classcontent datas if couple (type;uid) is valid
      *
-     * @param  string $type
+     * @param  string $type short namespace of a classcontent
+     *                      (full: BackBuilder\ClassContent\Block\paragraph => short: Block\paragraph)
      * @param  string $uid
      *
      * @return
@@ -106,6 +146,13 @@ class ClassContentController extends ARestController
         return $content;
     }
 
+    /**
+     * Returns current revision for the given $content
+     *
+     * @param  AClassContent $content content we want to get the latest revision
+     *
+     * @return null|BackBuilder\ClassContent\Revision
+     */
     private function getClassContentRevision(AClassContent $content)
     {
         return $this->getApplication()->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')

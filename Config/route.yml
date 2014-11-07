@@ -286,6 +286,22 @@ bb.rest.layout.delete:
         uid: \w{32}
         _method: DELETE
 
+bb.rest.classcontent.category.get:
+    pattern: /rest/{version}/classcontent/category/{id}
+    defaults:
+        _action: getCategoryAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        _method: GET
+
+bb.rest.classcontent.category.get_collection:
+    pattern: /rest/{version}/classcontent/category
+    defaults:
+        _action: getCategoryCollectionAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        _method: GET
+
 bb.rest.classcontent.get:
     pattern: /rest/{version}/classcontent/{type}/{uid}
     defaults:
