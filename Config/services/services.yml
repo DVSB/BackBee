@@ -61,6 +61,7 @@ parameters:
     bbapp.config.configurator.class: BackBuilder\Config\Configurator
     bbapp.config.persistor.class: BackBuilder\Config\Persistor
     bbapp.bundle.loader.class: BackBuilder\Bundle\BundleLoader
+    bbapp.classcontent.category_manager.class: BackBuilder\ClassContent\CategoryManager
 
 services:
 
@@ -155,6 +156,10 @@ services:
     config.persistor:
         class:      %bbapp.config.persistor.class%
         arguments:  ["@bbapp", "@config.configurator"]
+
+    classcontent.category_manager:
+        class:      %bbapp.classcontent.category_manager.class%
+        arguments: [@bbapp]
 
     analytics:
         class: BackBuilder\Application\Analytics
