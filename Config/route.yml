@@ -12,6 +12,7 @@ bb.upload:
     pattern: /
     defaults:
         _action: uploadAction
+        _controller: media.controller
     requirements:
         HTTP-X-Requested-With:  XMLHttpRequest
         HTTP-X-BB-METHOD:       Upload
@@ -25,11 +26,21 @@ bb.internal.services:
       servicename: (generate_classcontent_cache)
 
 # BackBuilder resources
+bb.classcontent_thumbnail:
+    pattern: /%bbapp.routing.resource_uri_prefix%/%classcontent_thumbnail.base_folder%/{filename}
+    # pattern: /ressources/%classcontent_thumbnail.base_folder%/{filename}
+    defaults:
+        _action: getClassContentThumbnailAction
+        _controller: resource.controller
+    requirements:
+        filename: .+
+
 bb.resources:
     # pattern: /%bbapp.routing.resource_uri_prefix%/{filename}
     pattern: /ressources/{filename}
     defaults:
         _action: resourcesAction
+        _controller: resource.controller
     requirements:
         filename: .+
 
@@ -38,6 +49,7 @@ bb.images:
     pattern: /{type}/{filename}
     defaults:
         _action: mediaAction
+        _controller: media.controller
     requirements:
         type: (%bbapp.routing.image_uri_prefix%|%bbapp.routing.media_uri_prefix%)
         filename: .+
@@ -328,8 +340,7 @@ bb.rest.bundle.exposed_actions:
         controller_name: "[a-z]+"
         action_name: "[a-z]+"
         parameters: "^\/.+|"
-        
-        
+
 bb.rest.group.get:
     pattern: /rest/{version}/group/{id}
     defaults:
@@ -373,4 +384,3 @@ default:
         uri:     _root_
     requirements:
         uri: .+
-

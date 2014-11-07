@@ -22,26 +22,25 @@
 namespace BackBuilder\FrontController;
 
 use BackBuilder\BBApplication;
+use BackBuilder\Event\PageFilterEvent;
 use BackBuilder\FrontController\Exception\FrontControllerException;
 use BackBuilder\NestedNode\Page;
-use BackBuilder\Routing\RouteCollection;
-use BackBuilder\Routing\RequestContext;
 use BackBuilder\Routing\Matcher\UrlMatcher;
-use BackBuilder\Util\File;
+use BackBuilder\Routing\RequestContext;
 use BackBuilder\Services\Content\Category;
+use BackBuilder\Util\File;
 use BackBuilder\Util\MimeType;
-use BackBuilder\Event\PageFilterEvent;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * The BackBuilder front controller
@@ -328,7 +327,7 @@ class FrontController implements HttpKernelInterface
      * Returns the routes collection defined
      *
      * @access public
-     * @return RouteCollection
+     * @return \BackBuilder\Routing\RouteCollection
      */
     public function getRouteCollection()
     {
@@ -414,7 +413,7 @@ class FrontController implements HttpKernelInterface
         try {
             $this->_application->info(sprintf('Handling URL request `%s`.', $uri));
 
-            $event = new \BackBuilder\Event\PageFilterEvent($this, $this->_application->getRequest(), self::MASTER_REQUEST, $page);
+            $event = new PageFilterEvent($this, $this->_application->getRequest(), self::MASTER_REQUEST, $page);
             $this->_application->getEventDispatcher()->dispatch('application.page', $event);
 
             if (null !== $this->getRequest()->get('bb5-mode')) {
@@ -471,36 +470,6 @@ class FrontController implements HttpKernelInterface
         } catch (\Exception $e) {
             $this->defaultAction('/rss/' . $uri);
         }
-    }
-
-    /**
-     * Handles a media file request
-     *
-     * @access public
-     * @param string $filename The media file to provide
-     * @throws FrontControllerException
-     */
-    public function mediaAction($type, $filename = null, $includePath = array())
-    {
-        $this->_validateResourcesAction($filename);
-
-        $includePath = array_merge($includePath, array($this->_application->getStorageDir(), $this->_application->getMediaDir()));
-        if (null !== $this->_application->getBBUserToken()) {
-            $includePath[] = $this->_application->getTemporaryDir();
-        }
-
-        $matches = array();
-        if (preg_match('/([a-f0-9]{3})\/([a-f0-9]{29})\/(.*)\.([^\.]+)/', $filename, $matches)) {
-            $filename = $matches[1] . '/' . $matches[2] . '.' . $matches[4];
-        } elseif (preg_match('/([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})\/.*\.([^\.]+)/', $filename, $matches)) {
-            $filename = $matches[1] . $matches[2] . $matches[3] . $matches[4] . $matches[5] . $matches[6] . $matches[7] . $matches[8] . '.' . $matches[9];
-            File::resolveMediapath($filename, null, array('include_path' => $includePath));
-        }
-
-        File::resolveFilepath($filename, null, array('include_path' => $includePath));
-
-        $this->_application->info(sprintf('Handling image URL `%s`.', $filename));
-        $this->_flushfile($filename);
     }
 
     /**
@@ -561,27 +530,6 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Handles a resource file request
-     *
-     * @access public
-     * @param string $filename The resource file to provide
-     * @throws FrontControllerException
-     */
-    public function resourcesAction($filename = null, $base_dir = null)
-    {
-        $this->_validateResourcesAction($filename);
-
-        if (null === $base_dir) {
-            File::resolveFilepath($filename, null, array('include_path' => $this->_application->getResourceDir()));
-        } else {
-            File::resolveFilepath($filename, null, array('base_dir' => $base_dir));
-        }
-
-        $this->_application->info(sprintf('Handling resource URL `%s`.', $filename));
-        $this->_flushfile($filename);
-    }
-
-    /**
      * Handles an RPC request
      *
      * @access public
@@ -594,27 +542,6 @@ class FrontController implements HttpKernelInterface
 
         try {
             $response = $this->_application->getRpcServer()->handle($this->getRequest());
-        } catch (\Exception $e) {
-            throw new FrontControllerException('An error occured while processing RPC request', FrontControllerException::INTERNAL_ERROR, $e);
-        }
-
-        $this->_send($response);
-    }
-
-    /**
-     * Handles an upload by RPC request
-     *
-     * @access public
-     * @throws FrontControllerException
-     */
-    public function uploadAction()
-    {
-        if (null === $this->_application) {
-            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
-        }
-
-        try {
-            $response = $this->_application->getUploadServer()->handle($this->getRequest());
         } catch (\Exception $e) {
             throw new FrontControllerException('An error occured while processing RPC request', FrontControllerException::INTERNAL_ERROR, $e);
         }
