@@ -27,9 +27,6 @@ use BackBuilder\FrontController\Exception\FrontControllerException;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Routing\Matcher\UrlMatcher;
 use BackBuilder\Routing\RequestContext;
-use BackBuilder\Services\Content\Category;
-use BackBuilder\Util\File;
-use BackBuilder\Util\MimeType;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,42 +53,28 @@ class FrontController implements HttpKernelInterface
     const DEFAULT_URL_EXTENSION = 'html';
 
     /**
-     * Iternal services map for Backbuilder
-     * @var array
-     */
-    private $_internalServicesMap = array(
-        "generate_classcontent_cache" => "generateClassContentCache"
-    );
-
-    /**
      * Current BackBuilder application
      * @var \BackBuilder\BBApplication
      */
-    protected $_application;
+    protected $application;
 
     /**
      * Current request handled
      * @var \Symfony\Component\HttpFoundation\Request
      */
-    protected $_request;
+    protected $request;
 
     /**
      * Response
      * @var \Symfony\Component\HttpFoundation\Response
      */
-    protected $_response;
+    protected $response;
 
     /**
      * Current request context
      * @var \BackBuilder\Routing\RequestContext
      */
-    protected $_requestContext;
-
-    /**
-     * Routes collection defined
-     * @var \BackBuilder\Routing\RouteCollection
-     */
-    protected $_routeCollection;
+    protected $requestContext;
 
     /**
      * @var boolean
@@ -111,7 +94,7 @@ class FrontController implements HttpKernelInterface
      */
     public function __construct(BBApplication $application = null)
     {
-        $this->_application = $application;
+        $this->application = $application;
 
         if (null !== $application) {
             if (null !== $parameters_config = $application->getConfig()->getParametersConfig()) {
@@ -133,153 +116,6 @@ class FrontController implements HttpKernelInterface
         register_shutdown_function(array($this, 'terminate'));
     }
 
-    /**
-     * Dispatches GetResponseEvent
-     *
-     * @access private
-     * @param  string $eventName The name of the event to dispatch
-     * @param  integer $type    The type of the request
-     *                          (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
-     * @param  boolean $stopWithResponse Send response if TRUE and response exists
-     */
-    private function _dispatch($eventName, $controller = null, $type = self::MASTER_REQUEST, $stopWithResponse = true)
-    {
-        if (null === $this->_application) {
-            return;
-        }
-
-        if (null !== $this->_application->getEventDispatcher()) {
-            $event = new GetResponseEvent(null === $controller ? $this : $controller, $this->getRequest(), $type);
-            $this->_application->getEventDispatcher()->dispatch($eventName, $event);
-
-            if ($stopWithResponse && $event->hasResponse()) {
-                $this->_send($event->getResponse());
-            }
-        }
-    }
-
-    /**
-     * Dispatch FilterResponseEvent then send response
-     *
-     * @acces private
-     * @param Response $response The repsonse to filter then send
-     * @param  integer $type    The type of the request
-     *                          (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
-     */
-    private function _send(Response $response, $type = self::MASTER_REQUEST)
-    {
-        if (null !== $this->_application && null !== $this->_application->getEventDispatcher()) {
-            $event = new FilterResponseEvent($this, $this->getRequest(), $type, $response);
-            $this->_application->getEventDispatcher()->dispatch('frontcontroller.response', $event);
-            $this->_application->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);
-        }
-
-        $response->send();
-        $this->_response = $response;
-        exit(0);
-    }
-
-    /**
-     * Send response to client
-     *
-     * Public api method
-     *
-     * @param \Symfony\Component\HttpFoundation\Response $response
-     */
-    public function sendResponse(Response $response)
-    {
-        $this->_send($response);
-    }
-
-    /**
-     * Invokes associated action to the current request
-     *
-     * @access private
-     * @param int $type request type
-     * @throws FrontControllerException
-     */
-    private function _invokeAction($type = self::MASTER_REQUEST)
-    {
-        $this->_dispatch('frontcontroller.request');
-
-        $controllerResolver = $this->getApplication()->getContainer()->get('controller_resolver');
-        $controller = $controllerResolver->getController($this->getRequest());
-
-        // logout Event dispatch
-        if (
-            null !== $this->getRequest()->get('logout')
-            && true == $this->getRequest()->get('logout')
-            && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')
-        ) {
-            $this->_dispatch('frontcontroller.request.logout');
-        }
-
-        if (null !== $controller) {
-            $eventName = str_replace('\\', '.', strtolower(get_class($controller[0])));
-            if (0 === strpos($eventName, 'backbuilder.')) {
-                $eventName = substr($eventName, 12);
-            }
-
-            if (0 === strpos($eventName, 'frontcontroller.')) {
-                $eventName = substr($eventName, 16);
-            }
-
-            $eventName .= '.pre' . $this->getRequest()->attributes->get('_action');
-            $this->_dispatch($eventName . '.pre' . $this->getRequest()->attributes->get('_action'));
-
-            // dispatch kernel.controller event
-            $event = new FilterControllerEvent($this, $controller, $this->getRequest(), $type);
-            $this->_application->getEventDispatcher()->dispatch(KernelEvents::CONTROLLER, $event);
-
-            // a listener could have changed the controller
-            $controller = $event->getController();
-
-            // get controller action arguments
-            $actionArguments = $controllerResolver->getArguments(
-                $this->getRequest(), $controller
-            );
-
-            $response = call_user_func_array($controller, $actionArguments);
-
-            return $response;
-        } else {
-            throw new FrontControllerException(sprintf('Unknown action `%s`.', $this->getRequest()->attributes->get('_action')), FrontControllerException::BAD_REQUEST);
-        }
-    }
-
-    /**
-     * Flush a file content to HTTP response
-     *
-     * @access private
-     * @param string $filename The filename to flush
-     * @throws FrontControllerException
-     */
-    private function _flushfile($filename)
-    {
-        if (false === file_exists($filename) || false === is_readable($filename) || true === is_dir($filename)) {
-            throw new FrontControllerException(sprintf('The file `%s` can not be found (referer: %s).', $this->_request->getHost() . '/' . $this->_request->getPathInfo(), $this->_request->server->get('HTTP_REFERER')), FrontControllerException::NOT_FOUND);
-        }
-
-        try {
-            $filestats = stat($filename);
-
-            $response = new Response();
-
-            $response->headers->set('Content-Type', MimeType::getInstance()->guess($filename));
-            $response->headers->set('Content-Length', $filestats['size']);
-
-            $response->setCache(array(
-                'etag' => basename($filename),
-                'last_modified' => new \DateTime('@' . $filestats['mtime']),
-                'public' => 'public'
-            ));
-
-            $response->setContent(file_get_contents($filename));
-            $this->_send($response);
-        } catch (\Exception $e) {
-            throw new FrontControllerException(sprintf('File `%s`can not be flushed.', basename($filename)), FrontControllerException::INTERNAL_ERROR, $e);
-        }
-    }
 
     /**
      * Returns current Backbuilder application
@@ -289,7 +125,7 @@ class FrontController implements HttpKernelInterface
      */
     public function getApplication()
     {
-        return $this->_application;
+        return $this->application;
     }
 
     /**
@@ -300,27 +136,11 @@ class FrontController implements HttpKernelInterface
      */
     public function getRequest()
     {
-        if (null === $this->_request) {
-            $this->_request = $this->getApplication()->getContainer()->get('request');
+        if (null === $this->request) {
+            $this->request = $this->getApplication()->getContainer()->get('request');
         }
 
-        return $this->_request;
-    }
-
-    /**
-     * Returns the current request context
-     *
-     * @access protected
-     * @return RequestContext
-     */
-    protected function getRequestContext()
-    {
-        if (null === $this->_requestContext) {
-            $this->_requestContext = new RequestContext();
-            $this->_requestContext->fromRequest($this->getRequest());
-        }
-
-        return $this->_requestContext;
+        return $this->request;
     }
 
     /**
@@ -331,222 +151,28 @@ class FrontController implements HttpKernelInterface
      */
     public function getRouteCollection()
     {
-        return $this->_application->getContainer()->get('routing');
+        return $this->application->getContainer()->get('routing');
     }
 
+
     /**
-     * Handles the request when none other action was found
+     * Returns true if url extension is required, else false
      *
-     * @access public
-     * @param string $uri The URI to handle
-     * @throws FrontControllerException
+     * @return boolean true if url extension is required, else false
      */
-    public function defaultAction($uri = null, $sendResponse = true)
+    public function isUrlExtensionRequired()
     {
-        if (null === $this->_application) {
-            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
-        }
-
-        if (false === $this->_application->getContainer()->has('site')) {
-            throw new FrontControllerException('A BackBuilder\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
-        }
-
-        $site = $this->_application->getContainer()->get('site');
-
-        preg_match('/(.*)(\.[' . $this->url_extension . ']+)/', $uri, $matches);
-        if (
-            (
-                '_root_' !== $uri
-                && '/' !== $uri[strlen($uri) - 1]
-                && 0 === count($matches)
-                && true === $this->force_url_extension
-            ) || (0 < count($matches) && true === isset($matches[2]) && $site->getDefaultExtension() !== $matches[2])
-        ) {
-            throw new FrontControllerException(sprintf(
-                    'The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND
-            );
-        }
-
-        $uri = preg_replace('/(.*)\.' . $this->url_extension . '?$/i', '$1', $uri);
-
-        $redirect_page = null !== $this->_application->getRequest()->get('bb5-redirect', null)
-            ? ('false' !== $this->_application->getRequest()->get('bb5-redirect'))
-            : true
-        ;
-
-        if ('_root_' == $uri) {
-            $page = $this->_application->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page')
-                ->getRoot($site)
-            ;
-        } else {
-            $page = $this->_application->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page')
-                ->findOneBy(array(
-                    '_site' => $site,
-                    '_url' => '/' . $uri,
-                    '_state' => Page::getUndeletedStates()
-                ))
-            ;
-        }
-
-        if (null !== $page && false === $page->isOnline()) {
-            $page = (null === $this->_application->getBBUserToken()) ? null : $page;
-        }
-
-        if (null === $page) {
-            throw new FrontControllerException(sprintf('The URL `%s` can not be found.', $this->_request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND);
-        }
-
-        if ((null !== $redirect = $page->getRedirect()) && $page->getUseUrlRedirect()) {
-            if ((null === $this->_application->getBBUserToken()) || ((null !== $this->_application->getBBUserToken()) && (TRUE === $redirect_page))) {
-                $redirect = $this->_application->getRenderer()->getUri($redirect);
-
-                header('Cache-Control: no-store, no-cache, must-revalidate');
-                header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
-                header('Status: 301 Moved Permanently', false, 301);
-                header('Location: ' . $redirect);
-                exit();
-            }
-        }
-
-        try {
-            $this->_application->info(sprintf('Handling URL request `%s`.', $uri));
-
-            $event = new PageFilterEvent($this, $this->_application->getRequest(), self::MASTER_REQUEST, $page);
-            $this->_application->getEventDispatcher()->dispatch('application.page', $event);
-
-            if (null !== $this->getRequest()->get('bb5-mode')) {
-                $response = new Response($this->_application->getRenderer()->render($page, $this->getRequest()->get('bb5-mode')));
-            } else {
-                $response = new Response($this->_application->getRenderer()->render($page));
-            }
-
-            if ($sendResponse) {
-                $this->_send($response);
-            } else {
-                return $response;
-            }
-        } catch (FrontControllerException $fe) {
-            throw $fe;
-        } catch (\Exception $e) {
-            throw new FrontControllerException(sprintf('An error occured while rendering URL `%s`.', $this->_request->getHost() . '/' . $uri), FrontControllerException::INTERNAL_ERROR, $e);
-        }
-    }
-
-    public function rssAction($uri = null)
-    {
-        if (NULL === $this->_application)
-            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
-
-        if (FALSE === $this->_application->getContainer()->has('site'))
-            throw new FrontControllerException('A BackBuilder\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
-
-        $site = $this->_application->getContainer()->get('site');
-        if (FALSE !== $ext = strrpos($uri, '.'))
-            $uri = substr($uri, 0, $ext);
-
-        if ('_root_' == $uri) {
-            $page = $this->_application->getEntityManager()
-                    ->getRepository('BackBuilder\NestedNode\Page')
-                    ->getRoot($site);
-        } else {
-            $page = $this->_application->getEntityManager()
-                    ->getRepository('BackBuilder\NestedNode\Page')
-                    ->findOneBy(array('_site' => $site,
-                '_url' => '/' . $uri,
-                '_state' => Page::getUndeletedStates()));
-        }
-
-        try {
-            $this->_application->info(sprintf('Handling URL request `rss%s`.', $uri));
-
-            $response = new Response($this->_application->getRenderer()->render($page, 'rss', null, 'rss.phtml', false));
-            $response->headers->set('Content-Type', 'text/xml');
-            $response->setClientTtl(15);
-            $response->setTtl(15);
-
-            $this->_send($response);
-        } catch (\Exception $e) {
-            $this->defaultAction('/rss/' . $uri);
-        }
+        return $this->force_url_extension;
     }
 
     /**
-     * Handles a themes resources files request
+     * Getter of url extension
      *
-     * @access public
-     * @param string $filename The media file to provide
-     * @throws FrontControllerException
+     * @return string configured url extension, html by default
      */
-    public function themesResourcesAction($type, $filename = null)
+    public function getUrlExtension()
     {
-        $this->staticResourcesAction($type, $filename);
-    }
-
-    /**
-     * Handles a static files request
-     *
-     * @access public
-     * @param string $filename The media file to provide
-     * @throws FrontControllerException
-     */
-    public function staticResourcesAction($type, $filename = null)
-    {
-        $this->_validateResourcesAction($filename);
-
-        $keyword = constant('BackBuilder\Theme\Theme::' . strtoupper($type) . '_DIR');
-        File::resolveMediapath($filename, null, array('include_path' => $this->_application->getTheme()->getIncludePath($keyword)));
-
-        $this->_application->info(sprintf('Handling %s URL `%s`.', $type, $filename));
-        $this->_flushfile($filename);
-    }
-
-    /**
-     * Handle static file request for bundle
-     */
-    public function bundleResourcesAction($bundleName, $type, $filename)
-    {
-        $pathInfos = array(
-            "css" => "Ressources/Templates/css",
-            "js" => "Ressources/Templates/javascript",
-            "less" => "Ressources/Templates/less",
-            "img" => "Ressources/Templates/img"
-        );
-        $bundleInfos = explode("-", $bundleName);
-        $bundleNameInfos = array_map(function($str) {
-            return ucfirst($str);
-        }, $bundleInfos);
-
-        $completeBundleName = join("", $bundleNameInfos);
-        $bundle = $this->_application->getContainer()->get('bundle.' . $completeBundleName);
-        if (!is_null($bundle)) {
-            if (in_array($type, array_keys($pathInfos))) {
-                $filePath = $bundle->getBaseDir() . DIRECTORY_SEPARATOR . $pathInfos[$type] . DIRECTORY_SEPARATOR . $filename;
-                $this->_application->info(sprintf('Handling %s URL `%s`.', $type, $filename));
-                $this->_flushfile($filePath);
-            }
-        }
-    }
-
-    /**
-     * Handles an RPC request
-     *
-     * @access public
-     * @throws FrontControllerException
-     */
-    public function rpcAction()
-    {
-        if (null === $this->_application)
-            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
-
-        try {
-            $response = $this->_application->getRpcServer()->handle($this->getRequest());
-        } catch (\Exception $e) {
-            throw new FrontControllerException('An error occured while processing RPC request', FrontControllerException::INTERNAL_ERROR, $e);
-        }
-
-        $this->_send($response);
+        return $this->url_extension;
     }
 
     /**
@@ -563,11 +189,11 @@ class FrontController implements HttpKernelInterface
     {
         // request
         $event = new GetResponseEvent($this, $this->getRequest(), $type);
-        $this->_application->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
+        $this->application->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
 
         try {
             if (null !== $request) {
-                $this->_request = $request;
+                $this->request = $request;
             }
 
             // resolve url
@@ -584,7 +210,7 @@ class FrontController implements HttpKernelInterface
             }
 
             if($this->getRequest()->attributes->has('_controller')) {
-                return $this->_invokeAction($type);
+                return $this->invokeAction($type);
             }
 
             throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getHost() . '/' . $this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);
@@ -598,114 +224,161 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Handles an exception by trying to convert it to a Response.
+     * Handles the request when none other action was found
      *
-     * @param \Exception $e       An \Exception instance
-     * @param Request    $request A Request instance
-     * @param integer    $type    The type of the request
-     *
-     * @return Response A Response instance
-     *
-     * @throws \Exception
+     * @access public
+     * @param string $uri The URI to handle
+     * @throws FrontControllerException
      */
-    private function handleException(\Exception $e, $request, $type)
+    public function defaultAction($uri = null, $sendResponse = true)
     {
-        $event = new GetResponseForExceptionEvent($this, $request, $type, $e);
-        $this->_application->getEventDispatcher()->dispatch(KernelEvents::EXCEPTION, $event);
-
-        // a listener might have replaced the exception
-        $e = $event->getException();
-
-        if (!$event->hasResponse()) {
-            throw $e;
-        }
-
-        $response = $event->getResponse();
-
-        if (!$response->isClientError() && !$response->isServerError() && !$response->isRedirect()) {
-            // ensure that we actually have an error response
-            if ($e instanceof HttpExceptionInterface) {
-                // keep the HTTP status code and headers
-                $response->setStatusCode($e->getStatusCode());
-                $response->headers->add($e->getHeaders());
-            } elseif ($e instanceof FrontControllerException) {
-                // keep the HTTP status code
-                $response->setStatusCode($e->getStatusCode());
-            } else {
-                $response->setStatusCode(500);
-            }
-        }
-
-        return $response;
-    }
-
-    private function _validateResourcesAction($value)
-    {
-        if (null === $value) {
-            throw new FrontControllerException('A filename is required', FrontControllerException::BAD_REQUEST);
-        }
-
-        if (null === $this->_application) {
+        if (null === $this->application) {
             throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
         }
 
-        return true;
-    }
+        if (false === $this->application->getContainer()->has('site')) {
+            throw new FrontControllerException('A BackBuilder\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
+        }
 
-    /**
-     * Internal services handler
-     * @access public
-     * services call must return a Symfony\Component\HttpFoundation\Response
-     */
-    public function handleInternalServicesAction($servicename = null)
-    {
+        $site = $this->application->getContainer()->get('site');
+
+        preg_match('/(.*)(\.[' . $this->url_extension . ']+)/', $uri, $matches);
+        if (
+            (
+                '_root_' !== $uri
+                && '/' !== $uri[strlen($uri) - 1]
+                && 0 === count($matches)
+                && true === $this->force_url_extension
+            ) || (0 < count($matches) && true === isset($matches[2]) && $site->getDefaultExtension() !== $matches[2])
+        ) {
+            throw new FrontControllerException(sprintf(
+                'The URL `%s` can not be found.', $this->request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND
+            );
+        }
+
+        $uri = preg_replace('/(.*)\.' . $this->url_extension . '?$/i', '$1', $uri);
+
+        $redirect_page = null !== $this->application->getRequest()->get('bb5-redirect', null)
+            ? ('false' !== $this->application->getRequest()->get('bb5-redirect'))
+            : true
+        ;
+
+        if ('_root_' == $uri) {
+            $page = $this->application->getEntityManager()
+                ->getRepository('BackBuilder\NestedNode\Page')
+                ->getRoot($site)
+            ;
+        } else {
+            $page = $this->application->getEntityManager()
+                ->getRepository('BackBuilder\NestedNode\Page')
+                ->findOneBy(array(
+                    '_site' => $site,
+                    '_url' => '/' . $uri,
+                    '_state' => Page::getUndeletedStates()
+                ))
+            ;
+        }
+
+        if (null !== $page && false === $page->isOnline()) {
+            $page = (null === $this->application->getBBUserToken()) ? null : $page;
+        }
+
+        if (null === $page) {
+            throw new FrontControllerException(sprintf('The URL `%s` can not be found.', $this->request->getHost() . '/' . $uri), FrontControllerException::NOT_FOUND);
+        }
+
+        if ((null !== $redirect = $page->getRedirect()) && $page->getUseUrlRedirect()) {
+            if ((null === $this->application->getBBUserToken()) || ((null !== $this->application->getBBUserToken()) && (true === $redirect_page))) {
+                $redirect = $this->application->getRenderer()->getUri($redirect);
+
+                header('Cache-Control: no-store, no-cache, must-revalidate');
+                header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+                header('Status: 301 Moved Permanently', false, 301);
+                header('Location: ' . $redirect);
+                exit();
+            }
+        }
+
         try {
-            if (isset($servicename) && array_key_exists($servicename, $this->_internalServicesMap)) {
-                $serviceCallback = $this->_internalServicesMap[$servicename];
-                if (method_exists($this, $serviceCallback)) {
-                    $success = call_user_func(array($this, $serviceCallback));
-                    if (!$success) {
-                        throw new \Exception("Service returns an error");
-                    }
+            $this->application->info(sprintf('Handling URL request `%s`.', $uri));
 
-                    if ($success) {
-                        $this->_send(new Response("Service returns successfully."));
-                    }
-                } else {
-                    throw new \Exception(sprintf("<strong>method '%s' can't be found</strong>", $serviceCallback));
-                }
+            $event = new PageFilterEvent($this, $this->application->getRequest(), self::MASTER_REQUEST, $page);
+            $this->application->getEventDispatcher()->dispatch('application.page', $event);
+
+            if (null !== $this->getRequest()->get('bb5-mode')) {
+                $response = new Response($this->application->getRenderer()->render($page, $this->getRequest()->get('bb5-mode')));
+            } else {
+                $response = new Response($this->application->getRenderer()->render($page));
             }
+
+            if ($sendResponse) {
+                $this->send($response);
+            } else {
+                return $response;
+            }
+        } catch (FrontControllerException $fe) {
+            throw $fe;
         } catch (\Exception $e) {
-            $exception = ($e instanceof FrontControllerException ) ? $e : new FrontControllerException(sprintf('An error occured while processing URL `%s`.', $this->getRequest()->getPathInfo()), FrontControllerException::INTERNAL_ERROR, $e);
-            $exception->setRequest($this->getRequest());
-            throw $exception;
+            throw new FrontControllerException(sprintf('An error occured while rendering URL `%s`.', $this->request->getHost() . '/' . $uri), FrontControllerException::INTERNAL_ERROR, $e);
+        }
+    }
+
+    public function rssAction($uri = null)
+    {
+        if (NULL === $this->application)
+            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
+
+        if (FALSE === $this->application->getContainer()->has('site'))
+            throw new FrontControllerException('A BackBuilder\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
+
+        $site = $this->application->getContainer()->get('site');
+        if (FALSE !== $ext = strrpos($uri, '.'))
+            $uri = substr($uri, 0, $ext);
+
+        if ('_root_' == $uri) {
+            $page = $this->application->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->getRoot($site);
+        } else {
+            $page = $this->application->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->findOneBy(array('_site' => $site,
+                '_url' => '/' . $uri,
+                '_state' => Page::getUndeletedStates()));
+        }
+
+        try {
+            $this->application->info(sprintf('Handling URL request `rss%s`.', $uri));
+
+            $response = new Response($this->application->getRenderer()->render($page, 'rss', null, 'rss.phtml', false));
+            $response->headers->set('Content-Type', 'text/xml');
+            $response->setClientTtl(15);
+            $response->setTtl(15);
+
+            $this->send($response);
+        } catch (\Exception $e) {
+            $this->defaultAction('/rss/' . $uri);
         }
     }
 
     /**
-     * Allow the classContents list to be served faster by caching them
+     * Handles an RPC request
+     *
      * @access public
+     * @throws FrontControllerException
      */
-    private function generateClassContentCache()
+    public function rpcAction()
     {
-        $contents = array();
-        $result = false;
-        $categoryList = Category::getCategories($this->_application);
-        if (is_array($categoryList) && count($categoryList)) {
-            foreach ($categoryList as $cat) {
-                $cat->setBBapp($this->_application);
-                foreach ($cat->getContents() as $content) {
-                    $contents[] = $content->__toStdObject(false);
-                }
-            }
-            if (count($contents)) {
-                /* save content here */
-                $cache = $this->_application->getBootstrapCache();
-                $cache->save(Category::getCacheKey(), json_encode($contents));
-                $result = true;
-            }
+        if (null === $this->application)
+            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
+
+        try {
+            $response = $this->application->getRpcServer()->handle($this->getRequest());
+        } catch (\Exception $e) {
+            throw new FrontControllerException('An error occured while processing RPC request', FrontControllerException::INTERNAL_ERROR, $e);
         }
-        return $result;
+
+        $this->send($response);
     }
 
     /**
@@ -754,17 +427,13 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * [isUrlExtensionRequired description]
-     * @return boolean true if url extension required, else false
+     * Send response to client
+     *
+     * @param \Symfony\Component\HttpFoundation\Response $response
      */
-    public function isUrlExtensionRequired()
+    public function sendResponse(Response $response)
     {
-        return $this->force_url_extension;
-    }
-
-    public function getUrlExtension()
-    {
-        return $this->url_extension;
+        $this->send($response);
     }
 
     /**
@@ -772,7 +441,7 @@ class FrontController implements HttpKernelInterface
      */
     public function terminate()
     {
-        if (!$this->_application || false === $this->_application->isStarted()) {
+        if (!$this->application || false === $this->application->isStarted()) {
             return;
         }
 
@@ -794,9 +463,169 @@ class FrontController implements HttpKernelInterface
         ob_implicit_flush(true);
         flush();
 
-        // $_response may not be set
-        if ($this->_response instanceof Response) {
-            $this->_application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->_response));
+        // $response may not be set
+        if ($this->response instanceof Response) {
+            $this->application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->response));
         }
+    }
+
+    /**
+     * Returns the current request context
+     *
+     * @access protected
+     * @return RequestContext
+     */
+    protected function getRequestContext()
+    {
+        if (null === $this->requestContext) {
+            $this->requestContext = new RequestContext();
+            $this->requestContext->fromRequest($this->getRequest());
+        }
+
+        return $this->requestContext;
+    }
+
+    /**
+     * Dispatches GetResponseEvent
+     *
+     * @access private
+     * @param  string $eventName The name of the event to dispatch
+     * @param  integer $type    The type of the request
+     *                          (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     * @param  boolean $stopWithResponse Send response if TRUE and response exists
+     */
+    private function dispatch($eventName, $controller = null, $type = self::MASTER_REQUEST, $stopWithResponse = true)
+    {
+        if (null === $this->application) {
+            return;
+        }
+
+        if (null !== $this->application->getEventDispatcher()) {
+            $event = new GetResponseEvent(null === $controller ? $this : $controller, $this->getRequest(), $type);
+            $this->application->getEventDispatcher()->dispatch($eventName, $event);
+
+            if ($stopWithResponse && $event->hasResponse()) {
+                $this->send($event->getResponse());
+            }
+        }
+    }
+
+    /**
+     * Dispatch FilterResponseEvent then send response
+     *
+     * @acces private
+     * @param Response $response The repsonse to filter then send
+     * @param  integer $type    The type of the request
+     *                          (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     */
+    private function send(Response $response, $type = self::MASTER_REQUEST)
+    {
+        if (null !== $this->application && null !== $this->application->getEventDispatcher()) {
+            $event = new FilterResponseEvent($this, $this->getRequest(), $type, $response);
+            $this->application->getEventDispatcher()->dispatch('frontcontroller.response', $event);
+            $this->application->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);
+        }
+
+        $response->send();
+        $this->response = $response;
+        exit(0);
+    }
+
+    /**
+     * Invokes associated action to the current request
+     *
+     * @access private
+     * @param int $type request type
+     * @throws FrontControllerException
+     */
+    private function invokeAction($type = self::MASTER_REQUEST)
+    {
+        $this->dispatch('frontcontroller.request');
+
+        $controllerResolver = $this->getApplication()->getContainer()->get('controller_resolver');
+        $controller = $controllerResolver->getController($this->getRequest());
+
+        // logout Event dispatch
+        if (
+            null !== $this->getRequest()->get('logout')
+            && true == $this->getRequest()->get('logout')
+            && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')
+        ) {
+            $this->dispatch('frontcontroller.request.logout');
+        }
+
+        if (null !== $controller) {
+            $eventName = str_replace('\\', '.', strtolower(get_class($controller[0])));
+            if (0 === strpos($eventName, 'backbuilder.')) {
+                $eventName = substr($eventName, 12);
+            }
+
+            if (0 === strpos($eventName, 'frontcontroller.')) {
+                $eventName = substr($eventName, 16);
+            }
+
+            $eventName .= '.pre' . $this->getRequest()->attributes->get('_action');
+            $this->dispatch($eventName . '.pre' . $this->getRequest()->attributes->get('_action'));
+
+            // dispatch kernel.controller event
+            $event = new FilterControllerEvent($this, $controller, $this->getRequest(), $type);
+            $this->application->getEventDispatcher()->dispatch(KernelEvents::CONTROLLER, $event);
+
+            // a listener could have changed the controller
+            $controller = $event->getController();
+
+            // get controller action arguments
+            $actionArguments = $controllerResolver->getArguments(
+                $this->getRequest(), $controller
+            );
+
+            $response = call_user_func_array($controller, $actionArguments);
+
+            return $response;
+        } else {
+            throw new FrontControllerException(sprintf('Unknown action `%s`.', $this->getRequest()->attributes->get('_action')), FrontControllerException::BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Handles an exception by trying to convert it to a Response.
+     *
+     * @param \Exception $e       An \Exception instance
+     * @param Request    $request A Request instance
+     * @param integer    $type    The type of the request
+     *
+     * @return Response A Response instance
+     *
+     * @throws \Exception
+     */
+    private function handleException(\Exception $e, $request, $type)
+    {
+        $event = new GetResponseForExceptionEvent($this, $request, $type, $e);
+        $this->application->getEventDispatcher()->dispatch(KernelEvents::EXCEPTION, $event);
+
+        // a listener might have replaced the exception
+        $e = $event->getException();
+
+        if (!$event->hasResponse()) {
+            throw $e;
+        }
+
+        $response = $event->getResponse();
+
+        if (!$response->isClientError() && !$response->isServerError() && !$response->isRedirect()) {
+            // ensure that we actually have an error response
+            if ($e instanceof HttpExceptionInterface) {
+                // keep the HTTP status code and headers
+                $response->setStatusCode($e->getStatusCode());
+                $response->headers->add($e->getHeaders());
+            } elseif ($e instanceof FrontControllerException) {
+                // keep the HTTP status code
+                $response->setStatusCode($e->getStatusCode());
+            } else {
+                $response->setStatusCode(500);
+            }
+        }
+
+        return $response;
     }
 }

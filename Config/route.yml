@@ -17,14 +17,6 @@ bb.upload:
         HTTP-X-Requested-With:  XMLHttpRequest
         HTTP-X-BB-METHOD:       Upload
 
-# Backbuilder internal services
-bb.internal.services:
-    pattern: /bb-internal-services/{servicename}
-    defaults:
-      _action: handleInternalServicesAction
-    requirements:
-      servicename: (generate_classcontent_cache)
-
 # BackBuilder resources
 bb.classcontent_thumbnail:
     pattern: /%bbapp.routing.resource_uri_prefix%/%classcontent_thumbnail.base_folder%/{filename}
