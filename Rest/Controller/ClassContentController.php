@@ -21,6 +21,7 @@
 
 namespace BackBuilder\Rest\Controller;
 
+use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Controller\ARestController;
@@ -77,7 +78,12 @@ class ClassContentController extends ARestController
     public function getAction($type, $uid)
     {
         $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $type);
-        $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
+
+        try {
+            $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
+        } catch (ClassNotFoundException $e) {
+            throw new NotFoundHttpException("No classcontent (:$classname) found with provided type (:$type)");
+        }
 
         if (null === $content) {
             throw new NotFoundHttpException("No `$classname` exists with uid `$uid`");
