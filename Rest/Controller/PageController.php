@@ -61,11 +61,11 @@ class PageController extends ARestController
 
     /**
      * Get collection of page entity
-     * 
+     *
      * By default returns online pages only
      *
      * @Rest\Pagination(default_count=25, max_count=100)
-     * 
+     *
      * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
      * @Rest\QueryParam(name="state", description="State", default="1", requirements={
      *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid")
@@ -76,7 +76,7 @@ class PageController extends ARestController
      * @Rest\QueryParam(name="dir", description="Order direction", default="asc", requirements={
      *   @Assert\Choice(choices = {"asc", "desc"}, message="Order direction is not valid")
      * })
-     * 
+     *
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
      * )
@@ -86,25 +86,25 @@ class PageController extends ARestController
         $qb = $this->getPageRepository()->createQueryBuilder('p')
             ->orderByMultiple(['_' . $request->query->get('order') => $request->query->get('dir')])
         ;
-        
-        if(null !== $parent) { 
+
+        if(null !== $parent) {
             // parent was defined - don't include it in the results
             $qb = $qb->andIsDescendantOf($parent, true);
         } else {
             // parent wasn't defined - retrieve the site's home page & include it in the returned results
             $parent = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
             $qb = $qb->andIsDescendantOf($parent, false);
-        } 
+        }
 
         $this->granted('VIEW', $parent);
-        
+
         $results = $qb
             ->andStateIsIn((array) $request->query->get('state'))
             ->setFirstResult($start)
             ->setMaxResults($count)
-            ->getQuery()->getResult() 
+            ->getQuery()->getResult()
         ;
-        
+
         $result_count = $start + count($results);
 
         $response = $this->createResponse($this->formatCollection($results));
@@ -146,7 +146,7 @@ class PageController extends ARestController
      * @Rest\ParamConverter(
      *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBuilder\Workflow\State", required=false
      * )
-     * 
+     *
      * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
     public function postAction(Layout $layout, Request $request, Page $parent = null)
@@ -157,7 +157,7 @@ class PageController extends ARestController
 
         $builder = $this->getApplication()->getContainer()->get('pagebuilder');
         $builder->setLayout($layout);
-        
+
         if(null !== $parent) {
             $builder->setParent($parent);
             $builder->setRoot($parent->getRoot());
@@ -165,19 +165,19 @@ class PageController extends ARestController
         } else {
             $builder->setSite($this->getApplication()->getSite());
         }
-        
+
         $builder->setTitle($request->request->get('title'));
         $builder->setUrl($request->request->get('url', null));
         $builder->setState($request->request->get('state'));
         $builder->setTarget($request->request->get('target'));
         $builder->setRedirect($request->request->get('redirect'));
-        $builder->setAltTitle($request->request->get('alt_title'));
+        $builder->setAltTitle($request->request->get('alttitle'));
         $builder->setPublishing(
             null !== $request->request->get('publishing')
                 ? new \DateTime(date('c', $request->request->get('publishing')))
                 : null
         );
-        
+
         $builder->setArchiving(
             null !== $request->request->get('archiving')
                 ? new \DateTime(date('c', $request->request->get('archiving')))
@@ -191,16 +191,16 @@ class PageController extends ARestController
             $this->granted('CREATE', $page);
 
             $this->getEntityManager()->persist($page);
-        
+
             $this->getEntityManager()->flush($page);
             $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
         } catch (\Exception $e) {
             return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
         }
 
-        
+
         return $this->redirect(
-            $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite()), 
+            $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite()),
             201
         );
     }
@@ -239,13 +239,13 @@ class PageController extends ARestController
     {
         $page->setLayout($layout);
         $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
-        
+
         $page->setTitle($request->request->get('title'))
             ->setUrl($request->request->get('url'))
             ->setTarget($request->request->get('target'))
             ->setState($request->request->get('state'))
             ->setRedirect($request->request->get('redirect', null))
-            ->setAltTitle($request->request->get('alt_title', null))
+            ->setAltTitle($request->request->get('alttitle', null))
         ;
 
         $publishing = $request->request->get('publishing');
@@ -276,7 +276,7 @@ class PageController extends ARestController
     public function patchAction(Page $page, Request $request)
     {
         $operations = $request->request->all();
-        
+
         try {
             (new OperationSyntaxValidator())->validate($operations);
         } catch (InvalidOperationSyntaxException $e) {
@@ -290,7 +290,7 @@ class PageController extends ARestController
         } catch (UnauthorizedPatchOperationException $e) {
             throw new AccessDeniedHttpException('Invalid patch operation: ' . $e->getMessage());
         }
-        
+
         if (true === $page->isOnline(true)) {
             $this->granted('PUBLISH', $page);
         }
@@ -366,11 +366,11 @@ class PageController extends ARestController
 
     /**
      * Clone a page
-     * 
+     *
      * @Rest\RequestParam(name="title", description="Cloning page new title", requirements={
      *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
      * })
-     * 
+     *
      * @Rest\ParamConverter(
      *   name="source", id_name="source_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=true
      * )
@@ -381,7 +381,7 @@ class PageController extends ARestController
     public function cloneAction(Page $source, Request $request)
     {
         // user must have view permission on chosen layout
-        $this->granted('VIEW', $source->getLayout()); 
+        $this->granted('VIEW', $source->getLayout());
 
         if (null !== $source->getParent()) {
             $this->granted('EDIT', $source->getParent());
