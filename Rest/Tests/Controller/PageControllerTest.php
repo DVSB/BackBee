@@ -263,10 +263,11 @@ class PageControllerTest extends RestTestCase
             MaskBuilder::MASK_VIEW
         );
         
-        // no filters - should return online pages by default
+        // no filters - should return all pages by default
         $response1 = $this->sendRequest(self::requestGet('/rest/1/page'));
         $this->assertEquals(200, $response1->getStatusCode());
         $res1 = json_decode($response1->getContent(), true);
+        var_dump($res1);
         $this->assertInternalType('array', $res1);
         $this->assertCount(3, $res1);
         

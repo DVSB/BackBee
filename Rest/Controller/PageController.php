@@ -62,12 +62,11 @@ class PageController extends ARestController
     /**
      * Get collection of page entity
      *
-     * By default returns online pages only
      *
      * @Rest\Pagination(default_count=25, max_count=100)
      *
      * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
-     * @Rest\QueryParam(name="state", description="State", default="1", requirements={
+     * @Rest\QueryParam(name="state", description="State", requirements={
      *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid")
      * })
      * @Rest\QueryParam(name="order", description="Order by field", default="leftnode", requirements={
@@ -97,13 +96,17 @@ class PageController extends ARestController
         }
 
         $this->granted('VIEW', $parent);
-
-        $results = $qb
-            ->andStateIsIn((array) $request->query->get('state'))
+        
+        $qb
             ->setFirstResult($start)
             ->setMaxResults($count)
-            ->getQuery()->getResult()
         ;
+
+        if (null !== $request->query->get('state')) {
+            $qb->andStateIsIn((array) $request->query->get('state'));
+        }
+
+        $results = $qb->getQuery()->getResult();
 
         $result_count = $start + count($results);
 
