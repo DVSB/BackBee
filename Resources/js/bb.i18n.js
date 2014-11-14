@@ -25,7 +25,7 @@ var bbTranslator = function(locale, options) {
         if ('undefined' != typeof(locale)) {
             _locale = locale;
         } else if ('undefined' != typeof(navigator.language)) {
-            _locale = navigator.language;
+            _locale = navigator.language.substring(0, 2);
         }
 
         bb.jquery('#bb5-i18n-choice').empty();

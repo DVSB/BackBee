@@ -35,7 +35,7 @@ use BackBuilder\NestedNode\Page,
 interface IUrlGenerator
 {
 
-    public function getDescriminators();
+    public function getDiscriminators();
 
     public function generate(Page $page, AClassContent $content = NULL, $exceptionOnMissingScheme = true);
 }

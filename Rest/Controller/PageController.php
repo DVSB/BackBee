@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\Rest\Controller;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,9 +19,9 @@ namespace BackBuilder\Rest\Controller;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace BackBuilder\Rest\Controller;
+
 use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\IApplication as ApplicationInterface;
-use BackBuilder\MetaData\MetaDataBag;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Patcher\EntityPatcher;
@@ -36,8 +35,10 @@ use BackBuilder\Workflow\State;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\HttpFoundation\Request;
+
 
 /**
  * Page Controller
@@ -62,41 +63,62 @@ class PageController extends ARestController
     /**
      * Get collection of page entity
      *
+     *
      * @Rest\Pagination(default_count=25, max_count=100)
+     *
+     * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
+     * @Rest\QueryParam(name="state", description="State", requirements={
+     *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid")
+     * })
+     * @Rest\QueryParam(name="order", description="Order by field", default="leftnode", requirements={
+     *   @Assert\Choice(choices = {"leftnode", "date", "title"}, message="Order by is not valid")
+     * })
+     * @Rest\QueryParam(name="dir", description="Order direction", default="asc", requirements={
+     *   @Assert\Choice(choices = {"asc", "desc"}, message="Order direction is not valid")
+     * })
+     *
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
      * )
      */
-    public function getCollectionAction()
+    public function getCollectionAction(Request $request, $start, $count, Page $parent = null)
     {
-        if (null === $parent = $this->getEntityFromAttributes('parent')) {
+        $qb = $this->getPageRepository()->createQueryBuilder('p')
+            ->orderByMultiple(['_' . $request->query->get('order') => $request->query->get('dir')])
+        ;
+
+        if(null !== $parent) {
+            // parent was defined - don't include it in the results
+            $qb = $qb->andIsDescendantOf($parent, true);
+        } else {
+            // parent wasn't defined - retrieve the site's home page & include it in the returned results
             $parent = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
+            $qb = $qb->andIsDescendantOf($parent, false);
         }
 
         $this->granted('VIEW', $parent);
-        $children = $this->getPageRepository()->getNotDeletedDescendants(
-            $parent,
-            1,
-            false,
-            array('_leftnode' => 'asc'),
-            true,
-            $start = $this->getRequest()->attributes->get('start'),
-            $this->getRequest()->attributes->get('count')
-        );
 
-        $result_count = $start;
-        foreach ($children as $child) {
-            $result_count++;
+        if (null !== $state = $request->query->get('state', null)) {
+            $qb->andStateIsIn(explode(',', $state));
         }
 
-        $response = $this->createResponse($this->formatCollection($children));
-        $response->headers->set('Content-Range', "$start-$result_count/" . $children->count());
+        $results = $qb
+            ->setFirstResult($start)
+            ->setMaxResults($count)
+            ->getQuery()
+            ->getResult()
+        ;
+
+        $result_count = $start + count($results);
+
+        $response = $this->createResponse($this->formatCollection($results));
+        $response->headers->set('Content-Range', "$start-$result_count/" . count($results));
 
         return $response;
     }
 
     /**
-     * Get page entity by uid
+     * Get page by uid
      *
      * @param string $uid the unique identifier of the page we want to retrieve
      *
@@ -109,14 +131,15 @@ class PageController extends ARestController
     }
 
     /**
-     * Create or clone a page entity
+     * Create a page
      *
-     * @Rest\QueryParam(name="title", description="Cloning page new title", requirements={
-     *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
+     * @Rest\RequestParam(name="title", description="Page title", requirements={
+     *   @Assert\Length(min=3, minMessage="Title must contain at least 3 characters"),
+     *   @Assert\NotBlank()
      * })
      *
      * @Rest\ParamConverter(
-     *   name="layout", id_name="layout_uid", id_source="request", class="BackBuilder\Site\Layout", required=false
+     *   name="layout", id_name="layout_uid", id_source="request", class="BackBuilder\Site\Layout", required=true
      * )
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=false
@@ -127,81 +150,84 @@ class PageController extends ARestController
      * @Rest\ParamConverter(
      *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBuilder\Workflow\State", required=false
      * )
+     *
+     * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
-    public function postAction()
+    public function postAction(Layout $layout, Request $request, Page $parent = null)
     {
-        if (0 === count($this->getRequest()->request->all())) {
-            return $this->clonePageAction();
-        }
-
-        $this->granted('VIEW', $layout = $this->getEntityFromAttributes('layout'));
-        $this->granted('EDIT', $parent = $this->getEntityFromAttributes('parent'));
-
-        if (0 === strlen($title = $this->getRequest()->request->get('title', null))) {
-            throw new NotFoundHttpException('Page\'s title cannot be empty.');
+        if(null !== $parent) {
+            $this->granted(MaskBuilder::MASK_EDIT, $parent);
         }
 
         $builder = $this->getApplication()->getContainer()->get('pagebuilder');
         $builder->setLayout($layout);
-        $builder->setParent($parent);
-        $builder->setRoot($parent->getRoot());
-        $builder->setSite($parent->getSite());
-        $builder->setTitle($title);
-        $builder->setUrl($this->getRequest()->request->get('url', null));
-        $builder->setState($this->getRequest()->request->get('state'));
-        $builder->setTarget($this->getRequest()->request->get('target'));
-        $builder->setRedirect($this->getRequest()->request->get('redirect'));
-        $builder->setAltTitle($this->getRequest()->request->get('alt_title'));
+
+        if(null !== $parent) {
+            $builder->setParent($parent);
+            $builder->setRoot($parent->getRoot());
+            $builder->setSite($parent->getSite());
+        } else {
+            $builder->setSite($this->getApplication()->getSite());
+        }
+
+        $builder->setTitle($request->request->get('title'));
+        $builder->setUrl($request->request->get('url', null));
+        $builder->setState($request->request->get('state'));
+        $builder->setTarget($request->request->get('target'));
+        $builder->setRedirect($request->request->get('redirect'));
+        $builder->setAltTitle($request->request->get('alttitle'));
         $builder->setPublishing(
-            null !== $this->getRequest()->request->get('publishing')
-                ? new \DateTime(date('c', $this->getRequest()->request->get('publishing')))
+            null !== $request->request->get('publishing')
+                ? new \DateTime(date('c', $request->request->get('publishing')))
                 : null
         );
+
         $builder->setArchiving(
-            null !== $this->getRequest()->request->get('archiving')
-                ? new \DateTime(date('c', $this->getRequest()->request->get('archiving')))
+            null !== $request->request->get('archiving')
+                ? new \DateTime(date('c', $request->request->get('archiving')))
                 : null
         );
 
-        $page = $builder->getPage();
-        $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
-        $this->granted('CREATE', $page);
-
-        $this->getEntityManager()->persist($page);
         try {
+            $page = $builder->getPage();
+
+            $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
+            $this->granted('CREATE', $page);
+
+            $this->getEntityManager()->persist($page);
+
             $this->getEntityManager()->flush($page);
             $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
         } catch (\Exception $e) {
             return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
         }
 
-        $response = $this->createResponse('', 201);
-        $response->headers->set(
-            'Location', $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite())
-        );
 
-        return $response;
+        return $this->redirect(
+            $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite()),
+            201
+        );
     }
 
     /**
-     * Update page entity with $uid
+     * Update page
      *
-     * @Rest\RequestParam(name="title", description="page new title", requirements={
+     * @Rest\RequestParam(name="title", description="Page title", requirements={
      *   @Assert\NotBlank(message="title is required")
      * })
-     * @Rest\RequestParam(name="url", description="page new url", requirements={
+     * @Rest\RequestParam(name="url", description="page url", requirements={
      *   @Assert\NotBlank(message="url is required")
      * })
-     * @Rest\RequestParam(name="target", description="page new target", requirements={
+     * @Rest\RequestParam(name="target", description="page target", requirements={
      *   @Assert\NotBlank(message="target is required")
      * })
-     * @Rest\RequestParam(name="state", description="page new state", requirements={
+     * @Rest\RequestParam(name="state", description="page state", requirements={
      *   @Assert\NotBlank(message="state is required")
      * })
-     * @Rest\RequestParam(name="publishing", description="page new publishing", requirements={
+     * @Rest\RequestParam(name="publishing", description="Publishing flag", requirements={
      *   @Assert\Type(type="digit", message="The value should be a positive number")
      * })
-     * @Rest\RequestParam(name="archiving", description="page new archiving", requirements={
+     * @Rest\RequestParam(name="archiving", description="Archiving flag", requirements={
      *   @Assert\Type(type="digit", message="The value should be a positive number")
      * })
      *
@@ -213,21 +239,23 @@ class PageController extends ARestController
      * @Rest\Security(expression="is_granted('EDIT', page)")
      * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
-    public function putAction(Page $page)
+    public function putAction(Page $page, Layout $layout, Request $request)
     {
-        $page->setLayout($this->getEntityFromAttributes('layout'));
+        $page->setLayout($layout);
         $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
-        $page->setTitle($this->getRequest()->request->get('title'));
-        $page->setUrl($this->getRequest()->request->get('url'));
-        $page->setTarget($this->getRequest()->request->get('target'));
-        $page->setState($this->getRequest()->request->get('state'));
-        $page->setRedirect($this->getRequest()->request->get('redirect', null));
-        $page->setAltTitle($this->getRequest()->request->get('alt_title', null));
 
-        $publishing = $this->getRequest()->request->get('publishing');
+        $page->setTitle($request->request->get('title'))
+            ->setUrl($request->request->get('url'))
+            ->setTarget($request->request->get('target'))
+            ->setState($request->request->get('state'))
+            ->setRedirect($request->request->get('redirect', null))
+            ->setAltTitle($request->request->get('alttitle', null))
+        ;
+
+        $publishing = $request->request->get('publishing');
         $page->setPublishing(null !== $publishing ? new \DateTime(date('c', $publishing)) : null);
 
-        $archiving = $this->getRequest()->request->get('archiving');
+        $archiving = $request->request->get('archiving');
         $page->setArchiving(null !== $archiving ? new \DateTime(date('c', $archiving)) : null);
 
         if (true === $page->isOnline(true)) {
@@ -240,32 +268,35 @@ class PageController extends ARestController
     }
 
     /**
-     * Patch of a page entity
+     * Patch page
      *
-     * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
-     *   @Assert\NotBlank(message="operations is required")
+     * @Rest\RequestParam(name="0", description="Patch operations", requirements={
+     *   @Assert\NotBlank(message="Request must contain at least one operation")
      * })
      *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      * @Rest\Security(expression="is_granted('EDIT', page)")
      */
-    public function patchAction(Page $page)
+    public function patchAction(Page $page, Request $request)
     {
-        $operations = $this->getRequest()->request->get('operations');
+        $operations = $request->request->all();
+
         try {
             (new OperationSyntaxValidator())->validate($operations);
         } catch (InvalidOperationSyntaxException $e) {
             throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
         }
 
-        $rest_config = $this->getApplication()->getConfig()->getRestConfig();
-        $entity_patcher = new EntityPatcher(new RightManager(
-            null !== $rest_config ? $rest_config['patcher']['rights'] : array()
-        ));
+        $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
+
         try {
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
             throw new AccessDeniedHttpException('Invalid patch operation: ' . $e->getMessage());
+        }
+
+        if (true === $page->isOnline(true)) {
+            $this->granted('PUBLISH', $page);
         }
 
         $this->getEntityManager()->flush($page);
@@ -286,7 +317,7 @@ class PageController extends ARestController
      * @Rest\Security(expression="is_granted('EDIT', page)")
      * @Rest\Security(expression="is_granted('EDIT', parent)")
      */
-    public function movePageNodeAction(Page $page)
+    public function moveNodeAction(Page $page, Page $parent)
     {
         if (true === $page->isRoot()) {
             throw new AccessDeniedHttpException('Cannot move root node of a site.');
@@ -297,7 +328,6 @@ class PageController extends ARestController
         }
 
         try {
-            $parent = $this->getEntityFromAttributes('parent');
             if (null === $next = $this->getEntityFromAttributes('next')) {
                 $this->getPageRepository()->moveAsLastChildOf($page, $parent);
             } else {
@@ -317,7 +347,7 @@ class PageController extends ARestController
     }
 
     /**
-     * [deleteAction description]
+     * Delete page
      *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      */
@@ -339,50 +369,44 @@ class PageController extends ARestController
     }
 
     /**
-     * [clonePageAction description]
+     * Clone a page
      *
-     * @return [type]
+     * @Rest\RequestParam(name="title", description="Cloning page new title", requirements={
+     *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
+     * })
+     *
+     * @Rest\ParamConverter(
+     *   name="source", id_name="source_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=true
+     * )
+     *
+     * @Rest\Security(expression="is_granted('CREATE', source)")
+     * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
-    private function clonePageAction()
+    public function cloneAction(Page $source, Request $request)
     {
-        if (null === $page = $this->getEntityFromAttributes('source')) {
-            throw new BadRequestHttpException('`source_uid` query parameter is missing.');
-        }
+        // user must have view permission on chosen layout
+        $this->granted('VIEW', $source->getLayout());
 
-        $title = $this->getRequest()->query->get('title', null);
-        if (null === $title) {
-            throw new BadRequestHttpException('`title` query parameter is missing.');
-        }
-
-        $this->granted('VIEW', $page->getLayout()); // user must have view permission on choosen layout
-        $this->granted('CREATE', $page); // user must have create permission on page
-
-        if (null !== $page->getParent()) {
-            $this->granted('EDIT', $page->getParent());
+        if (null !== $source->getParent()) {
+            $this->granted('EDIT', $source->getParent());
         } else {
             $this->granted('EDIT', $this->getApplication()->getSite());
         }
 
-        try {
-            $new_page = $this->getPageRepository()->duplicate(
-                $page, $title, $page->getParent(), true, $this->getApplication()->getBBUserToken()
-            );
-        } catch (\Exception $e) {
-            return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
-        }
-
-        $response = $this->createResponse('', 201);
-        $response->headers->set(
-            'Location', $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite())
+        $newPage = $this->getPageRepository()->duplicate(
+            $source, $request->request->get('title'), $source->getParent(), true, $this->getApplication()->getBBUserToken()
         );
 
-        return $response;
+        return $this->redirect(
+            $this->getApplication()->getRouting()->getUri($newPage->getUrl(), null, $newPage->getSite()),
+            201
+        );
     }
 
     /**
      * Getter for page entity repository
      *
-     * @return BackBuilder\NestedNode\Repository\PageRepository
+     * @return \BackBuilder\NestedNode\Repository\PageRepository
      */
     private function getPageRepository()
     {

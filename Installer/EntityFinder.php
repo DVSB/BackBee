@@ -1,5 +1,24 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBuilder5.
+ *
+ * BackBuilder5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBuilder5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBuilder\Installer;
 
 use BackBuilder\Util\Dir;
@@ -16,6 +35,8 @@ class EntityFinder
         '/Resources/',
         '/Ressources/',
         '/Test/',
+        '/Tests/',
+        '/Mock/',
         '/TestUnit/',
         '/Exception/',
         '/Commands/',
@@ -37,6 +58,10 @@ class EntityFinder
      */
     private $_annotationReader;
 
+    /**
+     * 
+     * @param string $baseDir
+     */
     public function __construct($baseDir)
     {
         $this->_baseDir = $baseDir;
@@ -56,8 +81,7 @@ class EntityFinder
 
         foreach($objects as $filename => $object){
             $file = explode('/', $filename);
-            if(!preg_filter($this->_ignoredFolder, array(), $file))
-            {
+            if(!preg_filter($this->_ignoredFolder, array(), $file)) {
                 $namespace = $this->getNamespace($filename);
                 if ($this->_isValidNamespace($namespace)) {
                     $entities[] = $namespace;
@@ -66,6 +90,30 @@ class EntityFinder
         }
 
         return $entities;
+    }
+    
+    /**
+     * Get the paths that should be excluded
+     * 
+     * @param string $path
+     * @return array
+     */
+    public function getExcludePaths($path)
+    {
+        $excludePaths = array();
+
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+        $objects = new \RegexIterator($iterator, '/.*(.php)$/', \RecursiveRegexIterator::GET_MATCH);
+
+        foreach($objects as $filename => $object){
+            if(preg_filter($this->_ignoredFolder, array(), $filename)) {
+                $excludePaths[] = dirname($filename);
+            }
+        }
+
+        $excludePaths = array_unique($excludePaths);
+
+        return $excludePaths;
     }
 
     public function parseFiles()
@@ -88,6 +136,11 @@ class EntityFinder
         return (strpos($classname, 'BackBuilder') === false) ? 'BackBuilder' . $classname : $classname;
     }
     
+    /**
+     * 
+     * @param string $namespace
+     * @return bool
+     */
     private function _isValidNamespace($namespace)
     {
         return (
@@ -115,6 +168,7 @@ class EntityFinder
             $this->_annotationReader = new SimpleAnnotationReader();
             $this->_annotationReader->addNamespace('Doctrine\ORM\Mapping');
         }
+        
         return $this->_annotationReader->getClassAnnotation($class, new Entity());
     }
 

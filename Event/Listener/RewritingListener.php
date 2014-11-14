@@ -100,9 +100,9 @@ class RewritingListener
         }
 
         $em = $application->getEntityManager();
-        if (null === $maincontent && 0 < count($url_generator->getDescriminators())) {
+        if (null === $maincontent && 0 < count($url_generator->getDiscriminators())) {
             $maincontent = $em->getRepository('BackBuilder\ClassContent\AClassContent')
-                ->getLastByMainnode($page, $url_generator->getDescriminators())
+                ->getLastByMainnode($page, $url_generator->getDiscriminators())
             ;
         }
 

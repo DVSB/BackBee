@@ -21,23 +21,24 @@
 
 namespace BackBuilder\Util\Doctrine;
 
+use BackBuilder\Annotations\ChainAnnotationReader;
 use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\DependencyInjection\ContainerInterface;
+
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Logging\SQLLogger;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\SimpleAnnotationReader;
+use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
-use Doctrine\ORM\Configuration,
-    Doctrine\DBAL\Connection,
-    Doctrine\ORM\EntityManager,
-    Doctrine\DBAL\Logging\SQLLogger,
-    Doctrine\Common\EventManager,
-    Doctrine\ORM\Mapping\Driver\AnnotationDriver,
-    Doctrine\Common\Annotations\AnnotationReader,
-    Doctrine\Common\Annotations\SimpleAnnotationReader,
-    Doctrine\Common\Annotations\CachedReader,
-    Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\EventManager;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 
 use Psr\Log\LoggerInterface;
-
-use BackBuilder\Annotations\ChainAnnotationReader;
 
 /**
  * Utility class to create a new Doctrine entity manager
@@ -66,17 +67,17 @@ class EntityManagerCreator
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be returned
      */
-    public static function create(array $options = array(), LoggerInterface $logger = null, EventManager $evm = null)
+    public static function create(array $options = array(), LoggerInterface $logger = null, EventManager $evm = null, ContainerInterface $container = null)
     {
         if (true === array_key_exists('entity_manager', $options)) {
             // Test the nature of the entity_manager parameter
             $em = self::_getEntityManagerWithEntityManager($options['entity_manager']);
         } else {
             // Init ORM Configuration
-            $config = self::_getORMConfiguration($options, $logger);
+            $config = self::_getORMConfiguration($options, $logger, $container);
 
             if (true === array_key_exists('connection', $options)) {
-                // An already connection is provided
+                // An existing connection is provided
                 $em = self::_createEntityManagerWithConnection($options['connection'], $config, $evm);
             } else {
                 $em = self::_createEntityManagerWithParameters($options, $config, $evm);
@@ -86,7 +87,29 @@ class EntityManagerCreator
         self::_setConnectionCharset($em->getConnection(), $options);
         self::_setConnectionCollation($em->getConnection(), $options);
 
+        if('sqlite' === $em->getConnection()->getDatabasePlatform()->getName()) {
+            self::_expandSqlite($em->getConnection());
+        }
+
         return $em;
+    }
+
+    /**
+     * Custom SQLite logic
+     *
+     * @param \Doctrine\DBAL\Connection $connection
+     */
+    private static function _expandSqlite(\Doctrine\DBAL\Connection $connection)
+    {
+        // add support for REGEXP operator
+        $connection->getWrappedConnection()->sqliteCreateFunction('regexp', function ($pattern, $data, $delimiter = '~', $modifiers = 'isuS') {
+                if (isset($pattern, $data) === true) {
+                    return (preg_match(sprintf('%1$s%2$s%1$s%3$s', $delimiter, $pattern, $modifiers), $data) > 0);
+                }
+
+                return null;
+            }
+        );
     }
 
     /**
@@ -95,7 +118,7 @@ class EntityManagerCreator
      * @return \Doctrine\ORM\Configuration
      * @codeCoverageIgnore
      */
-    private static function _getORMConfiguration(array $options = array(), LoggerInterface $logger = null)
+    private static function _getORMConfiguration(array $options = array(), LoggerInterface $logger = null, ContainerInterface $container = null)
     {
         $config = new Configuration();
 
@@ -192,7 +215,10 @@ class EntityManagerCreator
             if (true === array_key_exists('metadata_cache_driver', $options['orm']) && true === is_array($options['orm']['metadata_cache_driver'])) {
                 if (true === array_key_exists('type', $options['orm']['metadata_cache_driver'])) {
                     if ('service' === $options['orm']['metadata_cache_driver']['type'] && true === isset($options['orm']['metadata_cache_driver']['id'])) {
-                        $config->setMetadataCacheImpl($options['orm']['metadata_cache_driver']['id']);
+                        $service_id = str_replace('@', '', $options['orm']['metadata_cache_driver']['id']);
+                        if ($container->has($service_id)) {
+                            $config->setMetadataCacheImpl($container->get($service_id));
+                        }
                     }
                 }
             }
@@ -200,7 +226,10 @@ class EntityManagerCreator
             if (true === array_key_exists('query_cache_driver', $options['orm']) && true === is_array($options['orm']['query_cache_driver'])) {
                 if (true === array_key_exists('type', $options['orm']['query_cache_driver'])) {
                     if ('service' === $options['orm']['query_cache_driver']['type'] && true === isset($options['orm']['query_cache_driver']['id'])) {
-                        $config->setQueryCacheImpl($options['orm']['query_cache_driver']['id']);
+                        $service_id = str_replace('@', '', $options['orm']['query_cache_driver']['id']);
+                        if ($container->has($service_id)) {
+                            $config->setQueryCacheImpl($container->get($service_id));
+                        }
                     }
                 }
             }
@@ -210,7 +239,7 @@ class EntityManagerCreator
             $config->setSQLLogger($logger);
         }
 
-        return self::_addCustonFunctions($config, $options);
+        return self::_addCustomFunctions($config, $options);
     }
 
     /**
@@ -219,7 +248,7 @@ class EntityManagerCreator
      * @param array $options
      * @return \Doctrine\ORM\Configuration
      */
-    private static function _addCustonFunctions(Configuration $config, array $options = array())
+    private static function _addCustomFunctions(Configuration $config, array $options = array())
     {
         if (null !== $string_functions = \BackBuilder\Util\Arrays::get($options, 'orm:entity_managers:default:dql:string_functions')) {
             foreach ($string_functions as $name => $class) {

@@ -1,19 +1,19 @@
 <?php
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -59,6 +59,8 @@ class Importer
         $this->_application = $application;
         $this->_connector = $connector;
         $this->_config = $config;
+
+        $this->_application->getEntityManager()->getConnection()->getConfiguration()->setSQLLogger(null);
     }
 
     /**
@@ -72,11 +74,11 @@ class Importer
 
         $this->setConverter($this->initConvertion($config));
         $rows = $this->getConverter()->getRows($this);
-        
+
         if(!is_array($rows) && !($rows instanceof \Countable)) {
             throw new ImporterException('Result set must be an array or Countable');
         }
-        
+
         $items_count = count($rows);
         $limit = true === isset($config['limit']) ? $config['limit'] : null;
         if (0 === $items_count) {
@@ -88,29 +90,29 @@ class Importer
         }
 
         Buffer::dump(
-            "\n" . '===== Importation of ' . (null !== $limit ? $limit . " (total: $items_count)" : $items_count) 
+            "\n" . '===== Importation of ' . (null !== $limit ? $limit . " (total: $items_count)" : $items_count)
             . ' ' . $class . ' was started.' . "\n\n"
         );
 
         $this->_doImport($rows, $flush_every, $check_existing, $limit);
-        unset($rows);
+        $rows = null;
 
         $this->getConverter()->onImportationFinish();
-        unset($this->_converter);
+        $this->_converter = null;
         gc_collect_cycles();
 
         Buffer::dump(
-            "\n" . $this->_importedItemsCount . ' ' . $class . ' imported in ' 
+            "\n" . $this->_importedItemsCount . ' ' . $class . ' imported in '
             . (microtime(true) - $starttime) . ' s =====' . "\n\n"
         );
-        
+
         Buffer::dump(
             "\n" . $this->_failedItemsCount . ' ' . $class . ' failed items =====' . "\n\n"
         , 'bold_red');
     }
 
     /**
-     * 
+     *
      * @param array|\Traversable $rows
      * @param int $flush_every
      * @param bool $check_existing
@@ -122,7 +124,7 @@ class Importer
         if(!is_array($rows) && !($rows instanceof \Traversable)) {
             throw new ImporterException('Result set must be an array or Traversable');
         }
-        
+
         $i = 0;
         $count_null = 0;
         $total_ignored = 0;
@@ -132,7 +134,7 @@ class Importer
             try {
                 $entity = $this->getConverter()->convert($row);
             } catch(\Exception $e) {
-                unset($row);
+                $row = null;
                 Buffer::dump(
                     "===== Exception while processing row: " . $e->getMessage() . "\n"
                 , 'bold_red');
@@ -145,29 +147,29 @@ class Importer
                 if (++$i === $flush_every) {
                     $this->save($entities, $check_existing);
                     $i = 0;
-                    unset($entities);
+                    $entities = null;
                     $entities = array();
                 }
-                
+
                 $count_null = 0;
-                unset($entity);
+                $entity = null;
             } else {
                 $count_null++;
                 if (self::FLUSH_MEMORY_ON_NULL_EVERY <= $count_null) {
                     $total_ignored += $count_null;
                     Buffer::dump(
-                        'Cleaning memory on null (every ' . self::FLUSH_MEMORY_ON_NULL_EVERY 
-                        . ' - total: ' . $total_ignored . ') : [BEFORE] ' 
+                        'Cleaning memory on null (every ' . self::FLUSH_MEMORY_ON_NULL_EVERY
+                        . ' - total: ' . $total_ignored . ') : [BEFORE] '
                         .  self::convertMemorySize(memory_get_usage())
                     );
-                    
+
                     if (0 < count($entities)) {
                         $this->save($entities, $check_existing);
                         $i = 0;
-                        unset($entities);
+                        $entities = null;
                         $entities = array();
                     } else {
-                        $this->flushMemory();                        
+                        $this->flushMemory();
                     }
 
                     Buffer::dump('; [AFTER] ' . self::convertMemorySize(memory_get_usage()) . "\n");
@@ -175,8 +177,8 @@ class Importer
                 }
             }
 
-            unset($row);
-            
+            $row = null;
+
             if (null !== $limit) {
                 $limit--;
                 if (0 === $limit) {
@@ -191,8 +193,8 @@ class Importer
             $this->flushMemory();
         }
 
-        unset($entities);
-        unset($rows);
+        $entities = null;
+        $rows = null;
     }
 
     /**
@@ -207,12 +209,12 @@ class Importer
         $converter->setBBEntity($config['entity_class']);
         $converter->beforeImport($this, $config);
         $em = $this->_application->getEntityManager();
-        
+
         $table_name = $em->getClassMetadata($config['entity_class'])->getTableName();
         $where_clause = array_key_exists('where_clause', $config) ? $config['where_clause'] : 1;
         $id_label = array_key_exists('id_label', $config) ? $config['id_label'] : 'uid';
         $this->_object_identifier = array_key_exists('object_identifier', $config) ? $config['object_identifier'] : 'id';
-        //$this->_ids = $this->getExistingIds($id_label, $table_name, $where_clause);
+        // $this->_ids = $this->getExistingIds($id_label, $table_name, $where_clause);
 
         return $converter;
     }
@@ -257,16 +259,13 @@ class Importer
      * @param array $entities
      */
     public function save(array $entities, $check_existing = true)
-    { 
+    {
         $id_label = 'get' . ucfirst(array_key_exists('id_label', $this->_import_config) ? $this->_import_config['id_label'] : 'uid');
 
         $starttime = microtime(true);
         Buffer::dump('Saving ' . count($entities) . ' items...');
 
         foreach ($entities as $entity) {
-            //if (true === $check_existing && !in_array($entity->{$id_label}(), $this->_ids)) {
-            //  $this->_application->getEntityManager()->persist($entity);
-            //}
             if (null !== $entity && false === $this->_application->getEntityManager()->contains($entity)) {
                 $this->_application->getEntityManager()->persist($entity);
             }
@@ -275,11 +274,10 @@ class Importer
         }
 
         $this->_application->getEntityManager()->flush();
-
         $this->getConverter()->afterEntitiesFlush($this, $entities);
         $this->flushMemory();
 
-        Buffer::dump(' in ' . (microtime(true) - $starttime) . ' s (total: ' 
+        Buffer::dump(' in ' . (microtime(true) - $starttime) . ' s (total: '
             . $this->_importedItemsCount . ' - memory status: ' . self::convertMemorySize(memory_get_usage()) . ")\n");
     }
 
@@ -291,7 +289,7 @@ class Importer
     }
 
     public function flushMemory()
-    {   
+    {
         $this->_application->getEntityManager()->clear();
         gc_collect_cycles();
 
@@ -330,9 +328,9 @@ class Importer
     {
         return $this->_converter = $converter;
     }
-    
+
     /**
-     * 
+     *
      * @return \BackBuilder\Importer\IImporterConnector
      */
     public function getConnector()

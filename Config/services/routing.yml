@@ -7,10 +7,8 @@ parameters:
     bbapp.routing.media_uri_prefix: media
     bbapp.routing.resource_uri_prefix: ressources
 
-    bbapp.routing.url_prefix_config:
-        image_prefix: %bbapp.routing.image_uri_prefix%
-        media_prefix: %bbapp.routing.media_uri_prefix%
-        resource_prefix: %bbapp.routing.resource_uri_prefix%
+    classcontent_thumbnail.base_folder: img/contents
+    classcontent_thumbnail.extension: png
 
 services:
 

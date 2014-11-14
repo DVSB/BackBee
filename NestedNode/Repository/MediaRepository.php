@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -25,7 +25,7 @@ use Doctrine\ORM\EntityRepository;
 
 /**
  * Media repository
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder/NestedNode
  * @subpackage  Repository
@@ -51,20 +51,20 @@ class MediaRepository extends EntityRepository
             'rightnode_' . $mediafolder->getUid() => $mediafolder->getRightnode()
                 ));
 
-        $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : NULL;
-        if (NULL != $typeField)
+        $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : null;
+        if (null != $typeField)
             $q->andWhere('mc INSTANCE OF ' . $typeField);
 
-        $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : NULL;
-        if (NULL != $searchField)
+        $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
+        if (null != $searchField)
             $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%' . $searchField . '%')));
 
-        $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : NULL;
-        if (NULL != $afterPubdateField)
+        $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
+        if (null != $afterPubdateField)
             $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
 
-        $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : NULL;
-        if (NULL != $beforePubdateField)
+        $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
+        if (null != $beforePubdateField)
             $q->andWhere('mc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
 
         if (is_array($paging)) {
@@ -99,21 +99,25 @@ class MediaRepository extends EntityRepository
             'rightnode_' . $mediafolder->getUid() => $mediafolder->getRightnode()
                 ));
 
-        $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : NULL;
-        if (NULL != $typeField)
+        $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : null;
+        if (null != $typeField) {
             $q->andWhere('mc INSTANCE OF ' . $typeField);
+        }
 
-        $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : NULL;
-        if (NULL != $searchField)
+        $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
+        if (null != $searchField) {
             $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%' . $searchField . '%')));
+        }
 
-        $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : NULL;
-        if (NULL != $afterPubdateField)
+        $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
+        if (null != $afterPubdateField) {
             $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
+        }
 
-        $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : NULL;
-        if (NULL != $beforePubdateField)
+        $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
+        if (null != $beforePubdateField) {
             $q->andWhere('mc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
+        }
 
         return $q->getQuery()->getSingleScalarResult();
     }

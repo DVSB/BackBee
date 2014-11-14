@@ -22,10 +22,19 @@
 namespace BackBuilder\Rest\Controller;
 
 use BackBuilder\Bundle\BundleInterface;
+use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Controller\ARestController;
+use BackBuilder\Rest\Patcher\EntityPatcher;
+use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
+use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
+use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
+use BackBuilder\Rest\Patcher\RightManager;
 
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * REST API for application bundles
@@ -78,35 +87,90 @@ class BundleController extends ARestController
     /**
      * Patch the bundle
      *
+     * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
+     *   @Assert\NotBlank(message="operations is required")
+     * })
+     *
      * @param  string $id the id of the bundle we are looking for
      */
     public function patchAction($id)
     {
         $bundle = $this->getBundleById($id);
         $this->granted('EDIT', $bundle);
+        $operations = $this->getRequest()->request->get('operations');
 
-        $do_save = false;
-        $bundle_config = $bundle->getConfig()->getSection('bundle');
-        foreach ($this->getApplication()->getRequest()->request->all() as $key => $value) {
-            if ('enable' === $key || 'config_per_site' === $key) {
-                $bundle_config[$key] = (boolean) $value;
-                $do_save = true;
-            } elseif ('category' === $key) {
-                $bundle_config[$key] = (array) $value;
-            }
+        try {
+            (new OperationSyntaxValidator())->validate($operations);
+        } catch (InvalidOperationSyntaxException $e) {
+            throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
         }
 
-        if (true === $do_save) {
-            $bundle->getConfig()->setSection('bundle', $bundle_config);
-            $this->getApplication()->getContainer()->get('config.persistor')->persist(
-                $bundle->getConfig(),
-                true === array_key_exists('config_per_site', $bundle_config)
-                    ? $bundle_config['config_per_site']
-                    : false
+        $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
+        $entity_patcher->getRightManager()->addAuthorizationMapping($bundle, array(
+            'category'        => array('replace'),
+            'config_per_site' => array('replace'),
+            'enable'          => array('replace')
+        ));
+
+        try {
+            $entity_patcher->patch($bundle, $operations);
+        } catch (UnauthorizedPatchOperationException $e) {
+            throw new AccessDeniedHttpException('Invalid patch operation: ' . $e->getMessage());
+        }
+
+        $this->getApplication()->getContainer()->get('config.persistor')->persist(
+            $bundle->getConfig(),
+            null !== $bundle->getConfig()->getProperty('config_per_site')
+                ? $bundle->getConfig()->getProperty('config_per_site')
+                : false
+        );
+
+        return $this->createResponse('', 204);
+    }
+
+    /**
+     * This method is the front controller of every bundles exposed actions
+     *
+     * @param  string $bundle_name     name of bundle we want to reach its exposed actions
+     * @param  string $controller_name controller name
+     * @param  string $action_name     name of exposed action we want to reach
+     * @param  string  $parameters     optionnal, action's parameters
+     */
+    public function accessBundleExposedRoutesAction($bundle_name, $controller_name, $action_name, $parameters)
+    {
+        $bundle = $this->getBundleById($bundle_name);
+        if (null === $callback = $bundle->getExposedActionCallback($controller_name, $action_name)) {
+            throw new NotFoundHttpException('Not found');
+        }
+
+        if (false === empty($parameters)) {
+            $parameters = array_filter(explode('/', $parameters));
+        }
+
+        $response = call_user_func_array($callback, $parameters);
+
+        return is_object($response) && $response instanceof Response
+            ? $response
+            : $this->createResponse($response)
+        ;
+    }
+
+    /**
+     * @see BackBuilder\Rest\Controller\ARestController::granted
+     */
+    protected function granted($attributes, $object = null, $message = 'Access denied')
+    {
+        try {
+            parent::granted($attributes, $object);
+        } catch (AccessDeniedHttpException $e) {
+            throw new AccessDeniedHttpException(
+                'Acces denied: no "'
+                . (is_array($attributes) ? implode(', ', $attributes) : $attributes)
+                . '" rights for bundle ' . get_class($object) . '.'
             );
         }
 
-        return $this->createResponse('', 204);
+        return true;
     }
 
     /**
@@ -125,23 +189,5 @@ class BundleController extends ARestController
         }
 
         return $bundle;
-    }
-
-    /**
-     * @see BackBuilder\Rest\Controller\ARestController::granted
-     */
-    protected function granted($attributes, $object = null)
-    {
-        try {
-            parent::granted($attributes, $object);
-        } catch (AccessDeniedHttpException $e) {
-            throw new AccessDeniedHttpException(
-                'Acces denied: no "'
-                . (is_array($attributes) ? implode(', ', $attributes) : $attributes)
-                . '" rights for bundle ' . get_class($object) . '.'
-            );
-        }
-
-        return true;
     }
 }

@@ -1,18 +1,18 @@
 /*
  * Keyword selector
- *  
+ *
  */
 
 (function($,global){
     bb.jquery.widget("ui.bbKeywordBrowser",{
-    
+
         options : {
             editMode : true
         },
         webservice : {
             keyword : "local_ws_Keyword"
         },
-        
+
         _templates : {
             main :bb.jquery("<div class='main'><div class='bb5-windowpane-treewrapper-inner'></div></div>").clone(),
             keywordEditor : "<div class='keywordEditor'><form><fieldset><label for='bb-ui-keywordbrowser-form-title'>Mot clé</label>"
@@ -30,12 +30,12 @@
                 title: bb.i18n.__('keywordbrowser.create'),
                 content: bb.jquery(this._templates.keywordEditor).clone()
             });
-            
+
             this.keyWordEditorDialog.addButton({
                 text: bb.i18n.__('popupmanager.button.save'),
                 click:bb.jquery.proxy(this.callbacks.saveKeyword,this)
             });
-                
+
             this.keyWordEditorDialog.addButton({
                 text: bb.i18n.__('popupmanager.button.cancel'),
                 click:function(){
@@ -45,13 +45,13 @@
             this._initKeywordTree();
             this._bindEvents();
         },
-        
+
         _bindEvents: function(){
-            this.keyWordEditorDialog.on("close",bb.jquery.proxy(this._resetEditorForm,this)); 
+            this.keyWordEditorDialog.on("close",bb.jquery.proxy(this._resetEditorForm,this));
         },
-        
+
         _create : function(){},
-    
+
         callbacks : {
             nodeClickHandler : function(e){
                 var context = this.getContext();
@@ -60,44 +60,44 @@
                     var nodeType = bb.jquery(selectedNode).attr('rel');
                     var isAContentType = (nodeType.search("contentType")==-1) ? false : true;
                     var nodeType = (!isAContentType) ? "cat" : "contentType";
-                    var nodeId = bb.jquery(selectedNode).attr("id").replace("node_");  
+                    var nodeId = bb.jquery(selectedNode).attr("id").replace("node_");
                     this._trigger("select",e,{
-                        node_id:nodeId, 
-                        node:context.treeview.jstree('get_selected'), 
+                        node_id:nodeId,
+                        node:context.treeview.jstree('get_selected'),
                         nodeType:nodeType
                     });
                 }
             },
             removeKeyword : function(keywordId){
-              var context = this.getContext(); 
+              var context = this.getContext();
                  bb.webserviceManager.getInstance('ws_local_keyword').request("deleteKeyword",{
                      params : { keywordId : keywordId},
                     success: function(response){
                         context.jstree.treeview("reload");
                     },
                     error: function(response){
-                        
+
                     }
                  });
             },
-            
+
             showKeywordEditor :function(mode,nodeId){
                 var context = this.getContext();
                 var availableModes = ["create","edit"];
                 var mode =(typeof mode!="undefined" && bb.jquery.inArray(mode,availableModes)!=-1) ? mode : "create";
                 this.keyWordEditorDialog.setExtra({
-                    mode : mode, 
+                    mode : mode,
                     nodeId : nodeId
                 });
-                
+
                 if(mode=="edit"){
                     var selectedNode = context.treeview.jstree("get_text","#node_"+nodeId);
                       this._populateForm(selectedNode);
                 }
-              
+
                 this.keyWordEditorDialog.show();
             },
-          
+
             saveKeyword : function(){
                 var self = this;
                 var keyword = this._parseKeywordForm();
@@ -106,11 +106,11 @@
                 var keywordInfos = {
                     keyword:keyword,
                     mode:extra.mode
-                }  
-                var nodeKey = (keywordInfos.mode=="create") ? "parentUid": "keywordUid"; 
+                }
+                var nodeKey = (keywordInfos.mode=="create") ? "parentUid": "keywordUid";
                 keywordInfos[nodeKey] = extra.nodeId;
-               
-                /*show mask*/ 
+
+                /*show mask*/
                 bb.jquery(self.keyWordEditorDialog.dialogUi).mask(bb.i18n.loading);
                 bb.webserviceManager.getInstance('ws_local_keyword').request("postKeywordForm",{
                     params :{
@@ -124,16 +124,27 @@
                             context.treeview.jstree('rename_node', bb.jquery(treeContainer ).find('#node_' + extra.nodeId), response.result.data);
                         }
                         bb.jquery(self.keyWordEditorDialog.dialogUi).unmask();
-                        self.keyWordEditorDialog.close();    
+                        self.keyWordEditorDialog.close();
                     },
                     error : function(response){
+                        var popupDialog = bb.PopupManager.init().create('alertDialog', {
+                            title: 'Une erreur est survenue',
+                            buttons: {
+                                'Fermer': function () {
+                                    bb.jquery(this).dialog('close');
+                                }
+                            }
+                        });
+
                         bb.jquery(self.keyWordEditorDialog.dialogUi).unmask();
+                        popupDialog.setContent('<p>' + response.error.message + '</p>');
+                        popupDialog.show();
                     }
                 });
-            } 
-            
+            }
+
         },
-        
+
         _parseKeywordForm :function(){
             var keyword = this.keyWordEditorDialog.dialogUi.find("#bb-ui-keywordbrowser-form-title") || "";
             if(keyword.length==0) return;
@@ -141,7 +152,7 @@
                 return keyword.val();
             }
         },
-        
+
         _populateForm :function(keyword){
             var keyword = (typeof keyword=="string") ? keyword : false;
             if(keyword){
@@ -151,7 +162,7 @@
         _resetEditorForm :function(){
             this.keyWordEditorDialog.dialogUi.find("#bb-ui-keywordbrowser-form-title").val("");
         },
-        
+
         _destroyTree: function() {
             var context = this.getContext();
             if (context.treeview) {
@@ -160,38 +171,38 @@
                 this.setContext(context);
             }
         },
-        
+
         _initKeywordTree : function() {
             var myself = this,
             context = this.getContext();
             this._destroyTree();
-            var plugins = [ 
+            var plugins = [
             'themes', 'rpc_data', 'ui', 'crrm' ,'types', 'html_data'
             ];
-                        
+
             if (myself.options.editMode) {
                 plugins.push('dnd');
                 plugins.push('contextmenu');
-            } 
-            
+            }
+
             /*Création de l'arbre*/
-            context.treeview = bb.jquery(myself._popupDialog.dialogUi).find('.bb5-windowpane-treewrapper-inner').jstree({   
+            context.treeview = bb.jquery(myself._popupDialog.dialogUi).find('.bb5-windowpane-treewrapper-inner').jstree({
                 plugins : plugins,
-                rpc_data : { 
+                rpc_data : {
                     ajax : {
                         webservice : {
                             instance: bb.webserviceManager.getInstance('ws_local_keyword'),
                             method: 'getKeywordTree'
                         },
 
-                        data : function (n) { 
-                            return { 
+                        data : function (n) {
+                            return {
                                 'root_uid' : n.attr ? n.attr('id').replace('node_','') : null
-                            }; 
+                            };
                         }
                     }
                 },
-                    
+
                 types: {
                     valid_children : ['root'],
                     types: {
@@ -204,7 +215,7 @@
                         }
                     }
                 },
-                    
+
                 themes : {
                     theme: 'bb5',
                     dots: false
@@ -213,7 +224,7 @@
                 ui : {
                     select_limit: 1
                 },
-                    
+
                 core : {
                     strings: {
                         loading: bb.i18n.__('loading')
@@ -221,7 +232,7 @@
                         multiple_selection: myself.i18n.multiple_selection*/
                     }
                 },
-                    
+
                 contextmenu: {
                     select_node: true,
                     show_at_node: false,
@@ -235,9 +246,9 @@
                             label:  bb.i18n.__('popupmanager.button.create'),
                             action: function(obj) {
                                 if (obj){
-                                    myself.callbacks.showKeywordEditor.call(myself,"create",obj.attr("id").replace("node_",""));  
+                                    myself.callbacks.showKeywordEditor.call(myself,"create",obj.attr("id").replace("node_",""));
                                 }
-                               
+
                             },
                             separator_before: false,
                             separator_after: false,
@@ -247,7 +258,7 @@
                             label: bb.i18n.__('popupmanager.button.edit'),
                             action: function(obj) {
                                 var root = obj.parents('li:first');
-                                    
+
                                 if (obj){
                                     /*(root.length > 0) ? root.attr("id").replace("node_","") : null*/
                                     myself.callbacks.showKeywordEditor.call(myself,"edit",obj.attr("id").replace("node_",""));
@@ -257,7 +268,7 @@
                             separator_after: false,
                             icon: 'bb5-context-menu-edit'
                         },
-                            
+
                         "bb5-context-menu-remove": {
                             label: bb.i18n.__('popupmanager.button.remove'),
                             icon: 'bb5-context-menu-remove',
@@ -265,11 +276,11 @@
                                 if (obj){
                                     myself.callbacks.removeKeyword.call(myself,obj.attr("id").replace("node_",""));
                                 }
-                                   
+
 
                             }
                         },
-                            
+
                         "bb5-context-menu-cut": {
                             label: bb.i18n.__('popupmanager.button.cut'),
                             icon:"bb5-context-menu-cut",
@@ -278,7 +289,7 @@
                                     myself.cutPage(obj.attr("id").replace("node_",""));
                             }
                         },
-                            
+
                         "bb5-context-menu-paste" : {
                             label: bb.i18n.__('popupmanager.button.paste'),
                             icon:"bb5-context-menu-paste",
@@ -286,7 +297,7 @@
                                 if (obj)
                                     myself.pastePage(obj.attr("id").replace("node_",""));
                             }
-                        }   
+                        }
                     }
                 }
             }).bind('loaded.jstree', function (e, data) {
@@ -294,36 +305,36 @@
                     data.inst.select_node('ul > li:first');
                 }
                 myself._trigger('ready');
-                        
+
             }).bind('click.jstree',bb.jquery.proxy(myself.callbacks.nodeClickHandler,myself)).bind("create.jstree", bb.jquery.proxy(myself.callbacks.createHandler,myself));
             this.setContext(context);
         },
-       
+
         getWidgetApi: function(){
             var self = this;
-            var api = { 
+            var api = {
                 show : function(){
                     self._popupDialog.show();
                 },
-                
+
                 close : function(){
                     self._popupDialog.close();
                 }
             }
             return api;
         },
-        
+
         setContext: function(context) {
             return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
-        
+
         getContext: function() {
             return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         }
-    
-    
-       
-    }); 
+
+
+
+    });
 })(bb.jquery,window);
 
 

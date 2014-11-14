@@ -39,61 +39,65 @@ class PermissionMap extends BasicPermissionMap
     const PERMISSION_COMMIT = 'COMMIT';
     const PERMISSION_PUBLISH = 'PUBLISH';
 
-    protected $map = array(
-        self::PERMISSION_VIEW => array(
-            MaskBuilder::MASK_VIEW,
-            MaskBuilder::MASK_EDIT,
-            MaskBuilder::MASK_OPERATOR,
-            MaskBuilder::MASK_MASTER,
-            MaskBuilder::MASK_OWNER,
-        ),
-        self::PERMISSION_EDIT => array(
-            MaskBuilder::MASK_EDIT,
-            MaskBuilder::MASK_OPERATOR,
-            MaskBuilder::MASK_MASTER,
-            MaskBuilder::MASK_OWNER,
-        ),
-        self::PERMISSION_CREATE => array(
-            MaskBuilder::MASK_CREATE,
-            MaskBuilder::MASK_OPERATOR,
-            MaskBuilder::MASK_MASTER,
-            MaskBuilder::MASK_OWNER,
-        ),
-        self::PERMISSION_DELETE => array(
-            MaskBuilder::MASK_DELETE,
-            MaskBuilder::MASK_OPERATOR,
-            MaskBuilder::MASK_MASTER,
-            MaskBuilder::MASK_OWNER,
-        ),
-        self::PERMISSION_UNDELETE => array(
-            MaskBuilder::MASK_UNDELETE,
-            MaskBuilder::MASK_OPERATOR,
-            MaskBuilder::MASK_MASTER,
-            MaskBuilder::MASK_OWNER,
-        ),
-        self::PERMISSION_COMMIT => array(
-            MaskBuilder:: MASK_COMMIT,
-            MaskBuilder::MASK_OPERATOR,
-            MaskBuilder::MASK_MASTER,
-            MaskBuilder::MASK_OWNER
-        ),
-        self::PERMISSION_PUBLISH => array(
-            MaskBuilder:: MASK_PUBLISH,
-            MaskBuilder::MASK_MASTER
-        ),
-        self::PERMISSION_OPERATOR => array(
-            MaskBuilder::MASK_OPERATOR,
-            MaskBuilder::MASK_MASTER,
-            MaskBuilder::MASK_OWNER,
-        ),
-        self::PERMISSION_MASTER => array(
-            MaskBuilder::MASK_MASTER,
-            MaskBuilder::MASK_OWNER,
-        ),
-        self::PERMISSION_OWNER => array(
-            MaskBuilder::MASK_OWNER,
-        ),
-    );
+    public function __construct()
+    {
+        $this->map = array(
+            self::PERMISSION_VIEW => array(
+                MaskBuilder::MASK_VIEW,
+                MaskBuilder::MASK_EDIT,
+                MaskBuilder::MASK_OPERATOR,
+                MaskBuilder::MASK_MASTER,
+                MaskBuilder::MASK_OWNER,
+            ),
+            self::PERMISSION_EDIT => array(
+                MaskBuilder::MASK_EDIT,
+                MaskBuilder::MASK_OPERATOR,
+                MaskBuilder::MASK_MASTER,
+                MaskBuilder::MASK_OWNER,
+            ),
+            self::PERMISSION_CREATE => array(
+                MaskBuilder::MASK_CREATE,
+                MaskBuilder::MASK_OPERATOR,
+                MaskBuilder::MASK_MASTER,
+                MaskBuilder::MASK_OWNER,
+            ),
+            self::PERMISSION_DELETE => array(
+                MaskBuilder::MASK_DELETE,
+                MaskBuilder::MASK_OPERATOR,
+                MaskBuilder::MASK_MASTER,
+                MaskBuilder::MASK_OWNER,
+            ),
+            self::PERMISSION_UNDELETE => array(
+                MaskBuilder::MASK_UNDELETE,
+                MaskBuilder::MASK_OPERATOR,
+                MaskBuilder::MASK_MASTER,
+                MaskBuilder::MASK_OWNER,
+            ),
+            self::PERMISSION_COMMIT => array(
+                MaskBuilder::MASK_COMMIT,
+                MaskBuilder::MASK_OPERATOR,
+                MaskBuilder::MASK_MASTER,
+                MaskBuilder::MASK_OWNER
+            ),
+            self::PERMISSION_PUBLISH => array(
+                MaskBuilder::MASK_PUBLISH,
+                MaskBuilder::MASK_MASTER
+            ),
+            self::PERMISSION_OPERATOR => array(
+                MaskBuilder::MASK_OPERATOR,
+                MaskBuilder::MASK_MASTER,
+                MaskBuilder::MASK_OWNER,
+            ),
+            self::PERMISSION_MASTER => array(
+                MaskBuilder::MASK_MASTER,
+                MaskBuilder::MASK_OWNER,
+            ),
+            self::PERMISSION_OWNER => array(
+                MaskBuilder::MASK_OWNER,
+            ),
+        );
+    
+    }
 
     /**
      * {@inheritDoc}

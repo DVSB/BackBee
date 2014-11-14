@@ -163,7 +163,7 @@ class GroupControllerTest extends TestCase
     {
         $controller = $this->getController();
         
-        $response = $controller->getAction($this->groupEditor->getId());
+        $response = $controller->getAction($this->groupEditor);
         
         $this->assertEquals(200, $response->getStatusCode());
         
@@ -174,8 +174,7 @@ class GroupControllerTest extends TestCase
         $this->assertEquals($this->groupEditor->getId(), $content['id']);
         
         // invalid group id
-        $response = $controller->getAction(13807548404);
-        
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/group/13807548404/'));
         $this->assertEquals(404, $response->getStatusCode());
     }
     
@@ -187,7 +186,7 @@ class GroupControllerTest extends TestCase
         // create user
         $controller = $this->getController();
         $groupId = $this->groupEditor->getId();
-        $response = $controller->deleteAction($this->groupEditor->getId());
+        $response = $controller->deleteAction($this->groupEditor);
         
         $this->assertEquals(204, $response->getStatusCode());
         
@@ -195,7 +194,7 @@ class GroupControllerTest extends TestCase
         $this->assertTrue(is_null($groupAfterDelete));
         
         // invalid group id
-        $response = $controller->deleteAction(13807548404);
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/group/13807548404/', 'DELETE'));
         $this->assertEquals(404, $response->getStatusCode());
     }
     
@@ -215,7 +214,7 @@ class GroupControllerTest extends TestCase
             'site_uid' => $this->site->getUid()
         );
         
-        $response = $controller->putAction($groupId, new Request(array(), $data));
+        $response = $controller->putAction($this->groupEditor, new Request(array(), $data));
         
         $this->assertEquals(204, $response->getStatusCode());
         

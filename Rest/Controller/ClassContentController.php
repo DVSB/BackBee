@@ -21,15 +21,20 @@
 
 namespace BackBuilder\Rest\Controller;
 
+use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
 use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Controller\ARestController;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
+ * ClassContent API Controller
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Rest
  * @copyright   Lp digital system
@@ -37,6 +42,33 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class ClassContentController extends ARestController
 {
+    /**
+     * Returns category's datas if $id is valid
+     *
+     * @param  string $id category's id
+     *
+     * @return Response
+     */
+    public function getCategoryAction($id)
+    {
+        $category = $this->getCategoryManager()->getCategory($id);
+        if (null === $category) {
+            throw new NotFoundHttpException("No classcontent category exists for id `$id`.");
+        }
+
+        return $this->createResponse(json_encode($category));
+    }
+
+    /**
+     * Returns every availables categories datas
+     *
+     * @return Response
+     */
+    public function getCategoryCollectionAction()
+    {
+        return $this->createResponse(json_encode($this->getCategoryManager()->getCategories()));
+    }
+
     /**
      * Get classcontent
      *
@@ -47,14 +79,7 @@ class ClassContentController extends ARestController
      */
     public function getAction($type, $uid)
     {
-        $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $type);
-        $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
-
-        if (null === $content) {
-            throw new NotFoundHttpException("No `$classname` exists with uid `$uid`");
-        }
-
-        $this->granted('VIEW', $content);
+        $this->granted('VIEW', $content = $this->getClassContentByTypeAndUid($type, $uid));
 
         if (null !== $draft = $this->getClassContentRevision($content)) {
             $content->setDraft($draft);
@@ -87,17 +112,65 @@ class ClassContentController extends ARestController
     }
 
     /**
+     * render classcontent, with mode and/or page if needed
      *
+     * @param  string $type type of the class content (ex: Element/text)
+     * @param  string $uid  identifier of the class content
      *
-     * @param  string $type
+     * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\QueryParam(name="mode", description="The render mode to use")
+     * @Rest\QueryParam(name="page_uid", description="The page to set to application's renderer before rendering")
+     *
+     * @Rest\ParamConverter(
+     *   name="page", id_name="page_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
+     * )
+     */
+    public function renderAction($type, $uid, Request $request, Page $page = null)
+    {
+        $content = $this->getClassContentByTypeAndUid($type, $uid);
+        $mode = $request->query->get('mode', null);
+
+        if (null !== $page) {
+            $this->getApplication()->getRenderer()->getCurrentPage($page);
+        }
+
+        return $this->createResponse(json_encode(array(
+            'uid'    => $uid,
+            'type'   => $type,
+            'render' => $this->getApplication()->getRenderer()->render($content, $mode)
+        )));
+    }
+
+    /**
+     * Getter of classcontent category manager
+     *
+     * @return BackBuilder\ClassContent\CategoryManager
+     */
+    private function getCategoryManager()
+    {
+        return $this->getApplication()->getContainer()->get('classcontent.category_manager');
+    }
+
+    /**
+     * Returns classcontent datas if couple (type;uid) is valid
+     *
+     * @param  string $type short namespace of a classcontent
+     *                      (full: BackBuilder\ClassContent\Block\paragraph => short: Block\paragraph)
      * @param  string $uid
      *
      * @return
      */
     private function getClassContentByTypeAndUid($type, $uid)
     {
+        $content = null;
         $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $type);
-        $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
+
+        try {
+            $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
+        } catch (ClassNotFoundException $e) {
+            throw new NotFoundHttpException("No classcontent (:$classname) found with provided type (:$type)");
+        }
 
         if (null === $content) {
             throw new NotFoundHttpException("No `$classname` exists with uid `$uid`");
@@ -106,6 +179,13 @@ class ClassContentController extends ARestController
         return $content;
     }
 
+    /**
+     * Returns current revision for the given $content
+     *
+     * @param  AClassContent $content content we want to get the latest revision
+     *
+     * @return null|BackBuilder\ClassContent\Revision
+     */
     private function getClassContentRevision(AClassContent $content)
     {
         return $this->getApplication()->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')

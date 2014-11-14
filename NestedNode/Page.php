@@ -64,10 +64,9 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 {
     /**
-     * State off- line: the page can not be displayed on the website
+     * State off-line: the page can not be displayed on the website
      * @var int
      */
-
     const STATE_OFFLINE = 0;
 
     /**
@@ -114,6 +113,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
+     * @Serializer\ReadOnly
      */
     protected $_uid;
 

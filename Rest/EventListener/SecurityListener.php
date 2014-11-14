@@ -31,6 +31,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 
 /**
  * SecurityListener handles security restrictions on controllers.
@@ -63,6 +64,12 @@ class SecurityListener
 
     public function onKernelController(FilterControllerEvent $event)
     {
+        $token = $this->securityContext->getToken();
+        
+        if(null === $token) {
+            throw new AuthenticationCredentialsNotFoundException('The security context contains no authentication token. One possible reason may be that there is no firewall configured for this URL.');
+        }
+        
         $request = $event->getRequest();
         $controller = $event->getController();
         $metadata = $this->getControllerActionMetadata($controller);

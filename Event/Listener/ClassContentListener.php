@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -81,31 +81,28 @@ class ClassContentListener
         if ($uow->isScheduledForInsert($content) || $uow->isScheduledForUpdate($content)) {
             if (null !== $content->getProperty('labelized-by')) {
                 $elements = explode('->', $content->getProperty('labelized-by'));
-                $owner = NULL;
-                $element = NULL;
+                $owner = null;
+                $element = null;
                 $value = $content;
                 foreach ($elements as $element) {
                     $owner = $value;
 
-                    if (NULL !== $value) {
+                    if (null !== $value) {
                         $value = $value->getData($element);
-                        if ($value instanceof AClassContent && false == $em->contains($value))
+                        if ($value instanceof AClassContent && false == $em->contains($value)) {
                             $value = $em->find(get_class($value), $value->getUid());
+                        }
                     }
                 }
 
                 $content->setLabel($value);
-                if ($uow->isScheduledForUpdate($content)) {
-                    $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
-                }
             }
 
             if (null === $content->getLabel()) {
                 $content->setLabel($content->getProperty('name'));
-                if ($uow->isScheduledForUpdate($content)) {
-                    $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
-                }
             }
+
+            $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
 //
 //            if (null !== $page = $content->getMainNode()) {
 //                if (AClassContent::STATE_NORMAL === $content->getState()) {
@@ -150,15 +147,15 @@ class ClassContentListener
             throw new BBException('Enable to update object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBuilder\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
 
         $dispatcher = $event->getDispatcher();
-        if (NULL === $application = $dispatcher->getApplication())
+        if (null === $application = $dispatcher->getApplication())
             throw new BBException('Enable to update object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBuilder application has to be initialized'));
 
-        if (NULL === $token = $application->getBBUserToken())
+        if (null === $token = $application->getBBUserToken())
             throw new SecurityException('Enable to update : unauthorized user', SecurityException::UNAUTHORIZED_USER);
 
         $em = $dispatcher->getApplication()->getEntityManager();
-        if (NULL === $revision = $content->getDraft()) {
-            if (NULL === $revision = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token))
+        if (null === $revision = $content->getDraft()) {
+            if (null === $revision = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token))
                 throw new ClassContentException('Enable to get draft', ClassContentException::REVISION_MISSING);
             $content->setDraft($revision);
         }
@@ -168,7 +165,7 @@ class ClassContentListener
             throw new ClassContentException('Content is up to date', ClassContentException::REVISION_UPTODATE);
 
         $lastCommitted = $em->getRepository('BackBuilder\ClassContent\Revision')->findBy(array('_content' => $content, '_revision' => $content->getRevision(), '_state' => Revision::STATE_COMMITTED));
-        if (NULL === $lastCommitted)
+        if (null === $lastCommitted)
             throw new ClassContentException('Enable to get last committed revision', ClassContentException::REVISION_MISSING);
 
         $content->updateDraft($lastCommitted);
@@ -260,11 +257,11 @@ class ClassContentListener
 
 
             $includePath = array($application->getStorageDir(), $application->getMediaDir());
-            if (NULL !== $application->getBBUserToken())
+            if (null !== $application->getBBUserToken())
                 $includePath[] = $application->getTemporaryDir();
 
             $filename = $content->path;
-            File::resolveFilepath($filename, NULL, array('include_path' => $includePath));
+            File::resolveFilepath($filename, null, array('include_path' => $includePath));
 
             @unlink($filename);
         } catch (\Exception $e) {
@@ -292,7 +289,7 @@ class ClassContentListener
     private static function _setRendermodeParameter(Event $event)
     {
         $application = $event->getDispatcher()->getApplication();
-        if (NULL === $application)
+        if (null === $application)
             return;
 
         $method = $event->getArgument('method');

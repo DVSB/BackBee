@@ -31,6 +31,7 @@ use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Validator\ConstraintViolation;
@@ -154,6 +155,19 @@ abstract class ARestController extends Controller implements IRestController, IF
 
         return $response;
     }
+    
+    /**
+     * Returns a RedirectResponse to the given URL.
+     *
+     * @param string  $url    The URL to redirect to
+     * @param int     $status The status code to use for the Response
+     *
+     * @return RedirectResponse
+     */
+    protected function redirect($url, $status = 302)
+    {
+        return new RedirectResponse($url, $status);
+    }
 
     /**
      *
@@ -202,12 +216,12 @@ abstract class ARestController extends Controller implements IRestController, IF
      *
      * @return boolean
      */
-    protected function granted($attributes, $object = null)
+    protected function granted($attributes, $object = null, $message = 'Access denied')
     {
         $security_context = $this->getApplication()->getSecurityContext();
 
         if (null !== $security_context->getACLProvider() && false === parent::isGranted($attributes, $object)) {
-            throw new AccessDeniedHttpException('Access denied');
+            throw new AccessDeniedHttpException($message);
         }
 
         return true;

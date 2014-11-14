@@ -19,23 +19,37 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Exception;
+namespace BackBuilder\Bundle;
 
 /**
+ * This interface ensure that an exposed controller has an entry point (indexAction),
+ * a label getter and a description getter
+ *
  * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @package     BackBuilder\Bundle
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class BootstrapFileNotFoundException extends \BackBuilder\Exception\BBException
+interface BundleExposedControllerInterface
 {
     /**
-     * BootstrapFileNotFoundException's constructor
+     * This exposed controller entry point
      *
-     * @param array $directories [description]
+     * @return Symfony\Component\HttpFoundation\Response the response object to send
      */
-    public function __construct(array $directories)
-    {
-        parent::__construct('The file `bootstrap.yml` not found in: ' . implode(',', $directories));
-    }
+    public function indexAction();
+
+    /**
+     * This exposed controller entry point label
+     *
+     * @return string
+     */
+    public function getLabel();
+
+    /**
+     * This exposed controller description
+     *
+     * @return string
+     */
+    public function getDescription();
 }

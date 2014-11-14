@@ -48,14 +48,6 @@ route:
           HTTP-X-Requested-With:  XMLHttpRequest
           HTTP-X-BB-METHOD:       Upload
 
-  # Backbuilder internal services
-  bb.internal.services:
-      pattern: /bb-internal-services/{servicename}
-      defaults:
-        _action: handleInternalServicesAction
-      requirements:
-        servicename: (generate_classcontent_cache)
-
   # BackBuilder resources
   bb.resources:
       pattern: /ressources/{filename}

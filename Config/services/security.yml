@@ -99,7 +99,7 @@ services:
 
     security.acl_manager:
         class:      BackBuilder\Security\Acl\AclManager
-        arguments:  [@security.context]
+        arguments:  [@security.context, @security.acl.permission.map]
 
     bb.expression_language:
         class: %bbapp.expression_language.class%

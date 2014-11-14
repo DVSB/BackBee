@@ -296,17 +296,6 @@ abstract class ABundle extends AbstractBaseBundle
         return $this;
     }
 
-    public function serialize()
-    {
-        $obj = new \stdClass();
-        $obj->id = $this->getId();
-
-        foreach ($this->getProperty() as $key => $value)
-            $obj->$key = $value;
-
-        return json_encode($obj);
-    }
-
     public function unserialize($serialized)
     {
     }

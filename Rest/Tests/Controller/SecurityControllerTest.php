@@ -220,29 +220,39 @@ class SecurityControllerTest extends TestCase
         $this->getBBApp()->start();
         $controller = $this->getController();
         
-        // session doesnt exist
-        $response = $controller->deleteSessionAction(new Request());
-        $this->assertTrue($response instanceof Response);
-        $this->assertEquals(401, $response->getStatusCode());
-        
         // authenticated anonymously 
         $token = new \BackBuilder\Security\Token\AnonymousToken('test', 'test');
         $this->getSecurityContext()->setToken($token);
-        $response = $controller->deleteSessionAction(new Request());
+        $request = new Request();
+        $request->setSession($this->getBBApp()->getSession());
+        $response = $controller->deleteSessionAction($request);
         $this->assertTrue($response instanceof Response);
-        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertEquals(204, $response->getStatusCode());
         
         // create token
         $token = new BBUserToken();
         $this->getSecurityContext()->setToken($token);
-        
-        $controller = $this->getController();
         $request = new Request();
         $request->setSession($this->getBBApp()->getSession());
         $response = $controller->deleteSessionAction($request);
 
         $this->assertTrue($response instanceof Response);
         $this->assertEquals(204, $response->getStatusCode());
+    }
+    
+    /**
+     * @covers ::deleteSessionAction
+     * @expectedException Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    public function testDeleteSessionAction_sessionDoesntExist()
+    {
+        $this->getBBApp()->start();
+        $controller = $this->getController();
+        
+        // session doesnt exist
+        $response = $controller->deleteSessionAction(new Request());
+        $this->assertTrue($response instanceof Response);
+        $this->assertEquals(401, $response->getStatusCode());
     }
     
     

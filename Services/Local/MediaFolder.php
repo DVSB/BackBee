@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -189,7 +189,7 @@ class MediaFolder extends AbstractServiceLocal
 
         if (!is_null($root) && !is_null($mediafolder)) {
             $mediafolder = $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->insertNodeAsLastChildOf($mediafolder, $root);
-            $next = ((NULL != $next_uid) ? $em->find('\BackBuilder\NestedNode\MediaFolder', $next_uid) : null);
+            $next = ((null != $next_uid) ? $em->find('\BackBuilder\NestedNode\MediaFolder', $next_uid) : null);
             if (!is_null($next)) {
                 $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->moveAsPrevSiblingOf($mediafolder, $next);
             }
@@ -250,14 +250,16 @@ class MediaFolder extends AbstractServiceLocal
         $view = array();
         $result = array("numResults" => 0, "views" => $view);
 
-        if (NULL !== $mediafolder_uid) {
+        if (null !== $mediafolder_uid) {
             $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid);
             $pagingInfos = array("start" => (int) $start, "limit" => (int) $limit);
 
-            if (NULL !== $mediafolder) {
-                if (FALSE !== $classnames = $this->bbapp->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*'))
-                    foreach ($classnames as $classname)
+            if (null !== $mediafolder) {
+                if (false !== $classnames = $this->bbapp->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*')) {
+                    foreach ($classnames as $classname) {
                         class_exists($classname);
+                    }
+                }
 
                 $nbContent = $em->getRepository("\BackBuilder\NestedNode\Media")->countMedias($mediafolder, $params);
 
@@ -266,7 +268,7 @@ class MediaFolder extends AbstractServiceLocal
                     if (null === $media_content) {
                         continue;
                     }
-                    
+
                     $row = new \stdClass();
                     $row->id = $media->getId();
                     $row->mediafolder_uid = $media->getMediaFolder()->getUid();

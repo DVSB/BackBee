@@ -55,18 +55,24 @@ class File implements PersistorInterface
      */
     public function persist(Config $config, array $config_to_persist)
     {
-        $success = @file_put_contents(
-            $this->getConfigDumpRightDirectory($config->getBaseDir()) . DIRECTORY_SEPARATOR . 'config.yml',
-            Yaml::dump($config_to_persist)
-        );
+        try {
+            $success = @file_put_contents(
+                $this->getConfigDumpRightDirectory($config->getBaseDir()) . DIRECTORY_SEPARATOR . 'config.yml',
+                Yaml::dump($config_to_persist)
+            );
+        } catch (\Exception $e) {
+            $success = false;
+        }
 
         return false !== $success;
     }
 
     /**
-     * [getConfigDumpRightDirectory description]
-     * @param  [type] $base_directory [description]
-     * @return [type]                 [description]
+     * Returns path to the right directory to dump and save config.yml file
+     *
+     * @param  string $base_directory config base directory
+     *
+     * @return string
      */
     private function getConfigDumpRightDirectory($base_directory)
     {

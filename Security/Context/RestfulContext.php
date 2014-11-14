@@ -47,7 +47,7 @@ class RestfulContext extends BBAuthContext
                 'nonce_dir' => 'security/nonces',
                 'lifetime' => 1200,
                 'use_registry' => false
-            ), $config['restful']);
+            ), (array) $config['restful']);
 
             if (false !== ($default_provider = $this->getDefaultProvider($config))) {
                 $this->_context->getAuthenticationManager()->addProvider(

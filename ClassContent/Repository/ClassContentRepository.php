@@ -556,7 +556,7 @@ class ClassContentRepository extends EntityRepository
         } catch (\Exception $e) {
             return 0;
         }
-        
+
         return reset($result);
     }
 
@@ -870,7 +870,7 @@ class ClassContentRepository extends EntityRepository
         }
         return $rootContainer;
     }
-    
+
     /**
      * Returns an uid if parent with this classname found, false otherwise
      * @param string $child_uid
@@ -878,7 +878,7 @@ class ClassContentRepository extends EntityRepository
      * @return string|false
      */
     public function getParentByClassName($child_uid, $class_name)
-    {        
+    {
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
                 ->select('j.parent_uid, c.classname')
@@ -887,7 +887,7 @@ class ClassContentRepository extends EntityRepository
                 ->andWhere('c.uid = j.parent_uid')
                 ->andWhere('j.content_uid = :uid')
                 ->setParameter('uid', $child_uid);
-        
+
         $result = $q->execute()->fetch();
         if (false !== $result) {
             if ($result['classname'] == $class_name) {
@@ -898,7 +898,7 @@ class ClassContentRepository extends EntityRepository
         } else {
             return null;
         }
-        
+
         return $result;
     }
 
@@ -906,38 +906,35 @@ class ClassContentRepository extends EntityRepository
      * @param \BackBuilder\ClassContent\AClassContent $content
      * @return
      */
-    public function deleteContent(AClassContent $content, $updateParent = true)
+    public function deleteContent(AClassContent $content, $mainContent = true)
     {
+        $parents = $content->getParentContent();
+        $media = $this->_em->getRepository('BackBuilder\NestedNode\Media')->findOneBy(array(
+            '_content' => $content->getUid()
+        ));
 
-        if (!($content instanceof ContentSet)) {
-            $elements = $content->getData();
-            foreach ($elements as $key => $element) {
-                if (is_a($element, 'BackBuilder\Content\AClassContent')) {
-                    $parents = $element->getParentContent();
-                    /* it's the case for non-complex elements */
-                    if ($parents->count() == 1) {
-                        $this->deleteContent($element, false);
-                        $this->_em->remove($element);
-                    } else {
-                        $content->unsetSubContent($element); //persist?
-                    }
+        if (($parents->count() <= 1 && null === $media) || true === $mainContent) {
+            foreach ($content->getData() as $element) {
+                if ($element instanceof AClassContent) {
+                    $this->deleteContent($element, false);
                 }
             }
-        } else {
-            $content->clear();
-            $this->_em->remove($content);
-        }
-        if ($updateParent) {
-            $contentParents = $content->getParentContent();
-            if (!is_null($contentParents) && !$contentParents->isEmpty()) {
-                foreach ($contentParents as $parent) {
-                    $parent->unsetSubContent($content);
-                    /* persist the change on parent */
-                    $this->_em->persist($parent);
-                }
+
+            if ($content instanceof ContentSet) {
+                $content->clear();
             }
+
+            foreach ($parents as $parent) {
+                $parent->unsetSubContent($content);
+            }
+
+            $this->_em->getConnection()->executeQuery(
+                'DELETE FROM indexation WHERE owner_uid = "' . $content->getUid() . '";'
+            )->execute();
+            $this->_em->getConnection()->executeQuery(
+                'DELETE FROM revision WHERE content_uid = "' . $content->getUid() . '";'
+            )->execute();
             $this->_em->remove($content);
-            $this->_em->flush();
         }
     }
 
@@ -951,9 +948,10 @@ class ClassContentRepository extends EntityRepository
         $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("' . implode('","', $content_uids) . '")';
 
         return $this->getEntityManager()
-                        ->getConnection()
-                        ->executeQuery($sql)
-                        ->fetchAll(\PDO::FETCH_COLUMN);
+            ->getConnection()
+            ->executeQuery($sql)
+            ->fetchAll(\PDO::FETCH_COLUMN)
+        ;
     }
 
 }

@@ -63,7 +63,7 @@ class ClassContent extends AbstractServiceLocal
         if (true === is_array($accept) && 0 === count($accept)) {
             $accept = $initial_content->getAccept();
         }
-        
+
         $result = array();
         $em = $this->getApplication()->getEntityManager();
 
@@ -448,6 +448,7 @@ class ClassContent extends AbstractServiceLocal
                 throw new \Exception("content can't be null");
             }
             $em->getRepository("BackBuilder\ClassContent\AClassContent")->deleteContent($content);
+            $em->flush();
         } catch (\Exception $e) {
             throw new \Exception("Content can't be deleted");
         }

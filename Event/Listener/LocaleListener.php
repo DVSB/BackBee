@@ -98,8 +98,8 @@ class LocaleListener
             return;
 
         $em = $application->getEntityManager();
-        if (NULL === $maincontent && 0 < count($urlGenerator->getDescriminators())) {
-            $maincontent = $em->getRepository('BackBuilder\ClassContent\AClassContent')->getLastByMainnode($page, $urlGenerator->getDescriminators());
+        if (NULL === $maincontent && 0 < count($urlGenerator->getDiscriminators())) {
+            $maincontent = $em->getRepository('BackBuilder\ClassContent\AClassContent')->getLastByMainnode($page, $urlGenerator->getDiscriminators());
         }
 
         $newUrl = $urlGenerator->generate($page, $maincontent);

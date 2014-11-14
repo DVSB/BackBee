@@ -13,7 +13,7 @@
             searchToggleBtnClass : ".bb5-windowpane-main-toolbar-screener-toggle a",
             listContainerClass: ".bb5-listContainer",
             treewrapperClass :".bb5-windowpane-treewrapper",
-            cszParams: { 
+            cszParams: {
                 wrapperClass :".bb5-basket-wrapper-inner",
                 containerClass:".bb5-basket-wrapper-innest",
                 captionWrapper :".bb5-ico-basket", //bb5-basket-toggle
@@ -24,7 +24,7 @@
                 closeListClass :".bb5-button-closeList"
             }
         },
-        
+
         viewInfos : {
             "btnClass":".bb5-viewMode",
             "list":".bb5-ico-sortaslist",
@@ -32,42 +32,42 @@
         },
         data :null, //data cache
         _context : {
-            mainTemplate : null,  
+            mainTemplate : null,
             categoryTree : null,
             filterParameters : null,
             selectedContent :null,
             site: null
         },
-        
+
         i18n: {
             contents: 'élément(s)',
             all: "Tous",
             state_offline :"Hors ligne",
             state_online : "En ligne",
-            state_hidden : "Caché", 
+            state_hidden : "Caché",
             state_deleted :"Effacé"
         },
-    
+
         _templates :{
             mainPanel : bb.jquery("#bb5-ui-bbcontentselector-panel-tpl").clone(),
             viewgrid : null,
             viewlist: null
         },
-        
+
         _mask : function(action){
             var action = action || "none";
             var availableActions = ["show","hide"];
             if( bb.jquery.inArray(action,availableActions) == -1 ) return;
             if(action=="show") bb.jquery(this.element).mask(bb.i18n.loading);
-            if(action=="hide") bb.jquery(this.element).unmask();     
+            if(action=="hide") bb.jquery(this.element).unmask();
         },
-        
-        
+
+
         _initTemplates : function(item){
             /*List item template*/
-            var itemTemplate = '<li data-uid="${uid}" class="bb5-content-item">'
+            var itemTemplate = '<li style="height:240px;"data-uid="${uid}" class="bb5-content-item">'
             +'<p><a title="${completeTitle}" href="javascript:;"><img alt="${type}" src="${ico}"></a></p>'
-            +'<p><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
+            +'<p style="line-height:1.4em;"><a title="${completeTitle}" href="javascript:;">${title}</a></p>'
             +"<p>Date de création: <strong>${created}</strong></p>"
             +'<p>\n\
                     <button data-i18n="popupmanager.button.view" class="bb5-button bb5-ico-preview">Voir</button>\n\
@@ -77,16 +77,16 @@
               </p>'
             +'</li>';
             this._templates.contentItemTemplate = bb.jquery.template(itemTemplate);
-            
+
             /*List selected item*/
-            var selectionTpl = "<li class='bb5-content-list-item' data-uid='${uid}'><span><strong>${type}</strong><span><p>${completeTitle}<p><p><button class='bb5-button bb5-ico-del bb5-button-removeItem' href='javascript:;'>Effacer</button></li>";  
+            var selectionTpl = "<li class='bb5-content-list-item' data-uid='${uid}'><span><strong>${type}</strong><span><p>${completeTitle}<p><p><button class='bb5-button bb5-ico-del bb5-button-removeItem' href='javascript:;'>Effacer</button></li>";
             this._templates.selectedItemTemplate = bb.jquery.template(selectionTpl);
         },
-        
+
         _create : function(){
             var contentId = bb.Utils.generateId('contentSelector');
-            bb.jquery(this._templates.mainPanel).attr("id",contentId); 
-            this.element.html(bb.jquery(this._templates.mainPanel).show()); 
+            bb.jquery(this._templates.mainPanel).attr("id",contentId);
+            this.element.html(bb.jquery(this._templates.mainPanel).show());
             this._templates.treeview = null;
             this._templates.viewgrid = bb.jquery(this.element).find(".bb5-list-media-is-grid");
             this._templates.viewlist = bb.jquery(this.element).find(".bb5-list-media-is-list");
@@ -94,12 +94,12 @@
             bb.jquery(this.element).find(this.options.searchEngineContainerClass).hide(); //hide search engine
             this._bindEvents();
         },
-        
-        _init : function(){   
+
+        _init : function(){
             var self = this
             var context = {};
             context.selected = null;
-            context.selectedPageId = null; 
+            context.selectedPageId = null;
             this.selectModeView(this.options.viewMode);
             context.selectedContent = [];
             this.searchCriteria = null;
@@ -115,33 +115,33 @@
                 contentType:[
 
                 {
-                    label:this.i18n.all, 
+                    label:this.i18n.all,
                     value:"all"
                 },
 
                 {
-                    label:this.i18n.state_offline, 
+                    label:this.i18n.state_offline,
                     value:0
                 },
 
                 {
-                    label:this.i18n.state_online, 
+                    label:this.i18n.state_online,
                     value:1
                 },
 
                 {
-                    label:this.i18n.state_hidden, 
+                    label:this.i18n.state_hidden,
                     value:2
                 },
 
                 {
-                    label:this.i18n.state_deleted, 
+                    label:this.i18n.state_deleted,
                     value:4
                 }
                 ],
                 pages: []
             };
-            
+
             var searchWebservice = bb.webserviceManager.getInstance('ws_local_contentBlock');
             this.searchEngine = bb.jquery(this.element).find(this.options.searchEngineContainerClass).eq(0).bbSearchEngine({
                 onSearch : function(e,criteria){
@@ -149,38 +149,38 @@
                     if(("typeField" in criteria) && criteria.typeField){
                         if(context.selectedPageId) criteria.selectedPageId = context.selectedPageId;
                         self._showContent(criteria);
-                    } 
+                    }
                 }
             }).bbSearchEngine("getWidgetApi");
-            
+
             /*container list useful for resize*/
             this.listContainer = bb.jquery(this.element).find(this.options.listContainerClass).eq(0);
-            this.treeWrappers = bb.jquery(this.element).find(this.options.treewrapperClass);  
-            
+            this.treeWrappers = bb.jquery(this.element).find(this.options.treewrapperClass);
+
             /*set search engine type*/
             this.searchEngine.setFilterTypes(this.typeFilters.contentType);
             this.setContext(context);
             this._initTemplates();
             this._initSelectContentTabs();
             bb.jquery(this.element).disableSelection();
-            
+
             var sitesMenu = bb.jquery("<select class='bb5-available-sites'><option value='' data-i18n='toolbar.selector.select_site'>Sélectionner un site ...</option></select>").clone();
             bb.jquery(self.element).find('.bb5-windowpane-tree-inner').prepend(sitesMenu);
-            bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {    
+            bb.webserviceManager.getInstance('ws_local_site').request('getBBSelectorList', {
                 useCache:true,
                 cacheTags:["userSession"],
-                async : false, 
+                async : false,
                 success: function(result) {
                     var context = self.getContext();
                     var select = bb.jquery(self.element).find('.bb5-available-sites').eq(0);
-                    
+
                     //click focus (FIREFOX bug)
                     if ($.browser.mozilla) {
                         select.unbind('click').click(function() {
                             select.focus();
                         });
                     }
-                
+
                     //select change event
                     select.bind('change', function() {
                         if (bb.jquery(this).val()) {
@@ -188,14 +188,14 @@
                             if(self.pageTree){
                                 self._initPageTree(bb.jquery(this).val());
                             }
-                            
+
                             context.selectedPageId = null;
                             self.searchEngine.setSelectedPage(context.selectedPageId);
                             var criteria = self.searchEngine.getSearchCriteria();
                             if(context.selected){
                                 criteria.typeField = context.selected;
                                 self._showContent(criteria);
-                            }                      
+                            }
                             return true;
                         } else {
                             return false;
@@ -207,7 +207,7 @@
                     bb.jquery.each(result.result, function(index, site) {
                         var option = bb.jquery("<option></option>").clone();
                         bb.jquery(option).attr("value",index).text(site);
-                        select.append(option);         
+                        select.append(option);
                     });
 
                     //select current site if configured
@@ -236,7 +236,7 @@
                 }
             });*/
             this.getParent().on("open",function(){
-                bb.jquery(self.element).find(".bb5-windowpane-wrapper").layout({ 
+                bb.jquery(self.element).find(".bb5-windowpane-wrapper").layout({
                     applyDemoStyles: true,
                     defaults: {
                         closable : false
@@ -249,9 +249,9 @@
                 });
             });
         },
-        
-        
-        
+
+
+
         _initSelectContentTabs : function(){
             var tabContainer = this.element.find(this.options.tabsContainerClass).eq(0);
             this.treeTabs = new bb.LpTabs({
@@ -259,7 +259,7 @@
             });
             this.treeTabs.onShow = bb.jquery.proxy(this._initPageTree,this);
         },
-        
+
         _initPageTree : function(){
             var self = this;
             //            if(!this.pageTree){
@@ -279,19 +279,19 @@
                     if(context.selected){
                         criteria.typeField = context.selected;
                         self._showContent(criteria);
-                    }                      
+                    }
                     self.setContext(context);
                 }
             });
-                
+
         //            }
         },
-          
+
         selectModeView :function(viewMode){
             var viewMode = viewMode || "none";
             var availableMode = ["list","grid"];
             if(bb.jquery.inArray(viewMode,availableMode)==-1){
-                this.options.viewMode = "list"; 
+                this.options.viewMode = "list";
             }else{
                 this.options.viewMode = viewMode;
             }
@@ -299,7 +299,7 @@
             var btnToSelect = bb.jquery(this.element).find(this.viewInfos[this.options.viewMode]);
             bb.jquery(btnToSelect).addClass("bb5-button-selected");
         },
-        
+
         setFilterParameters : function(parameters){
             /*initTree here*/
             var params = parameters || {};
@@ -308,38 +308,38 @@
             this.selectedContent.setMaxEntry(parseInt(context.filterParameters.maxentry));
             this.setContext(context);
             this._initContentsTree();
-        }, 
-        
+        },
+
         updateListSize: function(delta){
             var delta = (typeof delta=="number") ? delta : 0;
-            
+
             /*tree wrappers*/
             bb.jquery.each(this.treeWrappers,function(i,treeWrapper){
                 var oldHeight = bb.jquery(treeWrapper).height();
                 bb.jquery(treeWrapper).height(oldHeight+delta);
             });
-             
+
             /*update list's height*/
-            var prevListHeight = bb.jquery(this.listContainer).height(); 
+            var prevListHeight = bb.jquery(this.listContainer).height();
             var listHeight = prevListHeight + delta;
             bb.jquery(this.listContainer).height(listHeight);
-            
+
             /*update mainPanel's height*/
             var prevMainPaneHeight = bb.jquery(this.element).height();
             var mainPanelHeight = prevMainPaneHeight + delta;
             bb.jquery(this.element).height(mainPanelHeight);
             return;
         },
-       
+
         /*onDestroy*/
         _onDestroyScContainer:function(){
             var context = this.getContext();
             this.selectedListCtn.find(this.options.cszParams.listClass).html("");
             this.selectedListCtn.find(this.options.cszParams.nbItemClass).html(0);//nbElements
             context.selectedContent = [];
-            this.setContext(context); 
+            this.setContext(context);
         },
-        
+
         /*onChange*/
         _onSelectedContentChange : function(data,listName,newContent){
             var context = this.getContext();
@@ -353,14 +353,14 @@
             });
             self.selectedListCtn.find(self.options.cszParams.nbItemClass).html(nbSelections);
             context.selectedContent = self.selectedContent.toArray(true);
-            this.setContext(context);  
+            this.setContext(context);
         },
-        
+
         close : function(){
             this.reset();
             this._trigger("close");
         } ,
-        
+
         reset : function(){
             var context = this.getContext();
             context.filterParameters = null;
@@ -375,10 +375,10 @@
             bb.jquery(this.element).find(this.options.searchEngineContainerClass).hide();
             bb.jquery(this.element).find(".bb5-selectedItems-container").hide();
             /*cancel request*/
-            
+
             this.selectedContent.reset();
-        },   
-        
+        },
+
         _bindEvents : function(){
             var self = this;
             bb.jquery(this.element).delegate(this.options.contentItemClass,"click",bb.jquery.proxy(this.callbacks["contentClickHandler"],this));
@@ -388,18 +388,18 @@
             bb.jquery(this.element).delegate(this.options.cszParams.closeListClass,'click',function(e){
                 self.selectedListCtn.find(self.options.cszParams.containerClass).hide();
             });
-            bb.jquery(this.element).delegate(this.options.cszParams.removeItemClass,"click",bb.jquery.proxy(this.callbacks["removeItemHandler"],this)); 
+            bb.jquery(this.element).delegate(this.options.cszParams.removeItemClass,"click",bb.jquery.proxy(this.callbacks["removeItemHandler"],this));
             bb.jquery(this.element).delegate(this.options.searchToggleBtnClass,"click",bb.jquery.proxy(this.callbacks["toggleSearchEngine"],this));
         },
-        
+
         _notifySelection:  function(){
             var context = this.getContext();
             this._trigger("selectcontent",0,{
-                receiver:context.filterParameters.receiver, 
+                receiver:context.filterParameters.receiver,
                 selectedContent:context.selectedContent
-            }); 
+            });
         },
-        
+
         fixContainersHeight : function(){
             var context = this.getContext();
             if(context.sizeIsFixed!="undefined" && context.sizeIsFixed) return false;
@@ -408,14 +408,14 @@
             context.sizeIsFixed = true;
             this.setContext(context);
         },
-        
+
         _updateSelectionList : function(selectedContent){
             var nbSelection = this.selectedContent.getSize();
-            this.selectedListCtn.find(".bb5-selectedItemsNbs").text(nbSelection);  
+            this.selectedListCtn.find(".bb5-selectedItemsNbs").text(nbSelection);
         },
-        
+
         callbacks : {
-            
+
             toggleSearchEngine : function(e){
                 var target = bb.jquery(e.currentTarget);
                 var mainContainer = bb.jquery(this.element).find(".bb5-windowpane-wrapper").get(0);
@@ -423,14 +423,14 @@
                 bb.jquery(this.element).find(this.options.searchEngineContainerClass).toggle();
                 var delta = (bb.jquery(target).hasClass("opened")) ? -45 : 45; //toggle filter's size
                 //bb.jquery(mainContainer).height(bb.jquery(mainContainer).height() + delta);
-                bb.jquery(this.listContainer).height( bb.jquery(this.listContainer).height() + delta);   
+                bb.jquery(this.listContainer).height( bb.jquery(this.listContainer).height() + delta);
             },
-            
+
             showBasket : function(e){
                 if(!this.selectedContent.getSize()) return false;
                 this.callbacks.showSelectedhandler.call(this);
             },
-            
+
             removeItemHandler : function(e){
                 var itemId = bb.jquery(e.currentTarget).parents(".bb5-content-list-item").eq(0).attr("data-uid");
                 this.selectedContent.deleteItemById(itemId);
@@ -439,7 +439,7 @@
                     this.callbacks.showSelectedhandler.call(this);
                 }
             },
-            
+
             confirmSelectionHandler:function(e){
                 var nbContent = this.selectedContent.getSize();
                 if(!nbContent) return false;
@@ -447,7 +447,7 @@
                 this._notifySelection();
                 this.close();
             },
-            
+
             showSelectedhandler : function(e){
                 /*fake toggle*/
                 if(this.selectedListCtn.find(this.options.cszParams.containerClass).eq(0).hasClass("hidden")){
@@ -456,9 +456,9 @@
                 else{
                     this.selectedListCtn.find(this.options.cszParams.containerClass).hide().addClass("hidden");
                 }
-                
+
             },
-            
+
             btnActionHandler : function(e){
                 e.stopPropagation();
                 var context = this.getContext();
@@ -471,34 +471,34 @@
                     this._notifySelection();
                     this.close();
                 }
-               
+
                 if(bb.jquery(e.currentTarget).hasClass("addToList")){
                     this.selectedContent.set(itemUid,bb.jquery(item).clone(true));
                 }
-               
+
                 if(bb.jquery(e.currentTarget).hasClass("bb5-ico-sortaslist")){
                     this._mask("show");
                     this.selectModeView("list");
                     this._populateView(this.data);
                 }
-                
+
                 if(bb.jquery(e.currentTarget).hasClass("bb5-ico-sortasgrid")){
                     this._mask("show");
                     this.selectModeView("grid");
                     this._populateView(this.data);
                 }
-                
+
                 if(bb.jquery(e.currentTarget).hasClass("bb5-ico-preview")){
                     if($.isPlainObject(data)){
-                        this._showContentPreview(data.content); 
+                        this._showContentPreview(data.content);
                     }
                 }
-                
+
                 if(bb.jquery(e.currentTarget).hasClass("bb5-ico-del")){
                     this._showDeleteDialog(data.content);
                 }
             },
-            
+
             contentClickHandler : function(e){
                 e.stopPropagation();
                 var context = this.getContext();
@@ -510,14 +510,14 @@
                 this.close();
                 return false;
             },
-            
+
             nodeClickHandler :function (e) {
                 var context = this.getContext();
-                e = e || context.lastEvent; //useful if we want to recall  
+                e = e || context.lastEvent; //useful if we want to recall
                 if ((bb.jquery(e.target).parents('a:first').hasClass('jstree-clicked')) || (bb.jquery(e.target).hasClass('jstree-clicked'))) {
                     /*do nothing for root*/
                     var isRoot = (bb.jquery(context.treeview.jstree('get_selected')).attr('rel').toUpperCase() == "ROOT") ? true : false;
-                    if(isRoot) return; //do nothing for root                    
+                    if(isRoot) return; //do nothing for root
                     var tree = bb.jquery.jstree._reference(context.treeview);
                     var selectedChildren = tree._get_children(context.treeview.jstree('get_selected'));
                     this._selectContentNode(bb.jquery(context.treeview.jstree('get_selected')).attr('rel'));
@@ -528,9 +528,9 @@
                 context.lastEvent = e;
                 this.setContext(context);
             },
-            
+
             createHandler : function(e, data) {
-                bb.webserviceManager.getInstance('ws_local_mediafolder').request('insertBBBrowserTree', {  
+                bb.webserviceManager.getInstance('ws_local_mediafolder').request('insertBBBrowserTree', {
                     params: {
                         title: data.rslt.name,
                         root_uid: data.rslt.parent.attr("id").replace("node_","")
@@ -543,46 +543,46 @@
                             bb.jquery(data.rslt.obj).attr('rel', result.result.attr.rel);
                         }
                     }
-                });  
+                });
             }
         },
-                
+
         destroy : function(){
             bb.jquery.Widget.prototype.destroy.call(this);
-        }, 
+        },
         /* proxies */
         publicApi : {},
         getContext: function() {
             return ( (typeof bb.jquery(this.element).data('context') != 'undefined') ? bb.jquery(this.element).data('context') : {} );
         },
-        
+
         setContext: function(context) {
             return bb.jquery(this.element).data('context', bb.jquery.extend(bb.jquery(this.element).data('context'), context));
         },
-        
+
         _showDeleteDialog: function(content){
             var self = this;
             bb.require(["ManagerFactory"], function(ContentManager){
                 try{
                     if(!self.contentManager){
-                        self.contentManager = ContentManager.getManager("content"); 
+                        self.contentManager = ContentManager.getManager("content");
                         self.contentManager.init({
                             ws: bb.webserviceManager.getInstance("ws_local_classContent"),
                             onDeleteContent: function(){
                                 self.callbacks.nodeClickHandler.call(self);
                             }
-                        });  
+                        });
                     }
                     self.contentManager.showDeleteDialog(content);
                 }catch(e){
                     throw e;
                 }
             });
-            
+
         },
-        
-        
-        
+
+
+
         _showContentPreview: function(content){
             var self = this;
             bb.require(["ManagerFactory"], function(Manager){
@@ -597,7 +597,7 @@
                 }
             });
         },
-        
+
         _destroyTree: function() {
             var context = this.getContext();
             if (context.treeview) {
@@ -606,23 +606,23 @@
                 this.setContext(context);
             }
         },
-        
+
         _selectContentNode : function(catName){
             var context = this.getContext();
             if(catName){
                 context.selected = catName;
                 this.searchEngine.setUserParams({
                     catName : catName
-                }); 
+                });
                 this.setContext(context);
             }
         },
-        
+
         _updateSearchEngineTypeFilters : function(contents){
             var context = this.getContext();
             var filters = [];
             var obj = {
-                value : context.selected, 
+                value : context.selected,
                 label : context.selected.replace("contentType_","")
             }; //selected content
             filters.push(obj);
@@ -635,7 +635,7 @@
             });
             this.searchEngine.setFilterTypes(filters);
         },
-        
+
         _showContent : function(criteria){
             var myself = this,
             context = this.getContext();
@@ -657,16 +657,16 @@
             var onLoad = function(data){
                 this._populateView(data);
                 this._mask("hide");
-            } 
+            }
             this._initPager(pagerParams,bb.jquery.proxy(onLoad,myself));
-            return;               
+            return;
         } ,
-        
+
         /*request here*/
         _initPager : function(pagerParams,successCallback){
             var myself = this;
             var context = this.getContext();
-            var successCallback = (typeof successCallback!= "function")? new Function("console.log('successCallback function must be provided');") : successCallback; 
+            var successCallback = (typeof successCallback!= "function")? new Function("console.log('successCallback function must be provided');") : successCallback;
             pagerParams = pagerParams || false;
             if(!pagerParams) return false;
             if(context.contentPager){
@@ -684,20 +684,20 @@
                         return;
                     },
                     dataWebserviceParams :{
-                        wb:pagerService, 
+                        wb:pagerService,
                         method:"searchContent"
                     },
                     callback: successCallback,
                     errorCallback : function(response){
                         alert("The server has sent an error message, please check your request.");
                         myself._mask("hide");
-                    } 
+                    }
                 });
-                this.setContext(context); 
+                this.setContext(context);
             }
-             
-        }, 
-        
+
+        },
+
         _populateView : function(response){
             /*data*/
             if(!response){
@@ -707,17 +707,17 @@
             this.data = response;
             var myself = this;
             var context = this.getContext();
-            
+
             /*captions*/
             bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(context.treeview.jstree('get_text', context.treeview.jstree('get_selected')));
-            bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').get(0).innerHTML + ' - ' + response.result.numResults + ' ' + myself.i18n.contents);                    
-            
+            bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').html(bb.jquery(myself.element).find('.bb5-windowpane-main-toolbar-caption').get(0).innerHTML + ' - ' + response.result.numResults + ' ' + myself.i18n.contents);
+
             /*list*/
             bb.jquery(myself._templates.viewgrid).empty();
             bb.jquery(myself._templates.viewlist).empty();
             var view = (this.options.viewMode=="list") ? bb.jquery(myself._templates.viewlist) : bb.jquery(myself._templates.viewgrid);
             bb.jquery(myself.element).find('.bb5-listContainer').append(bb.jquery(view));
-            
+
             /*populate items here*/
             bb.jquery.each(response.result.rows, function(index, content) {
                 content.ico = content.ico.replace('\\', '/');
@@ -725,51 +725,51 @@
                 contentRow = bb.jquery(contentRow).clone();
                 bb.jquery(contentRow).data('content',content);
                 bb.jquery(view).append(contentRow);
-            });         
+            });
             myself._mask("hide");
         },
-        
-       
-        
+
+
+
         _initContentsTree: function() {
             var myself = this,
             context = this.getContext();
             var maxEntry = context.filterParameters.maxentry || 0;
             var filters = {
-                maxEntry:maxEntry, 
+                maxEntry:maxEntry,
                 accept:context.filterParameters.accept||'all'
-            }; 
+            };
             this._destroyTree();
             myself.searchEngine.reset();
-            var plugins = [ 
+            var plugins = [
             'themes', 'rpc_data', 'ui', 'crrm' ,'types', 'html_data'
             ];
-                        
+
             if (myself.options.editMode) {
                 plugins.push('dnd');
                 plugins.push('contextmenu');
-            } 
-            
+            }
+
             /*Création de l'arbre*/
-            context.treeview = bb.jquery(myself.element).find('.bb5-windowpane-treewrapper-inner').jstree({   
+            context.treeview = bb.jquery(myself.element).find('.bb5-windowpane-treewrapper-inner').jstree({
                 plugins : plugins,
-                rpc_data : { 
+                rpc_data : {
                     ajax : {
                         webservice : {
                             instance: bb.webserviceManager.getInstance('ws_local_contentBlock'),
                             method: 'getBBContentBrowserTree'
                         },
 
-                        data : function (n) { 
-                            return { 
+                        data : function (n) {
+                            return {
                                 //'root_uid' : n.attr ? n.attr('id').replace('node_','') : null
                                 filters : filters, //accepted type
                                 site : bb.frontApplication.getSiteUid()
-                            }; 
+                            };
                         }
                     }
                 },
-                    
+
                 types: {
                     valid_children : ['root'],
                     types: {
@@ -782,7 +782,7 @@
                         }
                     }
                 },
-                    
+
                 themes : {
                     theme: 'bb5',
                     dots: false
@@ -791,7 +791,7 @@
                 ui : {
                     select_limit: 1
                 },
-                    
+
                 core : {
                     strings: {
                         loading: bb.i18n.loading,
@@ -799,7 +799,7 @@
                         multiple_selection: myself.i18n.multiple_selection
                     }
                 },
-                    
+
                 contextmenu: {
                     select_node: false,
                     show_at_node: true,
@@ -815,12 +815,12 @@
                 if (bb.jquery(e.target).find('ul > li:first').length > 0) {
                     data.inst.select_node('ul > li:first');
                 /*myself._selectContentNode(bb.jquery(e.target).find('ul > li:first').attr('id').replace('node_',''));*/
-                    
+
                 }
                 myself._trigger('ready');
             }).bind('click.jstree',bb.jquery.proxy(myself.callbacks.nodeClickHandler,myself)).bind("create.jstree", bb.jquery.proxy(myself.callbacks.createHandler,myself));
             this.setContext(context);
         }
-    });         
-    
+    });
+
 })(bb.jquery);

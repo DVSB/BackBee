@@ -402,7 +402,7 @@ class SecurityContext extends sfSecurityContext
                             'sid_table_name'           => 'acl_security_identities'
                     ));
                 } else {
-                    $this->aclprovider = $this->application->getContainer()->has('security.acl_provider');
+                    $this->aclprovider = $this->application->getContainer()->get('security.acl_provider');
                 }
 
             }

@@ -28,8 +28,8 @@ use BackBuilder\Security\Token\BBUserToken;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Auth Controller
@@ -60,10 +60,11 @@ class SecurityController extends ARestController
             ->authenticate($token)
         ;
 
-        return $this->createResponse($this->formatItem(array(
-            'X-API-KEY'       => $tokenAuthenticated->getUser()->getApiKeyPublic(),
-            'X-API-SIGNATURE' => $tokenAuthenticated->getNonce()
-        )));
+        $response = $this->createResponse('', 201);
+        $response->headers->set('X-API-KEY', $tokenAuthenticated->getUser()->getApiKeyPublic());
+        $response->headers->set('X-API-SIGNATURE', $tokenAuthenticated->getNonce());
+
+        return $response;
     }
 
 
@@ -151,19 +152,16 @@ class SecurityController extends ARestController
 
     /**
      *
+     * @Rest\Security(expression="is_fully_authenticated()")
      */
     public function deleteSessionAction(Request $request)
     {
-        try {
-            if (false === $this->isGranted('IS_AUTHENTICATED_FULLY') ){
-                return Response::create()->setStatusCode(401, "Session doesn't exist");
-            }
-        } catch (AuthenticationCredentialsNotFoundException $e) {
-            return Response::create()->setStatusCode(401, "Session doesn't exist");
+        if(null === $request->getSession()) {
+            throw new NotFoundHttpException('Session doesn\'t exist');
         }
 
-        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
         $request->getSession()->invalidate();
+        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
 
         return new Response('', 204);
     }
