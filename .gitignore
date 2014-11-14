@@ -6,3 +6,4 @@ TestUnit/
 /nbproject
 /composer.lock
 /phpunit.phar
+/build
