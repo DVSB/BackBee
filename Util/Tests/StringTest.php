@@ -49,7 +49,8 @@ class StringTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\String::toPath
      *
      */
-    public function testToPath() {
+    public function testToPath() 
+    {
         $options1 = array(
             'extension' => '.txt',
             'spacereplace' => '_'
@@ -92,6 +93,9 @@ class StringTest extends \PHPUnit_Framework_TestCase {
         );
 
         $this->assertEquals('testpath', String::toPath('test path', $options7));
+        
+        $this->assertEquals('vfs://test/test.yml', String::toPath('vfs://test/test.yml'));
+        
     }
 
     /**

@@ -21,16 +21,22 @@
 
 namespace BackBuilder\Rest\Tests\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
-
 use BackBuilder\Rest\Controller\PageController;
-use BackBuilder\Tests\TestCase;
+use BackBuilder\Rest\Test\RestTestCase;
 
 
-use BackBuilder\Security\User,
-    BackBuilder\Security\Group,
-    BackBuilder\Site\Site,
-    BackBuilder\NestedNode\Page;
+use BackBuilder\Site\Site,
+    BackBuilder\NestedNode\Page,
+    BackBuilder\Site\Layout;
+
+use BackBuilder\Security\Acl\Permission\MaskBuilder;
+
+use BackBuilder\Rest\Patcher\OperationBuilder;
+
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
+    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+
+use org\bovigo\vfs\vfsStream;
 
 /**
  * Test for PageController class
@@ -42,12 +48,11 @@ use BackBuilder\Security\User,
  * 
  * @coversDefaultClass \BackBuilder\Rest\Controller\PageController
  */
-class PageControllerTest extends TestCase
+class PageControllerTest extends RestTestCase
 {
     
-    protected $user;
+    
     protected $site;
-    protected $groupEditor;
     
     protected function setUp()
     {
@@ -55,47 +60,17 @@ class PageControllerTest extends TestCase
         $bbapp = $this->getBBApp();
         
         $this->initDb($bbapp);
+        $this->initAcl();
         $this->getBBApp()->setIsStarted(true);
-        $em = $bbapp->getEntityManager();
+        $this->em = $bbapp->getEntityManager();
+        
         $this->site = new Site();
         $this->site->setLabel('Test Site')->setServerName('test_server');
+        $this->em->persist($this->site);
         
-        $this->groupEditor = new Group();
-        $this->groupEditor->setName('groupName');
-        $this->groupEditor->setSite($this->site);
-        $this->groupEditor->setIdentifier('GROUP_ID');
-        
-        $em->persist($this->site);
-        $em->persist($this->groupEditor);
-        
-        
-        $this->deletedPage = new Page();
-        $this->deletedPage
-            ->setTitle('Deleted')
-            ->setState(Page::STATE_DELETED)
-            ->setSite($this->site)
-        ;
-        
-        $this->offlinePage = new Page();
-        $this->offlinePage
-            ->setTitle('Offline')
-            ->setState(Page::STATE_OFFLINE)
-            ->setSite($this->site)
-        ;
-        
-        $this->onlinePage = new Page();
-        $this->onlinePage
-            ->setTitle('Online')
-            ->setState(Page::STATE_ONLINE)
-            ->setSite($this->site)
-        ;
-        
-        $em->persist($this->deletedPage);
-        $em->persist($this->offlinePage);
-        $em->persist($this->onlinePage);
-        
-        
-        $em->flush();
+        // permissions
+        $this->getContainer()->set('site', $this->site);
+        $this->restUser = $this->createAuthUser('page_admin');
     }
     
     private function getController()
@@ -106,42 +81,212 @@ class PageControllerTest extends TestCase
         return $controller;
     }
 
+    /**
+     * @covers ::postAction
+     */
+    public function test_postAction()
+    {
+        $layout = new Layout();
+
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass)
+            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts/default.twig')
+        ;
+        
+        $em = $this->getEntityManager();
+        $em->persist($layout);
+        $em->flush();
+        
+        $this->getAclManager()->insertOrUpdateClassAce(
+            new ObjectIdentity('class', 'BackBuilder\NestedNode\Page'), 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_CREATE
+        )->insertOrUpdateClassAce(
+            $layout,
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_VIEW
+        );
+        
+        $response = $this->sendRequest(self::requestPost('/rest/1/page', [
+            'title' => 'New Page',
+            'url' => 'url',
+            'layout_uid' => $layout->getUid()
+        ]));
+        
+        $this->assertEquals(201, $response->getStatusCode());
+        $this->assertEquals('http://localhost/url', $response->headers->get('Location'));
+    }
+    
+    /**
+     * @covers ::putAction
+     */
+    public function test_putAction()
+    {
+        $em = $this->getEntityManager();
+        
+        $layout = new Layout();
+
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass)
+            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts/default.twig')
+        ;
+        $em->persist($layout);
+        
+        // create pages
+        $homePage = new Page();
+        $homePage
+            ->setTitle('Page')
+            ->setState(Page::STATE_OFFLINE)
+            ->setSite($this->site)
+        ;
+        $em->persist($homePage);
+        
+        $em->flush();
+        
+        
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $homePage, 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            ['PUBLISH', 'EDIT']
+        )->insertOrUpdateObjectAce(
+            $layout,
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            ['VIEW']
+        );
+
+        $response = $this->sendRequest(self::requestPut('/rest/1/page/' . $homePage->getUid(), [
+            'title' => 'New Page',
+            'url' => 'url',
+            'target' => Page::DEFAULT_TARGET,
+            'state' => Page::STATE_ONLINE,
+            'layout_uid' => $layout->getUid()
+        ]));
+        
+        $this->assertEquals(204, $response->getStatusCode());
+    }
+    
+    /**
+     * @covers ::patchAction
+     */
+    public function test_patchAction()
+    {
+        // create page
+        $page = (new Page())
+            ->setTitle('Page Title')
+            ->setState(Page::STATE_OFFLINE)
+            ->setSite($this->site)
+        ;
+        
+        $em = $this->getEntityManager();
+        $em->persist($page);
+        $em->flush();
+        
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $page, 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            ['PUBLISH', 'EDIT']
+        );
+
+        $response = $this->sendRequest(self::requestPatch('/rest/1/page/' . $page->getUid(), (new OperationBuilder())
+            ->replace('title', 'New Page Title')
+            ->replace('state', Page::STATE_ONLINE)
+            ->getOperations()
+        ));
+        
+        $this->assertEquals(204, $response->getStatusCode());
+        
+        $pageUpdated = $em->getRepository(get_class($page))->find($page->getUid());
+        
+        $this->assertEquals(Page::STATE_ONLINE, $pageUpdated->getState());
+        $this->assertEquals('New Page Title', $pageUpdated->getTitle());
+    }
     
     /**
      * @covers ::getCollectionAction
      */
-    public function testGetCollectionAction()
+    public function test_getCollectionAction()
     {
-        $controller = $this->getController();
+        // create pages
+        $homePage = new Page();
+        $homePage
+            ->setTitle('Home Page')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
         
-        // no filters
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-        ), array(
-            '_action' => 'getCollectionAction',
-            '_controller' => 'BackBuilder\Rest\Controller\PageController'
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        $deletedPage = new Page();
+        $deletedPage
+            ->setTitle('Deleted')
+            ->setState(Page::STATE_DELETED)
+            ->setSite($this->site)
+        ;
         
-        $res = json_decode($response->getContent(), true);
-        $this->assertInternalType('array', $res);
-        $this->assertCount(1, $res);
+        $offlinePage = new Page();
+        $offlinePage
+            ->setTitle('Offline')
+            ->setState(Page::STATE_OFFLINE)
+            ->setSite($this->site)
+        ;
+        
+        $onlinePage = new Page();
+        $onlinePage
+            ->setTitle('Online')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
+        $onlinePage2 = new Page();
+        $onlinePage2
+            ->setTitle('Online2')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+        ;
+        $this->em->persist($homePage);
+        $this->em->persist($deletedPage);
+        $this->em->persist($offlinePage);
+        $this->em->persist($onlinePage);
+        $this->em->persist($onlinePage2);
+        
+        $repo = $this->em->getRepository('BackBuilder\NestedNode\Page');
+        
+        $this->em->flush();
+        
+        $repo->insertNodeAsFirstChildOf($deletedPage, $homePage);
+        $repo->insertNodeAsFirstChildOf($offlinePage, $homePage);
+        $repo->insertNodeAsFirstChildOf($onlinePage, $homePage);
+        $repo->insertNodeAsFirstChildOf($onlinePage2, $onlinePage);
+        
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $homePage, 
+            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
+            MaskBuilder::MASK_VIEW
+        );
+        
+        // no filters - should return all pages by default
+        $response1 = $this->sendRequest(self::requestGet('/rest/1/page'));
+        $this->assertEquals(200, $response1->getStatusCode());
+        $res1 = json_decode($response1->getContent(), true);
+        var_dump($res1);
+        $this->assertInternalType('array', $res1);
+        $this->assertCount(3, $res1);
         
         
-        // filter by state
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-            'site_uid' => $this->site->getUid()
-        ), array(
-            'state' => 1,
-            '_action' => 'getCollectionAction',
-            '_controller' => 'BackBuilder\Rest\Controller\PageController'
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/') ));
+        // filter by state = offline
+        $response2 = $this->sendRequest(self::requestGet('/rest/1/page', ['state' => Page::STATE_OFFLINE]));
+        $this->assertEquals(200, $response2->getStatusCode());
+        $res2 = json_decode($response2->getContent(), true);
+        $this->assertInternalType('array', $res2);
+        $this->assertCount(1, $res2);
+        $this->assertEquals($offlinePage->getUid(), $res2[0]['uid']);
         
-        $this->assertEquals(200, $response->getStatusCode());
-        $res = json_decode($response->getContent(), true);
-        
-        $this->assertInternalType('array', $res);
-        $this->assertCount(1, $res);
-        $this->assertEquals($this->site->getUid(), $res[0]['site_uid']);
-        
+        // filter by parent
+        $response3 = $this->sendRequest(self::requestGet('/rest/1/page', ['parent_uid' => $onlinePage->getUid()]));
+        $this->assertEquals(200, $response3->getStatusCode());
+        $res3 = json_decode($response3->getContent(), true);
+        $this->assertInternalType('array', $res3);
+        $this->assertCount(1, $res3);
+        $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
     }
     
 }

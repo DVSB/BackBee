@@ -480,7 +480,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Sets the data associated to the layout.
-     * None validity checks are performed at this step.
+     * No validation checks are performed at this step.
      * @param mixed $data
      * @return \BackBuilder\Site\Layout
      */

@@ -8,6 +8,8 @@ parameters:
     bbapp.logger.class: BackBuilder\Logging\Logger
     bbapp.logger_debug.class: BackBuilder\Logging\DebugStackLogger
     bbapp.controller.class: BackBuilder\FrontController\FrontController
+    bbapp.media.controller.class: BackBuilder\Controller\MediaController
+    bbapp.resource.controller.class: BackBuilder\Controller\ResourceController
     bbapp.renderer.class: BackBuilder\Renderer\Renderer
     bbapp.ed.class: BackBuilder\Event\Dispatcher
     bbapp.rpcserver.class: BackBuilder\Services\Rpc\JsonRPCServer
@@ -59,22 +61,23 @@ parameters:
     bbapp.config.configurator.class: BackBuilder\Config\Configurator
     bbapp.config.persistor.class: BackBuilder\Config\Persistor
     bbapp.bundle.loader.class: BackBuilder\Bundle\BundleLoader
+    bbapp.classcontent.category_manager.class: BackBuilder\ClassContent\CategoryManager
 
 services:
 
     config:
         class:      %bbapp.config.class%
-        arguments:  ["%bbapp.base.dir%/Config", "@cache.bootstrap", null, "%debug%", "%config.yml_files_to_ignore%"]
+        arguments:  [%bbapp.base.dir%/Config, @cache.bootstrap, null, %debug%, %config.yml_files_to_ignore%]
         tags:
             - { name: "dumpable", dispatch_event: false }
         calls:
-            - [setContainer, ['@service_container']]
-            - [setEnvironment, ['%bbapp.environment%']]
-        configurator: ["@config.configurator", configureApplicationConfig]
+            - [setContainer, [@service_container]]
+            - [setEnvironment, [%bbapp.environment%]]
+        configurator: [@config.configurator, configureApplicationConfig]
 
     event.dispatcher:
         class:      %bbapp.ed.class%
-        arguments:  ["@bbapp", "@config"]
+        arguments:  [@bbapp, @config]
         tags:
             - { name: "dumpable", dispatch_event: false }
     ed:
@@ -87,64 +90,76 @@ services:
 
     controller:
         class:      %bbapp.controller.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
+
+    media.controller:
+        class:      %bbapp.media.controller.class%
+        arguments: [@bbapp]
+
+    resource.controller:
+        class:      %bbapp.resource.controller.class%
+        arguments: [@bbapp]
 
     renderer:
         class:      %bbapp.renderer.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
         tags:
             - { name: "dumpable", dispatch_event: false }
     rpcserver:
         class:      %bbapp.rpcserver.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
 
     uploadserver:
         class:      %bbapp.uploadserver.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
 
     rewriting.urlgenerator:
         class:      %bbapp.urlgenerator.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
 
     translator:
         class:      %bbapp.translator.class%
-        arguments:  ["@bbapp", "%bbapp.locale%"]
+        arguments:  [@bbapp, %bbapp.locale%]
         calls:
-            - [setLocale, ["%bbapp.locale%"]]
+            - [setLocale, [%bbapp.locale%]]
 
     pagebuilder:
         class:      %bbapp.pagebuilder.class%
-        arguments:  ["@em"]
+        arguments:  [@em]
 
     registry:
         class:      %bbapp.registry.class%
 
     autoloader:
         class:      %bbapp.autoloader.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
         calls:
-            - [setEventDispatcher, ["@event.dispatcher"]]
+            - [setEventDispatcher, [@event.dispatcher]]
         tags:
             - { name: "dumpable", dispatch_event: false }
 
     keywordbuilder:
         class:      %bbapp.keywordbuilder.class%
-        arguments:  ["@em"]
+        arguments:  [@em]
 
 
     bundle.loader:
         class:      %bbapp.bundle.loader.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
 
 
     config.configurator:
         class:      %bbapp.config.configurator.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
         public:     false
 
     config.persistor:
         class:      %bbapp.config.persistor.class%
         arguments:  ["@bbapp", "@config.configurator"]
+
+    classcontent.category_manager:
+        class:      %bbapp.classcontent.category_manager.class%
+        arguments: [@bbapp]
 
     analytics:
         class: BackBuilder\Application\Analytics
@@ -224,7 +239,7 @@ services:
 
     doctrine.dbal.logger.profiling:
         class: %bbapp.dbal.logger.profiling.class%
-        arguments:  ["@bbapp"]
+        arguments:  [@bbapp]
 
     job.queue.nested_node:
         class: %bbapp.job.queue.registry.class%

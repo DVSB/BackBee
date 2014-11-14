@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,7 +26,7 @@ use BackBuilder\Services\Exception\ServicesException,
 
 /**
  * RPC services for content revisions
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Services
  * @subpackage  Local
@@ -108,7 +108,6 @@ class Revision extends AbstractServiceLocal
         foreach ($revisions as $revision) {
             try {
                 $this->bbapp->getEventDispatcher()->triggerEvent('commit', $revision->getContent());
-                $this->em->flush();
 
                 if (null !== $revision->getContent()) {
                     $result[] = array('commited' => true,
@@ -123,6 +122,8 @@ class Revision extends AbstractServiceLocal
                     'message' => $e->getMessage());
             }
         }
+
+        $this->em->flush();
 
         return $result;
     }
@@ -166,7 +167,7 @@ class Revision extends AbstractServiceLocal
     }
 
     /**
-     * Increase memory limit and disable time limit in order 
+     * Increase memory limit and disable time limit in order
      * to treate huge commit or revert
      */
     private function _incRunningVariables()

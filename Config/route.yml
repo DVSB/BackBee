@@ -12,24 +12,27 @@ bb.upload:
     pattern: /
     defaults:
         _action: uploadAction
+        _controller: media.controller
     requirements:
         HTTP-X-Requested-With:  XMLHttpRequest
         HTTP-X-BB-METHOD:       Upload
 
-# Backbuilder internal services
-bb.internal.services:
-    pattern: /bb-internal-services/{servicename}
-    defaults:
-      _action: handleInternalServicesAction
-    requirements:
-      servicename: (generate_classcontent_cache)
-
 # BackBuilder resources
+bb.classcontent_thumbnail:
+    pattern: /%bbapp.routing.resource_uri_prefix%/%classcontent_thumbnail.base_folder%/{filename}
+    # pattern: /ressources/%classcontent_thumbnail.base_folder%/{filename}
+    defaults:
+        _action: getClassContentThumbnailAction
+        _controller: resource.controller
+    requirements:
+        filename: .+
+
 bb.resources:
     # pattern: /%bbapp.routing.resource_uri_prefix%/{filename}
     pattern: /ressources/{filename}
     defaults:
         _action: resourcesAction
+        _controller: resource.controller
     requirements:
         filename: .+
 
@@ -38,6 +41,7 @@ bb.images:
     pattern: /{type}/{filename}
     defaults:
         _action: mediaAction
+        _controller: media.controller
     requirements:
         type: (%bbapp.routing.image_uri_prefix%|%bbapp.routing.media_uri_prefix%)
         filename: .+
@@ -186,6 +190,14 @@ bb.rest.page.post:
     requirements:
         _method: POST
 
+bb.rest.page.clone:
+    pattern: /rest/{version}/page/{uid}/clone
+    defaults:
+        _action:     cloneAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        _method: POST
+
 bb.rest.page.put:
     pattern: /rest/{version}/page/{uid}
     defaults:
@@ -207,7 +219,7 @@ bb.rest.page.patch:
 bb.rest.page.move_node:
     pattern: /rest/{version}/page/{uid}/node/move
     defaults:
-        _action:     movePageNodeAction
+        _action:     moveNodeAction
         _controller: BackBuilder\Rest\Controller\PageController
     requirements:
         uid: \w{32}
@@ -266,10 +278,36 @@ bb.rest.layout.delete:
         uid: \w{32}
         _method: DELETE
 
+bb.rest.classcontent.category.get:
+    pattern: /rest/{version}/classcontent/category/{id}
+    defaults:
+        _action: getCategoryAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        _method: GET
+
+bb.rest.classcontent.category.get_collection:
+    pattern: /rest/{version}/classcontent/category
+    defaults:
+        _action: getCategoryCollectionAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        _method: GET
+
 bb.rest.classcontent.get:
     pattern: /rest/{version}/classcontent/{type}/{uid}
     defaults:
         _action: getAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: .+
+        _method: GET
+
+bb.rest.classcontent.render:
+    pattern: /rest/{version}/classcontent/{type}/{uid}/render
+    defaults:
+        _action: renderAction
         _controller: BackBuilder\Rest\Controller\ClassContentController
     requirements:
         uid: \w{32}
@@ -321,6 +359,32 @@ bb.rest.bundle.exposed_actions:
         action_name: "[a-z]+"
         parameters: "^\/.+|"
 
+bb.rest.group.get:
+    pattern: /rest/{version}/group/{id}
+    defaults:
+        _action:     getAction
+        _controller: BackBuilder\Rest\Controller\GroupController
+    requirements:
+        uid: \w{32}
+        _method: GET
+
+bb.rest.group.post:
+    pattern: /rest/{version}/group
+    defaults:
+        _action:     postAction
+        _controller: BackBuilder\Rest\Controller\GroupController
+    requirements:
+        _method: POST
+
+bb.rest.group.put:
+    pattern: /rest/{version}/group/{id}
+    defaults:
+        _action:     putAction
+        _controller: BackBuilder\Rest\Controller\GroupController
+    requirements:
+        uid: \w{32}
+        _method: PUT
+
 # BackBuilder rss
 bb.rss:
     pattern: /rss/{uri}
@@ -338,4 +402,3 @@ default:
         uri:     _root_
     requirements:
         uri: .+
-
