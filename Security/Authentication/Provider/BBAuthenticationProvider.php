@@ -109,7 +109,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         if (null === $user = $this->user_provider->loadUserByUsername($token->getUsername())) {
-            throw new SecurityException('Unknown user', SecurityException::UNKNOWN_USER);
+            throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
         }
 
         try {
