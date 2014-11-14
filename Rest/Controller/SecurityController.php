@@ -60,10 +60,11 @@ class SecurityController extends ARestController
             ->authenticate($token)
         ;
 
-        return $this->createResponse($this->formatItem(array(
-            'X-API-KEY'       => $tokenAuthenticated->getUser()->getApiKeyPublic(),
-            'X-API-SIGNATURE' => $tokenAuthenticated->getNonce()
-        )));
+        $response = $this->createResponse('', 201);
+        $response->headers->set('X-API-KEY', $tokenAuthenticated->getUser()->getApiKeyPublic());
+        $response->headers->set('X-API-SIGNATURE', $tokenAuthenticated->getNonce());
+
+        return $response;
     }
 
 
@@ -158,7 +159,7 @@ class SecurityController extends ARestController
         if(null === $request->getSession()) {
             throw new NotFoundHttpException('Session doesn\'t exist');
         }
-        
+
         $request->getSession()->invalidate();
         $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
 
