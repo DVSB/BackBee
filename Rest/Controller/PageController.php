@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\Rest\Controller;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,20 +19,24 @@ namespace BackBuilder\Rest\Controller;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace BackBuilder\Rest\Controller;
+
 use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\NestedNode\Page,
-    BackBuilder\Site\Layout;
+use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Patcher\EntityPatcher;
 use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
 use BackBuilder\Rest\Patcher\RightManager;
+use BackBuilder\Site\Layout;
 use BackBuilder\Workflow\State;
-use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+
+use Symfony\Component\Security\Acl\Permission\MaskBuilder;
+
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -99,21 +102,21 @@ class PageController extends ARestController
         }
 
         $this->granted('VIEW', $parent);
-        
-        $qb
-            ->setFirstResult($start)
-            ->setMaxResults($count)
-        ;
 
-        if (null !== $request->query->get('state')) {
-            $qb->andStateIsIn((array) $request->query->get('state'));
+        if (null !== $state = $request->query->get('state', null)) {
+            $qb->andStateIsIn(explode(',', $state));
         }
         
         if (null !== $request->query->get('depth')) {
             $qb->andLevelIsLowerThan($parent->getLevel() + $request->query->get('depth'));
         }
 
-        $results = $qb->getQuery()->getResult();
+        $results = $qb
+            ->setFirstResult($start)
+            ->setMaxResults($count)
+            ->getQuery()
+            ->getResult()
+        ;
 
         $result_count = $start + count($results);
 

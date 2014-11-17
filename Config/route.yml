@@ -304,6 +304,16 @@ bb.rest.classcontent.get:
         type: .+
         _method: GET
 
+bb.rest.classcontent.render:
+    pattern: /rest/{version}/classcontent/{type}/{uid}/render
+    defaults:
+        _action: renderAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: .+
+        _method: GET
+
 bb.rest.classcontent.delete:
     pattern: /rest/{version}/classcontent/{type}/{uid}
     defaults:
