@@ -287,6 +287,14 @@ class PageControllerTest extends RestTestCase
         $this->assertInternalType('array', $res3);
         $this->assertCount(1, $res3);
         $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
+        
+        // filter by depth
+        $response4 = $this->sendRequest(self::requestGet('/rest/1/page', ['parent_uid' => $onlinePage->getUid()]));
+        $this->assertEquals(200, $response4->getStatusCode());
+        $res4 = json_decode($response4->getContent(), true);
+        $this->assertInternalType('array', $res4);
+        $this->assertCount(1, $res4);
+        
     }
     
 }
