@@ -97,7 +97,7 @@ class BundleController extends ARestController
     {
         $bundle = $this->getBundleById($id);
         $this->granted('EDIT', $bundle);
-        $operations = $this->getRequest()->request->get('operations');
+        $operations = $this->getRequest()->request->all();
 
         try {
             (new OperationSyntaxValidator())->validate($operations);
