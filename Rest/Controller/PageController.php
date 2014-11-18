@@ -34,8 +34,9 @@ use BackBuilder\Workflow\State;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
+
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -76,6 +77,10 @@ class PageController extends ARestController
      * @Rest\QueryParam(name="dir", description="Order direction", default="asc", requirements={
      *   @Assert\Choice(choices = {"asc", "desc"}, message="Order direction is not valid")
      * })
+     * 
+     * @Rest\QueryParam(name="depth", description="Page depth", requirements={
+     *   @Assert\Range(min = 0, max = 100, minMessage="Page depth must be a positive number", maxMessage="Page depth cannot be greater than 100")
+     * })
      *
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
@@ -100,6 +105,10 @@ class PageController extends ARestController
 
         if (null !== $state = $request->query->get('state', null)) {
             $qb->andStateIsIn(explode(',', $state));
+        }
+        
+        if (null !== $request->query->get('depth')) {
+            $qb->andLevelIsLowerThan($parent->getLevel() + $request->query->get('depth'));
         }
 
         $results = $qb

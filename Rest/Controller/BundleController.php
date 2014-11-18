@@ -87,8 +87,8 @@ class BundleController extends ARestController
     /**
      * Patch the bundle
      *
-     * @Rest\RequestParam(name="operations", description="Patch operations", requirements={
-     *   @Assert\NotBlank(message="operations is required")
+     * @Rest\RequestParam(name="0", description="Patch operations", requirements={
+     *   @Assert\NotBlank(message="Request must contain at least one operation")
      * })
      *
      * @param  string $id the id of the bundle we are looking for
@@ -97,7 +97,7 @@ class BundleController extends ARestController
     {
         $bundle = $this->getBundleById($id);
         $this->granted('EDIT', $bundle);
-        $operations = $this->getRequest()->request->get('operations');
+        $operations = $this->getRequest()->request->all();
 
         try {
             (new OperationSyntaxValidator())->validate($operations);
