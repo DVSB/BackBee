@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -74,7 +74,7 @@ class Dir
      * Parse dir content.
      *
      * @param string $path path location
-     * @return array 
+     * @return array
      */
     public static function getContent($path)
     {
@@ -122,8 +122,7 @@ class Dir
                     return call_user_func_array(array($callback[0], $callback[1]));
                 }
                 if (count($callback) == 3) {
-                    return call_user_func_array(array($callback[0], $callback[1]), $callback[2]);
-                    ;
+                    return call_user_func_array(array($callback[0], $callback[1]), (array)$callback[2]);
                 }
             } catch (\Exception $e) {
                 unset($e);
