@@ -39,7 +39,7 @@ use BackBuilder\Security\Group;
  * @package     BackBuilder\Command
  * @copyright   Lp digital system
  * @author      k.golovin
- * 
+ *
  * @coversDefaultClass \BackBuilder\Command\AclLoadCommand
  */
 class AclLoadCommandTest extends TestCase
@@ -49,18 +49,18 @@ class AclLoadCommandTest extends TestCase
         $this->bbapp = $this->getBBApp();
         $this->initDb($this->bbapp);
         $this->initAcl();
-        
+
         $superAdminGroup = new Group();
         $superAdminGroup
             ->setIdentifier('super_admin')
             ->setName('Super Admin')
         ;
         $this->bbapp->getEntityManager()->persist($superAdminGroup);
-        
+
         $this->getBBApp()->getEntityManager()->flush();
-        
+
     }
-    
+
     /**
      * @covers ::execute
      */
@@ -72,8 +72,8 @@ class AclLoadCommandTest extends TestCase
 
         $command = $application->find('acl:load');
         $commandTester = new CommandTester($command);
-        
-        
+
+        vfsStream::umask(0000);
         $this->_mock_basedir = vfsStream::setup('test_dir', 0777, array(
             'file.xml' => '
 groups:
@@ -83,18 +83,18 @@ groups:
       actions: all
             '
         ));
-        
+
         $commandTester->execute(
             array(
                 'command' => $command->getName(),
                 'file' => 'vfs://test_dir/file.xml'
             )
         );
-        
+
         $this->assertContains('Processing file: vfs://test_dir/file.xml', $commandTester->getDisplay());
     }
-    
-    
+
+
     /**
      * @expectedException \Symfony\Component\Yaml\Exception\ParseException
      * @covers ::execute
@@ -107,14 +107,14 @@ groups:
 
         $command = $application->find('acl:load');
         $commandTester = new CommandTester($command);
-        
-        
+
+
         $this->_mock_basedir = vfsStream::setup('test_dir', 0777, array(
             'fileInvalid.xml' => '
 incorrectly formatted
 yml file'
         ));
-        
+
         $commandTester->execute(
             array(
                 'command' => $command->getName(),
@@ -122,7 +122,7 @@ yml file'
             )
         );
     }
-    
+
     /**
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage File not found: file_doesnt_exist.ext
@@ -136,7 +136,7 @@ yml file'
 
         $command = $application->find('acl:load');
         $commandTester = new CommandTester($command);
-        
+
         $file = 'file_doesnt_exist.ext';
         $commandTester->execute(
             array(
