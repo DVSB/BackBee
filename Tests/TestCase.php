@@ -125,6 +125,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function initDb($bbapp)
     {
         $em = $bbapp->getContainer()->get('em');
+        $em->getConnection()->getConfiguration()->setSQLLogger(null);
         $entityFinder = new EntityFinder($bbapp->getBBDir());
 
         $paths = [
@@ -142,7 +143,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $bbapp->getBBDir() . '/Util/Sequence/Entity',
             $bbapp->getBBDir() . '/Workflow',
         ];
-        
+
         foreach($paths as $path) {
             $em->getConfiguration()->getMetadataDriverImpl()->addPaths([$path]);
             $em->getConfiguration()->getMetadataDriverImpl()->addExcludePaths($entityFinder->getExcludePaths($path));
@@ -247,9 +248,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         return $this->getBBApp()->getEntityManager($name);
     }
-    
+
     /**
-     * 
+     *
      * @return \BackBuilder\Security\Acl\AclManager
      */
     protected function getAclManager()
