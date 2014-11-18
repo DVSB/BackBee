@@ -105,7 +105,7 @@ class MockBBApplication extends BBApplication
 
     public function getCacheDir()
     {
-        return vfsStream::url('Cache');
+        return vfsStream::url('cache');
     }
 
 
@@ -135,10 +135,11 @@ class MockBBApplication extends BBApplication
                     'Tmp' => array()
                 ),
                 'Ressources' => array(),
-                'Cache' => array()
+                'cache' => array()
             );
         }
 
+        vfsStream::umask(0000);
         $this->_mock_basedir = vfsStream::setup('repositorydir', 0777, $mockConfig);
 
         return $this;
