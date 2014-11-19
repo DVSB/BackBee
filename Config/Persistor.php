@@ -21,11 +21,15 @@ namespace BackBuilder\Config;
  */
 
 use BackBuilder\Config\Configurator;
+use BackBuilder\Config\Exception\PersistorListNotFoundException;
 use BackBuilder\Config\Persistor\PersistorInterface;
+use BackBuilder\Exception\BBException;
+use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Util\Arrays;
 
 /**
+ * Persistor allows us to handle with ease persistence of Config settings
  *
  * @category    BackBuilder
  * @package     BackBuilder\Config
@@ -37,59 +41,74 @@ class Persistor
     const DEFAULT_CONFIG_PER_SITE_VALUE = false;
 
     /**
-     * [$application description]
+     * Application this persistor belongs to
      *
-     * @var [type]
+     * @var BackBuilder\BBApplication
      */
     private $application;
 
     /**
-     * [$configurator description]
+     * Configurator will provide the default settings of application and bundles configs
      *
-     * @var [type]
+     * @var BackBuilder\Config\Configurator
      */
     private $configurator;
 
     /**
-     * [$persistors description]
-     * @var [type]
+     * List of declared persistor
+     *
+     * @var array
      */
     private $persistors;
 
     /**
-     * [__construct description]
+     * Persistor's constructor
      *
-     * @param ApplicationInterface $application  [description]
-     * @param Configurator         $configurator [description]
+     * @param ApplicationInterface $application  the application this persistor belongs to
+     * @param Configurator         $configurator provider of config default settings
      */
     public function __construct(ApplicationInterface $application, Configurator $configurator)
     {
         $this->application = $application;
         $this->configurator = $configurator;
-
-        $this->loadApplicationPersistors();
     }
 
     /**
-     * [persist description]
-     * @param  Config $config                 [description]
-     * @param  [type] $enable_config_per_site [description]
-     * @return [type]                         [description]
+     * Persist current settings $config
+     *
+     * @param  Config  $config                 the config to persist
+     * @param  boolean $enable_config_per_site if true we only persist difference between current config settings
+     *                                         and default config settings; default: false
      */
     public function persist(Config $config, $enable_config_per_site = self::DEFAULT_CONFIG_PER_SITE_VALUE)
     {
+        if (null === $this->persistors) {
+            $this->loadPersistors();
+        }
+
         if (true === $enable_config_per_site) {
             $this->updateConfigOverridedSectionsForSite($config);
         }
 
         $this->doPersist($config, $config->getAllRawSections());
+
+        // restore current config state after persist if config per site is enabled
+        if (true === $enable_config_per_site) {
+            $override_sections = $config->getRawSection('override_site');
+            $site_uid = $this->application->getSite()->getUid();
+            if (is_array($override_sections) && array_key_exists($site_uid, $override_sections)) {
+                foreach ($override_sections[$site_uid] as $section_name => $section_settings) {
+                    $config->setSection($section_name, $section_settings);
+                }
+            }
+        }
     }
 
     /**
-     * [doPersist description]
-     * @param  Config $config            [description]
-     * @param  array  $config_to_persist [description]
-     * @return [type]                    [description]
+     * Tries to persist config by calling every declared persistors; it will stop on first success
+     *
+     * @param  Config $config            the concern this persist action concern
+     * @param  array  $config_to_persist settings to persist for provided config
      */
     private function doPersist(Config $config, array $config_to_persist)
     {
@@ -102,38 +121,47 @@ class Persistor
     }
 
     /**
-     * [loadApplicationPersistors description]
-     * @return [type] [description]
+     * Loads every declared persistors in application config.yml, config section
+     *
+     * @throws PersistorListNotFoundException occurs if there is no persistor list in config.yml, section: config
+     *                                        it also occurs if config section does not exist in application config.yml
+     * @throws InvalidArgumentException raises if one of declared persistors does not implement PersistorInterface
      */
-    private function loadApplicationPersistors()
+    private function loadPersistors()
     {
         if (null !== $config = $this->application->getConfig()) {
             $config_config = $config->getConfigConfig();
-            if (false === array_key_exists('persistor', $config_config)) {
-                throw new \Exception('You has to specify persistor!');
+
+            if (false === is_array($config_config) || false === array_key_exists('persistor', $config_config)) {
+                throw new PersistorListNotFoundException();
             }
 
             $persistors = (array) $config_config['persistor'];
             foreach ($persistors as $persistor_classname) {
                 $persistor = new $persistor_classname($this->application);
                 if (false === ($persistor instanceof PersistorInterface)) {
-                    throw new \Exception('must implements PersistorInterface');
+                    throw new InvalidArgumentException(
+                        get_class($persistor) . ' must implements BackBuilder\Config\Persistor\PersistorInterface'
+                    );
                 }
 
                 $this->persistors[] = $persistor;
             }
+        } else {
+            throw new BBException('Application\'s Config must be different to null');
         }
     }
 
     /**
-     * [updateConfigOverridedSectionsForSite description]
+     * Add or update 'override_site' section to provided $config with difference between current config settings
+     * and config default settings
      *
-     * @param  Config $config [description]
+     * @param  Config $config the config we want to add/update its 'override_site' section
      */
     private function updateConfigOverridedSectionsForSite(Config $config)
     {
         if (false === $this->application->isStarted()) {
-            throw new \Exception('Application is not started, we are not able to persist multiple site config.');
+            throw new BBException('Application is not started, we are not able to persist multiple site config.');
         }
 
         $default_sections = $this->configurator->getConfigDefaultSections($config);
@@ -156,8 +184,12 @@ class Persistor
         foreach ($sections_to_update as $section) {
             if ('override_site' !== $section) {
                 $override_sections_site[$section] = $config->getRawSection($section);
-                $config->setSection($section, $default_sections[$section], true);
             }
+        }
+
+        $config->deleteAllSections();
+        foreach ($this->configurator->getConfigDefaultSections($config) as $section_name => $section_settings) {
+            $config->setSection($section_name, $section_settings);
         }
 
         $config->setSection('override_site', $override_site, true);
