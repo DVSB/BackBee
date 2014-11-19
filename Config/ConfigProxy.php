@@ -41,7 +41,7 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
      */
     public function __construct()
     {
-        $this->_is_restored = false;
+        $this->is_restored = false;
     }
 
     /**
@@ -52,11 +52,11 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
      */
     public function restore(ContainerInterface $container, array $dump)
     {
-        $this->_basedir = $dump['basedir'];
-        $this->_raw_parameters = $dump['raw_parameters'];
-        $this->_environment = $dump['environment'];
-        $this->_debug = $dump['debug'];
-        $this->_yml_names_to_ignore = $dump['yml_names_to_ignore'];
+        $this->basedir = $dump['basedir'];
+        $this->raw_parameters = $dump['raw_parameters'];
+        $this->environment = $dump['environment'];
+        $this->debug = $dump['debug'];
+        $this->yml_names_to_ignore = $dump['yml_names_to_ignore'];
 
         if (true === $dump['has_container']) {
             $this->setContainer($container);
@@ -66,6 +66,6 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
             $this->setCache($container->get('cache.bootstrap'));
         }
 
-        $this->_is_restored = true;
+        $this->is_restored = true;
     }
 }
