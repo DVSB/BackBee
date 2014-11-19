@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\Config\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -19,6 +18,8 @@ namespace BackBuilder\Config\Tests;
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace BackBuilder\Config\Tests;
 
 use BackBuilder\Config\Config;
 use BackBuilder\DependencyInjection\Container;
@@ -54,9 +55,9 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
      * test the Config constructor
      *
      * @covers ::extend
-     * @covers ::_loadFromBaseDir
-     * @covers ::_getYmlFiles
-     * @covers ::_loadFromFile
+     * @covers ::loadFromBaseDir
+     * @covers ::getYmlFiles
+     * @covers ::loadFromFile
      * @covers ::sectionHasKey
      * @covers ::getSection
      * @covers ::getBaseDir
@@ -153,8 +154,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
      *
      * @covers ::setContainer
      * @covers ::getRawSection
-     * @covers ::_compileParameters
-     * @covers ::_compileAllParameters
+     * @covers ::compileParameters
+     * @covers ::compileAllParameters
      */
     public function testConfigWithContainer()
     {
@@ -211,5 +212,41 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(false, $config_dump['has_cache']);
         $this->assertTrue(array_key_exists('has_container', $config_dump));
         $this->assertEquals(false, $config_dump['has_container']);
+    }
+
+    /**
+     * @covers ::deleteSection
+     * @covers ::deleteAllSections
+     */
+    public function testDeleteSection()
+    {
+        // init test environment
+        $config = new Config($this->test_base_dir);
+        $parameters_section_settings = array('foo' => 'bar');
+        $config->setSection('parameters', $parameters_section_settings);
+
+        // pre test
+        $this->assertTrue($config->getSection('say') !== null);
+        $this->assertEquals(array_merge(
+            array(
+                'say' => $config->getSection('say')
+            ),
+            array(
+                'parameters' => $parameters_section_settings
+            )
+        ), $config->getAllSections());
+
+        // call action to test
+        $config->deleteSection('say');
+
+        // post test
+        $this->assertFalse($config->getSection('say') !== null);
+        $this->assertEquals(array(
+            'parameters' => $parameters_section_settings
+        ), $config->getAllSections());
+
+        // second test
+        $config->deleteAllSections();
+        $this->assertEmpty($config->getAllSections());
     }
 }
