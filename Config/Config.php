@@ -264,6 +264,31 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
+     * Delete section by name and its parameters
+     * @param  string $section the name of the section you want to delete
+     * @return self
+     */
+    public function deleteSection($section)
+    {
+        unset($this->raw_parameters[$section]);
+        unset($this->parameters[$section]);
+
+        return $this;
+    }
+
+    /**
+     * Delete every sections of current Config
+     * @return self
+     */
+    public function deleteAllSections()
+    {
+        $this->raw_parameters = array();
+        $this->parameters = array();
+
+        return $this;
+    }
+
+    /**
      * Set environment context
      * @param string $env
      * @return self
