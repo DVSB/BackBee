@@ -89,6 +89,16 @@ class ManualBBApplication implements ApplicationInterface
     protected $container;
 
     /**
+     * @var BackBuilder\Config\Config
+     */
+    protected $config;
+
+    /**
+     * @var BackBuilder\Site\Site
+     */
+    protected $site;
+
+    /**
      * ManualBBApplication's constructor
      */
     public function __construct($context = null, $environment = null)
@@ -248,5 +258,29 @@ class ManualBBApplication implements ApplicationInterface
     public function isDebugMode()
     {
         return $this->debug_mode;
+    }
+
+    /**
+     * @return BackBuilder\Config\Config
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @return BackBuilder\Site\Site
+     */
+    public function getSite()
+    {
+        return $this->site;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isStarted()
+    {
+        return $this->is_started;
     }
 }

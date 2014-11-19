@@ -42,6 +42,11 @@ interface IApplication
     public function start(Site $site = null);
 
     /**
+     * @return boolean
+     */
+    public function isStarted();
+
+    /**
      * Stop the current BBApplication instance
      */
     public function stop();
@@ -79,6 +84,11 @@ interface IApplication
      * @return string
      */
     public function getRepository();
+
+    /**
+     * @return BackBuilder\Config\Config
+     */
+    public function getConfig();
 
     /**
      * @return string
@@ -121,6 +131,11 @@ interface IApplication
      * @return boolean
      */
     public function isDebugMode();
+
+    /**
+     * @return BackBuilder\Site\Site
+     */
+    public function getSite();
 
     /**
      *
