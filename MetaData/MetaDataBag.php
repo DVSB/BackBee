@@ -182,6 +182,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     /**
      * @param \stdClass $object
      * @return \BackBuilder\MetaData\MetaDataBag
+     * @deprecated since version 1.0
      */
     public function fromStdClass(\stdClass $object)
     {
@@ -223,13 +224,21 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
      */
     public function jsonSerialize()
     {
-        $metadata = array();
+        $metadatas = array();
         if (is_array($this->metadatas)) {
             foreach ($this->metadatas as $meta) {
-                $metadata[$meta->getName()] = $meta->jsonSerialize();
+                $attributes = array();
+
+                foreach ($meta->jsonSerialize() as $metadata) {
+                    if ('name' !== $metadata['attr']) {
+                        $attributes[$metadata['attr']] = $metadata['value'];
+                    }
+                }
+
+                $metadatas[$meta->getName()] = $attributes;
             }
         }
 
-        return $metadata;
+        return $metadatas;
     }
 }
