@@ -2,35 +2,35 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\MetaData;
 
-use BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\ContentSet,
-    BackBuilder\NestedNode\Page;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\NestedNode\Page;
 
 /**
  * A metadata
- * 
+ *
  * Metadata instance is composed by a name and a set of key/value attributes
  * The attribute can be staticaly defined in yaml file or to be computed:
- * 
+ *
  *     description:
  *       name: 'description'
  *       content:
@@ -38,46 +38,45 @@ use BackBuilder\ClassContent\AClassContent,
  *         layout:
  *           f5da92419743370d7581089605cdbc6e: $ContentSet[0]->$actu[0]->$chapo
  *       lang: 'en'
- * 
- * In this example, the attribute `lang` is static and set to `fr`, the attribute 
+ *
+ * In this example, the attribute `lang` is static and set to `fr`, the attribute
  * `content` will be set to `Default value`:
  *     <meta name="description" content="Default value" lang="en">
- * 
+ *
  * But if the page has the layout `f5da92419743370d7581089605cdbc6e` the attribute
  * `content` will set according to the scheme:
  * value of the element `chapo` of the first `content `actu` in the first column.
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\MetaData
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class MetaData implements \IteratorAggregate, \Countable
+class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 {
-
     /**
      * The name of the metadata
      * @var string
      */
-    private $_name;
+    private $name;
 
     /**
      * An array of attributes
-     * @var array 
+     * @var array
      */
-    private $_attributes;
+    private $attributes;
 
     /**
      * The scheme to compute for dynamic attributes
-     * @var array 
+     * @var array
      */
-    private $_scheme;
+    private $scheme;
 
     /**
      * The attributes to be computed
-     * @var array 
+     * @var array
      */
-    private $_isComputed;
+    private $is_computed;
 
     /**
      * Class constructor
@@ -88,9 +87,9 @@ class MetaData implements \IteratorAggregate, \Countable
         if (null !== $name)
             $this->setName($name);
 
-        $this->_attributes = array();
-        $this->_scheme = array();
-        $this->_isComputed = array();
+        $this->attributes = array();
+        $this->scheme = array();
+        $this->is_computed = array();
     }
 
     /**
@@ -100,7 +99,7 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function getName()
     {
-        return $this->_name;
+        return $this->name;
     }
 
     /**
@@ -115,7 +114,8 @@ class MetaData implements \IteratorAggregate, \Countable
             throw new \BackBuilder\Exception\InvalidArgumentException('Invalid name for metadata: \'%s\'', $name);
         }
 
-        $this->_name = $name;
+        $this->name = $name;
+
         return $this;
     }
 
@@ -127,7 +127,7 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function hasAttribute($attribute)
     {
-        return array_key_exists($attribute, $this->_attributes);
+        return array_key_exists($attribute, $this->attributes);
     }
 
     /**
@@ -138,7 +138,7 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function getAttribute($attribute, $default = '')
     {
-        return (true === $this->hasAttribute($attribute)) ? $this->_attributes[$attribute] : $default;
+        return (true === $this->hasAttribute($attribute)) ? $this->attributes[$attribute] : $default;
     }
 
     /**
@@ -155,17 +155,17 @@ class MetaData implements \IteratorAggregate, \Countable
         $functions = explode('||', $value);
         $value = array_shift($functions);
         if (0 < preg_match('/(\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $value)) {
-            $this->_scheme[$attribute] = $value;
-            $this->_isComputed[$attribute] = true;
+            $this->scheme[$attribute] = $value;
+            $this->is_computed[$attribute] = true;
 
             if (null !== $content && $originalValue === $value) {
                 $this->computeAttributes($content);
             } else {
-                $this->_attributes[$attribute] = $originalValue;
+                $this->attributes[$attribute] = $originalValue;
             }
         } else {
-            $this->_attributes[$attribute] = $value;
-            $this->_isComputed[$attribute] = false;
+            $this->attributes[$attribute] = $value;
+            $this->is_computed[$attribute] = false;
         }
 
         return $this;
@@ -184,10 +184,10 @@ class MetaData implements \IteratorAggregate, \Countable
         $functions = explode('||', $scheme);
         $value = array_shift($functions);
         if (0 < preg_match('/(\$([a-z\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $value)) {
-            $this->_scheme[$attribute] = $scheme;
+            $this->scheme[$attribute] = $scheme;
             if (null !== $content &&
-                    true === isset($this->_isComputed[$attribute]) &&
-                    true === $this->_isComputed[$attribute]) {
+                    true === isset($this->is_computed[$attribute]) &&
+                    true === $this->is_computed[$attribute]) {
                 $this->computeAttributes($content);
             }
         }
@@ -202,13 +202,13 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function computeAttributes(AClassContent $content, Page $page = null)
     {
-        foreach ($this->_attributes as $attribute => $value) {
-            if (true === $this->_isComputed[$attribute] && true === array_key_exists($attribute, $this->_scheme)) {
+        foreach ($this->attributes as $attribute => $value) {
+            if (true === $this->is_computed[$attribute] && true === array_key_exists($attribute, $this->scheme)) {
                 try {
                     $functions = explode('||', $value);
                     $matches = array();
-                    if (false !== preg_match_all('/(\$([a-z_\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $this->_scheme[$attribute], $matches, PREG_PATTERN_ORDER)) {
-                        $this->_attributes[$attribute] = $this->_scheme[$attribute];
+                    if (false !== preg_match_all('/(\$([a-z_\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $this->scheme[$attribute], $matches, PREG_PATTERN_ORDER)) {
+                        $this->attributes[$attribute] = $this->scheme[$attribute];
                         $initial_content = $content;
                         for ($i = 0; $i < count($matches[0]); $i++) {
                             $content = $initial_content;
@@ -264,9 +264,9 @@ class MetaData implements \IteratorAggregate, \Countable
                                 } else {
                                     $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags('' . $content)));
                                 }
-                                
-                                $this->_attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->_attributes[$attribute]);
-                                
+
+                                $this->attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->attributes[$attribute]);
+
                                 if (null !== $draft) {
                                     $content->setDraft($draft);
                                 }
@@ -274,14 +274,14 @@ class MetaData implements \IteratorAggregate, \Countable
                                 $v = array();
                                 foreach ($content as $c) {
                                     if ($c instanceof \BackBuilder\ClassContent\Element\keyword) {
-                                        
+
                                     }
                                     $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags('' . $c)));
                                 }
-                                $this->_attributes[$attribute] = str_replace($matches[0][$i], join(',', $v), $this->_attributes[$attribute]);
+                                $this->attributes[$attribute] = str_replace($matches[0][$i], join(',', $v), $this->attributes[$attribute]);
                             } else {
                                 $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags($content)));
-                                $this->_attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->_attributes[$attribute]);
+                                $this->attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->attributes[$attribute]);
                             }
                         }
                     }
@@ -291,9 +291,9 @@ class MetaData implements \IteratorAggregate, \Countable
                         foreach ($functions as $fct) {
                             $parts = explode(':', $fct);
                             $functionName = array_shift($parts);
-                            array_unshift($parts, $this->_attributes[$attribute]);
-                            $this->_attributes[$attribute];
-                            $this->_attributes[$attribute] = call_user_func_array($functionName, $parts);
+                            array_unshift($parts, $this->attributes[$attribute]);
+                            $this->attributes[$attribute];
+                            $this->attributes[$attribute] = call_user_func_array($functionName, $parts);
                         }
                     }
                 } catch (\Exception $e) {
@@ -303,7 +303,7 @@ class MetaData implements \IteratorAggregate, \Countable
                 switch (strtolower($matches[1])) {
                     case 'url':
                         if (null !== $page) {
-                            $this->_attributes[$attribute] = $page->getUrl();
+                            $this->attributes[$attribute] = $page->getUrl();
                         }
                     default:
                         break;
@@ -316,17 +316,19 @@ class MetaData implements \IteratorAggregate, \Countable
 
     /**
      * Returns a array representation of this metadata
+     *
      * @return array
+     * @deprecated since version 1.0
      */
     public function toArray()
     {
         $attributes = array();
-        foreach ($this->_attributes as $attribute => $value) {
+        foreach ($this->attributes as $attribute => $value) {
             $attr = new \stdClass();
             $attr->attr = $attribute;
             $attr->value = $value;
-            $attr->iscomputed = $this->_isComputed[$attribute];
-            $attr->scheme = (true === array_key_exists($attribute, $this->_scheme)) ? $this->_scheme[$attribute] : null;
+            $attr->iscomputed = $this->is_computed[$attribute];
+            $attr->scheme = (true === array_key_exists($attribute, $this->scheme)) ? $this->scheme[$attribute] : null;
             $attributes[] = $attr;
         }
 
@@ -339,7 +341,7 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function count()
     {
-        return count($this->_attributes);
+        return count($this->attributes);
     }
 
     /**
@@ -348,7 +350,24 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->_attributes);
+        return new \ArrayIterator($this->attributes);
     }
 
+    /**
+     * {@inherit}
+     */
+    public function jsonSerialize()
+    {
+        $attributes = array();
+        foreach ($this->attributes as $attribute => $value) {
+            $attr = array(
+                'attr'  => $attribute,
+                'value' => $value
+            );
+
+            $attributes[] = $attr;
+        }
+
+        return $attributes;
+    }
 }

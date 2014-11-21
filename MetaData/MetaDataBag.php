@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -25,20 +25,20 @@ use BackBuilder\NestedNode\Page;
 
 /**
  * A set of metadata
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\MetaData
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class MetaDataBag implements \IteratorAggregate, \Countable
+class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 {
 
     /**
      * The array of metadata
      * @var array
      */
-    private $_metadatas = array();
+    private $metadatas = array();
 
     /**
      * Class constructor
@@ -48,7 +48,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
      */
     public function __construct(array $definitions = null, Page $page = null)
     {
-        $this->_metadatas = array();
+        $this->metadatas = array();
         $this->update($definitions, $page);
     }
 
@@ -63,7 +63,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
             return $this;
         }
 
-        foreach ($this->_metadatas as $metadata) {
+        foreach ($this->metadatas as $metadata) {
             $metadata->computeAttributes($page->getContentSet(), $page);
         }
 
@@ -134,7 +134,8 @@ class MetaDataBag implements \IteratorAggregate, \Countable
      */
     public function add(MetaData $metadata)
     {
-        $this->_metadatas[$metadata->getName()] = $metadata;
+        $this->metadatas[$metadata->getName()] = $metadata;
+
         return $this;
     }
 
@@ -145,7 +146,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
      */
     public function has($name)
     {
-        return array_key_exists($name, $this->_metadatas);
+        return array_key_exists($name, $this->metadatas);
     }
 
     /**
@@ -155,19 +156,22 @@ class MetaDataBag implements \IteratorAggregate, \Countable
      */
     public function get($name)
     {
-        return (true === $this->has($name)) ? $this->_metadatas[$name] : null;
+        return (true === $this->has($name)) ? $this->metadatas[$name] : null;
     }
 
     /**
      * An array representation of the bag
+     *
      * @return array
+     * @deprecated since version 1.0
+     *
      * @codeCoverageIgnore
      */
     public function toArray()
     {
         $metadata = array();
-        if (is_array($this->_metadatas)) {
-            foreach ($this->_metadatas as $meta) {
+        if (is_array($this->metadatas)) {
+            foreach ($this->metadatas as $meta) {
                 $metadata[$meta->getName()] = $meta->toArray();
             }
         }
@@ -201,7 +205,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable
      */
     public function count()
     {
-        return count($this->_metadatas);
+        return count($this->metadatas);
     }
 
     /**
@@ -211,7 +215,21 @@ class MetaDataBag implements \IteratorAggregate, \Countable
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->_metadatas);
+        return new \ArrayIterator($this->metadatas);
     }
 
+    /**
+     * {@inherit}
+     */
+    public function jsonSerialize()
+    {
+        $metadata = array();
+        if (is_array($this->metadatas)) {
+            foreach ($this->metadatas as $meta) {
+                $metadata[$meta->getName()] = $meta->jsonSerialize();
+            }
+        }
+
+        return $metadata;
+    }
 }
