@@ -24,6 +24,7 @@ namespace BackBuilder\NestedNode;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\ClassContent\ContentSet;
 use BackBuilder\Exception\BBException;
+use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\MetaData\MetaDataBag;
 use BackBuilder\NestedNode\ANestedNode;
 use BackBuilder\Renderer\IRenderable;
@@ -766,49 +767,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
-     * Returns the inherited content from parent, $default if not found
-     * @param int $index
-     * @param \BackBuilder\ClassContent\AClassContent $default
-     * @return \BackBuilder\ClassContent\AClassContent
-     */
-    private function getInheritedContent($index, AClassContent $default)
-    {
-        if (
-                null !== $this->getParent() &&
-                $index < $this->getParent()->getContentSet()->count() &&
-                null !== $this->getParent()->getContentSet()->item($index)
-        ) {
-            return $this->getParent()->getContentSet()->item($index);
-        }
-
-        return $default;
-    }
-
-    /**
-     * Creates a new default content to be pushed in layout columns
-     * @param string $classname
-     * @param boolean $mainzone
-     * @return \BackBuilder\ClassContent\AClassContent
-     */
-    private function createNewDefaultContent($classname, $mainzone = false)
-    {
-        $content = new $classname();
-        if (null !== $content->getProperty('labelized-by')) {
-            try {
-                eval('$content->' . $content->getProperty('labelized-by') . '="' . str_replace('"', '\\"', $this->getTitle()) . '";');
-            } catch (\Exception $e) {
-                // Nothing to do
-            }
-        }
-
-        if (true === $mainzone) {
-            $content->setMainNode($this);
-        }
-
-        return $content;
-    }
-
-    /**
      * Sets the alternate title of the page.
      * @param string $alttitle
      * @return \BackBuilder\NestedNode\Page
@@ -889,11 +847,14 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @param \DateTime $publishing
      * @return \BackBuilder\NestedNode\Page
      */
-    public function setPublishing(\DateTime $publishing = null)
+    public function setPublishing($publishing = null)
     {
-        $this->_publishing = $publishing;
+        $this->_publishing = null !== $publishing ? $this->convertTimestampToDateTime($publishing) : null;
+
         return $this;
     }
+
+
 
     /**
      * Sets the archiving date
@@ -902,7 +863,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function setArchiving(\DateTime $archiving = null)
     {
-        $this->_archiving = $archiving;
+        $this->_archiving = null !== $archiving ? $this->convertTimestampToDateTime($archiving) : null;
+
         return $this;
     }
 
@@ -914,6 +876,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function setRevisions(ArrayCollection $revisions)
     {
         $this->_revision = $revisions;
+
         return $this;
     }
 
@@ -925,6 +888,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function setWorkflowState(State $state = null)
     {
         $this->_workflow_state = $state;
+
         return $this;
     }
 
@@ -1130,15 +1094,15 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         parent::unserialize($serialized, $strict);
 
         if (true === property_exists($serialized, 'date')) {
-            $this->_setDateTimeValue('_date', $serialized->date);
+            $this->setDateTimeValue('_date', $serialized->date);
         }
 
         if (true === property_exists($serialized, 'publishing')) {
-            $this->_setDateTimeValue('_publishing', $serialized->publishing);
+            $this->setDateTimeValue('_publishing', $serialized->publishing);
         }
 
         if (true === property_exists($serialized, 'archiving')) {
-            $this->_setDateTimeValue('_archiving', $serialized->archiving);
+            $this->setDateTimeValue('_archiving', $serialized->archiving);
         }
 
         if (true === property_exists($serialized, 'metadata')) {
@@ -1155,24 +1119,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
             }
         }
 
-        return $this;
-    }
-
-    /**
-     * Assign DateTime object to a property giving a time stamp
-     * @param string $property
-     * @param int $timestamp
-     * @return \BackBuilder\NestedNode\Page
-     */
-    private function _setDateTimeValue($property, $timestamp = null)
-    {
-        $date = null;
-        if (null !== $timestamp && 0 < $timestamp) {
-            $date = new \DateTime();
-            $date->setTimestamp($timestamp);
-        }
-
-        $this->$property = $date;
         return $this;
     }
 
@@ -1366,5 +1312,88 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function getWorkflowStateLabel()
     {
         return null !== $this->_workflow_state ? $this->_workflow_state->getLabel() : null;
+    }
+
+    /**
+     * Convert provided date to DateTime
+     *
+     * @param mixed date the date to convert to \DateTime
+     *
+     * @throws InvalidArgumentException raises if provided date is not an integer or an instance of \DateTime
+     *
+     * @return DateTime
+     */
+    private function convertTimestampToDateTime($date)
+    {
+        if (false === ($date instanceof \DateTime) && false === is_int($date)) {
+            throw new InvalidArgumentException(
+                'Page::convertTimestampToDateTime() expect date argument to be an integer or an instance of \DateTime'
+            );
+        } elseif (is_int($date)) {
+            $date = new \DateTime(date('c', $date));
+        }
+
+        return $date;
+    }
+
+    /**
+     * Assign DateTime object to a property giving a time stamp
+     * @param string $property
+     * @param int $timestamp
+     * @return \BackBuilder\NestedNode\Page
+     */
+    private function setDateTimeValue($property, $timestamp = null)
+    {
+        $date = null;
+        if (null !== $timestamp && 0 < $timestamp) {
+            $date = new \DateTime();
+            $date->setTimestamp($timestamp);
+        }
+
+        $this->$property = $date;
+        return $this;
+    }
+
+    /**
+     * Returns the inherited content from parent, $default if not found
+     * @param int $index
+     * @param \BackBuilder\ClassContent\AClassContent $default
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    private function getInheritedContent($index, AClassContent $default)
+    {
+        if (
+                null !== $this->getParent() &&
+                $index < $this->getParent()->getContentSet()->count() &&
+                null !== $this->getParent()->getContentSet()->item($index)
+        ) {
+            return $this->getParent()->getContentSet()->item($index);
+        }
+
+        return $default;
+    }
+
+    /**
+     * Creates a new default content to be pushed in layout columns
+     * @param string $classname
+     * @param boolean $mainzone
+     * @return \BackBuilder\ClassContent\AClassContent
+     */
+    private function createNewDefaultContent($classname, $mainzone = false)
+    {
+        $content = new $classname();
+        if (null !== $content->getProperty('labelized-by')) {
+            try {
+                eval('$content->' . $content->getProperty('labelized-by') . '="' . str_replace('"', '\\"', $this->getTitle()) . '";');
+            } catch (\Exception $e) {
+                // Nothing to do
+            }
+        }
+
+        if (true === $mainzone) {
+            $content->setMainNode($this);
+        }
+
+        return $content;
     }
 }
