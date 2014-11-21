@@ -861,7 +861,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @param \DateTime $archiving
      * @return \BackBuilder\NestedNode\Page
      */
-    public function setArchiving(\DateTime $archiving = null)
+    public function setArchiving($archiving = null)
     {
         $this->_archiving = null !== $archiving ? $this->convertTimestampToDateTime($archiving) : null;
 
