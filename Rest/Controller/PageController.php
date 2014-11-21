@@ -63,6 +63,24 @@ class PageController extends ARestController
     }
 
     /**
+     * Get page's metadatas
+     *
+     * @param  Page $page the page we want to get its metadatas
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     */
+    public function getMetadataAction($page)
+    {
+        $metadata = null !== $page->getMetaData() ? $page->getMetaData()->jsonSerialize() : array();
+        $default_metadata = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
+        $metadata = array_merge($default_metadata->jsonSerialize(), $metadata);
+
+        return $this->createResponse(json_encode($metadata));
+    }
+
+    /**
      * Get collection of page entity
      *
      *
@@ -140,30 +158,6 @@ class PageController extends ARestController
     public function getAction(Page $page)
     {
         return $this->createResponse($this->formatItem($page));
-    }
-
-    /**
-     * Get page's metadatas
-     *
-     * @param  Page $page the page we want to get its metadatas
-     *
-     * @return Symfony\Component\HttpFoundation\Response
-     *
-     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
-     */
-    public function getMetadataAction($page)
-    {
-        $metadata = $page->getMetaData();
-        $default_metadata = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
-        if (null === $metadata) {
-            $metadata = array();
-        } else {
-            $metadata = $metadata->jsonSerialize();
-        }
-
-        $metadata = array_merge($default_metadata->jsonSerialize(), $metadata);
-
-        return $this->createResponse(json_encode($metadata));
     }
 
     /**
