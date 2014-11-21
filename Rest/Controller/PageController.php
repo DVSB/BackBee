@@ -71,13 +71,43 @@ class PageController extends ARestController
      *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      */
-    public function getMetadataAction($page)
+    public function getMetadataAction(Page $page)
     {
         $metadata = null !== $page->getMetaData() ? $page->getMetaData()->jsonSerialize() : array();
         $default_metadata = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
         $metadata = array_merge($default_metadata->jsonSerialize(), $metadata);
 
         return $this->createResponse(json_encode($metadata));
+    }
+
+    /**
+     * Update page's metadatas
+     *
+     * @param  Page    $page    the page we want to update its metadatas
+     * @param  Request $request
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     */
+    public function putMetadataAction(Page $page, Request $request)
+    {
+        $metadatas = $page->getMetaData();
+
+        foreach ($request->request->all() as $name => $attributes) {
+            if ($metadatas->has($name)) {
+                foreach ($attributes as $attr_name => $attr_value) {
+                    if ($attr_value !== $metadatas->get($name)->getAttribute($attr_name)) {
+                        $metadatas->get($name)->setAttribute($attr_name, $attr_value);
+                    }
+                }
+            }
+        }
+
+        $page->setMetaData($metadatas->compute($page));
+        $this->getApplication()->getEntityManager()->flush($page);
+
+        return $this->createResponse('', 204);
     }
 
     /**

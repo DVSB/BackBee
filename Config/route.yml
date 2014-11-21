@@ -165,6 +165,25 @@ bb.rest.page.get_available_status:
     requirements:
         _method: GET
 
+
+bb.rest.page.get_metadata:
+    pattern: /rest/{version}/page/{uid}/metadata
+    defaults:
+        _action:     getMetadataAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: GET
+
+bb.rest.page.put_metadata:
+    pattern: /rest/{version}/page/{uid}/metadata
+    defaults:
+        _action:     putMetadataAction
+        _controller: BackBuilder\Rest\Controller\PageController
+    requirements:
+        uid: \w{32}
+        _method: PUT
+
 bb.rest.page.get_collection:
     pattern: /rest/{version}/page
     defaults:
@@ -177,15 +196,6 @@ bb.rest.page.get:
     pattern: /rest/{version}/page/{uid}
     defaults:
         _action:     getAction
-        _controller: BackBuilder\Rest\Controller\PageController
-    requirements:
-        uid: \w{32}
-        _method: GET
-
-bb.rest.page.get_metadata:
-    pattern: /rest/{version}/page/{uid}/metadata
-    defaults:
-        _action:     getMetadataAction
         _controller: BackBuilder\Rest\Controller\PageController
     requirements:
         uid: \w{32}
