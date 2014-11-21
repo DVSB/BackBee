@@ -322,7 +322,7 @@ class CacheListener implements EventSubscriberInterface
         }
 
         $lifetime = $this->cache_page->getMinExpireByTag($column_uids);
-        $render = array_shift($args);
+        $render = $event->getRender();
         $this->cache_page->save($cache_id, $render, $lifetime, $this->object->getUid());
         $this->application->debug(sprintf(
             'Save cache (id: %s, lifetime: %d) for rendering `%s(%s)` with mode `%s`.',
