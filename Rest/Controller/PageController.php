@@ -22,6 +22,7 @@
 namespace BackBuilder\Rest\Controller;
 
 use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\MetaData\MetaDataBag;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Patcher\EntityPatcher;
@@ -77,7 +78,7 @@ class PageController extends ARestController
      * @Rest\QueryParam(name="dir", description="Order direction", default="asc", requirements={
      *   @Assert\Choice(choices = {"asc", "desc"}, message="Order direction is not valid")
      * })
-     * 
+     *
      * @Rest\QueryParam(name="depth", description="Page depth", requirements={
      *   @Assert\Range(min = 0, max = 100, minMessage="Page depth must be a positive number", maxMessage="Page depth cannot be greater than 100")
      * })
@@ -85,6 +86,8 @@ class PageController extends ARestController
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
      * )
+     *
+     * @return Symfony\Component\HttpFoundation\Response
      */
     public function getCollectionAction(Request $request, $start, $count, Page $parent = null)
     {
@@ -106,7 +109,7 @@ class PageController extends ARestController
         if (null !== $state = $request->query->get('state', null)) {
             $qb->andStateIsIn(explode(',', $state));
         }
-        
+
         if (null !== $request->query->get('depth')) {
             $qb->andLevelIsLowerThan($parent->getLevel() + $request->query->get('depth'));
         }
@@ -137,6 +140,30 @@ class PageController extends ARestController
     public function getAction(Page $page)
     {
         return $this->createResponse($this->formatItem($page));
+    }
+
+    /**
+     * Get page's metadatas
+     *
+     * @param  Page $page the page we want to get its metadatas
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     */
+    public function getMetadataAction($page)
+    {
+        $metadata = $page->getMetaData();
+        $default_metadata = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
+        if (null === $metadata) {
+            $metadata = array();
+        } else {
+            $metadata = $metadata->jsonSerialize();
+        }
+
+        $metadata = array_merge($default_metadata->jsonSerialize(), $metadata);
+
+        return $this->createResponse(json_encode($metadata));
     }
 
     /**
