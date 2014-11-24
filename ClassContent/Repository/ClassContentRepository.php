@@ -21,43 +21,16 @@
 
 namespace BackBuilder\ClassContent\Repository;
 
-use BackBuilder\NestedNode\Page,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\ContentSet,
-    BackBuilder\Security\Token\BBUserToken,
-    BackBuilder\BBApplication;
-use Doctrine\ORM\Tools\Pagination\Paginator,
-    Doctrine\ORM\Query,
-    Doctrine\ORM\Query\ResultSetMapping,
-    Doctrine\ORM\Query\ResultSetMappingBuilder,
-    Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query\SqlWalker;
+use BackBuilder\BBApplication;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Security\Token\BBUserToken;
+use BackBuilder\Util\Doctrine\SettablePaginator;
 
-class MysqlPaginationWalker extends SqlWalker
-{
-
-    /**
-     * Walks down a SelectClause AST node, thereby generating the appropriate SQL.
-     *
-     * @param $selectClause
-     * @return string The SQL.
-     */
-    public function walkSelectClause($selectClause)
-    {
-        $sql = parent::walkSelectClause($selectClause);
-
-        if ($this->getQuery()->getHint('mysqlWalker.sqlCalcFoundRows') === true) {
-            if ($selectClause->isDistinct) {
-                $sql = str_replace('SELECT DISTINCT', 'SELECT DISTINCT SQL_CALC_FOUND_ROWS', $sql);
-            } else {
-                $sql = str_replace('SELECT', 'SELECT SQL_CALC_FOUND_ROWS', $sql);
-            }
-        }
-
-        return $sql;
-    }
-
-}
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * AClassContent repository
@@ -70,12 +43,6 @@ class MysqlPaginationWalker extends SqlWalker
  */
 class ClassContentRepository extends EntityRepository
 {
-
-    /**
-     * SQL query to select AClassContent
-     * @var \Doctrine\DBAL\Query\QueryBuilder
-     */
-    private $_query_selection;
 
     /**
      * Get all content uids owning the provided content
@@ -116,16 +83,17 @@ class ClassContentRepository extends EntityRepository
         $em = $this->_em;
         $q = $this->createQueryBuilder("c");
         $results = $q->leftJoin("c._pages", "p")
-                        ->leftJoin("c._subcontent", "subcontent")
-                        ->where("subcontent = :contentToReplace")
-                        ->andWhere("p._leftnode > :cpageLeftnode")
-                        ->andWhere("p._rightnode < :cpageRightnode")
-                        ->setParameters(array(
-                            "contentToReplace" => $oldContentSet,
-                            "cpageLeftnode" => $page->getLeftnode(),
-                            "cpageRightnode" => $page->getRightnode()
-                        ))
-                        ->getQuery()->getResult();
+            ->leftJoin("c._subcontent", "subcontent")
+            ->where("subcontent = :contentToReplace")
+            ->andWhere("p._leftnode > :cpageLeftnode")
+            ->andWhere("p._rightnode < :cpageRightnode")
+            ->setParameters(array(
+                "contentToReplace" => $oldContentSet,
+                "cpageLeftnode"    => $page->getLeftnode(),
+                "cpageRightnode"   => $page->getRightnode()
+            ))
+            ->getQuery()->getResult()
+        ;
 
         if ($results) {
             foreach ($results as $parentContentSet) {
@@ -333,9 +301,11 @@ class ClassContentRepository extends EntityRepository
             $q->setFirstResult($offset)
                     ->setMaxResults($limit);
 
-            $paginator = new \BackBuilder\Util\Doctrine\SettablePaginator($q);
-            $paginator->setCount($num_results)
-                    ->setResult($result);
+            $paginator = new SettablePaginator($q);
+            $paginator
+                ->setCount($num_results)
+                ->setResult($result)
+            ;
 
             return $paginator;
         }
