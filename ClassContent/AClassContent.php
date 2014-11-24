@@ -1039,17 +1039,23 @@ abstract class AClassContent extends AContent
     }
 
     /**
-     * [toJson description]
-     * @param  boolean $return_array [description]
-     * @return [type]                [description]
+     * {@inheritdoc}
      */
     public function toJson($return_array = false)
     {
+        return false === $return_array ? json_encode($this->jsonSerialize()) : $this->jsonSerialize();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
         $datas = array(
-            'properties'         => $this->getProperty(),
-            'main_node'          => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
-            'is_loaded'          => $this->_isloaded,
-            'parameters'         => $this->getParam()
+            'properties' => $this->getProperty(),
+            'main_node'  => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
+            'is_loaded'  => $this->_isloaded,
+            'parameters' => $this->getParam()
         );
 
         $datas['elements'] = array();
@@ -1061,9 +1067,8 @@ abstract class AClassContent extends AContent
             }
         }
 
-        $datas = array_merge(parent::toJson(true), $datas);
+        $datas = array_merge(parent::jsonSerialize(), $datas);
 
-        return false === $return_array ? json_encode($datas) : $datas;
+        return $datas;
     }
-
 }

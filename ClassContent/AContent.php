@@ -38,7 +38,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @MappedSuperclass
  */
-abstract class AContent implements IObjectIdentifiable, IRenderable
+abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerializable
 {
 
     /**
@@ -993,10 +993,19 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
      * @param  boolean $return_array define if we return an array or the json_encode of array, default setted at false
      *
      * @return string|array
+     * @deprecated since version 1.0
      */
     public function toJson($return_array = false)
     {
-        $datas = array(
+        return false === $return_array ? json_encode($this->jsonSerialize()) : $this->jsonSerialize();
+    }
+
+    /**
+     * {@inherit}
+     */
+    public function jsonSerialize()
+    {
+        return array(
             'uid'       => $this->_uid,
             'label'     => $this->_label,
             'type'      => str_replace('BackBuilder\ClassContent\\', '', get_class($this)),
@@ -1005,7 +1014,5 @@ abstract class AContent implements IObjectIdentifiable, IRenderable
             'modified'  => $this->_modified->getTimestamp(),
             'revision'  => $this->_revision
         );
-
-        return false === $return_array ? json_encode($datas) : $datas;
     }
 }
