@@ -262,11 +262,12 @@ class PageController extends ARestController
             return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
         }
 
-
-        return $this->redirect(
-            $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite()),
-            201
+        $response = $this->createResponse('', 201);
+        $response->headers->set(
+            'Location', $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite())
         );
+
+        return $response;
     }
 
     /**
@@ -432,7 +433,8 @@ class PageController extends ARestController
      * Clone a page
      *
      * @Rest\RequestParam(name="title", description="Cloning page new title", requirements={
-     *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters")
+     *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters"),
+     *   @Assert\NotBlank
      * })
      *
      * @Rest\ParamConverter(name="source", class="BackBuilder\NestedNode\Page")
@@ -450,7 +452,7 @@ class PageController extends ARestController
             $this->granted('EDIT', $this->getApplication()->getSite());
         }
 
-        $newPage = $this->getPageRepository()->duplicate(
+        $page = $this->getPageRepository()->duplicate(
             $source,
             $request->request->get('title'),
             $source->getParent(),
