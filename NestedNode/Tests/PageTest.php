@@ -21,13 +21,14 @@
 
 namespace BackBuilder\NestedNode\Tests;
 
-use BackBuilder\ClassContent\ContentSet,
-    BackBuilder\MetaData\MetaDataBag,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\Workflow\State,
-    BackBuilder\Site\Layout,
-    BackBuilder\Site\Site,
-    BackBuilder\Tests\TestCase;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\MetaData\MetaDataBag;
+use BackBuilder\NestedNode\Section;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Workflow\State;
+use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
+use BackBuilder\Tests\TestCase;
 
 /**
  * @category    BackBuilder
@@ -722,6 +723,25 @@ class PageTest extends TestCase
         $this->assertEquals(true, $this->page->getUseUrlRedirect());
         $this->page->setUseUrlRedirect(false);
         $this->assertEquals(false, $this->page->getUseUrlRedirect());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setMainSection
+     */
+    public function testSetMainSection()
+    {
+        $section = new Section();
+        $this->assertEquals($this->page, $this->page->setMainSection($section));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setSection
+     */
+    public function testSetSection()
+    {
+        $section = new Section();
+        $this->assertEquals($this->page, $this->page->setSection($section));
+        $this->assertEquals($section, $this->page->getSection());
     }
 
     /**

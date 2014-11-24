@@ -289,6 +289,21 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     protected $_revisions;
 
     /**
+     * The associated page of this section
+     * @var \BackBuilder\NestedNode\Section
+     * @OneToOne(targetEntity="BackBuilder\NestedNode\Section", mappedBy="_page", cascade={"persist"}, fetch="EXTRA_LAZY")
+     */
+    public $_main_section;
+
+    /**
+     * The section node.
+     * @var \BackBuilder\NestedNode\Section
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Section", inversedBy="_pages", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @JoinColumn(name="section_uid", referencedColumnName="uid")
+     */
+    public $_section;
+
+    /**
      * The type of the page
      * @var int
      */
@@ -1396,4 +1411,40 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
         return $content;
     }
+
+    /**
+     * Sets the main section for this page
+     * @param \BackBuilder\NestedNode\Section $section
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setMainSection(Section $section)
+    {
+        $this->_main_section = $section;
+        return $this->setSection($section);
+    }
+
+    /**
+     * Sets the section for this page
+     * @param \BackBuilder\NestedNode\Section $section
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setSection(Section $section)
+    {
+        $this->_section = $section;
+        return $this;
+    }
+
+    /**
+     * Returns the section of this page
+     * @return \BackBuilder\NestedNode\Section
+     */
+    public function getSection()
+    {
+        if (null === $this->_section) {
+            $this->_section = new Section($this->getUid(), array('page' => $this));
+        }
+
+        return $this->_section;
+    }
+
 }
