@@ -2,27 +2,31 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Workflow;
 
-use BackBuilder\Site\Layout,
-    BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\Site\Layout;
+use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
+use BackBuilder\Util\Numeric;
+
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * A workflow state for NestedNode\Page
@@ -31,21 +35,27 @@ use BackBuilder\Site\Layout,
  * A positive code state is applied after online main state
  *
  * A state can be associated to a specific Site\Layout and/or Listener
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Workflow
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\Workflow\Repository\StateRepository")
  * @Table(name="workflow")
+ *
+ * @Serializer\ExclusionPolicy("all")
  */
-class State extends AObjectIdentifiable
+class State extends AObjectIdentifiable implements \JsonSerializable
 {
 
     /**
      * The unique identifier of the state
      * @var string
      * @Id @Column(type="string", name="uid")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
+     * @Serializer\ReadOnly
      */
     protected $_uid;
 
@@ -53,6 +63,9 @@ class State extends AObjectIdentifiable
      * The code of the workflow state
      * @var int
      * @Column(type="integer", name="code")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("integer")
      */
     protected $_code;
 
@@ -60,6 +73,9 @@ class State extends AObjectIdentifiable
      * The label of the workflow state
      * @var string
      * @Column(type="string", name="label")
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("string")
      */
     protected $_label;
 
@@ -77,6 +93,24 @@ class State extends AObjectIdentifiable
      * @Column(type="string", name="listener")
      */
     protected $_listener;
+
+    /**
+     * State's constructor
+     * @param string $uid
+     * @param array  $options
+     */
+    public function __construct($uid = null, array $options = array())
+    {
+        $this->_uid = (null === $uid) ? md5(uniqid('', true)) : $uid;
+
+        if (true === array_key_exists('code', $options)) {
+            $this->setCode($options['code']);
+        }
+
+        if (true === array_key_exists('label', $options)) {
+            $this->setLabel($options['label']);
+        }
+    }
 
     /**
      * Returns the unique identifier
@@ -98,17 +132,21 @@ class State extends AObjectIdentifiable
         return $this->_code;
     }
 
-    public function __construct($uid = null, array $options = array())
+    /**
+     * Sets the code
+     * @param int $code
+     * @return \BackBuilder\Workflow\State
+     * @throws \BackBuilder\Exception\InvalidArgumentException
+     */
+    public function setCode($code)
     {
-        $this->_uid = (null === $uid) ? md5(uniqid('', true)) : $uid;
-
-        if (true === array_key_exists('code', $options)) {
-            $this->setCode($options['code']);
+        if (false === Numeric::isInteger($code)) {
+            throw new InvalidArgumentException('The code of a workflow state has to be an integer');
         }
 
-        if (true === array_key_exists('label', $options)) {
-            $this->setLabel($options['label']);
-        }
+        $this->_code = $code;
+
+        return $this;
     }
 
     /**
@@ -142,22 +180,6 @@ class State extends AObjectIdentifiable
     }
 
     /**
-     * Sets the code
-     * @param int $code
-     * @return \BackBuilder\Workflow\State
-     * @throws \BackBuilder\Exception\InvalidArgumentException
-     */
-    public function setCode($code)
-    {
-        if (false === \BackBuilder\Util\Numeric::isInteger($code)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException('The code of a workflow state has to be an integer');
-        }
-
-        $this->_code = $code;
-        return $this;
-    }
-
-    /**
      * Sets the label
      * @param type $label
      * @return \BackBuilder\Workflow\State
@@ -166,6 +188,7 @@ class State extends AObjectIdentifiable
     public function setLabel($label)
     {
         $this->_label = strval($label);
+
         return $this;
     }
 
@@ -177,6 +200,7 @@ class State extends AObjectIdentifiable
     public function setLayout(Layout $layout = null)
     {
         $this->_layout = $layout;
+
         return $this;
     }
 
@@ -189,12 +213,14 @@ class State extends AObjectIdentifiable
     public function setListener($listener = null)
     {
         $this->_listener = $listener;
+
         return $this;
     }
 
     /**
      * Returns an array representation of the workflow state
      * @return string
+     * @deprecated since version 1.0
      */
     public function toArray()
     {
@@ -203,13 +229,14 @@ class State extends AObjectIdentifiable
             'code' => $this->getCode(),
             'label' => $this->getLabel(),
             'layout' => (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null,
-            'listenre' => $this->getListener()
+            'listener' => $this->getListener()
         );
     }
 
     /**
      * Returns a string representation of the workflow state
      * @return string
+     * @deprecated since version 1.0
      */
     public function serialize()
     {
@@ -225,8 +252,9 @@ class State extends AObjectIdentifiable
      * Constructs the state from a string or object
      * @param mixed $serialized The string representation of the object.
      * @return \BackBuilder\Workflow\State
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or, 
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
      *                                                         with strict mode, if a property does not exists
+     * @deprecated since version 1.0
      */
     public function unserialize($serialized, $strict = false)
     {
@@ -248,6 +276,32 @@ class State extends AObjectIdentifiable
         }
 
         return $this;
+    }
+
+    /**
+     * Layout's uid getter
+     *
+     * @return null|string
+     *
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("layout_uid")
+     */
+    public function getLayoutUid()
+    {
+        return null !== $this->getLayout() ? $this->getLayout()->getUid() : null;
+    }
+
+    /**
+     * {@inherit}
+     */
+    public function jsonSerialize()
+    {
+        return array(
+            'uid'        => $this->getUid(),
+            'layout_uid' => null !== $this->getLayout() ? $this->getLayout()->getUid() : null,
+            'code'       => $this->getCode(),
+            'label'      => $this->getLabel()
+        );
     }
 
 }
