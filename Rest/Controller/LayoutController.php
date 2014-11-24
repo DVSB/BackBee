@@ -36,6 +36,24 @@ use Symfony\Component\Validator\Constraints as Assert;
 class LayoutController extends ARestController
 {
     /**
+     * Returns every workflow states associated to provided layout
+     *
+     * @param  Layout $layout
+     * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\ParamConverter(name="layout", class="BackBuilder\Site\Layout")
+     */
+    public function getWorkflowStateAction(Layout $layout)
+    {
+        $layout_states = $this->getApplication()->getEntityManager()
+            ->getRepository('BackBuilder\Workflow\State')
+            ->getWorkflowStatesForLayout($layout)
+        ;
+
+        return $this->createResponse($this->formatCollection($layout_states));
+    }
+
+    /**
      * @Rest\ParamConverter(
      *   name="site", id_name="site_uid", id_source="query", class="BackBuilder\Site\Site", required=false
      * )
