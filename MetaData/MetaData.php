@@ -354,7 +354,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * {@inherit}
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
