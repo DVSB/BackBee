@@ -131,6 +131,7 @@ class ClassContentController extends ARestController
             $content->setDraft($draft);
         }
 
+        $content_type = 'application/json';
         if ('html' === $request->getContentType()) {
             if (null !== $this->getEntityFromAttributes('page')) {
                 $this->getApplication()->getRenderer()->getCurrentPage($page);
@@ -138,11 +139,12 @@ class ClassContentController extends ARestController
 
             $mode = $request->query->get('mode', null);
             $content = $this->getApplication()->getRenderer()->render($content, $mode);
+            $content_type = 'text/html';
         } else {
             $content = json_encode($content);
         }
 
-        return $this->createResponse($content);
+        return $this->createResponse($content, 200, $content_type);
     }
 
     /**
