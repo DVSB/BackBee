@@ -105,7 +105,7 @@ class MockBBApplication extends BBApplication
 
     public function getCacheDir()
     {
-        return vfsStream::url('cache');
+        return vfsStream::url('repositorydir/cache');
     }
 
 
@@ -135,7 +135,9 @@ class MockBBApplication extends BBApplication
                     'Tmp' => array()
                 ),
                 'Ressources' => array(),
-                'cache' => array()
+                'cache' => array(
+                    'Proxies' => array()
+                )
             );
         }
 
