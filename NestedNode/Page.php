@@ -405,27 +405,25 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
             'contents' => array()
         );
 
-        $this->setDefaultProperties();
+        if (true === $this->hasMainSection()) {
+            // Main section has to be cloned also
+            $this->setDefaultProperties(null, clone $this->_mainsection, $this->_title, $this->_url, $this->_target);
+        } else {
+            // The new page keeps the same section
+            $section = $this->getSection();
+            $this->setDefaultProperties(null, null, $this->_title, $this->_url, $this->_target);
+            $this->setSection($section);
+        }
 
-        $this->_contentset = new ContentSet();
         if (null !== $this->_contentset && null !== $this->getLayout()) {
             $this->_contentset = $this->_contentset->createClone($this);
         } else {
             $this->_contentset = new ContentSet();
         }
 
-        $this->_revisions->clear();
+        $this->_revisions = new ArrayCollection();
 
         $this->cloning_datas['pages'][$source_uid] = $this;
-        
-        if (true === $this->hasMainSection()) {
-            $this->_mainsection = clone $this->_mainsection;
-            $this->_mainsection->setPage($this);
-            $this->_position = 0;
-            $this->_level = 0;
-        } else {
-            $this->_position = $this->getSection()->getChildren()->count();      
-        }
     }
 
     /**

@@ -25,6 +25,7 @@ use BackBuilder\ClassContent\ContentSet;
 use BackBuilder\MetaData\MetaDataBag;
 use BackBuilder\NestedNode\Section;
 use BackBuilder\NestedNode\Page;
+use BackBuilder\NestedNode\PageRevision;
 use BackBuilder\Workflow\State;
 use BackBuilder\Site\Layout;
 use BackBuilder\Site\Site;
@@ -51,6 +52,7 @@ class PageTest extends TestCase
 
     /**
      * @covers BackBuilder\NestedNode\Page::__construct
+     * @covers BackBuilder\NestedNode\Page::setDefaultProperties
      */
     public function test__construct()
     {
@@ -77,42 +79,44 @@ class PageTest extends TestCase
         $this->assertEquals('section', $this->page->getSection()->getUid());
     }
 
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::__clone
-//     */
-//    public function test__clone()
-//    {
-//        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
-//        $child->setRoot($this->page)
-//                ->setParent($this->page)
-//                ->setLeftnode(2)
-//                ->setRightnode(3)
-//                ->setState(Page::STATE_ONLINE);
-//
-//        $clone = clone $child;
-//        $this->assertNotEquals($child->getContentSet(), $clone->getContentSet());
-//        $this->assertNotEquals($child->getUid(), $clone->getUid());
-//        $this->assertEquals(1, $clone->getLeftnode());
-//        $this->assertEquals(2, $clone->getRightnode());
-//        $this->assertEquals(0, $clone->getLevel());
-//        $this->assertEquals($this->current_time, $clone->getCreated());
-//        $this->assertEquals($this->current_time, $clone->getModified());
-//        $this->assertNull($clone->getParent());
-//        $this->assertEquals($clone, $clone->getRoot());
-//        $this->assertEquals(Page::STATE_OFFLINE, $clone->getState());
-//        $this->assertFalse($clone->isStatic());
-//        $this->assertEquals($child->getTitle(), $clone->getTitle());
-//        $this->assertEquals($child->getUrl(), $clone->getUrl());
-//        $this->assertTrue(is_array($clone->cloning_datas));
-//        $this->assertTrue(isset($clone->cloning_datas['pages']));
-//        $this->assertTrue(isset($clone->cloning_datas['pages'][$child->getUid()]));
-//        $this->assertEquals($clone, $clone->cloning_datas['pages'][$child->getUid()]);
-//
-//        $clone2 = clone $this->page;
-//        $this->assertEquals($this->page->getLayout(), $clone2->getLayout());
-//        $this->assertNotEquals($this->page->getContentSet(), $clone2->getContentSet());
-//    }
+    /**
+     * @covers BackBuilder\NestedNode\Page::__clone
+     * @covers BackBuilder\NestedNode\Page::setDefaultProperties
+     */
+    public function test__clone()
+    {
+        $child = new Page('child', array('title' => 'child', 'url' => 'url'));
+        $revision = new PageRevision();
+        $child->setSection($this->page->getSection())
+                ->setState(Page::STATE_ONLINE)
+                ->getRevisions()
+                ->add($revision);
+        $clone = clone $child;
+
+        $this->assertNotEquals($child->getContentSet(), $clone->getContentSet());
+        $this->assertNotEquals($child->getUid(), $clone->getUid());
+        $this->assertEquals(1, $clone->getPosition());
+        $this->assertEquals(1, $clone->getLevel());
+        $this->assertGreaterThanOrEqual($clone->getCreated()->getTimestamp(), $child->getCreated()->getTimestamp());
+        $this->assertGreaterThanOrEqual($clone->getModified()->getTimestamp(), $child->getModified()->getTimestamp());
+        $this->assertNull($clone->getMainSection());
+        $this->assertEquals(Page::STATE_HIDDEN, $clone->getState());
+        $this->assertFalse($clone->isStatic());
+        $this->assertEquals($child->getTitle(), $clone->getTitle());
+        $this->assertEquals($child->getUrl(), $clone->getUrl());
+        $this->assertTrue(is_array($clone->cloning_datas));
+        $this->assertTrue(isset($clone->cloning_datas['pages']));
+        $this->assertTrue(isset($clone->cloning_datas['pages'][$child->getUid()]));
+        $this->assertEquals($clone, $clone->cloning_datas['pages'][$child->getUid()]);
+        $this->assertEquals(0, $clone->getRevisions()->count());
+
+        $clone2 = clone $this->page;
+        $this->assertNotEquals($this->page->getMainSection(), $clone2->getMainSection());
+        $this->assertEquals($clone2->getSection(), $clone2->getMainSection());
+        $this->assertEquals(0, $clone2->getPosition());
+        $this->assertEquals(0, $clone2->getLevel());
+    }
+
 //
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::getContentSet
