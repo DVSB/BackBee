@@ -40,7 +40,6 @@ class Section extends ANestedNode
      * Unique identifier of the section
      * @var string
      * @Id @Column(type="string", name="uid", nullable=false)
-     * @fixture(type="md5")
      */
     protected $_uid;
 
@@ -48,7 +47,7 @@ class Section extends ANestedNode
      * The root node, cannot be NULL.
      * @var \BackBuilder\NestedNode\Section
      * @ManyToOne(targetEntity="BackBuilder\NestedNode\Section", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid", nullable=false)
+     * @JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
 
@@ -78,7 +77,7 @@ class Section extends ANestedNode
      * The associated page of this section
      * @var \BackBuilder\NestedNode\Page
      * @OneToOne(targetEntity="BackBuilder\NestedNode\Page", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="uid", referencedColumnName="uid")
+     * @JoinColumn(name="page_uid", referencedColumnName="uid")
      */
     protected $_page;
 
@@ -135,7 +134,6 @@ class Section extends ANestedNode
     public function setPage(Page $page)
     {
         $this->_page = $page;
-        $this->_uid = $page->getUid();
         $page->setMainSection($this);
 
         return $this;
