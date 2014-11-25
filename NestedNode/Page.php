@@ -1484,6 +1484,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * Return the associated main section if exists, NULL otherwise
      * @return \BackBuilder\NestedNode\Section|NULL
+     * @codeCoverageIgnore
      */
     public function getMainSection()
     {
@@ -1524,13 +1525,10 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * Returns the section of this page
      * @return \BackBuilder\NestedNode\Section
+     * @codeCoverageIgnore
      */
     public function getSection()
     {
-        if (null === $this->_section) {
-            $this->_section = new Section($this->getUid(), array('page' => $this));
-        }
-
         return $this->_section;
     }
 
