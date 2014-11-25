@@ -71,6 +71,37 @@ class SectionTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Section::__clone
+     */
+    public function test__clone()
+    {
+        $page = new Page();
+        $root = new Section('root');
+
+        $child = new Section('child');
+        $child->setRoot($root)
+                ->setParent($root)
+                ->setLeftnode(2)
+                ->setRightnode(3)
+                ->setLevel(1);
+
+        $root->getChildren()->add($child);
+        $root->getDescendants()->add($child);
+        $root->getPages()->add($page);
+
+        $clone = clone $child;
+        $this->assertNotEquals($child->getUid(), $clone->getUid());
+        $this->assertEquals(1, $clone->getLeftnode());
+        $this->assertEquals(2, $clone->getRightnode());
+        $this->assertEquals(0, $clone->getLevel());
+        $this->assertNull($clone->getParent());
+        $this->assertEquals($clone, $clone->getRoot());
+        $this->assertEquals(0, $clone->getChildren()->count());
+        $this->assertEquals(0, $clone->getDescendants()->count());
+        $this->assertEquals(0, $clone->getPages()->count());
+    }
+
+    /**
      * @covers BackBuilder\NestedNode\Section::setPage
      */
     public function testSetPage()

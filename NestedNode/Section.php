@@ -127,6 +127,27 @@ class Section extends ANestedNode
     }
 
     /**
+     * Magical cloning method
+     */
+    public function __clone()
+    {
+        if ($this->_uid) {
+            $this->_uid = md5(uniqid('', true));
+            $this->_leftnode = 1;
+            $this->_rightnode = $this->_leftnode + 1;
+            $this->_level = 0;
+            $this->_created = new \DateTime();
+            $this->_modified = new \DateTime();
+            $this->_parent = null;
+            $this->_root = $this;
+
+            $this->_children->clear();
+            $this->_descendants->clear();
+            $this->_pages = new ArrayCollection();
+        }
+    }
+
+    /**
      * Sets the associated page for this section
      * @param \BackBuilder\NestedNode\Page $page
      * @return \BackBuilder\NestedNode\Section
