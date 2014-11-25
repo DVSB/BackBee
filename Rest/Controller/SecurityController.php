@@ -60,7 +60,7 @@ class SecurityController extends ARestController
             ->authenticate($token)
         ;
 
-        $response = $this->createResponse('', 201);
+        $response = $this->createResponse('', 204);
         $response->headers->set('X-API-KEY', $tokenAuthenticated->getUser()->getApiKeyPublic());
         $response->headers->set('X-API-SIGNATURE', $tokenAuthenticated->getNonce());
 
