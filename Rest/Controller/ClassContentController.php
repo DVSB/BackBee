@@ -115,8 +115,15 @@ class ClassContentController extends ARestController
      * @param  string $uid  identifier of the class content
      *
      * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\QueryParam(name="mode", description="The render mode to use")
+     * @Rest\QueryParam(name="page_uid", description="The page to set to application's renderer before rendering")
+     *
+     * @Rest\ParamConverter(
+     *   name="page", id_name="page_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
+     * )
      */
-    public function getAction($type, $uid)
+    public function getAction($type, $uid, Request $request)
     {
         $this->granted('VIEW', $content = $this->getClassContentByTypeAndUid($type, $uid));
 
@@ -124,7 +131,18 @@ class ClassContentController extends ARestController
             $content->setDraft($draft);
         }
 
-        return $this->createResponse($content->toJson());
+        if ('html' === $request->getContentType()) {
+            if (null !== $this->getEntityFromAttributes('page')) {
+                $this->getApplication()->getRenderer()->getCurrentPage($page);
+            }
+
+            $mode = $request->query->get('mode', null);
+            $content = $this->getApplication()->getRenderer()->render($content, $mode);
+        } else {
+            $content = json_encode($content);
+        }
+
+        return $this->createResponse($content);
     }
 
     /**
