@@ -117,9 +117,6 @@ class PageController extends ARestController
      * @Rest\Pagination(default_count=25, max_count=100)
      *
      * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
-     * @Rest\QueryParam(name="state", description="State", requirements={
-     *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid")
-     * })
      * @Rest\QueryParam(name="order", description="Order by field", default="leftnode", requirements={
      *   @Assert\Choice(choices = {"leftnode", "date", "title"}, message="Order by is not valid")
      * })
@@ -155,7 +152,7 @@ class PageController extends ARestController
         $this->granted('VIEW', $parent);
 
         if (null !== $state = $request->query->get('state', null)) {
-            $qb->andStateIsIn(explode(',', $state));
+            $qb->andStateIsIn((array) $state);
         }
 
         if (null !== $request->query->get('depth')) {
