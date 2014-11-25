@@ -41,7 +41,9 @@
         "backbuilder/api-client": "dev-master",
         "eric-chau/installers": "dev-master",
         "willdurand/jsonp-callback-validator": "~1.0",
-        "symfony/expression-language": "2.5.8"
+        "symfony/expression-language": "2.5.8",
+        "beelab/bowerphp":"1.0.*@dev"
+
     },
     "autoload": {
         "psr-4": {
@@ -54,5 +56,11 @@
         "mikey179/vfsStream": "1.4.0",
         "fzaninotto/faker": "1.4.0"
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "scripts": {
+        "post-install-cmd": [
+            "BackBuilder\\Resources\\Installer::downloadBBCoreJS",
+            "vendor/bin/bowerphp install --working-dir Resources/toolbar -vv"
+        ]
+    }
 }
