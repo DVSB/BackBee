@@ -140,8 +140,8 @@ class Section extends ANestedNode
         $this->_parent = null;
         $this->_root = $this;
 
-        $this->_children->clear();
-        $this->_descendants->clear();
+        $this->_children = new ArrayCollection();
+        $this->_descendants = new ArrayCollection();
         $this->_pages = new ArrayCollection();
     }
 
