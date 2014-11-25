@@ -27,6 +27,8 @@ use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Rest\Controller\ARestController;
 
+use Doctrine\ORM\Tools\Pagination\Paginator;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -67,6 +69,43 @@ class ClassContentController extends ARestController
     public function getCategoryCollectionAction()
     {
         return $this->createResponse(json_encode($this->getCategoryManager()->getCategories()));
+    }
+
+    /**
+     * Returns collection of classcontent associated to $type and according to provided criterias
+     *
+     * @param  string $type
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\Pagination(default_count=25, max_count=100)
+     */
+    public function getCollectionAction($type, $start, $count, Request $request)
+    {
+        $criterias = array_merge(array(
+            'only_online' => false,
+            'site_uid'    => $this->getApplication()->getSite()->getUid()
+        ), $request->query->all());
+
+        $criterias['only_online'] = (boolean) $criterias['only_online'];
+
+        $order_infos = array(
+            'column'    => isset($criterias['order_by']) ? $criterias['order_by'] : '_modified',
+            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc',
+        );
+
+        $pagination = array('start' => $start, 'limit' => $count);
+
+        unset($criterias['order_by']);
+        unset($criterias['order_direction']);
+
+        $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $type);
+        $contents = $this->getApplication()->getEntityManager()
+            ->getRepository('BackBuilder\ClassContent\AClassContent')
+            ->findContentsBySearch((array) $classname, $order_infos, $pagination, $criterias)
+        ;
+
+        return $this->createResponse(json_encode($this->convertPaginatorToArray($contents)));
     }
 
     /**
@@ -191,5 +230,22 @@ class ClassContentController extends ARestController
         return $this->getApplication()->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')
             ->getDraft($content, $this->getApplication()->getBBUserToken())
         ;
+    }
+
+    /**
+     * Converts Doctrine's paginator to php array
+     *
+     * @param  Paginator $paginator the paginator to convert
+     *
+     * @return array
+     */
+    private function convertPaginatorToArray(Paginator $paginator)
+    {
+        $contents = array();
+        foreach ($paginator as $content) {
+            $contents[] = $content;
+        }
+
+        return $contents;
     }
 }
