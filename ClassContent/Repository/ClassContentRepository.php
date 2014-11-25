@@ -551,7 +551,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         /* limit to online */
-        $limitToOnline = ( array_key_exists('limitToOnline', $cond) && is_bool($cond['limitToOnline']) ) ? $cond['limitToOnline'] : true;
+        $limitToOnline = ( array_key_exists('only_online', $cond) && is_bool($cond['only_online']) ) ? $cond['only_online'] : true;
         if ($limitToOnline) {
             $qb->limitToOnline();
         }
@@ -563,10 +563,11 @@ class ClassContentRepository extends EntityRepository
 
         /* handle order info */
         if (is_array($orderInfos) && array_key_exists('column', $orderInfos)) {
-            if (property_exists('BackBuilder\ClassContent\AClassContent', '_' . $orderInfos['column'])) {
-                $qb->orderBy('cc._' . $orderInfos['column'], array_key_exists('dir', $orderInfos) ? $orderInfos['dir'] : 'ASC');
+            $orderInfos['column'] = ('_' === $orderInfos['column'][0] ? '' : '_') . $orderInfos['column'];
+            if (property_exists('BackBuilder\ClassContent\AClassContent', $orderInfos['column'])) {
+                $qb->orderBy('cc.' . $orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
             } else {
-                $qb->orderByIndex($orderInfos['column'], array_key_exists('dir', $orderInfos) ? $orderInfos['dir'] : 'ASC');
+                $qb->orderByIndex($orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
             }
         }
 

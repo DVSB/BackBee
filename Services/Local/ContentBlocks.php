@@ -312,7 +312,7 @@ class ContentBlocks extends AbstractServiceLocal
         }
         $em = $this->bbapp->getEntityManager();
         $limitInfos = array("start" => (int) $start, "limit" => (int) $limit);
-        $orderInfos = array("column" => $order_sort, "dir" => $order_dir);
+        $orderInfos = array("column" => $order_sort, "direction" => $order_dir);
         $isCat = (strpos($catName, "contentType") === FALSE) ? true : false; //contentType_ || categorie
         if ($isCat) {
             $contents = $this->getContentsByCategory(strtolower($catName));
@@ -332,7 +332,7 @@ class ContentBlocks extends AbstractServiceLocal
             }
         }
         /* default value is true */
-        $params["limitToOnline"] = false;
+        $params["only_online"] = false;
         $params["site_uid"] = (null === $site_uid) ? $this->bbapp->getSite()->getUid() : $site_uid;
         $result["numResults"] = $em->getRepository("BackBuilder\ClassContent\AClassContent")->countContentsBySearch($classnames, $conditions = $params);
         $items = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findContentsBySearch($classnames, $orderInfos, $limitInfos, $conditions = $params);
