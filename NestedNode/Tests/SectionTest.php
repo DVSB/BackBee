@@ -80,7 +80,6 @@ class SectionTest extends TestCase
 
         $this->assertEquals($section, $section->setPage($page));
         $this->assertEquals($page, $section->getPage());
-        $this->assertEquals($page->getUid(), $section->getUid());
     }
 
     /**
