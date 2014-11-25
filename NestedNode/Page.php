@@ -21,9 +21,9 @@
 
 namespace BackBuilder\NestedNode;
 
+use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\Exception\BBException;
 use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\MetaData\MetaDataBag;
 use BackBuilder\NestedNode\ANestedNode;
@@ -55,14 +55,22 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @package     BackBuilder\NestedNode
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      Micael Malta <mmalta@nextinteractive.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
- * @Table(name="page",indexes={@index(name="IDX_STATEP", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "rightnode", "state", "publishing", "archiving", "modified"}), @index(name="IDX_URL", columns={"site_uid", "url"}), @index(name="IDX_ROOT_RIGHT", columns={"root_uid", "rightnode"})})
+  * @Table(name="page",indexes=
+ * {
+ * @index(columns={"state"}),
+ * @index(columns={"level", "state", "publishing", "archiving", "modified"}),
+ * @index(columns={"url"}),
+ * @index(columns={"modified"}),
+ * }
+ * )
  * @HasLifecycleCallbacks
  * @fixtures(qty=1)
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class Page extends ANestedNode implements IRenderable, DomainObjectInterface
+class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInterface
 {
     /**
      * State off-line: the page can not be displayed on the website
@@ -119,36 +127,12 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     protected $_uid;
 
     /**
-     * The owner site of this node
-     * @var \BackBuilder\Site\Site
-     * @ManyToOne(targetEntity="BackBuilder\Site\Site", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="site_uid", referencedColumnName="uid")
-     */
-    protected $_site;
-
-    /**
      * The layout associated to the page
      * @var \BackBuilder\Site\Layout
      * @ManyToOne(targetEntity="BackBuilder\Site\Layout", inversedBy="_pages", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="layout_uid", referencedColumnName="uid")
+     * @JoinColumn(name="layout_uid", referencedColumnName="uid", nullable=false)
      */
     protected $_layout;
-
-    /**
-     * The root node, cannot be NULL.
-     * @var \BackBuilder\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid")
-     */
-    protected $_root;
-
-    /**
-     * The parent node.
-     * @var \BackBuilder\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_children", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
-     */
-    protected $_parent;
 
     /**
      * The title of this page
@@ -268,20 +252,6 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     protected $_workflow_state;
 
     /**
-     * Descendants nodes.
-     * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_root", fetch="EXTRA_LAZY")
-     */
-    protected $_descendants;
-
-    /**
-     * Direct children nodes.
-     * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_parent", fetch="EXTRA_LAZY")
-     */
-    protected $_children;
-
-    /**
      * Revisions of the current page
      * @var \Doctrine\Common\Collections\ArrayCollection
      * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_page", fetch="EXTRA_LAZY")
@@ -289,11 +259,32 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     protected $_revisions;
 
     /**
-     * The associated page of this section
-     * @var \BackBuilder\NestedNode\Section
-     * @OneToOne(targetEntity="BackBuilder\NestedNode\Section", mappedBy="_page", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * The nested node level in the tree.
+     * @var int
+     * @Column(type="integer", name="level", nullable=false)
      */
-    public $_main_section;
+    protected $_level;
+
+    /**
+     * The order position in the section.
+     * @var int
+     * @Column(type="integer", name="position", nullable=false)
+     */
+    protected $_position;
+
+    /**
+     * The creation datetime
+     * @var \DateTime
+     * @Column(type="datetime", name="created", nullable=false)
+     */
+    protected $_created;
+
+    /**
+     * The last modification datetime
+     * @var \DateTime
+     * @Column(type="datetime", name="modified", nullable=false)
+     */
+    protected $_modified;
 
     /**
      * The section node.
@@ -302,6 +293,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @JoinColumn(name="section_uid", referencedColumnName="uid")
      */
     public $_section;
+
+    /**
+     * The associated page of this section
+     * @var \BackBuilder\NestedNode\Section
+     * @OneToOne(targetEntity="BackBuilder\NestedNode\Section", mappedBy="_page", cascade={"persist"}, fetch="EXTRA_LAZY")
+     */
+    public $_mainsection;    
 
     /**
      * The type of the page
@@ -356,28 +354,44 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Class constructor
      * @param string $uid The unique identifier of the page
      * @param array $options Initial options for the page:
-     *                         - title      the default title
-     *                         - url        the default url
+     *                         - main_section   the main section associated to the page
+     *                         - title          the default title
+     *                         - url            the default url
      */
     public function __construct($uid = null, $options = null)
     {
-        parent::__construct($uid);
-
-        if (true === is_array($options)) {
-            if (true === array_key_exists('title', $options)) {
-                $this->setTitle($options['title']);
-            }
-            if (true === array_key_exists('url', $options)) {
-                $this->setUrl($options['url']);
-            }
-        }
+        $default_values = array_merge(array('main_section' => null, 'title' => null, 'url' => null), (array) $options);
+        $this->setDefaultProperties($uid, $default_values['main_section'], $default_values['title'], $default_values['url']);
 
         $this->_contentset = new ContentSet();
         $this->_revisions = new ArrayCollection();
-        $this->_state = self::STATE_HIDDEN;
-        $this->_type = self::TYPE_DYNAMIC;
-        $this->_target = self::DEFAULT_TARGET;
-        $this->old_state = null;
+    }
+
+    /**
+     * Sets the default values to properties
+     * @param string $uid
+     * @param \BackBuilder\NestedNode\Section $section
+     * @param string $title
+     * @param string $url
+     * @return \BackBuilder\NestedNode\Page
+     */
+    private function setDefaultProperties($uid = null, Section $main_section = null, $title = null, $url = null, $target = self::DEFAULT_TARGET)
+    {
+        $this->_state = Page::STATE_HIDDEN;
+        $this->_type = Page::TYPE_DYNAMIC;
+        $this->_target = $target;
+        $this->_created = new \DateTime();
+        $this->_modified = new \DateTime();
+        $this->_title = $title;
+        $this->_url = $url;
+
+        if (null === $main_section) {
+            $main_section = new Section($uid, array('page' => $this));
+        }
+        $this->setMainSection($main_section);
+        $this->_uid = $main_section->getUid();
+
+        return $this;
     }
 
     /**
@@ -385,36 +399,32 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function __clone()
     {
-        $current_uid = $this->_uid;
-
+        $source_uid = $this->_uid;
         $this->cloning_datas = array(
             'pages' => array(),
             'contents' => array()
         );
 
-        if ($this->_uid) {
-            if (null !== $this->_contentset && null !== $this->getLayout()) {
-                $this->_contentset = $this->_contentset->createClone($this);
-            } else {
-                $this->_contentset = new ContentSet();
-            }
+        $this->setDefaultProperties();
 
-            $this->_uid = md5(uniqid('', true));
-            $this->_leftnode = 1;
-            $this->_rightnode = $this->_leftnode + 1;
+        $this->_contentset = new ContentSet();
+        if (null !== $this->_contentset && null !== $this->getLayout()) {
+            $this->_contentset = $this->_contentset->createClone($this);
+        } else {
+            $this->_contentset = new ContentSet();
+        }
+
+        $this->_revisions->clear();
+
+        $this->cloning_datas['pages'][$source_uid] = $this;
+        
+        if (true === $this->hasMainSection()) {
+            $this->_mainsection = clone $this->_mainsection;
+            $this->_mainsection->setPage($this);
+            $this->_position = 0;
             $this->_level = 0;
-            $this->_created = new \DateTime();
-            $this->_modified = new \DateTime();
-            $this->_parent = null;
-            $this->_root = $this;
-            $this->_state = Page::STATE_OFFLINE;
-            $this->_type = Page::TYPE_DYNAMIC;
-
-            $this->_children->clear();
-            $this->_descendants->clear();
-            $this->_revisions->clear();
-
-            $this->cloning_datas['pages'][$current_uid] = $this;
+        } else {
+            $this->_position = $this->getSection()->getChildren()->count();      
         }
     }
 
@@ -1413,13 +1423,84 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Returns te unique identifier.
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function getUid()
+    {
+        return $this->_uid;
+    }
+
+    /**
+     * Returns the level
+     * @return int
+     * @codeCoverageIgnore
+     */
+    public function getLevel()
+    {
+        return $this->_level;
+    }
+    
+    /**
+     * Returns the order position
+     * @return int
+     * @codeCoverageIgnore
+     */
+    public function getPosition()
+    {
+        return $this->_position;
+    }
+
+    /**
+     * Returns the creation date.
+     * @return \DateTime
+     * @codeCoverageIgnore
+     */
+    public function getCreated()
+    {
+        return $this->_created;
+    }
+
+    /**
+     * Returns the last modified date.
+     * @return \DateTime
+     * @codeCoverageIgnore
+     */
+    public function getModified()
+    {
+        return $this->_modified;
+    }
+
+    /**
+     * Is this page has an associated section
+     * @return boolean
+     */
+    public function hasMainSection()
+    {
+        return null !== $this->getMainSection();
+    }
+
+    /**
+     * Return the associated main section if exists, NULL otherwise
+     * @return \BackBuilder\NestedNode\Section|NULL
+     */
+    public function getMainSection()
+    {
+        return $this->_mainsection;
+    }
+
+    /**
      * Sets the main section for this page
      * @param \BackBuilder\NestedNode\Section $section
      * @return \BackBuilder\NestedNode\Page
      */
     public function setMainSection(Section $section)
     {
-        $this->_main_section = $section;
+        $this->_mainsection = $section;
+        $this->_position = 0;
+        $this->_level = $section->getLevel();
+
         return $this->setSection($section);
     }
 
@@ -1430,6 +1511,12 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function setSection(Section $section)
     {
+        if ($section !== $this->_mainsection) {
+            $this->_mainsection = null;
+            $this->_position = 1;
+            $this->_level = $section->getLevel() + 1;
+        }
+
         $this->_section = $section;
         return $this;
     }
