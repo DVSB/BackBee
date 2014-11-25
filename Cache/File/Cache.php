@@ -24,6 +24,7 @@ namespace BackBuilder\Cache\File;
 use BackBuilder\Cache\ACache;
 use BackBuilder\Cache\Exception\CacheException;
 use BackBuilder\Util\String;
+
 use Psr\Log\LoggerInterface;
 
 /**
@@ -44,14 +45,14 @@ class Cache extends ACache
      * The cache directory
      * @var string
      */
-    private $_cachedir;
+    private $cachedir;
 
     /**
      * Memcached adapter options
      * @var array
      */
     protected $_instance_options = array(
-        'cachedir' => null,
+        'cachedir'          => null,
         'cacheautogenerate' => true
     );
 
@@ -68,22 +69,22 @@ class Cache extends ACache
     {
         parent::__construct($options, $context, $logger);
 
-        $this->_cachedir = $this->_instance_options['cachedir'];
+        $this->cachedir = $this->_instance_options['cachedir'];
 
         if (null !== $this->getContext()) {
-            $this->_cachedir .= DIRECTORY_SEPARATOR . String::toPath($this->getContext());
+            $this->cachedir .= DIRECTORY_SEPARATOR . String::toPath($this->getContext());
         }
 
-        if (true === $this->_instance_options['cacheautogenerate'] && false === is_dir($this->_cachedir)
-                && false === @mkdir($this->_cachedir, 0755, true)) {
-            throw new CacheException(sprintf('Unable to create the cache directory `%s`.', $this->_cachedir));
+        if (true === $this->_instance_options['cacheautogenerate'] && false === is_dir($this->cachedir)
+                && false === @mkdir($this->cachedir, 0755, true)) {
+            throw new CacheException(sprintf('Unable to create the cache directory `%s`.', $this->cachedir));
         }
 
-        if (true === $this->_instance_options['cacheautogenerate'] && false === is_writable($this->_cachedir)) {
-            throw new CacheException(sprintf('Unable to write in the cache directory `%s`.', $this->_cachedir));
+        if (true === $this->_instance_options['cacheautogenerate'] && false === is_writable($this->cachedir)) {
+            throw new CacheException(sprintf('Unable to write in the cache directory `%s`.', $this->cachedir));
         }
 
-        $this->log('info', sprintf('File cache system initialized with directory set to `%s`.', $this->_cachedir));
+        $this->log('info', sprintf('File cache system initialized with directory set to `%s`.', $this->cachedir));
     }
 
     /**
@@ -104,7 +105,7 @@ class Cache extends ACache
                 || 0 === $last_timestamp
                 || $expire->getTimestamp() <= $last_timestamp) {
 
-            if (false !== $data = @file_get_contents($this->_getCacheFile($id))) {
+            if (false !== $data = @file_get_contents($this->getCacheFile($id))) {
                 $this->log('debug', sprintf('Reading file cache data for id `%s`.', $id));
                 return $data;
             }
@@ -124,7 +125,7 @@ class Cache extends ACache
      */
     public function test($id)
     {
-        if (false === $stat = @stat($this->_getCacheFile($id))) {
+        if (false === $stat = @stat($this->getCacheFile($id))) {
             return false;
         }
 
@@ -146,10 +147,10 @@ class Cache extends ACache
             $this->log('warning', sprintf('Lifetime and tag features are not available for cache adapter `%s`.', get_class($this)));
         }
 
-        if (true === $result = @file_put_contents($this->_getCacheFile($id), $data)) {
+        if (true === $result = @file_put_contents($this->getCacheFile($id), $data)) {
             $this->log('debug', sprintf('Storing data in cache for id `%s`.', $id));
         } else {
-            $this->log('warning', sprintf('Unable to save data to file cache for id `%s` in directory `%s`.', $id, $this->_cachedir));
+            $this->log('warning', sprintf('Unable to save data to file cache for id `%s` in directory `%s`.', $id, $this->cachedir));
         }
 
         return (false !== $result);
@@ -162,7 +163,7 @@ class Cache extends ACache
      */
     public function remove($id)
     {
-        if (true === $result = @unlink($this->_getCacheFile($id))) {
+        if (true === $result = @unlink($this->getCacheFile($id))) {
             $this->log('debug', sprintf('Cache data removed for id `%s`.', $id));
         }
 
@@ -176,20 +177,21 @@ class Cache extends ACache
     public function clear()
     {
         $result = false;
-
-        if (false !== $files = @scandir($this->_cachedir)) {
+        if (false !== $files = @scandir($this->cachedir)) {
             foreach ($files as $file) {
+                $file = $this->cachedir . DIRECTORY_SEPARATOR . $file;
                 if (false === is_dir($file)) {
-                    if (false === $remove = @unlink($file)) {
+                    if (false === @unlink($file)) {
                         $this->log('warning', sprintf('Enable to remove cache file `%s`.', $file));
-                        $result = false;
+                    } else {
+                        $result = true;
                     }
                 }
             }
         }
 
         if (true === $result) {
-            $this->log('debug', sprintf('File system cache cleared in `%s`.', $this->_cachedir));
+            $this->log('debug', sprintf('File system cache cleared in `%s`.', $this->cachedir));
         }
 
         return $result;
@@ -201,9 +203,9 @@ class Cache extends ACache
      * @return string The file path of the available cache record
      * @codeCoverageIgnore
      */
-    private function _getCacheFile($id)
+    private function getCacheFile($id)
     {
-        $cachefile = $this->_cachedir . DIRECTORY_SEPARATOR . $id;
+        $cachefile = $this->cachedir . DIRECTORY_SEPARATOR . $id;
         return $cachefile;
     }
 }
