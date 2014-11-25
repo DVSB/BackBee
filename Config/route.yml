@@ -165,7 +165,6 @@ bb.rest.page.get_available_status:
     requirements:
         _method: GET
 
-
 bb.rest.page.get_metadata:
     pattern: /rest/{version}/page/{uid}/metadata
     defaults:
@@ -252,6 +251,14 @@ bb.rest.page.delete:
     requirements:
         uid: \w{32}
         _method: DELETE
+
+bb.rest.layout.get_workflow_state:
+    pattern: /rest/{version}/layout/{uid}/workflow_state
+    defaults:
+        _action: getWorkflowStateAction
+        _controller: BackBuilder\Rest\Controller\LayoutController
+    requirements:
+        _method: GET
 
 bb.rest.layout.get_collection:
     pattern: /rest/{version}/layout
