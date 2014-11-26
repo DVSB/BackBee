@@ -241,7 +241,7 @@ bb.rest.page.move_node:
         _controller: BackBuilder\Rest\Controller\PageController
     requirements:
         uid: \w{32}
-        _method: PUT
+        _method: PATCH
 
 bb.rest.page.delete:
     pattern: /rest/{version}/page/{uid}
