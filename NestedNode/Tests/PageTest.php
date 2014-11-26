@@ -142,35 +142,27 @@ class PageTest extends TestCase
         $this->assertEquals('url.html', $this->page->getNormalizeUri());
     }
 
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getTarget
-//     */
-//    public function testGetTarget()
-//    {
-//        $this->assertEquals(Page::DEFAULT_TARGET, $this->page->getTarget());
-//
-//        $this->page->setTarget('target');
-//        $this->assertEquals('target', $this->page->getTarget());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::isRedirect
-//     */
-//    public function testIsRedirect()
-//    {
-//        $this->assertFalse($this->page->isRedirect());
-//
-//        $this->page->setRedirect('redirect');
-//        $this->assertTrue($this->page->isRedirect());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getRevisions
-//     */
-//    public function testGetRevisions()
-//    {
-//        $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $this->page->getRevisions());
-//    }
+    /**
+     * @covers BackBuilder\NestedNode\Page::getTarget
+     */
+    public function testGetTarget()
+    {
+        $this->assertEquals(Page::DEFAULT_TARGET, $this->page->getTarget());
+
+        $this->page->setTarget('target');
+        $this->assertEquals('target', $this->page->getTarget());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isRedirect
+     */
+    public function testIsRedirect()
+    {
+        $this->assertFalse($this->page->isRedirect());
+
+        $this->page->setRedirect('redirect');
+        $this->assertTrue($this->page->isRedirect());
+    }
 //
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::getData

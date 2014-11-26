@@ -592,6 +592,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * Returns the collection of revisions.
      * @return \Doctrine\Common\Collections\ArrayCollection
+     * @codeCoverageIgnore
      */
     public function getRevisions()
     {
