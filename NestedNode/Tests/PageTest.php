@@ -117,40 +117,31 @@ class PageTest extends TestCase
         $this->assertEquals(0, $clone2->getLevel());
     }
 
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getContentSet
-//     */
-//    public function testGetContentSet()
-//    {
-//        $this->assertInstanceOf('BackBuilder\ClassContent\ContentSet', $this->page->getContentSet());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getUrl
-//     */
-//    public function testGetUrl()
-//    {
-//        $this->assertEquals('url', $this->page->getUrl());
-//
-//        $this->page->setRedirect('redirect');
-//        $this->assertEquals('redirect', $this->page->getUrl());
-//        $this->assertEquals('redirect', $this->page->getUrl(true));
-//        $this->assertEquals('url', $this->page->getUrl(false));
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getNormalizeUri
-//     */
-//    public function testGetNormalizeUri()
-//    {
-//        $this->assertEquals('url', $this->page->getNormalizeUri());
-//
-//        $site = new Site();
-//        $this->page->setSite($site);
-//        $this->assertEquals('url.html', $this->page->getNormalizeUri());
-//    }
-//
+    /**
+     * @covers BackBuilder\NestedNode\Page::getUrl
+     */
+    public function testGetUrl()
+    {
+        $this->assertEquals('url', $this->page->getUrl());
+
+        $this->page->setRedirect('redirect');
+        $this->assertEquals('redirect', $this->page->getUrl());
+        $this->assertEquals('redirect', $this->page->getUrl(true));
+        $this->assertEquals('url', $this->page->getUrl(false));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getNormalizeUri
+     */
+    public function testGetNormalizeUri()
+    {
+        $this->assertEquals('url', $this->page->getNormalizeUri());
+
+        $site = new Site();
+        $this->page->setSite($site);
+        $this->assertEquals('url.html', $this->page->getNormalizeUri());
+    }
+
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::getTarget
 //     */

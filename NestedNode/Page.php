@@ -439,6 +439,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * Returns the main contentset associated to the node.
      * @return \BackBuilder\ClassContent\ContentSet
+     * @codeCoverageIgnore
      */
     public function getContentSet()
     {
@@ -724,7 +725,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function setSite(Site $site = null)
     {
-        $this->_site = $site;
+        $this->getSection()->setSite($site);
         return $this;
     }
 
