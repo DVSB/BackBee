@@ -1588,4 +1588,22 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         return $section->getPage();
     }
 
+    /**
+     * Returns the nested node left position.
+     * @return int
+     */
+    public function getLeftnode()
+    {
+        return $this->getSection()->getLeftnode();
+    }
+
+    /**
+     * Returns the nested node right position.
+     * @return int
+     */
+    public function getRightnode()
+    {
+        return $this->getSection()->getRightnode();
+    }
+
 }

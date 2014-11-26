@@ -884,6 +884,21 @@ class PageTest extends TestCase
         $this->assertEquals($child, $subchild->getParent());
     }
 
+        /**
+     * @covers BackBuilder\NestedNode\Page::getLeftnode()
+     * @covers BackBuilder\NestedNode\Page::getRightnode()
+     */
+    public function testGetNode()
+    {
+        $this->assertEquals(1, $this->page->getLeftnode());
+        $this->assertEquals(2, $this->page->getRightnode());
+        
+                $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertEquals(1, $child->getLeftnode());
+        $this->assertEquals(2, $child->getRightnode());
+    }
+
     /**
      * Sets up the fixture
      */
