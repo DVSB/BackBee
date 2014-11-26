@@ -347,6 +347,8 @@ class PageController extends ARestController
 
         $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
 
+        $this->patchStateOperation($page, $operations);
+
         try {
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
@@ -476,10 +478,10 @@ class PageController extends ARestController
     }
 
     /**
-     * [trySetPageWorkflowState description]
+     * Page workflow state setter
      *
-     * @param  Page   $page
-     * @param  [type] $workflow
+     * @param  Page  $page
+     * @param  State $workflow
      */
     private function trySetPageWorkflowState(Page $page, State $workflow = null)
     {
@@ -487,6 +489,45 @@ class PageController extends ARestController
         if (null !== $workflow) {
             if (null === $workflow->getLayout() || $workflow->getLayout()->getUid() === $page->getLayout()->getUid()) {
                 $page->setWorkflowState($workflow);
+            }
+        }
+    }
+
+    /**
+     * Custom patch process for Page's state property
+     *
+     * @param  Page   $page
+     * @param  array  $operations passed by reference
+     */
+    private function patchStateOperation(Page $page, array &$operations)
+    {
+        $matched = false;
+        foreach ($operations as $key => $operation) {
+            if ('/state' === $operation['path']) {
+                $matched = true;
+                break;
+            }
+        }
+
+        if ($matched) {
+            unset($operations[$key]);
+            $states = explode('_', $operation['value']);
+            if (in_array($state = (int) array_shift($states), Page::$STATES)) {
+                $page->setState($state);
+            }
+
+            if ($code = (int) array_shift($states)) {
+                $workflow_state = $this->getApplication()->getEntityManager()
+                    ->getRepository('BackBuilder\Workflow\State')
+                    ->findOneBy(array(
+                        '_code'   => $code,
+                        '_layout' => $page->getLayout()
+                    ))
+                ;
+
+                if (null !== $workflow_state) {
+                    $page->setWorkflowState($workflow_state);
+                }
             }
         }
     }
