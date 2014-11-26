@@ -1567,4 +1567,22 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         return (true === $this->hasMainSection() && null === $this->getSection()->getParent());
     }
 
+    /**
+     * Returns the parent page, NULL if this page is root
+     * @return \BackBuilder\NestedNode\Page|NULL
+     */
+    public function getParent()
+    {
+        $section = $this->getSection();
+        if (true === $section->isRoot()) {
+            return null;
+        }
+
+        if (false === $this->hasMainSection()) {
+            return $section->getPage();
+        }
+
+        return $section->getParent()->getPage();
+    }
+
 }

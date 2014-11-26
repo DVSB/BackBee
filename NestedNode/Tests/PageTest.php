@@ -834,6 +834,24 @@ class PageTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Page::getParent()
+     */
+    public function testgetParent()
+    {
+        $this->assertNull($this->page->getParent());
+
+        $subsection = new Section('sub-section');
+        $subsection->setRoot($this->page->getSection())
+                ->setParent($this->page->getSection());
+        $child = new Page('child', array('main_section' => $subsection));
+        $this->assertEquals($this->page, $child->getParent());
+
+        $subchild = new Page('child');
+        $subchild->setSection($child->getSection());
+        $this->assertEquals($child, $subchild->getParent());
+    }
+
+    /**
      * Sets up the fixture
      */
     public function setUp()
