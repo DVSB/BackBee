@@ -72,6 +72,34 @@ class ClassContentController extends ARestController
     }
 
     /**
+     * Returns collection of classcontent associated to category and according to provided criterias
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\QueryParam(name="category", description="Filter classcontent collection by provided category", requirements={
+     *     @Assert\NotBlank
+     * })
+     * @Rest\Pagination(default_count=25, max_count=100)
+     */
+    public function getCollectionByCategoryAction($start, $count, Request $request)
+    {
+        $category = $this->getCategoryManager()->getCategory($category_name = $request->query->get('category'));
+
+        if (null === $category) {
+            throw new NotFoundHttpException("`$category_name` is not a valid classcontent category.");
+        }
+
+        $classnames = array();
+        foreach ($category->getBlocks() as $block) {
+            $classnames[] = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $block->type);
+        }
+
+        return $this->createResponse(json_encode($this->convertPaginatorToArray($this->findContentsByCriterias(
+            $classnames, $start, $count
+        ))));
+    }
+
+    /**
      * Returns collection of classcontent associated to $type and according to provided criterias
      *
      * @param  string $type
@@ -80,32 +108,13 @@ class ClassContentController extends ARestController
      *
      * @Rest\Pagination(default_count=25, max_count=100)
      */
-    public function getCollectionAction($type, $start, $count, Request $request)
+    public function getCollectionAction($type, $start, $count)
     {
-        $criterias = array_merge(array(
-            'only_online' => false,
-            'site_uid'    => $this->getApplication()->getSite()->getUid()
-        ), $request->query->all());
-
-        $criterias['only_online'] = (boolean) $criterias['only_online'];
-
-        $order_infos = array(
-            'column'    => isset($criterias['order_by']) ? $criterias['order_by'] : '_modified',
-            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc',
-        );
-
-        $pagination = array('start' => $start, 'limit' => $count);
-
-        unset($criterias['order_by']);
-        unset($criterias['order_direction']);
-
         $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $type);
-        $contents = $this->getApplication()->getEntityManager()
-            ->getRepository('BackBuilder\ClassContent\AClassContent')
-            ->findContentsBySearch((array) $classname, $order_infos, $pagination, $criterias)
-        ;
 
-        return $this->createResponse(json_encode($this->convertPaginatorToArray($contents)));
+        return $this->createResponse(json_encode($this->convertPaginatorToArray($this->findContentsByCriterias(
+            (array) $classname, $start, $count
+        ))));
     }
 
     /**
@@ -222,17 +231,53 @@ class ClassContentController extends ARestController
     }
 
     /**
+     * Find classcontents by provided classnames, criterias from request, provided start and count
+     *
+     * @param  array   $classnames
+     * @param  integer $start
+     * @param  integer $count
+     *
+     * @return null|Paginator
+     */
+    private function findContentsByCriterias(array $classnames, $start, $count)
+    {
+        $criterias = array_merge(array(
+            'only_online' => false,
+            'site_uid'    => $this->getApplication()->getSite()->getUid()
+        ), $this->getApplication()->getRequest()->query->all());
+
+        $criterias['only_online'] = (boolean) $criterias['only_online'];
+
+        $order_infos = array(
+            'column'    => isset($criterias['order_by']) ? $criterias['order_by'] : '_modified',
+            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc',
+        );
+
+        $pagination = array('start' => $start, 'limit' => $count);
+
+        unset($criterias['order_by']);
+        unset($criterias['order_direction']);
+
+        return $this->getApplication()->getEntityManager()
+            ->getRepository('BackBuilder\ClassContent\AClassContent')
+            ->findContentsBySearch($classnames, $order_infos, $pagination, $criterias)
+        ;
+    }
+
+    /**
      * Converts Doctrine's paginator to php array
      *
      * @param  Paginator $paginator the paginator to convert
      *
      * @return array
      */
-    private function convertPaginatorToArray(Paginator $paginator)
+    private function convertPaginatorToArray(Paginator $paginator = null)
     {
         $contents = array();
-        foreach ($paginator as $content) {
-            $contents[] = $content;
+        if (null !== $paginator) {
+            foreach ($paginator as $content) {
+                $contents[] = $content;
+            }
         }
 
         return $contents;
