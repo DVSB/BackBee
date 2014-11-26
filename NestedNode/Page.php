@@ -290,7 +290,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      * The section node.
      * @var \BackBuilder\NestedNode\Section
      * @ManyToOne(targetEntity="BackBuilder\NestedNode\Section", inversedBy="_pages", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="section_uid", referencedColumnName="uid")
+     * @JoinColumn(name="section_uid", referencedColumnName="uid", nullable=false)
      */
     public $_section;
 
@@ -1523,10 +1523,13 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * Returns the section of this page
      * @return \BackBuilder\NestedNode\Section
-     * @codeCoverageIgnore
      */
     public function getSection()
     {
+        if (null === $this->_section) {
+            $this->setSection(new Section($this->getUid(),  array('page' => $this)));
+        }
+
         return $this->_section;
     }
 

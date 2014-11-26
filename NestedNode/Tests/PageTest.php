@@ -795,6 +795,18 @@ class PageTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Page::getSection()
+     */
+    public function testGetSection()
+    {
+        $this->assertEquals($this->page->getMainSection(), $this->page->getSection());
+
+        $page = new Page('test');
+        $this->assertEquals($page->getMainSection(), $page->getSection());
+        $this->assertEquals('test', $page->getSection()->getUid());
+    }
+
+    /**
      * Sets up the fixture
      */
     public function setUp()
