@@ -123,6 +123,8 @@ class SectionTest extends TestCase
 
         $this->assertEquals($section, $section->setSite($site));
         $this->assertEquals($site, $section->getSite());
+        $this->assertEquals($section, $section->setSite(null));
+        $this->assertNull($section->getSite());
     }
 
     /**

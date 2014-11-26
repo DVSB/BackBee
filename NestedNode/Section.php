@@ -183,7 +183,7 @@ class Section extends ANestedNode
      * @param \BackBuilder\Site\Site $site
      * @return \BackBuilder\NestedNode\Section
      */
-    public function setSite(Site $site)
+    public function setSite(Site $site = null)
     {
         $this->_site = $site;
         return $this;
