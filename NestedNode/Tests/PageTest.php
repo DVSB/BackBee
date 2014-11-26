@@ -164,16 +164,15 @@ class PageTest extends TestCase
         $this->assertTrue($this->page->isRedirect());
     }
 
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getData
-//     */
-//    public function testGetData()
-//    {
-//        $this->assertEquals($this->page->toArray(), $this->page->getData());
-//        $this->assertEquals('title', $this->page->getData('title'));
-//        $this->assertNull($this->page->getData('unknown'));
-//    }
+    /**
+     * @covers BackBuilder\NestedNode\Page::getData
+     */
+    public function testGetData()
+    {
+        $this->assertEquals($this->page->toArray(), $this->page->getData());
+        $this->assertEquals('title', $this->page->getData('title'));
+        $this->assertNull($this->page->getData('unknown'));
+    }
 //
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::getParam
