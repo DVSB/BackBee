@@ -629,7 +629,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         $param = array(
             'left' => $this->getLeftnode(),
             'right' => $this->getRightnode(),
-            'level' => $this->getLevel()
+            'level' => $this->getLevel(),
+            'position' => $this->getPosition()
         );
 
         if (null !== $var) {

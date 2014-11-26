@@ -173,24 +173,27 @@ class PageTest extends TestCase
         $this->assertEquals('title', $this->page->getData('title'));
         $this->assertNull($this->page->getData('unknown'));
     }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getParam
-//     */
-//    public function testGetParam()
-//    {
-//        $params = array(
-//            'left' => $this->page->getLeftnode(),
-//            'right' => $this->page->getRightnode(),
-//            'level' => $this->page->getLevel()
-//        );
-//
-//        $this->assertEquals($params, $this->page->getParam());
-//        $this->assertEquals($this->page->getLeftnode(), $this->page->getParam('left'));
-//        $this->assertEquals($this->page->getRightnode(), $this->page->getParam('right'));
-//        $this->assertEquals($this->page->getLevel(), $this->page->getParam('level'));
-//        $this->assertNull($this->page->getParam('unknown'));
-//    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getParam
+     */
+    public function testGetParam()
+    {
+        $params = array(
+            'left' => 1,
+            'right' => 2,
+            'level' => 0,
+            'position' => 0
+        );
+
+        $this->assertEquals($params, $this->page->getParam());
+        $this->assertEquals(1, $this->page->getParam('left'));
+        $this->assertEquals(2, $this->page->getParam('right'));
+        $this->assertEquals(0, $this->page->getParam('level'));
+        $this->assertEquals(0, $this->page->getParam('position'));
+        $this->assertNull($this->page->getParam('unknown'));
+    }
+
 //
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::isScheduled
@@ -884,7 +887,7 @@ class PageTest extends TestCase
         $this->assertEquals($child, $subchild->getParent());
     }
 
-        /**
+    /**
      * @covers BackBuilder\NestedNode\Page::getLeftnode()
      * @covers BackBuilder\NestedNode\Page::getRightnode()
      */
@@ -892,8 +895,8 @@ class PageTest extends TestCase
     {
         $this->assertEquals(1, $this->page->getLeftnode());
         $this->assertEquals(2, $this->page->getRightnode());
-        
-                $child = new Page('child');
+
+        $child = new Page('child');
         $child->setSection($this->page->getSection());
         $this->assertEquals(1, $child->getLeftnode());
         $this->assertEquals(2, $child->getRightnode());
