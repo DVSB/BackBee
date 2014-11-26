@@ -1529,10 +1529,19 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     public function getSection()
     {
         if (null === $this->_section) {
-            $this->setSection(new Section($this->getUid(),  array('page' => $this)));
+            $this->setSection(new Section($this->getUid(), array('page' => $this)));
         }
 
         return $this->_section;
+    }
+
+    /**
+     * Is the page is a leaf ?
+     * @return Boolean TRUE if the node if a leaf of tree, FALSE otherwise
+     */
+    public function isLeaf()
+    {
+        return (true === $this->hasMainSection()) ? $this->getSection()->isLeaf() : true;
     }
 
 }

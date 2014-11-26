@@ -163,6 +163,7 @@ class PageTest extends TestCase
         $this->page->setRedirect('redirect');
         $this->assertTrue($this->page->isRedirect());
     }
+
 //
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::getData
@@ -787,6 +788,18 @@ class PageTest extends TestCase
         $page = new Page('test');
         $this->assertEquals($page->getMainSection(), $page->getSection());
         $this->assertEquals('test', $page->getSection()->getUid());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isLeaf()
+     */
+    public function testIsLeaf()
+    {
+        $this->assertFalse($this->page->isLeaf());
+
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertTrue($child->isLeaf());
     }
 
     /**
