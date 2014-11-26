@@ -433,7 +433,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function getSite()
     {
-        return $this->_site;
+        return $this->getSection()->getSite();
     }
 
     /**
