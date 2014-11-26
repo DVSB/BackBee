@@ -1498,9 +1498,14 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function setMainSection(Section $section)
     {
+        if ($section === $this->_mainsection) {
+            return $this;
+        }
+
         $this->_mainsection = $section;
         $this->_position = 0;
         $this->_level = $section->getLevel();
+        $section->setPage($this);
 
         return $this->setSection($section);
     }
@@ -1542,6 +1547,15 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     public function isLeaf()
     {
         return (true === $this->hasMainSection()) ? $this->getSection()->isLeaf() : true;
+    }
+
+    /**
+     * Returns the root page.
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function getRoot()
+    {
+        return $this->getSection()->getRoot()->getPage();
     }
 
 }

@@ -761,6 +761,7 @@ class PageTest extends TestCase
         $this->assertEquals($section, $this->page->getSection());
         $this->assertEquals(0, $this->page->getPosition());
         $this->assertEquals(10, $this->page->getLevel());
+        $this->assertEquals($this->page, $section->getPage());
     }
 
     /**
@@ -800,6 +801,18 @@ class PageTest extends TestCase
         $child = new Page('child');
         $child->setSection($this->page->getSection());
         $this->assertTrue($child->isLeaf());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getRoot()
+     */
+    public function testGetRoot()
+    {
+        $this->assertEquals($this->page, $this->page->getRoot());
+
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertEquals($this->page, $child->getRoot());
     }
 
     /**
