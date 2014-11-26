@@ -75,8 +75,8 @@ class PageTest extends TestCase
         // test __construct with options
         $this->assertEquals('title', $this->page->getTitle());
         $this->assertEquals('url', $this->page->getUrl());
-        $this->assertEquals('section', $this->page->getUid());
-        $this->assertEquals('section', $this->page->getSection()->getUid());
+        $this->assertEquals('root', $this->page->getUid());
+        $this->assertEquals('root', $this->page->getSection()->getUid());
     }
 
     /**
@@ -595,70 +595,104 @@ class PageTest extends TestCase
 //        $this->assertEquals($newContentSet, $child->getContentSet()->last());
 //    }
 //
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::toArray
-//     */
-//    public function testToArray()
-//    {
-//        $expected = array(
-//            'id' => 'node_test',
-//            'rel' => 'leaf',
-//            'uid' => 'test',
-//            'rootuid' => 'test',
-//            'parentuid' => null,
-//            'created' => $this->current_time->getTimestamp(),
-//            'modified' => $this->current_time->getTimestamp(),
-//            'isleaf' => true,
-//            'siteuid' => null,
-//            'title' => 'title',
-//            'alttitle' => null,
-//            'url' => 'url',
-//            'target' => '_self',
-//            'redirect' => null,
-//            'state' => Page::STATE_HIDDEN,
-//            'date' => null,
-//            'publishing' => null,
-//            'archiving' => null,
-//            'metadata' => null,
-//            'layout_uid' => $this->page->getLayout()->getUid(),
-//            'workflow_state' => null
-//        );
-//
-//        $this->assertEquals($expected, $this->page->toArray());
-//
-//        $this->page->setSite(new Site())
-//                ->setDate($this->current_time)
-//                ->setArchiving($this->current_time)
-//                ->setPublishing($this->current_time)
-//                ->setMetadata(new MetaDataBag())
-//                ->setWorkflowState(new State(null, array('code' => 1)));
-//
-//        $expected = array(
-//            'id' => 'node_test',
-//            'rel' => 'leaf',
-//            'uid' => 'test',
-//            'rootuid' => 'test',
-//            'parentuid' => null,
-//            'created' => $this->current_time->getTimestamp(),
-//            'modified' => $this->current_time->getTimestamp(),
-//            'isleaf' => true,
-//            'siteuid' => $this->page->getSite()->getUid(),
-//            'title' => 'title',
-//            'alttitle' => null,
-//            'url' => 'url',
-//            'target' => '_self',
-//            'redirect' => null,
-//            'state' => Page::STATE_HIDDEN,
-//            'date' => $this->current_time->getTimestamp(),
-//            'publishing' => $this->current_time->getTimestamp(),
-//            'archiving' => $this->current_time->getTimestamp(),
-//            'metadata' => array(),
-//            'layout_uid' => $this->page->getLayout()->getUid(),
-//            'workflow_state' => 1
-//        );
-//
-//        $this->assertEquals($expected, $this->page->toArray());
-//    }
+    /**
+     * @covers BackBuilder\NestedNode\Page::toArray
+     */
+    public function testToArray()
+    {
+        $expected = array(
+            'id' => 'node_root',
+            'rel' => 'folder',
+            'uid' => 'root',
+            'rootuid' => 'root',
+            'parentuid' => null,
+            'created' => $this->current_time->getTimestamp(),
+            'modified' => $this->current_time->getTimestamp(),
+            'isleaf' => false,
+            'siteuid' => null,
+            'title' => 'title',
+            'alttitle' => null,
+            'url' => 'url',
+            'target' => '_self',
+            'redirect' => null,
+            'state' => Page::STATE_HIDDEN,
+            'date' => null,
+            'publishing' => null,
+            'archiving' => null,
+            'metadata' => null,
+            'layout_uid' => $this->page->getLayout()->getUid(),
+            'workflow_state' => null,
+            'section' => true
+        );
+
+        $this->assertEquals($expected, $this->page->toArray());
+
+        $this->page->setSite(new Site())
+                ->setDate($this->current_time)
+                ->setArchiving($this->current_time)
+                ->setPublishing($this->current_time)
+                ->setMetadata(new MetaDataBag())
+                ->setWorkflowState(new State(null, array('code' => 1)));
+
+        $expected = array(
+            'id' => 'node_root',
+            'rel' => 'folder',
+            'uid' => 'root',
+            'rootuid' => 'root',
+            'parentuid' => null,
+            'created' => $this->current_time->getTimestamp(),
+            'modified' => $this->current_time->getTimestamp(),
+            'isleaf' => false,
+            'siteuid' => $this->page->getSite()->getUid(),
+            'title' => 'title',
+            'alttitle' => null,
+            'url' => 'url',
+            'target' => '_self',
+            'redirect' => null,
+            'state' => Page::STATE_HIDDEN,
+            'date' => $this->current_time->getTimestamp(),
+            'publishing' => $this->current_time->getTimestamp(),
+            'archiving' => $this->current_time->getTimestamp(),
+            'metadata' => array(),
+            'layout_uid' => $this->page->getLayout()->getUid(),
+            'workflow_state' => 1,
+            'section' => true
+        );
+
+        $this->assertEquals($expected, $this->page->toArray());
+
+        $currenttime = new \Datetime();
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+
+        $expected = array(
+            'id' => 'node_child',
+            'rel' => 'leaf',
+            'uid' => 'child',
+            'rootuid' => $this->page->getUid(),
+            'parentuid' => $this->page->getUid(),
+            'created' => $currenttime->getTimestamp(),
+            'modified' => $currenttime->getTimestamp(),
+            'isleaf' => true,
+            'siteuid' => $this->page->getSite()->getUid(),
+            'title' => null,
+            'alttitle' => null,
+            'url' => null,
+            'target' => '_self',
+            'redirect' => null,
+            'state' => Page::STATE_HIDDEN,
+            'date' => null,
+            'publishing' => null,
+            'archiving' => null,
+            'metadata' => null,
+            'layout_uid' => null,
+            'workflow_state' => null,
+            'section' => false
+        );
+
+        $this->assertEquals($expected, $child->toArray());
+    }
+
 //
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::serialize
@@ -857,10 +891,10 @@ class PageTest extends TestCase
     public function setUp()
     {
         $this->current_time = new \Datetime();
-        $this->page = new Page('test', array('main_section' => new Section('section'), 'title' => 'title', 'url' => 'url'));
+        $this->page = new Page('root', array('main_section' => new Section('root'), 'title' => 'title', 'url' => 'url'));
 
-//        $layout = new Layout();
-//        $this->page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
+        $layout = new Layout();
+        $this->page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
     }
 
     /**

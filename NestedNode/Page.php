@@ -1082,23 +1082,30 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function toArray()
     {
-        $result = parent::toArray();
-
-        $result['siteuid'] = (null !== $this->getSite()) ? $this->getSite()->getUid() : null;
-        $result['title'] = $this->getTitle();
-        $result['alttitle'] = $this->getAltTitle();
-        $result['url'] = $this->getUrl();
-        $result['target'] = $this->getTarget();
-        $result['redirect'] = $this->getRedirect();
-        $result['state'] = $this->getState();
-        $result['date'] = (null !== $this->getDate()) ? $this->getDate()->getTimestamp() : null;
-        $result['publishing'] = (null !== $this->getPublishing()) ? $this->getPublishing()->getTimestamp() : null;
-        $result['archiving'] = (null !== $this->getArchiving()) ? $this->getArchiving()->getTimestamp() : null;
-        $result['metadata'] = (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null;
-        $result['layout_uid'] = (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null;
-        $result['workflow_state'] = (null !== $this->getWorkflowState()) ? $this->getWorkflowState()->getCode() : null;
-
-        return $result;
+        return array(
+            'id' => 'node_' . $this->getUid(),
+            'rel' => (true === $this->isLeaf()) ? 'leaf' : 'folder',
+            'uid' => $this->getUid(),
+            'rootuid' => $this->getRoot()->getUid(),
+            'parentuid' => (null !== $this->getParent()) ? $this->getParent()->getUid() : null,
+            'created' => $this->getCreated()->getTimestamp(),
+            'modified' => $this->getModified()->getTimestamp(),
+            'isleaf' => $this->isLeaf(),
+            'siteuid' => (null !== $this->getSite()) ? $this->getSite()->getUid() : null,
+            'title' => $this->getTitle(),
+            'alttitle' => $this->getAltTitle(),
+            'url' => $this->getUrl(),
+            'target' => $this->getTarget(),
+            'redirect' => $this->getRedirect(),
+            'state' => $this->getState(),
+            'date' => (null !== $this->getDate()) ? $this->getDate()->getTimestamp() : null,
+            'publishing' => (null !== $this->getPublishing()) ? $this->getPublishing()->getTimestamp() : null,
+            'archiving' => (null !== $this->getArchiving()) ? $this->getArchiving()->getTimestamp() : null,
+            'metadata' => (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null,
+            'layout_uid' => (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null,
+            'workflow_state' => (null !== $this->getWorkflowState()) ? $this->getWorkflowState()->getCode() : null,
+            'section' => $this->hasMainSection()
+        );
     }
 
     /**
@@ -1574,15 +1581,11 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     public function getParent()
     {
         $section = $this->getSection();
-        if (true === $section->isRoot()) {
-            return null;
+        if (true === $this->hasMainSection()) {
+            return (true === $section->isRoot()) ? null : $section->getParent()->getPage();
         }
 
-        if (false === $this->hasMainSection()) {
-            return $section->getPage();
-        }
-
-        return $section->getParent()->getPage();
+        return $section->getPage();
     }
 
 }
