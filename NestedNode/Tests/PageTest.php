@@ -194,125 +194,125 @@ class PageTest extends TestCase
         $this->assertNull($this->page->getParam('unknown'));
     }
 
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::isScheduled
-//     */
-//    public function testIsScheduled()
-//    {
-//        $this->assertFalse($this->page->isScheduled());
-//
-//        $this->page->setPublishing(new \DateTime());
-//        $this->page->setArchiving();
-//        $this->assertTrue($this->page->isScheduled());
-//
-//        $this->page->setPublishing();
-//        $this->page->setArchiving(new \DateTime());
-//        $this->assertTrue($this->page->isScheduled());
-//
-//        $this->page->setPublishing(new \DateTime());
-//        $this->page->setArchiving(new \DateTime());
-//        $this->assertTrue($this->page->isScheduled());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::isVisible
-//     */
-//    public function testIsVisble()
-//    {
-//        $this->assertFalse($this->page->isVisible());
-//
-//        $this->page->setState(Page::STATE_ONLINE);
-//        $this->assertTrue($this->page->isVisible());
-//
-//        $this->page->setState(Page::STATE_ONLINE & Page::STATE_HIDDEN);
-//        $this->assertFalse($this->page->isVisible());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::isOnline
-//     */
-//    public function testIsOnline()
-//    {
-//        $this->assertFalse($this->page->isOnline());
-//        $this->assertFalse($this->page->isOnline(true));
-//
-//        $this->page->setState(Page::STATE_ONLINE);
-//        $this->assertTrue($this->page->isOnline());
-//        $this->assertTrue($this->page->isOnline(true));
-//
-//        $this->page->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
-//        $this->assertTrue($this->page->isOnline());
-//        $this->assertTrue($this->page->isOnline(true));
-//
-//        $this->page->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN + Page::STATE_DELETED);
-//        $this->assertFalse($this->page->isOnline());
-//        $this->assertFalse($this->page->isOnline(true));
-//
-//        $yesterday = new \DateTime('yesterday');
-//        $tomorrow = new \DateTime('tomorrow');
-//
-//        $this->page->setState(Page::STATE_ONLINE)
-//                ->setPublishing($tomorrow)
-//                ->setArchiving();
-//        $this->assertFalse($this->page->isOnline());
-//        $this->assertTrue($this->page->isOnline(true));
-//
-//        $this->page->setPublishing()
-//                ->setArchiving($yesterday);
-//        $this->assertFalse($this->page->isOnline());
-//        $this->assertTrue($this->page->isOnline(true));
-//
-//        $this->page->setPublishing($yesterday)
-//                ->setArchiving($tomorrow);
-//        $this->assertTrue($this->page->isOnline());
-//        $this->assertTrue($this->page->isOnline(true));
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::isDeleted
-//     */
-//    public function testIsDeleted()
-//    {
-//        $this->assertFalse($this->page->isDeleted());
-//
-//        $this->page->setState($this->page->getState() + Page::STATE_DELETED);
-//        $this->assertTrue($this->page->isDeleted());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::setSite
-//     */
-//    public function testSetSite()
-//    {
-//        $site = new Site();
-//        $this->assertEquals($this->page, $this->page->setSite($site));
-//        $this->assertEquals($site, $this->page->getSite());
-//
-//        $this->page->setSite();
-//        $this->assertNull($this->page->getSite());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::setContentSet
-//     */
-//    public function testSetContentSet()
-//    {
-//        $contentset = new ContentSet();
-//        $this->assertEquals($this->page, $this->page->setContentSet($contentset));
-//        $this->assertEquals($contentset, $this->page->getContentSet());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::setDate
-//     */
-//    public function testSetDate()
-//    {
-//        $this->assertEquals($this->page, $this->page->setDate($this->current_time));
-//        $this->assertEquals($this->current_time, $this->page->getDate());
-//        $this->assertEquals($this->page, $this->page->setDate(null));
-//        $this->assertNull($this->page->getDate());
-//    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isScheduled
+     */
+    public function testIsScheduled()
+    {
+        $this->assertFalse($this->page->isScheduled());
+
+        $this->page->setPublishing(new \DateTime());
+        $this->page->setArchiving();
+        $this->assertTrue($this->page->isScheduled());
+
+        $this->page->setPublishing();
+        $this->page->setArchiving(new \DateTime());
+        $this->assertTrue($this->page->isScheduled());
+
+        $this->page->setPublishing(new \DateTime());
+        $this->page->setArchiving(new \DateTime());
+        $this->assertTrue($this->page->isScheduled());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isVisible
+     */
+    public function testIsVisble()
+    {
+        $this->assertFalse($this->page->isVisible());
+
+        $this->page->setState(Page::STATE_ONLINE);
+        $this->assertTrue($this->page->isVisible());
+
+        $this->page->setState(Page::STATE_ONLINE & Page::STATE_HIDDEN);
+        $this->assertFalse($this->page->isVisible());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isOnline
+     */
+    public function testIsOnline()
+    {
+        $this->assertFalse($this->page->isOnline());
+        $this->assertFalse($this->page->isOnline(true));
+
+        $this->page->setState(Page::STATE_ONLINE);
+        $this->assertTrue($this->page->isOnline());
+        $this->assertTrue($this->page->isOnline(true));
+
+        $this->page->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
+        $this->assertTrue($this->page->isOnline());
+        $this->assertTrue($this->page->isOnline(true));
+
+        $this->page->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN + Page::STATE_DELETED);
+        $this->assertFalse($this->page->isOnline());
+        $this->assertFalse($this->page->isOnline(true));
+
+        $yesterday = new \DateTime('yesterday');
+        $tomorrow = new \DateTime('tomorrow');
+
+        $this->page->setState(Page::STATE_ONLINE)
+                ->setPublishing($tomorrow)
+                ->setArchiving();
+        $this->assertFalse($this->page->isOnline());
+        $this->assertTrue($this->page->isOnline(true));
+
+        $this->page->setPublishing()
+                ->setArchiving($yesterday);
+        $this->assertFalse($this->page->isOnline());
+        $this->assertTrue($this->page->isOnline(true));
+
+        $this->page->setPublishing($yesterday)
+                ->setArchiving($tomorrow);
+        $this->assertTrue($this->page->isOnline());
+        $this->assertTrue($this->page->isOnline(true));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isDeleted
+     */
+    public function testIsDeleted()
+    {
+        $this->assertFalse($this->page->isDeleted());
+
+        $this->page->setState($this->page->getState() + Page::STATE_DELETED);
+        $this->assertTrue($this->page->isDeleted());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setSite
+     */
+    public function testSetSite()
+    {
+        $site = new Site();
+        $this->assertEquals($this->page, $this->page->setSite($site));
+        $this->assertEquals($site, $this->page->getSite());
+
+        $this->page->setSite();
+        $this->assertNull($this->page->getSite());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setContentSet
+     */
+    public function testSetContentSet()
+    {
+        $contentset = new ContentSet();
+        $this->assertEquals($this->page, $this->page->setContentSet($contentset));
+        $this->assertEquals($contentset, $this->page->getContentSet());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setDate
+     */
+    public function testSetDate()
+    {
+        $this->assertEquals($this->page, $this->page->setDate($this->current_time));
+        $this->assertEquals($this->current_time, $this->page->getDate());
+        $this->assertEquals($this->page, $this->page->setDate(null));
+        $this->assertNull($this->page->getDate());
+    }
 //
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::setLayout
