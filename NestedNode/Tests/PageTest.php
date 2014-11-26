@@ -816,6 +816,24 @@ class PageTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Page::isRoot()
+     */
+    public function testIsRoot()
+    {
+        $this->assertTrue($this->page->isRoot());
+
+        $subsection = new Section('sub-section');
+        $subsection->setRoot($this->page->getSection())
+                ->setParent($this->page->getSection());
+        $child = new Page('child', array('main_section' => $subsection));
+        $this->assertFalse($child->isRoot());
+
+        $subchild = new Page('child');
+        $subchild->setSection($child->getSection());
+        $this->assertFalse($subchild->isRoot());
+    }
+
+    /**
      * Sets up the fixture
      */
     public function setUp()

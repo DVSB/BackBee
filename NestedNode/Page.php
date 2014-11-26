@@ -1558,4 +1558,13 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         return $this->getSection()->getRoot()->getPage();
     }
 
+    /**
+     * Is the page a root ?
+     * @return Boolean TRUE if the page is root of tree, FALSE otherwise
+     */
+    public function isRoot()
+    {
+        return (true === $this->hasMainSection() && null === $this->getSection()->getParent());
+    }
+
 }
