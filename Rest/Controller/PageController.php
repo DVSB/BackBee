@@ -33,14 +33,13 @@ use BackBuilder\Rest\Patcher\RightManager;
 use BackBuilder\Site\Layout;
 use BackBuilder\Workflow\State;
 
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
-
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\Request;
-
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Page Controller
@@ -162,11 +161,15 @@ class PageController extends ARestController
         $results = $qb
             ->setFirstResult($start)
             ->setMaxResults($count)
-            ->getQuery()
-            ->getResult()
         ;
+        $results = new Paginator($qb);
 
-        $result_count = $start + count($results);
+        $count = 0;
+        foreach ($results as $row) {
+            $count++;
+        }
+
+        $result_count = $start + $count;
 
         $response = $this->createResponse($this->formatCollection($results));
         $response->headers->set('Content-Range', "$start-$result_count/" . count($results));
