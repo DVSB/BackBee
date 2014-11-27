@@ -28,8 +28,9 @@ namespace BackBuilder\Renderer\Helper;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class bb5toolbar extends AHelper
+class bb5head extends AHelper
 {
+
     /**
      * Possibilité d'ajouter des fichiers javascript dans l'entête de bb5toolbar
      * cf : _toolbars.bb5.phtml
@@ -41,6 +42,7 @@ class bb5toolbar extends AHelper
         $tokenArr = array('token' => $token);
         $params = (!is_null($params) && is_array($params) ) ? array_merge($tokenArr, $params) : $tokenArr;
 
-        return $this->_renderer->partial('bb5/_bb5.toolbars.phtml', $params);
+        return $this->_renderer->partial('bb5/_bb5.header.phtml', $params);
     }
+
 }

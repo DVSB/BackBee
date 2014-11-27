@@ -1,0 +1,10 @@
+<?php if (null !== $this->getParam('token') && $this->getParam('token') instanceof BackBuilder\Security\Token\BBUserToken): ?>
+    <div id="bb5-ui"></div>
+<?php else: ?>
+    <div id="bb5-ui"></div>
+    <script>
+        require(['src/tb/init'], function (init) {
+            init.listen();
+        });
+    </script>
+<?php endif; ?>
