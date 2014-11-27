@@ -1315,6 +1315,15 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("has_children")
+     */
+    public function getHasChildren()
+    {
+        return 0 < count($this->getChildren());
+    }
+
+    /**
      * Convert provided date to DateTime
      *
      * @param mixed date the date to convert to \DateTime
