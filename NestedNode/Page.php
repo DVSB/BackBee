@@ -1576,6 +1576,17 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     }
 
     /**
+     * Sets the parent node.
+     * @param \BackBuilder\NestedNode\Page $parent
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setParent(Page $parent)
+    {
+        $this->getSection()->setParent($parent->getSection());
+        return $this;
+    }
+
+    /**
      * Returns the parent page, NULL if this page is root
      * @return \BackBuilder\NestedNode\Page|NULL
      */
