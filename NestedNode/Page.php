@@ -348,7 +348,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      * Properties ignored while unserializing object
      * @var array
      */
-    protected $_unserialized_ignored = array('_created', '_modified', '_date', '_publishing', '_archiving', '_metadata', '_workflow_state');
+    protected $_unserialized_ignored = array('_section', '_created', '_modified', '_date', '_publishing', '_archiving', '_metadata', '_workflow_state');
 
     /**
      * Class constructor
@@ -1125,13 +1125,12 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     }
 
     /**
-     * Constructs the node from a string or object
+     * Constructs the page from a string or object
      * @param mixed $serialized The string representation of the object.
-     * @return \BackBuilder\NestedNode\ANestedNode
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                         with strict mode, if a property does not exists
+     * @return \BackBuilder\NestedNode\Page
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode
      */
-    public function unserialize($serialized, $strict = false)
+    public function unserialize($serialized)
     {
         if (false === is_object($serialized)) {
             if (null === $serialized = json_decode($serialized)) {
@@ -1139,7 +1138,16 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
             }
         }
 
-        parent::unserialize($serialized, $strict);
+        foreach (get_object_vars($serialized) as $property => $value) {
+            $property = '_' . $property;
+            if (true === in_array($property, $this->_unserialized_ignored)) {
+                continue;
+            } else if (true === property_exists($this, $property)) {
+                $this->$property = $value;
+            }
+        }
+ 
+        $this->setSection($this->getSection()->unserialize($serialized, false));
 
         if (true === property_exists($serialized, 'date')) {
             $this->setDateTimeValue('_date', $serialized->date);

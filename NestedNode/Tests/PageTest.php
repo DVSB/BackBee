@@ -695,27 +695,28 @@ class PageTest extends TestCase
         $this->assertEquals($expected, $child->toArray());
     }
 
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::serialize
-//     * @covers BackBuilder\NestedNode\Page::_setDateTimeValue
-//     */
-//    public function testUnserialize()
-//    {
-//        $this->page->setSite(new Site())
-//                ->setDate($this->current_time)
-//                ->setArchiving($this->current_time)
-//                ->setPublishing($this->current_time)
-//                ->setMetadata(new MetaDataBag());
-//
-//        $new_page = new Page();
-//        $new_page->setSite($this->page->getSite())
-//                ->setLayout($this->page->getLayout())
-//                ->setContentSet($this->page->getContentSet());
-//
-//        $this->assertEquals($this->page, $new_page->unserialize($this->page->serialize()));
-//    }
-//
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::serialize
+     * @covers BackBuilder\NestedNode\Page::_setDateTimeValue
+     */
+    public function testUnserialize()
+    {
+        $this->page->setSite(new Site())
+                ->setDate($this->current_time)
+                ->setArchiving($this->current_time)
+                ->setPublishing($this->current_time)
+                ->setMetadata(new MetaDataBag());
+
+        $new_page = new Page();
+        $new_page->setSite($this->page->getSite())
+                ->setLayout($this->page->getLayout())
+                ->setContentSet($this->page->getContentSet());
+
+        $this->assertEquals($this->page, $new_page->unserialize($this->page->serialize()));
+        $this->assertEquals($this->page->getSection(), $new_page->unserialize($this->page->serialize())->getSection());
+    }
+
 //    /**
 //     * @covers BackBuilder\NestedNode\Page::getOldState
 //     */
