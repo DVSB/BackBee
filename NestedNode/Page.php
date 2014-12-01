@@ -1396,4 +1396,13 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
         return $content;
     }
+    
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("boolean")
+     */
+    public function hasChildren()
+    {
+        return parent::hasChildren();
+    }
 }
