@@ -123,6 +123,13 @@ class PageController extends ARestController
      * @Rest\QueryParam(name="dir", description="Order direction", default="asc", requirements={
      *   @Assert\Choice(choices = {"asc", "desc"}, message="Order direction is not valid")
      * })
+     * 
+     * @Rest\QueryParam(name="state", description="Page State", requirements={
+     *   @Assert\Type(type="array", message="An array containing at least 1 state must be provided"),
+     *   @Assert\All({
+     *     @Assert\Choice(choices = {"0", "1", "2", "4"}, message="State is not valid")
+     *   })
+     * })
      *
      * @Rest\QueryParam(name="depth", description="Page depth", requirements={
      *   @Assert\Range(min = 0, max = 100, minMessage="Page depth must be a positive number", maxMessage="Page depth cannot be greater than 100")
