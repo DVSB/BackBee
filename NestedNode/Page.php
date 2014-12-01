@@ -1110,6 +1110,21 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     }
 
     /**
+     * Returns a string representation of page
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function serialize()
+    {
+        $serialized = new \stdClass();
+        foreach ($this->toArray() as $key => $value) {
+            $serialized->$key = $value;
+        }
+
+        return json_encode($serialized);
+    }
+
+    /**
      * Constructs the node from a string or object
      * @param mixed $serialized The string representation of the object.
      * @return \BackBuilder\NestedNode\ANestedNode
