@@ -31,11 +31,8 @@ use BackBuilder\Renderer\IRenderable;
 use BackBuilder\Site\Layout;
 use BackBuilder\Site\Site;
 use BackBuilder\Workflow\State;
-
 use Doctrine\Common\Collections\ArrayCollection;
-
 use JMS\Serializer\Annotation as Serializer;
-
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
@@ -57,7 +54,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @author      Micael Malta <mmalta@nextinteractive.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
-  * @Table(name="page",indexes=
+ * @Table(name="page",indexes=
  * {
  * @index(columns={"state"}),
  * @index(columns={"level", "state", "publishing", "archiving", "modified"}),
@@ -72,6 +69,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  */
 class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInterface
 {
+
     /**
      * State off-line: the page can not be displayed on the website
      * @var int
@@ -299,7 +297,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      * @var \BackBuilder\NestedNode\Section
      * @OneToOne(targetEntity="BackBuilder\NestedNode\Section", mappedBy="_page", cascade={"persist"}, fetch="EXTRA_LAZY")
      */
-    public $_mainsection;    
+    public $_mainsection;
 
     /**
      * The type of the page
@@ -487,11 +485,11 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function getUrl($doRedirect = null)
     {
-        if(null === $doRedirect) {
+        if (null === $doRedirect) {
             $doRedirect = $this->_use_url_redirect;
         }
 
-        if($this->isRedirect() && $doRedirect) {
+        if ($this->isRedirect() && $doRedirect) {
             return $this->getRedirect();
         }
 
@@ -679,8 +677,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function isVisible()
     {
-        return ($this->isOnline()
-                && !($this->getState() & self::STATE_HIDDEN));
+        return ($this->isOnline() && !($this->getState() & self::STATE_HIDDEN));
     }
 
     /**
@@ -695,9 +692,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         if (true === $ignoreSchedule) {
             return $onlineByState;
         } else {
-            return $onlineByState
-                    && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
-                    && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert);
+            return $onlineByState && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert) && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert);
         }
     }
 
@@ -802,6 +797,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         $this->_alttitle = $alttitle;
         return $this;
     }
+
     /**
      * Sets the title of the page.
      * @param string $title
@@ -879,8 +875,6 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
         return $this;
     }
-
-
 
     /**
      * Sets the archiving date
@@ -1146,7 +1140,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
                 $this->$property = $value;
             }
         }
- 
+
         $this->setSection($this->getSection()->unserialize($serialized, false));
 
         if (true === property_exists($serialized, 'date')) {
@@ -1163,7 +1157,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
         if (true === property_exists($serialized, 'metadata')) {
             $meta = new MetaDataBag();
-            $meta->fromStdClass((object)$serialized->metadata);
+            $meta->fromStdClass((object) $serialized->metadata);
             $this->setMetaData($meta);
         }
 
@@ -1383,7 +1377,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     {
         if (false === ($date instanceof \DateTime) && false === is_int($date)) {
             throw new InvalidArgumentException(
-                'Page::convertTimestampToDateTime() expect date argument to be an integer or an instance of \DateTime'
+            'Page::convertTimestampToDateTime() expect date argument to be an integer or an instance of \DateTime'
             );
         } elseif (is_int($date)) {
             $date = new \DateTime(date('c', $date));
@@ -1472,7 +1466,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     {
         return $this->_level;
     }
-    
+
     /**
      * Returns the order position
      * @return int

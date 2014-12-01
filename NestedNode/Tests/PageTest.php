@@ -194,7 +194,6 @@ class PageTest extends TestCase
         $this->assertNull($this->page->getParam('unknown'));
     }
 
-
     /**
      * @covers BackBuilder\NestedNode\Page::isScheduled
      */
@@ -695,7 +694,6 @@ class PageTest extends TestCase
         $this->assertEquals($expected, $child->toArray());
     }
 
-
     /**
      * @covers BackBuilder\NestedNode\Page::serialize
      * @covers BackBuilder\NestedNode\Page::_setDateTimeValue
@@ -717,60 +715,41 @@ class PageTest extends TestCase
         $this->assertEquals($this->page->getSection(), $new_page->unserialize($this->page->serialize())->getSection());
     }
 
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getOldState
-//     */
-//    public function testGetOldState()
-//    {
-//        $this->assertEquals(null, $this->page->getOldState());
-//        $this->page->setOldState(Page::STATE_DELETED);
-//        $this->assertEquals(Page::STATE_DELETED, $this->page->getOldState());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::setOldState
-//     */
-//    public function testSetOldState()
-//    {
-//        $this->assertEquals($this->page, $this->page->setOldState(Page::STATE_DELETED));
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::setUseUrlRedirect
-//     */
-//    public function testSetUseUrlRedirect()
-//    {
-//        $this->assertEquals($this->page, $this->page->setUseUrlRedirect(true));
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::getUseUrlRedirect
-//     */
-//    public function testGetUseUrlRedirect()
-//    {
-//        $this->assertEquals(true, $this->page->getUseUrlRedirect());
-//        $this->page->setUseUrlRedirect(false);
-//        $this->assertEquals(false, $this->page->getUseUrlRedirect());
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::setMainSection
-//     */
-//    public function testSetMainSection()
-//    {
-//        $section = new Section();
-//        $this->assertEquals($this->page, $this->page->setMainSection($section));
-//    }
-//
-//    /**
-//     * @covers BackBuilder\NestedNode\Page::setSection
-//     */
-//    public function testSetSection()
-//    {
-//        $section = new Section();
-//        $this->assertEquals($this->page, $this->page->setSection($section));
-//        $this->assertEquals($section, $this->page->getSection());
-//    }
+    /**
+     * @covers BackBuilder\NestedNode\Page::getOldState
+     */
+    public function testGetOldState()
+    {
+        $this->assertEquals(null, $this->page->getOldState());
+        $this->page->setOldState(Page::STATE_DELETED);
+        $this->assertEquals(Page::STATE_DELETED, $this->page->getOldState());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setOldState
+     */
+    public function testSetOldState()
+    {
+        $this->assertEquals($this->page, $this->page->setOldState(Page::STATE_DELETED));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setUseUrlRedirect
+     */
+    public function testSetUseUrlRedirect()
+    {
+        $this->assertEquals($this->page, $this->page->setUseUrlRedirect(true));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getUseUrlRedirect
+     */
+    public function testGetUseUrlRedirect()
+    {
+        $this->assertEquals(true, $this->page->getUseUrlRedirect());
+        $this->page->setUseUrlRedirect(false);
+        $this->assertEquals(false, $this->page->getUseUrlRedirect());
+    }
 
     /**
      * @covers BackBuilder\NestedNode\Page::hasMainSection()
