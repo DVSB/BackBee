@@ -50,7 +50,33 @@ class LayoutController extends ARestController
             ->getWorkflowStatesForLayout($layout)
         ;
 
-        return $this->createResponse($this->formatCollection($layout_states));
+        $states = array(
+            'online'  => array(),
+            'offline' => array()
+        );
+
+        foreach ($layout_states as $state) {
+            if (0 < $code = $state->getCode()) {
+                $states['online'][$code] = array(
+                    'label' => $state->getLabel(),
+                    'code'  => '1_' . $code
+                );
+            } else {
+                $states['offline'][$code] = array(
+                    'label' => $state->getLabel(),
+                    'code'  => '0_' . $code
+                );
+            }
+        }
+
+        $states = array_merge(
+            array('0' => array('label' => 'Hors ligne', 'code' => '0')),
+            $states['offline'],
+            array('1' => array('label' => 'En ligne', 'code' => '1')),
+            $states['online']
+        );
+
+        return $this->createResponse(json_encode(array_values($states)));
     }
 
     /**

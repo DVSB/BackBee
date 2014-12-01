@@ -241,7 +241,7 @@ bb.rest.page.move_node:
         _controller: BackBuilder\Rest\Controller\PageController
     requirements:
         uid: \w{32}
-        _method: PUT
+        _method: PATCH
 
 bb.rest.page.delete:
     pattern: /rest/{version}/page/{uid}
@@ -339,14 +339,12 @@ bb.rest.classcontent.get_collection:
         type: .+
         _method: GET
 
-
-bb.rest.classcontent.render:
-    pattern: /rest/{version}/classcontent/{type}/{uid}/render
+bb.rest.classcontent.get_collection_by_category:
+    pattern: /rest/{version}/classcontent
     defaults:
-        _action: renderAction
+        _action: getCollectionByCategoryAction
         _controller: BackBuilder\Rest\Controller\ClassContentController
     requirements:
-        uid: \w{32}
         type: .+
         _method: GET
 
