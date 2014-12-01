@@ -1635,4 +1635,14 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         return $this->getSection()->getRightnode();
     }
 
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("boolean")
+     * @codeCoverageIgnore
+     */
+    public function hasChildren()
+    {
+        return $this->getSection()->hasChildren();
+    }
+
 }

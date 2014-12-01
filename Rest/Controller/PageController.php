@@ -33,14 +33,13 @@ use BackBuilder\Rest\Patcher\RightManager;
 use BackBuilder\Site\Layout;
 use BackBuilder\Workflow\State;
 
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
-
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\Request;
-
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Page Controller
@@ -117,14 +116,18 @@ class PageController extends ARestController
      * @Rest\Pagination(default_count=25, max_count=100)
      *
      * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
-     * @Rest\QueryParam(name="state", description="State", requirements={
-     *   @Assert\Choice(choices = {0, 1, 2, 3, 4}, message="State is not valid")
-     * })
      * @Rest\QueryParam(name="order", description="Order by field", default="leftnode", requirements={
      *   @Assert\Choice(choices = {"leftnode", "date", "title"}, message="Order by is not valid")
      * })
      * @Rest\QueryParam(name="dir", description="Order direction", default="asc", requirements={
      *   @Assert\Choice(choices = {"asc", "desc"}, message="Order direction is not valid")
+     * })
+     * 
+     * @Rest\QueryParam(name="state", description="Page State", requirements={
+     *   @Assert\Type(type="array", message="An array containing at least 1 state must be provided"),
+     *   @Assert\All({
+     *     @Assert\Choice(choices = {"0", "1", "2", "4"}, message="State is not valid")
+     *   })
      * })
      *
      * @Rest\QueryParam(name="depth", description="Page depth", requirements={
@@ -155,7 +158,7 @@ class PageController extends ARestController
         $this->granted('VIEW', $parent);
 
         if (null !== $state = $request->query->get('state', null)) {
-            $qb->andStateIsIn(explode(',', $state));
+            $qb->andStateIsIn((array) $state);
         }
 
         if (null !== $request->query->get('depth')) {
@@ -165,11 +168,15 @@ class PageController extends ARestController
         $results = $qb
             ->setFirstResult($start)
             ->setMaxResults($count)
-            ->getQuery()
-            ->getResult()
         ;
+        $results = new Paginator($qb);
 
-        $result_count = $start + count($results);
+        $count = 0;
+        foreach ($results as $row) {
+            $count++;
+        }
+
+        $result_count = $start + $count;
 
         $response = $this->createResponse($this->formatCollection($results));
         $response->headers->set('Content-Range', "$start-$result_count/" . count($results));
@@ -350,6 +357,8 @@ class PageController extends ARestController
 
         $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
 
+        $this->patchStateOperation($page, $operations);
+
         try {
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
@@ -479,10 +488,10 @@ class PageController extends ARestController
     }
 
     /**
-     * [trySetPageWorkflowState description]
+     * Page workflow state setter
      *
-     * @param  Page   $page
-     * @param  [type] $workflow
+     * @param  Page  $page
+     * @param  State $workflow
      */
     private function trySetPageWorkflowState(Page $page, State $workflow = null)
     {
@@ -490,6 +499,45 @@ class PageController extends ARestController
         if (null !== $workflow) {
             if (null === $workflow->getLayout() || $workflow->getLayout()->getUid() === $page->getLayout()->getUid()) {
                 $page->setWorkflowState($workflow);
+            }
+        }
+    }
+
+    /**
+     * Custom patch process for Page's state property
+     *
+     * @param  Page   $page
+     * @param  array  $operations passed by reference
+     */
+    private function patchStateOperation(Page $page, array &$operations)
+    {
+        $matched = false;
+        foreach ($operations as $key => $operation) {
+            if ('/state' === $operation['path']) {
+                $matched = true;
+                break;
+            }
+        }
+
+        if ($matched) {
+            unset($operations[$key]);
+            $states = explode('_', $operation['value']);
+            if (in_array($state = (int) array_shift($states), Page::$STATES)) {
+                $page->setState($state);
+            }
+
+            if ($code = (int) array_shift($states)) {
+                $workflow_state = $this->getApplication()->getEntityManager()
+                    ->getRepository('BackBuilder\Workflow\State')
+                    ->findOneBy(array(
+                        '_code'   => $code,
+                        '_layout' => $page->getLayout()
+                    ))
+                ;
+
+                if (null !== $workflow_state) {
+                    $page->setWorkflowState($workflow_state);
+                }
             }
         }
     }

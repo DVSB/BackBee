@@ -189,6 +189,15 @@ class ClassContent extends AbstractServiceLocal
             $srzContent->data = $this->prepareContentData($content, $srzContent->data, $srzContent->accept, $srzContent->isAContentSet, $persist);
         }
 
+        if (null !== $srzContent->value && is_string($srzContent->value)) {
+            $srzContent->value = html_entity_decode($srzContent->value, ENT_COMPAT, 'UTF-8');
+            $srzContent->value = preg_replace('%(?:
+                  \xF0[\x90-\xBF][\x80-\xBF]{2}      # planes 1-3
+                | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
+                | \xF4[\x80-\x8F][\x80-\xBF]{2}      # plane 16
+            )%xs', '', $srzContent->value);
+        }
+
         $result = $content->unserialize($srzContent);
         $this->_processedContent[$srzContent->uid] = $result; //notify that content is already processed
 

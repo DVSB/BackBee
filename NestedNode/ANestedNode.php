@@ -288,6 +288,16 @@ abstract class ANestedNode extends AObjectIdentifiable
             return (($this->getLeftnode() >= $node->getLeftnode()) && ($this->getRightnode() <= $node->getRightnode()) && ($this->getRoot() === $node->getRoot()));
         }
     }
+    
+    /**
+     * Determine if current node has children
+     * 
+     * @return boolean
+     */
+    public function hasChildren()
+    {
+        return ($this->getRightnode() - $this->getLeftnode()) > 1;
+    }
 
     /**
      * Sets the unique identifier of the node

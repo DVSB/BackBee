@@ -76,7 +76,7 @@ abstract class ARestController extends Controller implements IRestController, IF
     {
         $items = array();
 
-        foreach($collection as $item) {
+        foreach ($collection as $item) {
             $items[] = $item;
         }
 
@@ -150,12 +150,16 @@ abstract class ARestController extends Controller implements IRestController, IF
      */
     protected function createResponse($content = '', $statusCode = 200, $contentType = 'application/json')
     {
+        if ('' === $content && 'application/json' === $contentType) {
+            $content = '{}';
+        }
+
         $response = new Response($content, $statusCode);
         $response->headers->set('Content-Type', $contentType);
 
         return $response;
     }
-    
+
     /**
      * Returns a RedirectResponse to the given URL.
      *
