@@ -653,8 +653,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function isVisible()
     {
-        return ($this->isOnline()
-                && !($this->getState() & self::STATE_HIDDEN));
+        return ($this->isOnline() && !($this->getState() & self::STATE_HIDDEN));
     }
 
     /**
@@ -670,8 +669,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
             return $onlineByState;
         } else {
             return $onlineByState
-                    && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
-                    && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert);
+                && (null === $this->getPublishing() || 0 === $this->getPublishing()->diff(new \DateTime())->invert)
+                && (null === $this->getArchiving() || 1 === $this->getArchiving()->diff(new \DateTime())->invert)
+            ;
         }
     }
 
@@ -902,9 +902,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         $zone = null;
 
         if (
-                null === $this->getLayout() ||
-                null === $this->getParent() ||
-                false === is_array($this->getLayout()->getZones())
+            null === $this->getLayout()
+            || null === $this->getParent()
+            || false === is_array($this->getLayout()->getZones())
         ) {
             return $zone;
         }
@@ -1001,10 +1001,10 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
             $currentZone = $currentpageRootZones->item($i);
 
             if (
-                    null !== $currentZone &&
-                    null !== $zoneInfos &&
-                    true === property_exists($zoneInfos, 'mainZone') &&
-                    true === $zoneInfos->mainZone
+                null !== $currentZone
+                && null !== $zoneInfos
+                && true === property_exists($zoneInfos, 'mainZone')
+                && true === $zoneInfos->mainZone
             ) {
                 $result[$currentZone->getUid()] = $currentZone;
             }
@@ -1021,8 +1021,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function isLinkedToHisParentBy(ContentSet $contentset = null)
     {
         if (
-                null !== $contentset &&
-                true === array_key_exists($contentset->getUid(), $this->getInheritedZones())
+            null !== $contentset &&
+            true === array_key_exists($contentset->getUid(), $this->getInheritedZones())
         ) {
             return true;
         }
@@ -1312,6 +1312,30 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     public function getWorkflowStateLabel()
     {
         return null !== $this->_workflow_state ? $this->_workflow_state->getLabel() : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("string")
+     */
+    public function getStateCode()
+    {
+        $code = $this->isOnline() ? '1' : '0';
+        $code .= null !== $this->_workflow_state
+            ? '_' . $this->_workflow_state->getCode()
+            : ''
+        ;
+
+        return $code;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("boolean")
+     */
+    public function isHidden()
+    {
+        return (boolean) $this->getState() & self::STATE_HIDDEN;
     }
 
     /**
