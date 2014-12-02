@@ -116,13 +116,14 @@ class PageController extends ARestController
      * @Rest\Pagination(default_count=25, max_count=100)
      *
      * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
-     * @Rest\QueryParam(name="order", description="Order by field", default="leftnode", requirements={
-     *   @Assert\Choice(choices = {"leftnode", "date", "title"}, message="Order by is not valid")
+     *
+     * @Rest\QueryParam(name="order_by", description="Page order by", requirements={
+     *   @Assert\Type(type="array", message="An array containing at least 1 column name to order by must be provided"),
+     *   @Assert\All({
+     *     @Assert\Choice(choices = {"asc", "desc"}, message="order direction is not valid")
+     *   })
      * })
-     * @Rest\QueryParam(name="dir", description="Order direction", default="asc", requirements={
-     *   @Assert\Choice(choices = {"asc", "desc"}, message="Order direction is not valid")
-     * })
-     * 
+     *
      * @Rest\QueryParam(name="state", description="Page State", requirements={
      *   @Assert\Type(type="array", message="An array containing at least 1 state must be provided"),
      *   @Assert\All({
@@ -142,9 +143,22 @@ class PageController extends ARestController
      */
     public function getCollectionAction(Request $request, $start, $count, Page $parent = null)
     {
-        $qb = $this->getPageRepository()->createQueryBuilder('p')
-            ->orderByMultiple(['_' . $request->query->get('order') => $request->query->get('dir')])
-        ;
+        $qb = $this->getPageRepository()->createQueryBuilder('p');
+
+        $order_by = array();
+        if (null !== $request->query->get('order_by', null)) {
+            foreach ($request->query->get('order_by') as $key => $value) {
+                if ('_' !== $key[0]) {
+                    $key = '_' . $key;
+                }
+
+                $order_by[$key] = $value;
+            }
+        } else {
+            $order_by['_leftnode'] = 'asc';
+        }
+
+        $qb->orderByMultiple($order_by);
 
         if(null !== $parent) {
             // parent was defined - don't include it in the results
