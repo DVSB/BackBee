@@ -112,7 +112,6 @@ class PageController extends ARestController
     /**
      * Get collection of page entity
      *
-     *
      * @Rest\Pagination(default_count=25, max_count=100)
      *
      * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
@@ -131,10 +130,6 @@ class PageController extends ARestController
      *   })
      * })
      *
-     * @Rest\QueryParam(name="depth", description="Page depth", requirements={
-     *   @Assert\Range(min = 0, max = 100, minMessage="Page depth must be a positive number", maxMessage="Page depth cannot be greater than 100")
-     * })
-     *
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
      * )
@@ -144,6 +139,14 @@ class PageController extends ARestController
     public function getCollectionAction(Request $request, $start, $count, Page $parent = null)
     {
         $qb = $this->getPageRepository()->createQueryBuilder('p');
+
+        if (null === $parent) {
+            $qb->andSiteIs($this->getApplication()->getSite());
+        } else {
+            $this->granted('VIEW', $parent);
+        }
+
+        $qb = $qb->andParentIs($parent);
 
         $order_by = array();
         if (null !== $request->query->get('order_by', null)) {
@@ -160,38 +163,17 @@ class PageController extends ARestController
 
         $qb->orderByMultiple($order_by);
 
-        if(null !== $parent) {
-            // parent was defined - don't include it in the results
-            $qb = $qb->andIsDescendantOf($parent, true);
-        } else {
-            // parent wasn't defined - retrieve the site's home page & include it in the returned results
-            $parent = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
-            $qb = $qb->andIsDescendantOf($parent, false);
-        }
-
-        $this->granted('VIEW', $parent);
-
         if (null !== $state = $request->query->get('state', null)) {
             $qb->andStateIsIn((array) $state);
         }
 
-        if (null !== $request->query->get('depth')) {
-            $qb->andLevelIsLowerThan($parent->getLevel() + $request->query->get('depth'));
-        }
-
-        $results = $qb
-            ->setFirstResult($start)
-            ->setMaxResults($count)
-        ;
-        $results = new Paginator($qb);
-
+        $results = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
         $count = 0;
         foreach ($results as $row) {
             $count++;
         }
 
         $result_count = $start + $count;
-
         $response = $this->createResponse($this->formatCollection($results));
         $response->headers->set('Content-Range', "$start-$result_count/" . count($results));
 
