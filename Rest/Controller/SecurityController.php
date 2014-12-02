@@ -114,7 +114,6 @@ class SecurityController extends ARestController
 
             $authProvider = $securityContext->getAuthProvider('bb_auth');
 
-
             $tokenAuthenticated = $authProvider->authenticate($token);
 
             $response->setContent($this->formatItem([

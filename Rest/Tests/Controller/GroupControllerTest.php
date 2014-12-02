@@ -67,6 +67,8 @@ class GroupControllerTest extends TestCase
         $bbapp->getEntityManager()->persist($this->groupEditor);
         
         $bbapp->getEntityManager()->flush();
+
+        $this->createAuthUser($this->groupEditor->getId());
         
     }
     
@@ -96,6 +98,7 @@ class GroupControllerTest extends TestCase
         
         $res = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $res);
+
         $this->assertCount(1, $res);
         
         // filter by site
@@ -111,6 +114,7 @@ class GroupControllerTest extends TestCase
         $res = json_decode($response->getContent(), true);
         
         $this->assertInternalType('array', $res);
+        
         $this->assertCount(1, $res);
         $this->assertEquals($this->site->getUid(), $res[0]['site_uid']);
         

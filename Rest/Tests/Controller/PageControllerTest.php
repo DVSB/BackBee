@@ -84,7 +84,7 @@ class PageControllerTest extends RestTestCase
     /**
      * @covers ::postAction
      */
-    public function test_postAction()
+    public function testPostAction()
     {
         $layout = new Layout();
 
@@ -115,13 +115,13 @@ class PageControllerTest extends RestTestCase
         ]));
         
         $this->assertEquals(201, $response->getStatusCode());
-        $this->assertEquals('http://localhost/url', $response->headers->get('Location'));
+        $this->assertEquals('http://test_server/', $response->headers->get('Location'));
     }
     
     /**
      * @covers ::putAction
      */
-    public function test_putAction()
+    public function testPutAction()
     {
         $em = $this->getEntityManager();
         
@@ -170,7 +170,7 @@ class PageControllerTest extends RestTestCase
     /**
      * @covers ::patchAction
      */
-    public function test_patchAction()
+    public function testPatchAction()
     {
         // create page
         $page = (new Page())
@@ -206,7 +206,7 @@ class PageControllerTest extends RestTestCase
     /**
      * @covers ::getCollectionAction
      */
-    public function test_getCollectionAction()
+    public function testGetCollectionAction()
     {
         // create pages
         $homePage = new Page();
@@ -250,24 +250,27 @@ class PageControllerTest extends RestTestCase
         
         $repo = $this->em->getRepository('BackBuilder\NestedNode\Page');
         
-        $this->em->flush();
-        
         $repo->insertNodeAsFirstChildOf($deletedPage, $homePage);
         $repo->insertNodeAsFirstChildOf($offlinePage, $homePage);
         $repo->insertNodeAsFirstChildOf($onlinePage, $homePage);
         $repo->insertNodeAsFirstChildOf($onlinePage2, $onlinePage);
         
+        $this->em->flush();
+
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage, 
             new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'), 
             MaskBuilder::MASK_VIEW
         );
         
-        // no filters - should return all pages by default
+        // no filters - should return all pages by default 
+        /**
+         * @todo should only return children of first level
+         */
         $response1 = $this->sendRequest(self::requestGet('/rest/1/page'));
         $this->assertEquals(200, $response1->getStatusCode());
         $res1 = json_decode($response1->getContent(), true);
-        var_dump($res1);
+
         $this->assertInternalType('array', $res1);
         $this->assertCount(3, $res1);
         
