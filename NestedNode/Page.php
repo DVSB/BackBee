@@ -1320,7 +1320,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function getStateCode()
     {
-        $code = $this->isOnline() ? '1' : '0';
+        $code = $this->isOnline(true) ? '1' : '0';
         $code .= null !== $this->_workflow_state
             ? '_' . $this->_workflow_state->getCode()
             : ''
