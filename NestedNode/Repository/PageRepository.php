@@ -43,7 +43,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  */
 class PageRepository extends NestedNodeRepository
 {
-
     /**
      * Creates a new Page QueryBuilder instance that is prepopulated for this entity name.
      * @param string $alias      the alias to use
@@ -53,20 +52,8 @@ class PageRepository extends NestedNodeRepository
     public function createQueryBuilder($alias, $indexBy = null)
     {
         $qb = new PageQueryBuilder($this->_em);
-        return $qb->select($alias)->from($this->_entityName, $alias, $indexBy);
-    }
 
-    /**
-     * @deprecated since version 0.10.0
-     */
-    private function _andOnline(\Doctrine\ORM\QueryBuilder $q)
-    {
-        return $q->andWhere('n._state >= ' . Page::STATE_ONLINE)
-            ->andWhere('n._state <' . Page::STATE_DELETED)
-			->andWhere('n._state <>' . Page::STATE_HIDDEN)
-            ->andWhere('n._publishing IS NULL OR n._publishing <= :now')
-            ->andWhere('n._archiving IS NULL OR n._archiving > :now')
-            ->setParameter('now', date('Y-m-d H:i:00', time()));
+        return $qb->select($alias)->from($this->_entityName, $alias, $indexBy);
     }
 
     /**
@@ -79,9 +66,10 @@ class PageRepository extends NestedNodeRepository
     public function getOnlineDescendants(Page $page, $depth = null, $includeNode = false)
     {
         $q = $this->createQueryBuilder('p')
-                ->andIsDescendantOf($page, !$includeNode)
-                ->andIsOnline()
-                ->orderBy('p._leftnode', 'asc');
+            ->andIsDescendantOf($page, !$includeNode)
+            ->andIsOnline()
+            ->orderBy('p._leftnode', 'asc')
+        ;
 
         if (null !== $depth) {
             $q->andLevelIsLowerThan($page->getLevel() + $depth);
@@ -98,9 +86,10 @@ class PageRepository extends NestedNodeRepository
     public function getOnlinePrevSibling(Page $page)
     {
         return $this->createQueryBuilder('p')
-                        ->andIsPreviousOnlineSiblingOf($page)
-                        ->getQuery()
-                        ->getOneOrNullResult();
+            ->andIsPreviousOnlineSiblingOf($page)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
     }
 
     /**
@@ -115,9 +104,10 @@ class PageRepository extends NestedNodeRepository
     public function getOnlineSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
         return $this->createQueryBuilder('p')
-                        ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
-                        ->getQuery()
-                        ->getResult();
+            ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 
     /**
@@ -133,10 +123,11 @@ class PageRepository extends NestedNodeRepository
     public function getOnlineSiblingsByLayout(Page $page, Layout $layout, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
         return $this->createQueryBuilder('p')
-                        ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
-                        ->andLayoutIs($layout)
-                        ->getQuery()
-                        ->getResult();
+            ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
+            ->andLayoutIs($layout)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 
     /**
@@ -147,9 +138,10 @@ class PageRepository extends NestedNodeRepository
     public function getOnlineNextSibling(Page $page)
     {
         return $this->createQueryBuilder('p')
-                        ->andIsNextOnlineSiblingOf($page)
-                        ->getQuery()
-                        ->getOneOrNullResult();
+            ->andIsNextOnlineSiblingOf($page)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
     }
 
     /**
@@ -208,9 +200,10 @@ class PageRepository extends NestedNodeRepository
     public function getVisibleDescendants(Page $page, $depth = null, $includeNode = false)
     {
         $q = $this->createQueryBuilder('p')
-                ->andIsDescendantOf($page, !$includeNode)
-                ->andIsVisible()
-                ->orderBy('p._leftnode', 'asc');
+            ->andIsDescendantOf($page, !$includeNode)
+            ->andIsVisible()
+            ->orderBy('p._leftnode', 'asc')
+        ;
 
         if (null !== $depth) {
             $q->andLevelIsLowerThan($page->getLevel() + $depth);
@@ -231,9 +224,10 @@ class PageRepository extends NestedNodeRepository
     public function getVisibleSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
         return $this->createQueryBuilder('p')
-                        ->andIsVisibleSiblingsOf($page, !$includeNode, $order, $limit, $start)
-                        ->getQuery()
-                        ->getResult();
+            ->andIsVisibleSiblingsOf($page, !$includeNode, $order, $limit, $start)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 
     /**
@@ -244,9 +238,10 @@ class PageRepository extends NestedNodeRepository
     public function getVisiblePrevSibling(Page $page)
     {
         return $this->createQueryBuilder('p')
-                        ->andIsPreviousVisibleSiblingOf($page)
-                        ->getQuery()
-                        ->getOneOrNullResult();
+            ->andIsPreviousVisibleSiblingOf($page)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
     }
 
     /**
@@ -276,12 +271,13 @@ class PageRepository extends NestedNodeRepository
      */
     public function replaceRootContentSet(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet)
     {
+        $result = false;
+
         try {
             $result = $page->replaceRootContentSet($oldContentSet, $newContentSet);
-            return $result;
-        } catch (Exception $e) {
-            return false;
-        }
+        } catch (\Exception $e) { /* nothing to do */ }
+
+        return $result;
     }
 
     /**
@@ -292,9 +288,10 @@ class PageRepository extends NestedNodeRepository
     public function getVisibleNextSibling(Page $page)
     {
         return $this->createQueryBuilder('p')
-                        ->andIsNextVisibleSiblingOf($page)
-                        ->getQuery()
-                        ->getOneOrNullResult();
+            ->andIsNextVisibleSiblingOf($page)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
     }
 
     /**
@@ -316,13 +313,15 @@ class PageRepository extends NestedNodeRepository
             if ('_' !== substr($order['field'], 0, 1)) {
                 $order['field'] = '_' . $order['field'];
             }
+
             $order = array($order['field'] => (true === array_key_exists('sort', $order) ? $order['sort'] : 'asc'));
         }
 
         $q = $this->createQueryBuilder('p')
-                ->andIsDescendantOf($page, !$includeNode)
-                ->andStateIsLowerThan(Page::STATE_DELETED)
-                ->orderByMultiple($order);
+            ->andIsDescendantOf($page, !$includeNode)
+            ->andStateIsLowerThan(Page::STATE_DELETED)
+            ->orderByMultiple($order)
+        ;
 
         if (null !== $depth) {
             $q->andLevelIsLowerThan($page->getLevel() + $depth);
@@ -338,7 +337,8 @@ class PageRepository extends NestedNodeRepository
 
         //@Todo: allow use of $firstresult or $maxresults without paginator
         $q->setFirstResult($firstresult)
-                ->setMaxResults($maxresults);
+          ->setMaxResults($maxresults)
+        ;
 
         return new Paginator($q);
     }
@@ -352,9 +352,10 @@ class PageRepository extends NestedNodeRepository
     public function getRoot(Site $site, array $restrictedStates = array())
     {
         $q = $this->createQueryBuilder('p')
-                ->andSiteIs($site)
-                ->andParentIs(null)
-                ->setMaxResults(1);
+            ->andSiteIs($site)
+            ->andParentIs(null)
+            ->setMaxResults(1)
+        ;
 
         if (0 < count($restrictedStates)) {
             $q->andStateIsIn($restrictedStates);
@@ -375,9 +376,10 @@ class PageRepository extends NestedNodeRepository
         $order = array_replace(array('_leftnode', 'asc'), $order);
 
         $q = $this->createQueryBuilder('p')
-                ->andParentIs($page)
-                ->andIsOnline()
-                ->orderBy('p.' . $order[0], $order[1]);
+            ->andParentIs($page)
+            ->andIsOnline()
+            ->orderBy('p.' . $order[0], $order[1])
+        ;
 
         if (null !== $maxResults) {
             $q->setMaxResults($maxResults);
@@ -401,17 +403,15 @@ class PageRepository extends NestedNodeRepository
     public function getChildren(Page $page, $order_sort = '_title', $order_dir = 'asc', $paging = array(), $restrictedStates = array(), $options = array())
     {
         $q = $this->createQueryBuilder('p')
-                ->andParentIs($page)
-                ->andSearchCriteria($restrictedStates, $options)
-                ->orderBy('p.' . $order_sort, $order_dir);
+            ->andParentIs($page)
+            ->andSearchCriteria($restrictedStates, $options)
+            ->orderBy('p.' . $order_sort, $order_dir)
+        ;
 
-        if (
-                true === is_array($paging) &&
-                true === array_key_exists("start", $paging) &&
-                true === array_key_exists("limit", $paging)
-        ) {
-            $q->setFirstResult($paging["start"])
-                    ->setMaxResults($paging["limit"]);
+        if (is_array($paging) && array_key_exists('start', $paging) && array_key_exists('limit', $paging)) {
+            $q->setFirstResult($paging['start'])
+              ->setMaxResults($paging['limit'])
+            ;
 
             return new Paginator($q);
         }
@@ -431,11 +431,12 @@ class PageRepository extends NestedNodeRepository
     public function countChildren(Page $page, $restrictedStates = array(), $options = array())
     {
         return $this->createQueryBuilder('p')
-                        ->select("COUNT(p)")
-                        ->andParentIs($page)
-                        ->andSearchCriteria($restrictedStates, $options)
-                        ->getQuery()
-                        ->getSingleScalarResult();
+            ->select("COUNT(p)")
+            ->andParentIs($page)
+            ->andSearchCriteria($restrictedStates, $options)
+            ->getQuery()
+            ->getSingleScalarResult()
+        ;
     }
 
     /**
@@ -460,20 +461,68 @@ class PageRepository extends NestedNodeRepository
      * @param array $limit          optional, the query limit restriction, array(0, 10) by default
      * @return array|null
      */
-    public function likeAPage($wordsSearch = "", array $limit = array(0, 10))
+    public function likeAPage($wordsSearch = '', array $limit = array(0, 10))
     {
         $limit = array_replace(array(0, 10), $limit);
 
-        if ("" === $wordsSearch) {
+        if ('' === $wordsSearch) {
             return null;
         }
 
         return $this->createQueryBuilder('p')
-                ->andTitleIsLike($wordsSearch)
-                ->setFirstResult($limit[0])
-                ->setMaxResults($limit[1])
-                ->getQuery()
-                ->getResult();
+            ->andTitleIsLike($wordsSearch)
+            ->setFirstResult($limit[0])
+            ->setMaxResults($limit[1])
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+     * Duplicate a page and optionnaly its descendants
+     * @param \BackBuilder\NestedNode\Page $page                the page to duplicate
+     * @param string $title                                     optional, the title of the copy, by default the title of the copied page
+     * @param \BackBuilder\NestedNode\Page $parent              optional, the parent of the copy, by default the parent of the copied page
+     * @param boolean $recursive                                if true (default) duplicate recursively the descendants of the page
+     * @param \BackBuilder\Security\Token\BBUserToken           the BBuser token to allow the update of revisions
+     * @return \BackBuilder\NestedNode\Page                     the copy of the page
+     * @throws \BackBuilder\Exception\InvalidArgumentException  occures if the page is deleted or if the page is recursively duplicated in itself
+     */
+    public function duplicate(Page $page, $title = null, Page $parent = null, $recursive = true, BBUserToken $token = null)
+    {
+        $new_page = $recursive ? $this->copyRecursively($page, $title, $parent) : $this->copy($page, $title, $parent);
+
+        // Finally updating contentset and mainnode
+        if (null !== $token) {
+            foreach ($new_page->cloning_datas['contents'] as $content) {
+                $this->updateRelatedPostCloning($content, $token, $new_page->cloning_datas)
+                     ->updateMainNodePostCloning($content, $token, $new_page->cloning_datas['pages'])
+                ;
+            }
+        }
+
+        return $new_page;
+    }
+
+    /**
+     * Removes page with no contentset for $site
+     * @param \BackBuilder\Site\Site $site
+     * @codeCoverageIgnore
+     * @Todo: what if the deleted page has chldren ?
+     */
+    public function removeEmptyPages(Site $site)
+    {
+        $q = $this->createQueryBuilder('p')
+            ->select()
+            ->andWhere('p._contentset IS NULL')
+            ->andWhere('p._site = :site')
+            ->orderBy('p._leftnode', 'desc')
+            ->setParameter('site', $site)
+        ;
+
+        foreach ($q->getQuery()->execute() as $page) {
+            $this->delete($page);
+        }
     }
 
     /**
@@ -484,7 +533,7 @@ class PageRepository extends NestedNodeRepository
      * @return \BackBuilder\NestedNode\Page                      the copy of the page
      * @throws \BackBuilder\Exception\InvalidArgumentException   occures if the page is deleted
      */
-    private function _copy(Page $page, $title = null, Page $parent = null)
+    private function copy(Page $page, $title = null, Page $parent = null)
     {
         if (Page::STATE_DELETED & $page->getState()) {
             throw new InvalidArgumentException('Cannot duplicate a deleted page');
@@ -505,9 +554,7 @@ class PageRepository extends NestedNodeRepository
             $new_page = $this->insertNodeAsFirstChildOf($new_page, $parent);
         }
 
-        // Persisting entities
         $this->_em->persist($new_page);
-        $this->_em->flush();
 
         return $new_page;
     }
@@ -520,20 +567,21 @@ class PageRepository extends NestedNodeRepository
      * @return \BackBuilder\NestedNode\Page                      the copy of the page
      * @throws \BackBuilder\Exception\InvalidArgumentException   occures if the page is deleted or if the page is recursively duplicated in itself
      */
-    private function _copy_recursively(Page $page, $title = null, Page $parent = null)
+    private function copyRecursively(Page $page, $title = null, Page $parent = null)
     {
         if (null !== $parent && true === $parent->isDescendantOf($page)) {
             throw new InvalidArgumentException('Cannot recursively duplicate a page in itself');
         }
 
         // Cloning the page
-        $new_page = $this->_copy($page, $title, $parent);
+        $new_page = $this->copy($page, $title, $parent);
 
         // Storing current children before clonage
         $children = array();
         if (false === $page->isLeaf()) {
             $children = $this->getDescendants($page, 1);
         }
+
         foreach (array_reverse($children) as $child) {
             if (!(Page::STATE_DELETED & $child->getState())) {
                 $this->_em->refresh($new_page);
@@ -542,7 +590,6 @@ class PageRepository extends NestedNodeRepository
                 $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
             }
         }
-        $this->_em->flush();
 
         return $new_page;
     }
@@ -554,14 +601,14 @@ class PageRepository extends NestedNodeRepository
      * @param array $cloning_datas
      * @return \BackBuilder\NestedNode\Repository\PageRepository
      */
-    private function _updateRelatedPostCloning(AClassContent $content, BBUserToken $token, array $cloning_datas)
+    private function updateRelatedPostCloning(AClassContent $content, BBUserToken $token, array $cloning_datas)
     {
         if (
-                false === ($content instanceof ContentSet) ||
-                false === array_key_exists('pages', $cloning_datas) ||
-                false === array_key_exists('contents', $cloning_datas) ||
-                0 === count($cloning_datas['pages']) ||
-                0 === count($cloning_datas['contents'])
+            false === ($content instanceof ContentSet)
+            || false === array_key_exists('pages', $cloning_datas)
+            || false === array_key_exists('contents', $cloning_datas)
+            || 0 === count($cloning_datas['pages'])
+            || 0 === count($cloning_datas['contents'])
         ) {
             // Nothing to do
             return $this;
@@ -578,9 +625,9 @@ class PageRepository extends NestedNodeRepository
             }
 
             if (
-                    null === $subcontent->getMainNode() ||
-                    false === in_array($subcontent->getMainNode()->getUid(), $copied_pages) ||
-                    false === in_array($subcontent->getUid(), $copied_contents)
+                null === $subcontent->getMainNode()
+                || false === in_array($subcontent->getMainNode()->getUid(), $copied_pages)
+                || false === in_array($subcontent->getUid(), $copied_contents)
             ) {
                 continue;
             }
@@ -603,13 +650,13 @@ class PageRepository extends NestedNodeRepository
      * @param array $cloning_pages
      * @return \BackBuilder\NestedNode\Repository\PageRepository
      */
-    private function _updateMainNodePostCloning(AClassContent $content, BBUserToken $token, array $cloning_pages)
+    private function updateMainNodePostCloning(AClassContent $content, BBUserToken $token, array $cloning_pages)
     {
         $mainnode = $content->getMainNode();
         if (null !== $mainnode && true === in_array($mainnode->getUid(), array_keys($cloning_pages))) {
 
             // Loading draft for content
-            if (NULL !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
+            if (null !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
                 $content->setDraft($draft);
             }
 
@@ -618,50 +665,4 @@ class PageRepository extends NestedNodeRepository
 
         return $this;
     }
-
-    /**
-     * Duplicate a page and optionnaly its descendants
-     * @param \BackBuilder\NestedNode\Page $page                the page to duplicate
-     * @param string $title                                     optional, the title of the copy, by default the title of the copied page
-     * @param \BackBuilder\NestedNode\Page $parent              optional, the parent of the copy, by default the parent of the copied page
-     * @param boolean $recursive                                if true (default) duplicate recursively the descendants of the page
-     * @param \BackBuilder\Security\Token\BBUserToken           the BBuser token to allow the update of revisions
-     * @return \BackBuilder\NestedNode\Page                     the copy of the page
-     * @throws \BackBuilder\Exception\InvalidArgumentException  occures if the page is deleted or if the page is recursively duplicated in itself
-     */
-    public function duplicate(Page $page, $title = null, Page $parent = null, $recursive = true, BBUserToken $token = null)
-    {
-        $new_page = (true === $recursive) ? $this->_copy_recursively($page, $title, $parent) : $this->_copy($page, $title, $parent);
-
-        // Finally updating contentset and mainnode
-        if (null !== $token) {
-            foreach ($new_page->cloning_datas['contents'] as $content) {
-                $this->_updateRelatedPostCloning($content, $token, $new_page->cloning_datas)
-                        ->_updateMainNodePostCloning($content, $token, $new_page->cloning_datas['pages']);
-            }
-            $this->_em->flush();
-        }
-
-        return $new_page;
-    }
-
-    /**
-     * Removes page with no contentset for $site
-     * @param \BackBuilder\Site\Site $site
-     * @codeCoverageIgnore
-     * @Todo: what if the deleted page has chldren ?
-     */
-    public function removeEmptyPages(Site $site)
-    {
-        $q = $this->createQueryBuilder('p')
-                ->select()
-                ->andWhere('p._contentset IS NULL')
-                ->andWhere('p._site = :site')
-                ->orderBy('p._leftnode', 'desc')
-                ->setParameter('site', $site);
-        foreach ($q->getQuery()->execute() as $page) {
-            $this->delete($page);
-        }
-    }
-
 }
