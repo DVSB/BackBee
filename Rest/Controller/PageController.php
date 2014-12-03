@@ -354,6 +354,7 @@ class PageController extends ARestController
         $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
 
         $this->patchStateOperation($page, $operations);
+        $this->patchSiblingAndParentOperation($page, $operations);
 
         try {
             $entity_patcher->patch($page, $operations);
@@ -363,48 +364,6 @@ class PageController extends ARestController
 
         if (true === $page->isOnline(true)) {
             $this->granted('PUBLISH', $page);
-        }
-
-        $this->getEntityManager()->flush($page);
-
-        return $this->createResponse('', 204);
-    }
-
-    /**
-     * Update page by moving it from current parent to new one
-     *
-     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
-     * @Rest\ParamConverter(
-     *   name="parent", id_name="parent_uid", class="BackBuilder\NestedNode\Page", id_source="request"
-     * )
-     * @Rest\ParamConverter(
-     *   name="next", id_name="next_uid", class="BackBuilder\NestedNode\Page", id_source="request", required=false
-     * )
-     * @Rest\Security(expression="is_granted('EDIT', page)")
-     * @Rest\Security(expression="is_granted('EDIT', parent)")
-     */
-    public function moveNodeAction(Page $page, Page $parent)
-    {
-        if (true === $page->isRoot()) {
-            throw new AccessDeniedHttpException('Cannot move root node of a site.');
-        }
-
-        if (true === $page->isOnline(true)) {
-            $this->granted('PUBLISH', $page); // user must have publish permission on the page
-        }
-
-        try {
-            if (null === $next = $this->getEntityFromAttributes('next')) {
-                $this->getPageRepository()->moveAsLastChildOf($page, $parent);
-            } else {
-                if (false === $next->getParent()->equals($parent)) {
-                    throw new AccessDeniedHttpException('Next node must have the same parent node.');
-                }
-
-                $this->getPageRepository()->moveAsPrevSiblingOf($page, $next);
-            }
-        } catch (InvalidArgumentException $e) {
-            throw new AccessDeniedHttpException('Invalid node move action: ' . $e->getMessage());
         }
 
         $this->getEntityManager()->flush($page);
@@ -536,5 +495,79 @@ class PageController extends ARestController
                 }
             }
         }
+    }
+
+    /**
+     * Custom patch process for Page's sibling or parent node
+     *
+     * @param  Page   $page
+     * @param  array  $operations passed by reference
+     */
+    private function patchSiblingAndParentOperation(Page $page, array &$operations)
+    {
+        if ($page->isRoot()) {
+            throw new AccessDeniedHttpException('Cannot move root node of a site.');
+        }
+
+        if ($page->isOnline(true)) {
+            $this->granted('PUBLISH', $page); // user must have publish permission on the page
+        }
+
+        $sibling_operation = null;
+        $parent_operation = null;
+        foreach ($operations as $key => $operation) {
+            if ('/sibling_uid' === $operation['path']) {
+                $sibling_operation = array(
+                    'key'       => $key,
+                    'operation' => $operation
+                );
+            } elseif ('/parent_uid' === $operation['path']) {
+                $parent_operation = array(
+                    'key'       => $key,
+                    'operation' => $operation
+                );
+            }
+        }
+
+        try {
+            if (null !== $sibling_operation) {
+                unset($operations[$sibling_operation['key']]);
+
+                $sibling = $this->getPageByUid($sibling_operation['operation']['value']);
+                $this->granted('EDIT', $sibling->getParent());
+
+                $this->getPageRepository()->moveAsPrevSiblingOf($page, $sibling);
+            } elseif (null !== $parent_operation) {
+                unset($operations[$parent_operation['key']]);
+
+                $parent = $this->getPageByUid($parent_operation['operation']['value']);
+                $this->granted('EDIT', $parent);
+
+                $this->getPageRepository()->moveAsLastChildOf($page, $parent);
+            }
+        } catch (InvalidArgumentException $e) {
+            throw new AccessDeniedHttpException('Invalid node move action: ' . $e->getMessage());
+        }
+
+        if (null !== $sibling_operation || null !== $parent_operation) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    /**
+     * Retrieves page entity with provided uid
+     *
+     * @param  string $uid
+     *
+     * @return Page
+     * @throws NotFoundHttpException raised if page not found with provided uid
+     */
+    private function getPageByUid($uid)
+    {
+        if (null === $page = $this->getApplication()->getEntityManager()->find('BackBuilder\NestedNode\Page', $uid)) {
+            throw new NotFoundHttpException("Unable to find page with uid `$uid`");
+        }
+
+        return $page;
     }
 }

@@ -47,13 +47,6 @@ bb.images:
         filename: .+
 
 # BackBuilder REST API test page
-# bb.rest.test:
-#     pattern: /rest/{version}/_generateKey/
-#     defaults:
-#         _action: generateKeyAction
-#         _controller: BackBuilder\Rest\Controller\TestController
-#     requirements:
-#         version: \d
 
 bb.rest.user_get:
     pattern: /rest/{version}/user/{id}
@@ -229,15 +222,6 @@ bb.rest.page.patch:
     pattern: /rest/{version}/page/{uid}
     defaults:
         _action:     patchAction
-        _controller: BackBuilder\Rest\Controller\PageController
-    requirements:
-        uid: \w{32}
-        _method: PATCH
-
-bb.rest.page.move_node:
-    pattern: /rest/{version}/page/{uid}/node/move
-    defaults:
-        _action:     moveNodeAction
         _controller: BackBuilder\Rest\Controller\PageController
     requirements:
         uid: \w{32}
