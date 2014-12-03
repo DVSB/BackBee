@@ -126,7 +126,7 @@ class PageController extends ARestController
      * @Rest\QueryParam(name="state", description="Page State", requirements={
      *   @Assert\Type(type="array", message="An array containing at least 1 state must be provided"),
      *   @Assert\All({
-     *     @Assert\Choice(choices = {"0", "1", "2", "4"}, message="State is not valid")
+     *     @Assert\Choice(choices = {"0", "1", "2", "3", 4"}, message="State is not valid")
      *   })
      * })
      *
