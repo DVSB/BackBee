@@ -23,6 +23,7 @@ namespace BackBuilder\Bundle\Registry;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
+
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
@@ -37,7 +38,7 @@ class Repository extends EntityRepository
 
     /**
      * Saves the registry entry in DB, persist it if need
-     * @param  \BackBuilder\Bundle\Registry $registry
+     * @param \BackBuilder\Bundle\Registry $registry
      * @return \BackBuilder\Bundle\Registry
      */
     public function save(\BackBuilder\Bundle\Registry $registry)
@@ -53,22 +54,24 @@ class Repository extends EntityRepository
 
     /**
      * Removes the registry entry from DB
-     * @param  \BackBuilder\Bundle\Registry $registry
+     * @param \BackBuilder\Bundle\Registry $registry
      * @return \BackBuilder\Bundle\Registry
      */
     public function remove(\BackBuilder\Bundle\Registry $registry)
     {
-        if (\Doctrine\ORM\UnitOfWork::STATE_NEW !== $this->getEntityManager()->getUnitOfWork()->getEntityState($registry)) {
+        if(\Doctrine\ORM\UnitOfWork::STATE_NEW !== $this->getEntityManager()->getUnitOfWork()->getEntityState($registry)) {
             $this->getEntityManager()->remove($registry);
             $this->getEntityManager()->flush($registry);
         }
+
+
 
         return $registry;
     }
 
     /**
      * Removes the registry entry from DB
-     * @param  \BackBuilder\Bundle\Registry $registry
+     * @param \BackBuilder\Bundle\Registry $registry
      * @return \BackBuilder\Bundle\Registry
      */
     public function removeEntity($entity)
@@ -106,7 +109,13 @@ class Repository extends EntityRepository
      **/
     public function findRegistriesEntityById($identifier, $id)
     {
-        $sql = 'SELECT * FROM registry AS r WHERE (r.type = "'.addslashes($identifier).'" OR r.scope = "'.addslashes($identifier).'") AND ((r.key = "identifier" AND r.value = "'.addslashes($id).'") OR (r.scope = "'.addslashes($id).'"))';
+        $sql = sprintf(
+            'SELECT * FROM registry AS r WHERE (r.type = "%s" OR r.scope = "%s") AND ((r.key = "identifier" AND r.value = "%s") OR (r.scope = "%s"))',
+            addslashes($identifier),
+            addslashes($identifier),
+            addslashes($id),
+            addslashes($id)
+        );
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
 
         return $query->getResult();
@@ -138,12 +147,12 @@ class Repository extends EntityRepository
             $identifier = $this->getEntityName();
         }
 
-        $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "'.$descriminator.'"';
+        $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "%s"';
 
         if (class_exists($descriminator) && (new Builder())->isRegistryEntity(new $descriminator())) {
-            $count = $this->countEntities($descriminator, $this->executeSql(sprintf($sql, 'type')));
+            $count = $this->countEntities($descriminator, $this->executeSql(sprintf($sql, 'type', $descriminator)));
         } else {
-            $count = $this->executeSql(sprintf($sql, 'scope'));
+            $count = $this->executeSql(sprintf($sql, 'scope', $descriminator));
         }
 
         return $count;
@@ -154,7 +163,11 @@ class Repository extends EntityRepository
         if (is_null($identifier)) {
             $identifier = $this->getEntityName();
         }
-        $sql = 'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = "'.addslashes($identifier).'" OR r.scope = "'.addslashes($identifier).'") ORDER BY r.id';
+        $sql = sprintf(
+            'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = "%s" OR r.scope = "%s") ORDER BY r.id',
+            addslashes($identifier),
+            addslashes($identifier)
+        );
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
 
         $entities = array();
