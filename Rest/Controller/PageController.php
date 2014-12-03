@@ -266,9 +266,17 @@ class PageController extends ARestController
         }
 
         $response = $this->createResponse('', 201);
-        $response->headers->set(
-            'Location', $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite())
+        $location = $this->getApplication()->getRouting()->getUrlByRouteName(
+            'bb.rest.page.get',
+            array(
+                'version' => $request->attributes->get('version'),
+                'uid'     => $page->getUid()
+            ),
+            null,
+            false,
+            $page->getSite()
         );
+        $response->headers->set('Location', $location);
 
         return $response;
     }
@@ -402,10 +410,16 @@ class PageController extends ARestController
      * })
      *
      * @Rest\ParamConverter(name="source", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(
+     *   name="parent", id_name="parent_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=false
+     * )
+     * @Rest\ParamConverter(
+     *   name="sibling", id_name="sibling_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=false
+     * )
      *
      * @Rest\Security(expression="is_granted('CREATE', source)")
      */
-    public function cloneAction(Page $source, Request $request)
+    public function cloneAction(Page $source, Page $parent = null, $sibling = null, Request $request)
     {
         // user must have view permission on chosen layout
         $this->granted('VIEW', $source->getLayout());
@@ -424,10 +438,30 @@ class PageController extends ARestController
             $this->getApplication()->getBBUserToken()
         );
 
+        $this->getApplication()->getEntityManager()->persist($page);
+
+        if (null !== $sibling) {
+            $this->granted('EDIT', $sibling->getParent());
+            $this->getPageRepository()->moveAsPrevSiblingOf($page, $sibling);
+        } elseif (null !== $parent) {
+            $this->granted('EDIT', $parent);
+            $this->getPageRepository()->moveAsLastChildOf($page, $parent);
+        }
+
+        $this->getApplication()->getEntityManager()->flush();
+
         $response = $this->createResponse('', 201);
-        $response->headers->set(
-            'Location', $this->getApplication()->getRouting()->getUri($page->getUrl(), null, $page->getSite())
+        $location = $this->getApplication()->getRouting()->getUrlByRouteName(
+            'bb.rest.page.get',
+            array(
+                'version' => $request->attributes->get('version'),
+                'uid'     => $page->getUid()
+            ),
+            null,
+            false,
+            $page->getSite()
         );
+        $response->headers->set('Location', $location);
 
         return $response;
     }
