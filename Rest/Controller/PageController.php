@@ -520,14 +520,6 @@ class PageController extends ARestController
      */
     private function patchSiblingAndParentOperation(Page $page, array &$operations)
     {
-        if ($page->isRoot()) {
-            throw new AccessDeniedHttpException('Cannot move root node of a site.');
-        }
-
-        if ($page->isOnline(true)) {
-            $this->granted('PUBLISH', $page); // user must have publish permission on the page
-        }
-
         $sibling_operation = null;
         $parent_operation = null;
         foreach ($operations as $key => $operation) {
@@ -536,6 +528,16 @@ class PageController extends ARestController
                 $sibling_operation = $op;
             } elseif ('/parent_uid' === $operation['path']) {
                 $parent_operation = $op;
+            }
+        }
+
+        if (null !== $sibling_operation || null !== $parent_operation) {
+            if ($page->isRoot()) {
+                throw new AccessDeniedHttpException('Cannot move root node of a site.');
+            }
+
+            if ($page->isOnline(true)) {
+                $this->granted('PUBLISH', $page); // user must have publish permission on the page
             }
         }
 
