@@ -202,13 +202,16 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
             return $pathinfo;
         }
 
-        $pathinfo = str_replace('//', '/', $pathinfo);
-        if (null === $site || $this->application->getSite() === $site) {
-            // If no site or current site provided, use BaseUrl
-            $pathinfo = $this->getUriFromBaseUrl($application->getRequest(), $pathinfo);
-        } else {
-            $pathinfo = $this->getUriForSite($application->getRequest(), $pathinfo, $site);
+        if (null === $pathinfo) {
+            $pathinfo = $this->getUriFromBaseUrl();
         }
+
+        $pathinfo = str_replace('//', '/', $pathinfo);
+        if (null === $site) {
+            $site = $this->application->getSite();
+        }
+
+        $pathinfo = $this->getUriForSite($application->getRequest(), $pathinfo, $site);
 
         // If need add default extension provided or set from $site
         if (false === strpos(basename($pathinfo), '.') && '/' !== substr($pathinfo, -1)) {
@@ -296,11 +299,10 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      * @param string $pathinfo
      * @return string
      */
-    private function getUriFromBaseUrl(Request $request, $pathinfo)
+    private function getUriFromBaseUrl()
     {
-        if (null === $pathinfo) {
-            $pathinfo = $request->getBaseUrl();
-        }
+        $request = $this->application->getRequest();
+        $pathinfo = $request->getBaseUrl();
 
         if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
             return $request->getSchemeAndHttpHost()

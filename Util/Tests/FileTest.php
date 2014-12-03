@@ -88,17 +88,26 @@ class FileTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('test', File::removeExtension('test'));
     }
 
+
     /**
      *
      * @covers \BackBuilder\Util\File::mkdir
-     * @expectedException \BackBuilder\Exception\InvalidArgumentsException
+     * 
      */
     public function testExistingDirMkdir() 
     {
         $vfs_dir = vfsStream::setup('dircopy', 0755, array('copyfile' => 'copy data'));
         $path = vfsStream::url('dircopy');
-        File::mkdir($path);
+        $this->assertTrue(File::mkdir($path));
+    }
 
+    /**
+     *
+     * @covers \BackBuilder\Util\File::mkdir
+     * @expectedException \BackBuilder\Exception\InvalidArgumentsException
+     */
+    public function testExistingDirMkdirWithBadRights() 
+    {
         $vfs_dir = vfsStream::setup('dircopy', 0000, array('copyfile' => 'copy data'));
         $path = vfsStream::url('dircopy');
         
@@ -221,8 +230,12 @@ class FileTest extends \PHPUnit_Framework_TestCase {
      */
     public function testExtractZipArchiveExistingDir() 
     {
-        // test broken
+        /**
+         * @todo ext/zip PHP extension does not work with vfsStream
+         * @link https://github.com/mikey179/vfsStream/wiki/Known-Issues
+         */
         $this->markTestSkipped();
+
         vfsStream::setup('dirzip', 0777);
         $path_zip = vfsStream::url('dirzip');
         File::extractZipArchive('test', $path_zip, true);

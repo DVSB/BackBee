@@ -32,11 +32,10 @@ namespace BackBuilder\Security\Exception;
  */
 class UnknownUserException extends SecurityException
 {
-
-    /**
-     * The default error code
-     * @var int
-     */
-    protected $_code = self::UNKNOWN_USER;
-
+	
+    public function __construct($message = 'Unknow user', $code = SecurityException::UNKNOWN_USER)
+    {
+		parent::__construct($message, $code);	
+    }
+    
 }

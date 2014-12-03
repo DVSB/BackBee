@@ -85,7 +85,7 @@ class SecurityControllerTest extends TestCase
      * @covers ::getSecurityContextConfig
      * 
      */
-    public function test_firewallAuthenticateAction_bb_area()
+    public function testFirewallAuthenticateActionBbArea()
     {
         $controller = $this->getController();
         
@@ -118,7 +118,7 @@ class SecurityControllerTest extends TestCase
      * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function test_firewallAuthenticateAction_bb_area_expired()
+    public function testFirewallAuthenticateActionBbAreaExpired()
     {
         $controller = $this->getController();
         
@@ -140,20 +140,26 @@ class SecurityControllerTest extends TestCase
     
     /**
      * @expectedException \BackBuilder\Security\Exception\SecurityException
-     * @expectedExceptionMessage Unknown user
+     * @expectedExceptionMessage Unknow user
      * 
      * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function test_firewallAuthenticateAction_bb_area_userDoesntExist()
+    public function testFirewallAuthenticateActionBbAreaUserDoesntExist()
     {
         $controller = $this->getController();
         
+        $created = date('r'); //'Wed, 09 Jul 2014 14:04:27 GMT';
+        $nonce = '05a90bfd413c223a3451d68968f9e5fa';
+        $username = 'userThatDoesntExist';
+        $password = 'password1234';
+        $digest = md5($nonce . $created . md5($password));
+
         $request = new Request([], array(
-            'username' => 'userThatDoesntExist',
-            'created' => 'test',
-            'digest' => 'test',
-            'nonce' => 'test'
+            'username' => $username,
+            'created' => $created,
+            'digest' => $digest,
+            'nonce' => $nonce
         ));
         $controller->firewallAuthenticateAction('bb_area', $request);
     }
@@ -165,7 +171,7 @@ class SecurityControllerTest extends TestCase
      * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function test_firewallAuthenticateAction_bb_area_invalidPassword()
+    public function testFirewallAuthenticateActionBbAreaInvalidPassword()
     {
         $controller = $this->getController();
         
@@ -189,7 +195,7 @@ class SecurityControllerTest extends TestCase
      * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function test_firewallAuthenticateAction_invalidFirewall()
+    public function testFirewallAuthenticateActionInvalidFirewall()
     {
         $controller = $this->getController();
         
@@ -202,7 +208,7 @@ class SecurityControllerTest extends TestCase
      * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
      */
-    public function test_firewallAuthenticateAction_firewallWithoutSupportedContexts()
+    public function testFirewallAuthenticateActionFirewallWithoutSupportedContexts()
     {
         $controller = $this->getController();
         
@@ -244,7 +250,7 @@ class SecurityControllerTest extends TestCase
      * @covers ::deleteSessionAction
      * @expectedException Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function testDeleteSessionAction_sessionDoesntExist()
+    public function testDeleteSessionActionSessionDoesntExist()
     {
         $this->getBBApp()->start();
         $controller = $this->getController();

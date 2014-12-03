@@ -56,13 +56,16 @@ abstract class AValidator
      */
     public function truncatePrefix($datas, $prefix = '')
     {
-        foreach ($datas as $key => $data) {
-            if (false === strpos($key, $prefix)) {
-                unset($datas[$key]);
-            }
-        }
+        $array = array();
+        $callback = function ($value, $key) use (&$array, $prefix){
 
-        return $datas;
+            $key = preg_replace('/'.$prefix.'/', '', $key, 1);
+            $array[$key] = $value;
+        };
+
+        array_walk($datas, $callback);
+
+        return $array;
     }
 
     /**

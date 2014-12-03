@@ -24,6 +24,7 @@ namespace BackBuilder\Security\Authentication\Provider;
 use BackBuilder\Bundle\Registry;
 use BackBuilder\Security\Encoder\RequestSignatureEncoder;
 use BackBuilder\Security\Exception\SecurityException;
+use BackBuilder\Security\Exception\UnknownUserException;
 use BackBuilder\Security\Token\BBUserToken;
 
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
@@ -104,12 +105,13 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      */
     public function authenticate(TokenInterface $token)
     {
+
         if (false === $this->supports($token)) {
             throw new SecurityException('Invalid token provided', SecurityException::UNSUPPORTED_TOKEN);
         }
 
         if (null === $user = $this->user_provider->loadUserByUsername($token->getUsername())) {
-            throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
+            throw new UnknownUserException();
         }
 
         try {
@@ -197,10 +199,8 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
         $value = $this->readNonceValue($nonce);
         if (null !== $value && $value[0] + $this->lifetime < time()) {
-//        if (file_exists($this->nonce_directory . DIRECTORY_SEPARATOR . $nonce) && file_get_contents($this->nonce_directory . DIRECTORY_SEPARATOR . $nonce) + $this->lifetime < time())
             throw new SecurityException('Prior authentication expired', SecurityException::EXPIRED_AUTH);
         }
-//        file_put_contents($this->nonce_directory . DIRECTORY_SEPARATOR . $nonce, time());
 
         return true;
     }
