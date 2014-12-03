@@ -115,7 +115,6 @@ class PageControllerTest extends RestTestCase
         ]));
 
         $this->assertEquals(201, $response->getStatusCode());
-        $this->assertEquals('http://test_server/', $response->headers->get('Location'));
     }
 
     /**

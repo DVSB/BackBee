@@ -46,7 +46,7 @@ bb.images:
         type: (%bbapp.routing.image_uri_prefix%|%bbapp.routing.media_uri_prefix%)
         filename: .+
 
-# BackBuilder REST API test page
+# BackBuilder REST API
 
 bb.rest.user_get:
     pattern: /rest/{version}/user/{id}
