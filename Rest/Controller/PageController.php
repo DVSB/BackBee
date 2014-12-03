@@ -126,7 +126,7 @@ class PageController extends ARestController
      * @Rest\QueryParam(name="state", description="Page State", requirements={
      *   @Assert\Type(type="array", message="An array containing at least 1 state must be provided"),
      *   @Assert\All({
-     *     @Assert\Choice(choices = {"0", "1", "2", "3", 4"}, message="State is not valid")
+     *     @Assert\Choice(choices = {"0", "1", "2", "3", "4"}, message="State is not valid")
      *   })
      * })
      *
@@ -366,7 +366,7 @@ class PageController extends ARestController
             $this->granted('PUBLISH', $page);
         }
 
-        $this->getEntityManager()->flush($page);
+        $this->getEntityManager()->flush();
 
         return $this->createResponse('', 204);
     }
@@ -466,17 +466,20 @@ class PageController extends ARestController
      */
     private function patchStateOperation(Page $page, array &$operations)
     {
-        $matched = false;
+        $state_operation = null;
+        $is_visible_operation = null;
         foreach ($operations as $key => $operation) {
+            $op = array('key' => $key, 'op' => $operation);
             if ('/state' === $operation['path']) {
-                $matched = true;
-                break;
+                $state_operation = $op;
+            } elseif ('/is_visible' === $operation['path']) {
+                $is_visible_operation = $op;
             }
         }
 
-        if ($matched) {
-            unset($operations[$key]);
-            $states = explode('_', $operation['value']);
+        if (null !== $state_operation) {
+            unset($operations[$state_operation['key']]);
+            $states = explode('_', $state_operation['op']['value']);
             if (in_array($state = (int) array_shift($states), Page::$STATES)) {
                 $page->setState($state);
             }
@@ -493,6 +496,18 @@ class PageController extends ARestController
                 if (null !== $workflow_state) {
                     $page->setWorkflowState($workflow_state);
                 }
+            }
+        }
+
+        if (null !== $is_visible_operation) {
+            unset($operations[$is_visible_operation['key']]);
+
+            $is_visible = (boolean) $is_visible_operation['op']['value'];
+
+            if ($is_visible && ($page->getState() & Page::STATE_HIDDEN)) {
+                $page->setState($page->getState() ^ Page::STATE_HIDDEN);
+            } elseif (!$is_visible && !($page->getState() & Page::STATE_HIDDEN)) {
+                $page->setState($page->getState() | Page::STATE_HIDDEN);
             }
         }
     }
@@ -516,16 +531,11 @@ class PageController extends ARestController
         $sibling_operation = null;
         $parent_operation = null;
         foreach ($operations as $key => $operation) {
+            $op = array('key' => $key, 'op' => $operation);
             if ('/sibling_uid' === $operation['path']) {
-                $sibling_operation = array(
-                    'key'       => $key,
-                    'operation' => $operation
-                );
+                $sibling_operation = $op;
             } elseif ('/parent_uid' === $operation['path']) {
-                $parent_operation = array(
-                    'key'       => $key,
-                    'operation' => $operation
-                );
+                $parent_operation = $op;
             }
         }
 
@@ -533,24 +543,20 @@ class PageController extends ARestController
             if (null !== $sibling_operation) {
                 unset($operations[$sibling_operation['key']]);
 
-                $sibling = $this->getPageByUid($sibling_operation['operation']['value']);
+                $sibling = $this->getPageByUid($sibling_operation['op']['value']);
                 $this->granted('EDIT', $sibling->getParent());
 
                 $this->getPageRepository()->moveAsPrevSiblingOf($page, $sibling);
             } elseif (null !== $parent_operation) {
                 unset($operations[$parent_operation['key']]);
 
-                $parent = $this->getPageByUid($parent_operation['operation']['value']);
+                $parent = $this->getPageByUid($parent_operation['op']['value']);
                 $this->granted('EDIT', $parent);
 
                 $this->getPageRepository()->moveAsLastChildOf($page, $parent);
             }
         } catch (InvalidArgumentException $e) {
             throw new AccessDeniedHttpException('Invalid node move action: ' . $e->getMessage());
-        }
-
-        if (null !== $sibling_operation || null !== $parent_operation) {
-            $this->getEntityManager()->flush();
         }
     }
 
