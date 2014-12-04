@@ -109,14 +109,12 @@ class Repository extends EntityRepository
      **/
     public function findRegistriesEntityById($identifier, $id)
     {
-        $sql = sprintf(
-            'SELECT * FROM registry AS r WHERE (r.type = "%s" OR r.scope = "%s") AND ((r.key = "identifier" AND r.value = "%s") OR (r.scope = "%s"))',
-            addslashes($identifier),
-            addslashes($identifier),
-            addslashes($id),
-            addslashes($id)
-        );
+        $sql = 'SELECT * FROM registry AS r WHERE (r.type = :identifier OR r.scope = :identifier) AND ((r.key = "identifier" AND r.value = :id) OR (r.scope = :id))';
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
+        $query->setParameters(array('identifier' => $identifier,
+            'id' => $id
+            )
+        );
 
         return $query->getResult();
     }
@@ -147,12 +145,12 @@ class Repository extends EntityRepository
             $identifier = $this->getEntityName();
         }
 
-        $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "%s"';
+        $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "' . $descriminator . '"';
 
         if (class_exists($descriminator) && (new Builder())->isRegistryEntity(new $descriminator())) {
-            $count = $this->countEntities($descriminator, $this->executeSql(sprintf($sql, 'type', $descriminator)));
+            $count = $this->countEntities($descriminator, $this->executeSql(sprintf($sql, 'type')));
         } else {
-            $count = $this->executeSql(sprintf($sql, 'scope', $descriminator));
+            $count = $this->executeSql(sprintf($sql, 'scope'));
         }
 
         return $count;
@@ -163,12 +161,9 @@ class Repository extends EntityRepository
         if (is_null($identifier)) {
             $identifier = $this->getEntityName();
         }
-        $sql = sprintf(
-            'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = "%s" OR r.scope = "%s") ORDER BY r.id',
-            addslashes($identifier),
-            addslashes($identifier)
-        );
+        $sql = 'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = :identifier OR r.scope = :identifier) ORDER BY r.id';
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
+        $query->setParameter('identifier', $identifier);
 
         $entities = array();
         foreach ($query->getResult() as $key => $value) {
