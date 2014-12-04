@@ -1408,7 +1408,16 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         $content = new $classname();
         if (null !== $content->getProperty('labelized-by')) {
             try {
-                eval('$content->' . $content->getProperty('labelized-by') . '="' . str_replace('"', '\\"', $this->getTitle()) . '";');
+                $label = $content;
+                foreach (explode('->', (string) $label->getProperty('labelized-by')) as $property) {
+                    if (is_object($label->$property)) {
+                        $label = $label->$property;
+                    } else {
+                        break;
+                    }
+                }
+
+                $label->$property = $this->getTitle();
             } catch (\Exception $e) {
                 // Nothing to do
             }

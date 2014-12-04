@@ -21,11 +21,11 @@
 
 namespace BackBuilder\Rewriting;
 
-use BackBuilder\BBApplication,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\Util\String,
-    BackBuilder\Rewriting\Exception\RewritingException;
+use BackBuilder\BBApplication;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Rewriting\Exception\RewritingException;
+use BackBuilder\Util\String;
 
 /**
  * Utility class to generate page URL according config rules
@@ -61,31 +61,31 @@ class UrlGenerator implements IUrlGenerator
      * Current BackBuilder application
      * @var BackBuilder\BBApplication
      */
-    private $_application;
+    private $application;
 
     /**
      * if true, forbid the URL updating for online page
      * @var boolean
      */
-    private $_preserveOnline = true;
+    private $preserveOnline = true;
 
     /**
      * if true, check for unique computed URL
      * @var boolean
      */
-    private $_preserveUnicity = true;
+    private $preserveUnicity = true;
 
     /**
      * Available rewriting schemes
      * @var array
      */
-    private $_schemes = array();
+    private $schemes = array();
 
     /**
      * Array of class content used by one of the schemes
      * @var array
      */
-    private $_descriminators;
+    private $descriminators;
 
     /**
      * Class constructor
@@ -93,19 +93,19 @@ class UrlGenerator implements IUrlGenerator
      */
     public function __construct(BBApplication $application)
     {
-        $this->_application = $application;
+        $this->application = $application;
 
-        if (null !== $rewritingConfig = $this->_application->getConfig()->getRewritingConfig()) {
+        if (null !== $rewritingConfig = $this->application->getConfig()->getRewritingConfig()) {
             if (true === array_key_exists('preserve-online', $rewritingConfig)) {
-                $this->_preserveOnline = (true === $rewritingConfig['preserve-online']);
+                $this->preserveOnline = (true === $rewritingConfig['preserve-online']);
             }
 
             if (true === array_key_exists('preserve-unicity', $rewritingConfig)) {
-                $this->_preserveUnicity = (true === $rewritingConfig['preserve-unicity']);
+                $this->preserveUnicity = (true === $rewritingConfig['preserve-unicity']);
             }
 
             if (true === isset($rewritingConfig['scheme']) && true === is_array($rewritingConfig['scheme'])) {
-                $this->_schemes = $rewritingConfig['scheme'];
+                $this->schemes = $rewritingConfig['scheme'];
             }
         }
     }
@@ -117,23 +117,24 @@ class UrlGenerator implements IUrlGenerator
      */
     public function getDiscriminators()
     {
-        if (null === $this->_descriminators) {
-            $this->_descriminators = array();
+        if (null === $this->descriminators) {
+            $this->descriminators = array();
 
-            if (true === array_key_exists('_content_', $this->_schemes)) {
-                foreach (array_keys($this->_schemes['_content_']) as $descriminator) {
-                    $this->_descriminators[] = 'BackBuilder\ClassContent\\' . $descriminator;
+            if (true === array_key_exists('_content_', $this->schemes)) {
+                foreach (array_keys($this->schemes['_content_']) as $descriminator) {
+                    $this->descriminators[] = 'BackBuilder\ClassContent\\' . $descriminator;
 
-                    if (null !== $this->_application->getEventDispatcher()) {
-                        $this->_application
-                                ->getEventDispatcher()
-                                ->addListener(str_replace(NAMESPACE_SEPARATOR, '.', $descriminator) . '.onflush', array('BackBuilder\Event\Listener\RewritingListener', 'onFlushContent'));
+                    if (null !== $this->application->getEventDispatcher()) {
+                        $this->application
+                             ->getEventDispatcher()
+                             ->addListener(str_replace(NAMESPACE_SEPARATOR, '.', $descriminator) . '.onflush', array('BackBuilder\Event\Listener\RewritingListener', 'onFlushContent'))
+                        ;
                     }
                 }
             }
         }
 
-        return $this->_descriminators;
+        return $this->descriminators;
     }
 
     /**
@@ -146,27 +147,27 @@ class UrlGenerator implements IUrlGenerator
     {
         if (
             null !== $page->getUrl(false)
-            && $this->_preserveOnline
+            && $this->preserveOnline
             && (null === $page->getOldState() || ($page->getOldState() & Page::STATE_ONLINE))
             && $page->getState() & Page::STATE_ONLINE
         ) {
             return $page->getUrl(false);
         }
 
-        if ($page->isRoot() && true == array_key_exists('_root_', $this->_schemes)) {
-            return $this->_generate($this->_schemes['_root_'], $page, $content);
+        if ($page->isRoot() && true == array_key_exists('_root_', $this->schemes)) {
+            return $this->doGenerate($this->schemes['_root_'], $page, $content);
         }
 
-        if (true === isset($this->_schemes['_layout_']) && true === is_array($this->_schemes['_layout_'])) {
-            if (true === array_key_exists($page->getlayout()->getUid(), $this->_schemes['_layout_'])) {
-                return $this->_generate($this->_schemes['_layout_'][$page->getlayout()->getUid()], $page);
+        if (true === isset($this->schemes['_layout_']) && true === is_array($this->schemes['_layout_'])) {
+            if (true === array_key_exists($page->getlayout()->getUid(), $this->schemes['_layout_'])) {
+                return $this->doGenerate($this->schemes['_layout_'][$page->getlayout()->getUid()], $page);
             }
         }
 
-        if (null !== $content && true === array_key_exists('_content_', $this->_schemes)) {
+        if (null !== $content && true === array_key_exists('_content_', $this->schemes)) {
             $shortClassname = str_replace('BackBuilder\ClassContent\\', '', get_class($content));
-            if (true === array_key_exists($shortClassname, $this->_schemes['_content_'])) {
-                return $this->_generate($this->_schemes['_content_'][$shortClassname], $page, $content);
+            if (true === array_key_exists($shortClassname, $this->schemes['_content_'])) {
+                return $this->doGenerate($this->schemes['_content_'][$shortClassname], $page, $content);
             }
         }
 
@@ -175,8 +176,8 @@ class UrlGenerator implements IUrlGenerator
             return $url;
         }
 
-        if (true == array_key_exists('_default_', $this->_schemes)) {
-            return $this->_generate($this->_schemes['_default_'], $page, $content);
+        if (true == array_key_exists('_default_', $this->schemes)) {
+            return $this->doGenerate($this->schemes['_default_'], $page, $content);
         }
 
         if (true === $exceptionOnMissingScheme) {
@@ -188,26 +189,29 @@ class UrlGenerator implements IUrlGenerator
 
     /**
      * Computes the URL of a page according to a scheme
-     * @param array $scheme                                    The scheme to apply
-     * @param \BackBuilder\NestedNode\Page $page               The page
-     * @param \BackBuilder\ClassContent\AClassContent $content The optionnal main content of the page
-     * @return string                                          The generated URL
+     * @param array         $scheme  The scheme to apply
+     * @param Page          $page    The page
+     * @param AClassContent $content The optionnal main content of the page
+     * @return string The generated URL
      */
-    private function _generate($scheme, Page $page, AClassContent $content = null)
+    private function doGenerate($scheme, Page $page, AClassContent $content = null)
     {
         $replacement = array(
             '$parent' => ($page->isRoot()) ? '' : $page->getParent()->getUrl(false),
             '$title' => String::urlize($page->getTitle()),
             '$datetime' => $page->getCreated()->format('ymdHis'),
             '$date' => $page->getCreated()->format('ymd'),
-            '$time' => $page->getCreated()->format('His'),
+            '$time' => $page->getCreated()->format('His')
         );
 
         $matches = array();
         if (preg_match_all('/(\$content->[a-z]+)/i', $scheme, $matches)) {
             foreach ($matches[1] as $pattern) {
+                $property = explode('->', $pattern);
+                $property = array_pop($property);
+
                 try {
-                    $replacement[$pattern] = eval('return \BackBuilder\Util\String::urlize(' . $pattern . ');');
+                    $replacement[$pattern] = String::urlize($content->$property);
                 } catch (\Exception $e) {
                     $replacement[$pattern] = '';
                 }
@@ -217,10 +221,11 @@ class UrlGenerator implements IUrlGenerator
         $matches = array();
         if (preg_match_all('/(\$ancestor\[([0-9]+)\])/i', $scheme, $matches)) {
             foreach ($matches[2] as $level) {
-                $ancestor = $this->_application
-                        ->getEntityManager()
-                        ->getRepository('BackBuilder\NestedNode\Page')
-                        ->getAncestor($page, $level);
+                $ancestor = $this->application
+                    ->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->getAncestor($page, $level)
+                ;
                 if (null !== $ancestor && $page->getLevel() > $level) {
                     $replacement['$ancestor[' . $level . ']'] = $ancestor->getUrl(false);
                 } else {
@@ -230,8 +235,8 @@ class UrlGenerator implements IUrlGenerator
         }
 
         $url = preg_replace('/\/+/', '/', str_replace(array_keys($replacement), array_values($replacement), $scheme));
-        if (true === $this->_preserveUnicity) {
-            $this->_checkUniqueness($page, $url);
+        if (true === $this->preserveUnicity) {
+            $this->checkUniqueness($page, $url);
         }
 
         return $url;
@@ -242,10 +247,10 @@ class UrlGenerator implements IUrlGenerator
      * @param \BackBuilder\NestedNode\Page $page   The page
      * @param string &$url                         The reference of the generated URL
      */
-    private function _checkUniqueness(Page $page, &$url)
+    private function checkUniqueness(Page $page, &$url)
     {
         $baseurl = $url . '-%d';
-        $page_repository = $this->_application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
+        $page_repository = $this->application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
 
         $count = 1;
         $existings = array();
@@ -260,7 +265,7 @@ class UrlGenerator implements IUrlGenerator
                 ->getResult()
             ;
         } else {
-            $existings = $this->_application->getEntityManager()->getConnection()->executeQuery(
+            $existings = $this->application->getEntityManager()->getConnection()->executeQuery(
                 'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
                 array(
                     'root'  => $page->getRoot()->getUid(),
@@ -288,5 +293,4 @@ class UrlGenerator implements IUrlGenerator
             $url = sprintf($baseurl, $count++);
         }
     }
-
 }
