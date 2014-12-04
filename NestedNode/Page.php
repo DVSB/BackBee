@@ -1335,7 +1335,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function isHidden()
     {
-        return (boolean) $this->getState() & self::STATE_HIDDEN;
+        return 0 === ($this->getState() & self::STATE_HIDDEN);
     }
 
     /**
