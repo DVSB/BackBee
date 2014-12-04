@@ -408,7 +408,6 @@ class File
             throw new \Exception('Could not open archive: '.$archive);
         }
 
-        var_dump($archive, $destinationDir);
         if (false === $archive->extractTo($destinationDir)) {
             throw new \Exception('Could not extract archive: '.$archive);
         }
