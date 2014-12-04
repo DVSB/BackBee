@@ -57,8 +57,8 @@ class AdminLogRepository extends EntityRepository
                 'AND entity = "'.str_replace('\\', '\\\\', (string) ObjectIdentity::fromDomainObject($entity)).'" '.
                 'ORDER BY created_at DESC';
 
-        $sql = 'SELECT owner, entity FROM ('.$from.') AS orderer_log GROUP BY owner';
-        $result = $this->getEntityManager()->getConnection()->executeQuery($sql);
+        $sql = 'SELECT owner, entity FROM :from_result AS orderer_log GROUP BY owner';
+        $result = $this->getEntityManager()->getConnection()->executeQuery($sql, array('form_result' => $from));
 
         $verif = $this->_getActualAdminEdition();
         $return = $result->fetchAll(\PDO::FETCH_ASSOC);

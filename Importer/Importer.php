@@ -210,16 +210,18 @@ class Importer
         $where_clause = array_key_exists('where_clause', $config) ? $config['where_clause'] : 1;
         $id_label = array_key_exists('id_label', $config) ? $config['id_label'] : 'uid';
         $this->_object_identifier = array_key_exists('object_identifier', $config) ? $config['object_identifier'] : 'id';
-        // $this->_ids = $this->getExistingIds($id_label, $table_name, $where_clause);
 
         return $converter;
     }
 
     final protected function getExistingIds($id_label, $table_name, $where_clause)
     {
-        $sql = 'SELECT '.$id_label.' FROM '.$table_name.' WHERE '.$where_clause;
-        $statement = $this->_application->getEntityManager()->getConnection()->executeQuery($sql);
-
+        $sql= 'SELECT :id_label FROM :table_name WHERE :where_clause';
+        $statement = $this->_application->getEntityManager()->getConnection()->executeQuery($sql, array('id_label' => $id_label,
+            'table_name' => $table_name,
+            'where_clause' => $where_clause
+            )
+        );
         return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 
