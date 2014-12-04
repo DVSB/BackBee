@@ -272,9 +272,8 @@ class PageController extends ARestController
                 'version' => $request->attributes->get('version'),
                 'uid'     => $page->getUid()
             ),
-            null,
-            false,
-            $page->getSite()
+            '',
+            false
         );
         $response->headers->set('Location', $location);
 
@@ -457,9 +456,8 @@ class PageController extends ARestController
                 'version' => $request->attributes->get('version'),
                 'uid'     => $page->getUid()
             ),
-            null,
-            false,
-            $page->getSite()
+            '',
+            false
         );
         $response->headers->set('Location', $location);
 
@@ -515,7 +513,7 @@ class PageController extends ARestController
             unset($operations[$state_operation['key']]);
             $states = explode('_', $state_operation['op']['value']);
             if (in_array($state = (int) array_shift($states), Page::$STATES)) {
-                $page->setState($state);
+                $page->setState($state | ($page->getState() & Page::STATE_HIDDEN ? Page::STATE_HIDDEN : 0));
             }
 
             if ($code = (int) array_shift($states)) {
