@@ -22,9 +22,6 @@
 namespace BackBuilder\DependencyInjection;
 
 use BackBuilder\Event\Event;
-use BackBuilder\DependencyInjection\ContainerInterface;
-use BackBuilder\DependencyInjection\DispatchTagEventInterface;
-
 use Symfony\Component\DependencyInjection\ContainerBuilder as sfContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface as sfContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
@@ -71,7 +68,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
             foreach ($this->getDefinition($id)->getTags() as $tag => $datas) {
                 if (false === isset($datas[0]['dispatch_event']) || true === $datas[0]['dispatch_event']) {
                     $this->services['event.dispatcher']->dispatch(
-                        'service.tagged.' . $tag,
+                        'service.tagged.'.$tag,
                         new Event($service, array('id' => $id))
                     );
                 }
@@ -84,7 +81,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
     /**
      * Giving a string, try to return the container service or parameter if exists
      * This method can be call by array_walk or array_walk_recursive
-     * @param mixed $item
+     * @param  mixed $item
      * @return mixed
      */
     public function getContainerValues(&$item)
@@ -98,7 +95,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
 
     /**
      * Replaces known container parameters key by their values
-     * @param string $item
+     * @param  string $item
      * @return string
      */
     private function _getContainerParameters($item)
@@ -113,7 +110,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
         if (preg_match_all('/%([^%]+)%/', $item, $matches, PREG_PATTERN_ORDER)) {
             foreach ($matches[1] as $expr) {
                 if ($this->hasParameter($expr)) {
-                    $item = str_replace('%' . $expr . '%', $this->getParameter($expr), $item);
+                    $item = str_replace('%'.$expr.'%', $this->getParameter($expr), $item);
                 }
             }
         }
@@ -123,7 +120,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
 
     /**
      * Returns the associated service to item if exists, item itself otherwise
-     * @param string $item
+     * @param  string $item
      * @return mixed
      */
     private function _getContainerServices($item)
@@ -154,14 +151,14 @@ class Container extends sfContainerBuilder implements ContainerInterface
         $id = strtolower($id);
 
         return $this->hasInstanceOf($id)
-            || method_exists($this, 'get' . strtr($id, array('_' => '', '.' => '_')) . 'Service')
+            || method_exists($this, 'get'.strtr($id, array('_' => '', '.' => '_')).'Service')
         ;
     }
 
     /**
      * Checks if current container has an instance of service with $id or not
      *
-     * @param  string  $id identifier of the service we want to check for instance
+     * @param string $id identifier of the service we want to check for instance
      *
      * @return boolean true if current container has an instance of service with $id, else false
      */

@@ -22,8 +22,6 @@
 namespace BackBuilder\Cache;
 
 use BackBuilder\Cache\Exception\CacheException;
-use BackBuilder\Cache\QueryParamStrategyManagerInterface;
-
 use Psr\Log\LoggerInterface;
 
 /**
@@ -49,7 +47,7 @@ abstract class ACache
      */
     private $_default_instance_options = array(
         'min_lifetime'       => null,
-        'max_lifetime'       => null
+        'max_lifetime'       => null,
     );
 
     /**
@@ -66,9 +64,9 @@ abstract class ACache
 
     /**
      * Class constructor
-     * @param array $options An array of options allowing to construct the cache adapter
-     * @param string $context An optional cache context
-     * @param \Psr\Log\LoggerInterface $logger An optional logger
+     * @param  array                                       $options An array of options allowing to construct the cache adapter
+     * @param  string                                      $context An optional cache context
+     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache adapter cannot be construct
      * @codeCoverageIgnore
      */
@@ -83,34 +81,34 @@ abstract class ACache
 
     /**
      * Returns the available cache for the given id if found returns FALSE else
-     * @param string $id Cache id
-     * @param boolean $bypassCheck Allow to find cache without test it before
-     * @param \DateTime $expire Optionnal, the expiration time (now by default)
+     * @param  string       $id          Cache id
+     * @param  boolean      $bypassCheck Allow to find cache without test it before
+     * @param  \DateTime    $expire      Optionnal, the expiration time (now by default)
      * @return string|FALSE
      */
     abstract public function load($id, $bypassCheck = false, \DateTime $expire = null);
 
     /**
      * Tests if a cache is available or not (for the given id)
-     * @param string $id Cache id
+     * @param  string    $id Cache id
      * @return int|FALSE the last modified timestamp of the available cache record (0 infinite expiration date)
      */
     abstract public function test($id);
 
     /**
      * Saves some string datas into a cache record
-     * @param string $id Cache id
-     * @param string $data Datas to cache
-     * @param int $lifetime Optional, the specific lifetime for this record
-     *                      (by default null, infinite lifetime)
-     * @param string $tag Optional, an associated tag to the data stored
+     * @param  string  $id       Cache id
+     * @param  string  $data     Datas to cache
+     * @param  int     $lifetime Optional, the specific lifetime for this record
+     *                           (by default null, infinite lifetime)
+     * @param  string  $tag      Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     abstract public function save($id, $data, $lifetime = null, $tag = null);
 
     /**
      * Removes a cache record
-     * @param  string $id Cache id
+     * @param  string  $id Cache id
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     abstract public function remove($id);
@@ -123,13 +121,14 @@ abstract class ACache
 
     /**
      * Sets the cache logger
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param  \Psr\Log\LoggerInterface  $logger
      * @return \BackBuilder\Cache\ACache
      * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger = null)
     {
         $this->_logger = $logger;
+
         return $this;
     }
 
@@ -155,19 +154,20 @@ abstract class ACache
 
     /**
      * Sets the cache coontext
-     * @param string $context
+     * @param  string                    $context
      * @return \BackBuilder\Cache\ACache
      * @codeCoverageIgnore
      */
     protected function setContext($context = null)
     {
         $this->_context = $context;
+
         return $this;
     }
 
     /**
      * Sets the cache adapter instance options
-     * @param array $options
+     * @param  array                                       $options
      * @return \BackBuilder\Cache\ACache
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */
@@ -186,9 +186,9 @@ abstract class ACache
 
     /**
      * Logs a message on provided level if a logger is defined
-     * @param string $level The log level
+     * @param string $level   The log level
      * @param string $message The message to log
-     * @param array $context The logging context
+     * @param array  $context The logging context
      * @codeCoverageIgnore
      */
     protected function log($level, $message, array $context = array('cache'))
@@ -200,7 +200,7 @@ abstract class ACache
 
     /**
      * Returns the expiration timestamp
-     * @param int $lifetime
+     * @param  int $lifetime
      * @return int
      * @codeCoverageIgnore
      */
@@ -212,9 +212,9 @@ abstract class ACache
             $now = new \DateTime();
 
             if (0 < $lifetime) {
-                $now->add(new \DateInterval('PT' . $lifetime . 'S'));
+                $now->add(new \DateInterval('PT'.$lifetime.'S'));
             } else {
-                $now->sub(new \DateInterval('PT' . (-1 * $lifetime) . 'S'));
+                $now->sub(new \DateInterval('PT'.(-1 * $lifetime).'S'));
             }
 
             $expire = $now->getTimestamp();
@@ -229,7 +229,7 @@ abstract class ACache
 
     /**
      * Control the lifetime against min and max lifetime if provided
-     * @param int $lifetime
+     * @param  int $lifetime
      * @return int
      */
     protected function getControledLifetime($lifetime)
@@ -251,7 +251,7 @@ abstract class ACache
 
     /**
      * Control the expiration time against min and max lifetime if provided
-     * @param int $expire
+     * @param  int $expire
      * @return int
      */
     private function _getControledExpireTime($expire)
@@ -264,5 +264,4 @@ abstract class ACache
 
         return $expire;
     }
-
 }

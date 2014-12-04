@@ -21,9 +21,9 @@
 
 namespace BackBuilder\NestedNode\Tests\Repository;
 
-use BackBuilder\Tests\TestCase,
-    BackBuilder\NestedNode\Repository\NestedNodeRepository,
-    BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
+use BackBuilder\Tests\TestCase;
+use BackBuilder\NestedNode\Repository\NestedNodeRepository;
+use BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
  * @category    BackBuilder
@@ -33,7 +33,6 @@ use BackBuilder\Tests\TestCase,
  */
 class NestedNodeRepositoryTest extends TestCase
 {
-
     /**
      * @var \BackBuilder\Tests\Mock\MockBBApplication
      */
@@ -561,7 +560,7 @@ class NestedNodeRepositoryTest extends TestCase
                 ->getRepository('BackBuilder\NestedNode\Tests\Mock\MockNestedNode');
 
         NestedNodeRepository::$config = array(
-            'nestedNodeCalculateAsync' => false
+            'nestedNodeCalculateAsync' => false,
         );
 
         return $this;
@@ -630,5 +629,4 @@ class NestedNodeRepositoryTest extends TestCase
 
         return $this;
     }
-
 }

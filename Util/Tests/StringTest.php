@@ -4,13 +4,14 @@ namespace bbUnit\Util;
 
 use BackBuilder\Util\String;
 
-class StringTest extends \PHPUnit_Framework_TestCase {
-
+class StringTest extends \PHPUnit_Framework_TestCase
+{
     /**
      * @covers \BackBuilder\Util\String::toAscii
      *
      */
-    public function testToASCII() {
+    public function testToASCII()
+    {
         $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII('test')));
 
         $this->assertEquals('ASCII', mb_detect_encoding(String::toASCII('te90-+st\\')));
@@ -34,7 +35,8 @@ class StringTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\String::toUTF8
      *
      */
-    public function testToUTF8() {
+    public function testToUTF8()
+    {
         $this->assertEquals('UTF-8', mb_detect_encoding(String::toUTF8('aaa'), 'UTF-8', true));
 
         $this->assertEquals('UTF-8', mb_detect_encoding(String::toUTF8('accentu�'), 'UTF-8', true));
@@ -53,7 +55,7 @@ class StringTest extends \PHPUnit_Framework_TestCase {
     {
         $options1 = array(
             'extension' => '.txt',
-            'spacereplace' => '_'
+            'spacereplace' => '_',
         );
 
         $this->assertEquals('test_path.txt', String::toPath('test path', $options1));
@@ -61,7 +63,7 @@ class StringTest extends \PHPUnit_Framework_TestCase {
         $options2 = array(
             'extension' => '.txt',
             'spacereplace' => '_',
-            'lengthlimit' => 5
+            'lengthlimit' => 5,
         );
 
         $this->assertEquals('test_.txt', String::toPath('test path', $options2));
@@ -71,7 +73,7 @@ class StringTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('testpath', String::toPath('test path', $options3));
 
         $options4 = array(
-            'extension' => '.jpg'
+            'extension' => '.jpg',
         );
 
         $this->assertEquals('testpath.jpg', String::toPath('test path', $options4));
@@ -83,19 +85,18 @@ class StringTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('test+path', String::toPath('test path', $options5));
 
         $options6 = array(
-            'lengthlimit' => 3
+            'lengthlimit' => 3,
         );
 
         $this->assertEquals('tes', String::toPath('test path', $options6));
 
         $options7 = array(
-            'new' => 'aaa'
+            'new' => 'aaa',
         );
 
         $this->assertEquals('testpath', String::toPath('test path', $options7));
 
         $this->assertEquals('foodefaut.yml', String::toPath('foo/défaut.yml'));
-
     }
 
     /**
@@ -103,7 +104,8 @@ class StringTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\String::urlize
      *
      */
-    public function testUrlize() {
+    public function testUrlize()
+    {
         $this->assertEquals('test-s-url', String::urlize('test’s url'));
 
         $this->assertEquals('test-s-url', String::urlize('test\'s url'));
@@ -122,13 +124,13 @@ class StringTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('tests_u.com', String::urlize('test`s url', array(
                     'extension' => '.com',
                     'spacereplace' => '_',
-                    'lengthlimit' => 7
+                    'lengthlimit' => 7,
         )));
 
         $this->assertEquals('tests#the#url#this#one.com', String::urlize('test`s the.url:this\'one', array(
                     'extension' => '.com',
                     'separators' => '/[.\'’:]+/',
-                    'spacereplace' => '#'
+                    'spacereplace' => '#',
         )));
     }
 
@@ -137,7 +139,8 @@ class StringTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\String::toXmlCompliant
      *
      */
-    public function testToXmlCompliant() {
+    public function testToXmlCompliant()
+    {
         $this->assertEquals(' test line ', String::toXmlCompliant('<a> test line </a>'));
         $this->assertEquals('&amp;lt;a&amp;gt; test line &amp;lt;/a&amp;gt;', String::toXmlCompliant('<a> test line </a>', false));
     }
@@ -147,7 +150,8 @@ class StringTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\String::br2nl
      *
      */
-    public function testBr2nl() {
+    public function testBr2nl()
+    {
         $this->assertEquals("test aaa \r\ntest bbb \r\ntest ccc \r\n", String::br2nl("test aaa <br> test bbb <br> test ccc <br>"));
         $this->assertEquals("test aaa \r\ntest bbb \r\ntest ccc \r\n", String::br2nl("test aaa <br\> test bbb <br> test ccc <br\>"));
         $this->assertEquals("test aaa \r\ntest bbb \r\ntest ccc", String::br2nl("test aaa <br \> test bbb <br \> test ccc"));
@@ -157,7 +161,8 @@ class StringTest extends \PHPUnit_Framework_TestCase {
      *
      * @covers \BackBuilder\Util\String::truncateText
      */
-    public function testTruncateText() {
+    public function testTruncateText()
+    {
         $this->assertEquals('text +newstring', String::truncateText('text of test ', 2, '+newstring'));
         $this->assertEquals('text of test ', String::truncateText('text of test ', 30, '+newstring'));
         $this->assertEquals('text ', String::truncateText('text ', 10, '+newstring'));
@@ -169,11 +174,11 @@ class StringTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\String::formatBytes
      *
      */
-    public function testFormatBytes() {
+    public function testFormatBytes()
+    {
         $this->assertEquals('1.953 kb', String::formatBytes(2000, 3));
         $this->assertEquals('553.71094 kb', String::formatBytes(567000, 5));
         $this->assertEquals('553.71 kb', String::formatBytes(567000));
         $this->assertEquals('5.28 gb', String::formatBytes(5670008902));
     }
-
 }

@@ -29,14 +29,12 @@ use BackBuilder\Serializer\SerializerBuilder;
 // use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
-
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
-
 
 /**
  * Abstract class for an api controller
@@ -66,7 +64,6 @@ abstract class ARestController extends Controller implements IRestController, IF
         return array();
     }
 
-
     /*
      * Default formatter for a collection of objects
      *
@@ -87,7 +84,7 @@ abstract class ARestController extends Controller implements IRestController, IF
      * Serializes an object
      *
      * Implements BackBuilder\Rest\Formatter\IFormatter::formatItem($item)
-     * @param mixed $item
+     * @param  mixed $item
      * @return array
      */
     public function formatItem($item, $format = 'json')
@@ -110,7 +107,6 @@ abstract class ARestController extends Controller implements IRestController, IF
                     throw new BadRequestHttpException('Invalid JSONP callback value');
                 }
 
-
                 $context = new SerializationContext();
                 $context->setSerializeNull(true);
                 $json = $this->getSerializer()->serialize($item, 'json', $context);
@@ -128,13 +124,13 @@ abstract class ARestController extends Controller implements IRestController, IF
     /**
      * Deserialize data into Doctrine entity
      *
-     * @param string|mixed $item Either a valid Entity class name, or a Doctrine Entity object
+     * @param  string|mixed $item Either a valid Entity class name, or a Doctrine Entity object
      * @return mixed
      */
     public function deserializeEntity(array $data, $entityOrClass)
     {
         $context = null;
-        if(is_object($entityOrClass)) {
+        if (is_object($entityOrClass)) {
             $context = DeserializationContext::create();
             $context->attributes->set('target', $entityOrClass);
             $entityOrClass = get_class($entityOrClass);
@@ -142,7 +138,6 @@ abstract class ARestController extends Controller implements IRestController, IF
 
         return $this->getSerializer()->deserialize(json_encode($data), $entityOrClass, 'json',  $context);
     }
-
 
     /**
      * Create a RESTful response
@@ -163,8 +158,8 @@ abstract class ARestController extends Controller implements IRestController, IF
     /**
      * Returns a RedirectResponse to the given URL.
      *
-     * @param string  $url    The URL to redirect to
-     * @param int     $status The status code to use for the Response
+     * @param string $url    The URL to redirect to
+     * @param int    $status The status code to use for the Response
      *
      * @return RedirectResponse
      */
@@ -175,7 +170,7 @@ abstract class ARestController extends Controller implements IRestController, IF
 
     /**
      *
-     * @param type $message
+     * @param  type $message
      * @return type
      */
     protected function create404Response($message = null)
@@ -191,7 +186,7 @@ abstract class ARestController extends Controller implements IRestController, IF
      */
     protected function getSerializer()
     {
-        if(null === $this->serializer) {
+        if (null === $this->serializer) {
             $builder = SerializerBuilder::create()
                 ->setObjectConstructor($this->getContainer()->get('serializer.object_constructor'))
                 ->setPropertyNamingStrategy($this->getContainer()->get('serializer.naming_strategy'))
@@ -208,15 +203,15 @@ abstract class ARestController extends Controller implements IRestController, IF
     protected function createValidationException($field, $value, $message)
     {
         return new ValidationException(new ConstraintViolationList(array(
-            new ConstraintViolation($message, $message, array(), $field, $field, $value)
+            new ConstraintViolation($message, $message, array(), $field, $field, $value),
         )));
     }
 
     /**
      * Same as isGranted() but throw exception if it is not instead of return false
      *
-     * @param  string  $attributes
-     * @param  mixed   $object
+     * @param string $attributes
+     * @param mixed  $object
      *
      * @return boolean
      */
@@ -233,7 +228,7 @@ abstract class ARestController extends Controller implements IRestController, IF
 
     /**
      *
-     * @param  string $name
+     * @param string $name
      *
      * @return object|null
      */

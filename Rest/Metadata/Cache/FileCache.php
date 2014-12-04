@@ -21,8 +21,8 @@
 
 namespace BackBuilder\Rest\Metadata\Cache;
 
-use Metadata\ClassMetadata,
-    Metadata\Cache\CacheInterface;
+use Metadata\ClassMetadata;
+use Metadata\Cache\CacheInterface;
 
 /**
  * Metadata file cache
@@ -76,7 +76,7 @@ class FileCache implements CacheInterface
     {
         $path = $this->dir.'/'.strtr($class->name, '\\', '-').'.cache.php';
         if (!file_exists($path)) {
-            return null;
+            return;
         }
 
         return include $path;
@@ -93,11 +93,10 @@ class FileCache implements CacheInterface
 
         $path = $this->dir.'/'.strtr($metadata->name, '\\', '-').'.cache.php';
 
-        $tmpFile = $this->dir . '/' . uniqid('metadata_cache_', true);
+        $tmpFile = $this->dir.'/'.uniqid('metadata_cache_', true);
 
         @file_put_contents($tmpFile, '<?php return unserialize('.var_export(serialize($metadata), true).');');
         chmod($tmpFile, 0666 & ~umask());
-
 
         if (false === @rename($tmpFile, $path)) {
             throw new \RuntimeException(sprintf('Could not write new cache file to %s.', $path));

@@ -27,12 +27,11 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\Validator\Validator,
-    Symfony\Component\Validator\ConstraintViolationList,
-    Symfony\Component\Validator\ConstraintViolationListInterface,
-    Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Validator;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Symfony\Component\Validator\ConstraintViolation;
 use BackBuilder\Event\Listener\APathEnabledListener;
-
 use BackBuilder\Rest\Exception\ValidationException;
 
 /**
@@ -45,7 +44,6 @@ use BackBuilder\Rest\Exception\ValidationException;
  */
 class ValidationListener extends APathEnabledListener
 {
-
     /**
      * @var ContainerInterface
      */
@@ -64,7 +62,7 @@ class ValidationListener extends APathEnabledListener
     /**
      * Core request handler
      *
-     * @param GetResponseEvent $event The event
+     * @param  GetResponseEvent                  $event The event
      * @throws BadRequestHttpException
      * @throws UnsupportedMediaTypeHttpException
      */
@@ -74,7 +72,7 @@ class ValidationListener extends APathEnabledListener
         $request = $event->getRequest();
         $metadata = $this->getControllerActionMetadata($controller);
 
-        if(null !== $metadata) {
+        if (null !== $metadata) {
             $violations = new ConstraintViolationList();
 
             if (0 < count($metadata->queryParams)) {
@@ -95,7 +93,7 @@ class ValidationListener extends APathEnabledListener
 
             $violationParam = $this->getViolationsParameterName($metadata);
 
-            if(null !== $violationParam) {
+            if (null !== $violationParam) {
                 // if action has an argument for violations, pass it
                 $request->attributes->set($violationParam, $violations);
             } elseif (0 < count($violations)) {
@@ -107,7 +105,7 @@ class ValidationListener extends APathEnabledListener
 
     /**
      *
-     * @param \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata $metadata
+     * @param  \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata $metadata
      * @return string|null
      */
     protected function getViolationsParameterName($metadata)
@@ -118,23 +116,23 @@ class ValidationListener extends APathEnabledListener
             }
         }
 
-        return null;
+        return;
     }
 
     /**
      * Set default values
      *
-     * @param array $params
+     * @param array                                          $params
      * @param \Symfony\Component\HttpFoundation\ParameterBag $values
      */
     protected function setDefaultValues(array $params, ParameterBag $values)
     {
-        foreach($params as $param) {
-            if(!array_key_exists('default', $param) || null === $param['default']) {
+        foreach ($params as $param) {
+            if (!array_key_exists('default', $param) || null === $param['default']) {
                 continue;
             }
 
-            if(false === $values->has($param['name'])) {
+            if (false === $values->has($param['name'])) {
                 $values->set($param['name'], $param['default']);
             }
         }
@@ -143,16 +141,16 @@ class ValidationListener extends APathEnabledListener
     /**
      * Validate params
      *
-     * @param \Symfony\Component\Validator\Validator $validator
-     * @param array $params
-     * @param \Symfony\Component\HttpFoundation\ParameterBag $values
+     * @param  \Symfony\Component\Validator\Validator               $validator
+     * @param  array                                                $params
+     * @param  \Symfony\Component\HttpFoundation\ParameterBag       $values
      * @return \Symfony\Component\Validator\ConstraintViolationList
      */
     protected function validateParams(Validator $validator, array $params, ParameterBag $values)
     {
         $violations = new ConstraintViolationList();
-        foreach($params as $param) {
-            if(empty($param['requirements'])) {
+        foreach ($params as $param) {
+            if (empty($param['requirements'])) {
                 continue;
             }
 
@@ -161,13 +159,13 @@ class ValidationListener extends APathEnabledListener
             $paramViolations = $validator->validateValue($value, $param['requirements']);
 
             // add missing data
-            foreach($paramViolations as $violation) {
+            foreach ($paramViolations as $violation) {
                 $extendedViolation = new ConstraintViolation(
                     $violation->getMessage(),
                     $violation->getMessageTemplate(),
                     $violation->getMessageParameters(),
                     $violation->getRoot(),
-                    $param['name'] . $violation->getPropertyPath(),
+                    $param['name'].$violation->getPropertyPath(),
                     $violation->getInvalidValue(),
                     $violation->getMessagePluralization(),
                     $violation->getCode()
@@ -182,7 +180,7 @@ class ValidationListener extends APathEnabledListener
 
     /**
      *
-     * @param mixed $controller
+     * @param  mixed                                                             $controller
      * @return \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata
      */
     protected function getControllerActionMetadata($controller)
@@ -194,7 +192,7 @@ class ValidationListener extends APathEnabledListener
         $controllerMetadata = $metadata->getOutsideClassMetadata();
 
         $action_metadatas = null;
-        if(array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
+        if (array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
             $action_metadatas = $controllerMetadata->methodMetadata[$controller[1]];
         }
 

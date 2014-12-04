@@ -21,14 +21,14 @@
 
 namespace BackBuilder\NestedNode\Tests\Repository;
 
-use BackBuilder\Tests\TestCase,
-    BackBuilder\Site\Site,
-    BackBuilder\Site\Layout,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\NestedNode\Tests\Mock\MockNestedNode,
-    BackBuilder\NestedNode\Repository\PageRepository,
-    BackBuilder\NestedNode\Repository\PageQueryBuilder,
-    BackBuilder\ClassContent\ContentSet;
+use BackBuilder\Tests\TestCase;
+use BackBuilder\Site\Site;
+use BackBuilder\Site\Layout;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
+use BackBuilder\NestedNode\Repository\PageRepository;
+use BackBuilder\NestedNode\Repository\PageQueryBuilder;
+use BackBuilder\ClassContent\ContentSet;
 
 /**
  * @category    BackBuilder
@@ -38,7 +38,6 @@ use BackBuilder\Tests\TestCase,
  */
 class PageRepositoryTest extends TestCase
 {
-
     /**
      * @var \BackBuilder\Tests\Mock\MockBBApplication
      */
@@ -346,7 +345,6 @@ class PageRepositoryTest extends TestCase
      */
     public function testGetOnlineChildren()
     {
-
         $this->assertEquals(array(), $this->repo->getOnlineChildren($this->root));
 
         $child1 = $this->repo->find('child1');
@@ -426,7 +424,6 @@ class PageRepositoryTest extends TestCase
      */
     public function testToTrash()
     {
-
         $this->assertEquals(4, $this->repo->toTrash($this->root));
 
         $child1 = $this->repo->find('child1');
@@ -539,13 +536,13 @@ class PageRepositoryTest extends TestCase
                 'root' => $root2,
                 'child1' => $descendants[2],
                 'child2' => $descendants[1],
-                'child3' => $descendants[0]
+                'child3' => $descendants[0],
             ),
             'contents' => array(
                 $this->root->getContentSet()->getUid() => $root2->getContentSet(),
                 $this->root->getContentSet()->first()->getUid() => $root2->getContentSet()->first(),
-                $this->root->getContentSet()->first()->last()->getUid() => $root2->getContentSet()->first()->last()
-            )
+                $this->root->getContentSet()->first()->last()->getUid() => $root2->getContentSet()->first()->last(),
+            ),
         );
 
         $this->assertEquals($expected_datas, $root2->cloning_datas);
@@ -624,11 +621,11 @@ class PageRepositoryTest extends TestCase
                 ->getRepository('BackBuilder\NestedNode\Page');
 
         PageRepository::$config = array(
-            'nestedNodeCalculateAsync' => false
+            'nestedNodeCalculateAsync' => false,
         );
 
         PageQueryBuilder::$config = array(
-            'dateSchemeForPublishing' => 'Y-m-d H:i:s'
+            'dateSchemeForPublishing' => 'Y-m-d H:i:s',
         );
 
         return $this;
@@ -663,10 +660,9 @@ class PageRepositoryTest extends TestCase
         $data = new \stdClass();
         $data->templateLayouts = array(
             $mainzone,
-            $asidezone
+            $asidezone,
         );
 
         return $data;
     }
-
 }

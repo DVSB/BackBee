@@ -4,18 +4,18 @@
     <div class="row">
         <label>Public Key:</label> <input type="text" name="generator[public_key]" value="{{ form.public_key|e }}" />
     </div>
-    
+
     <div class="row">
         <label>Private Key:</label> <input type="text" name="generator[private_key]" value="{{ form.private_key|e }}" />
     </div>
-    
+
     <div class="row">
         <label>Url:</label> <input type="text" name="generator[url]" value="{{ form.url|e }}" />
     </div>
-    
+
     <div class="row">
-        <label>Method:</label> 
-        
+        <label>Method:</label>
+
         <select type="text" name="generator[method]">
             <option value="GET"{% if form.method == 'GET' %} selected{% endif %}>GET</option>
             <option value="POST"{% if form.method == 'POST' %} selected{% endif %}>POST</option>
@@ -24,9 +24,9 @@
             <option value="DELETE"{% if form.method == 'DELETE' %} selected{% endif %}>DELETE</option>
         </select>
     </div>
-    
+
     <input type="submit" value="Generate Signature">
 </form>
-        
-        
+
+
 {% if signature %}<div>{{ signature }}</div>{% endif %}

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -33,7 +33,6 @@ use BackBuilder\ClassContent\AClassContent;
  */
 class ContentRender
 {
-
     private $category;
     private $name;
     private $editables;
@@ -47,13 +46,16 @@ class ContentRender
     private function globRecursive($pattern, $flags = 0)
     {
         $files = glob($pattern, $flags);
-        $dirs = glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT);
+        $dirs = glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT);
         if (is_array($dirs) && count($dirs)) {
-            foreach ($dirs as $dir)
-                $subdirs = $this->globRecursive($dir . '/' . basename($pattern), $flags);
-            if (true === is_array($subdirs))
+            foreach ($dirs as $dir) {
+                $subdirs = $this->globRecursive($dir.'/'.basename($pattern), $flags);
+            }
+            if (true === is_array($subdirs)) {
                 $files = array_merge($files, $subdirs);
+            }
         }
+
         return $files;
     }
 
@@ -61,12 +63,13 @@ class ContentRender
     {
         $str = str_replace('\\', '/', $this->name);
 
-        $file = $this->globRecursive($this->bbapp->getRepository() . '/ClassContent/' . $str . '.yml', 0);
+        $file = $this->globRecursive($this->bbapp->getRepository().'/ClassContent/'.$str.'.yml', 0);
         if (is_array($file) && count($file)) {
             $dataYaml = parserYaml::parse($file[0]);
             foreach ($dataYaml as $name => $item) {
-                if (isset($item['properties']['category']))
+                if (isset($item['properties']['category'])) {
                     return $item['properties']['category'];
+                }
             }
         }
     }
@@ -74,11 +77,12 @@ class ContentRender
     public function initContentObject()
     {
         if (NULL === $this->content) {
-            $classname = "BackBuilder\ClassContent\\" . $this->name;
-            if (NULL !== $this->uid)
+            $classname = "BackBuilder\ClassContent\\".$this->name;
+            if (NULL !== $this->uid) {
                 $this->content = $this->bbapp->getEntityManager()->find($classname, $this->uid);
+            }
 //            if (NULL !== $content) {
-//                
+//
 //                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
 //                    $content->setDraft($draft);
 //                    $this->content = $content;
@@ -87,7 +91,7 @@ class ContentRender
             if (NULL === $this->content) {
                 $this->content = new $classname();
             }
-            
+
             if (null !== $this->bbapp->getBBUserToken()) {
                 if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
                     $this->content->setDraft($draft);
@@ -127,7 +131,7 @@ class ContentRender
 
         $this->editables = array();
         $this->mode = $mode;
-        $this->content = NULL;
+        $this->content = null;
 
         $this->initContentObject();
         // Useless init because it's already done by BackBuilder\Services\Local\ClassContent::getContentsRteParams(); and it used the wrong config.yml's section
@@ -173,12 +177,13 @@ class ContentRender
 
     /**
      * @codeCoverageIgnore
-     * @param string $label
+     * @param  string                                      $label
      * @return \BackBuilder\Services\Content\ContentRender
      */
     public function setLabel($label)
     {
         $this->label = $label;
+
         return $this;
     }
 
@@ -213,9 +218,9 @@ class ContentRender
         $stdClass->render = ($withRender) ? $this->getRender() : "";
         $stdClass->sortable = array(
             'created' => 'Creation date',
-            'modified' => 'Last modification date'
+            'modified' => 'Last modification date',
         );
-        $stdClass->isVisible = (!is_null($this->content->getProperty("is-visible"))) ? (boolean)$this->content->getProperty("is-visible") : true;
+        $stdClass->isVisible = (!is_null($this->content->getProperty("is-visible"))) ? (boolean) $this->content->getProperty("is-visible") : true;
         if (is_array($this->content->getProperty()) && array_key_exists('indexation', $this->content->getProperty())) {
             foreach ($this->content->getProperty('indexation') as $indexedElement) {
                 $indexedElement = (array) $indexedElement;
@@ -235,5 +240,4 @@ class ContentRender
 
         return $stdClass;
     }
-
 }

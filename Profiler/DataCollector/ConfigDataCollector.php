@@ -25,7 +25,6 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-
 use BackBuilder\BBApplication;
 
 /**
@@ -61,7 +60,6 @@ class ConfigDataCollector extends DataCollector
      */
     public function setKernel(HttpKernelInterface $kernel = null)
     {
-
         $this->kernel = $kernel;
     }
 
@@ -84,7 +82,7 @@ class ConfigDataCollector extends DataCollector
             'xcache_enabled'   => extension_loaded('xcache') && ini_get('xcache.cacher'),
             'wincache_enabled' => extension_loaded('wincache') && ini_get('wincache.ocenabled'),
             'bundles'          => array(),
-            'sapi_name'        => php_sapi_name()
+            'sapi_name'        => php_sapi_name(),
         );
 
         if (isset($this->kernel)) {

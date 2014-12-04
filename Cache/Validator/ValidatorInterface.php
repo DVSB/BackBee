@@ -36,7 +36,7 @@ interface ValidatorInterface
     /**
      * Defines if object is candidate for cache processing or not
      *
-     * @param  mixed  $object represents the content we want to apply cache process, can be null
+     * @param mixed $object represents the content we want to apply cache process, can be null
      *
      * @return boolean return true if this object is candidate for cache process, else false
      */

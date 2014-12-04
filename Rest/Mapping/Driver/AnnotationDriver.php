@@ -21,12 +21,9 @@ namespace BackBuilder\Rest\Mapping\Driver;
  */
 
 use BackBuilder\Rest\Mapping\ActionMetadata;
-
 use Doctrine\Common\Annotations\AnnotationReader;
-
 use Metadata\ClassMetadata;
 use Metadata\Driver\DriverInterface;
-use Metadata\MergeableClassMetadata;
 use Metadata\MethodMetadata;
 
 /**
@@ -60,7 +57,7 @@ class AnnotationDriver implements DriverInterface
 
     /**
      *
-     * @param \ReflectionClass $class
+     * @param  \ReflectionClass        $class
      * @return \Metadata\ClassMetadata
      */
     public function loadMetadataForClass(\ReflectionClass $class)
@@ -68,12 +65,11 @@ class AnnotationDriver implements DriverInterface
         $classMetadata = new ClassMetadata($class->getName());
 
         foreach ($class->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
-
-            if(false === strpos($reflectionMethod->getName(), 'Action')) {
+            if (false === strpos($reflectionMethod->getName(), 'Action')) {
                 continue;
             }
 
-            if($reflectionMethod->isAbstract()) {
+            if ($reflectionMethod->isAbstract()) {
                 continue;
             }
 
@@ -81,7 +77,7 @@ class AnnotationDriver implements DriverInterface
 
             $annotations = $this->reader->getMethodAnnotations($reflectionMethod);
 
-            foreach($annotations as $annotation) {
+            foreach ($annotations as $annotation) {
                 if ($annotation instanceof \BackBuilder\Rest\Controller\Annotations\QueryParam) {
                     $data = array(
                         'name' => $annotation->name,

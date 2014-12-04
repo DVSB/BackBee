@@ -22,7 +22,6 @@
 namespace BackBuilder\Security\Encoder;
 
 use BackBuilder\Security\Token\BBUserToken;
-
 use Symfony\Component\Security\Core\Util\StringUtils;
 
 /**
@@ -39,8 +38,8 @@ class RequestSignatureEncoder
     /**
      * Checks if the presented signature is valid or not according to token
      *
-     * @param  BBUserToken $token
-     * @param  string      $signaturePresented signature we want to check if it's correct
+     * @param BBUserToken $token
+     * @param string      $signaturePresented signature we want to check if it's correct
      *
      * @return boolean true if signature is valid, else false
      */
@@ -58,6 +57,6 @@ class RequestSignatureEncoder
     */
    public function createSignature(BBUserToken $token)
    {
-        return md5($token->getUser()->getApiKeyPublic() . $token->getUser()->getApiKeyPrivate() . $token->getNonce());
+       return md5($token->getUser()->getApiKeyPublic().$token->getUser()->getApiKeyPrivate().$token->getNonce());
    }
 }

@@ -22,13 +22,9 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use Doctrine\ORM\Tools\SchemaTool;
 
 /**
  * Install all bundles command
@@ -50,7 +46,7 @@ class BundleInstallAllCommand extends ACommand
             ->addOption('force', null, InputOption::VALUE_NONE, 'The install SQL will be executed against the DB')
             ->setDescription('Installs a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> installs all bundles: 
+The <info>%command.name%</info> installs all bundles:
 
    <info>php bundle:install_all MyBundle</info>
 EOF
@@ -63,23 +59,21 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        
         $force = $input->getOption('force');
-        
+
         $bbapp = $this->getContainer()->get('bbapp');
-        
-        foreach($bbapp->getBundles() as $bundle) {
-            $output->writeln('Installing bundle: ' . $bundle->getId() . '');
+
+        foreach ($bbapp->getBundles() as $bundle) {
+            $output->writeln('Installing bundle: '.$bundle->getId().'');
 
             $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
 
-            if($force) {
+            if ($force) {
                 $output->writeln('<info>Running install</info>');
                 $bundle->install();
-            } 
+            }
 
-            $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
+            $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
         }
     }
-    
 }

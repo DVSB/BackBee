@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,7 +23,6 @@ namespace BackBuilder\Security;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-
 use JMS\Serializer\Annotation as Serializer;
 
 /**
@@ -39,13 +38,12 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class User implements UserInterface
 {
-
     /**
      * Unique identifier of the user
      * @var integer
      * @Id @Column(type="integer", name="id")
      * @GeneratedValue(strategy="IDENTITY")
-     * 
+     *
      * @Serializer\Type('integer'))
      */
     protected $_id;
@@ -55,7 +53,7 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="login")
      * @fixture(type="word")
-     * 
+     *
      * @Serializer\Type('string'))
      */
     protected $_login;
@@ -65,7 +63,7 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="password")
      * @fixture(type="word")
-     * 
+     *
      * @Serializer\Exclude()
      */
     protected $_password;
@@ -100,18 +98,18 @@ class User implements UserInterface
     /**
      * @var BackBuilder\NestedNode\PageRevision
      * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_user", fetch="EXTRA_LAZY")
-     * 
+     *
      * @Serializer\Exclude()
      */
     protected $_revisions;
 
     /**
      * @ManyToMany(targetEntity="BackBuilder\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
-     * 
+     *
      * @Serializer\MaxDepth(1)
      */
     protected $_groups;
-    
+
     /**
      * User's public api key
      * @var String
@@ -120,7 +118,7 @@ class User implements UserInterface
      * @Serializer\Type('string'))
      */
     protected $_api_key_public;
-    
+
     /**
      * User's private api key
      * @var String
@@ -130,7 +128,7 @@ class User implements UserInterface
      * @Serializer\Type('string'))
      */
     protected $_api_key_private;
-    
+
     /**
      * Whether the api key is enabled (default false)
      * @var Boolean
@@ -155,9 +153,6 @@ class User implements UserInterface
      * @Serializer\Type('DateTime'))
      */
     protected $_modified;
-    
-    
-    
 
     /**
      * Class constructor
@@ -167,7 +162,7 @@ class User implements UserInterface
      * @param string $firstname
      * @param string $lastname
      */
-    public function __construct($login = NULL, $password = NULL, $firstname = NULL, $lastname = NULL)
+    public function __construct($login = null, $password = null, $firstname = null, $lastname = null)
     {
         $this->_login = (is_null($login)) ? '' : $login;
         $this->_password = (is_null($password)) ? '' : $password;
@@ -188,7 +183,7 @@ class User implements UserInterface
      */
     public function __toString()
     {
-        return trim($this->_firstname . ' ' . $this->_lastname . ' (' . $this->_login . ')');
+        return trim($this->_firstname.' '.$this->_lastname.' ('.$this->_login.')');
     }
 
     /**
@@ -200,14 +195,14 @@ class User implements UserInterface
     {
         $serialized = new \stdClass();
         $serialized->username = $this->_login;
-        $serialized->commonname = trim($this->_firstname . ' ' . $this->_lastname);
+        $serialized->commonname = trim($this->_firstname.' '.$this->_lastname);
 
         return json_encode($serialized);
     }
 
     /**
      *
-     * @param boolean $bool
+     * @param  boolean                    $bool
      * @return \BackBuilder\Security\User
      * @codeCoverageIgnore
      */
@@ -216,54 +211,59 @@ class User implements UserInterface
         if (is_bool($bool)) {
             $this->_activated = $bool;
         }
+
         return $this;
     }
 
     /**
      *
-     * @param string $login
+     * @param  string                     $login
      * @return \BackBuilder\Security\User
      * @codeCoverageIgnore
      */
     public function setLogin($login)
     {
         $this->_login = $login;
+
         return $this;
     }
 
     /**
      *
-     * @param string $password
+     * @param  string                     $password
      * @return \BackBuilder\Security\User
      * @codeCoverageIgnore
      */
     public function setPassword($password)
     {
         $this->_password = $password;
+
         return $this;
     }
 
     /**
      *
-     * @param string $firstname
+     * @param  string                     $firstname
      * @return \BackBuilder\Security\User
      * @codeCoverageIgnore
      */
     public function setFirstname($firstname)
     {
         $this->_firstname = $firstname;
+
         return $this;
     }
 
     /**
      *
-     * @param string $lastname
+     * @param  string                     $lastname
      * @return \BackBuilder\Security\User
      * @codeCoverageIgnore
      */
     public function setLastname($lastname)
     {
         $this->_lastname = $lastname;
+
         return $this;
     }
 
@@ -342,17 +342,19 @@ class User implements UserInterface
     public function setGroups(ArrayCollection $groups)
     {
         $this->_groups = $groups;
+
         return $this;
     }
 
     /**
-     * @param Group $group
+     * @param  Group $group
      * @return User
      * @codeCoverageIgnore
      */
     public function addGroup(Group $group)
     {
         $this->_groups->add($group);
+
         return $this;
     }
 
@@ -362,16 +364,15 @@ class User implements UserInterface
     public function getRoles()
     {
         $roles =  array();
-        
-        if($this->getApiKeyEnabled()) {
+
+        if ($this->getApiKeyEnabled()) {
             $roles[] = 'ROLE_API_USER';
         }
-        
-        if($this->_activated) {
+
+        if ($this->_activated) {
             $roles[] = 'ROLE_ACTIVE_USER';
         }
-        
-        
+
         return $roles;
     }
 
@@ -398,74 +399,74 @@ class User implements UserInterface
      */
     public function eraseCredentials()
     {
-        
     }
-    
-    
+
     /**
-     * 
+     *
      * @return string
      * @codeCoverageIgnore
      */
-    public function getApiKeyPublic() 
+    public function getApiKeyPublic()
     {
         return $this->_api_key_public;
     }
-    
+
     /**
-     * 
-     * @param string $api_key_public
+     *
+     * @param  string                     $api_key_public
      * @return \BackBuilder\Security\User
      * @codeCoverageIgnore
      */
-    public function setApiKeyPublic($api_key_public) 
+    public function setApiKeyPublic($api_key_public)
     {
         $this->_api_key_public = $api_key_public;
-        return $this;
-    }
-    
-    /**
-     * 
-     * @return string
-     * @codeCoverageIgnore
-     */
-    public function getApiKeyPrivate() 
-    {
-        return $this->_api_key_private;
-    }
-    
-    /**
-     * 
-     * @param string $api_key_private
-     * @return \BackBuilder\Security\User
-     * @codeCoverageIgnore
-     */
-    public function setApiKeyPrivate($api_key_private) 
-    {
-        $this->_api_key_private = $api_key_private;
-        return $this;
-    }
-    
-    /**
-     * 
-     * @return bool
-     * @codeCoverageIgnore
-     */
-    public function getApiKeyEnabled() 
-    {
-        return $this->_api_key_enabled;
-    }
-    
-    /**
-     * 
-     * @param bool $api_key_enabled
-     * @return \BackBuilder\Security\User
-     * @codeCoverageIgnore
-     */
-    public function setApiKeyEnabled($api_key_enabled) 
-    {
-        $this->_api_key_enabled = (bool) $api_key_enabled;
+
         return $this;
     }
 
+    /**
+     *
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function getApiKeyPrivate()
+    {
+        return $this->_api_key_private;
+    }
+
+    /**
+     *
+     * @param  string                     $api_key_private
+     * @return \BackBuilder\Security\User
+     * @codeCoverageIgnore
+     */
+    public function setApiKeyPrivate($api_key_private)
+    {
+        $this->_api_key_private = $api_key_private;
+
+        return $this;
+    }
+
+    /**
+     *
+     * @return bool
+     * @codeCoverageIgnore
+     */
+    public function getApiKeyEnabled()
+    {
+        return $this->_api_key_enabled;
+    }
+
+    /**
+     *
+     * @param  bool                       $api_key_enabled
+     * @return \BackBuilder\Security\User
+     * @codeCoverageIgnore
+     */
+    public function setApiKeyEnabled($api_key_enabled)
+    {
+        $this->_api_key_enabled = (bool) $api_key_enabled;
+
+        return $this;
+    }
 }

@@ -48,7 +48,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->test_base_dir = __DIR__ . '/ConfigTest_Resources';
+        $this->test_base_dir = __DIR__.'/ConfigTest_Resources';
     }
 
     /**
@@ -72,7 +72,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($config->getSection('say'), array(
             'hello'   => 'world',
             'bonjour' => 'monde',
-            'hola'    => 'mundo'
+            'hola'    => 'mundo',
         ));
     }
 
@@ -96,16 +96,16 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
             'say' => array(
                 'hello'   => 'world',
                 'bonjour' => 'monde',
-                'hola'    => 'mundo'
+                'hola'    => 'mundo',
             ),
             'bar' => array(
                 'foo' => 'bar',
-                'php' => '5.4'
+                'php' => '5.4',
             ),
             'foo' => array(
                 'bar'  => 'foo',
-                'back' => 'bee'
-            )
+                'back' => 'bee',
+            ),
         ));
 
         // test config extend with environment and with yml filename ignore
@@ -119,12 +119,12 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
             'say' => array(
                 'hello'   => 'world',
                 'bonjour' => 'monde',
-                'hola'    => 'mundo'
+                'hola'    => 'mundo',
             ),
             'foo' => array(
                 'bar'  => 'foo',
-                'back' => 'bee'
-            )
+                'back' => 'bee',
+            ),
         ));
 
         // prepare test extend with and withtout override
@@ -134,18 +134,18 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $config->extend();
 
         // test extend WITHOUT override
-        $config->extend(realpath($this->test_base_dir . '/test_override'));
+        $config->extend(realpath($this->test_base_dir.'/test_override'));
         $this->assertEquals($config->getSection('foo'), array(
             'bar'  => null,
             'back' => 'bee',
-            'tic'  => 'tac'
+            'tic'  => 'tac',
         ));
 
         // test extend WITH override
-        $config->extend(realpath($this->test_base_dir . '/test_override'), true);
+        $config->extend(realpath($this->test_base_dir.'/test_override'), true);
         $this->assertEquals($config->getSection('foo'), array(
             'bar' => null,
-            'tic' => 'tac'
+            'tic' => 'tac',
         ));
     }
 
@@ -162,18 +162,18 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $container = new Container();
         $container->setParameter('brand', 'LP Digital');
 
-        $config = new Config(realpath($this->test_base_dir . '/test_container'));
+        $config = new Config(realpath($this->test_base_dir.'/test_container'));
         $this->assertEquals($config->getSection('parameters'), array(
-            'brand' => '%brand%'
+            'brand' => '%brand%',
         ));
 
         $config->setContainer($container);
         $this->assertEquals($config->getRawSection('parameters'), array(
-            'brand' => '%brand%'
+            'brand' => '%brand%',
         ));
 
         $this->assertEquals($config->getSection('parameters'), array(
-            'brand' => 'LP Digital'
+            'brand' => 'LP Digital',
         ));
     }
 
@@ -197,8 +197,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
                 'say' => array(
                     'hello'   => 'world',
                     'bonjour' => 'monde',
-                    'hola'    => 'mundo'
-                )
+                    'hola'    => 'mundo',
+                ),
             ),
             $config_dump['raw_parameters']
         );
@@ -229,10 +229,10 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($config->getSection('say') !== null);
         $this->assertEquals(array_merge(
             array(
-                'say' => $config->getSection('say')
+                'say' => $config->getSection('say'),
             ),
             array(
-                'parameters' => $parameters_section_settings
+                'parameters' => $parameters_section_settings,
             )
         ), $config->getAllSections());
 
@@ -242,7 +242,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         // post test
         $this->assertFalse($config->getSection('say') !== null);
         $this->assertEquals(array(
-            'parameters' => $parameters_section_settings
+            'parameters' => $parameters_section_settings,
         ), $config->getAllSections());
 
         // second test

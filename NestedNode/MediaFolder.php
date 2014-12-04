@@ -2,33 +2,32 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode;
 
-use BackBuilder\NestedNode\ANestedNode;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Media folder object in BackBuilder
- * 
+ *
  * A media folder is...
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\NestedNode
  * @copyright   Lp digital system
@@ -38,7 +37,6 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class MediaFolder extends ANestedNode
 {
-
     /**
      * Unique identifier of the content
      * @var string
@@ -103,7 +101,7 @@ class MediaFolder extends ANestedNode
      * @param string $title
      * @param string $url
      */
-    public function __construct($uid = NULL, $title = NULL, $url = NULL)
+    public function __construct($uid = null, $title = null, $url = null)
     {
         parent::__construct($uid);
 
@@ -156,24 +154,25 @@ class MediaFolder extends ANestedNode
 
     /**
      * Sets the title.
-     * @param string $title
+     * @param  string                              $title
      * @return \BackBuilder\NestedNode\MediaFolder
      */
     public function setTitle($title)
     {
         $this->_title = $title;
+
         return $this;
     }
 
     /**
      * Sets the URL
-     * @param type $url
+     * @param  type                                $url
      * @return \BackBuilder\NestedNode\MediaFolder
      */
     public function setUrl($url)
     {
         $this->_url = $url;
+
         return $this;
     }
-
 }

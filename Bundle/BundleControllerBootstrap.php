@@ -21,10 +21,8 @@
 
 namespace BackBuilder\Bundle;
 
-use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Bundle\Exception\RequestErrorException;
 use BackBuilder\FrontController\Exception\FrontControllerException;
-
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -69,8 +67,8 @@ class BundleControllerBootstrap
      * It will act as the main controller of current controller; it will dispatch
      * resquest to the right protected action method
      *
-     * @param  string $method
-     * @param  mixed  $args
+     * @param  string                                                         $method
+     * @param  mixed                                                          $args
      * @throws BackBuilder\FrontController\Exception\FrontControllerException if called action is not available
      */
     public function __call($method, $args)
@@ -80,7 +78,7 @@ class BundleControllerBootstrap
             $content = '';
             $statusCode = 200;
             $headers = array(
-                'Content-Type' => 'text/html'
+                'Content-Type' => 'text/html',
             );
 
             try {
@@ -128,9 +126,9 @@ class BundleControllerBootstrap
     /**
      * Generic way to send response back to client browser
      *
-     * @param  string  $content    the string to print on client browser screen
-     * @param  integer $statusCode the request status code (default: 200)
-     * @param  array   $headers    headers of the response (default: void array)
+     * @param string  $content    the string to print on client browser screen
+     * @param integer $statusCode the request status code (default: 200)
+     * @param array   $headers    headers of the response (default: void array)
      */
     private function sendResponse($content, $statusCode = 200, array $headers = array())
     {
@@ -144,6 +142,7 @@ class BundleControllerBootstrap
         $response->setContent($content);
 
         // Finally
-        $response->send(); die;
+        $response->send();
+        die;
     }
 }

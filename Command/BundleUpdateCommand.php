@@ -22,13 +22,10 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use Doctrine\ORM\Tools\SchemaTool;
 
 /**
  * Update bundle command
@@ -51,7 +48,7 @@ class BundleUpdateCommand extends ACommand
             ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
             ->setDescription('Updates a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> updates a bundle: 
+The <info>%command.name%</info> updates a bundle:
 
    <info>php bundle:update MyBundle</info>
 EOF
@@ -65,30 +62,28 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $name = strtr($input->getArgument('name'), '/', '\\');
-        
+
         $force = $input->getOption('force');
-        
+
         $bbapp = $this->getContainer()->get('bbapp');
-        
+
         $bundle = $bbapp->getBundle($name);
         /* @var $bundle \BackBuilder\Bundle\ABundle */
-        
-        if(null === $bundle) {
+
+        if (null === $bundle) {
             throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
         }
-        
-        
-        $output->writeln('Updating bundle: ' . $bundle->getId() . '');
-        
+
+        $output->writeln('Updating bundle: '.$bundle->getId().'');
+
         $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
-        
-        if($force) {
+
+        if ($force) {
             $output->writeln('<info>Running update</info>');
-            
+
             $bundle->update();
-        } 
-        
-        $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
+        }
+
+        $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
     }
-    
 }

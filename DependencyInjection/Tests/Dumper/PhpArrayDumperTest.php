@@ -23,7 +23,6 @@ namespace BackBuilder\DependencyInjection\Tests\Dumper;
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
-
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Yaml\Yaml;
@@ -75,13 +74,13 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     {
         $this->container = new Container();
         $this->dumper = new PhpArrayDumper($this->container);
-        $config_test_directory = realpath(__DIR__ . '/PhpArrayDumperTest_Resources');
+        $config_test_directory = realpath(__DIR__.'/PhpArrayDumperTest_Resources');
 
         if (false === is_dir($config_test_directory)) {
             throw new \Exception(sprintf('Unable to find test Config directory (%s)', $config_test_directory));
         }
 
-        $services_filepath = $config_test_directory . DIRECTORY_SEPARATOR . 'services.yml';
+        $services_filepath = $config_test_directory.DIRECTORY_SEPARATOR.'services.yml';
         if (false === is_file($services_filepath) || false === is_readable($services_filepath)) {
             throw new \Exception(sprintf('Unable to find or read services.yml (%s)', $services_filepath));
         }

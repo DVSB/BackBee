@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,8 +23,8 @@ namespace BackBuilder\Theme;
 
 use BackBuilder\BBApplication;
 use BackBuilder\Theme\Exception\ThemeException;
-use BackBuilder\Util\Dir,
-    BackBuilder\Util\File;
+use BackBuilder\Util\Dir;
+use BackBuilder\Util\File;
 use BackBuilder\Config\Config;
 
 /**
@@ -35,7 +35,6 @@ use BackBuilder\Config\Config;
  */
 class Theme extends ThemeConst
 {
-
     /**
      * Site identifier
      * @var string
@@ -93,7 +92,7 @@ class Theme extends ThemeConst
     /**
      * Theme object constructor
      *
-     * @param \BackBuilder\BBApplication $bbapp
+     * @param  \BackBuilder\BBApplication $bbapp
      * @throws ThemeException
      */
     public function __construct(BBApplication $bbapp = null)
@@ -104,7 +103,7 @@ class Theme extends ThemeConst
         $this->_application = $bbapp;
         $this->_site_uid = (null !== $bbapp->getSite()) ? $bbapp->getSite()->getUid() : null;
         $this->_themes_dir = $this->_application->getConfig()->getSection('themes_dir');
-        
+
         $manager = new ThemesManager($this->getThemeDir(self::DEFAULT_NAME));
         $this->_default_theme = $manager->hydrateTheme($this->_application->getConfig()->getSection('theme'));
     }
@@ -147,23 +146,24 @@ class Theme extends ThemeConst
     /**
      * Return the base theme folder.
      *
-     * @param string $type
+     * @param  string $type
      * @return Mixed
      */
     public function getThemeDir($type)
     {
         if (array_key_exists($type, $this->_themes_dir)) {
             $theme_dir = $this->_themes_dir[$type];
-            $options = '/' === $theme_dir[0] ? 
+            $options = '/' === $theme_dir[0] ?
                 array() :
                 array(
-                    'base_dir' => $this->_application->getBaseDir()
+                    'base_dir' => $this->_application->getBaseDir(),
                 )
             ;
-            File::resolveFilepath($theme_dir, NULL, $options);
-            
-            return $theme_dir . DIRECTORY_SEPARATOR;
+            File::resolveFilepath($theme_dir, null, $options);
+
+            return $theme_dir.DIRECTORY_SEPARATOR;
         }
+
         return false;
     }
 
@@ -175,10 +175,11 @@ class Theme extends ThemeConst
     public function getDirectory()
     {
         if ($this->_is_valid) {
-            $dir = $this->getThemeDir(static::THEME_NAME) . $this->_theme->getFolder();
+            $dir = $this->getThemeDir(static::THEME_NAME).$this->_theme->getFolder();
 //            File::resolveFilepath($dir, NULL, array('base_dir' => $this->getThemeDir(static::THEME_NAME)));
             return $dir;
         }
+
         return $this->getDefaultDirectory();
     }
 
@@ -190,11 +191,12 @@ class Theme extends ThemeConst
     public function getDefaultDirectory()
     {
         if (
-            is_dir($this->getThemeDir(static::DEFAULT_NAME) . $this->_default_theme->getFolder()) &&
-            is_readable($this->getThemeDir(static::DEFAULT_NAME) . $this->_default_theme->getFolder())
+            is_dir($this->getThemeDir(static::DEFAULT_NAME).$this->_default_theme->getFolder()) &&
+            is_readable($this->getThemeDir(static::DEFAULT_NAME).$this->_default_theme->getFolder())
         ) {
-            return $this->getThemeDir(static::DEFAULT_NAME) . $this->_default_theme->getFolder();
+            return $this->getThemeDir(static::DEFAULT_NAME).$this->_default_theme->getFolder();
         }
+
         return false;
     }
 
@@ -206,19 +208,20 @@ class Theme extends ThemeConst
      */
     public function getPersonalDirectory()
     {
-        $site_folder = $this->_site_uid . DIRECTORY_SEPARATOR . $this->_personal_theme->getFolder();
-        if (!is_dir($this->getThemeDir(static::PERSONAL_NAME) . $site_folder)) {
-            $sub_folder = mkdir($this->getThemeDir(static::PERSONAL_NAME) . $this->_site_uid, 0700, true);
-            $theme_folder = mkdir($this->getThemeDir(static::PERSONAL_NAME) . $site_folder, 0700, true);
+        $site_folder = $this->_site_uid.DIRECTORY_SEPARATOR.$this->_personal_theme->getFolder();
+        if (!is_dir($this->getThemeDir(static::PERSONAL_NAME).$site_folder)) {
+            $sub_folder = mkdir($this->getThemeDir(static::PERSONAL_NAME).$this->_site_uid, 0700, true);
+            $theme_folder = mkdir($this->getThemeDir(static::PERSONAL_NAME).$site_folder, 0700, true);
 
             if ($sub_folder && $theme_folder) {
-                $manager = new PersonalThemesManager($this->getThemeDir(static::PERSONAL_NAME) . $this->_site_uid);
+                $manager = new PersonalThemesManager($this->getThemeDir(static::PERSONAL_NAME).$this->_site_uid);
                 $manager->updateConfig($this->_personal_theme);
             } else {
                 throw new ThemeException('Folder creation error', ThemeException::THEME_PATH_INCORRECT);
             }
         }
-        return $this->getThemeDir(static::PERSONAL_NAME) . $site_folder;
+
+        return $this->getThemeDir(static::PERSONAL_NAME).$site_folder;
     }
 
     public function getIncludePath($name)
@@ -247,25 +250,26 @@ class Theme extends ThemeConst
     /**
      * Send to the object
      *
-     * @param string $path current path
+     * @param string $path   current path
      * @param string $target target you need to dispatch
      */
     private function dispatchDirectory($architecture, $path, $target)
     {
         if ($target === static::SCRIPT_DIR) {
-            $this->_application->getRenderer()->addScriptDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            $this->_application->getRenderer()->addScriptDir($path.DIRECTORY_SEPARATOR.$architecture[$target]);
         } elseif ($target === static::HELPER_DIR) {
-            $this->_application->getRenderer()->addHelperDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            $this->_application->getRenderer()->addHelperDir($path.DIRECTORY_SEPARATOR.$architecture[$target]);
         } elseif ($target === static::LAYOUT_DIR) {
-            $this->_application->getRenderer()->addLayoutDir($path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            $this->_application->getRenderer()->addLayoutDir($path.DIRECTORY_SEPARATOR.$architecture[$target]);
         } elseif ($target === static::LISTENER_DIR) {
-            $this->_application->getAutoloader()->registerListenerNamespace($path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            $this->_application->getAutoloader()->registerListenerNamespace($path.DIRECTORY_SEPARATOR.$architecture[$target]);
         } elseif (in_array($target, array(static::CSS_DIR, static::LESS_DIR, static::JS_DIR, static::IMG_DIR))) {
             if (!array_key_exists($target, $this->_dir)) {
                 $this->_dir[$target] = array();
             }
-            array_unshift($this->_dir[$target], $path . DIRECTORY_SEPARATOR . $architecture[$target]);
+            array_unshift($this->_dir[$target], $path.DIRECTORY_SEPARATOR.$architecture[$target]);
         }
+
         return true;
     }
 
@@ -278,11 +282,12 @@ class Theme extends ThemeConst
     {
         if (
                 empty($this->_themes_dir[static::THEME_NAME]) ||
-                !is_dir($this->getThemeDir(static::THEME_NAME) . $this->_theme->getFolder()) ||
-                !is_readable($this->getThemeDir(static::THEME_NAME) . $this->_theme->getFolder())
+                !is_dir($this->getThemeDir(static::THEME_NAME).$this->_theme->getFolder()) ||
+                !is_readable($this->getThemeDir(static::THEME_NAME).$this->_theme->getFolder())
         ) {
             return false;
         }
+
         return true;
     }
 
@@ -296,9 +301,10 @@ class Theme extends ThemeConst
         if (null === $this->_application) {
             throw new \BackBuilder\Exception\MissingApplicationException('Missing BackBuilder application for theme');
         }
-        
-        if (is_null($configdir))
+
+        if (is_null($configdir)) {
             $configdir = $this->getDirectory();
+        }
 
         $this->_config = new Config($configdir, $this->_application->getBootstrapCache());
 
@@ -312,10 +318,10 @@ class Theme extends ThemeConst
      */
     public function getConfig()
     {
-        if (NULL === $this->_config)
+        if (NULL === $this->_config) {
             $this->_initConfig();
+        }
 
         return $this->_config;
     }
-
 }

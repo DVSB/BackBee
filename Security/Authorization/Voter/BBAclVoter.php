@@ -2,38 +2,38 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Security\Authorization\Voter;
 
-use BackBuilder\Bundle\ABundle,
-    BackBuilder\NestedNode\ANestedNode,
-    BackBuilder\ClassContent\AClassContent;
+use BackBuilder\Bundle\ABundle;
+use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\ClassContent\AClassContent;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Security\Core\Util\ClassUtils,
-    Symfony\Component\Security\Acl\Voter\AclVoter,
-    Symfony\Component\Security\Acl\Permission\PermissionMapInterface,
-    Symfony\Component\Security\Acl\Model\AclProviderInterface,
-    Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface,
-    Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
-    Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
+use Symfony\Component\Security\Core\Util\ClassUtils;
+use Symfony\Component\Security\Acl\Voter\AclVoter;
+use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
+use Symfony\Component\Security\Acl\Model\AclProviderInterface;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
+use Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 
 /**
  * @category    BackBuilder
@@ -44,10 +44,9 @@ use Symfony\Component\Security\Core\Util\ClassUtils,
  */
 class BBAclVoter extends AclVoter
 {
-
     /**
      * The current BackBuilder application
-     * @var \BackBuilder\BBApplication 
+     * @var \BackBuilder\BBApplication
      */
     private $_application;
 
@@ -59,17 +58,17 @@ class BBAclVoter extends AclVoter
 
     /**
      * Returns the vote for the given parameters.
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token A TokenInterface instance
-     * @param object|ObjectIdentityInterface $object The object to secure
-     * @param array $attributes An array of attributes associated with the method being invoked
-     * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token      A TokenInterface instance
+     * @param  object|ObjectIdentityInterface                                       $object     The object to secure
+     * @param  array                                                                $attributes An array of attributes associated with the method being invoked
+     * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     public function vote(TokenInterface $token, $object, array $attributes)
     {
-        if(null === $object) {
+        if (null === $object) {
             return self::ACCESS_ABSTAIN;
         }
-        
+
         if ($object instanceof ANestedNode) {
             return $this->_voteForNestedNode($token, $object, $attributes);
         } elseif ($object instanceof AClassContent) {
@@ -83,23 +82,23 @@ class BBAclVoter extends AclVoter
 
     /**
      * Returns the vote for the cuurent object, if denied try the vote for the general object
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param object|ObjectIdentityInterface $object
-     * @param array $attributes
-     * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  object|ObjectIdentityInterface                                       $object
+     * @param  array                                                                $attributes
+     * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     private function _vote(TokenInterface $token, $object, array $attributes)
     {
         if (self::ACCESS_GRANTED !== $result = parent::vote($token, $object, $attributes)) {
             // try class-scope ace
             $objectIdentity = null;
-            
-            if($object instanceof ObjectIdentityInterface) {
+
+            if ($object instanceof ObjectIdentityInterface) {
                 $objectIdentity = new ObjectIdentity('class', $object->getType());
             } else {
                 $objectIdentity = new ObjectIdentity('class', ClassUtils::getRealClass($object));
             }
-            
+
             $result = parent::vote($token, $objectIdentity, $attributes);
         }
 
@@ -108,10 +107,10 @@ class BBAclVoter extends AclVoter
 
     /**
      * Returns the vote for nested node object, recursively till root
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param \BackBuilder\NestedNode\ANestedNode $node
-     * @param array $attributes
-     * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  \BackBuilder\NestedNode\ANestedNode                                  $node
+     * @param  array                                                                $attributes
+     * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     private function _voteForNestedNode(TokenInterface $token, ANestedNode $node, array $attributes)
     {
@@ -126,10 +125,10 @@ class BBAclVoter extends AclVoter
 
     /**
      * Returns the vote for class content object, recursively till AClassContent
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @param array $attributes
-     * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  \BackBuilder\ClassContent\AClassContent                              $content
+     * @param  array                                                                $attributes
+     * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     private function _voteForClassContent(TokenInterface $token, AClassContent $content, array $attributes)
     {
@@ -140,7 +139,7 @@ class BBAclVoter extends AclVoter
         if (self::ACCESS_DENIED === $result = $this->_vote($token, $content, $attributes)) {
             if (false !== $parent_class = get_parent_class($content)) {
                 if ('BackBuilder\ClassContent\AClassContent' !== $parent_class) {
-                    $parent_class = NAMESPACE_SEPARATOR . $parent_class;
+                    $parent_class = NAMESPACE_SEPARATOR.$parent_class;
                     $result = $this->_voteForClassContent($token, new $parent_class('*'), $attributes);
                 }
             }
@@ -148,5 +147,4 @@ class BBAclVoter extends AclVoter
 
         return $result;
     }
-
 }

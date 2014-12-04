@@ -33,7 +33,7 @@ class PersistorListNotFoundException extends \BackBuilder\Exception\BBException
     public function __construct()
     {
         parent::__construct(
-            'To use BackBuilder\Config\Persistor::persist(), ' .
+            'To use BackBuilder\Config\Persistor::persist(), '.
             'you have to provide a list of config persistor in your application config.yml'
         );
     }

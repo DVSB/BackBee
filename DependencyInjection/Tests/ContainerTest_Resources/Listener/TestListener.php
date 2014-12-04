@@ -62,7 +62,7 @@ class TestListener
     /**
      * occurs on `service.tagged.test`
      *
-     * @param  Event  $event
+     * @param Event $event
      */
     public function onGetServiceTaggedTestEvent(Event $event)
     {

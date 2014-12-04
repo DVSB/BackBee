@@ -21,8 +21,8 @@
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\Services\Exception\ServicesException,
-    BackBuilder\ClassContent\Exception\ClassContentException;
+use BackBuilder\Services\Exception\ServicesException;
+use BackBuilder\ClassContent\Exception\ClassContentException;
 
 /**
  * RPC services for content revisions
@@ -35,7 +35,6 @@ use BackBuilder\Services\Exception\ServicesException,
  */
 class Revision extends AbstractServiceLocal
 {
-
     /**
      * Return current list of revisionned content for authenticated user
      * @exposed(secured=true)
@@ -77,14 +76,14 @@ class Revision extends AbstractServiceLocal
                 $this->em->flush();
 
                 $result[] = array('reverted' => true,
-                    'content' => json_decode($revision->getContent()->serialize()));
+                    'content' => json_decode($revision->getContent()->serialize()), );
             } catch (ClassContentException $e) {
                 $result[] = array('error' => $e->getCode(),
                     'message' => $e->getMessage(),
-                    'content' => json_decode($revision->getContent()->serialize()));
+                    'content' => json_decode($revision->getContent()->serialize()), );
             } catch (\Exception $e) {
                 $result[] = array('error' => $e->getCode(),
-                    'message' => $e->getMessage());
+                    'message' => $e->getMessage(), );
             }
         }
 
@@ -111,15 +110,15 @@ class Revision extends AbstractServiceLocal
 
                 if (null !== $revision->getContent()) {
                     $result[] = array('commited' => true,
-                        'content' => json_decode($revision->getContent()->serialize()));
+                        'content' => json_decode($revision->getContent()->serialize()), );
                 }
             } catch (ClassContentException $e) {
                 $result[] = array('error' => $e->getCode(),
                     'message' => $e->getMessage(),
-                    'content' => json_decode($revision->getContent()->serialize()));
+                    'content' => json_decode($revision->getContent()->serialize()), );
             } catch (\Exception $e) {
                 $result[] = array('error' => $e->getCode(),
-                    'message' => $e->getMessage());
+                    'message' => $e->getMessage(), );
             }
         }
 
@@ -148,14 +147,14 @@ class Revision extends AbstractServiceLocal
                 $this->em->flush();
 
                 $result[] = array('reverted' => true,
-                    'content' => json_decode($revision->getContent() ? $revision->getContent()->serialize() : ''));
+                    'content' => json_decode($revision->getContent() ? $revision->getContent()->serialize() : ''), );
             } catch (ClassContentException $e) {
                 $result[] = array('error' => $e->getCode(),
                     'message' => $e->getMessage(),
-                    'content' => json_decode($revision->getContent() ? $revision->getContent()->serialize() : ''));
+                    'content' => json_decode($revision->getContent() ? $revision->getContent()->serialize() : ''), );
             } catch (\Exception $e) {
                 $result[] = array('error' => $e->getCode(),
-                    'message' => $e->getMessage());
+                    'message' => $e->getMessage(), );
                 break;
             }
         }
@@ -176,5 +175,4 @@ class Revision extends AbstractServiceLocal
         set_time_limit(0);
         ini_set('memory_limit', '512M');
     }
-
 }

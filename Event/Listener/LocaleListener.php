@@ -2,30 +2,30 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Event\Listener;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Event\Event,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\Rewriting\IUrlGenerator;
+use BackBuilder\BBApplication;
+use BackBuilder\Event\Event;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\Rewriting\IUrlGenerator;
 
 /**
  * Listener to rewriting events
@@ -38,7 +38,6 @@ use BackBuilder\BBApplication,
  */
 class LocaleListener
 {
-
     /**
      * Occur on classcontent.onflush events
      * @param \BackBuilder\Event\Event $event
@@ -46,12 +45,14 @@ class LocaleListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent))
+        if (!($content instanceof AClassContent)) {
             return;
+        }
 
         $page = $content->getMainNode();
-        if (NULL === $page)
+        if (NULL === $page) {
             return;
+        }
 
         $newEvent = new Event($page, $content);
         $newEvent->setDispatcher($event->getDispatcher());
@@ -65,12 +66,14 @@ class LocaleListener
     public static function onFlushPage(Event $event)
     {
         $page = $event->getTarget();
-        if (!($page instanceof Page))
+        if (!($page instanceof Page)) {
             return;
+        }
 
         $maincontent = $event->getEventArgs();
-        if (!($maincontent instanceof AClassContent))
-            $maincontent = NULL;
+        if (!($maincontent instanceof AClassContent)) {
+            $maincontent = null;
+        }
 
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
@@ -86,16 +89,17 @@ class LocaleListener
 
     /**
      * Update URL for a page and its descendants according to the application IUrlGenerator
-     * 
-     * @param \BackBuilder\BBApplication $application
-     * @param \BackBuilder\NestedNode\Page $page
+     *
+     * @param \BackBuilder\BBApplication              $application
+     * @param \BackBuilder\NestedNode\Page            $page
      * @param \BackBuilder\ClassContent\AClassContent $maincontent
      */
-    private static function _updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = NULL)
+    private static function _updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = null)
     {
         $urlGenerator = $application->getUrlGenerator();
-        if (!($urlGenerator instanceof IUrlGenerator))
+        if (!($urlGenerator instanceof IUrlGenerator)) {
             return;
+        }
 
         $em = $application->getEntityManager();
         if (NULL === $maincontent && 0 < count($urlGenerator->getDiscriminators())) {
@@ -107,11 +111,11 @@ class LocaleListener
             $page->setUrl($newUrl);
 
             $uow = $em->getUnitOfWork();
-            if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page))
+            if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {
                 $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
-            elseif (!$uow->isScheduledForDelete($page))
+            } elseif (!$uow->isScheduledForDelete($page)) {
                 $uow->computeChangeSet($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
+            }
         }
     }
-
 }

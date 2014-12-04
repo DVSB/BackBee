@@ -22,10 +22,8 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
 use BackBuilder\Util\Dir;
 /**
  * Install BBApp assets
@@ -46,7 +44,7 @@ class AssetsInstallCommand extends ACommand
             ->setName('assets:install')
             ->setDescription('Updated bbapp')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> install app assets: 
+The <info>%command.name%</info> install app assets:
 
    <info>php assets:install</info>
 EOF
@@ -60,19 +58,17 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $bbapp = $this->getContainer()->get('bbapp');
-        
-        $publicResourcesDir = $bbapp->getBaseDir() . '/public/ressources';
-        
-        $bbappResourcesDir = $bbapp->getBBDir() . '/Resources';
-        $repoResourcesDir = $bbapp->getBaseRepository() . '/Ressources';
-        
+
+        $publicResourcesDir = $bbapp->getBaseDir().'/public/ressources';
+
+        $bbappResourcesDir = $bbapp->getBBDir().'/Resources';
+        $repoResourcesDir = $bbapp->getBaseRepository().'/Ressources';
+
         Dir::copy($repoResourcesDir, $publicResourcesDir, 0755);
         Dir::copy($bbappResourcesDir, $publicResourcesDir, 0755);
-        
-        foreach($bbapp->getBundles() as $bundle) {
+
+        foreach ($bbapp->getBundles() as $bundle) {
             Dir::copy($bundle->getResourcesDir(), $publicResourcesDir, 0755);
         }
-        
     }
-    
 }

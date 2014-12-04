@@ -32,7 +32,6 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  */
 abstract class AUidEntity implements DomainObjectInterface
 {
-
     /**
      * @var string
      * @Id @Column(type="string", name="uid")
@@ -90,5 +89,4 @@ abstract class AUidEntity implements DomainObjectInterface
     {
         return $this->_uid;
     }
-
 }

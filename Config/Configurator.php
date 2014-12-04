@@ -22,15 +22,11 @@ namespace BackBuilder\Config;
 
 use BackBuilder\IApplication;
 use BackBuilder\Bundle\Registry;
-use BackBuilder\Config\Config;
 use BackBuilder\Config\Exception\InvalidConfigTypeException;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBuilder\Event\Event;
 use BackBuilder\Util\Resolver\BundleConfigDirectory;
 use BackBuilder\Util\Resolver\ConfigDirectory;
-
 use Doctrine\DBAL\DBALException;
-use Doctrine\ORM\EntityManager;
 
 /**
  * Allow us to build and extend config depending on the type (which can be equals to
@@ -140,7 +136,7 @@ class Configurator
     /**
      * [configureApplicationConfig description]
      *
-     * @param  Config $config [description]
+     * @param Config $config [description]
      */
     public function configureApplicationConfig(Config $config)
     {
@@ -151,7 +147,7 @@ class Configurator
     /**
      * [configureBundleConfig description]
      * @param  Config $config [description]
-     * @return [type]         [description]
+     * @return [type] [description]
      */
     public function configureBundleConfig(Config $config)
     {
@@ -162,9 +158,9 @@ class Configurator
     /**
      * [getConfigDefaultSections description]
      *
-     * @param  Config $config [description]
+     * @param Config $config [description]
      *
-     * @return [type]         [description]
+     * @return [type] [description]
      */
     public function getConfigDefaultSections(Config $config)
     {
@@ -180,7 +176,7 @@ class Configurator
     /**
      * [onGetServiceConfig description]
      *
-     * @param  Event  $event [description]
+     * @param Event $event [description]
      */
     public function onGetServiceConfig(Event $event)
     {
@@ -201,7 +197,7 @@ class Configurator
     /**
      * [storeConfigDefaultSections description]
      *
-     * @param  Config $config [description]
+     * @param Config $config [description]
      */
     private function storeConfigDefaultSections(Config $config)
     {
@@ -211,7 +207,7 @@ class Configurator
     /**
      * Do every extend according to application context and envrionment for application's Config
      *
-     * @param  Config $config config we want to apply Application Config extend type
+     * @param Config $config config we want to apply Application Config extend type
      */
     private function doApplicationConfigExtend(Config $config)
     {
@@ -232,10 +228,10 @@ class Configurator
     /**
      * [doBundleConfigExtend description]
      *
-     * @param  Config $config  [description]
-     * @param  array  $options [description]
+     * @param Config $config  [description]
+     * @param array  $options [description]
      *
-     * @return [type]          [description]
+     * @return [type] [description]
      */
     private function doBundleConfigExtend(Config $config, array $options)
     {
@@ -253,8 +249,8 @@ class Configurator
     /**
      * [overrideConfigByFile description]
      *
-     * @param  Config $config    [description]
-     * @param  [type] $bundle_id [description]
+     * @param Config $config    [description]
+     * @param [type] $bundle_id [description]
      */
     private function overrideConfigByFile(Config $config, $bundle_id)
     {
@@ -273,8 +269,8 @@ class Configurator
     /**
      * [overrideConfigByRegistry description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $bundle_id     [description]
+     * @param Config $config    [description]
+     * @param [type] $bundle_id [description]
      */
     private function overrideConfigByRegistry(Config $config, $bundle_id)
     {
@@ -305,7 +301,7 @@ class Configurator
             if (null !== $em = $this->application->getEntityManager()) {
                 $registry = $em->getRepository('BackBuilder\Bundle\Registry')->findOneBy(array(
                     'key' => $bundle_id,
-                    'scope' => 'BUNDLE_CONFIG.' . $this->context . '.' . $this->environment
+                    'scope' => 'BUNDLE_CONFIG.'.$this->context.'.'.$this->environment,
                 ));
             }
         } catch (DBALException $e) {

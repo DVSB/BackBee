@@ -24,7 +24,6 @@ namespace BackBuilder\Rest\Test;
 use BackBuilder\ApiClient\Auth\PrivateKeyAuth;
 use BackBuilder\Security\User;
 use BackBuilder\Tests\TestCase;
-
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -42,16 +41,16 @@ class RestTestCase extends TestCase
     /**
      * POST request helper
      *
-     * @param type $uri
-     * @param array $data
-     * @param type $contentType
+     * @param  type                                      $uri
+     * @param  array                                     $data
+     * @param  type                                      $contentType
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPost($uri, array $data = [], $contentType = 'application/json', $sign = false)
     {
-        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'POST'] );
+        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'POST']);
 
-        if($sign) {
+        if ($sign) {
             self::signRequest($request);
         }
 
@@ -61,14 +60,14 @@ class RestTestCase extends TestCase
     /**
      * PUT request helper
      *
-     * @param type $uri
-     * @param array $data
-     * @param type $contentType
+     * @param  type                                      $uri
+     * @param  array                                     $data
+     * @param  type                                      $contentType
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPut($uri, array $data = [], $contentType = 'application/json', $sign = false)
     {
-        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PUT'] );
+        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PUT']);
 
         if ($sign) {
             self::signRequest($request);
@@ -80,14 +79,14 @@ class RestTestCase extends TestCase
     /**
      * PATCH request helper
      *
-     * @param type $uri
-     * @param array $operations an array of PATCH operations
-     * @param type $contentType
+     * @param  type                                      $uri
+     * @param  array                                     $operations  an array of PATCH operations
+     * @param  type                                      $contentType
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPatch($uri, array $operations = [], $contentType = 'application/json', $sign = false)
     {
-        $request = new Request([], $operations, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PATCH'] );
+        $request = new Request([], $operations, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PATCH']);
 
         if ($sign) {
             self::signRequest($request);
@@ -99,15 +98,15 @@ class RestTestCase extends TestCase
     /**
      * Get request helper
      *
-     * @param type $uri
-     * @param array $data
-     * @param type $contentType
-     * @param array $headers
+     * @param  type                                      $uri
+     * @param  array                                     $data
+     * @param  type                                      $contentType
+     * @param  array                                     $headers
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestGet($uri, array $filters = [], $sign = false)
     {
-        $request = new Request($filters, [], [], [], [], ['REQUEST_URI' => $uri, 'REQUEST_METHOD' => 'GET'] );
+        $request = new Request($filters, [], [], [], [], ['REQUEST_URI' => $uri, 'REQUEST_METHOD' => 'GET']);
 
         if ($sign) {
             self::signRequest($request);
@@ -118,8 +117,8 @@ class RestTestCase extends TestCase
 
     /**
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param BackBuilder\Security\User $user
+     * @param  \Symfony\Component\HttpFoundation\Request $request
+     * @param  BackBuilder\Security\User                 $user
      * @return self
      */
     protected static function signRequest(Request $request, User $user = null)
@@ -133,7 +132,7 @@ class RestTestCase extends TestCase
         $auth->setPublicKey($user->getApiKeyPublic());
         $request->headers->add([
             PrivateKeyAuth::AUTH_PUBLIC_KEY_TOKEN => $user->getApiKeyPublic(),
-            PrivateKeyAuth::AUTH_SIGNATURE_TOKEN => $auth->getRequestSignature($request->getMethod(), $request->getRequestUri())
+            PrivateKeyAuth::AUTH_SIGNATURE_TOKEN => $auth->getRequestSignature($request->getMethod(), $request->getRequestUri()),
         ]);
 
         return self;
@@ -141,8 +140,8 @@ class RestTestCase extends TestCase
 
     /**
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param \BackBuilder\Security\User $apiUser
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  \BackBuilder\Security\User                 $apiUser
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function sendRequest(Request $request, User $apiUser = null)
@@ -171,5 +170,4 @@ class RestTestCase extends TestCase
         $this->dropDb($this->getBBApp());
         $this->getBBApp()->stop();
     }
-
 }

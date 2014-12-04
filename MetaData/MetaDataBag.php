@@ -33,7 +33,6 @@ use BackBuilder\NestedNode\Page;
  */
 class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 {
-
     /**
      * The array of metadata
      * @var array
@@ -42,7 +41,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Class constructor
-     * @param array $definitions
+     * @param array                        $definitions
      * @param \BackBuilder\NestedNode\Page $page
      * @codeCoverageIgnore
      */
@@ -54,7 +53,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Compute all metadata according to the provided page
-     * @param \BackBuilder\NestedNode\Page $page
+     * @param  \BackBuilder\NestedNode\Page      $page
      * @return \BackBuilder\MetaData\MetaDataBag
      */
     public function compute(Page $page = null)
@@ -72,7 +71,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Updates the associated definition of the set of metadata
-     * @param array $definitions
+     * @param array                        $definitions
      * @param \BackBuilder\NestedNode\Page $page
      */
     public function update(array $definitions = null, Page $page = null)
@@ -128,7 +127,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Adds a new matadata to the bag
-     * @param \BackBuilder\MetaData\MetaData $metadata
+     * @param  \BackBuilder\MetaData\MetaData    $metadata
      * @return \BackBuilder\MetaData\MetaDataBag
      * @codeCoverageIgnore
      */
@@ -141,7 +140,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Checks if a metadata exists with the given name
-     * @param string $name
+     * @param  string  $name
      * @return Boolean
      */
     public function has($name)
@@ -151,7 +150,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Returns the metadata associated to $name or NULL if it doesn't exist
-     * @param string $name
+     * @param  string                              $name
      * @return \BackBuilder\MetaData\MetaData|NULL
      */
     public function get($name)
@@ -180,7 +179,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * @param \stdClass $object
+     * @param  \stdClass                         $object
      * @return \BackBuilder\MetaData\MetaDataBag
      * @deprecated since version 1.0
      */

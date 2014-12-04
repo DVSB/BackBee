@@ -25,7 +25,6 @@ use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\Site\Layout;
 use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
 use BackBuilder\Util\Numeric;
-
 use JMS\Serializer\Annotation as Serializer;
 
 /**
@@ -47,7 +46,6 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class State extends AObjectIdentifiable implements \JsonSerializable
 {
-
     /**
      * The unique identifier of the state
      * @var string
@@ -134,7 +132,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Sets the code
-     * @param int $code
+     * @param  int                                             $code
      * @return \BackBuilder\Workflow\State
      * @throws \BackBuilder\Exception\InvalidArgumentException
      */
@@ -181,7 +179,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Sets the label
-     * @param type $label
+     * @param  type                        $label
      * @return \BackBuilder\Workflow\State
      * @codeCoverageIgnore
      */
@@ -194,7 +192,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Sets the layout associated to this state
-     * @param \BackBuilder\Site\Layout $layout
+     * @param  \BackBuilder\Site\Layout    $layout
      * @return \BackBuilder\Workflow\State
      */
     public function setLayout(Layout $layout = null)
@@ -206,7 +204,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Sets the optional listener classname
-     * @param string $listener
+     * @param  string                      $listener
      * @return \BackBuilder\Workflow\State
      * @codeCoverageIgnore
      */
@@ -229,7 +227,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
             'code' => $this->getCode(),
             'label' => $this->getLabel(),
             'layout' => (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null,
-            'listener' => $this->getListener()
+            'listener' => $this->getListener(),
         );
     }
 
@@ -250,10 +248,10 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Constructs the state from a string or object
-     * @param mixed $serialized The string representation of the object.
+     * @param  mixed                                           $serialized The string representation of the object.
      * @return \BackBuilder\Workflow\State
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                         with strict mode, if a property does not exists
+     *                                                                    with strict mode, if a property does not exists
      * @deprecated since version 1.0
      */
     public function unserialize($serialized, $strict = false)
@@ -265,12 +263,12 @@ class State extends AObjectIdentifiable implements \JsonSerializable
         }
 
         foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
+            $property = '_'.$property;
             if (true === in_array($property, array('_layout'))) {
                 $this->$property = new Layout($value);
-            } else if (true === property_exists($this, $property)) {
+            } elseif (true === property_exists($this, $property)) {
                 $this->$property = $value;
-            } else if (true === $strict) {
+            } elseif (true === $strict) {
                 throw new InvalidArgumentException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this)));
             }
         }
@@ -300,8 +298,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
             'uid'        => $this->getUid(),
             'layout_uid' => null !== $this->getLayout() ? $this->getLayout()->getUid() : null,
             'code'       => $this->getCode(),
-            'label'      => $this->getLabel()
+            'label'      => $this->getLabel(),
         );
     }
-
 }

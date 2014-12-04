@@ -21,15 +21,15 @@
 
 namespace BackBuilder\Event\Listener;
 
-use BackBuilder\Util\File,
-    BackBuilder\Event\Event,
-    BackBuilder\Exception\BBException,
-    BackBuilder\ClassContent\ContentSet,
-    BackBuilder\ClassContent\Revision,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\Element\file as elementFile,
-    BackBuilder\ClassContent\Exception\ClassContentException,
-    BackBuilder\Security\Exception\SecurityException;
+use BackBuilder\Util\File;
+use BackBuilder\Event\Event;
+use BackBuilder\Exception\BBException;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\ClassContent\Revision;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\Element\file as elementFile;
+use BackBuilder\ClassContent\Exception\ClassContentException;
+use BackBuilder\Security\Exception\SecurityException;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
@@ -45,7 +45,6 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  */
 class ClassContentListener
 {
-
     /**
      * Add discriminator values to class MetaData when a content class is loaded
      * Occur on classcontent.include events
@@ -71,8 +70,9 @@ class ClassContentListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent))
+        if (!($content instanceof AClassContent)) {
             return;
+        }
 
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
@@ -121,13 +121,14 @@ class ClassContentListener
 
     public static function handleContentMainnode(AClassContent $content, $application)
     {
-        if (!isset($content) && $content->isElementContent())
+        if (!isset($content) && $content->isElementContent()) {
             return;
+        }
     }
 
     /**
      * Occur on clascontent.preremove event
-     * @param \BackBuilder\Event\Event $event
+     * @param  \BackBuilder\Event\Event $event
      * @return type
      */
     public static function onPreRemove(Event $event)
@@ -137,45 +138,51 @@ class ClassContentListener
 
     /**
      * Occurs on classcontent.update event
-     * @param Event $event
+     * @param  Event       $event
      * @throws BBException Occurs on illegal targeted object or missing BackBuilder Application
      */
     public static function onUpdate(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent))
+        if (!($content instanceof AClassContent)) {
             throw new BBException('Enable to update object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBuilder\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
+        }
 
         $dispatcher = $event->getDispatcher();
-        if (null === $application = $dispatcher->getApplication())
+        if (null === $application = $dispatcher->getApplication()) {
             throw new BBException('Enable to update object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBuilder application has to be initialized'));
+        }
 
-        if (null === $token = $application->getBBUserToken())
+        if (null === $token = $application->getBBUserToken()) {
             throw new SecurityException('Enable to update : unauthorized user', SecurityException::UNAUTHORIZED_USER);
+        }
 
         $em = $dispatcher->getApplication()->getEntityManager();
         if (null === $revision = $content->getDraft()) {
-            if (null === $revision = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token))
+            if (null === $revision = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token)) {
                 throw new ClassContentException('Enable to get draft', ClassContentException::REVISION_MISSING);
+            }
             $content->setDraft($revision);
         }
 
         $content->releaseDraft();
-        if (0 == $revision->getRevision() || $revision->getRevision() == $content->getRevision)
+        if (0 == $revision->getRevision() || $revision->getRevision() == $content->getRevision) {
             throw new ClassContentException('Content is up to date', ClassContentException::REVISION_UPTODATE);
+        }
 
         $lastCommitted = $em->getRepository('BackBuilder\ClassContent\Revision')->findBy(array('_content' => $content, '_revision' => $content->getRevision(), '_state' => Revision::STATE_COMMITTED));
-        if (null === $lastCommitted)
+        if (null === $lastCommitted) {
             throw new ClassContentException('Enable to get last committed revision', ClassContentException::REVISION_MISSING);
+        }
 
         $content->updateDraft($lastCommitted);
     }
 
     /**
      * Occurs on classcontent.commit event
-     * @param Event $event
-     * @throws BBException Occurs on illegal targeted object or missing BackBuilder Application
-     * @throws SecurityException Occurs on missing valid BBUserToken
+     * @param  Event                 $event
+     * @throws BBException           Occurs on illegal targeted object or missing BackBuilder Application
+     * @throws SecurityException     Occurs on missing valid BBUserToken
      * @throws ClassContentException Occurs on missing revision
      */
     public static function onCommit(Event $event)
@@ -237,7 +244,7 @@ class ClassContentListener
 
     /**
      * Occurs on classcontent.revert event
-     * @param Event $event
+     * @param  Event       $event
      * @throws BBException Occurs on illegal targeted object or missing BackBuilder Application
      */
     public static function onRevert(Event $event)
@@ -252,20 +259,21 @@ class ClassContentListener
 
         try {
             $content = $event->getEventArgs()->getEntity();
-            if (!($content instanceof \BackBuilder\ClassContent\Element\file))
+            if (!($content instanceof \BackBuilder\ClassContent\Element\file)) {
                 return;
-
+            }
 
             $includePath = array($application->getStorageDir(), $application->getMediaDir());
-            if (null !== $application->getBBUserToken())
+            if (null !== $application->getBBUserToken()) {
                 $includePath[] = $application->getTemporaryDir();
+            }
 
             $filename = $content->path;
             File::resolveFilepath($filename, null, array('include_path' => $includePath));
 
             @unlink($filename);
         } catch (\Exception $e) {
-            $application->warning('Unable to delete file: ' . $e->getMessage());
+            $application->warning('Unable to delete file: '.$e->getMessage());
         }
     }
 
@@ -276,8 +284,9 @@ class ClassContentListener
     public static function onServicePostCall(Event $event)
     {
         $service = $event->getTarget();
-        if (false === is_a($service, 'BackBuilder\Services\Local\ClassContent'))
+        if (false === is_a($service, 'BackBuilder\Services\Local\ClassContent')) {
             return;
+        }
 
         self::_setRendermodeParameter($event);
     }
@@ -289,30 +298,38 @@ class ClassContentListener
     private static function _setRendermodeParameter(Event $event)
     {
         $application = $event->getDispatcher()->getApplication();
-        if (null === $application)
+        if (null === $application) {
             return;
+        }
 
         $method = $event->getArgument('method');
-        if ('getContentParameters' !== $method)
+        if ('getContentParameters' !== $method) {
             return;
+        }
 
         $result = $event->getArgument('result', array());
-        if (false === array_key_exists('rendermode', $result))
+        if (false === array_key_exists('rendermode', $result)) {
             return;
-        if (false === array_key_exists('array', $result['rendermode']))
+        }
+        if (false === array_key_exists('array', $result['rendermode'])) {
             return;
-        if (false === array_key_exists('options', $result['rendermode']['array']))
+        }
+        if (false === array_key_exists('options', $result['rendermode']['array'])) {
             return;
+        }
 
         $params = $event->getArgument('params', array());
-        if (false === array_key_exists('nodeInfos', $params))
+        if (false === array_key_exists('nodeInfos', $params)) {
             return;
-        if (false === array_key_exists('type', $params['nodeInfos']))
+        }
+        if (false === array_key_exists('type', $params['nodeInfos'])) {
             return;
+        }
 
-        $classname = '\BackBuilder\ClassContent\\' . $params['nodeInfos']['type'];
-        if (false === class_exists($classname))
+        $classname = '\BackBuilder\ClassContent\\'.$params['nodeInfos']['type'];
+        if (false === class_exists($classname)) {
             return;
+        }
 
         $renderer = $application->getRenderer();
         $modes = array('default' => 'default');
@@ -324,5 +341,4 @@ class ClassContentListener
 
         $event->setArgument('result', $result);
     }
-
 }

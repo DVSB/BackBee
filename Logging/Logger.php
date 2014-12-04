@@ -22,10 +22,10 @@
 namespace BackBuilder\Logging;
 
 use Doctrine\DBAL\Logging\SQLLogger;
-use BackBuilder\BBApplication,
-    BackBuilder\Logging\Appender\IAppender,
-    BackBuilder\Logging\Exception\LoggingException,
-    BackBuilder\FrontController\Exception\FrontControllerException;
+use BackBuilder\BBApplication;
+use BackBuilder\Logging\Appender\IAppender;
+use BackBuilder\Logging\Exception\LoggingException;
+use BackBuilder\FrontController\Exception\FrontControllerException;
 use Symfony\Component\HttpFoundation\Response;
 use Psr\Log\LoggerInterface;
 use Doctrine\DBAL\Logging\DebugStack;
@@ -38,7 +38,6 @@ use Doctrine\DBAL\Logging\DebugStack;
  */
 class Logger extends DebugStack implements LoggerInterface, SQLLogger
 {
-
     const ERROR = 1;
     const WARNING = 2;
     const NOTICE = 3;
@@ -63,11 +62,13 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
     {
         $priorityname = strtoupper($method);
 
-        if (!($priority = array_search($priorityname, $this->_priorities)))
+        if (!($priority = array_search($priorityname, $this->_priorities))) {
             throw new LoggingException(sprintf('Unkown priority `%s`.', $priorityname));
+        }
 
-        if (0 == count($args))
+        if (0 == count($args)) {
             throw new LoggingException('None log message provided.');
+        }
 
         $this->log($priority, $args[0], 0 < count($args) ? $args[1] : array());
     }
@@ -95,13 +96,13 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 if ($this->_application->isDebugMode()) {
                     error_reporting(E_ALL);
                     $this->setLevel(Logger::DEBUG);
-                } else if (array_key_exists('level', $loggingConfig)) {
+                } elseif (array_key_exists('level', $loggingConfig)) {
                     $this->setLevel(strtoupper($loggingConfig['level']));
                 }
 
                 if (array_key_exists('logfile', $loggingConfig)) {
                     if (false === realpath(dirname($loggingConfig['logfile']))) {
-                        $loggingConfig['logfile'] = $application->getBaseDir() . DIRECTORY_SEPARATOR . $loggingConfig['logfile'];
+                        $loggingConfig['logfile'] = $application->getBaseDir().DIRECTORY_SEPARATOR.$loggingConfig['logfile'];
                     }
                 }
 
@@ -133,8 +134,9 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     private function _setErrorHandler()
     {
-        if (true === $this->_errorHandling)
+        if (true === $this->_errorHandling) {
             return;
+        }
 
         $this->_errorHandlers = set_error_handler(array($this, 'errorHandler'));
         $this->_errorHandling = true;
@@ -144,8 +146,9 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     private function _setExceptionHandler()
     {
-        if ($this->_exceptionHandling)
+        if ($this->_exceptionHandling) {
             return;
+        }
 
         $this->_exceptionHandlers = set_exception_handler(array($this, 'exceptionHandler'));
         $this->_exceptionHandling = true;
@@ -155,12 +158,13 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
-     * @param \BackBuilder\Logging\Appender\IAppender $appender
+     * @param  \BackBuilder\Logging\Appender\IAppender $appender
      * @return \BackBuilder\Logging\Logger
      */
     public function addAppender(IAppender $appender)
     {
         $this->_appenders[] = $appender;
+
         return $this;
     }
 
@@ -203,7 +207,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $httpCode = $exception->getCode() - FrontControllerException::UNKNOWN_ERROR;
 
             // Not logging when not found
-            if($httpCode !== 404){
+            if ($httpCode !== 404) {
                 $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', $exception->getFile(), $exception->getLine(), $exception->getMessage()));
             }
 
@@ -215,8 +219,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $error_trace = '';
 
             if (null !== $this->_application) {
-
-                $error_trace .= ' in ' . $exception->getFile() . ' on line ' . $exception->getLine() . '</th></tr>';
+                $error_trace .= ' in '.$exception->getFile().' on line '.$exception->getLine().'</th></tr>';
                 foreach ($exception->getTrace() as $trace) {
                     $this->getTemplateError($trace);
                 }
@@ -224,12 +227,12 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 $previous = $exception->getPrevious();
                 while (NULL !== $previous) {
                     // Not logging when not found
-                    if($httpCode !== 404){
+                    if ($httpCode !== 404) {
                         $this->error(sprintf('Cause By : Error occurred in file `%s` at line %d with message: %s', $previous->getFile(), $previous->getLine(), $previous->getMessage()));
                     }
 
-                    $error_trace .= '<tr><th colspan="5">Caused by: ' . $previous->getMessage() .
-                            ' in ' . $previous->getFile() . ' on line ' . $previous->getLine() . '</td></tr>';
+                    $error_trace .= '<tr><th colspan="5">Caused by: '.$previous->getMessage().
+                            ' in '.$previous->getFile().' on line '.$previous->getLine().'</td></tr>';
                     foreach ($previous->getTrace() as $trace) {
                         $this->getTemplateError($trace);
                     }
@@ -241,9 +244,9 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 if ($this->_application->isDebugMode()) {
                     $content = '<link type="text/css" rel="stylesheet" href="ressources/css/debug.css"/>';
                 }
-                $content .= '<h1>' . $httpCode . ': ' . $title . '<h1>';
+                $content .= '<h1>'.$httpCode.': '.$title.'<h1>';
                 $content .= '<table>';
-                $content .= '<tr><th colspan="5">' . $message;
+                $content .= '<tr><th colspan="5">'.$message;
                 if ($this->_application->isDebugMode()) {
                     $content .= $error_trace;
                 } else {
@@ -255,20 +258,19 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $this->_sendErrorMail(
                 $title,
                 "<h1>$httpCode: $title</h1><h2>$message</h2><p>Referer: "
-                . $this->_application->getContainer()->get('request')->server->get('HTTP_REFERER') . "</p>$error_trace"
+                .$this->_application->getContainer()->get('request')->server->get('HTTP_REFERER')."</p>$error_trace"
             );
 
             $response = new Response($content, $httpCode);
             $response->send();
             die();
         } else {
-
             $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', $exception->getFile(), $exception->getLine(), $exception->getMessage()));
 
             if (false === $this->_application->isClientSAPI()) {
                 if (!headers_sent()) {
                     header("HTTP/1.0 500 Internal Server Error");
-                }else{
+                } else {
                     $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', __FILE__, __LINE__, 'This error should not happend, headers already sents'));
                 }
 
@@ -278,26 +280,26 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             }
 
             if (null !== $this->_application && $this->_application->isDebugMode()) {
-                echo 'An error occured: ' . $exception->getMessage() . ' (errNo: ' . $exception->getCode() . ')' . PHP_EOL;
+                echo 'An error occured: '.$exception->getMessage().' (errNo: '.$exception->getCode().')'.PHP_EOL;
                 foreach ($exception->getTrace() as $trace) {
-                    echo 'Trace: line ' .
-                    (array_key_exists('line', $trace) ? $trace['line'] : '-') . ': ' .
-                    (array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ', ' .
-                    (array_key_exists('class', $trace) ? $trace['class'] : '') .
-                    (array_key_exists('type', $trace) ? $trace['type'] : '') .
-                    (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()' . PHP_EOL;
+                    echo 'Trace: line '.
+                    (array_key_exists('line', $trace) ? $trace['line'] : '-').': '.
+                    (array_key_exists('file', $trace) ? $trace['file'] : 'unset file').', '.
+                    (array_key_exists('class', $trace) ? $trace['class'] : '').
+                    (array_key_exists('type', $trace) ? $trace['type'] : '').
+                    (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function').'()'.PHP_EOL;
                 }
 
                 $previous = $exception->getPrevious();
                 while (null !== $previous) {
-                    echo PHP_EOL . 'Caused by: ' . $previous->getMessage() . ' (errNo: ' . $previous->getCode() . ')' . PHP_EOL;
+                    echo PHP_EOL.'Caused by: '.$previous->getMessage().' (errNo: '.$previous->getCode().')'.PHP_EOL;
                     foreach ($previous->getTrace() as $trace) {
-                        echo 'Trace: line ' .
-                        (array_key_exists('line', $trace) ? $trace['line'] : '-') . ': ' .
-                        (array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ', ' .
-                        (array_key_exists('class', $trace) ? $trace['class'] : '') .
-                        (array_key_exists('type', $trace) ? $trace['type'] : '') .
-                        (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()' . PHP_EOL;
+                        echo 'Trace: line '.
+                        (array_key_exists('line', $trace) ? $trace['line'] : '-').': '.
+                        (array_key_exists('file', $trace) ? $trace['file'] : 'unset file').', '.
+                        (array_key_exists('class', $trace) ? $trace['class'] : '').
+                        (array_key_exists('type', $trace) ? $trace['type'] : '').
+                        (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function').'()'.PHP_EOL;
                     }
                     $previous = $previous->getPrevious();
                 }
@@ -313,12 +315,12 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     private function getTemplateError($trace)
     {
-        return '<tr>' .
-                '<td>' . (array_key_exists('file', $trace) ? $trace['file'] : 'unset file') . ': ' .
-                (array_key_exists('line', $trace) ? $trace['line'] : '-') . '</td>' .
-                '<td>' . (array_key_exists('class', $trace) ? $trace['class'] : '') .
-                (array_key_exists('type', $trace) ? $trace['type'] : '') .
-                (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function') . '()</td>' .
+        return '<tr>'.
+                '<td>'.(array_key_exists('file', $trace) ? $trace['file'] : 'unset file').': '.
+                (array_key_exists('line', $trace) ? $trace['line'] : '-').'</td>'.
+                '<td>'.(array_key_exists('class', $trace) ? $trace['class'] : '').
+                (array_key_exists('type', $trace) ? $trace['type'] : '').
+                (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function').'()</td>'.
                 '</tr>';
     }
 
@@ -330,8 +332,9 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $this->log($level, $buffer);
         }
 
-        if (0 == count($this->_appenders))
+        if (0 == count($this->_appenders)) {
             throw new LoggingException('None appenders defined.');
+        }
 
         if (array_key_exists(strtoupper($level), $this->_priorities_name)) {
             $level = $this->_priorities_name[strtoupper($level)];
@@ -341,13 +344,14 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             throw new LoggingException(sprintf('Unkown priority level `%d`.', $level));
         }
 
-        if ($level > $this->_level)
+        if ($level > $this->_level) {
             return;
+        }
 
-        if(isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])){
+        if (isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
             $message = sprintf("http://%s%s : %s", $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'], $message);
-        }elseif(PHP_SAPI == 'cli'){
-            if(isset($argv)){
+        } elseif (PHP_SAPI == 'cli') {
+            if (isset($argv)) {
                 $message = sprintf("%s : %s", implode(" ", $argv), $message);
             }
         }
@@ -356,7 +360,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $appender->write(array('d' => @date('Y/m/d H:i:s'),
                 'p' => $this->_priorities[$level],
                 'm' => $message,
-                'u' => $this->_uniqid));
+                'u' => $this->_uniqid, ));
         }
     }
 
@@ -367,8 +371,9 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $level = $r->getConstant($level);
         }
 
-        if (!array_key_exists($level, $this->_priorities))
+        if (!array_key_exists($level, $this->_priorities)) {
             throw new LoggingException(sprintf('Unkown priority level `%d`.', $level));
+        }
 
         $this->_level = $level;
 
@@ -380,7 +385,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         if (self::DEBUG === $this->_level) {
             $this->_start = microtime(true);
             //$this->_buffer = '[Doctrine] ' . $sql . ' with ' . var_export($params, true); //old throw error  "Nesting level too deep - recursive dependency?"
-            $this->_buffer = '[Doctrine] ' . $sql;
+            $this->_buffer = '[Doctrine] '.$sql;
         }
     }
 
@@ -389,81 +394,81 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         if (self::DEBUG === $this->_level) {
             $buffer = $this->_buffer;
             $this->_buffer = null;
-            $this->log(self::DEBUG, $buffer . ' in ' . (microtime(true) - $this->_start) . 'ms');
+            $this->log(self::DEBUG, $buffer.' in '.(microtime(true) - $this->_start).'ms');
         }
     }
 
     /**
      * @codeCoverageIgnore
-     * @param type $message
+     * @param type  $message
      * @param array $context
      */
-    function emergency($message, array $context = array())
+    public function emergency($message, array $context = array())
     {
         $this->log(self::ERROR, $message, $context);
     }
 
     /**
      * @codeCoverageIgnore
-     * @param type $message
+     * @param type  $message
      * @param array $context
      */
-    function alert($message, array $context = array())
+    public function alert($message, array $context = array())
     {
         $this->log(self::WARNING, $message, $context);
     }
 
-    function critical($message, array $context = array())
+    public function critical($message, array $context = array())
     {
         $this->log(self::ERROR, $message, $context);
     }
 
     /**
      * @codeCoverageIgnore
-     * @param type $message
+     * @param type  $message
      * @param array $context
      */
-    function error($message, array $context = array())
+    public function error($message, array $context = array())
     {
         $this->log(self::ERROR, $message, $context);
     }
 
     /**
      * @codeCoverageIgnore
-     * @param type $message
+     * @param type  $message
      * @param array $context
      */
-    function warning($message, array $context = array())
+    public function warning($message, array $context = array())
     {
         $this->log(self::WARNING, $message, $context);
     }
 
     /**
      * @codeCoverageIgnore
-     * @param type $message
+     * @param type  $message
      * @param array $context
      */
-    function notice($message, array $context = array())
+    public function notice($message, array $context = array())
     {
         $this->log(self::NOTICE, $message, $context);
     }
 
     /**
      * @codeCoverageIgnore
-     * @param type $message
+     * @param type  $message
      * @param array $context
      */
-    function info($message, array $context = array())
+    public function info($message, array $context = array())
     {
         $this->log(self::INFO, $message, $context);
     }
 
     /**
      * @codeCoverageIgnore
-     * @param type $message
+     * @param type  $message
      * @param array $context
      */
-    function debug($message, array $context = array())
+    public function debug($message, array $context = array())
     {
         $this->log(self::DEBUG, $message, $context);
     }
@@ -482,10 +487,12 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             $from = isset($mailerconfig['from']) ? $mailerconfig['from'] : 'no-reply@anonymous.com';
             $from_name = isset($mailerconfig['from_name']) ? $mailerconfig['from_name'] : null;
 
-            if (is_array($from))
+            if (is_array($from)) {
                 $from = reset($from);
-            if (is_array($from_name))
+            }
+            if (is_array($from_name)) {
                 $from_name = reset($from_name);
+            }
 
             $mail = \Swift_Message::newInstance($subject, $message, 'text/html', 'utf-8');
             $mail->addFrom($from, $from_name);
@@ -503,12 +510,11 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
     /**
      * Get priority name by its code
      *
-     * @param int $code
+     * @param  int         $code
      * @return string|null
      */
     protected function getPriorityName($code)
     {
         return isset($this->_priorities[$code]) ? $this->_priorities[$code] : null;
     }
-
 }

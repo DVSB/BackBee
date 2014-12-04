@@ -33,7 +33,6 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  */
 class NestedNodeLRCalculateJob extends AJob
 {
-
     /**
      * The entity manager to be used
      * @var \Doctrine\ORM\EntityManager
@@ -42,18 +41,19 @@ class NestedNodeLRCalculateJob extends AJob
 
     /**
      * Sets the entity manager to use
-     * @param \Doctrine\ORM\EntityManager $em
+     * @param  \Doctrine\ORM\EntityManager                   $em
      * @return \BackBuilder\Job\NestedNodeDetachCalculateJob
      */
     public function setEntityManager($em)
     {
         $this->em = $em;
+
         return $this;
     }
 
     /**
      * Run the job
-     * @param mixed $args
+     * @param  mixed                     $args
      * @throws \InvalidArgumentException
      */
     public function run($args)
@@ -84,7 +84,7 @@ class NestedNodeLRCalculateJob extends AJob
                 'delta' => $delta,
                 'root' => $node->getRoot(),
                 'leftnode' => $first,
-                'uid' => $node->getUid()))
+                'uid' => $node->getUid(), ))
             ->update()
             ->getQuery()
             ->execute()
@@ -100,11 +100,10 @@ class NestedNodeLRCalculateJob extends AJob
                 'delta' => $delta,
                 'root' => $node->getRoot(),
                 'rightnode' => $first,
-                'uid' => $node->getUid()))
+                'uid' => $node->getUid(), ))
             ->update()
             ->getQuery()
             ->execute()
         ;
     }
-
 }

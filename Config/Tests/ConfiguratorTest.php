@@ -67,8 +67,8 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testExtendApplicationConfig()
     {
-        $this->application->setBB_Dir(__DIR__ . '/ConfiguratorTest_Resources/bbdir');
-        $this->application->setBase_Repository(__DIR__ . '/ConfiguratorTest_Resources/repository');
+        $this->application->setBB_Dir(__DIR__.'/ConfiguratorTest_Resources/bbdir');
+        $this->application->setBase_Repository(__DIR__.'/ConfiguratorTest_Resources/repository');
         $this->application->setOverrided_Config(false);
 
         // Test without context and without environment
@@ -78,8 +78,8 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
                 'parameters' => array(
                     'base_directory' => 'bbdir',
                     'context'        => 'default',
-                    'environment'    => ''
-                )
+                    'environment'    => '',
+                ),
             ),
             $config->getAllSections()
         );
@@ -92,8 +92,8 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
                     'base_directory' => 'repository',
                     'context'        => 'default',
                     'environment'    => '',
-                    'foo'            => 'bar'
-                )
+                    'foo'            => 'bar',
+                ),
             ),
             $config->getAllSections()
         );
@@ -110,8 +110,8 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
                     'context'        => 'api',
                     'environment'    => '',
                     'foo'            => 'bar',
-                    'bar'            => 'foo'
-                )
+                    'bar'            => 'foo',
+                ),
             ),
             $config->getAllSections()
         );
@@ -128,8 +128,8 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
                 'parameters' => array(
                     'context'          => 'api',
                     'environment'      => 'preprod',
-                    'overrided_config' => true
-                )
+                    'overrided_config' => true,
+                ),
             ),
             $config->getAllSections()
         );

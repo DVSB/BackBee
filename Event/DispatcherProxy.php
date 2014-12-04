@@ -22,7 +22,6 @@ namespace BackBuilder\Event;
 
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\Event\Dispatcher;
 
 /**
  * This interface must be implemented if you want to use a proxy class instead of your service real class
@@ -42,12 +41,11 @@ class DispatcherProxy extends Dispatcher implements DumpableServiceProxyInterfac
         $this->_is_restored = false;
     }
 
-
     /**
      * Restore current service to the dump's state
      *
-     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
-     *                     restore current service
+     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                    restore current service
      */
     public function restore(ContainerInterface $container, array $dump)
     {

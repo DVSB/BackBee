@@ -71,7 +71,6 @@ if (false === defined('NAMESPACE_SEPARATOR')) {
  */
 class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
-
     /**
      * Current BackBuilder application
      * @var \BackBuilder\BBApplication
@@ -128,9 +127,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Class constructor
-     * @param \BackBuilder\BBApplication $application Optionnal BackBuilder Application
-     * @param \BackBuilder\Event\Dispatcher $dispatcher Optionnal events dispatcher
-     * @param \BackBuilder\Logging\Logger $logger Optionnal logging engine
+     * @param \BackBuilder\BBApplication    $application Optionnal BackBuilder Application
+     * @param \BackBuilder\Event\Dispatcher $dispatcher  Optionnal events dispatcher
+     * @param \BackBuilder\Logging\Logger   $logger      Optionnal logging engine
      */
     public function __construct(BBApplication $application = null, Dispatcher $dispatcher = null)
     {
@@ -144,7 +143,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Sets the Backbuilder Application
-     * @param \BackBuilder\BBApplication $application
+     * @param  \BackBuilder\BBApplication         $application
      * @return \BackBuilder\AutoLoader\AutoLoader The current autoloader
      */
     public function setApplication(BBApplication $application = null)
@@ -156,7 +155,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Sets the events dispatcher
-     * @param \BackBuilder\Event\Dispatcher $dispatcher
+     * @param  \BackBuilder\Event\Dispatcher      $dispatcher
      * @return \BackBuilder\AutoLoader\AutoLoader The current autoloader
      */
     public function setEventDispatcher(Dispatcher $dispatcher = null)
@@ -168,11 +167,11 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Looks for class definition throw declared wrappers according to the namespace
-     * @param string $namespace the namespace's class
-     * @param string $classname the class name looked for
-     * @return Boolean TRUE if the class is found FALSE else
+     * @param  string                                                           $namespace the namespace's class
+     * @param  string                                                           $classname the class name looked for
+     * @return Boolean                                                          TRUE if the class is found FALSE else
      * @throws \BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException Occurs when the wrapper can not build PHP code
-     * @throws \BackBuilder\AutoLoader\Exception\SyntaxErrorException Occurs when the generated PHP code is not valid
+     * @throws \BackBuilder\AutoLoader\Exception\SyntaxErrorException           Occurs when the generated PHP code is not valid
      */
     private function _autoloadThrowWrappers($namespace, $classname)
     {
@@ -189,7 +188,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
                 foreach ($wrappers as $wrapper) {
                     try {
-                        @include(sprintf('%s://%s/%s', $wrapper['protocol'], $classpath, $classname));
+                        @include sprintf('%s://%s/%s', $wrapper['protocol'], $classpath, $classname);
+
                         return true;
                     } catch (ClassWrapperException $e) {
                         // The class wrapper cannot return a valid class
@@ -211,9 +211,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Looks for class definition using the PHP 5.3 standards to the namespace
-     * @param string $namespace the namespace's class
-     * @param string $classname the class name looked for
-     * @return Boolean TRUE if the class is found FALSE else
+     * @param  string                                                 $namespace the namespace's class
+     * @param  string                                                 $classname the class name looked for
+     * @return Boolean                                                TRUE if the class is found FALSE else
      * @throws \BackBuilder\AutoLoader\Exception\SyntaxErrorException Occurs when the found PHP code is not valid
      */
     private function _autoloadThrowFilesystem($namespace, $classname)
@@ -225,10 +225,10 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
         $pathfiles = array();
         if (false === is_array($this->_includeExtensions)
                 || 0 == count($this->_includeExtensions)) {
-            $pathfiles[] = str_replace(NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR . $classname;
+            $pathfiles[] = str_replace(NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $namespace).DIRECTORY_SEPARATOR.$classname;
         } else {
             foreach ($this->_includeExtensions as $ext) {
-                $pathfiles[] = str_replace(NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR . $classname . $ext;
+                $pathfiles[] = str_replace(NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $namespace).DIRECTORY_SEPARATOR.$classname.$ext;
             }
         }
 
@@ -236,14 +236,15 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
             if (strpos($namespace, $n) === 0) {
                 foreach ($paths as $path) {
                     foreach ($pathfiles as $pathfile) {
-                        $filename = $path . DIRECTORY_SEPARATOR . $pathfile;
+                        $filename = $path.DIRECTORY_SEPARATOR.$pathfile;
                         if (false === file_exists($filename)) {
-                            $filename = $path . DIRECTORY_SEPARATOR . str_replace(str_replace(NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $n), '', $pathfile);
+                            $filename = $path.DIRECTORY_SEPARATOR.str_replace(str_replace(NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $n), '', $pathfile);
                         }
 
                         if (true === file_exists($filename) && true === is_readable($filename)) {
                             try {
-                                include_once($filename);
+                                include_once $filename;
+
                                 return true;
                             } catch (\RuntimeException $e) {
                                 // The include php file is not valid
@@ -256,13 +257,14 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
                 $this->_registeredNamespace = true;
             }
         }
+
         return false;
     }
 
     /**
      * Returns the namespace and the class name to be found
-     * @param string $classpath the absolute class name
-     * @return array array($namespace, $classname)
+     * @param  string                                                      $classpath the absolute class name
+     * @return array                                                       array($namespace, $classname)
      * @throws \BackBuilder\AutoLoader\Exception\InvalidNamespaceException Occurs when the namespace is not valid
      * @throws \BackBuilder\AutoLoader\Exception\InvalidClassnameException Occurs when the class name is not valid
      */
@@ -309,7 +311,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     /**
      * Looks for the class name, call back function for spl_autolad_register()
      * First using the defined wrappers then throw filesystem
-     * @param string $classpath
+     * @param  string                                                   $classpath
      * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs when the class can not be found
      */
     public function autoload($classpath)
@@ -355,9 +357,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Returns the wrappers registered for provided namespaces and protocols
-     * @param string|array $namespace The namespaces to look for
-     * @param string|array $protocol The protocols to use
-     * @return array An array of wrappers registered for these namespaces and protocols
+     * @param  string|array $namespace The namespaces to look for
+     * @param  string|array $protocol  The protocols to use
+     * @return array        An array of wrappers registered for these namespaces and protocols
      */
     public function getStreamWrapperClassname($namespace, $protocol)
     {
@@ -380,7 +382,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Returns AClassContent whom classname matches the provided pattern
-     * @param string $pattern The pattern to test
+     * @param  string      $pattern The pattern to test
      * @return array|FALSE An array of classnames matching the pattern of FALSE if none found
      */
     public function glob($pattern)
@@ -399,32 +401,34 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
             }
         }
 
-        if (0 == count($classnames))
+        if (0 == count($classnames)) {
             return false;
+        }
 
         return array_unique($classnames);
     }
 
     /**
      * Registers this auloloader
-     * @param Boolean $throw [optional] This parameter specifies whether
-     *                       spl_autoload_register should throw exceptions
-     *                       when the autoload_function cannot be registered.
-     * @param Boolean $prepend [optional] If TRUE, spl_autoload_register will
-     *                         prepend the autoloader on the autoload stack
-     *                         instead of appending it.
+     * @param  Boolean                            $throw   [optional] This parameter specifies whether
+     *                                                     spl_autoload_register should throw exceptions
+     *                                                     when the autoload_function cannot be registered.
+     * @param  Boolean                            $prepend [optional] If TRUE, spl_autoload_register will
+     *                                                     prepend the autoloader on the autoload stack
+     *                                                     instead of appending it.
      * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function register($throw = true, $prepend = false)
     {
         spl_autoload_register(array($this, 'autoload'), $throw, $prepend);
+
         return $this;
     }
 
     /**
      * Registers namespace parts to look for class name
-     * @param string $namespace The namespace
-     * @param string|array $paths One or an array of associated locations
+     * @param  string                             $namespace The namespace
+     * @param  string|array                       $paths     One or an array of associated locations
      * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerNamespace($namespace, $paths)
@@ -440,7 +444,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Registers listeners namespace parts to look for class name
-     * @param string $path
+     * @param  string                             $path
      * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerListenerNamespace($path)
@@ -456,9 +460,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Registers stream wrappers
-     * @param string $namespace The namespace
-     * @param string $protocol The wrapper's protocol
-     * @param string $classname The class name implementing the wrapper
+     * @param  string                             $namespace The namespace
+     * @param  string                             $protocol  The wrapper's protocol
+     * @param  string                             $classname The class name implementing the wrapper
      * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerStreamWrapper($namespace, $protocol, $classname)
@@ -482,7 +486,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      */
     public function getClassProxy()
     {
-        return null;
+        return;
     }
 
     /**
@@ -496,15 +500,15 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
         return array(
             'namespaces_locations' => $this->_namespaces,
             'wrappers_namespaces'  => $this->_streamWrappers,
-            'has_event_dispatcher' => null !== $this->_dispatcher
+            'has_event_dispatcher' => null !== $this->_dispatcher,
         );
     }
 
     /**
      * Restore current service to the dump's state
      *
-     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
-     *                     restore current service
+     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                    restore current service
      */
     public function restore(ContainerInterface $container, array $dump)
     {
@@ -523,7 +527,6 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
         $this->_is_restored = true;
     }
-
 
     /**
      * @return boolean true if current service is already restored, otherwise false

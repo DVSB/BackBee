@@ -22,14 +22,9 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use BackBuilder\Job\AJob,
-    BackBuilder\Job\Queue\AQueue;
 /**
  * Update BBApp database
  *
@@ -50,7 +45,7 @@ class NestedNodeProcessJobsCommand extends ACommand
             ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
             ->setDescription('Updated bbapp')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> updates app: 
+The <info>%command.name%</info> updates app:
 
    <info>php bbapp:update</info>
 EOF
@@ -64,8 +59,7 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $queue = $this->getContainer()->get('job.queue.nested_node');
-        
+
         $queue->startAllJobs();
     }
-    
 }

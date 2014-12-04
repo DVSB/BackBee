@@ -21,14 +21,10 @@ namespace BackBuilder\Rest\EventListener;
  */
 
 use BackBuilder\Event\Listener\APathEnabledListener;
-use BackBuilder\Rest\Exception\ValidationException;
-
 use Metadata\MetadataFactory;
-
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator;
 
 /**
@@ -90,10 +86,10 @@ class ParamConverterListener extends APathEnabledListener
             try {
                 if (null === $unique_identifier) {
                     throw new \InvalidArgumentException(
-                        'Unable to find identifier with provided attribute: ' . $param_converter->id_name
+                        'Unable to find identifier with provided attribute: '.$param_converter->id_name
                     );
                 }
-            } catch(\InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException $e) {
                 if (true === $param_converter->required) {
                     throw $e;
                 }
@@ -112,7 +108,7 @@ class ParamConverterListener extends APathEnabledListener
 
     /**
      *
-     * @param mixed $controller
+     * @param  mixed                                    $controller
      * @return \BackBuilder\Rest\Mapping\ActionMetadata
      */
     protected function getControllerActionMetadata($controller)
@@ -124,7 +120,7 @@ class ParamConverterListener extends APathEnabledListener
         $controllerMetadata = $metadata->getOutsideClassMetadata();
 
         $action_metadatas = null;
-        if(array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
+        if (array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
             $action_metadatas = $controllerMetadata->methodMetadata[$controller[1]];
         }
 

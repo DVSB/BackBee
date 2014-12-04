@@ -40,7 +40,7 @@ interface IRegistryEntity
      * Set all class properties.
      *
      * @param string $property the property name
-     * @param mixed $value the property value
+     * @param mixed  $value    the property value
      */
     public function setObjectProperty($property, $value);
 

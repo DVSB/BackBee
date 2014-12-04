@@ -112,8 +112,8 @@ class ManualBBApplication implements ApplicationInterface
     /**
      * __call allow us to catch everytime user wanted to set a value for a protected attribute;
      *
-     * @param  string $method
-     * @param  array  $arguments
+     * @param string $method
+     * @param array  $arguments
      */
     public function __call($method, $arguments)
     {

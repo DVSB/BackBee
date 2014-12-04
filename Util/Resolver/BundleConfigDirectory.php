@@ -20,7 +20,6 @@ namespace BackBuilder\Util\Resolver;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Util\Resolver\BootstrapDirectory;
 
 /**
  * This bootstrap directory resolver allows to get every folders in which we can find bootstrap.yml
@@ -45,8 +44,8 @@ class BundleConfigDirectory
     {
         $directories = array();
         foreach (BootstrapDirectory::getDirectories($base_directory, $context, $environment) as $directory) {
-            $directory .= DIRECTORY_SEPARATOR . self::OVERRIDE_BUNDLE_CONFIG_DIRECTORY_NAME
-                . DIRECTORY_SEPARATOR . $bundle_id
+            $directory .= DIRECTORY_SEPARATOR.self::OVERRIDE_BUNDLE_CONFIG_DIRECTORY_NAME
+                .DIRECTORY_SEPARATOR.$bundle_id
             ;
 
             if (true === is_dir($directory)) {

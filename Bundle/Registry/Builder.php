@@ -23,7 +23,6 @@ namespace BackBuilder\Bundle\Registry;
 
 use BackBuilder\Bundle\Registry;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
@@ -72,8 +71,8 @@ class Builder
 
     /**
      * Set the entity
-     * 
-     * @param mixed $entity
+     *
+     * @param  mixed $entity
      * @return self
      */
     public function setEntity($entity)
@@ -88,7 +87,7 @@ class Builder
 
     /**
      * return the entity
-     * 
+     *
      * @return mixed
      */
     public function getEntity()
@@ -102,8 +101,8 @@ class Builder
 
     /**
      * Add registries elements
-     * 
-     * @param array $registries
+     *
+     * @param  array $registries
      * @return self
      */
     public function setRegistries(array $registries, $classname)
@@ -116,7 +115,7 @@ class Builder
 
     /**
      * return the registries elements as array
-     * 
+     *
      * @return array
      */
     public function getRegistries()
@@ -165,7 +164,6 @@ class Builder
         foreach ($this->registries as $registry) {
             $this->entity->{$registry->getKey()} = $registry->getValue();
         }
-
     }
 
     /**
@@ -189,7 +187,7 @@ class Builder
 
     /**
      * Identify if the current element is IEntityRegistry
-     * 
+     *
      * @return boolean
      */
     public function isRegistryEntity($class = null)

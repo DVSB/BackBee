@@ -23,20 +23,13 @@ namespace BackBuilder\Rest\Tests\Controller;
 
 use BackBuilder\Rest\Controller\PageController;
 use BackBuilder\Rest\Test\RestTestCase;
-
-
-use BackBuilder\Site\Site,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\Site\Layout;
-
+use BackBuilder\Site\Site;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Site\Layout;
 use BackBuilder\Security\Acl\Permission\MaskBuilder;
-
 use BackBuilder\Rest\Patcher\OperationBuilder;
-
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-
-use org\bovigo\vfs\vfsStream;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 /**
  * Test for PageController class
@@ -50,8 +43,6 @@ use org\bovigo\vfs\vfsStream;
  */
 class PageControllerTest extends RestTestCase
 {
-
-
     protected $site;
 
     protected function setUp()
@@ -90,8 +81,8 @@ class PageControllerTest extends RestTestCase
 
         $layout->setLabel('Default')
             ->setSite($this->site)
-            ->setDataObject(new \stdClass)
-            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts/default.twig')
+            ->setDataObject(new \stdClass())
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts/default.twig')
         ;
 
         $em = $this->getEntityManager();
@@ -128,8 +119,8 @@ class PageControllerTest extends RestTestCase
 
         $layout->setLabel('Default')
             ->setSite($this->site)
-            ->setDataObject(new \stdClass)
-            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts/default.twig')
+            ->setDataObject(new \stdClass())
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts/default.twig')
         ;
         $em->persist($layout);
 
@@ -144,7 +135,6 @@ class PageControllerTest extends RestTestCase
 
         $em->flush();
 
-
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage,
             new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'),
@@ -155,7 +145,7 @@ class PageControllerTest extends RestTestCase
             ['VIEW']
         );
 
-        $response = $this->sendRequest(self::requestPut('/rest/1/page/' . $homePage->getUid(), [
+        $response = $this->sendRequest(self::requestPut('/rest/1/page/'.$homePage->getUid(), [
             'title' => 'New Page',
             'url' => 'url',
             'target' => Page::DEFAULT_TARGET,
@@ -188,7 +178,7 @@ class PageControllerTest extends RestTestCase
             ['PUBLISH', 'EDIT']
         );
 
-        $response = $this->sendRequest(self::requestPatch('/rest/1/page/' . $page->getUid(), (new OperationBuilder())
+        $response = $this->sendRequest(self::requestPatch('/rest/1/page/'.$page->getUid(), (new OperationBuilder())
             ->replace('title', 'New Page Title')
             ->replace('state', Page::STATE_ONLINE)
             ->getOperations()
@@ -281,7 +271,7 @@ class PageControllerTest extends RestTestCase
         // filter by state = offline
         $response3 = $this->sendRequest(self::requestGet('/rest/1/page', array(
             'parent_uid' => $homePage->getUid(),
-            'state'      => array(Page::STATE_OFFLINE)
+            'state'      => array(Page::STATE_OFFLINE),
         )));
 
         $this->assertEquals(200, $response3->getStatusCode());
@@ -290,5 +280,4 @@ class PageControllerTest extends RestTestCase
         $this->assertCount(1, $res3);
         $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
     }
-
 }

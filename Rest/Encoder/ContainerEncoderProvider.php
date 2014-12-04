@@ -13,8 +13,6 @@ namespace BackBuilder\Rest\Encoder;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 
-use BackBuilder\Rest\Encoder\IEncoderProvider;
-
 /**
  * Provides encoders through the Symfony2 DIC
  *

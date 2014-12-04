@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,16 +22,16 @@
 namespace BackBuilder\ClassContent;
 
 use BackBuilder\ClassContent\Exception\ClassContentException;
-use Symfony\Component\Security\Core\User\UserInterface,
-    Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Security\Core\Util\ClassUtils;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Revision of a content in BackBuilder.
- * 
+ *
  * A revision is owned by a valid user and has several states :
- * 
+ *
  * * STATE_ADDED : new content, revision number to 0
  * * STATE_MODIFIED : new draft of an already revisionned content
  * * STATE_COMMITTED : one of the committed revision of a content
@@ -125,7 +125,7 @@ class Revision extends AContent implements \Iterator, \Countable
     private $_index = 0;
 
     /**
-     * @param \Doctrine\ORM\EntityManager $em 
+     * @param \Doctrine\ORM\EntityManager $em
      */
     private $_em;
 
@@ -136,30 +136,32 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the current entity manager to dynamicaly load subrevisions
-     * @param \Doctrine\ORM\EntityManager $em
+     * @param  \Doctrine\ORM\EntityManager        $em
      * @return \BackBuilder\ClassContent\Revision
      */
     public function setEntityManager(\Doctrine\ORM\EntityManager $em = null)
     {
         $this->_em = $em;
+
         return $this;
     }
 
     /**
      * Sets the current BB user's token to dynamically load subrevisions
-     * @param \BackBuilder\Security\Token\BBUserToken $token
+     * @param  \BackBuilder\Security\Token\BBUserToken $token
      * @return \BackBuilder\ClassContent\Revision
      */
     public function setToken(\BackBuilder\Security\Token\BBUserToken $token = null)
     {
         $this->_token = $token;
+
         return $this;
     }
 
     /**
      * Return a subcontent instance by its type and value, FALSE if not found
-     * @param string $type The classname of the subcontent
-     * @param string $value The value of the subcontent (uid)
+     * @param  string                                        $type  The classname of the subcontent
+     * @param  string                                        $value The value of the subcontent (uid)
      * @return \BackBuilder\ClassContent\AClassContent|FALSE
      */
     protected function _getContentByDataValue($type, $value)
@@ -181,7 +183,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Class constructor.
-     * @param string $uid The unique identifier of the revision
+     * @param string         $uid   The unique identifier of the revision
      * @param TokenInterface $token The current auth token
      */
     public function __construct($uid = null, $token = null)
@@ -233,19 +235,20 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the whole datas of the revision
-     * @param array $data
+     * @param  array                                   $data
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setData(array $data)
     {
         $this->_data = $data;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets the attached revisionned content
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\ClassContent\AClassContent $content
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
      */
     public function setContent(AClassContent $content = null)
@@ -261,37 +264,40 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the entity target content classname
-     * @param string $classname
+     * @param  string                                  $classname
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setClassname($classname)
     {
         $this->_classname = $classname;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets the owner of the revision
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user
-     * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @param  \Symfony\Component\Security\Core\User\UserInterface $user
+     * @return \BackBuilder\ClassContent\AClassContent             the current instance content
      * @codeCoverageIgnore
      */
     public function setOwner(UserInterface $user)
     {
         $this->_owner = UserSecurityIdentity::fromAccount($user);
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets the comment associated to the revision
-     * @param string $comment
+     * @param  string                                  $comment
      * @return \BackBuilder\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setComment($comment)
     {
         $this->_comment = $comment;
+
         return $this->_getContentInstance();
     }
 
@@ -307,7 +313,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets options at the construction of a new revision
-     * @param mixed $options 
+     * @param  mixed                              $options
      * @return \BackBuilder\ClassContent\AContent
      */
     protected function _setOptions($options = null)
@@ -331,8 +337,9 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function clear()
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not clear an content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
         $this->_data = array();
         $this->_index = 0;
@@ -344,8 +351,9 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function count()
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not count an content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
         return count($this->_data);
     }
@@ -356,8 +364,9 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function current()
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not get current of a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
         return $this->getData($this->_index);
     }
@@ -373,17 +382,19 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Return the item at index
-     * @param int $index
-     * @return the item or NULL if $index is out of bounds
+     * @param  int                   $index
+     * @return the                   item or NULL if $index is out of bounds
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function item($index)
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not get item of a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
-        if (0 <= $index && $index < $this->count())
+        if (0 <= $index && $index < $this->count()) {
             return $this->getData($index);
+        }
 
         return NULL;
     }
@@ -394,8 +405,9 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function key()
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not get key of a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
         return $this->_index;
     }
@@ -415,8 +427,9 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function next()
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not get next of a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
         return $this->getData($this->_index++);
     }
@@ -429,8 +442,9 @@ class Revision extends AContent implements \Iterator, \Countable
     {
         $last = $this->last();
 
-        if (NULL === $last)
+        if (NULL === $last) {
             return NULL;
+        }
 
         array_pop($this->_data);
         $this->rewind();
@@ -440,14 +454,15 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Push one element onto the end of the set
-     * @param AClassContent $var The pushed values
-     * @return AClassContent the current instance content
+     * @param  AClassContent         $var The pushed values
+     * @return AClassContent         the current instance content
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function push(AClassContent $var)
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not push in a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
         if ($this->_isAccepted($var)) {
             $this->_data[] = array(get_class($var) => $var->getUid());
@@ -462,8 +477,9 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function rewind()
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not rewind a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
         $this->_index = 0;
     }
@@ -476,8 +492,9 @@ class Revision extends AContent implements \Iterator, \Countable
     {
         $first = $this->first();
 
-        if (NULL === $first)
+        if (NULL === $first) {
             return NULL;
+        }
 
         array_shift($this->_data);
         $this->rewind();
@@ -487,8 +504,8 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Prepend one to the beginning of the set
-     * @param AClassContent $var The prepended values
-     * @return ContentSet The current content set
+     * @param  AClassContent $var The prepended values
+     * @return ContentSet    The current content set
      */
     public function unshift(AClassContent $var)
     {
@@ -507,8 +524,9 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function valid()
     {
-        if (!($this->_content instanceof ContentSet))
+        if (!($this->_content instanceof ContentSet)) {
             throw new ClassContentException(sprintf('Can not valid a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+        }
 
         return isset($this->_data[$this->_index]);
     }
@@ -530,5 +548,4 @@ class Revision extends AContent implements \Iterator, \Countable
 
         return json_encode($serialized);
     }
-
 }

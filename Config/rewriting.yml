@@ -4,7 +4,7 @@ preserve-online: true
 ## if true check for unique computed URL
 preserve-unicity: true
 
-## Rewriting scheme, 
+## Rewriting scheme,
 ##   available rules:
 ##     - _root_      : scheme for root node
 ##     - _default_   : default scheme

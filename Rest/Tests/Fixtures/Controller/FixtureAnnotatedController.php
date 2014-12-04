@@ -40,13 +40,15 @@ class FixtureAnnotatedController
      * @Rest\Pagination
      */
     public function defaultPaginationAction()
-    {}
+    {
+    }
 
     /**
      * @Rest\Pagination(default_count=20, max_count=100, min_count=10)
      */
     public function customPaginationAction()
-    {}
+    {
+    }
 
     /**
      * @Rest\RequestParam(name = "name", key = "_name", requirements = {
@@ -65,8 +67,8 @@ class FixtureAnnotatedController
      * @Rest\Pagination(default_count=20, max_count=100, min_count=10)
      */
     public function requestParamsAction()
-    {}
-
+    {
+    }
 
     /**
      * @Rest\RequestParam(name = "name", requirements = {
@@ -82,16 +84,16 @@ class FixtureAnnotatedController
      *
      */
     public function requestParamsWithoutViolationsArgumentAction()
-    {}
-
-
+    {
+    }
 
     /**
      * @Rest\QueryParam(name = "queryParamField")
      *
      */
     public function queryParamsAction()
-    {}
+    {
+    }
 
     /**
      * @Rest\RequestParam(name = "name", requirements = {
@@ -100,7 +102,8 @@ class FixtureAnnotatedController
      * })
      */
     public function requestParamsWithViolationsArgumentAction(\Symfony\Component\Validator\ConstraintViolationList $violations)
-    {}
+    {
+    }
 
     /**
      * this is not a controller action
@@ -123,5 +126,6 @@ class FixtureAnnotatedController
      *
      */
     public function noMetadataAction()
-    {}
+    {
+    }
 }

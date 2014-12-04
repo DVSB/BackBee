@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,7 +29,6 @@ namespace BackBuilder\Importer;
  */
 interface IConverter
 {
-
     /**
      * Returns the values
      *
@@ -40,7 +39,7 @@ interface IConverter
     /**
      * Convert each entries of the array into a BackBuilder Object Entity
      *
-     * @param array $values
+     * @param  array $values
      * @return array composed by BackBuilder Object Entity
      */
     public function convert($values);
@@ -49,7 +48,7 @@ interface IConverter
      * Function executed before the import started
      *
      * @param \BackBuilder\Importer\Importer $importer
-     * @param array $config
+     * @param array                          $config
      */
     public function beforeImport(Importer $importer, array $config);
 
@@ -57,20 +56,20 @@ interface IConverter
      * Function executed after each entity fush
      *
      * @param \BackBuilder\Importer\Importer $importer
-     * @param array $entities
+     * @param array                          $entities
      */
     public function afterEntitiesFlush(Importer $importer, array $entities);
 
     /**
      * Returns an existing or new object of BB Entity according to $identifier
-     * @param  string $identifier 
+     * @param  string                                 $identifier
      * @return BackBuilder\ClassContent\AClassContent $entity
      */
     public function getBBEntity($identifier);
 
     /**
      * Returns in an array list of every existing uid
-     * @return array 
+     * @return array
      */
     public function getAvailableKeys();
 }

@@ -69,7 +69,6 @@ class Registry
      */
     protected $scope;
 
-
     /**
      * Gets the value of id.
      *

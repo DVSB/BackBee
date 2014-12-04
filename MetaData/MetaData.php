@@ -84,8 +84,9 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
      */
     public function __construct($name = null)
     {
-        if (null !== $name)
+        if (null !== $name) {
             $this->setName($name);
+        }
 
         $this->attributes = array();
         $this->scheme = array();
@@ -104,7 +105,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Sets the name of the metadata
-     * @param string $name
+     * @param  string                             $name
      * @return \BackBuilder\MetaData\MetaData
      * @throws \BackBuilder\Exception\BBException Occurs if $name if not a valid string
      */
@@ -121,7 +122,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Checks if the provided attribute exists for this metadata
-     * @param string $attribute The attribute looked for
+     * @param  string  $attribute The attribute looked for
      * @return Boolean Returns TRUE if the attribute is defined for the metadata, FALSE otherwise
      * @codeCoverageIgnore
      */
@@ -132,8 +133,8 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Returns the value of the attribute
-     * @param string $attribute The attribute looked for
-     * @param string $default Optional, the default value return if attribute does not exist
+     * @param  string $attribute The attribute looked for
+     * @param  string $default   Optional, the default value return if attribute does not exist
      * @return string
      */
     public function getAttribute($attribute, $default = '')
@@ -143,10 +144,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Sets the value of the attribute
-     * @param string $attribute
-     * @param string $value
-     * @param \BackBuilder\ClassContent\AClassContent $content Optional, if the attribute is computed
-     *                                                         the content on which apply the scheme
+     * @param  string                                  $attribute
+     * @param  string                                  $value
+     * @param  \BackBuilder\ClassContent\AClassContent $content   Optional, if the attribute is computed
+     *                                                            the content on which apply the scheme
      * @return \BackBuilder\MetaData\MetaData
      */
     public function setAttribute($attribute, $value, AClassContent $content = null)
@@ -173,10 +174,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Updates the scheme of the attribute
-     * @param string $attribute
-     * @param string $scheme
-     * @param \BackBuilder\ClassContent\AClassContent $content Optional, if the attribute is computed
-     *                                                         the content on which apply the scheme
+     * @param  string                                  $attribute
+     * @param  string                                  $scheme
+     * @param  \BackBuilder\ClassContent\AClassContent $content   Optional, if the attribute is computed
+     *                                                            the content on which apply the scheme
      * @return \BackBuilder\MetaData\MetaData
      */
     public function updateAttributeScheme($attribute, $scheme, AClassContent $content = null)
@@ -197,7 +198,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Compute values of attributes according to the AClassContent provided
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\ClassContent\AClassContent $content
      * @return \BackBuilder\MetaData\MetaData
      */
     public function computeAttributes(AClassContent $content, Page $page = null)
@@ -227,7 +228,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                         $newcontent = $content->item($m[3]);
                                     } elseif (3 < count($m) && $content instanceof ContentSet) {
                                         $index = intval($m[3]);
-                                        $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $m[1]);
+                                        $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $m[1]);
                                         foreach ($content as $subcontent) {
                                             if (get_class($subcontent) == $classname) {
                                                 if (0 === $index) {
@@ -241,7 +242,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                         $property = $m[1];
                                         try {
                                             $newcontent = $content->$property;
-                                        } catch(\Exception $e) {
+                                        } catch (\Exception $e) {
                                             $newcontent = new \BackBuilder\ClassContent\Element\text();
                                         }
                                     }
@@ -262,7 +263,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                 if ($content instanceof \BackBuilder\ClassContent\Element\File) {
                                     $new_value = $content->path;
                                 } else {
-                                    $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags('' . $content)));
+                                    $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$content)));
                                 }
 
                                 $this->attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->attributes[$attribute]);
@@ -274,9 +275,8 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                 $v = array();
                                 foreach ($content as $c) {
                                     if ($c instanceof \BackBuilder\ClassContent\Element\keyword) {
-
                                     }
-                                    $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags('' . $c)));
+                                    $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$c)));
                                 }
                                 $this->attributes[$attribute] = str_replace($matches[0][$i], join(',', $v), $this->attributes[$attribute]);
                             } else {
@@ -362,7 +362,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
         foreach ($this->attributes as $attribute => $value) {
             $attr = array(
                 'attr'  => $attribute,
-                'value' => $value
+                'value' => $value,
             );
 
             $attributes[] = $attr;

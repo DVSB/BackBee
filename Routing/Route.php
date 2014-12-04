@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -31,7 +31,6 @@ use Symfony\Component\Routing\Route as sfRoute;
  */
 class Route extends sfRoute
 {
-
     /**
      * Part of requirements related to headers
      * @var array
@@ -44,10 +43,10 @@ class Route extends sfRoute
      * Available requirements:
      *  - HTTP_<<headername>> : HTTP header value required
      *
-     * @param string $pattern       The pattern to match
-     * @param array  $defaults      An array of default parameter values
-     * @param array  $requirements  An array of requirements for parameters (regexes)
-     * @param array  $options       An array of options
+     * @param string $pattern      The pattern to match
+     * @param array  $defaults     An array of default parameter values
+     * @param array  $requirements An array of requirements for parameters (regexes)
+     * @param array  $options      An array of options
      */
     public function __construct($pattern, array $defaults = array(), array $requirements = array(), array $options = array())
     {
@@ -65,8 +64,9 @@ class Route extends sfRoute
     {
         $this->_headerRequirements = array();
         foreach ($this->getRequirements() as $key => $value) {
-            if (0 === strpos($key, 'HTTP-'))
+            if (0 === strpos($key, 'HTTP-')) {
                 $this->_headerRequirements[substr($key, 5)] = $value;
+            }
         }
 
         return $this;
@@ -94,12 +94,12 @@ class Route extends sfRoute
      *
      * @return array The requirements
      */
-    public function getRequirements($startingWith = NULL)
+    public function getRequirements($startingWith = null)
     {
-        if (NULL === $startingWith)
+        if (NULL === $startingWith) {
             return parent::getRequirements();
+        }
 
         return ('HTTP-' == $startingWith) ? $this->_headerRequirements : array();
     }
-
 }

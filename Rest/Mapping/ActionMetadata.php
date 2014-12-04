@@ -91,14 +91,14 @@ class ActionMetadata extends MethodMetadata
             $this->max_count,
             $this->min_count,
             $this->param_converter_bag,
-            $this->security
+            $this->security,
         ]);
     }
 
     /**
      * unserialize
      *
-     * @param  string $str
+     * @param string $str
      */
     public function unserialize($str)
     {

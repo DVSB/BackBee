@@ -24,7 +24,6 @@ namespace BackBuilder\DependencyInjection;
 use BackBuilder\BBApplication;
 use BackBuilder\DependencyInjection\Exception\BootstrapFileNotFoundException;
 use BackBuilder\Util\Resolver\BootstrapDirectory;
-
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -102,7 +101,7 @@ class BootstrapResolver
 
         $directories = BootstrapDirectory::getDirectories($this->base_dir, $this->context, $this->environment);
         foreach ($directories as $directory) {
-            $bootstrap_filepath = $directory . DIRECTORY_SEPARATOR . self::BOOTSTRAP_FILENAME;
+            $bootstrap_filepath = $directory.DIRECTORY_SEPARATOR.self::BOOTSTRAP_FILENAME;
             if (true === is_file($bootstrap_filepath) && true === is_readable($bootstrap_filepath)) {
                 break;
             }

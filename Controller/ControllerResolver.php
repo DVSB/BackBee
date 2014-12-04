@@ -21,11 +21,9 @@
 
 namespace BackBuilder\Controller;
 
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
-
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-
 use BackBuilder\IApplication;
 
 /**
@@ -45,19 +43,19 @@ class ControllerResolver implements ControllerResolverInterface
      * @var IApplication
      */
     protected $bbapp;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param \BackBuilder\IApplication $bbapp
      */
     public function __construct(IApplication $bbapp = null)
     {
-        if(null !== $bbapp) {
+        if (null !== $bbapp) {
             $this->bbapp = $bbapp;
         }
     }
-    
+
     /**
      * Returns the Controller instance associated with a Request.
      *
@@ -76,7 +74,7 @@ class ControllerResolver implements ControllerResolverInterface
     public function getController(Request $request)
     {
         if (!$controller = $request->attributes->get('_controller')) {
-            if(null !== $this->bbapp) {
+            if (null !== $this->bbapp) {
                 $this->bbapp->getLogging()->warning('Unable to look for the controller as the "_controller" parameter is missing');
             }
 
@@ -86,9 +84,9 @@ class ControllerResolver implements ControllerResolverInterface
         if (is_array($controller)) {
             return $controller;
         }
-        
+
         if (is_object($controller)) {
-            if($request->attributes->has('_action')) {
+            if ($request->attributes->has('_action')) {
                 return array($controller, $request->attributes->get('_action'));
             }
         }
@@ -103,14 +101,14 @@ class ControllerResolver implements ControllerResolverInterface
     }
 
     /**
-     * 
+     *
      * @param string $controllerName
      * @param string $actionName
      */
     protected function createController($controllerName, $actionName = null)
     {
         $controllerClass = null;
-        if(null === $actionName) {
+        if (null === $actionName) {
             // support for ControllerClass::methodName notation
             if (false !== strpos($controllerName, '::')) {
                 list($controllerClass, $actionName) = explode('::', $controllerName, 2);
@@ -120,12 +118,12 @@ class ControllerResolver implements ControllerResolverInterface
         } else {
             $controllerClass = $controllerName;
         }
-        
-        if(null === $controllerClass) {
+
+        if (null === $controllerClass) {
             throw new \InvalidArgumentException(sprintf('Controller class couldn\'t be resolved for "%s".', $controllerName));
         }
-        
-        if(class_exists($controllerClass)) {
+
+        if (class_exists($controllerClass)) {
             $controller = new $controllerClass();
             if ($controller instanceof ContainerAwareInterface) {
                 $controller->setContainer($this->bbapp->getContainer());
@@ -134,11 +132,10 @@ class ControllerResolver implements ControllerResolverInterface
             // support for service id
             $controller = $this->bbapp->getContainer()->get($controllerClass);
         }
-        
+
         return array($controller, $actionName);
     }
-    
-    
+
     /**
      * Returns the arguments to pass to the controller.
      *
@@ -191,5 +188,4 @@ class ControllerResolver implements ControllerResolverInterface
 
         return $arguments;
     }
-
 }

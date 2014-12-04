@@ -2,28 +2,28 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Site\Repository;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Site\Layout,
-    BackBuilder\Util\File;
+use BackBuilder\BBApplication;
+use BackBuilder\Site\Layout;
+use BackBuilder\Util\File;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -35,16 +35,15 @@ use Doctrine\ORM\EntityRepository;
  */
 class LayoutRepository extends EntityRepository
 {
-
     /**
      * Draw a filled rect on image
      *
      * @access private
-     * @param ressource $image    The image ressource
-     * @param array $clip         The clip rect to draw
-     * @param int $background     The background color
-     * @param boolean $nowpadding If true don't insert a right padding
-     * @param boolean $nohpadding If true don't insert a bottom padding
+     * @param ressource $image      The image ressource
+     * @param array     $clip       The clip rect to draw
+     * @param int       $background The background color
+     * @param boolean   $nowpadding If true don't insert a right padding
+     * @param boolean   $nohpadding If true don't insert a bottom padding
      */
     private function _drawRect(&$image, $clip, $background, $nowpadding = true, $nohpadding = true)
     {
@@ -55,13 +54,13 @@ class LayoutRepository extends EntityRepository
      * Draw a final layout zone on its thumbnail
      *
      * @access private
-     * @param ressource $thumbnail The thumbnail ressource
-     * @param DOMNode $node        The current node zone
-     * @param array $clip          The clip rect to draw
-     * @param int $background      The background color
-     * @param int $gridcolumn      The number of columns in the grid
-     * @param boolean $lastChild   True if the current node is the last child of its parent node
-     * @return int The new X axis position;
+     * @param  ressource $thumbnail  The thumbnail ressource
+     * @param  DOMNode   $node       The current node zone
+     * @param  array     $clip       The clip rect to draw
+     * @param  int       $background The background color
+     * @param  int       $gridcolumn The number of columns in the grid
+     * @param  boolean   $lastChild  True if the current node is the last child of its parent node
+     * @return int       The new X axis position;
      */
     private function _drawThumbnailZone(&$thumbnail, $node, $clip, $background, $gridcolumn, $lastChild = false)
     {
@@ -70,20 +69,24 @@ class LayoutRepository extends EntityRepository
         $width = $clip[2];
         $height = $clip[3];
 
-        if (NULL !== $spansize = preg_replace('/[^0-9]+/', '', $node->getAttribute('class')))
+        if (NULL !== $spansize = preg_replace('/[^0-9]+/', '', $node->getAttribute('class'))) {
             $width = floor($width * $spansize / $gridcolumn);
+        }
 
-        if (FALSE !== strpos($node->getAttribute('class'), 'Child'))
+        if (FALSE !== strpos($node->getAttribute('class'), 'Child')) {
             $height = floor($height / 2);
+        }
 
         if (!$node->hasChildNodes()) {
             $this->_drawRect($thumbnail, array($x, $y, $width, $height), $background, ($width == $clip[2] || strpos($node->getAttribute('class'), 'hChild')), $lastChild);
+
             return $width + 2;
         }
 
         foreach ($node->childNodes as $child) {
-            if (is_a($child, 'DOMText'))
+            if (is_a($child, 'DOMText')) {
                 continue;
+            }
 
             if ('clear' == $child->getAttribute('class')) {
                 $x = $clip[0];
@@ -101,79 +104,92 @@ class LayoutRepository extends EntityRepository
      * Generate a layout thumbnail according to the configuration
      *
      * @access public
-     * @param Layout $layout     The layout to treate
-     * @param BBApplication $app The current instance of BBApplication
-     * @return mixed FALSE if something wrong, the ressource path of the thumbnail elsewhere
+     * @param  Layout        $layout The layout to treate
+     * @param  BBApplication $app    The current instance of BBApplication
+     * @return mixed         FALSE if something wrong, the ressource path of the thumbnail elsewhere
      */
     public function generateThumbnail(Layout $layout, BBApplication $app)
     {
         // Is the layout valid ?
-        if (!$layout->isValid())
+        if (!$layout->isValid()) {
             return FALSE;
+        }
 
         // Is some layout configuration existing ?
-        if (NULL === $app->getConfig()->getSection('layout'))
+        if (NULL === $app->getConfig()->getSection('layout')) {
             return FALSE;
+        }
         $layoutconfig = $app->getConfig()->getSection('layout');
 
         // Is some thumbnail configuration existing ?
-        if (!isset($layoutconfig['thumbnail']))
+        if (!isset($layoutconfig['thumbnail'])) {
             return FALSE;
+        }
         $thumbnailconfig = $layoutconfig['thumbnail'];
 
         // Is gd available ?
-        if (!function_exists('gd_info'))
+        if (!function_exists('gd_info')) {
             return FALSE;
+        }
         $gd_info = gd_info();
 
         // Is the selected format supported by gd ?
-        if (!isset($thumbnailconfig['format']))
+        if (!isset($thumbnailconfig['format'])) {
             return FALSE;
-        if (TRUE !== $gd_info[strtoupper($thumbnailconfig['format']) . ' Support'])
+        }
+        if (TRUE !== $gd_info[strtoupper($thumbnailconfig['format']).' Support']) {
             return FALSE;
+        }
 
         // Is the template file existing ?
-        if (!isset($thumbnailconfig['template']))
+        if (!isset($thumbnailconfig['template'])) {
             return FALSE;
+        }
         $templatefile = $thumbnailconfig['template'];
         $thumbnaildir = dirname($templatefile);
-        File::resolveFilepath($templatefile, NULL, array('include_path' => $app->getResourceDir()));
-        if (FALSE === file_exists($templatefile) || false === is_readable($templatefile))
+        File::resolveFilepath($templatefile, null, array('include_path' => $app->getResourceDir()));
+        if (FALSE === file_exists($templatefile) || false === is_readable($templatefile)) {
             return FALSE;
+        }
 
         try {
-            $gd_function = 'imagecreatefrom' . strtolower($thumbnailconfig['format']);
+            $gd_function = 'imagecreatefrom'.strtolower($thumbnailconfig['format']);
             $thumbnail = $gd_function($templatefile);
-            $thumbnailfile = $thumbnaildir . '/' . $layout->getUid() . '.' . strtolower($thumbnailconfig['format']);
+            $thumbnailfile = $thumbnaildir.'/'.$layout->getUid().'.'.strtolower($thumbnailconfig['format']);
 
             // Is a background color existing ?
-            if (!isset($thumbnailconfig['background']) || !is_array($thumbnailconfig['background']) || 3 != count($thumbnailconfig['background']))
+            if (!isset($thumbnailconfig['background']) || !is_array($thumbnailconfig['background']) || 3 != count($thumbnailconfig['background'])) {
                 return FALSE;
+            }
             $background = imagecolorallocate($thumbnail, $thumbnailconfig['background'][0], $thumbnailconfig['background'][1], $thumbnailconfig['background'][2]);
 
             // Is a clipping zone existing ?
-            if (!isset($thumbnailconfig['clip']) || !is_array($thumbnailconfig['clip']) || 4 != count($thumbnailconfig['clip']))
+            if (!isset($thumbnailconfig['clip']) || !is_array($thumbnailconfig['clip']) || 4 != count($thumbnailconfig['clip'])) {
                 return FALSE;
+            }
 
             $gridcolumn = 12;
             if (NULL !== $lessconfig = $app->getConfig()->getSection('less')) {
-                if (isset($lessconfig['gridcolumn']))
+                if (isset($lessconfig['gridcolumn'])) {
                     $gridcolumn = $lessconfig['gridcolumn'];
+                }
             }
 
             $domlayout = $layout->getDomDocument();
-            if (!$domlayout->hasChildNodes() || !$domlayout->firstChild->hasChildNodes())
+            if (!$domlayout->hasChildNodes() || !$domlayout->firstChild->hasChildNodes()) {
                 $this->_drawRect($thumbnail, $thumbnailconfig['clip'], $background);
-            else
+            } else {
                 $this->_drawThumbnailZone($thumbnail, $domlayout->firstChild, $thumbnailconfig['clip'], $background, $gridcolumn);
+            }
 
-            imagesavealpha($thumbnail, TRUE);
+            imagesavealpha($thumbnail, true);
 
-            $thumbnaildir = dirname(File::normalizePath($app->getCurrentResourceDir() . '/' . $thumbnailfile));
-            if (false === is_dir($thumbnaildir))
+            $thumbnaildir = dirname(File::normalizePath($app->getCurrentResourceDir().'/'.$thumbnailfile));
+            if (false === is_dir($thumbnaildir)) {
                 mkdir($thumbnaildir, 0755, true);
+            }
 
-            imagepng($thumbnail, File::normalizePath($app->getCurrentResourceDir() . '/' . $thumbnailfile));
+            imagepng($thumbnail, File::normalizePath($app->getCurrentResourceDir().'/'.$thumbnailfile));
         } catch (\Exception $e) {
             return FALSE;
         }
@@ -186,13 +202,13 @@ class LayoutRepository extends EntityRepository
     public function removeThumbnail(Layout $layout, BBApplication $app)
     {
         $thumbnailfile = $layout->getPicPath();
-        File::resolveFilepath($thumbnailfile, NULL, array('include_path' => $app->getResourceDir()));
+        File::resolveFilepath($thumbnailfile, null, array('include_path' => $app->getResourceDir()));
 
         while (TRUE === file_exists($thumbnailfile) && TRUE === is_writable($thumbnailfile)) {
             @unlink($thumbnailfile);
 
             $thumbnailfile = $layout->getPicPath();
-            File::resolveFilepath($thumbnailfile, NULL, array('include_path' => $app->getResourceDir()));
+            File::resolveFilepath($thumbnailfile, null, array('include_path' => $app->getResourceDir()));
         }
 
         return TRUE;
@@ -211,12 +227,12 @@ class LayoutRepository extends EntityRepository
                     ->where('l._site IS NULL')
                     ->orderBy('l._label', 'ASC')
                     ->getQuery();
+
             return $q->getResult();
         } catch (\Doctrine\ORM\NoResultException $e) {
-            return null;
+            return;
         } catch (Exception $e) {
-            return null;
+            return;
         }
     }
-
 }

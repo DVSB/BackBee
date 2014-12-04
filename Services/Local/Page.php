@@ -21,11 +21,11 @@
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Exception\InvalidArgumentException,
-    BackBuilder\MetaData\MetaDataBag,
-    BackBuilder\NestedNode\Page as NestedPage,
-    BackBuilder\Site\Layout as SiteLayout;
+use BackBuilder\BBApplication;
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\MetaData\MetaDataBag;
+use BackBuilder\NestedNode\Page as NestedPage;
+use BackBuilder\Site\Layout as SiteLayout;
 
 /**
  * RPC services for NestedNode\Page
@@ -38,7 +38,6 @@ use BackBuilder\BBApplication,
  */
 class Page extends AbstractServiceLocal
 {
-
     /**
      * Page entities repository
      * @var \BackBuilder\NestedNode\Repository\PageRepository
@@ -76,8 +75,9 @@ class Page extends AbstractServiceLocal
         $em = $this->bbapp->getEntityManager();
         $page = $em->getRepository('\BackBuilder\NestedNode\Page')->find($uid);
 
-        if (NULL === $page)
+        if (NULL === $page) {
             throw new ServicesException(sprintf('Unable to find page for `%s` uid', $uid));
+        }
 
         $newpage = clone $page;
     }
@@ -85,7 +85,7 @@ class Page extends AbstractServiceLocal
     /**
      * Return the serialized form of a page
      * Returns the available workflow states for NestedNode\Page and Site\Layout
-     * @param string $layout_uid
+     * @param  string                                          $layout_uid
      * @return array
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $layout_uid is invalid
      * @exposed(secured=true)
@@ -112,10 +112,10 @@ class Page extends AbstractServiceLocal
 
     /**
      * Get the page info
-     * @param string $page_uid The unique identifier of the page
+     * @param  string                                                   $page_uid The unique identifier of the page
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid is invalid
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $page_uid is invalid
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
@@ -141,10 +141,10 @@ class Page extends AbstractServiceLocal
 
     /**
      * Updates a page
-     * @param string $serialized The serialized page
+     * @param  string                                                   $serialized The serialized page
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $serialized is not valid
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $serialized is not valid
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
@@ -211,24 +211,24 @@ class Page extends AbstractServiceLocal
         $this->getEntityManager()->flush();
 
         return array(
-            'url'   => $page->getUrl() . (
+            'url'   => $page->getUrl().(
                 true === $this->getApplication()->getController()->isUrlExtensionRequired()
                 && '/' !== substr($page->getUrl(), -1)
-                ? '.' . $this->getApplication()->getController()->getUrlExtension()
+                ? '.'.$this->getApplication()->getController()->getUrlExtension()
                 : ''
             ),
-            'state' => $page->getState()
+            'state' => $page->getState(),
         );
     }
 
     /**
      * Returns a part of the site tree
-     * @param string $site_uid The unique identifier of the site
-     * @param string $page_uid The parent uid of the part of the tree
-     * @param string $current_uid
+     * @param  string                                                   $site_uid    The unique identifier of the site
+     * @param  string                                                   $page_uid    The parent uid of the part of the tree
+     * @param  string                                                   $current_uid
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $site_uid is not valid
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $site_uid is not valid
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
@@ -239,7 +239,7 @@ class Page extends AbstractServiceLocal
         }
         $tree = array();
         if (null === $page = $this->_repo->find(strval($page_uid))) {
-// @todo strange call to this service with another site
+            // @todo strange call to this service with another site
 //$this->isGranted('VIEW', $site);
             $page = $this->_repo->getRoot($site);
             $leaf = new \stdClass();
@@ -251,7 +251,7 @@ class Page extends AbstractServiceLocal
         } else {
             try {
                 $this->isGranted('VIEW', $page);
-                $children = $this->_repo->getNotDeletedDescendants($page, 1, FALSE, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult, $having_child);
+                $children = $this->_repo->getNotDeletedDescendants($page, 1, false, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult, $having_child);
                 $tree['numresults'] = $children->count();
                 $tree['firstresult'] = $firstresult;
                 $tree['maxresult'] = $maxresult;
@@ -278,16 +278,17 @@ class Page extends AbstractServiceLocal
                 // Ignore it
             }
         }
+
         return $tree;
     }
 
     /**
      * Duplicate the page in the tree
-     * @param string $page_uid The unique identifier of the page
-     * @param string $title The title of the clone
+     * @param  string                                                   $page_uid The unique identifier of the page
+     * @param  string                                                   $title    The title of the clone
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid is invalid
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $page_uid is invalid
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
@@ -304,10 +305,10 @@ class Page extends AbstractServiceLocal
         $this->isGranted('CREATE', $page);
 
         if (null !== $page->getParent()) {
-// User must have edit permission on parent
+            // User must have edit permission on parent
             $this->isGranted('EDIT', $page->getParent());
         } else {
-// User must have edit permission on site to add a new root
+            // User must have edit permission on site to add a new root
             $this->isGranted('EDIT', $this->getApplication()->getSite());
         }
 
@@ -317,7 +318,7 @@ class Page extends AbstractServiceLocal
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
         $leaf->attr->rel = 'leaf';
-        $leaf->attr->id = 'node_' . $new_page->getUid();
+        $leaf->attr->id = 'node_'.$new_page->getUid();
         $leaf->data = $new_page->getTitle();
         $leaf->state = 'closed';
 
@@ -326,12 +327,12 @@ class Page extends AbstractServiceLocal
 
     /**
      * Moves the page in the tree
-     * @param string $page_uid The unique identifier of the page
-     * @param string $parent_uid The unique identifier of the new parent page
-     * @param string $next_uid Optional, the unique identifier of the previous sibling
+     * @param  string                                                   $page_uid   The unique identifier of the page
+     * @param  string                                                   $parent_uid The unique identifier of the new parent page
+     * @param  string                                                   $next_uid   Optional, the unique identifier of the previous sibling
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid or $parent_uid are invalid
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $page_uid or $parent_uid are invalid
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
@@ -348,7 +349,7 @@ class Page extends AbstractServiceLocal
 // User must have edit permission on both page and parent
         $this->isGranted('EDIT', $page);
         $this->isGranted('EDIT', $parent);
-        
+
         //User must have view permission on layout for move page
         $this->isGranted('VIEW', $page->getLayout());
 
@@ -373,7 +374,7 @@ class Page extends AbstractServiceLocal
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
         $leaf->attr->rel = 'folder';
-        $leaf->attr->id = 'node_' . $page->getUid();
+        $leaf->attr->id = 'node_'.$page->getUid();
         $leaf->data = $page->getTitle();
         $leaf->state = 'closed';
 
@@ -382,10 +383,10 @@ class Page extends AbstractServiceLocal
 
     /**
      * Removes the page off the tree
-     * @param string $page_uid The unique identifier of the page
-     * @return \stdClass The serialized parent
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $page_uid is invalid or page is root
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @param  string                                                   $page_uid The unique identifier of the page
+     * @return \stdClass                                                The serialized parent
+     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $page_uid is invalid or page is root
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
@@ -416,9 +417,9 @@ class Page extends AbstractServiceLocal
 
     /**
      * Returns the serialize page to edit it
-     * @param string $page_uid The unique identifier of the page
+     * @param  string                                                   $page_uid The unique identifier of the page
      * @return \stdClass
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
@@ -428,7 +429,7 @@ class Page extends AbstractServiceLocal
             $page = new \BackBuilder\NestedNode\Page();
             $page->setSite($this->getApplication()->getSite());
         } else {
-// User must have edit permission on page
+            // User must have edit permission on page
             $this->isGranted('EDIT', $page);
 
 // If the page is online, user must have publish permission on it
@@ -442,17 +443,17 @@ class Page extends AbstractServiceLocal
 
     /**
      * Inserts or updates a Page from the posted BBSelector form
-     * @param string $page_uid The unique identifier of the page
-     * @param string $parent_uid The unique identifier of the parent of the page
-     * @param string $title The title
-     * @param string $url The url (currently unused)
-     * @param string $target The target is redirect is defined
-     * @param string $redirect  The permananet redirect URL
-     * @param string $layout_uid The unique identifier of the layout to use
-     * @param string $alttitle The alternate title bb5 #366
+     * @param  string                                                   $page_uid   The unique identifier of the page
+     * @param  string                                                   $parent_uid The unique identifier of the parent of the page
+     * @param  string                                                   $title      The title
+     * @param  string                                                   $url        The url (currently unused)
+     * @param  string                                                   $target     The target is redirect is defined
+     * @param  string                                                   $redirect   The permananet redirect URL
+     * @param  string                                                   $layout_uid The unique identifier of the layout to use
+     * @param  string                                                   $alttitle   The alternate title bb5 #366
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the layout is undefined
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if the layout is undefined
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
@@ -464,24 +465,22 @@ class Page extends AbstractServiceLocal
         if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', strval($layout_uid))) {
             throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
         }
-        
+
         $parent = $this->_repo->find(strval($parent_uid));
         if (false === empty($move_node_uid)) {
             $parent = $this->_repo->find(strval($move_node_uid));
         }
-        
+
         $is_final = $parent->getLayout()->getParam('final');
         if (true === $is_final) {
             if (null === $parent->getParent()) {
                 throw new ServicesException('Impossible to create or move a child page for this layout.');
-            } 
+            }
 
             $leaf = $this->postBBSelectorForm($page_uid, $parent->getParent()->getUid(), $title, $url, $target, $redirect, $layout_uid, $alttitle, "", true);
         } else {
-
             // User must have view permission on choosen layout
             $this->isGranted('VIEW', $layout);
-
 
             if (null !== $page = $this->_repo->find(strval($page_uid))) {
                 $this->isGranted('EDIT', $page);
@@ -511,7 +510,7 @@ class Page extends AbstractServiceLocal
                     $page->setParent($parent);
                     $this->isGranted('CREATE', $page);
                     $this->isGranted('EDIT', $parent);
-              
+
                     $this->_repo->insertNodeAsFirstChildOf($page, $parent);
                 } else {
                     // User must have edit permission on site to add a new root
@@ -537,16 +536,16 @@ class Page extends AbstractServiceLocal
             $leaf->is_sibling = $is_sibling;
             $leaf->move_node_uid = (false === empty($move_node_uid)) ? $move_node_uid : null;
         }
-        
+
         return $leaf;
     }
 
     /**
      * Update page's attributes with this method's arguments
-     * @param  NestedPage $page
-     * @param  string     $target
-     * @param  string     $redirect
-     * @param  Layout     $layout
+     * @param NestedPage $page
+     * @param string     $target
+     * @param string     $redirect
+     * @param Layout     $layout
      */
     private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout, $alttitle)
     {
@@ -628,7 +627,7 @@ class Page extends AbstractServiceLocal
                     $leaf = new \stdClass();
                     $leaf->attr = new \stdClass();
                     $leaf->attr->rel = 'folder';
-                    $leaf->attr->id = 'node_' . $child->getUid();
+                    $leaf->attr->id = 'node_'.$child->getUid();
                     $leaf->data = html_entity_decode($child->getTitle(), ENT_COMPAT, 'UTF-8');
                     $leaf->state = 'closed';
 
@@ -644,7 +643,7 @@ class Page extends AbstractServiceLocal
                     $leaf = new \stdClass();
                     $leaf->attr = new \stdClass();
                     $leaf->attr->rel = 'root';
-                    $leaf->attr->id = 'node_' . $page->getUid();
+                    $leaf->attr->id = 'node_'.$page->getUid();
                     $leaf->data = html_entity_decode($page->getTitle(), ENT_COMPAT, 'UTF-8');
                     $leaf->state = 'closed';
 
@@ -676,12 +675,15 @@ class Page extends AbstractServiceLocal
         }
 
         $options = array();
-        if (NULL !== $searchField)
+        if (NULL !== $searchField) {
             $options['searchField'] = $searchField;
-        if (NULL !== $beforePubdateField && "" !== $beforePubdateField)
+        }
+        if (NULL !== $beforePubdateField && "" !== $beforePubdateField) {
             $options['beforePubdateField'] = $beforePubdateField;
-        if (NULL !== $afterPubdateField && "" !== $afterPubdateField)
+        }
+        if (NULL !== $afterPubdateField && "" !== $afterPubdateField) {
             $options['afterPubdateField'] = $afterPubdateField;
+        }
         $em = $this->bbapp->getEntityManager();
 
         $site = $em->find('\BackBuilder\Site\Site', $site_uid);
@@ -718,7 +720,7 @@ class Page extends AbstractServiceLocal
             }
             $result = array("numResults" => $nbChildren, "views" => $view);
         }
+
         return $result;
     }
-
 }

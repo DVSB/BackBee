@@ -3,7 +3,6 @@
 namespace BackBuilder\Security\Context;
 
 use BackBuilder\Security\Listeners\AnonymousAuthenticationListener;
-
 use Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider;
 
 /**
@@ -28,6 +27,7 @@ class AnonymousContext extends AbstractContext implements ContextInterface
             $this->_context->addAuthProvider(new AnonymousAuthenticationProvider($key));
             $listeners[] = new AnonymousAuthenticationListener($this->_context, $key, $this->_context->getLogger());
         }
+
         return $listeners;
     }
 }

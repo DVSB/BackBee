@@ -21,8 +21,8 @@
 
 namespace BackBuilder\Security\Authorization\Adaptator;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Security\Role\Role;
+use BackBuilder\BBApplication;
+use BackBuilder\Security\Role\Role;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
@@ -34,7 +34,6 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
  */
 class Yml implements IRoleReaderAdaptator
 {
-
     private $_roles;
 
     /**
@@ -59,5 +58,4 @@ class Yml implements IRoleReaderAdaptator
 
         return $user_roles;
     }
-
 }

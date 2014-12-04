@@ -24,7 +24,6 @@ namespace BackBuilder\DependencyInjection\Tests;
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\Tests\ContainerTest_Resources\Listener\TestListener;
 use BackBuilder\Event\Dispatcher;
-
 use Symfony\Component\DependencyInjection\Definition;
 
 /**

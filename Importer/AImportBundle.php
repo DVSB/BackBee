@@ -1,9 +1,9 @@
 <?php
 namespace BackBuilder\Importer;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Config\Config,
-    BackBuilder\Importer\Exception\SkippedImportException;
+use BackBuilder\BBApplication;
+use BackBuilder\Config\Config;
+use BackBuilder\Importer\Exception\SkippedImportException;
 
 /**
  * @category    BackBuilder
@@ -32,8 +32,8 @@ abstract class AImportBundle
 
     /**
      * AImportBundle's constructor
-     * 
-     * @param BBApplication $application 
+     *
+     * @param BBApplication $application
      */
     public function __construct(BBApplication $application)
     {
@@ -53,28 +53,28 @@ abstract class AImportBundle
         $log_filepath = $log_filepath['logfile'];
 
         if ('/' !== $log_filepath[0] || false === is_dir(dirname($log_filepath))) {
-            $log_filepath = $application->getBaseDir() . '/log/import.log';
+            $log_filepath = $application->getBaseDir().'/log/import.log';
         } else {
-            $log_filepath = dirname($log_filepath) . '/import.log';
+            $log_filepath = dirname($log_filepath).'/import.log';
         }
 
         $logger = new \BackBuilder\Logging\Appender\File(array(
-            'logfile' => $log_filepath
+            'logfile' => $log_filepath,
         ));
 
         $this->setPhpConf($this->_config->getSection('php_ini'));
         foreach ($this->_relations as $class => $config) {
             $type = true === isset($config['type']) ? $config['type'] : 'import';
             try {
-                $this->{$type . ucfirst($class)}($config);
+                $this->{$type.ucfirst($class)}($config);
             } catch (SkippedImportException $exc) {
-                echo $exc->getMessage() . "\n";
+                echo $exc->getMessage()."\n";
             } catch (\Exception $e) {
                 $logger->write(array(
                     'd' => date('Y/m/d H:i:s'),
                     'p' => '',
                     'm' => $e->getMessage(),
-                    'u' => '')
+                    'u' => '', )
                 );
             }
         }
@@ -85,19 +85,19 @@ abstract class AImportBundle
     public function __call($name, $arguments)
     {
         $config = reset($arguments);
-        
+
         if (true === isset($config['do_import']) && false === $config['do_import']) {
-            $this->markAsSkipped('`' . str_replace('import', '', $name) . '`');
+            $this->markAsSkipped('`'.str_replace('import', '', $name).'`');
         }
 
         $key = (0 === strpos($name, 'import')) ? strtolower(str_replace('import', '', $name)) : '';
         if ($key !== '') {
-            $connectorName = '\BackBuilder\Importer\Connector\\' . $config['connector'];
-            
+            $connectorName = '\BackBuilder\Importer\Connector\\'.$config['connector'];
+
             $connector = new $connectorName($this->_application, $this->_config->getSection($config['config']));
             $importer = new Importer($this->_application, $connector, $this->_config);
-            $flushEvery = array_key_exists('flush_every', $config) ? (int)$config['flush_every'] : 1000;
-            $checkForExisting = array_key_exists('check_exists', $config) ? (boolean)$config['check_exists'] : true;
+            $flushEvery = array_key_exists('flush_every', $config) ? (int) $config['flush_every'] : 1000;
+            $checkForExisting = array_key_exists('check_exists', $config) ? (boolean) $config['check_exists'] : true;
             $importer->run($key, $config, $flushEvery, $checkForExisting);
             unset($connector);
             unset($importer);
@@ -106,7 +106,7 @@ abstract class AImportBundle
 
     protected function markAsSkipped($name)
     {
-        throw new SkippedImportException(ucfirst($name) . ' importation has been skipped.');
+        throw new SkippedImportException(ucfirst($name).' importation has been skipped.');
     }
 
     protected function setPhpConf($config)

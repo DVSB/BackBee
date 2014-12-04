@@ -2,8 +2,8 @@
 
 namespace BackBuilder\Security\Context;
 
-use BackBuilder\Security\Authentication\Provider\UserAuthenticationProvider,
-    BackBuilder\Security\Listeners\UsernamePasswordAuthenticationListener;
+use BackBuilder\Security\Authentication\Provider\UserAuthenticationProvider;
+use BackBuilder\Security\Listeners\UsernamePasswordAuthenticationListener;
 
 /**
  * Description of AnonymousContext
@@ -23,7 +23,7 @@ class UsernamePasswordContext extends AbstractContext implements ContextInterfac
     {
         $listeners = array();
         if (array_key_exists('form_login', $config)) {
-            if(false !== ($default_provider = $this->getDefaultProvider($config))) {
+            if (false !== ($default_provider = $this->getDefaultProvider($config))) {
                 $login_path = array_key_exists('login_path', $config['form_login']) ? $config['form_login']['login_path'] : null;
                 $check_path = array_key_exists('check_path', $config['form_login']) ? $config['form_login']['check_path'] : null;
                 $this->_context->getAuthenticationManager()->addProvider(new UserAuthenticationProvider($default_provider, $this->_context->getEncoderFactory()));
@@ -35,6 +35,7 @@ class UsernamePasswordContext extends AbstractContext implements ContextInterfac
                 }
             }
         }
+
         return $listeners;
     }
 }

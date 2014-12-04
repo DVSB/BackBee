@@ -16,6 +16,6 @@ class Lorempixel extends Base
         $height = array_key_exists('height', $params) ? $params['height'] : static::HEIGHT;
         $category = array_key_exists('category', $params) ? $params['category'] : static::CATEGORY;
 
-        return static::URL . '/' . $witdh . '/' . $height . '/' . $category;
+        return static::URL.'/'.$witdh.'/'.$height.'/'.$category;
     }
 }

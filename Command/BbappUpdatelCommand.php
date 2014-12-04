@@ -22,14 +22,11 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use Doctrine\ORM\Tools\SchemaTool,
-    Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\ORM\EntityManager;
 
 /**
  * Update BBApp database
@@ -51,7 +48,7 @@ class BbappUpdatelCommand extends ACommand
             ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
             ->setDescription('Updated bbapp')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> updates app: 
+The <info>%command.name%</info> updates app:
 
    <info>php bbapp:update</info>
 EOF
@@ -65,56 +62,54 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $force = $input->getOption('force');
-        
+
         $bbapp = $this->getContainer()->get('bbapp');
         $em = $this->getContainer()->get('em');
-        
+
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
-            $bbapp->getBBDir() . '/Bundle',
-            $bbapp->getBBDir() . '/Cache/DAO',
-            $bbapp->getBBDir() . '/ClassContent',
-            $bbapp->getBBDir() . '/ClassContent/Indexes',
-            $bbapp->getBBDir() . '/Logging',
-            $bbapp->getBBDir() . '/NestedNode',
-            $bbapp->getBBDir() . '/Security',
-            $bbapp->getBBDir() . '/Site',
-            $bbapp->getBBDir() . '/Site/Metadata',
-            $bbapp->getBBDir() . '/Stream/ClassWrapper',
-            $bbapp->getBBDir() . '/Theme',
-            $bbapp->getBBDir() . '/Util/Sequence/Entity',
-            $bbapp->getBBDir() . '/Workflow',
+            $bbapp->getBBDir().'/Bundle',
+            $bbapp->getBBDir().'/Cache/DAO',
+            $bbapp->getBBDir().'/ClassContent',
+            $bbapp->getBBDir().'/ClassContent/Indexes',
+            $bbapp->getBBDir().'/Logging',
+            $bbapp->getBBDir().'/NestedNode',
+            $bbapp->getBBDir().'/Security',
+            $bbapp->getBBDir().'/Site',
+            $bbapp->getBBDir().'/Site/Metadata',
+            $bbapp->getBBDir().'/Stream/ClassWrapper',
+            $bbapp->getBBDir().'/Theme',
+            $bbapp->getBBDir().'/Util/Sequence/Entity',
+            $bbapp->getBBDir().'/Workflow',
         ));
-        
+
         $sqls = $this->getUpdateQueries($em);
 
-        if($force) {
+        if ($force) {
             $output->writeln('<info>Running update</info>');
-            
+
             $metadata = $em->getMetadataFactory()->getAllMetadata();
             $schema = new SchemaTool($em);
-            
+
             $em->getConnection()->executeQuery('SET FOREIGN_KEY_CHECKS=0');
             $schema->updateSchema($metadata, true);
             $em->getConnection()->executeQuery('SET FOREIGN_KEY_CHECKS=1');
         }
 
-        $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
-        
+        $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
     }
-    
+
     /**
      * Get update queries
-     * @param EntityManager $em
+     * @param  EntityManager $em
      * @return String[]
      */
     protected function getUpdateQueries(EntityManager $em)
     {
         $schema = new SchemaTool($em);
-        
+
         $metadatas = $em->getMetadataFactory()->getAllMetadata();
         $sqls = $schema->getUpdateSchemaSql($metadatas, true);
-        
+
         return $sqls;
     }
-    
 }

@@ -23,9 +23,7 @@ namespace BackBuilder\Cache\IdentifierAppender;
 
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\Renderer\IRenderer;
-
 use Doctrine\ORM\EntityManager;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
@@ -142,7 +140,7 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     /**
      * Returns content cache query parameters by exploring class content yaml files
      *
-     * @param  AClassContent $content the content we want to get its cache query parameters
+     * @param AClassContent $content the content we want to get its cache query parameters
      *
      * @return array contains every query parameters, can be empty if there is no cache query parameter found
      */

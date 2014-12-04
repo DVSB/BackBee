@@ -2,11 +2,10 @@
 
 namespace BackBuilder\NestedNode\Builder;
 
-use BackBuilder\ClassContent\AClassContent,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\Site\Layout,
-    BackBuilder\Site\Site;
-
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
 use Doctrine\ORM\EntityManager;
 
 /**
@@ -398,7 +397,7 @@ class PageBuilder
         $this->elements[] = array(
             'content'               => $element,
             'set_main_node'         => $setMainNode,
-            'content_set_position'  => $contentSetPos
+            'content_set_position'  => $contentSetPos,
         );
 
         return $this;
@@ -419,7 +418,7 @@ class PageBuilder
             $this->elements[$index] = array(
                 'content'               => $element,
                 'set_main_node'         => $setMainNode,
-                'content_set_position'  => $contentSetPos
+                'content_set_position'  => $contentSetPos,
             );
         } else {
             $this->pushElement($element, $setMainNode, $contentSetPos);
@@ -632,12 +631,12 @@ class PageBuilder
     /**
      * Call
      * @param  Page   $page [description]
-     * @return [type]       [description]
+     * @return [type] [description]
      */
     private function doPersistIfValid(Page $page)
     {
         if (null === $page->getParent()) {
-            return null;
+            return;
         }
 
         $method = '';

@@ -111,7 +111,6 @@ class RandomService implements DumpableServiceInterface
         return array('size' => $this->size);
     }
 
-
     /**
      * @return boolean true if current service is already restored, otherwise false
      */

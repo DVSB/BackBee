@@ -26,9 +26,7 @@ use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
-
 use Symfony\Component\Yaml\Yaml;
-
 use org\bovigo\vfs\vfsStream;
 
 /**
@@ -69,78 +67,78 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
                 'service.class' => 'BackBuilder\DependencyInjection\Tests\RandomService',
                 'size_one'      => 300,
                 'size_two'      => 8000,
-                'size_three'    => 44719
+                'size_three'    => 44719,
             ),
             'services'   => array(
                 'service_one' => array(
                     'class'     => '%service.class%',
-                    'arguments' => array('%size_two%')
+                    'arguments' => array('%size_two%'),
                 ),
                 'service_two' => array(
                     'class'     => '%service.class%',
                     'calls'     => array(
-                        array('setSize', array('%size_three%'))
+                        array('setSize', array('%size_three%')),
                     ),
                     'tags'  => array(
-                        array('name' => 'dumpable')
-                    )
+                        array('name' => 'dumpable'),
+                    ),
                 ),
                 'service_three' => array(
                     'class'     => '%service.class%',
                     'calls'     => array(
-                        array('setClassProxy', array(''))
+                        array('setClassProxy', array('')),
                     ),
                     'tags'  => array(
-                        array('name' => 'dumpable')
-                    )
+                        array('name' => 'dumpable'),
+                    ),
                 ),
                 'service_four' => array(
                     'class' => '%service.class%',
                     'tags'  => array(
                         array('name' => 'foo'),
-                        array('name' => 'bar')
-                    )
+                        array('name' => 'bar'),
+                    ),
                 ),
                 'service_five' => array(
-                    'synthetic' => true
+                    'synthetic' => true,
                 ),
                 'service_six' => array(
                     'class'  => '%service.class%',
-                    'public' => false
+                    'public' => false,
                 ),
                 'service_seven' => array(
                     'class'        => '%service.class%',
                     'scope'        => 'prototype',
                     'file'         => '/foo/bar',
-                    'configurator' => array('@service_six', 'getSize')
+                    'configurator' => array('@service_six', 'getSize'),
                 ),
                 'service_eight' => array(
                     'class'          => '%service.class%',
                     'factory_class'  => '/foo/bar/ServiceFactory',
-                    'factory_method' => 'get'
+                    'factory_method' => 'get',
                 ),
                 'service_nine' => array(
                     'class'           => '%service.class%',
                     'factory_service' => 'service_zero',
-                    'factory_method'  => 'get'
+                    'factory_method'  => 'get',
                 ),
                 'service_ten' => array(
                     'abstract' => true,
                     'calls'    => array(
-                        array('setSize', array(8))
-                    )
+                        array('setSize', array(8)),
+                    ),
                 ),
                 'service_eleven' => array(
                     'class'  => '%service.class%',
-                    'parent' => 'service_ten'
-                )
-            )
+                    'parent' => 'service_ten',
+                ),
+            ),
         );
 
         $this->container = new Container();
 
         vfsStream::setup('directory', 0777, array(
-            'services.yml' => Yaml::dump($this->services_yml_array)
+            'services.yml' => Yaml::dump($this->services_yml_array),
         ));
 
         ServiceLoader::loadServicesFromYamlFile($this->container, vfsStream::url('directory'));
@@ -219,7 +217,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
             $dumper->dump(array('do_compile' => false));
             $this->fail('Raise of InvalidServiceProxyException expected.');
         } catch (\Exception $e) {
-
             $this->assertInstanceOf(
                 'BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException',
                 $e

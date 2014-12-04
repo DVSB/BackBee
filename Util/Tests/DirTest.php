@@ -3,16 +3,14 @@
 namespace BackBuilder\TestUnit\BackBuilder\Util;
 
 use BackBuilder\Util\Dir;
-use org\bovigo\vfs\vfsStream,
-    org\bovigo\vfs\vfsStreamFile,
-    org\bovigo\vfs\vfsStreamDirectory,
-    org\bovigo\vfs\vfsStreamWrapper;
+use org\bovigo\vfs\vfsStream;
 
-class DirTest extends \PHPUnit_Framework_TestCase {
-
+class DirTest extends \PHPUnit_Framework_TestCase
+{
     private $copy_path;
 
-    public function setUp() {
+    public function setUp()
+    {
         $this->copy_path = 'file.txt';
     }
 
@@ -22,7 +20,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::getContent
      *
      */
-    public function testCopy() {
+    public function testCopy()
+    {
         $dir_mode = 0777;
         $vfs_dir = vfsStream::setup('startpath', $dir_mode, array('startfile' => 'start data'));
         $start_path = vfsStream::url('startpath');
@@ -42,7 +41,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::getContent
      *
      */
-    public function unreadbleCopy() {
+    public function unreadbleCopy()
+    {
         $dir_mode = 0000;
         $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
 
@@ -51,7 +51,6 @@ class DirTest extends \PHPUnit_Framework_TestCase {
         $unreadable = vfsStream::setup('copydir', 0000);
         $dir_path1 = Dir::copy($start_path, $unreadable);
 
-
         $this->assertEquals(false, $dir_path1);
     }
 
@@ -59,7 +58,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::getContent
      * @expectedException \Exception
      */
-    public function testUnknownGetContent() {
+    public function testUnknownGetContent()
+    {
         $this->markTestSkipped('Exception catching don\'t work');
         Dir::getContent('unknow');
     }
@@ -68,7 +68,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::getContent
      * @expectedException \Exception
      */
-    public function testFileGetContent() {
+    public function testFileGetContent()
+    {
         $this->markTestSkipped('Exception catching don\'t work');
         Dir::getContent('/DirTest.php');
     }
@@ -77,7 +78,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::getContent
      *
      */
-    public function testGetContent() {
+    public function testGetContent()
+    {
         $test_dir = vfsStream::setup('test_dir');
         $path_dir = vfsStream::url('test_dir');
 
@@ -93,7 +95,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @expectedException \Exception
      *
      */
-    public function testModeFilesGetContent() {
+    public function testModeFilesGetContent()
+    {
         $this->markTestSkipped('Exception catching don\'t work');
         $test_dir = vfsStream::setup('test_dir', 0000, array('file1' => 'file1 data', 'file2' => 'file2 data'));
         $path_dir = vfsStream::url('test_dir');
@@ -106,7 +109,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::getContent
      *
      */
-    public function testIsArrayGetContent() {
+    public function testIsArrayGetContent()
+    {
         $test_dir = vfsStream::setup('test_dir', 0777, array('file1' => 'file1 data', 'file2' => 'file2 data'));
         $path_dir = vfsStream::url('test_dir');
 
@@ -118,13 +122,14 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::delete
      *
      */
-    public function testDelete() {
+    public function testDelete()
+    {
         vfsStream::setup('test_dir');
         $path_dir = vfsStream::url('test_dir');
 
         $res = Dir::delete($path_dir);
 
-        $this->assertEquals(TRUE, $res);
+        $this->assertEquals(true, $res);
         $this->assertFileNotExists($path_dir);
     }
 
@@ -132,7 +137,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::move
      *
      */
-    public function testSimpleMove() {
+    public function testSimpleMove()
+    {
         $dir_mode = 0777;
         $vfs_dir = vfsStream::setup('dirstart', $dir_mode, array('startfile' => 'start data'));
         $start_path = vfsStream::url('dirstart');
@@ -148,7 +154,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::move
      *
      */
-    public function testCallback2ParamsMove() {
+    public function testCallback2ParamsMove()
+    {
         $dir_mode = 0777;
         $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
 
@@ -163,7 +170,8 @@ class DirTest extends \PHPUnit_Framework_TestCase {
      * @covers \BackBuilder\Util\Dir::move
      *
      */
-    public function testCallback3ParamsMove() {
+    public function testCallback3ParamsMove()
+    {
         $dir_mode = 0777;
         $vfs_dir = vfsStream::setup('dircopy', $dir_mode, array('copyfile' => 'copy data'));
 
@@ -174,17 +182,17 @@ class DirTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(true, $dir_path);
     }
 
-    public function tearDown() {
+    public function tearDown()
+    {
         if (is_dir($this->copy_path)) {
             $allfiles = scandir($this->copy_path);
             foreach ($allfiles as $file) {
                 if (!is_dir($file)) {
-                    unlink($this->copy_path . DIRECTORY_SEPARATOR . $file);
+                    unlink($this->copy_path.DIRECTORY_SEPARATOR.$file);
                 }
             }
 
             rmdir($this->copy_path);
         }
     }
-
 }

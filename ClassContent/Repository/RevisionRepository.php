@@ -22,11 +22,11 @@
 namespace BackBuilder\ClassContent\Repository;
 
 use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\ClassContent\Revision,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\Exception\ClassContentException;
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use BackBuilder\ClassContent\Revision;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\Exception\ClassContentException;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -40,11 +40,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class RevisionRepository extends EntityRepository
 {
-
     /**
      * Checks the content state of a revision
-     * @param Revision $revision
-     * @return AClassContent the valid content according to revision state
+     * @param  Revision              $revision
+     * @return AClassContent         the valid content according to revision state
      * @throws ClassContentException Occurs when the revision is orphan
      */
     private function _checkContent(Revision $revision)
@@ -70,23 +69,23 @@ class RevisionRepository extends EntityRepository
         $revision->setContent($content);
         $revision->setData($content->getDataToObject());
         $revision->setLabel($content->getLabel());
-        
+
         $maxEntry = (array) $content->getMaxEntry();
-        $minEntry = (array) $content->getMinEntry();   
+        $minEntry = (array) $content->getMinEntry();
         $revision->setMaxEntry($maxEntry);
         $revision->setMinEntry($minEntry);
 
         $revision->setOwner($token->getUser());
-        $revision->setParam(NULL, $content->getParam());
-        $revision->setRevision($content->getRevision() ? $content->getRevision() : 0 );
-        $revision->setState($content->getRevision() ? Revision::STATE_MODIFIED : Revision::STATE_ADDED );
+        $revision->setParam(null, $content->getParam());
+        $revision->setRevision($content->getRevision() ? $content->getRevision() : 0);
+        $revision->setState($content->getRevision() ? Revision::STATE_MODIFIED : Revision::STATE_ADDED);
 
         return $revision;
     }
 
     /**
      * Update user revision
-     * @param Revision $revision
+     * @param  Revision              $revision
      * @throws ClassContentException Occurs on illegal revision state
      */
     public function update(Revision $revision)
@@ -119,7 +118,7 @@ class RevisionRepository extends EntityRepository
 
     /**
      * Commit user revision
-     * @param Revision $revision
+     * @param  Revision              $revision
      * @throws ClassContentException Occurs on illegal revision state
      */
     public function commit(Revision $revision)
@@ -129,6 +128,7 @@ class RevisionRepository extends EntityRepository
             case Revision::STATE_MODIFIED :
                 $revision->setRevision($revision->getRevision() + 1)
                         ->setState(Revision::STATE_COMMITTED);
+
                 return $this->loadSubcontents($revision);
                 break;
 
@@ -142,7 +142,7 @@ class RevisionRepository extends EntityRepository
 
     /**
      * Revert (ie delete) user revision
-     * @param Revision $revision
+     * @param  Revision              $revision
      * @throws ClassContentException Occurs on illegal revision state
      */
     public function revert(Revision $revision)
@@ -159,6 +159,7 @@ class RevisionRepository extends EntityRepository
                 }
 
                 $this->_em->remove($revision);
+
                 return $revision;
                 break;
         }
@@ -171,14 +172,16 @@ class RevisionRepository extends EntityRepository
         $content = $revision->getContent();
         if ($content instanceof ContentSet) {
             while ($subcontent = $revision->next()) {
-                if (!($subcontent instanceof AClassContent))
+                if (!($subcontent instanceof AClassContent)) {
                     continue;
+                }
 
-                if ($this->_em->contains($subcontent))
+                if ($this->_em->contains($subcontent)) {
                     continue;
+                }
 
                 $subcontent = $this->_em->find(get_class($subcontent), $subcontent->getUid());
-                echo "Subcontent " . get_class($subcontent) . "(" . $subcontent->getUid() . ") loaded\n";
+                echo "Subcontent ".get_class($subcontent)."(".$subcontent->getUid().") loaded\n";
             }
         } else {
             foreach ($revision->getData() as $key => $value) {
@@ -186,15 +189,15 @@ class RevisionRepository extends EntityRepository
                     foreach ($value as &$val) {
                         if ($val instanceof AClassContent) {
                             if (NULL !== $entity = $this->_em->find(get_class($val), $val->getUid())) {
-                                echo "Subcontent " . get_class($entity) . "(" . $entity->getUid() . ") loaded\n";
+                                echo "Subcontent ".get_class($entity)."(".$entity->getUid().") loaded\n";
                                 $val = $entity;
                             }
                         }
                     }
                     unset($val);
-                } else if ($value instanceof AClassContent) {
+                } elseif ($value instanceof AClassContent) {
                     if (NULL !== $entity = $this->_em->find(get_class($value), $value->getUid())) {
-                        echo "Subcontent " . get_class($entity) . "(" . $entity->getUid() . ") loaded\n";
+                        echo "Subcontent ".get_class($entity)."(".$entity->getUid().") loaded\n";
                         $value = $entity;
                     }
                 }
@@ -202,16 +205,16 @@ class RevisionRepository extends EntityRepository
             }
         }
 
-        $revision->setSubcontentsLoaded(TRUE);
+        $revision->setSubcontentsLoaded(true);
 
         return $revision;
     }
 
     /**
      * Return the user's draft of a content, optionally checks out a new one if not exists
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @param \BackBuilder\Security\Token\BBUserToken $token
-     * @param boolean $checkoutOnMissing If true, checks out a new revision if none was found
+     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\Security\Token\BBUserToken $token
+     * @param  boolean                                 $checkoutOnMissing If true, checks out a new revision if none was found
      * @return \BackBuilder\ClassContent\Revision|null
      */
     public function getDraft(AClassContent $content, \BackBuilder\Security\Token\BBUserToken $token, $checkoutOnMissing = false)
@@ -220,8 +223,9 @@ class RevisionRepository extends EntityRepository
             try {
                 if (FALSE === $this->_em->contains($content)) {
                     $content = $this->_em->find(get_class($content), $content->getUid());
-                    if (NULL === $content)
+                    if (NULL === $content) {
                         return NULL;
+                    }
                 }
                 $q = $this->createQueryBuilder('r')
                                 ->andWhere('r._content = :content')
@@ -231,8 +235,8 @@ class RevisionRepository extends EntityRepository
                                 ->orderBy('r._modified', 'desc')
                                 ->setParameters(array(
                                     'content' => $content,
-                                    'owner' => '' . UserSecurityIdentity::fromToken($token),
-                                    'states' => array(Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_CONFLICTED)
+                                    'owner' => ''.UserSecurityIdentity::fromToken($token),
+                                    'states' => array(Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_CONFLICTED),
                                 ))->getQuery();
 
                 $revision = $q->getSingleResult();
@@ -241,7 +245,7 @@ class RevisionRepository extends EntityRepository
                     $revision = $this->checkout($content, $token);
                     $this->_em->persist($revision);
                 } else {
-                    $revision = NULL;
+                    $revision = null;
                 }
             }
         }
@@ -257,7 +261,7 @@ class RevisionRepository extends EntityRepository
     {
         $revisions = $this->_em->getRepository('\BackBuilder\ClassContent\Revision')
                 ->findBy(array('_owner' => UserSecurityIdentity::fromToken($token),
-            '_state' => array(Revision::STATE_ADDED, Revision::STATE_MODIFIED)));
+            '_state' => array(Revision::STATE_ADDED, Revision::STATE_MODIFIED), ));
 
         return $revisions;
     }
@@ -269,5 +273,4 @@ class RevisionRepository extends EntityRepository
 
         return $revisions;
     }
-
 }

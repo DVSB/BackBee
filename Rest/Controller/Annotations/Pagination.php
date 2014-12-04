@@ -51,5 +51,4 @@ class Pagination
      * @var integer
      */
     public $min_count = 1;
-
 }

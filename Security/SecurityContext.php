@@ -33,9 +33,6 @@ use BackBuilder\Security\Context\ContextInterface;
 use BackBuilder\Security\Exception\SecurityException;
 use BackBuilder\Security\Listeners\LogoutListener;
 use BackBuilder\Security\Role\RoleHierarchy;
-
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
@@ -55,7 +52,6 @@ use Symfony\Component\Security\Http\FirewallMap;
  */
 class SecurityContext extends sfSecurityContext
 {
-
     private $application;
     private $logger;
     private $dispatcher;
@@ -84,6 +80,7 @@ class SecurityContext extends sfSecurityContext
 
         if (null === $securityConfig = $this->application->getConfig()->getSecurityConfig()) {
             trigger_error('None security configuration found', E_USER_NOTICE);
+
             return;
         }
         $this->config = $securityConfig;
@@ -288,9 +285,9 @@ class SecurityContext extends sfSecurityContext
     /**
      * Get auth provider
      *
-     * @param string $key
+     * @param  string                          $key
      * @return AuthenticationProviderInterface
-     * @throws InvalidArgumentException if provider not found
+     * @throws InvalidArgumentException        if provider not found
      */
     public function getAuthProvider($key)
     {
@@ -303,7 +300,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
-     * @param string $name
+     * @param string                                                      $name
      * @param \Symfony\Component\Security\Core\User\UserProviderInterface $provider
      */
     public function addUserProvider($name, UserProviderInterface $provider)
@@ -399,12 +396,11 @@ class SecurityContext extends sfSecurityContext
                             'entry_table_name'         => 'acl_entries',
                             'oid_table_name'           => 'acl_object_identities',
                             'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
-                            'sid_table_name'           => 'acl_security_identities'
+                            'sid_table_name'           => 'acl_security_identities',
                     ));
                 } else {
                     $this->aclprovider = $this->application->getContainer()->get('security.acl_provider');
                 }
-
             }
         }
 
@@ -413,7 +409,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * Create an encoders factory if need
-     * @param array $config
+     * @param  array                                 $config
      * @return \BackBuilder\Security\SecurityContext
      */
     private function createEncoderFactory(array $config)

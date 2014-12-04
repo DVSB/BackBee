@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -32,7 +32,6 @@ use Doctrine\ORM\EntityRepository;
  */
 class SiteRepository extends EntityRepository
 {
-
     public function findByServerName($server_name)
     {
         $q = $this->createQueryBuilder('s')
@@ -45,10 +44,10 @@ class SiteRepository extends EntityRepository
 
     /**
      * Returns site entity according to custom server_name if it exists in sites_config
-     * 
-     * @param  string $server_name  
-     * @param  array  $sites_config 
-     * @return null|BackBuilder\Site\Site               
+     *
+     * @param  string                     $server_name
+     * @param  array                      $sites_config
+     * @return null|BackBuilder\Site\Site
      */
     public function findByCustomServerName($server_name, array $sites_config)
     {
@@ -58,15 +57,15 @@ class SiteRepository extends EntityRepository
                 $site_label = $key;
                 break;
             }
-        } 
+        }
 
         $site = null;
         if (null !== $site_label) {
             $site = $this->findOneBy(array(
-                '_label' => $site_label
+                '_label' => $site_label,
             ));
         }
-        
+
         return $site;
     }
 }

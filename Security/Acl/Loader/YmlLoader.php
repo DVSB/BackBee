@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,19 +22,15 @@
 namespace BackBuilder\Security\Acl\Loader;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
-
-use Symfony\Component\Yaml\Parser;
-
-use Symfony\Component\Yaml\Yaml,
-    Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use BackBuilder\Security\Acl\Permission\PermissionMap;
 use BackBuilder\Security\Acl\Permission\MaskBuilder;
 
 /**
  * Yml Loader
- * 
+ *
  * Loads yml acl data into the DB
  *
  * @category    BackBuilder
@@ -48,26 +44,24 @@ class YmlLoader extends ContainerAware
     protected $em;
     protected $bbapp;
 
-    
     public function load($aclData)
     {
         $aclProvider = $this->container->get('bbapp')->getSecurityContext()->getACLProvider();
-        
-        if(null === $aclProvider) {
+
+        if (null === $aclProvider) {
             throw new \RuntimeException('ACL configuration missing');
         }
-        
+
         $this->em = $this->container->get('bbapp')->getEntityManager();
         $this->bbapp = $this->container->get('bbapp');
-        
-        $grid = Yaml::parse($aclData, true);
-        
-        if (false === array_key_exists('groups', $grid) || false === is_array($grid['groups'])) {
-            throw new \Exception('Invalid yml: ' . $ymlFile);
-        }
-        
-        foreach ($grid['groups'] as $group_identifier => $rights) {
 
+        $grid = Yaml::parse($aclData, true);
+
+        if (false === array_key_exists('groups', $grid) || false === is_array($grid['groups'])) {
+            throw new \Exception('Invalid yml: '.$ymlFile);
+        }
+
+        foreach ($grid['groups'] as $group_identifier => $rights) {
             if (null === $group = $this->em->getRepository('BackBuilder\Security\Group')->findOneBy(array('_identifier' => $group_identifier))) {
                 // ensure group exists
                 $group = new \BackBuilder\Security\Group();
@@ -105,9 +99,7 @@ class YmlLoader extends ContainerAware
             }
         }
     }
-    
-    
-    
+
     private function addSiteRights($sites_def, $aclProvider, $securityIdentity)
     {
         if (false === array_key_exists('resources', $sites_def) || false === array_key_exists('actions', $sites_def)) {
@@ -145,7 +137,6 @@ class YmlLoader extends ContainerAware
 
         $actions = $this->getActions($layout_def['actions']);
         if (0 === count($actions)) {
-
             return array();
         }
 
@@ -222,13 +213,13 @@ class YmlLoader extends ContainerAware
             $service = new \BackBuilder\Services\Local\ContentBlocks();
             $service->initService($this->bbapp);
             foreach ($all_classes as $content) {
-                $classname = '\BackBuilder\ClassContent\\' . $content->name;
+                $classname = '\BackBuilder\ClassContent\\'.$content->name;
                 $this->addClassAcl(new $classname('*'), $aclProvider, $securityIdentity, $actions);
             }
         } elseif (true === is_array($content_def['resources']) && 0 < count($content_def['resources'])) {
             if (true === is_array($content_def['resources'][0])) {
                 $used_classes = array();
-                foreach($content_def['resources'] as $index => $resources_def) {
+                foreach ($content_def['resources'] as $index => $resources_def) {
                     if (false === isset($content_def['actions'][$index])) {
                         continue;
                     }
@@ -236,8 +227,8 @@ class YmlLoader extends ContainerAware
                     $actions = $this->getActions($content_def['actions'][$index]);
 
                     if ('remains' === $resources_def) {
-                        foreach($all_classes as $content) {
-                            $classname = '\BackBuilder\ClassContent\\' . $content->name;
+                        foreach ($all_classes as $content) {
+                            $classname = '\BackBuilder\ClassContent\\'.$content->name;
                             if (false === in_array($classname, $used_classes)) {
                                 $used_classes[] = $classname;
                                 if (0 < count($actions)) {
@@ -247,11 +238,11 @@ class YmlLoader extends ContainerAware
                         }
                     } elseif (true === is_array($resources_def)) {
                         foreach ($resources_def as $content) {
-                            $classname = '\BackBuilder\ClassContent\\' . $content;
+                            $classname = '\BackBuilder\ClassContent\\'.$content;
                             if (substr($classname, -1) === '*') {
                                 $classname = substr($classname, 0 - 1);
                                 foreach ($all_classes as $content) {
-                                    $fullclass = '\BackBuilder\ClassContent\\' . $content->name;
+                                    $fullclass = '\BackBuilder\ClassContent\\'.$content->name;
                                     if (0 === strpos($fullclass, $classname)) {
                                         $used_classes[] = $fullclass;
                                         if (0 < count($actions)) {
@@ -275,11 +266,11 @@ class YmlLoader extends ContainerAware
                 }
 
                 foreach ($content_def['resources'] as $content) {
-                    $classname = '\BackBuilder\ClassContent\\' . $content;
+                    $classname = '\BackBuilder\ClassContent\\'.$content;
                     if (substr($classname, -1) === '*') {
                         $classname = substr($classname, 0 -1);
-                        foreach($all_classes as $content) {
-                            $fullclass = '\BackBuilder\ClassContent\\' . $content->name;
+                        foreach ($all_classes as $content) {
+                            $fullclass = '\BackBuilder\ClassContent\\'.$content->name;
                             if (0 === strpos($fullclass, $classname)) {
                                 $this->addClassAcl(new $fullclass('*'), $aclProvider, $securityIdentity, $actions);
                             }
@@ -300,7 +291,8 @@ class YmlLoader extends ContainerAware
 
         $actions = $this->getActions($bundle_def['actions']);
         if (0 === count($actions)) {
-            echo 'Notice: none actions defined on bundle' . PHP_EOL;
+            echo 'Notice: none actions defined on bundle'.PHP_EOL;
+
             return array();
         }
 

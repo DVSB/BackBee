@@ -36,7 +36,7 @@ class BundleListener
     /**
      * Occurs on `bbapplication.stop` event to stop every started bundles
      *
-     * @param  Event  $event
+     * @param Event $event
      */
     public static function onApplicationStop(Event $event)
     {

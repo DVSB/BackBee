@@ -21,19 +21,15 @@
 
 namespace BackBuilder\Controller;
 
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response;
-
-use Symfony\Component\Form\Forms,
-    Symfony\Component\Form\FormBuilderInterface;
-
-
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\Forms;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Validator\Validation;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface,
-    Symfony\Component\DependencyInjection\ContainerInterface;
-
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use BackBuilder\IApplication;
 
 /**
@@ -51,7 +47,7 @@ class Controller implements ContainerAwareInterface
      * @var \BackBuilder\BBApplication
      */
     protected $_application;
-    
+
     protected $container;
 
     /**
@@ -60,154 +56,147 @@ class Controller implements ContainerAwareInterface
      * @access public
      * @param IApplication $application The current BBapplication
      */
-    public function __construct(IApplication $application = null) 
+    public function __construct(IApplication $application = null)
     {
-        if(null !== $application) {
+        if (null !== $application) {
             $this->_application = $application;
             $this->container = $application->getContainer();
         }
     }
-    
+
     /**
      * Returns current Backbuilder application
      *
      * @access public
      * @return \BackBuilder\IApplication
      */
-    public function getApplication() 
+    public function getApplication()
     {
         return $this->container->get('bbapp');
     }
-    
-    
+
     public function setContainer(ContainerInterface $container = null)
     {
         $this->container = $container;
-        
+
         $this->_application = $this->container->get('bbapp');
     }
-    
-    
+
     /**
      * Returns the application's DIC
      *
      * @access public
      * @return ContainerBuilder
      */
-    public function getContainer() 
+    public function getContainer()
     {
         return $this->container;
     }
-    
-    
+
     /**
      * Returns the current request
      *
      * @access public
      * @return Request
      */
-    public function getRequest() 
+    public function getRequest()
     {
         return $this->_application->getRequest();
     }
-    
+
     /**
-     * 
+     *
      * @return Doctrine\ORM\EntityManager
      */
     public function getEntityManager()
     {
         return $this->_application->getEntityManager();
     }
-    
+
     /**
-     * 
+     *
      * @return FormBuilderInterface
      */
     public function createFormBuilder($data)
     {
         $validator = Validation::createValidator();
-                
+
         $formFactory = Forms::createFormFactoryBuilder()
             ->addExtension(new ValidatorExtension($validator))
             ->addExtension(new HttpFoundationExtension())
             ->getFormFactory();
-        
+
         return $formFactory->createBuilder('form', $data);
     }
-    
+
     /**
-     * 
-     * @param string $view
-     * @param array $parameters
-     * @param \Symfony\Component\HttpFoundation\Response $response
+     *
+     * @param  string                                     $view
+     * @param  array                                      $parameters
+     * @param  \Symfony\Component\HttpFoundation\Response $response
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function render($view, array $parameters = array(), Response $response = null)
     {
-        if(null === $response) {
+        if (null === $response) {
             $response = new Response();
         }
-        
+
         // locate the full path to the view
         $matches = null;
-        preg_match("/Bundle\\\([a-zA-Z0-9]+Bundle)\\\/i", get_class($this), $matches); 
-        if(isset($matches[1])) {
+        preg_match("/Bundle\\\([a-zA-Z0-9]+Bundle)\\\/i", get_class($this), $matches);
+        if (isset($matches[1])) {
             $bundleName = $matches[1];
-            
+
             // check that the view is not the full path already
             $matchesView = null;
-            preg_match("/Bundle\\\\([a-zA-Z0-9]+Bundle)\\\\/i", $view, $matchesView); 
+            preg_match("/Bundle\\\\([a-zA-Z0-9]+Bundle)\\\\/i", $view, $matchesView);
 
-            if(!isset($matchesView[1])) {
+            if (!isset($matchesView[1])) {
                 // view is not the full path, so prepend the bundle views dir
                 $bundle = $this->getApplication()->getBundle($bundleName);
                 $bundle->getBaseDir();
-                $view = $bundle->getBaseDir() . '/Ressources/views/' . $view;
+                $view = $bundle->getBaseDir().'/Ressources/views/'.$view;
             }
         } else {
-            $view = $this->getApplication()->getBBDir() . '/Resources/views/' . $view;
+            $view = $this->getApplication()->getBBDir().'/Resources/views/'.$view;
         }
 
         try {
             $this->renderer = $this->getApplication()->getRenderer();
             $content = $this->renderer->partial($view, $parameters);
             $response->setContent($content);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             throw $e;
         }
-        
+
         return $response;
     }
-    
-    
+
     /**
      * Returns the validator service
      *
      * @access public
      * @return \Symfony\Component\Validator\ValidatorInterface
      */
-    public function getValidator() 
+    public function getValidator()
     {
         return $this->_application->getValidator();
     }
-    
-    
+
     /**
      * Shortcut for Symfony\Component\Security\Core\SecurityContext::isGranted()
-     * 
+     *
      * @see \Symfony\Component\Security\Core\SecurityContext::isGranted()
-     * @param string $permission
-     * @param mixed $object
+     * @param  string $permission
+     * @param  mixed  $object
      * @return bool
      */
     protected function isGranted($attributes, $object = null)
     {
         return $this->getContainer()->get('security.context')->isGranted($attributes, $object);
     }
-    
 
-        
     /**
      * Get a user from the Security Context
      *
@@ -231,5 +220,4 @@ class Controller implements ContainerAwareInterface
 
         return $user;
     }
- 
 }

@@ -25,10 +25,7 @@ use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
-use BackBuilder\Rest\Controller\ARestController;
-
 use Doctrine\ORM\Tools\Pagination\Paginator;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -47,7 +44,7 @@ class ClassContentController extends ARestController
     /**
      * Returns category's datas if $id is valid
      *
-     * @param  string $id category's id
+     * @param string $id category's id
      *
      * @return Response
      */
@@ -91,7 +88,7 @@ class ClassContentController extends ARestController
 
         $classnames = array();
         foreach ($category->getBlocks() as $block) {
-            $classnames[] = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $block->type);
+            $classnames[] = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $block->type);
         }
 
         return $this->createResponse(json_encode($this->convertPaginatorToArray($this->findContentsByCriterias(
@@ -102,7 +99,7 @@ class ClassContentController extends ARestController
     /**
      * Returns collection of classcontent associated to $type and according to provided criterias
      *
-     * @param  string $type
+     * @param string $type
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -110,7 +107,7 @@ class ClassContentController extends ARestController
      */
     public function getCollectionAction($type, $start, $count)
     {
-        $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $type);
+        $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $type);
 
         return $this->createResponse(json_encode($this->convertPaginatorToArray($this->findContentsByCriterias(
             (array) $classname, $start, $count
@@ -120,8 +117,8 @@ class ClassContentController extends ARestController
     /**
      * Get classcontent
      *
-     * @param  string $type type of the class content (ex: Element/text)
-     * @param  string $uid  identifier of the class content
+     * @param string $type type of the class content (ex: Element/text)
+     * @param string $uid  identifier of the class content
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -159,8 +156,8 @@ class ClassContentController extends ARestController
     /**
      * delete a classcontent
      *
-     * @param  string $type type of the class content (ex: Element/text)
-     * @param  string $uid  identifier of the class content
+     * @param string $type type of the class content (ex: Element/text)
+     * @param string $uid  identifier of the class content
      *
      * @return Symfony\Component\HttpFoundation\Response
      */
@@ -192,16 +189,16 @@ class ClassContentController extends ARestController
     /**
      * Returns classcontent datas if couple (type;uid) is valid
      *
-     * @param  string $type short namespace of a classcontent
-     *                      (full: BackBuilder\ClassContent\Block\paragraph => short: Block\paragraph)
-     * @param  string $uid
+     * @param string $type short namespace of a classcontent
+     *                     (full: BackBuilder\ClassContent\Block\paragraph => short: Block\paragraph)
+     * @param string $uid
      *
      * @return
      */
     private function getClassContentByTypeAndUid($type, $uid)
     {
         $content = null;
-        $classname = 'BackBuilder\ClassContent\\' . str_replace('/', NAMESPACE_SEPARATOR, $type);
+        $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $type);
 
         try {
             $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
@@ -219,7 +216,7 @@ class ClassContentController extends ARestController
     /**
      * Returns current revision for the given $content
      *
-     * @param  AClassContent $content content we want to get the latest revision
+     * @param AClassContent $content content we want to get the latest revision
      *
      * @return null|BackBuilder\ClassContent\Revision
      */
@@ -233,9 +230,9 @@ class ClassContentController extends ARestController
     /**
      * Find classcontents by provided classnames, criterias from request, provided start and count
      *
-     * @param  array   $classnames
-     * @param  integer $start
-     * @param  integer $count
+     * @param array   $classnames
+     * @param integer $start
+     * @param integer $count
      *
      * @return null|Paginator
      */
@@ -243,7 +240,7 @@ class ClassContentController extends ARestController
     {
         $criterias = array_merge(array(
             'only_online' => false,
-            'site_uid'    => $this->getApplication()->getSite()->getUid()
+            'site_uid'    => $this->getApplication()->getSite()->getUid(),
         ), $this->getApplication()->getRequest()->query->all());
 
         $criterias['only_online'] = (boolean) $criterias['only_online'];
@@ -267,7 +264,7 @@ class ClassContentController extends ARestController
     /**
      * Converts Doctrine's paginator to php array
      *
-     * @param  Paginator $paginator the paginator to convert
+     * @param Paginator $paginator the paginator to convert
      *
      * @return array
      */

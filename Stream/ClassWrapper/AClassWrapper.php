@@ -2,27 +2,27 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Stream\ClassWrapper;
 
-use BackBuilder\Stream\IStreamWrapper,
-    BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
+use BackBuilder\Stream\IStreamWrapper;
+use BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
 
 /**
  * Abstract class for content wrapper in BackBuilder 4
@@ -42,7 +42,6 @@ use BackBuilder\Stream\IStreamWrapper,
  */
 abstract class AClassWrapper implements IStreamWrapper
 {
-
     /**
      * The registered BackBuilder autoloader
      * @var \BackBuilder\Autoloader\Autoloader
@@ -84,13 +83,13 @@ abstract class AClassWrapper implements IStreamWrapper
      * @var string
      */
     protected $extends = '\BackBuilder\ClassContent\AClassContent';
-    
+
     /**
      * Interface(s) used by the class content
      * @var string
      */
     protected $interfaces;
-    
+
     /**
      * Trait(s) used by the class content
      * @var string
@@ -144,13 +143,13 @@ namespace <namespace>;
 class <classname> extends <extends> <interface>
 {
     <trait>
-    public function __construct($uid = NULL, $options = NULL) 
+    public function __construct($uid = NULL, $options = NULL)
     {
         parent::__construct($uid, $options);
         $this->_initData();
     }
 
-    protected function _initData() 
+    protected function _initData()
     {
         <defineDatas>
         <defineParam>
@@ -169,8 +168,7 @@ class <classname> extends <extends> <interface>
     {
         foreach (spl_autoload_functions() as $autoloader) {
             if (true === is_array($autoloader) && $autoloader[0] instanceof \BackBuilder\AutoLoader\AutoLoader) {
-                if($autoloader[0] !== null && $autoloader[0]->getApplication())
-                {
+                if ($autoloader[0] !== null && $autoloader[0]->getApplication()) {
                     $this->_autoloader = $autoloader[0];
                     break;
                 }
@@ -194,27 +192,24 @@ class <classname> extends <extends> <interface>
         $defineProps = $this->properties;
 
         $docBlock = '';
-        foreach($defineDatas as $key => $element) {
+        foreach ($defineDatas as $key => $element) {
             $type = $element['type'];
-            if('scalar' === $type) {
+            if ('scalar' === $type) {
                 $type = 'string';
             }
-            $docBlock .= "\n * @property " . $type . ' $' .  $key . ' ' . $element['options']['label'];
+            $docBlock .= "\n * @property ".$type.' $'.$key.' '.$element['options']['label'];
         }
-        
+
         array_walk($defineDatas, function (&$value, $key) {
-                    $value = "->_defineData('" . $key . "', '" . $value['type'] . "', " . var_export($value['options'], TRUE) . ")";
+                    $value = "->_defineData('".$key."', '".$value['type']."', ".var_export($value['options'], true).")";
                 });
         array_walk($defineParam, function (&$value, $key) {
-                    $value = "->_defineParam('" . $key . "', '" . $value['type'] . "', " . var_export($value['options'], TRUE) . ")";
+                    $value = "->_defineParam('".$key."', '".$value['type']."', ".var_export($value['options'], true).")";
                 });
         array_walk($defineProps, function (&$value, $key) {
-                    $value = "->_defineProperty('" . $key . "', " . var_export($value, TRUE) . ")";
+                    $value = "->_defineProperty('".$key."', ".var_export($value, true).")";
                 });
 
-        
-        
-                
         $phpCode = str_replace(array('<namespace>',
             '<classname>',
             '<repository>',
@@ -224,38 +219,40 @@ class <classname> extends <extends> <interface>
             '<defineDatas>',
             '<defineParam>',
             '<defineProps>',
-            '<docblock>'), array($this->namespace,
+            '<docblock>', ), array($this->namespace,
             $this->classname,
             $this->repository,
             $this->extends,
             $this->interfaces,
             $this->traits,
-            (0 < count($defineDatas)) ? '$this' . implode('', $defineDatas) . ';' : '',
-            (0 < count($defineParam)) ? '$this' . implode('', $defineParam) . ';' : '',
-            (0 < count($defineProps)) ? '$this' . implode('', $defineProps) . ';' : '',
-            $docBlock), $this->template);
-        
+            (0 < count($defineDatas)) ? '$this'.implode('', $defineDatas).';' : '',
+            (0 < count($defineParam)) ? '$this'.implode('', $defineParam).';' : '',
+            (0 < count($defineProps)) ? '$this'.implode('', $defineProps).';' : '',
+            $docBlock, ), $this->template);
+
         return $phpCode;
     }
 
     /**
      * Checks for a normalize var name
      *
-     * @param string $var The var name to check
+     * @param  string                $var The var name to check
      * @throws ClassWrapperException Occurs for a syntax error
      */
     protected function _normalizeVar($var, $includeSeparator = false)
     {
-        if ($includeSeparator)
+        if ($includeSeparator) {
             $var = explode(NAMESPACE_SEPARATOR, $var);
+        }
 
         $vars = (array) $var;
 
         $pattern = "/[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/";
 
         foreach ($vars as $var) {
-            if ($var != '' && !preg_match($pattern, $var))
+            if ($var != '' && !preg_match($pattern, $var)) {
                 throw new ClassWrapperException(sprintf('Syntax error: \'%s\'', $var));
+            }
         }
 
         return implode(($includeSeparator) ? NAMESPACE_SEPARATOR : '', $vars);
@@ -266,7 +263,6 @@ class <classname> extends <extends> <interface>
      */
     public function stream_close()
     {
-        
     }
 
     /**
@@ -284,6 +280,7 @@ class <classname> extends <extends> <interface>
     {
         $ret = substr($this->_data, $this->_pos, $count);
         $this->_pos += strlen($ret);
+
         return $ret;
     }
 
@@ -296,6 +293,7 @@ class <classname> extends <extends> <interface>
             case \SEEK_SET:
                 if ($offset < strlen($this->_data) && $offset >= 0) {
                     $this->_pos = $offset;
+
                     return true;
                 } else {
                     return false;
@@ -305,6 +303,7 @@ class <classname> extends <extends> <interface>
             case \SEEK_CUR:
                 if ($offset >= 0) {
                     $this->_pos += $offset;
+
                     return true;
                 } else {
                     return false;
@@ -314,6 +313,7 @@ class <classname> extends <extends> <interface>
             case \SEEK_END:
                 if (strlen($this->_data) + $offset >= 0) {
                     $this->_pos = strlen($this->_data) + $offset;
+
                     return true;
                 } else {
                     return false;
@@ -351,8 +351,8 @@ class <classname> extends <extends> <interface>
 
     /**
      * Extract and format datas from parser
-     * @param array $datas
-     * @return the extracted datas
+     * @param  array $datas
+     * @return the   extracted datas
      */
     abstract protected function _extractDatas($datas);
 

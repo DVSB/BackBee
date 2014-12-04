@@ -20,7 +20,6 @@ namespace BackBuilder\Util\Resolver;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Util\Resolver\BootstrapDirectory;
 
 /**
  * This config directory resolver allows to get every folders in which we can find bootstrap.yml
@@ -43,7 +42,7 @@ class ConfigDirectory
     {
         $directories = BootstrapDirectory::getDirectories($repository_directory, $context, $environment);
         if (null !== $bb_directory) {
-            array_push($directories, $bb_directory . DIRECTORY_SEPARATOR . 'Config');
+            array_push($directories, $bb_directory.DIRECTORY_SEPARATOR.'Config');
         }
 
         $directories = array_reverse($directories);

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,16 +22,16 @@
 namespace BackBuilder\Security\Authentication\Provider;
 
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use BackBuilder\Security\Token\UsernamePasswordToken,
-    BackBuilder\Security\Exception\SecurityException;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Security\Core\User\UserInterface,
-    Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface,
-    Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use BackBuilder\Security\Token\UsernamePasswordToken;
+use BackBuilder\Security\Exception\SecurityException;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
+use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 
 /**
  * Authentication provider for username/password firewall
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Security
  * @subpackage  Authentication\Provider
@@ -40,7 +40,6 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
  */
 class UserAuthenticationProvider implements AuthenticationProviderInterface
 {
-
     /**
      * The user provider to query
      * @var \Symfony\Component\Security\Core\User\UserProviderInterface
@@ -65,15 +64,15 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Authenticate a token according to the user provider.
-     * 
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return \Symfony\Component\Security\Core\User\UserProviderInterface
-     * @throws SecurityException Occures on invalid connection
+     * @throws SecurityException                                                    Occures on invalid connection
      */
     public function authenticate(TokenInterface $token)
     {
         if (!$this->supports($token)) {
-            return null;
+            return;
         }
 
         $username = $token->getUsername();
@@ -104,8 +103,8 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Checks whether this provider supports the given token.
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @return Boolean true if the implementation supports the Token, false otherwise
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @return Boolean                                                              true if the implementation supports the Token, false otherwise
      */
     public function supports(TokenInterface $token)
     {
@@ -114,8 +113,8 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Authenticate a token accoridng to the user provided
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
      * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
      */
     private function _authenticateUser(TokenInterface $token, UserInterface $user)
@@ -129,8 +128,8 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Authenticate a token according to the user provided with password encoder
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
      * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
      */
     private function _authenticateWithEncoder(TokenInterface $token, UserInterface $user)
@@ -149,8 +148,8 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Authenticate a token according to the user provided without any password encoders
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
      * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
      */
     private function _authenticateWithoutEncoder(TokenInterface $token, UserInterface $user)
@@ -165,5 +164,4 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
             return false;
         }
     }
-
 }

@@ -3,13 +3,12 @@
 namespace BackBuilder\Translation;
 
 use BackBuilder\BBApplication;
-
-use Symfony\Component\Translation\Loader\XliffFileLoader,
-    Symfony\Component\Translation\Translator as sfTranslator;
+use Symfony\Component\Translation\Loader\XliffFileLoader;
+use Symfony\Component\Translation\Translator as sfTranslator;
 
 /**
  * Extends Symfony\Component\Translation\Translator to allow lazy load of BackBee catalogues
- * 
+ *
  * @author e.chau <eric.chau@lp-digital.fr>
  */
 class Translator extends sfTranslator
@@ -19,7 +18,7 @@ class Translator extends sfTranslator
      *     - BackBuilder\Resources\translations
      *     - PATH_TO_REPOSITORY\Ressources\translations
      *     - PATH_TO_CONTEXT_REPOSITORY\Ressources\translations
-     *     
+     *
      * @param BBApplication $application
      * @param string        $locale
      */
@@ -36,12 +35,12 @@ class Translator extends sfTranslator
 
         // define in which directory we should looking at to find xliff files
         $dirToLookingAt = array(
-            $application->getBBDir() . DIRECTORY_SEPARATOR . 'Resources' . DIRECTORY_SEPARATOR . 'translations',
-            $application->getRepository() . DIRECTORY_SEPARATOR . 'Ressources' . DIRECTORY_SEPARATOR . 'translations'
+            $application->getBBDir().DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'translations',
+            $application->getRepository().DIRECTORY_SEPARATOR.'Ressources'.DIRECTORY_SEPARATOR.'translations',
         );
 
         if ($application->getRepository() !== $application->getBaseRepository()) {
-            $dirToLookingAt[] = $application->getBaseRepository() . 'Ressources' . DIRECTORY_SEPARATOR . 'translations';
+            $dirToLookingAt[] = $application->getBaseRepository().'Ressources'.DIRECTORY_SEPARATOR.'translations';
         }
 
         // loop in every directory we should looking at and load catalogue from file which match to the pattern
@@ -50,7 +49,7 @@ class Translator extends sfTranslator
                 foreach (scandir($dir) as $filename) {
                     preg_match('/(.+)\.(.+)\.xlf$/', $filename, $matches);
                     if (0 < count($matches)) {
-                        $this->addResource('xliff', $dir . DIRECTORY_SEPARATOR . $filename, $matches[2], $matches[1]);
+                        $this->addResource('xliff', $dir.DIRECTORY_SEPARATOR.$filename, $matches[2], $matches[1]);
                     }
                 }
             }

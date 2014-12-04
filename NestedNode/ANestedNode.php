@@ -2,28 +2,28 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode;
 
-use BackBuilder\Util\Numeric,
-    BackBuilder\Security\Acl\Domain\AObjectIdentifiable,
-    BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\Util\Numeric;
+use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
+use BackBuilder\Exception\InvalidArgumentException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 use JMS\Serializer\Annotation as Serializer;
@@ -33,11 +33,11 @@ use JMS\Serializer\Annotation as Serializer;
  *
  * A nested node is used to build nested tree.
  * Nested nodes are used by:
- * 
+ *
  * * \BackBuilder\NestedNode\Page        The page tree of a website
  * * \BackBuilder\NestedNode\Mediafolder The folder tree of the library
  * * \BackBuilder\NestedNode\KeyWord     The keywords trees
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\NestedNode
  * @copyright   Lp digital system
@@ -47,12 +47,11 @@ use JMS\Serializer\Annotation as Serializer;
  */
 abstract class ANestedNode extends AObjectIdentifiable
 {
-
     /**
      * Unique identifier of the node
      * @var string
      * @Id @Column(type="string", name="uid")
-     * 
+     *
      * @Serializer\Type("string")
      */
     protected $_uid;
@@ -122,11 +121,11 @@ abstract class ANestedNode extends AObjectIdentifiable
      * @var array
      */
     protected $_unserialized_ignored = array('_created', '_modified');
-    
+
     /**
      * Class constructor
-     * @param string $uid The unique identifier of the node
-     * @param array $options Initial options for the node
+     * @param string $uid     The unique identifier of the node
+     * @param array  $options Initial options for the node
      */
     public function __construct($uid = null, $options = null)
     {
@@ -261,9 +260,9 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Is this node is an ancestor of the provided one ?
-     * @param \BackBuilder\NestedNode\ANestedNode $node
-     * @param Boolean $strict Optional, if TRUE (default) this node is excluded of ancestors list
-     * @return Boolean TRUE if this node is an anscestor or provided node, FALSE otherwise
+     * @param  \BackBuilder\NestedNode\ANestedNode $node
+     * @param  Boolean                             $strict Optional, if TRUE (default) this node is excluded of ancestors list
+     * @return Boolean                             TRUE if this node is an anscestor or provided node, FALSE otherwise
      */
     public function isAncestorOf(ANestedNode $node, $strict = true)
     {
@@ -276,9 +275,9 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Is this node is a descendant of the provided one ?
-     * @param \BackBuilder\NestedNode\ANestedNode $node
-     * @param Boolean $strict Optional, if TRUE (default) this node is excluded of descendants list
-     * @return Boolean TRUE if this node is a descendant or provided node, FALSE otherwise
+     * @param  \BackBuilder\NestedNode\ANestedNode $node
+     * @param  Boolean                             $strict Optional, if TRUE (default) this node is excluded of descendants list
+     * @return Boolean                             TRUE if this node is a descendant or provided node, FALSE otherwise
      */
     public function isDescendantOf(ANestedNode $node, $strict = true)
     {
@@ -288,10 +287,10 @@ abstract class ANestedNode extends AObjectIdentifiable
             return (($this->getLeftnode() >= $node->getLeftnode()) && ($this->getRightnode() <= $node->getRightnode()) && ($this->getRoot() === $node->getRoot()));
         }
     }
-    
+
     /**
      * Determine if current node has children
-     * 
+     *
      * @return boolean
      */
     public function hasChildren()
@@ -306,34 +305,37 @@ abstract class ANestedNode extends AObjectIdentifiable
     public function setUid($uid)
     {
         $this->_uid = $uid;
+
         return $this;
     }
 
     /**
      * Sets the root node.
-     * @param \BackBuilder\NestedNode\ANestedNode $root
+     * @param  \BackBuilder\NestedNode\ANestedNode $root
      * @return \BackBuilder\NestedNode\ANestedNode
      */
     public function setRoot(ANestedNode $root)
     {
         $this->_root = $root;
+
         return $this;
     }
 
     /**
      * Sets the parent node.
-     * @param \BackBuilder\NestedNode\ANestedNode $parent
+     * @param  \BackBuilder\NestedNode\ANestedNode $parent
      * @return \BackBuilder\NestedNode\ANestedNode
      */
     public function setParent(ANestedNode $parent)
     {
         $this->_parent = $parent;
+
         return $this;
     }
 
     /**
      * Sets the left position.
-     * @param int $leftnode
+     * @param  int                                             $leftnode
      * @return \BackBuilder\NestedNode\ANestedNode
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
@@ -344,12 +346,13 @@ abstract class ANestedNode extends AObjectIdentifiable
         }
 
         $this->_leftnode = $leftnode;
+
         return $this;
     }
 
     /**
      * Sets the right position.
-     * @param int $rightnode
+     * @param  int                                             $rightnode
      * @return \BackBuilder\NestedNode\ANestedNode
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
@@ -360,12 +363,13 @@ abstract class ANestedNode extends AObjectIdentifiable
         }
 
         $this->_rightnode = $rightnode;
+
         return $this;
     }
 
     /**
      * Sets the level.
-     * @param type $level
+     * @param  type                                            $level
      * @return \BackBuilder\NestedNode\ANestedNode
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
@@ -376,28 +380,31 @@ abstract class ANestedNode extends AObjectIdentifiable
         }
 
         $this->_level = $level;
+
         return $this;
     }
 
     /**
      * Sets the creation date
-     * @param \DateTime $created
+     * @param  \DateTime                           $created
      * @return \BackBuilder\NestedNode\ANestedNode
      */
     public function setCreated(\DateTime $created)
     {
         $this->_created = $created;
+
         return $this;
     }
 
     /**
      * Sets the last modified date
-     * @param \DateTime $modified
+     * @param  \DateTime                           $modified
      * @return \BackBuilder\NestedNode\ANestedNode
      */
     public function setModified($modified)
     {
         $this->_modified = $modified;
+
         return $this;
     }
 
@@ -408,14 +415,14 @@ abstract class ANestedNode extends AObjectIdentifiable
     public function toArray()
     {
         return array(
-            'id' => 'node_' . $this->getUid(),
+            'id' => 'node_'.$this->getUid(),
             'rel' => (true === $this->isLeaf()) ? 'leaf' : 'folder',
             'uid' => $this->getUid(),
             'rootuid' => $this->getRoot()->getUid(),
             'parentuid' => (null !== $this->getParent()) ? $this->getParent()->getUid() : null,
             'created' => $this->getCreated()->getTimestamp(),
             'modified' => $this->getModified()->getTimestamp(),
-            'isleaf' => $this->isLeaf()
+            'isleaf' => $this->isLeaf(),
         );
     }
 
@@ -435,10 +442,10 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Constructs the node from a string or object
-     * @param mixed $serialized The string representation of the object.
+     * @param  mixed                                           $serialized The string representation of the object.
      * @return \BackBuilder\NestedNode\ANestedNode
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or, 
-     *                                                         with strict mode, if a property does not exists
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
+     *                                                                    with strict mode, if a property does not exists
      */
     public function unserialize($serialized, $strict = false)
     {
@@ -449,17 +456,16 @@ abstract class ANestedNode extends AObjectIdentifiable
         }
 
         foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
+            $property = '_'.$property;
             if (true === in_array($property, $this->_unserialized_ignored)) {
                 continue;
-            } else if (true === property_exists($this, $property)) {
+            } elseif (true === property_exists($this, $property)) {
                 $this->$property = $value;
-            } else if (true === $strict) {
+            } elseif (true === $strict) {
                 throw new InvalidArgumentException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this)));
             }
         }
 
         return $this;
     }
-
 }

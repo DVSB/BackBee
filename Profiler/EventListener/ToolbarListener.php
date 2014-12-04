@@ -21,15 +21,14 @@
 
 namespace BackBuilder\Profiler\EventListener;
 
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\HttpKernel\Profiler\Profiler,
-    Symfony\Component\HttpKernel\Profiler\Profile,
-    Symfony\Component\DependencyInjection\ContainerAwareInterface,
-    Symfony\Component\DependencyInjection\ContainerInterface;
-
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent,
-    Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
+use Symfony\Component\HttpKernel\Profiler\Profile;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Profiler Toolbar listener
@@ -56,7 +55,7 @@ class ToolbarListener implements ContainerAwareInterface
     }
 
     /**
-     * @param Request $request
+     * @param  Request $request
      * @return boolean - true if the listener should be enabled for the $request
      */
     public function isEnabled()
@@ -64,14 +63,13 @@ class ToolbarListener implements ContainerAwareInterface
         return $this->enabled;
     }
 
-
     public function onKernelResponse(FilterResponseEvent $event)
     {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
             return;
         }
 
-        if(false === $this->isEnabled()) {
+        if (false === $this->isEnabled()) {
             return;
         }
 
@@ -90,16 +88,12 @@ class ToolbarListener implements ContainerAwareInterface
             return;
         }
 
-
         $profiler = $event->getKernel()->getApplication()->getContainer()->get('profiler');
         $profile = $profiler->collect($request, $response, null);
         $renderer = $event->getKernel()->getApplication()->getRenderer();
 
-
         $this->injectToolbar($response, $profile, $renderer);
     }
-
-
 
     protected function loadTemplates()
     {
@@ -107,15 +101,12 @@ class ToolbarListener implements ContainerAwareInterface
 
         $templateNames = $this->container->getParameter('data_collector.templates');
 
-        foreach($templateNames as $name => $file) {
+        foreach ($templateNames as $name => $file) {
             $templates[$name] = $this->container->get('renderer')->getAdapterByExt('twig')->loadTemplate($file);
         }
 
         return $templates;
     }
-
-
-
 
     /**
      * Injects the web debug toolbar into the given Response.
@@ -130,14 +121,14 @@ class ToolbarListener implements ContainerAwareInterface
         if (false !== $pos) {
             $bb_dir = $renderer->getApplication()->getBBDir();
             $toolbar = "\n".str_replace("\n", '', $renderer->partial(
-                $bb_dir .  '/Resources/scripts/Profiler/toolbar.html.twig',
+                $bb_dir.'/Resources/scripts/Profiler/toolbar.html.twig',
                 array(
                     'profile'   => $profile,
                     'templates' => $this->loadTemplates(),
                 )
             ))."\n";
 
-            $content = substr($content, 0, $pos) . $toolbar . substr($content, $pos);
+            $content = substr($content, 0, $pos).$toolbar.substr($content, $pos);
             $response->setContent($content);
         }
     }

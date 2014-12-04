@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -58,7 +58,6 @@ use Doctrine\ORM\Events;
  */
 class DoctrineListener
 {
-
     /**
      * Current BackBuilder application
      * @var BackBuilder\BBApplication
@@ -84,12 +83,14 @@ class DoctrineListener
      */
     protected function _triggerEvent($eventName, $entity, $eventArgs)
     {
-        if (NULL === $this->_application)
+        if (NULL === $this->_application) {
             return;
+        }
 
         $dispatcher = $this->_application->getEventDispatcher();
-        if (NULL != $dispatcher)
+        if (NULL != $dispatcher) {
             $dispatcher->triggerEvent($eventName, $entity, $eventArgs);
+        }
     }
 
     /**
@@ -99,7 +100,6 @@ class DoctrineListener
      */
     public function loadClassMetadata($eventArgs)
     {
-        
     }
 
     /**
@@ -109,7 +109,6 @@ class DoctrineListener
      */
     public function onClear($eventArgs)
     {
-        
     }
 
     /**
@@ -122,15 +121,15 @@ class DoctrineListener
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
 
-        foreach ($uow->getScheduledEntityInsertions() AS $entity) {
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $this->_triggerEvent(Events::preFlush, $entity, $eventArgs);
         }
 
-        foreach ($uow->getScheduledEntityUpdates() AS $entity) {
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
             $this->_triggerEvent(Events::preFlush, $entity, $eventArgs);
         }
 
-        foreach ($uow->getScheduledEntityDeletions() AS $entity) {
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
             $this->_triggerEvent(Events::preFlush, $entity, $eventArgs);
         }
     }
@@ -145,15 +144,15 @@ class DoctrineListener
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
 
-        foreach ($uow->getScheduledEntityInsertions() AS $entity) {
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $this->_triggerEvent(Events::onFlush, $entity, $eventArgs);
         }
 
-        foreach ($uow->getScheduledEntityUpdates() AS $entity) {
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
             $this->_triggerEvent(Events::onFlush, $entity, $eventArgs);
         }
 
-        foreach ($uow->getScheduledEntityDeletions() AS $entity) {
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
             $this->_triggerEvent(Events::onFlush, $entity, $eventArgs);
         }
     }
@@ -168,15 +167,15 @@ class DoctrineListener
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
 
-        foreach ($uow->getScheduledEntityInsertions() AS $entity) {
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $this->_triggerEvent(Events::postFlush, $entity, $eventArgs);
         }
 
-        foreach ($uow->getScheduledEntityUpdates() AS $entity) {
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
             $this->_triggerEvent(Events::postFlush, $entity, $eventArgs);
         }
 
-        foreach ($uow->getScheduledEntityDeletions() AS $entity) {
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
             $this->_triggerEvent(Events::postFlush, $entity, $eventArgs);
         }
     }
@@ -188,8 +187,9 @@ class DoctrineListener
      */
     public function postLoad($eventArgs)
     {
-        if (method_exists($eventArgs, 'getEntity'))
+        if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::postLoad, $eventArgs->getEntity(), $eventArgs);
+        }
 
         if (is_a($eventArgs->getEntity(), 'BackBuilder\ClassContent\AClassContent')) {
             $eventArgs->getEntity()->postLoad();
@@ -203,8 +203,9 @@ class DoctrineListener
      */
     public function postPersist($eventArgs)
     {
-        if (method_exists($eventArgs, 'getEntity'))
+        if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::postPersist, $eventArgs->getEntity(), $eventArgs);
+        }
     }
 
     /**
@@ -214,8 +215,9 @@ class DoctrineListener
      */
     public function preRemove($eventArgs)
     {
-        if (method_exists($eventArgs, 'getEntity'))
+        if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::preRemove, $eventArgs->getEntity(), $eventArgs);
+        }
     }
 
     /**
@@ -225,8 +227,9 @@ class DoctrineListener
      */
     public function postRemove($eventArgs)
     {
-        if (method_exists($eventArgs, 'getEntity'))
+        if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::postRemove, $eventArgs->getEntity(), $eventArgs);
+        }
     }
 
     /**
@@ -236,8 +239,9 @@ class DoctrineListener
      */
     public function postUpdate($eventArgs)
     {
-        if (method_exists($eventArgs, 'getEntity'))
+        if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::postUpdate, $eventArgs->getEntity(), $eventArgs);
+        }
     }
 
     /**
@@ -247,8 +251,9 @@ class DoctrineListener
      */
     public function prePersist($eventArgs)
     {
-        if (method_exists($eventArgs, 'getEntity'))
+        if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::prePersist, $eventArgs->getEntity(), $eventArgs);
+        }
     }
 
     /**
@@ -258,8 +263,8 @@ class DoctrineListener
      */
     public function preUpdate($eventArgs)
     {
-        if (method_exists($eventArgs, 'getEntity'))
+        if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::preUpdate, $eventArgs->getEntity(), $eventArgs);
+        }
     }
-
 }

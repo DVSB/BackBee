@@ -1,10 +1,7 @@
-<?
-if($_GET['quirks'] == "")
-{
+<?php
+if ($_GET['quirks'] == "") {
     echo "<!DOCTYPE html>\n";
-}
-else
-{
+} else {
     echo "\n";
 }
 ?>
@@ -59,10 +56,10 @@ else
     <p>This test tests async attribute. It attaches two scripts to the DOM, <b>one.php</b> and <b>two.js</b>.
     The URLs to the scripts always has a timestamp querystring to make sure the scripts are fetched
     fresh for each request.</p>
-    
+
     <p>one.php uses a PHP sleep of 3 seconds before returning its result (a log message), where two.js will return
     immediately with a log message.</p>
-    
+
     <p>If the async attribute is being effective (In Gecko 1.9.2+/Firefox 3.6+ browsers, maybe
     Opera in the future), then the log message for two.js should appear before the one.php log message.
     If async is <b>not</b> effective, then one.php's log message will appear first.</p>
@@ -87,7 +84,7 @@ else
             <option value="attribute">script.setAttribute('async', 'async')</option>
             <option value="">No async (one.php should be first in Firefox 3.6+)</option>
         </select>
-        <input type="submit" name="Go" value="Go"> 
+        <input type="submit" name="Go" value="Go">
     </form>
 
 </body>

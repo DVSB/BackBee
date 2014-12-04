@@ -25,7 +25,6 @@ use BackBuilder\BBApplication;
 use BackBuilder\FrontController\Exception\FrontControllerException;
 use BackBuilder\Util\File;
 use BackBuilder\Util\MimeType;
-
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -57,7 +56,7 @@ class ResourceController
     /**
      * Handles a resource file request
      *
-     * @param string $filename The resource file to provide
+     * @param  string                   $filename The resource file to provide
      * @throws FrontControllerException
      *
      * @return Response
@@ -77,7 +76,7 @@ class ResourceController
 
             throw new FrontControllerException(sprintf(
                 'The file `%s` can not be found (referer: %s).',
-                $request->getHost() . '/' . $request->getPathInfo(),
+                $request->getHost().'/'.$request->getPathInfo(),
                 $request->server->get('HTTP_REFERER')
             ), FrontControllerException::NOT_FOUND);
         }
@@ -88,7 +87,7 @@ class ResourceController
     /**
      * Hdandles classcontent thumbnail request, returns the right thumbnail if it exists, else the default one
      *
-     * @param  string $filename
+     * @param string $filename
      *
      * @return Response
      */
@@ -97,9 +96,9 @@ class ResourceController
         $base_folder = $this->application->getContainer()->getParameter('classcontent_thumbnail.base_folder');
         $base_directories = array_map(function ($directory) use ($base_folder) {
             return str_replace(
-                DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR,
+                DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,
                 DIRECTORY_SEPARATOR,
-                $directory . '/' . $base_folder
+                $directory.'/'.$base_folder
             );
         }, $this->application->getResourceDir());
 
@@ -114,7 +113,7 @@ class ResourceController
 
             throw new FrontControllerException(sprintf(
                 'The file `%s` can not be found (referer: %s).',
-                $request->getHost() . '/' . $request->getPathInfo(),
+                $request->getHost().'/'.$request->getPathInfo(),
                 $request->server->get('HTTP_REFERER')
             ), FrontControllerException::NOT_FOUND);
         }
@@ -125,7 +124,7 @@ class ResourceController
     /**
      * Returns the default classcontent thumbnail filepath
      *
-     * @param  array $base_directories list of every resources directories of current application
+     * @param array $base_directories list of every resources directories of current application
      *
      * @return string
      */
@@ -155,8 +154,8 @@ class ResourceController
 
         $response->setCache(array(
             'etag'          => basename($filename),
-            'last_modified' => new \DateTime('@' . $filestats['mtime']),
-            'public'        => 'public'
+            'last_modified' => new \DateTime('@'.$filestats['mtime']),
+            'public'        => 'public',
         ));
 
         $response->setContent(file_get_contents($filename));

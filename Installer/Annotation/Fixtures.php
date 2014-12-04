@@ -12,11 +12,13 @@ class Fixtures
     {
         $this->_qty = (isset($options["qty"])) ? $options["qty"] : 0;
     }
-    
+
     public function __get($name)
     {
-        if ($name === 'qty')
-            return $this->{'_' . $name};
-        return null;
+        if ($name === 'qty') {
+            return $this->{'_'.$name};
+        }
+
+        return;
     }
 }
