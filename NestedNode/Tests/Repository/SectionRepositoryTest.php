@@ -74,7 +74,7 @@ class SectionRepositoryTest extends TestCase
         $this->assertEquals(4, $child1->getLeftnode());
         $this->assertEquals(5, $child1->getRightnode());
         $this->assertEquals(1, $child1->getLevel());
-        
+
         $this->root->setLeftnode(rand(1, 20))
                 ->setRightnode(rand(1, 20))
                 ->setLevel(rand(0, 20));

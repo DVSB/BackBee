@@ -23,6 +23,7 @@ namespace BackBuilder\NestedNode\Repository;
 
 use BackBuilder\Site\Site;
 use BackBuilder\Util\Arrays;
+use BackBuilder\Util\Buffer;
 use Doctrine\ORM\NoResultException;
 
 /**
@@ -58,6 +59,46 @@ class SectionRepository extends NestedNodeRepository
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Updates a tree from root and dumps messages
+     * @param mixed $node_uid
+     * @codeCoverageIgnore
+     */
+    public function updateTreeNativelyWithProgressMessage($node_uid)
+    {
+        $node_uid = (array) $node_uid;
+        if (0 === count($node_uid)) {
+            Buffer::dump("\n##### Nothing to update. ###\n");
+            return;
+        }
+
+        $convert_memory = function($size) {
+            $unit = array('B', 'KB', 'MB', 'GB');
+            return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+        };
+
+        $starttime = microtime(true);
+
+        Buffer::dump("\n##### Update tree (natively) started ###\n");
+
+        foreach ($node_uid as $uid) {
+            $this->_em->clear();
+
+            $starttime = microtime(true);
+            Buffer::dump("\n   [START] update tree of $uid in progress\n\n");
+
+            $this->updateTreeNatively($uid);
+
+            Buffer::dump(
+                    "\n   [END] update tree of $uid in "
+                    . (microtime(true) - $starttime) . 's (memory status: ' . $convert_memory(memory_get_usage()) . ')'
+                    . "\n"
+            );
+        }
+
+        Buffer::dump("\n##### Update tree (natively) in " . (microtime(true) - $starttime) . "s #####\n\n");
     }
 
     /**
