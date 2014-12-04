@@ -37,6 +37,11 @@ class SectionRepositoryTest extends TestCase
 {
 
     /**
+     * @var \BackBuilder\BBApplication
+     */
+    private $application;
+
+    /**
      * @var \BackBuilder\NestedNode\Section
      */
     private $root;
@@ -55,6 +60,54 @@ class SectionRepositoryTest extends TestCase
 
         $new_site = new Site();
         $this->assertNull($this->repo->getRoot($new_site));
+    }
+
+    public function testUpdateTreeNatively()
+    {
+        $child1 = $this->repo->find('child1');
+        $child2 = $this->repo->find('child2');
+
+        $this->assertEquals(2, $child2->getLeftnode());
+        $this->assertEquals(3, $child2->getRightnode());
+        $this->assertEquals(1, $child2->getLevel());
+
+        $this->assertEquals(4, $child1->getLeftnode());
+        $this->assertEquals(5, $child1->getRightnode());
+        $this->assertEquals(1, $child1->getLevel());
+        
+        $this->root->setLeftnode(rand(1, 20))
+                ->setRightnode(rand(1, 20))
+                ->setLevel(rand(0, 20));
+
+        $child1->setLeftnode(rand(11, 20))
+                ->setRightnode(rand(1, 20))
+                ->setLevel(rand(0, 20));
+
+        $child2->setLeftnode(rand(1, 10))
+                ->setRightnode(rand(1, 20))
+                ->setLevel(rand(0, 20));
+
+        $em = $this->application->getEntityManager();
+        $em->flush();
+
+        $expected = new \StdClass();
+        $expected->uid = $this->root->getUid();
+        $expected->leftnode = 1;
+        $expected->rightnode = 6;
+        $expected->level = 0;
+
+        $this->assertEquals($expected, $this->repo->updateTreeNatively($this->root->getUid()));
+
+        $em->refresh($child1);
+        $em->refresh($child2);
+
+        $this->assertEquals(2, $child2->getLeftnode());
+        $this->assertEquals(3, $child2->getRightnode());
+        $this->assertEquals(1, $child2->getLevel());
+
+        $this->assertEquals(4, $child1->getLeftnode());
+        $this->assertEquals(5, $child1->getRightnode());
+        $this->assertEquals(1, $child1->getLevel());
     }
 
     /**
@@ -76,6 +129,7 @@ class SectionRepositoryTest extends TestCase
 
         $st = new SchemaTool($em);
         $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Section')));
+        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Page')));
         $st->createSchema(array($em->getClassMetaData('BackBuilder\Site\Site')));
 
         $this->repo = $em->getRepository('BackBuilder\NestedNode\Section');
@@ -91,6 +145,8 @@ class SectionRepositoryTest extends TestCase
 
         $child2 = $this->repo->insertNodeAsFirstChildOf(new Section('child2', array('site' => $site)), $this->root);
         $em->flush($child2);
+        $em->refresh($child1);
+        $em->refresh($this->root);
     }
 
 }

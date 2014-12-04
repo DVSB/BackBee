@@ -61,6 +61,33 @@ class SectionRepository extends NestedNodeRepository
     }
 
     /**
+     * Updates nodes information of a tree
+     * @param string $node_uid  The starting point in the tree
+     * @param int $leftnode     Optional, the first value of left node
+     * @param int $level        Optional, the first value of level
+     * @return \StdClass
+     */
+    public function updateTreeNatively($node_uid, $leftnode = 1, $level = 0)
+    {
+        $node = new \StdClass();
+        $node->uid = $node_uid;
+        $node->leftnode = $leftnode;
+        $node->rightnode = $leftnode + 1;
+        $node->level = $level;
+
+        foreach ($children = $this->getNativelyNodeChildren($node_uid) as $child_uid) {
+            $child = $this->updateTreeNatively($child_uid, $leftnode + 1, $level + 1);
+            $node->rightnode = $child->rightnode + 1;
+            $leftnode = $child->rightnode;
+        }
+
+        $this->updateSectionNodes($node->uid, $node->leftnode, $node->rightnode, $node->level)
+                ->updatePageLevel($node->uid, $node->level);
+
+        return $node;
+    }
+
+    /**
      * Returns an array of uid of the children of $node_uid
      * @param string $node_uid  The node uid to look for children
      * @return array
@@ -68,17 +95,75 @@ class SectionRepository extends NestedNodeRepository
     public function getNativelyNodeChildren($node_uid)
     {
         $query = $this->createQueryBuilder('s')
-                ->select('s._uid')
+                ->select('s._uid', 's._leftnode')
                 ->where('s._parent = :node')
                 ->addOrderBy('s._leftnode', 'asc')
-                ->addOrderBy('s._modified', 'desc');
+                ->addOrderBy('s._modified', 'desc')
+                ->getQuery()
+                ->getSQL();
 
         $result = $this->getEntityManager()
                 ->getConnection()
-                ->executeQuery($query->getQuery()->getSQL(), array($node_uid), array(\Doctrine\DBAL\Types\Type::STRING))
+                ->executeQuery($query, array($node_uid), array(\Doctrine\DBAL\Types\Type::STRING))
                 ->fetchAll();
 
         return Arrays::array_column($result, 'uid0');
+    }
+
+    /**
+     * Updates nodes information for Section $section_uid
+     * @param string $section_uid
+     * @param int $leftnode
+     * @param int $rightnode
+     * @param int $level
+     * @return \BackBuilder\NestedNode\Repository\SectionRepository
+     * @codeCoverageIgnore
+     */
+    private function updateSectionNodes($section_uid, $leftnode, $rightnode, $level)
+    {
+        $this->createQueryBuilder('s')
+                ->update()
+                ->set('s._leftnode', $leftnode)
+                ->set('s._rightnode', $rightnode)
+                ->set('s._level', $level)
+                ->where('s._uid = :uid')
+                ->setParameter('uid', $section_uid)
+                ->getQuery()
+                ->execute();
+
+        return $this;
+    }
+
+    /**
+     * Updates level of page attach to section $section_uid
+     * @param string $section_uid
+     * @param int $level
+     * @return \BackBuilder\NestedNode\Repository\SectionRepository
+     * @codeCoverageIgnore
+     */
+    private function updatePageLevel($section_uid, $level)
+    {
+        $page_repo = $this->getEntityManager()
+                ->getRepository('BackBuilder\NestedNode\Page');
+
+        $page_repo->createQueryBuilder('p')
+                ->update()
+                ->set('p._level', $level)
+                ->where('p._uid = :uid')
+                ->setParameter('uid', $section_uid)
+                ->getQuery()
+                ->execute();
+
+        $page_repo->createQueryBuilder('p')
+                ->update()
+                ->set('p._level', $level + 1)
+                ->where('p._section = :uid')
+                ->andWhere('p._uid <> :uid')
+                ->setParameter('uid', $section_uid)
+                ->getQuery()
+                ->execute();
+
+        return $this;
     }
 
 }
