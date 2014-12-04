@@ -283,7 +283,7 @@ abstract class ABundle extends AbstractBaseBundle
     public function getRequest()
     {
         if (null === $this->_request) {
-            $this->_request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+            $this->_request = $this->getApplication()->getContainer()->get('request');
         }
 
         return $this->_request;
