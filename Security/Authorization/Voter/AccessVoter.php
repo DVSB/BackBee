@@ -81,22 +81,6 @@ class AccessVoter implements VoterInterface
         }
 
         return $result;
-        $result = VoterInterface::ACCESS_ABSTAIN;
-
-        foreach ($attributes as $attribute) {
-            if (!$this->supportsAttribute($attribute)) {
-                continue;
-            }
-            if (
-                    array_key_exists($token->getUsername(), $this->_sudoers) &&
-                    $token->getUser()->getId() === $this->_sudoers[$token->getUsername()]
-            ) {
-                $result = VoterInterface::ACCESS_GRANTED;
-            }
-            break;
-        }
-
-        return $result;
     }
 
     private function voteForAccess(TokenInterface $token, array $attributes)
