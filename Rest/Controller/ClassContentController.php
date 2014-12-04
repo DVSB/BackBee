@@ -27,7 +27,7 @@ use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -170,7 +170,7 @@ class ClassContentController extends ARestController
                 ->deleteContent($content)
             ;
         } catch (\Exception $e) {
-            throw new AccessDeniedHttpException("Unable to delete content with type: `$type` and uid: `$uid`");
+            throw new BadRequestHttpException("Unable to delete content with type: `$type` and uid: `$uid`");
         }
 
         return $this->createResponse('', 204);

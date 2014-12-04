@@ -21,9 +21,10 @@
 
 namespace BackBuilder\Rest\Controller;
 
-use Symfony\Component\HttpFoundation\Response;
 use BackBuilder\Rest\Controller\Annotations as Rest;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * Site Controller

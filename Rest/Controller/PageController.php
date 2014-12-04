@@ -32,11 +32,12 @@ use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
 use BackBuilder\Rest\Patcher\RightManager;
 use BackBuilder\Site\Layout;
 use BackBuilder\Workflow\State;
+
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Symfony\Component\Security\Acl\Permission\MaskBuilder;
+
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -353,7 +354,7 @@ class PageController extends ARestController
         try {
             (new OperationSyntaxValidator())->validate($operations);
         } catch (InvalidOperationSyntaxException $e) {
-            throw new BadRequestHttpException('operation invalid syntax: '.$e->getMessage());
+            throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
         }
 
         $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
@@ -364,7 +365,7 @@ class PageController extends ARestController
         try {
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
-            throw new AccessDeniedHttpException('Invalid patch operation: '.$e->getMessage());
+            throw new BadRequestHttpException('Invalid patch operation: ' . $e->getMessage());
         }
 
         if (true === $page->isOnline(true)) {
@@ -384,7 +385,7 @@ class PageController extends ARestController
     public function deleteAction(Page $page)
     {
         if (true === $page->isRoot()) {
-            throw new AccessDeniedHttpException('Cannot remove root page of a site.');
+            throw new BadRequestHttpException('Cannot remove root page of a site.');
         }
 
         $this->granted('EDIT', $page->getParent()); // user must have edit permission on parent
@@ -561,7 +562,7 @@ class PageController extends ARestController
 
         if (null !== $sibling_operation || null !== $parent_operation) {
             if ($page->isRoot()) {
-                throw new AccessDeniedHttpException('Cannot move root node of a site.');
+                throw new BadRequestHttpException('Cannot move root node of a site.');
             }
 
             if ($page->isOnline(true)) {
@@ -586,7 +587,7 @@ class PageController extends ARestController
                 $this->getPageRepository()->moveAsLastChildOf($page, $parent);
             }
         } catch (InvalidArgumentException $e) {
-            throw new AccessDeniedHttpException('Invalid node move action: '.$e->getMessage());
+            throw new BadRequestHttpException('Invalid node move action: '.$e->getMessage());
         }
     }
 

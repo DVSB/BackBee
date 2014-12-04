@@ -26,13 +26,13 @@ use BackBuilder\Rest\Formatter\IFormatter;
 use BackBuilder\Rest\Exception\ValidationException;
 use BackBuilder\Serializer\SerializerBuilder;
 
-// use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 
@@ -220,7 +220,7 @@ abstract class ARestController extends Controller implements IRestController, IF
         $security_context = $this->getApplication()->getSecurityContext();
 
         if (null !== $security_context->getACLProvider() && false === parent::isGranted($attributes, $object)) {
-            throw new AccessDeniedHttpException($message);
+            throw new AccessDeniedException($message);
         }
 
         return true;

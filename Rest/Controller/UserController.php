@@ -21,14 +21,15 @@
 
 namespace BackBuilder\Rest\Controller;
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use BackBuilder\Rest\Controller\Annotations as Rest;
-use Symfony\Component\Validator\Constraints as Assert;
 use BackBuilder\Security\User;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * User Controller
@@ -60,7 +61,7 @@ class UserController extends ARestController
 
 
         if (!$this->isGranted('VIEW', new ObjectIdentity('class', 'BackBuilder\Security\User'))) {
-            throw new AccessDeniedHttpException(sprintf('You are not authorized to view users'));
+            throw new AccessDeniedException(sprintf('You are not authorized to view users'));
         }
 
         return array();
@@ -74,7 +75,7 @@ class UserController extends ARestController
     public function getAction($id)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedHttpException('You must be authenticated to delete users');
+            throw new AccessDeniedException('You must be authenticated to delete users');
         }
 
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
@@ -84,7 +85,7 @@ class UserController extends ARestController
         }
 
         if (!$this->isGranted('VIEW', $user)) {
-            throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
+            throw new AccessDeniedException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
         return new Response($this->formatItem($user), 200, ['Content-Type' => 'application/json']);
@@ -98,7 +99,7 @@ class UserController extends ARestController
     public function deleteAction($id)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedHttpException('You must be authenticated to delete users');
+            throw new AccessDeniedException('You must be authenticated to delete users');
         }
 
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
@@ -108,7 +109,7 @@ class UserController extends ARestController
         }
 
         if (!$this->isGranted('DELETE', $user)) {
-            throw new AccessDeniedHttpException(sprintf('You are not authorized to delete user with id %s', $id));
+            throw new AccessDeniedException(sprintf('You are not authorized to delete user with id %s', $id));
         }
 
         $this->getEntityManager()->remove($user);
@@ -136,7 +137,7 @@ class UserController extends ARestController
     public function putAction($id, Request $request)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedHttpException('You must be authenticated to view users');
+            throw new AccessDeniedException('You must be authenticated to view users');
         }
 
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
@@ -146,7 +147,7 @@ class UserController extends ARestController
         }
 
         if (!$this->isGranted('EDIT', $user)) {
-            throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
+            throw new AccessDeniedException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
         $this->deserializeEntity($request->request->all(), $user);
@@ -181,7 +182,7 @@ class UserController extends ARestController
     public function postAction(Request $request)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedHttpException('You must be authenticated to view users');
+            throw new AccessDeniedException('You must be authenticated to view users');
         }
 
         $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\User')->findBy(array('_login' => $request->request->get('login')));
@@ -193,7 +194,7 @@ class UserController extends ARestController
         $user = new User();
 
         if (!$this->isGranted('CREATE', new ObjectIdentity('class', get_class($user)))) {
-            throw new AccessDeniedHttpException(sprintf('You are not authorized to create users'));
+            throw new AccessDeniedException(sprintf('You are not authorized to create users'));
         }
 
         $user = $this->deserializeEntity($request->request->all(), $user);
