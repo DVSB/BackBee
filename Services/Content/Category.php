@@ -217,23 +217,6 @@ class Category
         return $this->contents;
     }
 
-    public static function getContentsByCategory(array $classcontent_dirs, $category)
-    {
-        self::getCategories($classcontent_dirs);
-        if (false === array_key_exists($category, self::$_classnames_by_category)) {
-            self::$_classnames_by_category[$category] = array();
-        }
-
-        $contents = array();
-        foreach (self::$_classnames_by_category[$category] as $classname) {
-            $contentRender = new ContentRender($classname, $this->application, $this->name);
-            $contentRender->setLabel($label);
-            $contents[] = $contentRender;
-        }
-
-        return $contents;
-    }
-
     /**
      * Returns an array of defined categories for the BBApp instance
      * @param array $classcontent_dirs
