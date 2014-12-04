@@ -118,7 +118,7 @@ class Auth
             list($date, $user) = explode('-', $this->application->getSession()->get("session_informations"));
 
             // On vérifie que la session n'est pas expirée
-            if ($date + $this->validity_time > time() and $date <= time()) {
+            if ($date + $this->validity_time > time() && $date <= time()) {
                 // On peut aussi vérifier que l'url en referer est cohérente avec l'action entreprise
                 // Par exemple que l'action suppression a bien été précédé de l'action de confirmation
                 //echo "session en cour de validité<br>";
