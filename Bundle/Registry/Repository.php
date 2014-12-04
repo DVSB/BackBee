@@ -109,8 +109,12 @@ class Repository extends EntityRepository
      **/
     public function findRegistriesEntityById($identifier, $id)
     {
-        $sql = 'SELECT * FROM registry AS r WHERE (r.type = "' . addslashes($identifier) . '" OR r.scope = "' . addslashes($identifier) . '") AND ((r.key = "identifier" AND r.value = "' . addslashes($id) . '") OR (r.scope = "' . addslashes($id) . '"))';
+        $sql = 'SELECT * FROM registry AS r WHERE (r.type = :identifier OR r.scope = :identifier) AND ((r.key = "identifier" AND r.value = :id) OR (r.scope = :id))';
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
+        $query->setParameters(array('identifier' => $identifier,
+            'id' => $id
+            )
+        );
 
         return $query->getResult();
     }
@@ -157,8 +161,9 @@ class Repository extends EntityRepository
         if (is_null($identifier)) {
             $identifier = $this->getEntityName();
         }
-        $sql = 'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = "' . addslashes($identifier) . '" OR r.scope = "' . addslashes($identifier) . '") ORDER BY r.id';
+        $sql = 'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = :identifier OR r.scope = :identifier) ORDER BY r.id';
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
+        $query->setParameter('identifier', $identifier);
 
         $entities = array();
         foreach ($query->getResult() as $key => $value) {
