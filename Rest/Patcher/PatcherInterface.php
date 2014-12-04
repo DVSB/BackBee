@@ -62,9 +62,9 @@ interface PatcherInterface
     /**
      * [patch description]
      *
-     * @param  object  $entity
-     * @param  array   $operations
-     * @param  integer $on_invalid_operation
+     * @param object  $entity
+     * @param array   $operations
+     * @param integer $on_invalid_operation
      *
      * @return [type]
      */

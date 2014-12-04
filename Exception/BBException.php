@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -31,7 +31,6 @@ namespace BackBuilder\Exception;
  */
 class BBException extends \Exception
 {
-
     /**
      * Unknown error
      * @var int
@@ -61,7 +60,7 @@ class BBException extends \Exception
      * @var int
      */
     const UNKNOWN_CONTEXT = 1004;
-    
+
     /**
      * The default error code
      * @var int
@@ -82,17 +81,17 @@ class BBException extends \Exception
 
     /**
      * The error message
-     * @var type 
+     * @var type
      */
     private $_message;
 
     /**
      * Class constructor
-     * @param type $message The error message
-     * @param type $code The error code
+     * @param type       $message  The error message
+     * @param type       $code     The error code
      * @param \Exception $previous Optional, the previous exception generated
-     * @param type $source Optional, the last source file before the exception thrown
-     * @param type $seek Optional, the line of the source file where the exception trown
+     * @param type       $source   Optional, the last source file before the exception thrown
+     * @param type       $seek     Optional, the line of the source file where the exception trown
      */
     public function __construct($message = "", $code = 0, \Exception $previous = null, $source = null, $seek = null)
     {
@@ -128,23 +127,25 @@ class BBException extends \Exception
 
     /**
      * Sets the last source file before the exception thrown
-     * @param string $source
+     * @param  string                             $source
      * @return \BackBuilder\Exception\BBException
      */
     public function setSource($source)
     {
         $this->_source = $source;
+
         return $this->_updateMessage();
     }
 
     /**
      * Sets the line of the source file where the exception thrown
-     * @param type $seek
+     * @param  type                               $seek
      * @return \BackBuilder\Exception\BBException
      */
     public function setSeek($seek)
     {
         $this->_seek = $seek;
+
         return $this->_updateMessage();
     }
 
@@ -158,11 +159,10 @@ class BBException extends \Exception
 
         if (null !== $this->_source && null !== $this->_seek) {
             $this->message .= sprintf(' in %s at %d.', $this->_source, $this->_seek);
-        } else if (null !== $this->_source) {
+        } elseif (null !== $this->_source) {
             $this->message .= sprintf(' : %s.', $this->_source);
         }
 
         return $this;
     }
-
 }

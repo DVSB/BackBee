@@ -2,32 +2,32 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode\Tests;
 
-use BackBuilder\ClassContent\ContentSet,
-    BackBuilder\MetaData\MetaDataBag,
-    BackBuilder\NestedNode\Page,
-    BackBuilder\Workflow\State,
-    BackBuilder\Site\Layout,
-    BackBuilder\Site\Site,
-    BackBuilder\Tests\TestCase;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\MetaData\MetaDataBag;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\Workflow\State;
+use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
+use BackBuilder\Tests\TestCase;
 
 /**
  * @category    BackBuilder
@@ -41,7 +41,7 @@ class PageTest extends TestCase
      * @var \Datetime
      */
     private $current_time;
-    
+
     /**
      * @var \BackBuilder\NestedNode\Page
      */
@@ -191,7 +191,7 @@ class PageTest extends TestCase
         $params = array(
             'left' => $this->page->getLeftnode(),
             'right' => $this->page->getRightnode(),
-            'level' => $this->page->getLevel()
+            'level' => $this->page->getLevel(),
         );
 
         $this->assertEquals($params, $this->page->getParam());
@@ -629,7 +629,7 @@ class PageTest extends TestCase
             'archiving' => null,
             'metadata' => null,
             'layout_uid' => $this->page->getLayout()->getUid(),
-            'workflow_state' => null
+            'workflow_state' => null,
         );
 
         $this->assertEquals($expected, $this->page->toArray());
@@ -662,7 +662,7 @@ class PageTest extends TestCase
             'archiving' => $this->current_time->getTimestamp(),
             'metadata' => array(),
             'layout_uid' => $this->page->getLayout()->getUid(),
-            'workflow_state' => 1
+            'workflow_state' => 1,
         );
 
         $this->assertEquals($expected, $this->page->toArray());
@@ -765,10 +765,9 @@ class PageTest extends TestCase
         $data = new \stdClass();
         $data->templateLayouts = array(
             $mainzone,
-            $asidezone
+            $asidezone,
         );
 
         return $data;
     }
-
 }

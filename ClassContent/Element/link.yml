@@ -7,4 +7,3 @@ link:
   parameters:
     target: !!scalar _self
     title: !!scalar link title
-

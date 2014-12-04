@@ -37,15 +37,14 @@ use Psr\Log\LoggerInterface;
  */
 class Memcached extends AMemcache
 {
-
     /**
      * Class constructor
-     * @param array $options Initial options for the cache adapter:
-     *                         - persistent_id string Optional persistent key
-     *                         - servers array The memcached servers to add
-     *                         - options array The memcached options to set
-     * @param string $context An optional cache context use as prefix key
-     * @param \Psr\Log\LoggerInterface $logger An optional logger
+     * @param  array                                       $options Initial options for the cache adapter:
+     *                                                              - persistent_id string Optional persistent key
+     *                                                              - servers array The memcached servers to add
+     *                                                              - options array The memcached options to set
+     * @param  string                                      $context An optional cache context use as prefix key
+     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if Memcached extension is not available.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -99,8 +98,8 @@ class Memcached extends AMemcache
 
     /**
      * Sets memcached option
-     * @param int $option
-     * @param mixed $value
+     * @param  int     $option
+     * @param  mixed   $value
      * @return boolean
      * @link http://php.net/manual/en/memcached.setoption.php
      */
@@ -108,6 +107,7 @@ class Memcached extends AMemcache
     {
         if (false === is_int($option)) {
             $this->log('warning', sprintf('Unknown memcached option: `%s`.', $option));
+
             return false;
         }
 
@@ -120,8 +120,8 @@ class Memcached extends AMemcache
 
     /**
      * Gets memcached option
-     * @param mixed $option
-     * @param mixed $value
+     * @param  mixed   $option
+     * @param  mixed   $value
      * @return boolean
      * @link http://php.net/manual/en/memcached.getoption.php
      */
@@ -129,6 +129,7 @@ class Memcached extends AMemcache
     {
         if (false === is_int($option)) {
             $this->log('warning', sprintf('Unknown memcached option: `%s`.', $option));
+
             return false;
         }
 
@@ -176,18 +177,18 @@ class Memcached extends AMemcache
 
     /**
      * Saves some string datas into a cache record
-     * @param string $id Cache id
-     * @param string $data Datas to cache
-     * @param int $lifetime Optional, the specific lifetime for this record
-     *                      (by default null, infinite lifetime)
-     * @param string $tag Optional, an associated tag to the data stored
+     * @param  string  $id       Cache id
+     * @param  string  $data     Datas to cache
+     * @param  int     $lifetime Optional, the specific lifetime for this record
+     *                           (by default null, infinite lifetime)
+     * @param  string  $tag      Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false)
     {
         $lifetime = $this->getLifeTime($lifetime);
 
-        if (false === $this->_cache->set($id, (is_array($data) ? $data : '' . $data), $lifetime)){
+        if (false === $this->_cache->set($id, (is_array($data) ? $data : ''.$data), $lifetime)) {
             return $this->_onError('save');
         }
 
@@ -197,5 +198,4 @@ class Memcached extends AMemcache
 
         return true;
     }
-
 }

@@ -11,11 +11,8 @@
 
 namespace BackBuilder\Tests\Mock\EventDispatcher;
 
-
 use Symfony\Component\EventDispatcher\Event;
-
 use BackBuilder\Event\Dispatcher;
-
 
 /**
  * @category    BackBuilder
@@ -25,7 +22,6 @@ use BackBuilder\Event\Dispatcher;
  */
 class MockNoopEventDispatcher extends Dispatcher
 {
-    
     /**
      * Noop event dispatcher
      * @see EventDispatcherInterface::dispatch
@@ -36,5 +32,4 @@ class MockNoopEventDispatcher extends Dispatcher
     {
         return $event;
     }
-
 }

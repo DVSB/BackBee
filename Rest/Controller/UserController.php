@@ -21,23 +21,14 @@
 
 namespace BackBuilder\Rest\Controller;
 
-use Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\Validator\ConstraintViolationList,
-    Symfony\Component\Validator\ConstraintViolation,
-    Symfony\Component\Security\Http\Event\InteractiveLoginEvent,
-    Symfony\Component\Security\Http\SecurityEvents,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
-
-use BackBuilder\Security\Acl\Permission\MaskBuilder;
 use BackBuilder\Security\User;
-use BackBuilder\Rest\Exception\ValidationException;
-
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException,
-    Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 /**
  * User Controller
@@ -49,7 +40,6 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException,
  */
 class UserController extends ARestController
 {
-
     /**
      * Get all records
      *
@@ -68,8 +58,8 @@ class UserController extends ARestController
     {
         // TODO
 
-        
-        if(!$this->isGranted('VIEW', new ObjectIdentity('class', 'BackBuilder\Security\User'))) {
+
+        if (!$this->isGranted('VIEW', new ObjectIdentity('class', 'BackBuilder\Security\User'))) {
             throw new AccessDeniedHttpException(sprintf('You are not authorized to view users'));
         }
 
@@ -83,17 +73,17 @@ class UserController extends ARestController
      */
     public function getAction($id)
     {
-        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw new AccessDeniedHttpException('You must be authenticated to delete users');
         }
-        
+
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
-        if(!$user) {
+        if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
         }
-        
-        if(!$this->isGranted('VIEW', $user)) {
+
+        if (!$this->isGranted('VIEW', $user)) {
             throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
@@ -107,17 +97,17 @@ class UserController extends ARestController
      */
     public function deleteAction($id)
     {
-        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw new AccessDeniedHttpException('You must be authenticated to delete users');
         }
-        
+
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
-        if(!$user) {
+        if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
         }
-        
-        if(!$this->isGranted('DELETE', $user)) {
+
+        if (!$this->isGranted('DELETE', $user)) {
             throw new AccessDeniedHttpException(sprintf('You are not authorized to delete user with id %s', $id));
         }
 
@@ -145,17 +135,17 @@ class UserController extends ARestController
      */
     public function putAction($id, Request $request)
     {
-        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw new AccessDeniedHttpException('You must be authenticated to view users');
         }
-        
+
         $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
 
-        if(!$user) {
+        if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
         }
-        
-        if(!$this->isGranted('EDIT', $user)) {
+
+        if (!$this->isGranted('EDIT', $user)) {
             throw new AccessDeniedHttpException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
@@ -185,35 +175,35 @@ class UserController extends ARestController
      * @Rest\RequestParam(name = "lastname", requirements = {
      *  @Assert\NotBlank(message="Last Name is required")
      * })
-     * 
+     *
      *
      */
     public function postAction(Request $request)
     {
-        if(!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw new AccessDeniedHttpException('You must be authenticated to view users');
         }
-        
+
         $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\User')->findBy(array('_login' => $request->request->get('login')));
 
-        if($userExists) {
+        if ($userExists) {
             throw new ConflictHttpException(sprintf('User with that login already exists: %s', $request->request->get('login')));
         }
-        
+
         $user = new User();
-        
-        if(!$this->isGranted('CREATE', new ObjectIdentity('class', get_class($user)))) {
+
+        if (!$this->isGranted('CREATE', new ObjectIdentity('class', get_class($user)))) {
             throw new AccessDeniedHttpException(sprintf('You are not authorized to create users'));
         }
-        
+
         $user = $this->deserializeEntity($request->request->all(), $user);
 
         // handle the password
-        if($request->request->has('password')) {
+        if ($request->request->has('password')) {
             $encoderFactory = $this->getContainer()->get('security.context')->getEncoderFactory();
             $password = $request->request->get('password');
 
-            if($encoderFactory && $encoder = $encoderFactory->getEncoder($user)) {
+            if ($encoderFactory && $encoder = $encoderFactory->getEncoder($user)) {
                 $password = $encoder->encodePassword($password, "");
             }
 
@@ -225,5 +215,4 @@ class UserController extends ARestController
 
         return new Response($this->formatItem($user), 200, array('Content-Type' => 'application/json'));
     }
-
 }

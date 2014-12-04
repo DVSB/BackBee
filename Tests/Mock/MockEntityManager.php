@@ -28,6 +28,7 @@ class MockEntityManager extends \PHPUnit_Framework_TestCase implements IMock
             $exploded_namespace = explode('\\', $namespace);
             $this->stub_container[$namespace] = $this->{lcfirst(end($exploded_namespace)).'Stub'}($namespace);
         }
+
         return $this->stub_container[$namespace];
     }
 
@@ -36,11 +37,11 @@ class MockEntityManager extends \PHPUnit_Framework_TestCase implements IMock
         $theme = new \BackBuilder\Theme\PersonalThemeEntity($this->faker->themeEntity);
 
         $stub = $this->getMockBuilder('BackBuilder\Theme\Repository\ThemeRepository')->disableOriginalConstructor()->getMock();
-        
+
         $stub->expects($this->any())
               ->method('retrieveBySiteUid')
               ->will($this->returnValue($theme));
-        
+
         return $stub;
     }
 }

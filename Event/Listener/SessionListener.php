@@ -21,9 +21,9 @@
 
 namespace BackBuilder\Event\Listener;
 
-use Symfony\Component\HttpFoundation\Session\Session,
-    Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Listener to FrontController events :
@@ -38,7 +38,6 @@ use Symfony\Component\HttpFoundation\Session\Session,
  */
 class SessionListener
 {
-
     public function handle(GetResponseEvent $event)
     {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
@@ -61,5 +60,4 @@ class SessionListener
             $request->setSession($application->getContainer()->get('bb_session'));
         }
     }
-
 }

@@ -22,8 +22,8 @@
 namespace BackBuilder\Util;
 
 use BackBuilder\Exception\BBException;
-use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser,
-    Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
+use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
+use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 
 /**
  * @category    BackBuilder
@@ -33,7 +33,6 @@ use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser,
  */
 class ExtensionMimeTypeGuesser implements MimeTypeGuesserInterface
 {
-
     private $_default = 'application/octet-stream';
     private $_extensions = array(
         '.3dm' => 'x-world/x-3dmf',
@@ -501,7 +500,7 @@ class ExtensionMimeTypeGuesser implements MimeTypeGuesserInterface
         '.z' => 'application/x-compressed',
         '.zip' => 'application/x-compressed',
         '.zoo' => 'application/octet-stream',
-        '.zsh' => 'text/x-script.zsh'
+        '.zsh' => 'text/x-script.zsh',
     );
 
     public function guess($path)
@@ -517,23 +516,22 @@ class ExtensionMimeTypeGuesser implements MimeTypeGuesserInterface
         $mimetype = $this->_default;
 
         $extension = strtolower(substr($path, strrpos($path, '.')));
-        if (array_key_exists($extension, $this->_extensions))
+        if (array_key_exists($extension, $this->_extensions)) {
             $mimetype = $this->_extensions[$extension];
+        }
 
         return $mimetype;
     }
-
 }
 
 class MimeType
 {
-
     /**
      * The singleton instance
      * @var MimeTypeGuesser
      */
-    static private $instance = null;
-    static private $guesser = null;
+    private static $instance = null;
+    private static $guesser = null;
 
     private function __construct()
     {
@@ -541,7 +539,7 @@ class MimeType
         self::$guesser->register(new ExtensionMimeTypeGuesser());
     }
 
-    static public function getInstance()
+    public static function getInstance()
     {
         if (null === self::$instance) {
             self::$instance = new self();
@@ -552,12 +550,11 @@ class MimeType
 
     /**
      * @codeCoverageIgnore
-     * @param type $path
+     * @param  type $path
      * @return type
      */
     public function guess($path)
     {
         return self::$guesser->guess($path);
     }
-
 }

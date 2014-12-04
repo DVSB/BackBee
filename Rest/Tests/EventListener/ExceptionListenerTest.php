@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,14 +22,10 @@
 namespace BackBuilder\Rest\Tests\EventListener;
 
 use BackBuilder\Tests\TestCase;
-
 use Symfony\Component\HttpFoundation\Request;
-
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-
-use BackBuilder\Rest\EventListener\ExceptionListener,
-    BackBuilder\FrontController\FrontController;
-
+use BackBuilder\Rest\EventListener\ExceptionListener;
+use BackBuilder\FrontController\FrontController;
 use BackBuilder\Security\Exception\SecurityException;
 
 /**
@@ -39,12 +35,11 @@ use BackBuilder\Security\Exception\SecurityException;
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
- * 
+ *
  * @coversDefaultClass \BackBuilder\Rest\EventListener\ExceptionListener
  */
 class ExceptionListenerTest extends TestCase
 {
-    
     /**
      * @covers ::onKernelException
      * @covers ::setMapping
@@ -53,34 +48,30 @@ class ExceptionListenerTest extends TestCase
     {
         $listener = new ExceptionListener();
         $event = new GetResponseForExceptionEvent(
-            $this->getBBApp()->getController(), 
-            new Request(), 
-            FrontController::MASTER_REQUEST, 
+            $this->getBBApp()->getController(),
+            new Request(),
+            FrontController::MASTER_REQUEST,
             new \InvalidArgumentException('Invalid Argument')
         );
-        
-        
+
         $listener->setMapping([]);
         $listener->onKernelException($event);
         $this->assertEquals(null, $event->getResponse());
-        
 
         $listener->setMapping([
             'InvalidArgumentException' => [
                 'code' => 501,
-                'message' => 'Server could not respond to your request'
-            ]
+                'message' => 'Server could not respond to your request',
+            ],
         ]);
         $listener->onKernelException($event);
         $this->assertEquals(501, $event->getResponse()->getStatusCode());
-        
-        
+
         $listener->setMapping(['InvalidArgumentException' => []]);
         $listener->onKernelException($event);
         $this->assertEquals(500, $event->getResponse()->getStatusCode());
     }
-    
-    
+
     /**
      * @covers ::onKernelException
      */
@@ -89,28 +80,27 @@ class ExceptionListenerTest extends TestCase
         $listener = new ExceptionListener();
         $exception = new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException();
         $event = new GetResponseForExceptionEvent(
-            $this->getBBApp()->getController(), 
-            new Request(), 
-            FrontController::MASTER_REQUEST, 
+            $this->getBBApp()->getController(),
+            new Request(),
+            FrontController::MASTER_REQUEST,
             $exception
         );
         $listener->onKernelException($event);
-        
+
         $this->assertEquals($exception->getStatusCode(), $event->getResponse()->getStatusCode());
-        
-        
+
         // ValidationException
         $exception = new \BackBuilder\Rest\Exception\ValidationException(
             new \Symfony\Component\Validator\ConstraintViolationList([
                 new \Symfony\Component\Validator\ConstraintViolation(
-                    'Validation Error','Validation Error', [], 'root', 'property', 'valueInvalid'
-                )
+                    'Validation Error', 'Validation Error', [], 'root', 'property', 'valueInvalid'
+                ),
             ])
         );
         $event = new GetResponseForExceptionEvent(
-            $this->getBBApp()->getController(), 
-            new Request(), 
-            FrontController::MASTER_REQUEST, 
+            $this->getBBApp()->getController(),
+            new Request(),
+            FrontController::MASTER_REQUEST,
             $exception
         );
         $listener->onKernelException($event);
@@ -119,59 +109,56 @@ class ExceptionListenerTest extends TestCase
         $this->assertArrayHasKey('errors', $response);
         $this->assertArrayHasKey('property', $response['errors']);
     }
-    
+
      /**
      * @covers ::onKernelException
      */
     public function test_onKernelException_SecurityException()
     {
         $listener = new ExceptionListener();
-        
+
         $exception = new SecurityException("", SecurityException::EXPIRED_AUTH);
         $event = new GetResponseForExceptionEvent(
-            $this->getBBApp()->getController(), 
-            new Request(), 
-            FrontController::MASTER_REQUEST, 
+            $this->getBBApp()->getController(),
+            new Request(),
+            FrontController::MASTER_REQUEST,
             $exception
         );
         $listener->onKernelException($event);
-        
+
         $this->assertEquals(401, $event->getResponse()->getStatusCode());
-        
-        
+
         $exception = new SecurityException("", SecurityException::EXPIRED_TOKEN);
         $event = new GetResponseForExceptionEvent(
-            $this->getBBApp()->getController(), 
-            new Request(), 
-            FrontController::MASTER_REQUEST, 
+            $this->getBBApp()->getController(),
+            new Request(),
+            FrontController::MASTER_REQUEST,
             $exception
         );
         $listener->onKernelException($event);
-        
+
         $this->assertEquals(401, $event->getResponse()->getStatusCode());
-        
-        
+
         $exception = new SecurityException("", SecurityException::UNKNOWN_USER);
         $event = new GetResponseForExceptionEvent(
-            $this->getBBApp()->getController(), 
-            new Request(), 
-            FrontController::MASTER_REQUEST, 
+            $this->getBBApp()->getController(),
+            new Request(),
+            FrontController::MASTER_REQUEST,
             $exception
         );
         $listener->onKernelException($event);
-        
+
         $this->assertEquals(404, $event->getResponse()->getStatusCode());
-        
+
         $exception = new SecurityException("", SecurityException::INVALID_CREDENTIALS);
         $event = new GetResponseForExceptionEvent(
-            $this->getBBApp()->getController(), 
-            new Request(), 
-            FrontController::MASTER_REQUEST, 
+            $this->getBBApp()->getController(),
+            new Request(),
+            FrontController::MASTER_REQUEST,
             $exception
         );
         $listener->onKernelException($event);
-        
+
         $this->assertEquals(401, $event->getResponse()->getStatusCode());
     }
-    
 }

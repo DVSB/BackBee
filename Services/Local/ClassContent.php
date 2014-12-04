@@ -21,9 +21,9 @@
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\Services\Content\ContentRender,
-    BackBuilder\Services\Content\Category,
-    BackBuilder\Services\Exception\ServicesException;
+use BackBuilder\Services\Content\ContentRender;
+use BackBuilder\Services\Content\Category;
+use BackBuilder\Services\Exception\ServicesException;
 
 /**
  * @category    BackBuilder
@@ -34,7 +34,6 @@ use BackBuilder\Services\Content\ContentRender,
  */
 class ClassContent extends AbstractServiceLocal
 {
-
     private $_frontData = null;
     private $_processedContent = array();
 
@@ -46,10 +45,11 @@ class ClassContent extends AbstractServiceLocal
     public function find($classname, $uid)
     {
         $em = $this->getApplication()->getEntityManager();
-        $content = $em->getRepository('\BackBuilder\ClassContent\\' . $classname)->find($uid);
+        $content = $em->getRepository('\BackBuilder\ClassContent\\'.$classname)->find($uid);
 
-        if (null === $content)
+        if (null === $content) {
             throw new ServicesException(sprintf('Unable to find content for `%s` uid', $uid));
+        }
 
         $this->isGranted('VIEW', $content);
 
@@ -76,12 +76,12 @@ class ClassContent extends AbstractServiceLocal
                 $createDraft = true;
                 if ($isParentAContentSet) {
                     $contentInfo = (object) $contentInfo;
-                    $contentType = 'BackBuilder\ClassContent\\' . $contentInfo->nodeType;
+                    $contentType = 'BackBuilder\ClassContent\\'.$contentInfo->nodeType;
                     $contentUid = $contentInfo->uid;
                 } else {
                     $contentType = (is_array($accept[$key])) ? $accept[$key][0] : $accept[$key];
                     if (0 !== strpos($contentType, 'BackBuilder\ClassContent\\')) {
-                        $contentType = 'BackBuilder\ClassContent\\' . $contentType;
+                        $contentType = 'BackBuilder\ClassContent\\'.$contentType;
                     }
                     $contentUid = $contentInfo;
                 }
@@ -92,9 +92,10 @@ class ClassContent extends AbstractServiceLocal
                 } elseif (null !== $exists = $em->find($contentType, $contentUid)) {
                     $result[$key] = $exists;
                 } else {
-                    $content = ( $initial_content instanceof \BackBuilder\ClassContent\ContentSet ) ? $initial_content->item($key) : $initial_content->$key;
-                    if (null !== $content)
+                    $content = ($initial_content instanceof \BackBuilder\ClassContent\ContentSet) ? $initial_content->item($key) : $initial_content->$key;
+                    if (null !== $content) {
                         $result[$key] = $content;
+                    }
                 }
             }
         }
@@ -107,8 +108,9 @@ class ClassContent extends AbstractServiceLocal
      */
     public function update($data = array())
     {
-        if (!is_array($data))
+        if (!is_array($data)) {
             throw new ServicesException("ClassContent.update data can't be empty");
+        }
         $this->_frontData = $data;
         $em = $this->getApplication()->getEntityManager();
         foreach ($data as $srzContent) {
@@ -122,15 +124,17 @@ class ClassContent extends AbstractServiceLocal
      */
     public function updateContentRender($renderType, $srzContent = null, $page_uid = null)
     {
-        if (is_null($srzContent))
+        if (is_null($srzContent)) {
             throw new ServicesException("ClassContent.update data can't be null");
+        }
         $em = $this->getApplication()->getEntityManager();
         $srzContent = (object) $srzContent;
-        if (FALSE === array_key_exists('uid', $srzContent))
+        if (FALSE === array_key_exists('uid', $srzContent)) {
             throw new ServicesException('An uid must be provided');
-        $content = $this->getApplication()->getEntityManager()->find('BackBuilder\ClassContent\\' . $srzContent->type, $srzContent->uid);
+        }
+        $content = $this->getApplication()->getEntityManager()->find('BackBuilder\ClassContent\\'.$srzContent->type, $srzContent->uid);
         if (null === $content) {
-            $classname = 'BackBuilder\ClassContent\\' . $srzContent->type;
+            $classname = 'BackBuilder\ClassContent\\'.$srzContent->type;
             $content = new $classname($srzContent->uid);
         }
 
@@ -141,12 +145,14 @@ class ClassContent extends AbstractServiceLocal
             $content->setDraft($draft);
         }
         $content = $content->unserialize($srzContent);
-        if (null !== $page_uid && (null !== $page = $em->find('BackBuilder\NestedNode\Page', $page_uid)))
+        if (null !== $page_uid && (null !== $page = $em->find('BackBuilder\NestedNode\Page', $page_uid))) {
             $this->getApplication()->getRenderer()->setCurrentPage($page);
+        }
 
         //$cRender = new ContentRender($content["type"], $this->getApplication(), null, $renderType, $content["uid"]);
         $result = new \stdClass();
         $result->render = $this->getApplication()->getRenderer()->render($content, $renderType);
+
         return $result;
     }
 
@@ -155,19 +161,21 @@ class ClassContent extends AbstractServiceLocal
     private function processContent($srzContent = null, $persist = true)
     {
         $em = $this->getApplication()->getEntityManager();
-        if (is_null($srzContent))
+        if (is_null($srzContent)) {
             throw new ServicesException("ClassContent.processData data can't be null");
+        }
 
         $srzContent = (object) $srzContent;
 
-        if (FALSE === array_key_exists('uid', $srzContent))
+        if (FALSE === array_key_exists('uid', $srzContent)) {
             throw new ServicesException('An uid has to be provided');
+        }
         if (array_key_exists($srzContent->uid, $this->_processedContent)) {
             return $this->_processedContent[$srzContent->uid];
         }
 
         if (0 !== strpos($srzContent->type, 'BackBuilder\ClassContent\\')) {
-            $srzContent->type = 'BackBuilder\ClassContent\\' . $srzContent->type;
+            $srzContent->type = 'BackBuilder\ClassContent\\'.$srzContent->type;
         }
         //if (!$srzContent->isAContentSet) {
         $content = $this->getApplication()->getEntityManager()->find($srzContent->type, $srzContent->uid);
@@ -214,14 +222,15 @@ class ClassContent extends AbstractServiceLocal
             $receiver = null;
             $em = $this->getApplication()->getEntityManager();
 
-            if (null !== $page_uid && (null !== $page = $em->find('BackBuilder\NestedNode\Page', $page_uid)))
+            if (null !== $page_uid && (null !== $page = $em->find('BackBuilder\NestedNode\Page', $page_uid))) {
                 $this->getApplication()->getRenderer()->setCurrentPage($page);
+            }
 
             foreach ($contents as $content) {
                 $content = (object) $content;
                 $cRender = new ContentRender($content->type, $this->getApplication(), null, $renderType, $content->uid);
                 if ($cRender) {
-                    $classname = '\BackBuilder\ClassContent\\' . $content->type;
+                    $classname = '\BackBuilder\ClassContent\\'.$content->type;
                     if (null === $nwContent = $em->find($classname, $content->uid)) {
                         $nwContent = new $classname();
                     }
@@ -249,10 +258,11 @@ class ClassContent extends AbstractServiceLocal
     {
         $contentType = (is_array($nodeInfos) && array_key_exists("type", $nodeInfos)) ? $nodeInfos["type"] : null;
         $contentUid = (is_array($nodeInfos) && array_key_exists("uid", $nodeInfos)) ? $nodeInfos["uid"] : null;
-        if (is_null($contentType) || is_null($contentUid))
+        if (is_null($contentType) || is_null($contentUid)) {
             throw new \Exception("params content.type and content.uid can't be null");
+        }
         $contentParams = array();
-        $contentTypeClass = "BackBuilder\ClassContent\\" . $contentType;
+        $contentTypeClass = "BackBuilder\ClassContent\\".$contentType;
 
         $em = $this->getApplication()->getEntityManager();
         if (null === $contentNode = $em->find($contentTypeClass, $contentUid)) {
@@ -289,6 +299,7 @@ class ClassContent extends AbstractServiceLocal
         }
 
         unset($contentParams["indexation"]);
+
         return $contentParams;
     }
 
@@ -299,14 +310,17 @@ class ClassContent extends AbstractServiceLocal
             $categoryList = Category::getCategories($this->getApplication()->getClassContentDir());
             foreach ($categoryList as $cat) {
                 $cat->setBBapp($this->getApplication());
-                foreach ($cat->getContents() as $content)
+                foreach ($cat->getContents() as $content) {
                     $contents[] = $content->__toStdObject();
+                }
             }
         } else {
             $category = new Category($name, $this->getApplication());
-            foreach ($category->getContents() as $content)
+            foreach ($category->getContents() as $content) {
                 $contents[] = $content->__toStdObject();
+            }
         }
+
         return $contents;
     }
 
@@ -392,9 +406,9 @@ class ClassContent extends AbstractServiceLocal
         }
 
         $parentZoneAtSamePosition = $currentPage->getParentZoneAtSamePositionIfExists($contentSetToReplace);
-        if (!$parentZoneAtSamePosition || is_null($parentZoneAtSamePosition))
+        if (!$parentZoneAtSamePosition || is_null($parentZoneAtSamePosition)) {
             return false;
-
+        }
 
         /* draft for parentSimilaireZone */
         if (null !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($parentZoneAtSamePosition, $this->getApplication()->getBBUserToken(), true)) {
@@ -415,7 +429,6 @@ class ClassContent extends AbstractServiceLocal
 
         return $result;
 
-
         /* flush
          * $em->flush();
          */
@@ -427,7 +440,7 @@ class ClassContent extends AbstractServiceLocal
     public function showContentsPage($contentUid, $contentType)
     {
         $em = $this->getApplication()->getEntityManager();
-        $content = $em->find("BackBuilder\\ClassContent\\" . $contentType, $contentUid);
+        $content = $em->find("BackBuilder\\ClassContent\\".$contentType, $contentUid);
         if ($content == null) {
             throw new \Exception("content can't be null");
         }
@@ -442,6 +455,7 @@ class ClassContent extends AbstractServiceLocal
                 $results->pages[] = $pageObject;
             }
         }
+
         return $results;
     }
 
@@ -452,7 +466,7 @@ class ClassContent extends AbstractServiceLocal
     {
         try {
             $em = $this->getApplication()->getEntityManager();
-            $content = $em->find("BackBuilder\\ClassContent\\" . $contentType, $contentUid);
+            $content = $em->find("BackBuilder\\ClassContent\\".$contentType, $contentUid);
             if ($content == null) {
                 throw new \Exception("content can't be null");
             }
@@ -470,8 +484,9 @@ class ClassContent extends AbstractServiceLocal
     {
         $result = array("mainZones" => null, "linkedZones" => array());
         $pageId = (!is_null($pageId)) ? $pageId : false;
-        if (!$pageId)
+        if (!$pageId) {
             return $result;
+        }
         $em = $this->getApplication()->getEntityManager();
         $currentPage = $em->find("BackBuilder\NestedNode\\Page", $pageId);
         $mainZones = null;
@@ -483,6 +498,7 @@ class ClassContent extends AbstractServiceLocal
         if ($mainZones) {
             $result["mainZones"] = array_keys($mainZones);
         }
+
         return $result;
     }
 
@@ -492,14 +508,15 @@ class ClassContent extends AbstractServiceLocal
      */
     public function getContentsRteParams($contentType = null, $rte = null)
     {
-        $contentTypeClass = "BackBuilder\ClassContent\\" . $contentType;
+        $contentTypeClass = "BackBuilder\ClassContent\\".$contentType;
         $content = new $contentTypeClass();
         $editable = array();
         if (!is_a($contentTypeClass, 'BackBuilder\ClassContent\ContentSet')) {
             $config = $this->getApplication()->getConfig();
             $rteMainConfig = $config->getSection("rteconfig");
-            if (!array_key_exists("config", $rteMainConfig) || !is_array($rteMainConfig["config"]))
+            if (!array_key_exists("config", $rteMainConfig) || !is_array($rteMainConfig["config"])) {
                 throw new \Exception("rte config can't be found");
+            }
             $rteConfig = $rteMainConfig["config"];
             if (array_key_exists("adapter", $rteConfig)) {
                 $adapter = $rteConfig["adapter"];
@@ -517,20 +534,21 @@ class ClassContent extends AbstractServiceLocal
                     if (is_a($content->$key, "BackBuilder\ClassContent\AClassContent")) {
                         $rteStyle = $content->{$key}->getParam('aloha', 'scalar');
                         if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == true && null !== $rteStyle)) {
-
                             /* if the style doesn't exist */
-                            if (!array_key_exists($rteStyle, $customConf))
-                                throw new \Exception("rte conf '" . $rteStyle . "' can't be found. Add it to your config.");
+                            if (!array_key_exists($rteStyle, $customConf)) {
+                                throw new \Exception("rte conf '".$rteStyle."' can't be found. Add it to your config.");
+                            }
                             $editable->{$key} = $rteStyle;
                         }
                     }
                 }
                 $result = new \stdClass();
                 $result->editables = $editable;
+
                 return $result;
             }
         }
+
         return $editable;
     }
-
 }

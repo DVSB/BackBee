@@ -2,28 +2,27 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode;
 
-use BackBuilder\ClassContent\AClassContent,
-    BackBuilder\NestedNode\ANestedNode,
-    BackBuilder\Renderer\IRenderable;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\Renderer\IRenderable;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -36,17 +35,16 @@ use JMS\Serializer\Annotation as Serializer;
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\KeyWordRepository")
  * @Table(name="keyword",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_KEYWORD", columns={"root_uid", "leftnode", "rightnode"}), @index(name="IDX_KEYWORD", columns={"keyword"})})
- * 
+ *
  * @Serializer\ExclusionPolicy("all")
  */
 class KeyWord extends ANestedNode implements IRenderable
 {
-
     /**
      * Unique identifier of the content
      * @var string
      * @Id @Column(type="string", name="uid")
-     * 
+     *
      * @Serializer\Expose
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
@@ -74,7 +72,7 @@ class KeyWord extends ANestedNode implements IRenderable
      * The keyword
      * @var string
      * @Column(type="string", name="keyword")
-     * 
+     *
      * @Serializer\Expose
      * @Serializer\SerializedName("keyword")
      * @Serializer\Type("string")
@@ -109,7 +107,7 @@ class KeyWord extends ANestedNode implements IRenderable
      * Class constructor
      * @param string $uid The unique identifier of the keyword
      */
-    public function __construct($uid = NULL)
+    public function __construct($uid = null)
     {
         parent::__construct($uid);
 
@@ -137,23 +135,25 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Sets the keyword
-     * @param string $keyWord
+     * @param  string                          $keyWord
      * @return \BackBuilder\NestedNode\KeyWord
      */
     public function setKeyWord($keyWord)
     {
         $this->_keyWord = $keyWord;
+
         return $this;
     }
 
     /**
      * Adds a content to the collection
-     * @param BackBuilder\ClassContent\AClassContent $content
+     * @param  BackBuilder\ClassContent\AClassContent $content
      * @return \BackBuilder\NestedNode\KeyWord
      */
     public function addContent(AClassContent $content)
     {
         $this->_content->add($content);
+
         return $this;
     }
 
@@ -180,7 +180,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
+     * @param  string            $var
      * @return string|array|null
      */
     public function getData($var = null)
@@ -189,7 +189,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
         if (null !== $var) {
             if (false === array_key_exists($var, $data)) {
-                return null;
+                return;
             }
 
             return $data[$var];
@@ -200,20 +200,20 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param string $var
+     * @param  string            $var
      * @return string|array|null
      */
-    public function getParam($var = NULL)
+    public function getParam($var = null)
     {
         $param = array(
             'left' => $this->getLeftnode(),
             'right' => $this->getRightnode(),
-            'level' => $this->getLevel()
+            'level' => $this->getLevel(),
         );
 
         if (null !== $var) {
             if (false === array_key_exists($var, $param)) {
-                return null;
+                return;
             }
 
             return $param[$var];
@@ -239,7 +239,7 @@ class KeyWord extends ANestedNode implements IRenderable
      */
     public function getTemplateName()
     {
-        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "NestedNode" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+        return str_replace(array("BackBuilder".NAMESPACE_SEPARATOR."NestedNode".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
     }
 
     /**
@@ -253,7 +253,7 @@ class KeyWord extends ANestedNode implements IRenderable
         $object->level = $this->getLevel();
         $object->keyword = $this->getKeyword();
         $object->children = array();
+
         return $object;
     }
-
 }

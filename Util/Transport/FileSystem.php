@@ -34,12 +34,11 @@ use BackBuilder\Util\Transport\Exception\TransportException;
  */
 class FileSystem extends ATransport
 {
-
     /**
      * Class constructor, config should overwrite following option:
      * * remotepath
      *
-     * @param array $config
+     * @param  array                               $config
      * @throws Exception\MisconfigurationException Occures if the remote path can not be created
      */
     public function __construct(array $config = null)
@@ -55,8 +54,8 @@ class FileSystem extends ATransport
     }
 
     /**
-     * @param string $host
-     * @param string $port
+     * @param  string                                 $host
+     * @param  string                                 $port
      * @return \BackBuilder\Util\Transport\FileSystem
      * @codeCoverageIgnore
      */
@@ -69,8 +68,8 @@ class FileSystem extends ATransport
      * Tries to change dir to the defined remote path.
      * An error is triggered if failed.
      *
-     * @param string $username
-     * @param string $password
+     * @param  string                                                        $username
+     * @param  string                                                        $password
      * @return \BackBuilder\Util\Transport\FileSystem
      * @throws \BackBuilder\Util\Transport\Exception\AuthenticationException
      */
@@ -99,7 +98,7 @@ class FileSystem extends ATransport
 
     /**
      * Change remote directory
-     * @param string $dir
+     * @param  string  $dir
      * @return boolean TRUE on success
      */
     public function cd($dir = null)
@@ -109,12 +108,13 @@ class FileSystem extends ATransport
             return $this->_trigger_error(sprintf('Unable to change remote directory to %s.', $dir));
         }
         $this->_remotepath = $dir;
+
         return true;
     }
 
     /**
      * List remote files on $dir
-     * @param string $dir
+     * @param  string      $dir
      * @return array|FALSE
      */
     public function ls($dir = null)
@@ -123,6 +123,7 @@ class FileSystem extends ATransport
         if (false === $ls = @scandir($dir)) {
             return $this->_trigger_error(sprintf('Unable to list files of remote directory %s.', $dir));
         }
+
         return $ls;
     }
 
@@ -138,9 +139,9 @@ class FileSystem extends ATransport
 
     /**
      * Copy a local file to the remote server
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
+     * @param  string  $local_file
+     * @param  string  $remote_file
+     * @param  boolean $overwrite
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function send($local_file, $remote_file, $overwrite = false)
@@ -167,9 +168,9 @@ class FileSystem extends ATransport
 
     /**
      * Copy recursively a local file and subfiles to the remote server
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
+     * @param  string  $local_file
+     * @param  string  $remote_file
+     * @param  boolean $overwrite
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function sendRecursive($local_path, $remote_path, $overwrite = false)
@@ -195,7 +196,7 @@ class FileSystem extends ATransport
         $this->cd($remote_path);
         foreach ($lls as $file) {
             if ($file != "." && $file != "..") {
-                $this->sendRecursive($local_path . DIRECTORY_SEPARATOR . $file, $file, $overwrite);
+                $this->sendRecursive($local_path.DIRECTORY_SEPARATOR.$file, $file, $overwrite);
             }
         }
         $this->cd($currentpwd);
@@ -205,9 +206,9 @@ class FileSystem extends ATransport
 
     /**
      * Copy a remote file on local filesystem
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
+     * @param  string  $local_file
+     * @param  string  $remote_file
+     * @param  boolean $overwrite
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function get($local_file, $remote_file, $overwrite = false)
@@ -247,7 +248,7 @@ class FileSystem extends ATransport
         $this->cd($remote_path);
         foreach ($this->ls() as $file) {
             if ($file != "." && $file != "..") {
-                $this->getRecursive($local_path . DIRECTORY_SEPARATOR . $file, $file, $overwrite);
+                $this->getRecursive($local_path.DIRECTORY_SEPARATOR.$file, $file, $overwrite);
             }
         }
         $this->cd($currentpwd);
@@ -257,8 +258,8 @@ class FileSystem extends ATransport
 
     /**
      * Creates a new remote directory
-     * @param string $dir
-     * @param boolean $recursive
+     * @param  string  $dir
+     * @param  boolean $recursive
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function mkdir($dir, $recursive = false)
@@ -273,8 +274,8 @@ class FileSystem extends ATransport
 
     /**
      * Deletes a remote file
-     * @param string $remote_path
-     * @param boolean $recursive
+     * @param  string  $remote_path
+     * @param  boolean $recursive
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function delete($remote_path, $recursive = false)
@@ -284,7 +285,7 @@ class FileSystem extends ATransport
             if (true === $recursive) {
                 foreach ($this->ls($remote_path) as $file) {
                     if ('.' !== $file && '..' !== $file) {
-                        $this->delete($remote_path . DIRECTORY_SEPARATOR . $file, $recursive);
+                        $this->delete($remote_path.DIRECTORY_SEPARATOR.$file, $recursive);
                     }
                 }
             }
@@ -303,8 +304,8 @@ class FileSystem extends ATransport
 
     /**
      * Renames a remote file
-     * @param string $old_name
-     * @param string $new_name
+     * @param  string  $old_name
+     * @param  string  $new_name
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function rename($old_name, $new_name)
@@ -326,5 +327,4 @@ class FileSystem extends ATransport
 
         return true;
     }
-
 }

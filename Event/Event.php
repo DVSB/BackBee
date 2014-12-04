@@ -33,7 +33,6 @@ use Symfony\Component\EventDispatcher\Event as sfEvent;
  */
 class Event extends sfEvent
 {
-
     /**
      * The target entity of the event
      * @var mixed
@@ -48,7 +47,7 @@ class Event extends sfEvent
 
     /**
      * Class constructor
-     * @param mixed $target The target of the event
+     * @param mixed $target    The target of the event
      * @param mixed $eventArgs The optional arguments passed to the event
      */
     public function __construct($target, $eventArgs = null)
@@ -59,10 +58,10 @@ class Event extends sfEvent
 
     /**
      * Returns the target of the event, optionally checks the class of the target
-     * @param type $classname The optional class name to checks
+     * @param  type                      $classname The optional class name to checks
      * @return mixed
      * @throws \InvalidArgumentException Occures on invalid type of target
-     *                                   according to the waited class name
+     *                                             according to the waited class name
      */
     public function getTarget($classname = null)
     {
@@ -82,9 +81,9 @@ class Event extends sfEvent
 
     /**
      * Checks if the target is of this class or has this class as one of its parents
-     * @param string $classname The class name
-     * @return bool TRUE if the object is of this class or has this class as one of
-     *              its parents, FALSE otherwise
+     * @param  string $classname The class name
+     * @return bool   TRUE if the object is of this class or has this class as one of
+     *                          its parents, FALSE otherwise
      */
     public function isTargetInstanceOf($classname)
     {
@@ -93,9 +92,9 @@ class Event extends sfEvent
 
     /**
      * Get argument by key.
-     * @param string $key Key.
-     * @param mixed $default default value to return
-     * @return mixed Contents of array key.
+     * @param  string $key     Key.
+     * @param  mixed  $default default value to return
+     * @return mixed  Contents of array key.
      */
     public function getArgument($key, $default = null)
     {
@@ -108,8 +107,8 @@ class Event extends sfEvent
 
     /**
      * Add argument to event.
-     * @param string $key   Argument name.
-     * @param mixed  $value Value.
+     * @param  string       $key   Argument name.
+     * @param  mixed        $value Value.
      * @return GenericEvent
      */
     public function setArgument($key, $value)
@@ -121,7 +120,7 @@ class Event extends sfEvent
 
     /**
      * Has argument.
-     * @param string $key Key of arguments array.
+     * @param  string  $key Key of arguments array.
      * @return boolean
      */
     public function hasArgument($key)
@@ -141,8 +140,8 @@ class Event extends sfEvent
     /**
      * Returns the current BackBuilder application
      * @return \BackBuilder\BBApplication
-     * @throws \BadMethodCallException Occures if the event dispatcher is not a
-     *                                 BackBuilder dispatcher
+     * @throws \BadMethodCallException    Occures if the event dispatcher is not a
+     *                                    BackBuilder dispatcher
      */
     public function getApplication()
     {
@@ -152,5 +151,4 @@ class Event extends sfEvent
 
         throw new \BadMethodCallException('Invalid event dispatcher used');
     }
-
 }

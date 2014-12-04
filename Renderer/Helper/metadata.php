@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -35,7 +35,6 @@ use BackBuilder\MetaData\MetaDataBag;
  */
 class metadata extends AHelper
 {
-
     public function __invoke()
     {
         if (null === $renderer = $this->_renderer) {
@@ -49,7 +48,7 @@ class metadata extends AHelper
         if (null === $metadata = $page->getMetaData()) {
             $metadata = new MetaDataBag($renderer->getApplication()->getConfig()->getMetadataConfig(), $page);
             $page->setMetaData($metadata);
-            if($renderer->getApplication()->getEntityManager()->contains($page)) {
+            if ($renderer->getApplication()->getEntityManager()->contains($page)) {
                 $renderer->getApplication()->getEntityManager()->flush($page);
             }
         }
@@ -62,12 +61,12 @@ class metadata extends AHelper
                     if (false !== strpos($meta->getName(), 'keyword') && 'content' === $attribute) {
                         $keywords = explode(',', $value);
                         $objects = $this->getRenderer()->getKeywordObjects($keywords);
-                        foreach($objects as $object) {
+                        foreach ($objects as $object) {
                             $value = trim(str_replace($object->getUid(), $object->getKeyWord(), $value), ',');
                         }
                     }
-                    
-                    $result .= $attribute . '="' . html_entity_decode($value, ENT_COMPAT, 'UTF-8') . '" ';
+
+                    $result .= $attribute.'="'.html_entity_decode($value, ENT_COMPAT, 'UTF-8').'" ';
                 }
                 $result .= '/>'.PHP_EOL;
             }
@@ -75,5 +74,4 @@ class metadata extends AHelper
 
         return $result;
     }
-
 }

@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2014 Lp digital system
- * 
+ *
  * This file is part of BackBee.
  *
  * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -33,7 +33,6 @@ namespace BackBuilder\Util\Sequence;
  */
 class Sequencer extends \Doctrine\ORM\EntityRepository
 {
-
     /**
      * The table name
      * @var string
@@ -54,7 +53,7 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
 
     /**
      * Class constructor
-     * @param type $em
+     * @param type                                $em
      * @param \Doctrine\ORM\Mapping\ClassMetadata $class
      */
     public function __construct($em, \Doctrine\ORM\Mapping\ClassMetadata $class)
@@ -68,11 +67,11 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
 
     /**
      * Initiate a new sequence with name $name
-     * @param string $name
-     * @param int $first
+     * @param  string                                          $name
+     * @param  int                                             $first
      * @return int
      * @throws \BackBuilder\Exception\InvalidArgumentException Occures if sequence $name already exists
-     *                                                         or $first is not a positive integer
+     *                                                               or $first is not a positive integer
      */
     private function _init($name, $first = 0)
     {
@@ -84,10 +83,10 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
             throw new \BackBuilder\Exception\InvalidArgumentException('Initial value of a sequence must be a positive integer');
         }
 
-        $query = 'INSERT INTO ' . $this->_table . ' (' . $this->_name . ', ' . $this->_value . ') VALUE(:name, :value)';
+        $query = 'INSERT INTO '.$this->_table.' ('.$this->_name.', '.$this->_value.') VALUE(:name, :value)';
         $params = array(
             'name' => $name,
-            'value' => $first
+            'value' => $first,
         );
 
         $this->getEntityManager()
@@ -99,11 +98,11 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
 
     /**
      * Update a sequence with name $name
-     * @param string $name
-     * @param int $first
+     * @param  string                                          $name
+     * @param  int                                             $first
      * @return int
      * @throws \BackBuilder\Exception\InvalidArgumentException Occures if sequence $name doesn't exist
-     *                                                         or $value is not a positive integer
+     *                                                               or $value is not a positive integer
      */
     private function _update($name, $value = 0)
     {
@@ -115,10 +114,10 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
             throw new \BackBuilder\Exception\InvalidArgumentException('Initial value of a sequence must be a positive integer');
         }
 
-        $query = 'UPDATE ' . $this->_table . ' SET ' . $this->_value . ' = :value WHERE ' . $this->_name . ' = :name';
+        $query = 'UPDATE '.$this->_table.' SET '.$this->_value.' = :value WHERE '.$this->_name.' = :name';
         $params = array(
             'name' => $name,
-            'value' => $value
+            'value' => $value,
         );
 
         $this->getEntityManager()
@@ -130,8 +129,8 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
 
     /**
      * Read a sequence with name $name, create it if doesn't exist
-     * @param string $name
-     * @param int $default
+     * @param  string $name
+     * @param  int    $default
      * @return int
      */
     private function _read($name, $default = 0)
@@ -145,20 +144,21 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
 
     /**
      * Get the next sequence value
-     * @param string $name
-     * @param int $default
+     * @param  string $name
+     * @param  int    $default
      * @return int
      */
     public function getValue($name, $default = 0)
     {
         $current = $this->_read($name, $default);
+
         return $this->_update($name, $current + 1);
     }
 
     /**
      * Update a sequence to $value only if greater than its current value
-     * @param string $name
-     * @param int $value
+     * @param  string                                          $name
+     * @param  int                                             $value
      * @return int
      * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $value is not a positive integer
      */
@@ -175,5 +175,4 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
 
         return $current;
     }
-
 }

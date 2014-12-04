@@ -28,7 +28,7 @@
 {% endblock %}
 
 {% block panel %}
-    
+
     <script type="text/javascript">
 
         function toggleRunnableQuery(target) {
@@ -58,8 +58,8 @@
         }
 
     </script>
-    
-    
+
+
     <h2>Queries</h2>
 
     {% for connection, queries in collector.queries %}
@@ -77,18 +77,18 @@
                                 <code id="smallcode-{{ i }}-{{ loop.parent.loop.index }}">
                                     {{ query.sql|raw }}
                                 </code>
-                                
+
                                 <code id="original-query-{{ i }}-{{ loop.parent.loop.index }}" style="display: none;">
                                     {{ query.sqlInterpolated|raw }}
                                 </code>
                             </div>
-                            
+
                             <small>
                                 <strong>Parameters</strong>: {{ query.paramsString }} <br />
                                 [<span id="expandParams-{{ i }}-{{ loop.parent.loop.index }}" onclick="toggleRunnableQuery(this);" target-data-id="original-query-{{ i }}-{{ loop.parent.loop.index }}" style="cursor: pointer;">Display runnable query</span>]<br/>
                                 <strong>Time</strong>: {{ '%0.2f'|format(query.executionMS * 1000) }} ms
                             </small>
-                            
+
                         </div>
                     </li>
                 {% endfor %}

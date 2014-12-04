@@ -21,9 +21,7 @@ namespace BackBuilder\Config\Persistor;
  */
 
 use BackBuilder\Config\Config;
-use BackBuilder\Config\Persistor\PersistorInterface;
 use BackBuilder\IApplication as ApplicationInterface;
-
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -57,7 +55,7 @@ class File implements PersistorInterface
     {
         try {
             $success = @file_put_contents(
-                $this->getConfigDumpRightDirectory($config->getBaseDir()) . DIRECTORY_SEPARATOR . 'config.yml',
+                $this->getConfigDumpRightDirectory($config->getBaseDir()).DIRECTORY_SEPARATOR.'config.yml',
                 Yaml::dump($config_to_persist)
             );
         } catch (\Exception $e) {
@@ -70,7 +68,7 @@ class File implements PersistorInterface
     /**
      * Returns path to the right directory to dump and save config.yml file
      *
-     * @param  string $base_directory config base directory
+     * @param string $base_directory config base directory
      *
      * @return string
      */
@@ -78,16 +76,16 @@ class File implements PersistorInterface
     {
         $config_dump_directory = $this->application->getRepository();
         if (ApplicationInterface::DEFAULT_CONTEXT !== $this->application->getContext()) {
-            $config_dump_directory .= DIRECTORY_SEPARATOR . $this->application->getContext();
+            $config_dump_directory .= DIRECTORY_SEPARATOR.$this->application->getContext();
         }
 
-        $config_dump_directory .= DIRECTORY_SEPARATOR . 'Config';
+        $config_dump_directory .= DIRECTORY_SEPARATOR.'Config';
         if (ApplicationInterface::DEFAULT_ENVIRONMENT !== $this->application->getEnvironment()) {
-            $config_dump_directory .= DIRECTORY_SEPARATOR . $this->application->getEnvironment();
+            $config_dump_directory .= DIRECTORY_SEPARATOR.$this->application->getEnvironment();
         }
 
         if (1 === preg_match('#(bundle/[a-zA-Z]+Bundle)#', $base_directory, $matches)) {
-            $config_dump_directory .= DIRECTORY_SEPARATOR . $matches[1];
+            $config_dump_directory .= DIRECTORY_SEPARATOR.$matches[1];
         }
 
         if (false === is_dir($config_dump_directory) && false === @mkdir($config_dump_directory, 0755, true)) {

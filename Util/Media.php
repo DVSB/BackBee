@@ -2,31 +2,31 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Util;
 
-use BackBuilder\ClassContent\Element\file as elementFile,
-    BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\ClassContent\Element\file as elementFile;
+use BackBuilder\Exception\InvalidArgumentException;
 
 /**
  * Set of utility methods to deal with media files
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @copyright   Lp digital system
@@ -34,11 +34,10 @@ use BackBuilder\ClassContent\Element\file as elementFile,
  */
 class Media
 {
-
     /**
      * Returns the computed storage filename of an element file
-     * @param \BackBuilder\ClassContent\Element\file $content
-     * @param int $folder_size Optional, size in characters of the storing folder
+     * @param  \BackBuilder\ClassContent\Element\file          $content
+     * @param  int                                             $folder_size Optional, size in characters of the storing folder
      * @return string
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the provided element file is empty
      */
@@ -56,21 +55,21 @@ class Media
         }
 
         if (0 < $folder_size && strlen($filename) > $folder_size) {
-            $folder = substr($filename, 0, $folder_size) . '/';
+            $folder = substr($filename, 0, $folder_size).'/';
             $filename = substr($filename, $folder_size);
         }
 
         $extension = File::getExtension($content->originalname, true);
 
-        return $folder . $filename . $extension;
+        return $folder.$filename.$extension;
     }
 
     /**
      * Returns the computed storage filename base on an uid
-     * @param string $uid
-     * @param string $originalname
-     * @param int $folder_size
-     * @param boolean $include_originalname
+     * @param  string                                          $uid
+     * @param  string                                          $originalname
+     * @param  int                                             $folder_size
+     * @param  boolean                                         $include_originalname
      * @return string
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the provided $uid is invalid
      */
@@ -83,29 +82,29 @@ class Media
         $folder = '';
         $filename = $uid;
         if (0 < $folder_size && strlen($uid) > $folder_size) {
-            $folder = substr($uid, 0, $folder_size) . DIRECTORY_SEPARATOR;
+            $folder = substr($uid, 0, $folder_size).DIRECTORY_SEPARATOR;
             $filename = substr($uid, $folder_size);
         }
 
         if (true === $include_originalname) {
-            $filename .= DIRECTORY_SEPARATOR . $include_originalname;
+            $filename .= DIRECTORY_SEPARATOR.$include_originalname;
         } else {
             $extension = File::getExtension($originalname, true);
             $filename .= $extension;
         }
 
-        return $folder . $filename;
+        return $folder.$filename;
     }
 
     /**
      * Resizes an image and saves it to the provided file path
-     * @param string $source The filepath of the source image
-     * @param string $dest   The filepath of the target image
-     * @param int $width
-     * @param int $height
-     * @return boolean       Returns TRUE on success, FALSE on failure
+     * @param  string                             $source The filepath of the source image
+     * @param  string                             $dest   The filepath of the target image
+     * @param  int                                $width
+     * @param  int                                $height
+     * @return boolean                            Returns TRUE on success, FALSE on failure
      * @throws \BackBuilder\Exception\BBException Occures if gd extension is not loaded
-     * @throws InvalidArgumentException Occures on unsupported file type or unreadable file source
+     * @throws InvalidArgumentException           Occures on unsupported file type or unreadable file source
      */
     public static function resize($source, $dest, $width, $height)
     {
@@ -171,5 +170,4 @@ class Media
                 break;
         }
     }
-
 }

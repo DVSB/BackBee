@@ -22,7 +22,6 @@ namespace BackBuilder\Config\Persistor;
 
 use BackBuilder\Bundle\Registry as RegistryEntity;
 use BackBuilder\Config\Config;
-use BackBuilder\Config\Persistor\PersistorInterface;
 use BackBuilder\IApplication as ApplicationInterface;
 
 /**
@@ -56,17 +55,17 @@ class Registry implements PersistorInterface
     {
         if (true === array_key_exists('override_site', $config_to_persist)) {
             $config_to_persist = array(
-                'override_site' => $config_to_persist['override_site']
+                'override_site' => $config_to_persist['override_site'],
             );
         }
 
         $key = basename(dirname($config->getBaseDir()));
-        $scope = 'BUNDLE_CONFIG.' . $this->application->getContext() . '.' . $this->application->getEnvironment();
+        $scope = 'BUNDLE_CONFIG.'.$this->application->getContext().'.'.$this->application->getEnvironment();
 
         $registry = $this->application->getEntityManager()
             ->getRepository('BackBuilder\Bundle\Registry')->findOneBy(array(
                 'key'   => $key,
-                'scope' => $scope
+                'scope' => $scope,
             ))
         ;
 

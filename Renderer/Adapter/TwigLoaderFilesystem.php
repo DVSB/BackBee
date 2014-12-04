@@ -33,7 +33,6 @@ use Twig_Loader_Filesystem;
  */
 class TwigLoaderFilesystem extends Twig_Loader_Filesystem
 {
-
     /**
      * Do same stuff than Twig_Loader_Filesystem::exists() plus check if the file is
      * readable
@@ -83,5 +82,4 @@ class TwigLoaderFilesystem extends Twig_Loader_Filesystem
             );
         }
     }
-
 }

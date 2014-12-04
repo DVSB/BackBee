@@ -35,7 +35,6 @@ use BackBuilder\Exception\BBException;
  */
 class ClassContentTest extends \PHPUnit_Framework_TestCase
 {
-
     public function setUp()
     {
         $this->content = new MockContent();
@@ -105,7 +104,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     {
         $name = $this->content->getProperty('name');
 
-        $this->content->defineProperty('name', $name . ' foobar');
+        $this->content->defineProperty('name', $name.' foobar');
         $this->assertEquals($name, $this->content->getProperty('name'));
 
         $this->content->defineProperty('newproperty', 'foobar');
@@ -123,8 +122,8 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
             $this->content->getDefaultParameters()['excludefromautobloc']['array']['default'],
             'Before load excludefromautobloc have to be false'
         );
-        $param = array (
-            'default' => array (
+        $param = array(
+            'default' => array(
                 'rendertype' => 'checkbox',
                 'label' => 'Exclude from autoblocs',
                 'default' => true,
@@ -153,23 +152,23 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->content->defineData(
             'title',
             '\BackBuilder\ClassContent\Element\date',
-            array (
-                'default' => array ('value' => 'Foo Bar Baz')
+            array(
+                'default' => array('value' => 'Foo Bar Baz'),
             )
         );
         $this->content->defineData(
             'title',
             '\BackBuilder\ClassContent\Element\image',
-            array (
-                'default' => array ('value' => 'Foo Bar Baz')
+            array(
+                'default' => array('value' => 'Foo Bar Baz'),
             ),
             false
         );
         $this->content->defineData(
             'date',
             '\BackBuilder\ClassContent\Element\date',
-            array (
-                'default' => array ('value' => 'A date')
+            array(
+                'default' => array('value' => 'A date'),
             ),
             true
         );

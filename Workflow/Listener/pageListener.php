@@ -35,7 +35,6 @@ use BackBuilder\Event\Event;
 
 class pageListener
 {
-
     /**
      * Occur on nestednode.page.preupdate events
      *
@@ -45,23 +44,24 @@ class pageListener
 
     public static function onPreUpdate(Event $event)
     {
-
-    	$page = $event->getTarget();
+        $page = $event->getTarget();
         $eventArgs = $event->getEventArgs();
 
-        if (!is_a($page, 'BackBuilder\NestedNode\Page'))
-        return;
+        if (!is_a($page, 'BackBuilder\NestedNode\Page')) {
+            return;
+        }
 
         if (is_a($eventArgs, 'Doctrine\ORM\Event\PreUpdateEventArgs')) {
-
             if ($eventArgs->hasChangedField('_workflow_state')) {
-
                 $old = $eventArgs->getOldValue('_workflow_state');
                 $new = $eventArgs->getNewValue('_workflow_state');
 
-                if(null !== $new && null !== $new->getListener()) $new->getListener()->arrivedInState($event);
-                if(null !== $old && null !== $old->getListener()) $old->getListener()->outInState($event);
-
+                if (null !== $new && null !== $new->getListener()) {
+                    $new->getListener()->arrivedInState($event);
+                }
+                if (null !== $old && null !== $old->getListener()) {
+                    $old->getListener()->outInState($event);
+                }
             }
 
             if ($eventArgs->hasChangedField('_state')) {
@@ -86,10 +86,5 @@ class pageListener
                 }
             }
         }
-
     }
-
-
 }
-
-?>

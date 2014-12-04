@@ -2,14 +2,11 @@
 namespace BackBuilder\Tests;
 
 use Doctrine\ORM\Tools\SchemaTool;
-
 use BackBuilder\AutoLoader\AutoLoader;
 use BackBuilder\Installer\EntityFinder;
 use BackBuilder\Security\Token\BBUserToken;
-
-use BackBuilder\Security\User,
-    BackBuilder\Security\Group;
-
+use BackBuilder\Security\User;
+use BackBuilder\Security\Group;
 use BackBuilder\Tests\Mock\MockBBApplication;
 
 /**
@@ -33,8 +30,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function initAutoload()
     {
         $this->root_folder = self::getRootFolder();
-        $this->backbuilder_folder = $this->root_folder . DIRECTORY_SEPARATOR . 'BackBuilder';
-        $this->repository_folder = $this->root_folder . DIRECTORY_SEPARATOR . 'repository';
+        $this->backbuilder_folder = $this->root_folder.DIRECTORY_SEPARATOR.'BackBuilder';
+        $this->repository_folder = $this->root_folder.DIRECTORY_SEPARATOR.'repository';
 
         $backbuilder_autoloader = new AutoLoader();
 
@@ -53,15 +50,15 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function getClassContentDir()
     {
         return array(
-            $this->repository_folder . DIRECTORY_SEPARATOR . 'ClassContent',
-            $this->backbuilder_folder . DIRECTORY_SEPARATOR . 'ClassContent'
+            $this->repository_folder.DIRECTORY_SEPARATOR.'ClassContent',
+            $this->backbuilder_folder.DIRECTORY_SEPARATOR.'ClassContent',
         );
     }
 
     /**
      * Simple load class function
      *
-     * @param type $namespace
+     * @param  type       $namespace
      * @throws \Exception
      */
     public function load($namespace)
@@ -94,7 +91,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public static function getBackbuilderFolder()
     {
-        return realpath(self::getRootFolder() . DIRECTORY_SEPARATOR . 'BackBuilder');
+        return realpath(self::getRootFolder().DIRECTORY_SEPARATOR.'BackBuilder');
     }
 
     /**
@@ -104,21 +101,22 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public static function getRepositoyFolder()
     {
-        return realpath(self::getRootFolder() . DIRECTORY_SEPARATOR . 'repository');
+        return realpath(self::getRootFolder().DIRECTORY_SEPARATOR.'repository');
     }
 
     /**
      * Return the mock entity corresponding at the string pass in parameter
      *
-     * @param string $obj_name the mock entity name
-     * @return IMock MockObject
+     * @param  string $obj_name the mock entity name
+     * @return IMock  MockObject
      */
     public function getMockObjectContainer($obj_name)
     {
-        if(!array_key_exists($obj_name, $this->mock_container)) {
+        if (!array_key_exists($obj_name, $this->mock_container)) {
             $class_name = '\BackBuilder\Tests\Mock\Mock'.ucfirst($obj_name);
             $this->mock_container[$obj_name] = new $class_name();
         }
+
         return $this->mock_container[$obj_name];
     }
 
@@ -129,22 +127,22 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $entityFinder = new EntityFinder($bbapp->getBBDir());
 
         $paths = [
-            $bbapp->getBBDir() . '/Bundle',
-            $bbapp->getBBDir() . '/Cache/DAO',
-            $bbapp->getBBDir() . '/ClassContent',
-            $bbapp->getBBDir() . '/ClassContent/Indexes',
-            $bbapp->getBBDir() . '/Logging',
-            $bbapp->getBBDir() . '/NestedNode',
-            $bbapp->getBBDir() . '/Security',
-            $bbapp->getBBDir() . '/Site',
-            $bbapp->getBBDir() . '/Site/Metadata',
-            $bbapp->getBBDir() . '/Stream/ClassWrapper',
-            $bbapp->getBBDir() . '/Theme',
-            $bbapp->getBBDir() . '/Util/Sequence/Entity',
-            $bbapp->getBBDir() . '/Workflow',
+            $bbapp->getBBDir().'/Bundle',
+            $bbapp->getBBDir().'/Cache/DAO',
+            $bbapp->getBBDir().'/ClassContent',
+            $bbapp->getBBDir().'/ClassContent/Indexes',
+            $bbapp->getBBDir().'/Logging',
+            $bbapp->getBBDir().'/NestedNode',
+            $bbapp->getBBDir().'/Security',
+            $bbapp->getBBDir().'/Site',
+            $bbapp->getBBDir().'/Site/Metadata',
+            $bbapp->getBBDir().'/Stream/ClassWrapper',
+            $bbapp->getBBDir().'/Theme',
+            $bbapp->getBBDir().'/Util/Sequence/Entity',
+            $bbapp->getBBDir().'/Workflow',
         ];
 
-        foreach($paths as $path) {
+        foreach ($paths as $path) {
             $em->getConfiguration()->getMetadataDriverImpl()->addPaths([$path]);
             $em->getConfiguration()->getMetadataDriverImpl()->addExcludePaths($entityFinder->getExcludePaths($path));
         }
@@ -168,19 +166,19 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $platform = $conn->getDatabasePlatform();
 
-        foreach($schema->toSql($platform) as $query) {
+        foreach ($schema->toSql($platform) as $query) {
             $conn->executeQuery($query);
         }
     }
 
     /**
      *
-     * @param type $config
+     * @param  type                       $config
      * @return \BackBuilder\BBApplication
      */
     public function getBBApp(array $config = null)
     {
-        if(null === $this->bbapp) {
+        if (null === $this->bbapp) {
             $this->bbapp = new MockBBApplication(null, 'test', false, $config);
         }
 
@@ -192,10 +190,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $this->getBBApp()->getContainer();
     }
 
-
     /**
      * Creates a user for the specified group, and authenticates a BBUserToken
-     * @param string $groupId
+     * @param  string                                  $groupId
      * @return \BackBuilder\Security\Token\BBUserToken
      */
     protected function createAuthUser($groupId, $roles = array())
@@ -215,7 +212,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             ->findOneBy(array('_identifier' => $groupId))
         ;
 
-        if(!$group) {
+        if (!$group) {
             $group = new Group();
             $group->setIdentifier($groupId);
             $group->setName($groupId);

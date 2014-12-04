@@ -21,7 +21,6 @@
 
 namespace BackBuilder\Security\Acl\Permission;
 
-
 /**
 
  * @category    BackBuilder
@@ -33,21 +32,20 @@ namespace BackBuilder\Security\Acl\Permission;
 class InvalidPermissionException extends \InvalidArgumentException
 {
     protected $permission;
-    
-    public function __construct($message, $permission, $previous = null) 
+
+    public function __construct($message, $permission, $previous = null)
     {
         $this->permission = $permission;
-        
+
         parent::__construct($message, null, $previous);
     }
-    
+
     /**
-     * 
+     *
      * @return string
      */
     public function getPermission()
     {
         return $this->permission;
     }
-
 }

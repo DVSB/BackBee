@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -25,7 +25,7 @@ use BackBuilder\NestedNode\Page;
 
 /**
  * Keyword repository
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder/NestedNode
  * @subpackage  Repository
@@ -34,18 +34,18 @@ use BackBuilder\NestedNode\Page;
  */
 class KeyWordRepository extends NestedNodeRepository
 {
-
     public function getLikeKeyWords($cond)
     {
         try {
             $q = $this->createQueryBuilder('k')->andWhere('k._keyWord like :key')->orderBy('k._keyWord', 'ASC')->setMaxResults(10)
-                    ->setParameters(array('key' => $cond . '%'))
+                    ->setParameters(array('key' => $cond.'%'))
                     ->getQuery();
+
             return $q->getResult();
         } catch (\Doctrine\ORM\NoResultException $e) {
-            return null;
+            return;
         } catch (Exception $e) {
-            return null;
+            return;
         }
     }
 
@@ -55,11 +55,12 @@ class KeyWordRepository extends NestedNodeRepository
             $q = $this->createQueryBuilder('k')
                     ->andWhere('k._parent is NULL')
                     ->getQuery();
+
             return $q->getSingleResult();
         } catch (\Doctrine\ORM\NoResultException $e) {
-            return null;
+            return;
         } catch (Exception $e) {
-            return null;
+            return;
         }
     }
 
@@ -77,6 +78,7 @@ class KeyWordRepository extends NestedNodeRepository
                 $nodeInfos->children[] = $this->getKeywordTreeAsArray($child);
             }
         }
+
         return $nodeInfos;
     }
 
@@ -84,26 +86,25 @@ class KeyWordRepository extends NestedNodeRepository
     {
         try {
             if (isset($keywords) && !empty($keywords)) {
-
                 $keywords = (is_array($keywords)) ? $keywords : array($keywords);
                 $db = $this->_em->getConnection();
-                $queryString = "SELECT content.uid 
+                $queryString = "SELECT content.uid
                     FROM
-                        keywords_contents 
-                    LEFT JOIN 
+                        keywords_contents
+                    LEFT JOIN
                         content on (content.uid = keywords_contents.content_uid)
-                    LEFT JOIN 
+                    LEFT JOIN
                         page on (content.node_uid = page.uid)
                     WHERE
                         keywords_contents.keyword_uid IN (?)";
 
                 if ($limitToOnline) {
-                    $queryString .=" AND page.state IN (?)";
+                    $queryString .= " AND page.state IN (?)";
                     $pageStates = array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN);
                     $secondParam = \Doctrine\DBAL\Connection::PARAM_STR_ARRAY;
                 } else {
                     $pageStates = Page::STATE_DELETED;
-                    $queryString .=" AND page.state < (?)";
+                    $queryString .= " AND page.state < (?)";
                     $secondParam = 1;
                 }
                 $stmt = $db->executeQuery($queryString, array($keywords, $pageStates), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, $secondParam));
@@ -111,19 +112,20 @@ class KeyWordRepository extends NestedNodeRepository
                 while ($contendId = $stmt->fetchColumn()) {
                     $result[] = $contendId;
                 }
+
                 return $result;
             }
         } catch (\Doctrine\ORM\NoResultException $e) {
-            return null;
+            return;
         } catch (Exception $e) {
-            return null;
+            return;
         }
     }
 
     /**
      * Returns the nested keywords object according to the element keyword objects provided
      * Also set the parameter 'objectKeyword' from the element to the nested keyword
-     * @param array $elements
+     * @param  array $elements
      * @return array
      */
     public function getKeywordsFromElements(&$elements = array())
@@ -131,10 +133,10 @@ class KeyWordRepository extends NestedNodeRepository
         if (0 === count($elements)) {
             return array();
         }
-        
+
         $uids = array();
         $assoc = array();
-        foreach($elements as &$element) {
+        foreach ($elements as &$element) {
             if ($element instanceof \BackBuilder\ClassContent\Element\keyword) {
                 $uids[] = $element->value;
                 $assoc[$element->value] = &$element;
@@ -150,20 +152,20 @@ class KeyWordRepository extends NestedNodeRepository
                 ->getQuery()
                 ->getResult();
 
-        foreach($objects as $object) {
+        foreach ($objects as $object) {
             if (true === array_key_exists($object->getUid(), $assoc)) {
                 $assoc[$object->getUid()]->setParam('objectKeyword', $object, 'object');
             }
         }
-        
+
         return $objects;
     }
 
     /**
      * Check if given keyword already exists in database; it's case sensitive and make difference
      * between "e" and "é"
-     * 
-     * @param  string $keyword string
+     *
+     * @param  string      $keyword string
      * @return object|null return object if it already exists, else null
      */
     public function exists($keyword)
@@ -182,4 +184,3 @@ class KeyWordRepository extends NestedNodeRepository
         return $object;
     }
 }
-

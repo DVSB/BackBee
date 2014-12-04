@@ -22,15 +22,10 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use BackBuilder\Job\AJob;
 use BackBuilder\Job\NestedNodeLRCalculateJob;
-use BackBuilder\Job\Queue\AQueue;
 
 /**
  * Update BBApp database
@@ -68,7 +63,7 @@ class NestedNodeLRCalculateCommand extends ACommand
             'nodeId'    => $input->getOption('nodeId'),
             'nodeClass' => $input->getOption('nodeClass'),
             'first'     => $input->getOption('first'),
-            'delta'     => $input->getOption('delta')
+            'delta'     => $input->getOption('delta'),
         ));
     }
 }

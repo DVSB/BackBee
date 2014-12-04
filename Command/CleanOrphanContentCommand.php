@@ -23,9 +23,7 @@ namespace BackBuilder\Command;
 
 use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -68,7 +66,7 @@ class CleanOrphanContentCommand extends ACommand
         $before_contents_count = $contents_count[0];
         $output->writeln(
             "\nBefore cleaning, content table contains $before_contents_count row(s)"
-            . " (including " . count($orphans) . " potentials orphans).\n"
+            ." (including ".count($orphans)." potentials orphans).\n"
         );
 
         foreach ($orphans as $orphan) {

@@ -21,7 +21,6 @@
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\Services\Local\AbstractServiceLocal;
 
 /**
  * @category    BackBuilder
@@ -32,7 +31,6 @@ use BackBuilder\Services\Local\AbstractServiceLocal;
  */
 class Keyword extends AbstractServiceLocal
 {
-
     /**
      * @exposed(secured=true)
      *
@@ -43,18 +41,18 @@ class Keyword extends AbstractServiceLocal
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
         $leaf->attr->rel = 'root';
-        $leaf->attr->id = 'node_base' ;
+        $leaf->attr->id = 'node_base';
         $leaf->attr->state = 1;
         $leaf->data = "root";
         $leaf->state = 'closed';
         $tree[] = $leaf;
+
         return $tree;
 
         # This function can"t work with our keywords
         # There are 110K+ keywords and the recursive takes too much time
         # The code just above is ignoring the creation of the keyword arbo
         # The possibility to add keyword works though
-
 
 
         /*
@@ -113,7 +111,7 @@ class Keyword extends AbstractServiceLocal
         $leaf = false;
 
         if (null !== $em->getRepository('BackBuilder\NestedNode\KeyWord')->exists($keywordInfos->keyword)) {
-            throw new \Exception('Keyword with `' . $keywordInfos->keyword . '` as value already exists!');
+            throw new \Exception('Keyword with `'.$keywordInfos->keyword.'` as value already exists!');
         }
 
         if ($mode == "create") {
@@ -143,7 +141,7 @@ class Keyword extends AbstractServiceLocal
             $leaf = new \stdClass();
             $leaf->attr = new \stdClass();
             $leaf->attr->rel = 'leaf';
-            $leaf->attr->id = 'node_' . $keyword->getUid();
+            $leaf->attr->id = 'node_'.$keyword->getUid();
             $leaf->data = html_entity_decode($keyword->getKeyWord(), ENT_COMPAT, 'UTF-8');
         }
 
@@ -156,8 +154,9 @@ class Keyword extends AbstractServiceLocal
      */
     public function deleteKeyword($keywordId)
     {
-        if (!isset($keywordId))
+        if (!isset($keywordId)) {
             throw new ServicesException(sprintf("Keyword can't be null"));
+        }
         $result = false;
         $em = $this->bbapp->getEntityManager();
         $keyword = $em->find('\BackBuilder\NestedNode\KeyWord', $keywordId);
@@ -166,6 +165,7 @@ class Keyword extends AbstractServiceLocal
             $em->flush();
             $result = true;
         }
+
         return $result;
     }
 
@@ -184,7 +184,7 @@ class Keyword extends AbstractServiceLocal
 
         if (null !== $term) {
             $q->where('k._keyWord LIKE :term')
-                    ->setParameter('term', $term . '%');
+                    ->setParameter('term', $term.'%');
         }
 
         $keywordList = $q->getQuery()
@@ -236,5 +236,4 @@ class Keyword extends AbstractServiceLocal
 
         return $keywordContainer;
     }
-
 }

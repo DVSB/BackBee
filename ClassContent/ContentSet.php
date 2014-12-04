@@ -21,8 +21,8 @@
 
 namespace BackBuilder\ClassContent;
 
-use BackBuilder\NestedNode\Page,
-    BackBuilder\ClassContent\Exception\UnknownPropertyException;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\ClassContent\Exception\UnknownPropertyException;
 
 /**
  * A set of content objects in BackBuilder
@@ -38,7 +38,6 @@ use BackBuilder\NestedNode\Page,
  */
 class ContentSet extends AClassContent implements \Iterator, \Countable
 {
-
     /**
      * Internal position in iterator
      * @var int
@@ -87,7 +86,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Alternative recursive clone method, created because of problems related to doctrine clone method
-     * @param \BackBuilder\NestedNode\Page $origin_page
+     * @param  \BackBuilder\NestedNode\Page         $origin_page
      * @return \BackBuilder\ClassContent\ContentSet
      */
     public function createClone(Page $origin_page = null)
@@ -121,12 +120,12 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Sets options at the construction of a new instance
-     * @param array $options Initial options for the content:
-     *                         - label       the label of the content
-     *                         - maxentry    the maximum number of content accepted
-     *                         - minentry    the minimum number of content accepted
-     *                         - accept      an array of classname accepted
-     *                         - default     array default value for datas
+     * @param  array                                $options Initial options for the content:
+     *                                                       - label       the label of the content
+     *                                                       - maxentry    the maximum number of content accepted
+     *                                                       - minentry    the minimum number of content accepted
+     *                                                       - accept      an array of classname accepted
+     *                                                       - default     array default value for datas
      * @return \BackBuilder\ClassContent\ContentSet
      */
     protected function _setOptions($options = null)
@@ -162,13 +161,13 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Dynamically adds and sets new element to this content
-     * @param string $var the name of the element
-     * @param string $type the type
-     * @param array $options Initial options for the content (see this constructor)
-     * @param Boolean $updateAccept dynamically accept or not the type for the new element
+     * @param  string                                  $var          the name of the element
+     * @param  string                                  $type         the type
+     * @param  array                                   $options      Initial options for the content (see this constructor)
+     * @param  Boolean                                 $updateAccept dynamically accept or not the type for the new element
      * @return \BackBuilder\ClassContent\AClassContent The current instance
      */
-    protected function _defineData($var, $type = 'scalar', $options = NULL, $updateAccept = FALSE)
+    protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
     {
         if (true === $updateAccept) {
             $this->_addAcceptedType($type, $var);
@@ -205,8 +204,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Adds a new accepted type to the element
-     * @param string $type the type to accept
-     * @param string $var the element
+     * @param  string                                  $type the type to accept
+     * @param  string                                  $var  the element
      * @return \BackBuilder\ClassContent\AClassContent The current instance
      */
     protected function _addAcceptedType($type, $var = null)
@@ -227,8 +226,9 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function clear()
     {
-        if (NULL !== $this->getDraft())
+        if (NULL !== $this->getDraft()) {
             return $this->getDraft()->clear();
+        }
 
         $this->_subcontent->clear();
         $this->_subcontentmap = array();
@@ -270,7 +270,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * only the value but also the type must match.
      * For objects this means reference equality.
      *
-     * @param mixed $element The element to search for.
+     * @param  mixed $element The element to search for.
      * @return mixed The key/index of the element or FALSE if the element was not found.
      */
     public function indexOf($element, $useIntIndex = false)
@@ -281,6 +281,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
                 foreach ($this->_data as $key => $data) {
                     if (FALSE !== $index = array_search($element->getUid(), $data, true)) {
                         $index = ($useIntIndex) ? $key : $index;
+
                         return $index;
                     }
                 }
@@ -300,24 +301,28 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             foreach ($this->getData() as $key => $content) {
                 if ($content instanceof AClassContent && $element->getUid() === $content->getUid()) {
                     $index = ($useIntIndex) ? $key : $index;
+
                     return $index;
                 }
                 $index++;
             }
+
             return FALSE;
         }
+
         return array_search($element, $this->_data, true);
     }
 
     /**
-     * @param int $index
+     * @param int                                     $index
      * @param \BackBuilder\ClassContent\AClassContent $contentSet
      */
     public function replaceChildAtBy($index, AClassContent $contentSet)
     {
         $index = (isset($index) && is_int($index)) ? $index : false;
-        if (is_bool($index))
-            throw new \BackBuilder\Exception\BBException(__METHOD__ . " index  parameter must be an integer");
+        if (is_bool($index)) {
+            throw new \BackBuilder\Exception\BBException(__METHOD__." index  parameter must be an integer");
+        }
         $newContentsetArr = array();
         /** revoir * */
         foreach ($this->getData() as $key => $content) {
@@ -331,34 +336,39 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
                 $this->push($content);
             }
         }
+
         return true;
     }
 
     /**
      * @param \BackBuilder\ClassContent\AClassContent $prevContentSet
      * @param \BackBuilder\ClassContent\AClassContent $nextContentSet
-     * Replace prevContentSet by nextContentSet
+     *                                                                Replace prevContentSet by nextContentSet
      */
     public function replaceChildBy(AClassContent $prevContentSet, AClassContent $nextContentSet)
     {
         $index = $this->indexOfByUid($prevContentSet, true);
-        if (is_bool($index))
+        if (is_bool($index)) {
             return false;
+        }
+
         return $this->replaceChildAtBy($index, $nextContentSet);
     }
 
     /**
      * Return the item at index
-     * @param int $index
+     * @param  int $index
      * @return the item or NULL if $index is out of bounds
      */
     public function item($index)
     {
-        if (NULL !== $this->getDraft())
+        if (NULL !== $this->getDraft()) {
             return $this->getDraft()->item($index);
+        }
 
-        if (0 <= $index && $index < $this->count())
+        if (0 <= $index && $index < $this->count()) {
             return $this->getData($index);
+        }
 
         return NULL;
     }
@@ -397,16 +407,18 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function pop()
     {
-        if (NULL !== $this->getDraft())
+        if (NULL !== $this->getDraft()) {
             return $this->getDraft()->pop();
+        }
 
         $last = $this->last();
 
-        if (NULL === $last)
+        if (NULL === $last) {
             return NULL;
+        }
 
         array_pop($this->_data);
-        $content = NULL;
+        $content = null;
         if (isset($this->_subcontentmap[$last->getUid()])) {
             $content = $this->_subcontent->get($this->_subcontentmap[$last->getUid()]);
             $this->_subcontent->removeElement($content);
@@ -420,13 +432,14 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Push one element onto the end of the set
-     * @param AClassContent $var The pushed values
-     * @return ContentSet The current content set
+     * @param  AClassContent $var The pushed values
+     * @return ContentSet    The current content set
      */
     public function push(AClassContent $var)
     {
-        if (NULL !== $this->getDraft())
+        if (NULL !== $this->getDraft()) {
             return $this->getDraft()->push($var);
+        }
 
         if ($this->_isAccepted($var)) {
             if (
@@ -435,8 +448,9 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
                     ($this->_maxentry > $this->count() && $this->_minentry < $this->count())
             ) {
                 $this->_data[] = array($this->_getType($var) => $var->getUid());
-                if ($this->_subcontent->add($var))
+                if ($this->_subcontent->add($var)) {
                     $this->_subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
+                }
             }
         }
 
@@ -448,10 +462,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function rewind()
     {
-        if (NULL === $this->getDraft())
+        if (NULL === $this->getDraft()) {
             $this->_index = 0;
-        else
+        } else {
             $this->getDraft()->rewind();
+        }
     }
 
     /**
@@ -460,15 +475,17 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function shift()
     {
-        if (NULL !== $this->getDraft())
+        if (NULL !== $this->getDraft()) {
             return $this->getDraft()->shift();
+        }
 
         $first = $this->first();
-        if (NULL === $first)
+        if (NULL === $first) {
             return NULL;
+        }
 
         array_shift($this->_data);
-        $content = NULL;
+        $content = null;
         if (isset($this->_subcontentmap[$first->getUid()])) {
             $content = $this->_subcontent->get($this->_subcontentmap[$first->getUid()]);
             $this->_subcontent->removeElement($content);
@@ -482,19 +499,21 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Prepend one to the beginning of the set
-     * @param AClassContent $var The prepended values
-     * @return ContentSet The current content set
+     * @param  AClassContent $var The prepended values
+     * @return ContentSet    The current content set
      */
     public function unshift(AClassContent $var)
     {
-        if (NULL !== $this->getDraft())
+        if (NULL !== $this->getDraft()) {
             return $this->getDraft()->unshift($var);
+        }
 
         if ($this->_isAccepted($var)) {
             if (!$this->_maxentry || $this->_maxentry > $this->count()) {
                 array_unshift($this->_data, array($this->_getType($var) => $var->getUid()));
-                if ($this->_subcontent->add($var))
+                if ($this->_subcontent->add($var)) {
                     $this->_subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
+                }
             }
         }
 
@@ -520,7 +539,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * Return the data of this content
      * @param $var string The element to be return, if NULL, all datas are returned
      * @param $forceArray Boolean Force the return as array
-     * @return mixed Could be either NULL or one or array of scalar, array, AClassContent instance
+     * @return mixed                                                    Could be either NULL or one or array of scalar, array, AClassContent instance
      * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
      */
     public function getData($var = null, $forceArray = false)
@@ -528,7 +547,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         try {
             return parent::getData($var, $forceArray);
         } catch (UnknownPropertyException $e) {
-            return null;
+            return;
         }
     }
 
@@ -540,11 +559,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Initialized the instance from a serialized string
-     * @param string $serialized
-     * @param Boolean $strict If TRUE, all missing or additionnal element will generate an error
-     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     * @param  string                                                       $serialized
+     * @param  Boolean                                                      $strict     If TRUE, all missing or additionnal element will generate an error
+     * @return \BackBuilder\ClassContent\AClassContent                      The current instance
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
-     *                                                                      property does not match an element
+     *                                                                                 property does not match an element
      */
     public function unserialize($serialized, $strict = false)
     {
@@ -553,20 +572,20 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         }
 
         foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
+            $property = '_'.$property;
 
             if (true === in_array($property, array('_created', '_modified')) || null === $value) {
                 continue;
-            } else if ('_param' === $property) {
+            } elseif ('_param' === $property) {
                 foreach ($value as $param => $paramvalue) {
                     $this->setParam($param, $paramvalue);
                 }
-            } else if ('_data' === $property) {
+            } elseif ('_data' === $property) {
                 $this->clear();
                 foreach ($value as $val) {
                     $this->push($val);
                 }
-            } else if (false === property_exists($this, $property) && true === $strict) {
+            } elseif (false === property_exists($this, $property) && true === $strict) {
                 throw new Exception\UnknownPropertyException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this->_getContentInstance())));
             }
         }
@@ -581,7 +600,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         foreach ($this->getData() as $content) {
             $datas['elements'][] = array(
                 'uid'  => $content->getUid(),
-                'type' => str_replace('BackBuilder\ClassContent\\', '', get_class($content))
+                'type' => str_replace('BackBuilder\ClassContent\\', '', get_class($content)),
             );
         }
 
@@ -589,5 +608,4 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         return false === $return_array ? json_encode($datas) : $datas;
     }
-
 }

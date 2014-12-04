@@ -21,13 +21,11 @@
 
 namespace BackBuilder\Bundle;
 
-use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Config\Config;
 use BackBuilder\DependencyInjection\Util\ServiceLoader;
 use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\IApplication;
 use BackBuilder\Util\Resolver\BundleConfigDirectory;
-
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -90,7 +88,7 @@ class BundleLoader
     /**
      * [load description]
      * @param  array  $bundles_config [description]
-     * @return [type]                 [description]
+     * @return [type] [description]
      */
     public function load(array $bundles_config)
     {
@@ -115,9 +113,9 @@ class BundleLoader
     /**
      * [buildBundleBaseDirectoryFromClassname description]
      *
-     * @param  [type] $classname [description]
+     * @param [type] $classname [description]
      *
-     * @return [type]            [description]
+     * @return [type] [description]
      */
     public function buildBundleBaseDirectoryFromClassname($classname)
     {
@@ -137,8 +135,8 @@ class BundleLoader
     /**
      * [loadConfigDefinition description]
      *
-     * @param  [type] $config_id      [description]
-     * @param  [type] $base_directory [description]
+     * @param [type] $config_id      [description]
+     * @param [type] $base_directory [description]
      */
     public function loadConfigDefinition($config_id, $base_directory)
     {
@@ -164,7 +162,7 @@ class BundleLoader
     /**
      * [generateBundleKey description]
      * @param  [type] $id [description]
-     * @return [type]       [description]
+     * @return [type] [description]
      */
     private function generateBundleServiceId($id)
     {
@@ -174,7 +172,7 @@ class BundleLoader
     /**
      * [buildBundleDefinition description]
      * @param  [type] $classname [description]
-     * @return [type]            [description]
+     * @return [type] [description]
      */
     private function buildBundleDefinition($classname, $base_directory)
     {
@@ -263,9 +261,9 @@ class BundleLoader
     /**
      * [buildConfigDefinition description]
      *
-     * @param  [type] $base_directory [description]
+     * @param [type] $base_directory [description]
      *
-     * @return [type]                 [description]
+     * @return [type] [description]
      */
     private function buildConfigDefinition($base_directory)
     {
@@ -274,7 +272,7 @@ class BundleLoader
             new Reference('cache.bootstrap'),
             null,
             '%debug%',
-            '%config.yml_files_to_ignore%'
+            '%config.yml_files_to_ignore%',
         ));
 
         if (true === $this->application->getContainer()->getParameter('container.autogenerate')) {
@@ -292,15 +290,15 @@ class BundleLoader
     /**
      * [getConfigDirectoryByBaseDirectory description]
      *
-     * @param  [type] $base_directory [description]
+     * @param [type] $base_directory [description]
      *
-     * @return [type]                 [description]
+     * @return [type] [description]
      */
     private function getConfigDirectoryByBaseDirectory($base_directory)
     {
-        $directory = $base_directory . DIRECTORY_SEPARATOR . BundleInterface::CONFIG_DIRECTORY_NAME;
+        $directory = $base_directory.DIRECTORY_SEPARATOR.BundleInterface::CONFIG_DIRECTORY_NAME;
         if (false === is_dir($directory)) {
-            $directory = $base_directory . DIRECTORY_SEPARATOR . BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
+            $directory = $base_directory.DIRECTORY_SEPARATOR.BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
         }
 
         return $directory;
@@ -310,7 +308,7 @@ class BundleLoader
      * [getLoaderRecipesByConfig description]
      *
      * @param  Config $config [description]
-     * @return [type]         [description]
+     * @return [type] [description]
      */
     private function getLoaderRecipesByConfig(Config $config)
     {
@@ -327,7 +325,7 @@ class BundleLoader
      * [getCallableByRecipesAndKey description]
      * @param  [type] $recipes [description]
      * @param  [type] $key     [description]
-     * @return [type]          [description]
+     * @return [type] [description]
      */
     private function getCallableByRecipesAndKey(array $recipes = null, $key)
     {
@@ -342,8 +340,8 @@ class BundleLoader
     /**
      * [loadServices description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      */
     private function loadServices(Config $config, callable $recipe = null)
     {
@@ -358,18 +356,20 @@ class BundleLoader
             array_unshift($directories, $this->getConfigDirectoryByBaseDirectory(dirname($config->getBaseDir())));
 
             foreach ($directories as $directory) {
-                $filepath = $directory . DIRECTORY_SEPARATOR . 'services.xml';
+                $filepath = $directory.DIRECTORY_SEPARATOR.'services.xml';
                 if (true === is_file($filepath) && true === is_readable($filepath)) {
                     try {
                         ServiceLoader::loadServicesFromXmlFile($this->container, $directory);
-                    } catch (\Exception $e) { /* nothing to do, just ignore it */ }
+                    } catch (\Exception $e) { /* nothing to do, just ignore it */
+                    }
                 }
 
-                $filepath = $directory . DIRECTORY_SEPARATOR . 'services.yml';
+                $filepath = $directory.DIRECTORY_SEPARATOR.'services.yml';
                 if (true === is_file($filepath) && true === is_readable($filepath)) {
                     try {
                         ServiceLoader::loadServicesFromYamlFile($this->container, $directory);
-                    } catch (\Exception $e) { /* nothing to do, just ignore it */ }
+                    } catch (\Exception $e) { /* nothing to do, just ignore it */
+                    }
                 }
             }
         }
@@ -378,12 +378,12 @@ class BundleLoader
     /**
      * [loadEvents description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      */
     private function loadEvents(Config $config, callable $recipe = null)
     {
-       if (false === $this->runRecipe($config, $recipe)) {
+        if (false === $this->runRecipe($config, $recipe)) {
             $events = $config->getRawSection('events');
             if (true === is_array($events) || 0 < count($events)) {
                 $this->application->getEventDispatcher()->addListeners($events);
@@ -394,15 +394,15 @@ class BundleLoader
     /**
      * [registerClassContentDirectory description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      */
     private function registerClassContentDirectory(Config $config, callable $recipe = null)
     {
         if (null !== $recipe) {
             $this->runRecipe($config, $recipe);
         } else {
-            $directory = realpath(dirname($config->getBaseDir()) . DIRECTORY_SEPARATOR . 'ClassContent');
+            $directory = realpath(dirname($config->getBaseDir()).DIRECTORY_SEPARATOR.'ClassContent');
             if (false !== $directory) {
                 $this->application->pushClassContentDir($directory);
             }
@@ -412,15 +412,15 @@ class BundleLoader
     /**
      * [registerTemplatesDirectory description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      */
     private function registerTemplatesDirectory(Config $config, callable $recipe = null)
     {
         if (false === $this->runRecipe($config, $recipe)) {
             $directory = realpath(
-                dirname($config->getBaseDir()) . DIRECTORY_SEPARATOR
-                . 'Templates' . DIRECTORY_SEPARATOR . 'scripts'
+                dirname($config->getBaseDir()).DIRECTORY_SEPARATOR
+                .'Templates'.DIRECTORY_SEPARATOR.'scripts'
             );
             if (false !== $directory) {
                 $this->application->getRenderer()->addScriptDir($directory);
@@ -431,15 +431,15 @@ class BundleLoader
     /**
      * [registerHelpersDirectory description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      */
     private function registerHelpersDirectory(Config $config, callable $recipe = null)
     {
         if (false === $this->runRecipe($config, $recipe)) {
             $directory = realpath(
-                dirname($config->getBaseDir()) . DIRECTORY_SEPARATOR
-                . 'Templates' . DIRECTORY_SEPARATOR . 'helpers'
+                dirname($config->getBaseDir()).DIRECTORY_SEPARATOR
+                .'Templates'.DIRECTORY_SEPARATOR.'helpers'
             );
 
             if (false !== $directory) {
@@ -451,8 +451,8 @@ class BundleLoader
     /**
      * [loadRoutes description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      */
     private function loadRoutes(Config $config, callable $recipe = null)
     {
@@ -470,16 +470,16 @@ class BundleLoader
     /**
      * [registerResourcesDirectory description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      */
     private function registerResourcesDirectory(Config $config, callable $recipe = null)
     {
         if (false === $this->runRecipe($config, $recipe)) {
-            $base_directory = dirname($config->getBaseDir()) . DIRECTORY_SEPARATOR;
-            $directory = realpath($base_directory . DIRECTORY_SEPARATOR . 'Resources');
+            $base_directory = dirname($config->getBaseDir()).DIRECTORY_SEPARATOR;
+            $directory = realpath($base_directory.DIRECTORY_SEPARATOR.'Resources');
             if (false === $directory) {
-                $directory = realpath($base_directory . DIRECTORY_SEPARATOR . 'Ressources');
+                $directory = realpath($base_directory.DIRECTORY_SEPARATOR.'Ressources');
             }
 
             if (false !== $directory) {
@@ -491,8 +491,8 @@ class BundleLoader
     /**
      * [registerNamespaces description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      */
     private function registerNamespaces(Config $config, callable $recipe = null)
     {
@@ -502,10 +502,10 @@ class BundleLoader
     /**
      * [runRecipe description]
      *
-     * @param  Config $config [description]
-     * @param  [type] $recipe [description]
+     * @param Config $config [description]
+     * @param [type] $recipe [description]
      *
-     * @return [type]         [description]
+     * @return [type] [description]
      */
     private function runRecipe(Config $config, callable $recipe = null)
     {

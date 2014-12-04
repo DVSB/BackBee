@@ -110,7 +110,7 @@ class Category implements \JsonSerializable
     {
         return array(
             'name'     => $this->name,
-            'contents' => $this->blocks
+            'contents' => $this->blocks,
         );
     }
 }

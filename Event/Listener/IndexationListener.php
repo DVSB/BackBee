@@ -21,10 +21,10 @@
 
 namespace BackBuilder\Event\Listener;
 
-use BackBuilder\Event\Event,
-    BackBuilder\ClassContent\Indexation,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\Util\Doctrine\ScheduledEntities;
+use BackBuilder\Event\Event;
+use BackBuilder\ClassContent\Indexation;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\Util\Doctrine\ScheduledEntities;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -38,7 +38,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class IndexationListener implements EventSubscriberInterface
 {
-
     /**
      * The current application instance
      * @var \BackBuilder\BBApplication
@@ -114,23 +113,23 @@ class IndexationListener implements EventSubscriberInterface
      */
     public static function onFlushPage(Event $event)
     {
-
     }
 
     /**
      * Checks the event validity
-     * @param \BackBuilder\Event\Event $event
+     * @param  \BackBuilder\Event\Event $event
      * @return boolean
      */
     private static function _checkContentEvent(Event $event)
     {
         self::$_content = $event->getTarget();
+
         return self::$_content instanceof AClassContent;
     }
 
     /**
      * Returns the current application
-     * @param \BackBuilder\Event\Event $event
+     * @param  \BackBuilder\Event\Event   $event
      * @return \BackBuilder\BBApplication
      */
     private static function _getApplication(Event $event)
@@ -146,7 +145,7 @@ class IndexationListener implements EventSubscriberInterface
 
     /**
      * Returns the current entity manager
-     * @param \BackBuilder\Event\Event $event
+     * @param  \BackBuilder\Event\Event    $event
      * @return \Doctrine\ORM\EntityManager
      */
     private static function _getEntityManager(Event $event)
@@ -180,14 +179,15 @@ class IndexationListener implements EventSubscriberInterface
         // Updates site-content indexes
         self::_updateIdxSiteContents($contents_inserted, $contents_deleted);
 
-
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent))
+        if (!($content instanceof AClassContent)) {
             return;
+        }
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
-        if (NULL === $application)
+        if (NULL === $application) {
             return;
+        }
 
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
@@ -199,7 +199,7 @@ class IndexationListener implements EventSubscriberInterface
             if (is_array($content->getProperty()) && array_key_exists('indexation', $content->getProperty())) {
                 foreach ($content->getProperty('indexation') as $indexedElement) {
                     $indexedElement = (array) $indexedElement;
-                    $callback = array_key_exists(1, $indexedElement) ? $indexedElement[1] : NULL;
+                    $callback = array_key_exists(1, $indexedElement) ? $indexedElement[1] : null;
 
                     if ('@' === substr($indexedElement[0], 0, 1)) {
                         // parameter indexation
@@ -209,8 +209,8 @@ class IndexationListener implements EventSubscriberInterface
                     } else {
                         $elements = explode('->', $indexedElement[0]);
 
-                        $owner = NULL;
-                        $element = NULL;
+                        $owner = null;
+                        $element = null;
                         $value = $content;
                         foreach ($elements as $element) {
                             $owner = $value;
@@ -220,16 +220,18 @@ class IndexationListener implements EventSubscriberInterface
 
                             if (NULL !== $value) {
                                 $value = $value->getData($element);
-                                if ($value instanceof AClassContent && false == $em->contains($value))
+                                if ($value instanceof AClassContent && false == $em->contains($value)) {
                                     $value = $em->find(get_class($value), $value->getUid());
+                                }
                             }
                         }
                     }
 
                     if (NULL !== $callback) {
                         $callback = (array) $callback;
-                        foreach ($callback as $func)
+                        foreach ($callback as $func) {
                             $value = call_user_func($func, $value);
+                        }
                     }
 
                     if (NULL !== $owner && NULL !== $value) {
@@ -291,8 +293,7 @@ class IndexationListener implements EventSubscriberInterface
     {
         return array(
             'classcontent.onflush' => 'onFlushContent',
-            'nestednode.page.onflush' => 'onFlushPage'
+            'nestednode.page.onflush' => 'onFlushPage',
         );
     }
-
 }

@@ -77,9 +77,9 @@ class CacheIdentifierGenerator
     /**
      * This method will compute cache identifier with every appenders that belong to group name
      *
-     * @param  string    $group_name the group name of appenders to apply
-     * @param  string    $identifier identifier we want to update
-     * @param  IRenderer $renderer   the current renderer, can be null
+     * @param string    $group_name the group name of appenders to apply
+     * @param string    $identifier identifier we want to update
+     * @param IRenderer $renderer   the current renderer, can be null
      *
      * @return string the identifier new computed with appenders of group name
      */

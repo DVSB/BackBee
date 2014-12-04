@@ -32,7 +32,6 @@ use BackBuilder\NestedNode\Page;
 use BackBuilder\Renderer\ARenderer;
 use BackBuilder\Renderer\Event\RendererEvent;
 use BackBuilder\Util\Doctrine\ScheduledEntities;
-
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
@@ -116,7 +115,7 @@ class CacheListener implements EventSubscriberInterface
             'classcontent.onflush'       => 'onFlushContent',
             'nestednode.page.prerender'  => 'onPreRenderPage',
             'nestednode.page.postrender' => 'onPostRenderPage',
-            'nestednode.page.onflush'    => 'onFlushPage'
+            'nestednode.page.onflush'    => 'onFlushPage',
         );
     }
 
@@ -373,8 +372,8 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Checks the event and system validity then returns the content target, FALSE otherwise
-     * @param \BackBuilder\Event\Event $event
-     * @param boolean $check_status
+     * @param  \BackBuilder\Event\Event $event
+     * @param  boolean                  $check_status
      * @return boolean
      */
     private function checkCacheContentEvent($check_status = true)
@@ -398,8 +397,8 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Checks the event and system validity then returns the page target, FALSE otherwise
-     * @param \BackBuilder\Event\Event $event
-     * @param boolean $check_status
+     * @param  \BackBuilder\Event\Event $event
+     * @param  boolean                  $check_status
      * @return boolean
      */
     private function checkCachePageEvent($check_status = true)
@@ -421,11 +420,11 @@ class CacheListener implements EventSubscriberInterface
     private function getContentCacheId(ARenderer $renderer)
     {
         $cache_id = $this->identifier_generator->compute(
-            'content', $this->object->getUid() . '-' . $renderer->getMode(),
+            'content', $this->object->getUid().'-'.$renderer->getMode(),
             $renderer
         );
 
-        return md5('_content_' . $cache_id);
+        return md5('_content_'.$cache_id);
     }
 
     /**

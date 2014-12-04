@@ -24,7 +24,6 @@ namespace BackBuilder\Security\Authorization\Voter;
 use BackBuilder\BBApplication;
 use BackBuilder\Security\Token\BBUserToken;
 use BackBuilder\Security\Token\PublicKeyToken;
-
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
@@ -37,7 +36,6 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
  */
 class SudoVoter implements VoterInterface
 {
-
     private $_application;
     private $_sudoers;
 
@@ -74,7 +72,7 @@ class SudoVoter implements VoterInterface
     /**
      * {@inheritdoc}
      */
-    function vote(TokenInterface $token, $object, array $attributes)
+    public function vote(TokenInterface $token, $object, array $attributes)
     {
         $result = VoterInterface::ACCESS_ABSTAIN;
 
@@ -95,5 +93,4 @@ class SudoVoter implements VoterInterface
 
         return $result;
     }
-
 }

@@ -23,10 +23,7 @@ namespace BackBuilder\ClassContent;
 
 use BackBuilder\ClassContent\Exception\ClassContentException;
 use BackBuilder\NestedNode\Page;
-use BackBuilder\Util\Arrays;
-
 use Doctrine\Common\Collections\ArrayCollection;
-
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
@@ -154,11 +151,11 @@ abstract class AClassContent extends AContent
 
     /**
      * Class constructor
-     * @param string $uid The unique identifier of the content
-     * @param array $options Initial options for the content:
-     *                         - accept      array Acceptable class names for the value
-     *                         - maxentry    int The maxentry in value
-     *                         - default     array default value for datas
+     * @param string $uid     The unique identifier of the content
+     * @param array  $options Initial options for the content:
+     *                        - accept      array Acceptable class names for the value
+     *                        - maxentry    int The maxentry in value
+     *                        - default     array default value for datas
      */
     public function __construct($uid = null, $options = null)
     {
@@ -186,13 +183,14 @@ abstract class AClassContent extends AContent
 
     /**
      * Set the main page to this content
-     * @param \BackBuilder\NestedNode\Page $node
+     * @param  \BackBuilder\NestedNode\Page            $node
      * @return \BackBuilder\ClassContent\AClassContent the current instance
      * @codeCoverageIgnore
      */
     public function setMainNode(Page $node = null)
     {
         $this->_mainnode = $node;
+
         return $this;
     }
 
@@ -228,13 +226,14 @@ abstract class AClassContent extends AContent
 
     /**
      * Add a new revision to the collection
-     * @param \BackBuilder\ClassContent\Revision $revisions
+     * @param  \BackBuilder\ClassContent\Revision      $revisions
      * @return \BackBuilder\ClassContent\AClassContent the current instance
      * @codeCoverageIgnore
      */
     public function addRevision(Revision $revision)
     {
         $this->_revisions[] = $revision;
+
         return $this;
     }
 
@@ -263,18 +262,19 @@ abstract class AClassContent extends AContent
             return $this->_properties[$var];
         }
 
-        return null;
+        return;
     }
 
     /**
      * Updates a non persistent property value for the current instance
-     * @param string $var the name of the property
-     * @param mixed $value the value of the property
+     * @param  string                                  $var   the name of the property
+     * @param  mixed                                   $value the value of the property
      * @return \BackBuilder\ClassContent\AClassContent the current instance
      */
     public function setProperty($var, $value)
     {
         $this->_properties[$var] = $value;
+
         return $this;
     }
 
@@ -306,27 +306,29 @@ abstract class AClassContent extends AContent
     public function releaseDraft()
     {
         $this->_draft = null;
+
         return $this;
     }
 
     /**
      * Associates an user's draft to this content
-     * @param \BackBuilder\ClassContent\Revision $draft
+     * @param  \BackBuilder\ClassContent\Revision      $draft
      * @return \BackBuilder\ClassContent\AClassContent the current instance
      * @codeCoverageIgnore
      */
     public function setDraft(Revision $draft = null)
     {
         $this->_draft = $draft;
+
         return $this;
     }
 
     /**
      * Prepares to commit an user's draft data for current content
-     * @return \BackBuilder\ClassContent\AClassContent the current instance
-     * @throws \BackBuilder\ClassContent\Exception\RevisionMissingException Occurs if none draft is defined
+     * @return \BackBuilder\ClassContent\AClassContent                         the current instance
+     * @throws \BackBuilder\ClassContent\Exception\RevisionMissingException    Occurs if none draft is defined
      * @throws \BackBuilder\ClassContent\Exception\RevisionConflictedException Occurs if the revision is conlicted
-     * @throws \BackBuilder\ClassContent\Exception\RevisionUptodateException Occurs if the revision is already up to date
+     * @throws \BackBuilder\ClassContent\Exception\RevisionUptodateException   Occurs if the revision is already up to date
      */
     public function prepareCommitDraft()
     {
@@ -388,7 +390,7 @@ abstract class AClassContent extends AContent
 
     /**
      * Alternative recursive clone method, created because of problems related to doctrine clone method
-     * @param \BackBuilder\NestedNode\Page $origin_page
+     * @param  \BackBuilder\NestedNode\Page         $origin_page
      * @return \BackBuilder\ClassContent\ContentSet
      */
     public function createClone(Page $origin_page = null)
@@ -449,10 +451,10 @@ abstract class AClassContent extends AContent
 
     /**
      * Sets options at the construction of a new instance
-     * @param array $options Initial options for the content:
-     *                         - label       the label of the content
-     *                         - parameters  a set of parameters for the content
-     *                         - default     array default value for datas
+     * @param  array                                   $options Initial options for the content:
+     *                                                          - label       the label of the content
+     *                                                          - parameters  a set of parameters for the content
+     *                                                          - default     array default value for datas
      * @return \BackBuilder\ClassContent\AClassContent
      */
     protected function _setOptions($options = null)
@@ -497,8 +499,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Dynamically adds and sets new property to this content
-     * @param string $var the name of the property
-     * @param mixed $value the value of the property
+     * @param  string                                  $var   the name of the property
+     * @param  mixed                                   $value the value of the property
      * @return \BackBuilder\ClassContent\AClassContent The current instance
      */
     protected function _defineProperty($var, $value)
@@ -512,10 +514,10 @@ abstract class AClassContent extends AContent
 
     /**
      * Dynamically adds and sets new element to this content
-     * @param string $var the name of the element
-     * @param string $type the type
-     * @param array $options Initial options for the content (see this constructor)
-     * @param Boolean $updateAccept dynamically accept or not the type for the new element
+     * @param  string                                  $var          the name of the element
+     * @param  string                                  $type         the type
+     * @param  array                                   $options      Initial options for the content (see this constructor)
+     * @param  Boolean                                 $updateAccept dynamically accept or not the type for the new element
      * @return \BackBuilder\ClassContent\AClassContent The current instance
      */
     protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = true)
@@ -551,9 +553,9 @@ abstract class AClassContent extends AContent
 
     /**
      * Dynamically add and set new parameter to this content
-     * @param string $var the name of the element
-     * @param string $type the type
-     * @param array $options Initial options for the parameter (see this constructor)
+     * @param  string                                  $var     the name of the element
+     * @param  string                                  $type    the type
+     * @param  array                                   $options Initial options for the parameter (see this constructor)
      * @return \BackBuilder\ClassContent\AClassContent The current instance
      */
     protected function _defineParam($var, $type = 'scalar', $options = null)
@@ -576,8 +578,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Adds a new accepted type to the element
-     * @param string $type the type to accept
-     * @param string $var the element
+     * @param  string                                  $type the type to accept
+     * @param  string                                  $var  the element
      * @return \BackBuilder\ClassContent\AClassContent The current instance
      */
     protected function _addAcceptedType($type, $var = null)
@@ -603,8 +605,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Adds a subcontent to the collection.
-     * @param \BackBuilder\ClassContent\AClassContent $value
-     * @return string the unique identifier of the add subcontent
+     * @param  \BackBuilder\ClassContent\AClassContent $value
+     * @return string                                  the unique identifier of the add subcontent
      */
     protected function _addSubcontent(AClassContent $value)
     {
@@ -667,9 +669,9 @@ abstract class AClassContent extends AContent
 
     /**
      * Magical function to set value to given element
-     * @param string $var The name of the element
-     * @param mixed $value The value to set
-     * @return \BackBuilder\ClassContent\AClassContent The current instance content
+     * @param  string                                                       $var   The name of the element
+     * @param  mixed                                                        $value The value to set
+     * @return \BackBuilder\ClassContent\AClassContent                      The current instance content
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      * @codeCoverageIgnore
      */
@@ -790,9 +792,9 @@ abstract class AClassContent extends AContent
 
     /**
      * Sets one or all parameters
-     * @param string $var the parameter name to set, if NULL all the parameters array wil be set
-     * @param mixed $values the parameter value or all the parameters if $var is NULL
-     * @param string $type the optionnal casting type of the value
+     * @param  string                                  $var    the parameter name to set, if NULL all the parameters array wil be set
+     * @param  mixed                                   $values the parameter value or all the parameters if $var is NULL
+     * @param  string                                  $type   the optionnal casting type of the value
      * @return \BackBuilder\ClassContent\AClassContent The current instance
      * @codeCoverageIgnore
      */
@@ -803,7 +805,7 @@ abstract class AClassContent extends AContent
 
     /**
      * Checks if the element accept subcontent
-     * @param string $var the element
+     * @param  string  $var the element
      * @return Boolean TRUE if a subcontents are accepted, FALSE otherwise
      * @codeCoverageIgnore
      */
@@ -818,7 +820,7 @@ abstract class AClassContent extends AContent
      */
     public function getMode()
     {
-        $rendermode = NULL;
+        $rendermode = null;
 
         if (is_array($this->getParam('rendermode'))) {
             $rendermode = (array) $this->getParam('rendermode');
@@ -844,23 +846,23 @@ abstract class AClassContent extends AContent
 
     /**
      * Return the data of this content
-     * @param string $var The element to be return, if NULL, all datas are returned
-     * @param Boolean $forceArray Force the return as array
-     * @return mixed Could be either one or array of scalar, array, AClassContent instance
+     * @param  string                                                       $var        The element to be return, if NULL, all datas are returned
+     * @param  Boolean                                                      $forceArray Force the return as array
+     * @return mixed                                                        Could be either one or array of scalar, array, AClassContent instance
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
-     * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
+     * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException     Occurs if the class of a subcontent can not be loaded
      * @codeCoverageIgnore
      */
-    public function getData($var = NULL, $forceArray = false)
+    public function getData($var = null, $forceArray = false)
     {
         return (null != $this->getDraft()) ? $this->getDraft()->getData($var, $forceArray) : parent::getData($var, $forceArray);
     }
 
     /**
      * Returns defined parameters
-     * @param string $var The parameter to be return, if NULL, all parameters are returned
-     * @param string $type The casting type of the parameter
-     * @return mixed the parameter value or NULL if unfound
+     * @param  string $var  The parameter to be return, if NULL, all parameters are returned
+     * @param  string $type The casting type of the parameter
+     * @return mixed  the parameter value or NULL if unfound
      * @codeCoverageIgnore
      */
     public function getParam($var = null, $type = null)
@@ -924,13 +926,14 @@ abstract class AClassContent extends AContent
     /**
      * ?????????????????????
      * Unsets a subcontent to the current collection
-     * @param \BackBuilder\ClassContent\AClassContent $subContent
+     * @param  \BackBuilder\ClassContent\AClassContent $subContent
      * @return \BackBuilder\ClassContent\AClassContent
      */
     public function unsetSubContent(AClassContent $subContent)
     {
-        if (NULL !== $this->getDraft())
+        if (NULL !== $this->getDraft()) {
             return $this->getDraft()->unsetSubContent($subContent);
+        }
 
         foreach ($this->_data as $key => $value) {
             if (is_array($value)) {
@@ -962,13 +965,14 @@ abstract class AClassContent extends AContent
     /**
      * ??????????????????????????????
      * Update the instance
-     * @param Revision $lastCommitted The last committed revision of the content
+     * @param  Revision              $lastCommitted The last committed revision of the content
      * @throws ClassContentException Occurs when a data conflict is detected
      */
     public function updateDraft(Revision $lastCommitted)
     {
-        if (NULL === $revision = $this->getDraft())
+        if (NULL === $revision = $this->getDraft()) {
             throw new ClassContentException('Enable to update: missing draft', ClassContentException::REVISION_MISSING);
+        }
 
         if ($revision->getLabel() != $this->_label) {
             $revision->setState(Revision::STATE_CONFLICTED);
@@ -977,7 +981,6 @@ abstract class AClassContent extends AContent
 
         $this->releaseDraft();
         foreach ($revision->getData() as $key => $value) {
-
         }
     }
 
@@ -1005,8 +1008,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Returns a subcontent instance by its type and value, FALSE if not found
-     * @param string $type The classname of the subcontent
-     * @param string $value The value of the subcontent (uid)
+     * @param  string                                        $type  The classname of the subcontent
+     * @param  string                                        $value The value of the subcontent (uid)
      * @return \BackBuilder\ClassContent\AClassContent|FALSE
      */
     protected function _getContentByDataValue($type, $value)
@@ -1033,9 +1036,9 @@ abstract class AClassContent extends AContent
         $accepts = ($this->getAccept());
         if (isset($accepts[$var]) && !empty($accepts[$var])) {
             return reset($accepts[$var]);
-        }
-        else
+        } else {
             throw new ClassContentException(sprintf('Unknown element %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
+        }
     }
 
     /**
@@ -1055,7 +1058,7 @@ abstract class AClassContent extends AContent
             'properties' => $this->getProperty(),
             'main_node'  => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
             'is_loaded'  => $this->_isloaded,
-            'parameters' => $this->getParam()
+            'parameters' => $this->getParam(),
         );
 
         $datas['elements'] = array();

@@ -26,7 +26,6 @@ use BackBuilder\Security\Listeners\BBAuthenticationListener;
 use BackBuilder\Security\Listeners\LogoutListener;
 use BackBuilder\Security\Logout\BBLogoutHandler;
 use BackBuilder\Security\Logout\BBLogoutSuccessHandler;
-
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\HttpUtils;
 
@@ -51,7 +50,7 @@ class BBAuthContext extends AbstractContext implements ContextInterface
             $config = array_merge(array(
                 'nonce_dir' => 'security/nonces',
                 'lifetime' => 1200,
-                'use_registry' => false
+                'use_registry' => false,
             ), $config['bb_auth']);
 
             if (false !== ($default_provider = $this->getDefaultProvider($config))) {
@@ -81,7 +80,7 @@ class BBAuthContext extends AbstractContext implements ContextInterface
     /**
      * Load LogoutListener into security context
      *
-     * @param  AuthenticationProviderInterface $bb_provider
+     * @param AuthenticationProviderInterface $bb_provider
      */
     protected function loadLogoutListener(AuthenticationProviderInterface $bb_provider)
     {
@@ -97,13 +96,13 @@ class BBAuthContext extends AbstractContext implements ContextInterface
     /**
      * Returns the nonce directory path
      *
-     * @param  array $config
+     * @param array $config
      *
      * @return string the nonce directory path
      */
     protected function getNonceDirectory(array $config)
     {
-        return $this->_context->getApplication()->getCacheDir() . DIRECTORY_SEPARATOR . $config['nonce_dir'];
+        return $this->_context->getApplication()->getCacheDir().DIRECTORY_SEPARATOR.$config['nonce_dir'];
     }
 
     /**
@@ -120,5 +119,4 @@ class BBAuthContext extends AbstractContext implements ContextInterface
 
         return $repository;
     }
-
 }

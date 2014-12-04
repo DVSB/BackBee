@@ -2,27 +2,27 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode\Tests;
 
-use BackBuilder\Tests\TestCase,
-    BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
+use BackBuilder\Tests\TestCase;
+use BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
  * @category    BackBuilder
@@ -32,14 +32,13 @@ use BackBuilder\Tests\TestCase,
  */
 class ANestedNodeTest extends TestCase
 {
-
     /**
      * @var \Datetime
      */
     private $current_time;
 
     /**
-     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode 
+     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode
      */
     private $mock;
 
@@ -331,7 +330,7 @@ class ANestedNodeTest extends TestCase
             'parentuid' => null,
             'created' => $this->current_time->getTimestamp(),
             'modified' => $this->current_time->getTimestamp(),
-            'isleaf' => false
+            'isleaf' => false,
         );
 
         $expected_child = array(
@@ -342,7 +341,7 @@ class ANestedNodeTest extends TestCase
             'parentuid' => 'test',
             'created' => $now->getTimestamp(),
             'modified' => $now->getTimestamp(),
-            'isleaf' => true
+            'isleaf' => true,
         );
 
         $this->assertEquals($expected_mock, $this->mock->toArray());
@@ -354,7 +353,7 @@ class ANestedNodeTest extends TestCase
      */
     public function testSerialize()
     {
-        $expected = '{"id":"node_test","rel":"leaf","uid":"test","rootuid":"test","parentuid":null,"created":' . $this->current_time->getTimestamp() . ',"modified":' . $this->current_time->getTimestamp() . ',"isleaf":true}';
+        $expected = '{"id":"node_test","rel":"leaf","uid":"test","rootuid":"test","parentuid":null,"created":'.$this->current_time->getTimestamp().',"modified":'.$this->current_time->getTimestamp().',"isleaf":true}';
         $this->assertEquals($expected, $this->mock->serialize());
     }
 
@@ -363,7 +362,7 @@ class ANestedNodeTest extends TestCase
      */
     public function testUnserialize()
     {
-        $serialized = '{"id":"node_test","rel":"leaf","uid":"test","rootuid":"test","parentuid":null,"created":' . $this->current_time->getTimestamp() . ',"modified":' . $this->current_time->getTimestamp() . ',"isleaf":true}';
+        $serialized = '{"id":"node_test","rel":"leaf","uid":"test","rootuid":"test","parentuid":null,"created":'.$this->current_time->getTimestamp().',"modified":'.$this->current_time->getTimestamp().',"isleaf":true}';
         $new_from_string = new MockNestedNode();
         $this->assertEquals($this->mock, $new_from_string->unserialize($serialized));
 
@@ -393,7 +392,7 @@ class ANestedNodeTest extends TestCase
      */
     public function testUnserializeWithStrictOptionActivated()
     {
-        $serialized = '{"unknown":"unknown","id":"node_test","rel":"leaf","uid":"test","rootuid":"test","parentuid":null,"created":' . $this->current_time->getTimestamp() . ',"modified":' . $this->current_time->getTimestamp() . ',"isleaf":true}';
+        $serialized = '{"unknown":"unknown","id":"node_test","rel":"leaf","uid":"test","rootuid":"test","parentuid":null,"created":'.$this->current_time->getTimestamp().',"modified":'.$this->current_time->getTimestamp().',"isleaf":true}';
         $new = new MockNestedNode();
         $new->unserialize($serialized, true);
     }
@@ -406,5 +405,4 @@ class ANestedNodeTest extends TestCase
         $this->current_time = new \Datetime();
         $this->mock = new MockNestedNode('test');
     }
-
 }

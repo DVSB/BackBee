@@ -2,26 +2,24 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Serializer\Construction;
-
-
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use JMS\Serializer\VisitorInterface;
@@ -80,33 +78,33 @@ class DoctrineObjectConstructor implements ObjectConstructorInterface
             // Single identifier, load proxy
             return $objectManager->getReference($metadata->name, $data);
         }
-        
+
         // Fallback to default constructor if missing identifier(s)
         $classMetadata  = $objectManager->getClassMetadata($metadata->name);
         $identifierList = array();
 
         foreach ($classMetadata->getIdentifierFieldNames() as $name) {
-            
-            if(is_array($name)) {
+            if (is_array($name)) {
                 $name = array_shift($name);
             }
 
-            if ( ! array_key_exists($name, $data)) {
+            if (! array_key_exists($name, $data)) {
                 $targetObject = $context->attributes->get('target');
-                if($targetObject) {
+                if ($targetObject) {
                     $data = array_merge($data, $classMetadata->getIdentifierValues($targetObject->get()));
                 }
             }
 
-            if ( ! array_key_exists($name, $data)) {
+            if (! array_key_exists($name, $data)) {
                 $object = $context->attributes->get('target')->get();
                 $objectManager->initializeObject($object);
+
                 return $object;
             }
 
             $identifierList[$name] = $data[$name];
         }
-        
+
         // Entity update, load it from database
         $object = $objectManager->find($metadata->name, $identifierList);
 

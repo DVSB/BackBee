@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,7 +22,6 @@
 namespace BackBuilder\Annotations;
 
 use Doctrine\Common\Annotations\Reader;
-
 use Doctrine\Common\Annotations\AnnotationException;
 
 /**
@@ -57,8 +56,8 @@ final class ChainAnnotationReader implements Reader
     {
         $e = null;
         $annotations = array();
-        
-        foreach($this->delegates as $delegateReader) {
+
+        foreach ($this->delegates as $delegateReader) {
             try {
                 $annot = $delegateReader->getClassAnnotations($class);
                 $annotations = array_merge_recursive($annotations, $annot);
@@ -66,7 +65,7 @@ final class ChainAnnotationReader implements Reader
                 continue;
             }
         }
-        
+
         return $annotations;
     }
 
@@ -81,7 +80,7 @@ final class ChainAnnotationReader implements Reader
             }
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -90,10 +89,10 @@ final class ChainAnnotationReader implements Reader
     public function getPropertyAnnotations(\ReflectionProperty $property)
     {
         $e = null;
-        
+
         $annotations = array();
-        
-        foreach($this->delegates as $delegateReader) {
+
+        foreach ($this->delegates as $delegateReader) {
             try {
                 $annot = $delegateReader->getPropertyAnnotations($property);
                 $annotations = array_merge_recursive($annotations, $annot);
@@ -101,7 +100,7 @@ final class ChainAnnotationReader implements Reader
                 continue;
             }
         }
-        
+
         return $annotations;
     }
 
@@ -116,7 +115,7 @@ final class ChainAnnotationReader implements Reader
             }
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -127,8 +126,8 @@ final class ChainAnnotationReader implements Reader
         $e = null;
 
         $annotations = array();
-        
-        foreach($this->delegates as $delegateReader) {
+
+        foreach ($this->delegates as $delegateReader) {
             try {
                 $annot = $delegateReader->getMethodAnnotations($method);
                 $annotations = array_merge_recursive($annotations, $annot);
@@ -136,7 +135,7 @@ final class ChainAnnotationReader implements Reader
                 continue;
             }
         }
-        
+
         return $annotations;
     }
 
@@ -151,8 +150,6 @@ final class ChainAnnotationReader implements Reader
             }
         }
 
-        return null;
+        return;
     }
-
-
 }

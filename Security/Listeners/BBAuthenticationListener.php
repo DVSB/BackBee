@@ -21,13 +21,13 @@
 
 namespace BackBuilder\Security\Listeners;
 
-use BackBuilder\Security\Exception\SecurityException,
-    BackBuilder\Security\Token\BBUserToken;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
-    Symfony\Component\Security\Core\SecurityContextInterface,
-    Symfony\Component\Security\Http\Firewall\ListenerInterface;
+use BackBuilder\Security\Exception\SecurityException;
+use BackBuilder\Security\Token\BBUserToken;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
+use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -39,7 +39,6 @@ use Psr\Log\LoggerInterface;
  */
 class BBAuthenticationListener implements ListenerInterface
 {
-
     private $_context;
     private $_authenticationManager;
     private $_logger;
@@ -61,10 +60,10 @@ class BBAuthenticationListener implements ListenerInterface
         $emsg = '';
 
         try {
-            if (false === \BackBuilder\Services\Rpc\JsonRPCServer::isRPCInvokedMethodSecured($request))
+            if (false === \BackBuilder\Services\Rpc\JsonRPCServer::isRPCInvokedMethodSecured($request)) {
                 return;
+            }
         } catch (\Exception $e) {
-
         }
 
         if ($request->headers->has('X_BB_AUTH')) {
@@ -83,8 +82,9 @@ class BBAuthenticationListener implements ListenerInterface
                 try {
                     $token = $this->_authenticationManager->authenticate($token);
 
-                    if (null !== $this->_logger)
+                    if (null !== $this->_logger) {
                         $this->_logger->info(sprintf('BB Authentication request succeed for user "%s"', $username));
+                    }
 
                     return $this->_context->setToken($token);
                 } catch (SecurityException $e) {
@@ -102,8 +102,9 @@ class BBAuthenticationListener implements ListenerInterface
                     $ecode = -1;
                     $emsg = $e->getMessage();
 
-                    if (null !== $this->_logger)
+                    if (null !== $this->_logger) {
                         $this->_logger->error($e->getMessage());
+                    }
                 }
             }
 
@@ -121,5 +122,4 @@ class BBAuthenticationListener implements ListenerInterface
         $response->setStatusCode(403);
         $event->setResponse($response);
     }
-
 }

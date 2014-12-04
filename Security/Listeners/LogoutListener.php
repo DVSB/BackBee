@@ -2,37 +2,37 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Security\Listeners;
 
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\Security\Core\SecurityContextInterface,
-    Symfony\Component\Security\Http\HttpUtils,
-    Symfony\Component\Security\Http\Logout\LogoutHandlerInterface,
-    Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface,
-    Symfony\Component\Security\Http\Firewall\ListenerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\Security\Http\HttpUtils;
+use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
+use Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface;
+use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 
 /**
  * LogoutListener logout users
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Security
  * @subpackage  Listeners
@@ -41,7 +41,6 @@ use Symfony\Component\HttpFoundation\Request,
  */
 class LogoutListener implements ListenerInterface
 {
-
     /**
      * The current security context
      * @var \Symfony\Component\Security\Core\SecurityContextInterface
@@ -50,26 +49,26 @@ class LogoutListener implements ListenerInterface
 
     /**
      * An array of logout handlers
-     * @var array 
+     * @var array
      */
     private $handlers;
 
     /**
-     * @var \Symfony\Component\Security\Http\HttpUtils 
+     * @var \Symfony\Component\Security\Http\HttpUtils
      */
     private $httpUtils;
 
     /**
      * On success handler
-     * @var \Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface 
+     * @var \Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface
      */
     private $successHandler;
 
     /**
      * Class constructor
-     * @param \Symfony\Component\Security\Core\SecurityContextInterface $securityContext
-     * @param \Symfony\Component\Security\Http\HttpUtils $httpUtils An HttpUtilsInterface instance
-     * @param \Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface $successHandler A LogoutSuccessHandlerInterface instance
+     * @param \Symfony\Component\Security\Core\SecurityContextInterface             $securityContext
+     * @param \Symfony\Component\Security\Http\HttpUtils                            $httpUtils       An HttpUtilsInterface instance
+     * @param \Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface $successHandler  A LogoutSuccessHandlerInterface instance
      */
     public function __construct(SecurityContextInterface $securityContext, HttpUtils $httpUtils, LogoutSuccessHandlerInterface $successHandler)
     {
@@ -91,8 +90,8 @@ class LogoutListener implements ListenerInterface
 
     /**
      * Performs the logout if requested
-     * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event A GetResponseEvent instance
-     * @throws RuntimeException if the LogoutSuccessHandlerInterface instance does not return a response
+     * @param  \Symfony\Component\HttpKernel\Event\GetResponseEvent $event A GetResponseEvent instance
+     * @throws RuntimeException                                     if the LogoutSuccessHandlerInterface instance does not return a response
      */
     public function handle(GetResponseEvent $event)
     {
@@ -116,7 +115,7 @@ class LogoutListener implements ListenerInterface
 
     /**
      * Whether this request is asking for logout.
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param  \Symfony\Component\HttpFoundation\Request $request
      * @return Boolean
      * @codeCoverageIgnore
      */
@@ -124,5 +123,4 @@ class LogoutListener implements ListenerInterface
     {
         return true;
     }
-
 }

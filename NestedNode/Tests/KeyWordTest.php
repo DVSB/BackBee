@@ -2,27 +2,27 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode\Tests;
 
-use BackBuilder\Tests\TestCase,
-    BackBuilder\NestedNode\KeyWord;
+use BackBuilder\Tests\TestCase;
+use BackBuilder\NestedNode\KeyWord;
 
 /**
  * @category    BackBuilder
@@ -32,7 +32,6 @@ use BackBuilder\Tests\TestCase,
  */
 class KeyWordTest extends TestCase
 {
-
     /**
      * @var \Datetime
      */
@@ -79,7 +78,7 @@ class KeyWordTest extends TestCase
         $params = array(
             'left' => $this->keyword->getLeftnode(),
             'right' => $this->keyword->getRightnode(),
-            'level' => $this->keyword->getLevel()
+            'level' => $this->keyword->getLevel(),
         );
 
         $this->assertEquals($params, $this->keyword->getParam());
@@ -102,7 +101,7 @@ class KeyWordTest extends TestCase
             'created' => $this->current_time->getTimestamp(),
             'modified' => $this->current_time->getTimestamp(),
             'isleaf' => true,
-            'keyword' => 'test'
+            'keyword' => 'test',
         );
 
         $this->assertEquals($expected, $this->keyword->toArray());
@@ -129,5 +128,4 @@ class KeyWordTest extends TestCase
         $this->keyword = new KeyWord('test');
         $this->keyword->setKeyWord('test');
     }
-
 }

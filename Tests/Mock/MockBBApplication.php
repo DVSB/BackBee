@@ -21,8 +21,8 @@
 
 namespace BackBuilder\Tests\Mock;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Site\Site;
+use BackBuilder\BBApplication;
+use BackBuilder\Site\Site;
 use org\bovigo\vfs\vfsStream;
 
 /**
@@ -33,7 +33,6 @@ use org\bovigo\vfs\vfsStream;
  */
 class MockBBApplication extends BBApplication
 {
-
     private $_container;
     private $_context;
     private $_debug;
@@ -62,7 +61,7 @@ class MockBBApplication extends BBApplication
     /**
      * Mock the BBApplication class constructor
      *
-     * @param string $context
+     * @param string  $context
      * @param boolean $debug
      * @param boolean $overwrite_config
      */
@@ -79,7 +78,6 @@ class MockBBApplication extends BBApplication
             $this->_bbdir = dirname($r->getFileName());
         }
 
-
         return $this->_bbdir;
     }
 
@@ -90,7 +88,7 @@ class MockBBApplication extends BBApplication
      */
     public function getVendorDir()
     {
-        return $this->getBBDir() . '/vendor';
+        return $this->getBBDir().'/vendor';
     }
 
     /**
@@ -108,8 +106,6 @@ class MockBBApplication extends BBApplication
         return vfsStream::url('repositorydir/cache');
     }
 
-
-
     /**
      * Initilizes the mock structure
      *
@@ -117,27 +113,27 @@ class MockBBApplication extends BBApplication
      */
     protected function mockInitStructure(array $mockConfig = null)
     {
-        if(null === $mockConfig) {
+        if (null === $mockConfig) {
             $mockConfig = array(
                 'ClassContent' => [],
                 'Config' => array(
-                    'bootstrap.yml' => file_get_contents(__DIR__ . '/../Config/bootstrap.yml'),
-                    'config.yml' => file_get_contents(__DIR__ . '/../Config/config.yml'),
-                    'doctrine.yml' => file_get_contents(__DIR__ . '/../Config/doctrine.yml'),
-                    'logging.yml' => file_get_contents(__DIR__ . '/../Config/logging.yml'),
-                    'security.yml' => file_get_contents(__DIR__ . '/../Config/security.yml'),
-                    'services.yml' => file_get_contents(__DIR__ . '/../Config/services.yml'),
+                    'bootstrap.yml' => file_get_contents(__DIR__.'/../Config/bootstrap.yml'),
+                    'config.yml' => file_get_contents(__DIR__.'/../Config/config.yml'),
+                    'doctrine.yml' => file_get_contents(__DIR__.'/../Config/doctrine.yml'),
+                    'logging.yml' => file_get_contents(__DIR__.'/../Config/logging.yml'),
+                    'security.yml' => file_get_contents(__DIR__.'/../Config/security.yml'),
+                    'services.yml' => file_get_contents(__DIR__.'/../Config/services.yml'),
                 ),
                 'Layouts' => ['default.twig' => '<html></html>'],
                 'Data' => array(
                     'Media' => array(),
                     'Storage' => array(),
-                    'Tmp' => array()
+                    'Tmp' => array(),
                 ),
                 'Ressources' => array(),
                 'cache' => array(
-                    'Proxies' => array()
-                )
+                    'Proxies' => array(),
+                ),
             );
         }
 
@@ -146,7 +142,6 @@ class MockBBApplication extends BBApplication
 
         return $this;
     }
-
 
     /**
      *
@@ -164,7 +159,6 @@ class MockBBApplication extends BBApplication
         $this->_isstarted = $isStarted;
     }
 
-
     /**
      * @return boolean
      */
@@ -172,5 +166,4 @@ class MockBBApplication extends BBApplication
     {
         return (true === $this->_isstarted);
     }
-
 }

@@ -2,31 +2,31 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Stream\ClassWrapper\Adapter;
 
-use BackBuilder\Exception\BBException,
-    BackBuilder\Util\File,
-    BackBuilder\Stream\ClassWrapper\AClassWrapper,
-    BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
-use Symfony\Component\Yaml\Exception\ParseException,
-    Symfony\Component\Yaml\Yaml as parserYaml;
+use BackBuilder\Exception\BBException;
+use BackBuilder\Util\File;
+use BackBuilder\Stream\ClassWrapper\AClassWrapper;
+use BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml as parserYaml;
 
 /**
  * Stream wrapper to interprate yaml file as class content description
@@ -40,7 +40,6 @@ use Symfony\Component\Yaml\Exception\ParseException,
  */
 class Yaml extends AClassWrapper
 {
-
     /**
      * Current BackBuilder application
      * @var BackBuilder\BBApplication
@@ -88,7 +87,7 @@ class Yaml extends AClassWrapper
 
     /**
      * Extract and format datas from parser
-     * @param array $datas
+     * @param  array $datas
      * @return array The extracted datas
      */
     protected function _extractDatas($datas)
@@ -102,14 +101,18 @@ class Yaml extends AClassWrapper
             if (is_array($value)) {
                 if (isset($value['type'])) {
                     $type = $value['type'];
-                    if (isset($value['default']))
+                    if (isset($value['default'])) {
                         $options['default'] = $value['default'];
-                    if (isset($value['label']))
+                    }
+                    if (isset($value['label'])) {
                         $options['label'] = $value['label'];
-                    if (isset($value['maxentry']))
+                    }
+                    if (isset($value['maxentry'])) {
                         $options['maxentry'] = $value['maxentry'];
-                    if (isset($value['parameters']))
+                    }
+                    if (isset($value['parameters'])) {
                         $options['parameters'] = $this->_extractDatas($value['parameters']);
+                    }
                 } else {
                     $type = 'array';
                     $options['default'] = $value;
@@ -120,8 +123,9 @@ class Yaml extends AClassWrapper
                 if (strpos($value, '!!') === 0) {
                     $typedValue = explode(' ', $value, 2);
                     $type = str_replace('!!', '', $typedValue[0]);
-                    if (isset($typedValue[1]))
+                    if (isset($typedValue[1])) {
                         $options['default'] = $typedValue[1];
+                    }
                 }
             }
 
@@ -133,8 +137,8 @@ class Yaml extends AClassWrapper
 
     /**
      * Checks the validity of the extracted data from yaml file
-     * @param array $yamlDatas The yaml datas
-     * @return Boolean Returns TRUE if datas are valid, FALSE if not
+     * @param  array                 $yamlDatas The yaml datas
+     * @return Boolean               Returns TRUE if datas are valid, FALSE if not
      * @throws ClassWrapperException Occurs when datas are not valid
      */
     private function _checkDatas($yamlDatas)
@@ -158,8 +162,8 @@ class Yaml extends AClassWrapper
                         case 'extends':
                             $this->extends = $this->_normalizeVar($datas, true);
                             if (substr($this->extends, 0, 1) != NAMESPACE_SEPARATOR) {
-                                $this->extends = NAMESPACE_SEPARATOR . $this->namespace .
-                                        NAMESPACE_SEPARATOR . $this->extends;
+                                $this->extends = NAMESPACE_SEPARATOR.$this->namespace.
+                                        NAMESPACE_SEPARATOR.$this->extends;
                             }
                             break;
                         case 'interfaces':
@@ -169,7 +173,7 @@ class Yaml extends AClassWrapper
                             foreach ($datas as $i) {
                                 $interface = $i;
                                 if (NAMESPACE_SEPARATOR !== substr($i, 0, 1)) {
-                                    $interface = NAMESPACE_SEPARATOR . $i;
+                                    $interface = NAMESPACE_SEPARATOR.$i;
                                 }
 
                                 // add interface only if it exists
@@ -177,11 +181,11 @@ class Yaml extends AClassWrapper
                                     $this->interfaces[] = $interface;
                                 }
                             }
-                            
+
                             // build up interface use string
                             $str = implode(', ', $this->interfaces);
                             if (0 < count($this->interfaces)) {
-                                $this->interfaces = 'implements ' . $str;
+                                $this->interfaces = 'implements '.$str;
                             } else {
                                 $this->interfaces = '';
                             }
@@ -198,7 +202,7 @@ class Yaml extends AClassWrapper
                             foreach ($datas as $t) {
                                 $trait = $t;
                                 if (NAMESPACE_SEPARATOR !== substr($t, 0, 1)) {
-                                    $trait = NAMESPACE_SEPARATOR . $t;
+                                    $trait = NAMESPACE_SEPARATOR.$t;
                                 }
 
                                 // add traits only if it exists
@@ -210,7 +214,7 @@ class Yaml extends AClassWrapper
                             // build up trait use string
                             $str = implode(', ', $this->traits);
                             if (0 < count($this->traits)) {
-                                $this->traits = 'use ' . $str . ';';
+                                $this->traits = 'use '.$str.';';
                             } else {
                                 $this->traits = '';
                             }
@@ -230,7 +234,7 @@ class Yaml extends AClassWrapper
                 }
             }
         } catch (ClassWrapperException $e) {
-            throw new ClassWrapperException($e->getMessage(), 0, NULL, $this->_path);
+            throw new ClassWrapperException($e->getMessage(), 0, null, $this->_path);
         }
 
         return true;
@@ -238,16 +242,16 @@ class Yaml extends AClassWrapper
 
     /**
      * Return the real yaml file path of the loading class
-     * @param string $path
+     * @param  string $path
      * @return string The real path if found
      */
     private function _resolveFilePath($path)
     {
-        $path = str_replace(array($this->_protocol . '://', '/'), array('', DIRECTORY_SEPARATOR), $path);
+        $path = str_replace(array($this->_protocol.'://', '/'), array('', DIRECTORY_SEPARATOR), $path);
 
         foreach ($this->_includeExtensions as $ext) {
-            $filename = $path . $ext;
-            File::resolveFilepath($filename, NULL, array('include_path' => $this->_classcontentdir));
+            $filename = $path.$ext;
+            File::resolveFilepath($filename, null, array('include_path' => $this->_classcontentdir));
             if (true === is_file($filename)) {
                 return $filename;
             }
@@ -264,9 +268,9 @@ class Yaml extends AClassWrapper
         $classnames = array();
         foreach ($this->_classcontentdir as $repository) {
             foreach ($this->_includeExtensions as $ext) {
-                if (FALSE !== $files = glob($repository . DIRECTORY_SEPARATOR . $pattern . $ext)) {
+                if (FALSE !== $files = glob($repository.DIRECTORY_SEPARATOR.$pattern.$ext)) {
                     foreach ($files as $file) {
-                        $classnames[] = $this->namespace . NAMESPACE_SEPARATOR . str_replace(array($repository . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), array('', NAMESPACE_SEPARATOR), $file);
+                        $classnames[] = $this->namespace.NAMESPACE_SEPARATOR.str_replace(array($repository.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), array('', NAMESPACE_SEPARATOR), $file);
                     }
                 }
             }
@@ -287,16 +291,16 @@ class Yaml extends AClassWrapper
     /**
      * Opens a stream content for a yaml file
      * @see BackBuilder\Stream\ClassWrapper.IClassWrapper::stream_open()
-     * @throws BBException Occurs when none yamel files were found
+     * @throws BBException           Occurs when none yamel files were found
      * @throws ClassWrapperException Occurs when yaml file is not a valid class content description
      */
     public function stream_open($path, $mode, $options, &$opened_path)
     {
-        $path = str_replace(array($this->_protocol . '://', '/'), array('', DIRECTORY_SEPARATOR), $path);
+        $path = str_replace(array($this->_protocol.'://', '/'), array('', DIRECTORY_SEPARATOR), $path);
 
         $this->classname = basename($path);
         if (dirname($path) && dirname($path) != DIRECTORY_SEPARATOR) {
-            $this->namespace .= NAMESPACE_SEPARATOR .
+            $this->namespace .= NAMESPACE_SEPARATOR.
                     str_replace(DIRECTORY_SEPARATOR, NAMESPACE_SEPARATOR, dirname($path));
         }
 
@@ -332,7 +336,7 @@ class Yaml extends AClassWrapper
             }
         }
 
-        throw new BBException(sprintf('Class \'%s\' not found', $this->namespace . NAMESPACE_SEPARATOR . $this->classname));
+        throw new BBException(sprintf('Class \'%s\' not found', $this->namespace.NAMESPACE_SEPARATOR.$this->classname));
     }
 
     /**
@@ -341,7 +345,7 @@ class Yaml extends AClassWrapper
      */
     public function url_stat($path, $flag)
     {
-        $path = str_replace(array($this->_protocol . '://', '/'), array('', DIRECTORY_SEPARATOR), $path);
+        $path = str_replace(array($this->_protocol.'://', '/'), array('', DIRECTORY_SEPARATOR), $path);
 
         $this->_path = $this->_resolveFilePath($path);
         if (is_file($this->_path) && is_readable($this->_path)) {
@@ -354,5 +358,4 @@ class Yaml extends AClassWrapper
 
         return NULL;
     }
-
 }

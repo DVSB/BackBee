@@ -26,9 +26,7 @@ use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\Tests\Mock\ManualBBApplication;
-
 use org\bovigo\vfs\vfsStream;
-
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 
 /**
@@ -62,19 +60,19 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->resources_directory = __DIR__ . '/ContainerBuilderTest_Resources';
+        $this->resources_directory = __DIR__.'/ContainerBuilderTest_Resources';
 
         // create basic manual application without context and environment
         $this->application = new ManualBBApplication();
-        $this->application->setBase_Repository($this->resources_directory . '/repository');
+        $this->application->setBase_Repository($this->resources_directory.'/repository');
         $this->application->setRepository($this->application->getBaseRepository());
-        $this->application->setBB_Dir($this->resources_directory . '/backbee');
+        $this->application->setBB_Dir($this->resources_directory.'/backbee');
         $this->application->setConfig_Dir($this->application->getBaseRepository());
         $this->application->setBase_Dir($this->resources_directory);
 
         // setup a virtual filesystem to allow dump and restore of container
         vfsStream::setup('container_dump_directory', 0777, array(
-            'container' => array()
+            'container' => array(),
         ));
     }
 
@@ -146,7 +144,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             implode(DIRECTORY_SEPARATOR, array(
                 $this->application->getBaseDir(),
-                ContainerBuilder::DEFAULT_CACHE_FOLDER_NAME
+                ContainerBuilder::DEFAULT_CACHE_FOLDER_NAME,
             )),
             $container->getParameter('bbapp.cache.dir')
         );
@@ -154,7 +152,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($container->getParameter('bbapp.cache.autogenerate'), '%container.autogenerate%');
 
         $this->assertEquals(
-            $this->application->getRepository() . DIRECTORY_SEPARATOR . ContainerBuilder::DEFAULT_DATA_FOLDER_NAME,
+            $this->application->getRepository().DIRECTORY_SEPARATOR.ContainerBuilder::DEFAULT_DATA_FOLDER_NAME,
             $container->getParameter('bbapp.data.dir')
         );
 
@@ -187,11 +185,11 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     public function testTryParseContainerDumpWithDebugTrue(Container $container)
     {
         $this->assertEquals(
-            'bb' . md5(
+            'bb'.md5(
                 '__container__'
-                . $this->application->getContext()
-                . $this->application->getEnvironment()
-                . filemtime($container->getParameter('bootstrap_filepath'))
+                .$this->application->getContext()
+                .$this->application->getEnvironment()
+                .filemtime($container->getParameter('bootstrap_filepath'))
             ),
             $container->getParameter('container.filename')
         );
@@ -228,7 +226,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $this->application->setContext('test');
         $this->application->setEnvironment('test');
         $this->application->setRepository(
-            $this->application->getBaseRepository() . DIRECTORY_SEPARATOR . $this->application->getContext()
+            $this->application->getBaseRepository().DIRECTORY_SEPARATOR.$this->application->getContext()
         );
 
         $container_builder = new ContainerBuilder($this->application);
@@ -263,20 +261,20 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $container_proxy->setParameter('is_compiled', $dump['is_compiled']);
 
         file_put_contents(
-            $dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php',
+            $dump_directory.DIRECTORY_SEPARATOR.$dump_filename.'.php',
             (new PhpDumper($container_proxy))->dump(array(
                 'class'      => $dump_filename,
-                'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy'
+                'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy',
             ))
         );
 
-        $this->assertFileExists($dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php');
-        $this->assertTrue(is_readable($dump_directory . DIRECTORY_SEPARATOR . $dump_filename . '.php'));
+        $this->assertFileExists($dump_directory.DIRECTORY_SEPARATOR.$dump_filename.'.php');
+        $this->assertTrue(is_readable($dump_directory.DIRECTORY_SEPARATOR.$dump_filename.'.php'));
 
         $this->application->setContext('test');
         $this->application->setEnvironment('test');
         $this->application->setRepository(
-            $this->application->getBaseRepository() . DIRECTORY_SEPARATOR . $this->application->getContext()
+            $this->application->getBaseRepository().DIRECTORY_SEPARATOR.$this->application->getContext()
         );
 
         $container_builder = new ContainerBuilder($this->application);
@@ -295,7 +293,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     {
         $this->application->setContext('fake_bootstrap');
         $this->application->setRepository(
-            $this->application->getBaseRepository() . DIRECTORY_SEPARATOR . $this->application->getContext()
+            $this->application->getBaseRepository().DIRECTORY_SEPARATOR.$this->application->getContext()
         );
 
         $container_builder = new ContainerBuilder($this->application);

@@ -22,11 +22,8 @@
 namespace BackBuilder\Controller\Tests;
 
 use Symfony\Component\HttpFoundation\Request;
-
 use BackBuilder\Controller\ControllerResolver;
-
 use BackBuilder\Tests\TestCase;
-
 
 /**
  * ControllerResolver Test
@@ -35,7 +32,7 @@ use BackBuilder\Tests\TestCase;
  * @package     BackBuilder\Controller
  * @copyright   Lp system
  * @author      k.golovin
- * 
+ *
  * @coversDefaultClass \BackBuilder\Controller\ControllerResolver
  */
 class ControllerResolverTest extends TestCase
@@ -43,11 +40,10 @@ class ControllerResolverTest extends TestCase
     public function test__construct()
     {
         $resolver = new ControllerResolver($this->getBBApp());
-        
+
         $this->assertInstanceOf('BackBuilder\Controller\ControllerResolver', $resolver);
     }
 
-    
     /**
      * @covers ::getController
      * @covers ::createController
@@ -55,7 +51,7 @@ class ControllerResolverTest extends TestCase
     public function test_getController()
     {
         $resolver = new ControllerResolver($this->getBBApp());
-        
+
         $request = new Request();
         $this->assertFalse($resolver->getController($request));
     }

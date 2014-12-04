@@ -21,13 +21,11 @@
 
 namespace BackBuilder\Installer;
 
-use BackBuilder\Util\Dir;
-use Doctrine\Common\Annotations\SimpleAnnotationReader,
-    Doctrine\ORM\Mapping\Entity;
+use Doctrine\Common\Annotations\SimpleAnnotationReader;
+use Doctrine\ORM\Mapping\Entity;
 
 class EntityFinder
 {
-
     /**
      * @var array
      */
@@ -47,7 +45,6 @@ class EntityFinder
         '/helpers/',
     );
 
-
     /**
      * @var string
      */
@@ -59,7 +56,7 @@ class EntityFinder
     private $_annotationReader;
 
     /**
-     * 
+     *
      * @param string $baseDir
      */
     public function __construct($baseDir)
@@ -68,7 +65,7 @@ class EntityFinder
     }
 
     /**
-     * @param string $path
+     * @param  string $path
      * @return array
      */
     public function getEntities($path)
@@ -79,9 +76,9 @@ class EntityFinder
         $Iterator = new \RecursiveIteratorIterator($Directory);
         $objects = new \RegexIterator($Iterator, '/.*(.php)$/', \RecursiveRegexIterator::GET_MATCH);
 
-        foreach($objects as $filename => $object){
+        foreach ($objects as $filename => $object) {
             $file = explode('/', $filename);
-            if(!preg_filter($this->_ignoredFolder, array(), $file)) {
+            if (!preg_filter($this->_ignoredFolder, array(), $file)) {
                 $namespace = $this->getNamespace($filename);
                 if ($this->_isValidNamespace($namespace)) {
                     $entities[] = $namespace;
@@ -91,11 +88,11 @@ class EntityFinder
 
         return $entities;
     }
-    
+
     /**
      * Get the paths that should be excluded
-     * 
-     * @param string $path
+     *
+     * @param  string $path
      * @return array
      */
     public function getExcludePaths($path)
@@ -105,8 +102,8 @@ class EntityFinder
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
         $objects = new \RegexIterator($iterator, '/.*(.php)$/', \RecursiveRegexIterator::GET_MATCH);
 
-        foreach($objects as $filename => $object){
-            if(preg_filter($this->_ignoredFolder, array(), $filename)) {
+        foreach ($objects as $filename => $object) {
+            if (preg_filter($this->_ignoredFolder, array(), $filename)) {
                 $excludePaths[] = dirname($filename);
             }
         }
@@ -118,27 +115,27 @@ class EntityFinder
 
     public function parseFiles()
     {
-
     }
-    
+
     public function addIgnoredFolder($folder)
     {
         $this->_ignoredFolder[] = $folder;
     }
 
     /**
-     * @param string $file
+     * @param  string $file
      * @return string
      */
     public function getNamespace($file)
     {
         $classname = str_replace(array($this->_baseDir, 'bundle', '.php', '/'), array('', 'Bundle', '', '\\'), $file);
-        return (strpos($classname, 'BackBuilder') === false) ? 'BackBuilder' . $classname : $classname;
+
+        return (strpos($classname, 'BackBuilder') === false) ? 'BackBuilder'.$classname : $classname;
     }
-    
+
     /**
-     * 
-     * @param string $namespace
+     *
+     * @param  string $namespace
      * @return bool
      */
     private function _isValidNamespace($namespace)
@@ -150,7 +147,7 @@ class EntityFinder
     }
 
     /**
-     * @param \ReflectionClass $reflection
+     * @param  \ReflectionClass $reflection
      * @return boolean
      */
     private function _isEntity(\ReflectionClass $reflection)
@@ -159,7 +156,7 @@ class EntityFinder
     }
 
     /**
-     * @param \ReflectionClass $class
+     * @param  \ReflectionClass $class
      * @return Entity
      */
     private function _getEntityAnnotation(\ReflectionClass $class)
@@ -168,8 +165,7 @@ class EntityFinder
             $this->_annotationReader = new SimpleAnnotationReader();
             $this->_annotationReader->addNamespace('Doctrine\ORM\Mapping');
         }
-        
+
         return $this->_annotationReader->getClassAnnotation($class, new Entity());
     }
-
 }

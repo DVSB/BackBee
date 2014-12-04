@@ -22,7 +22,6 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -111,18 +110,18 @@ class CleanRevisionCommand extends ACommand
                           LIMIT $revision";
 
                 foreach ($conn->executeQuery($query)->fetchAll() as $row) {
-                    $validRevisions[] = '"' . $row['uid'] . '"';
+                    $validRevisions[] = '"'.$row['uid'].'"';
                 }
 
                 $conn->executeQuery(
                     "DELETE FROM revision
                      WHERE content_uid = '$contentUid'
-                     AND uid NOT IN (" . implode(', ', $validRevisions) . ')'
+                     AND uid NOT IN (".implode(', ', $validRevisions).')'
                 )->execute();
 
                 $output->writeln(
-                    "    Cleaning `$contentUid` revisions done in " . (microtime(true) - $time) . 's '
-                    . '(' . $contentCount++ . '/' . count($contentUids) . ')'
+                    "    Cleaning `$contentUid` revisions done in ".(microtime(true) - $time).'s '
+                    .'('.$contentCount++.'/'.count($contentUids).')'
                 );
             }
         }
@@ -133,7 +132,7 @@ class CleanRevisionCommand extends ACommand
 
         $output->writeln(
             "\nAfter cleaning, revision table contains $afterRevisionCount row(s) ($savedRows row(s) saved"
-            . ' - duration: ' . (microtime(true) - $starttime) . "s)\n"
+            .' - duration: '.(microtime(true) - $starttime)."s)\n"
         );
     }
 }

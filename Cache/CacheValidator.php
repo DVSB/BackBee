@@ -78,8 +78,8 @@ class CacheValidator
     /**
      * It will invoke every validators of provided group name to define if current set is valid or not
      *
-     * @param  string  $group_name the validator group name to use
-     * @param  mixed   $object
+     * @param string $group_name the validator group name to use
+     * @param mixed  $object
      *
      * @return boolean return true if every validators return true, else false
      */

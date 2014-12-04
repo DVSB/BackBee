@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -30,7 +30,6 @@ namespace BackBuilder\Services\Less;
  */
 class LessParser
 {
-
     public static $DISABLE_FILEDS = array("import 'grid_constant.less'", 'gridColumns');
     private $filename;
     private $pattern;
@@ -40,30 +39,34 @@ class LessParser
 
     /**
      * @codeCoverageIgnore
-     * @param type $attribute
-     * @param type $val
+     * @param  type $attribute
+     * @param  type $val
      * @return type
      */
     private function toLessAttr($attribute, $val)
     {
-        return "@" . str_pad($attribute . ":", 30, " ", STR_PAD_RIGHT) . $val . ";\n";
+        return "@".str_pad($attribute.":", 30, " ", STR_PAD_RIGHT).$val.";\n";
     }
 
     private function parse()
     {
         $content = file($this->filename);
-        foreach ($content as $line => $string)
+        foreach ($content as $line => $string) {
             $this->parseLine($string, $line);
+        }
+
         return $this->matchesComm;
     }
 
     private function getAttrKey($array, $needle)
     {
         foreach ($array as $keyItem => $val) {
-            if ($val['name'] == $needle)
+            if ($val['name'] == $needle) {
                 return $keyItem;
+            }
         }
-        return null;
+
+        return;
     }
 
     private function parseLine($buffer, $numline)
@@ -86,10 +89,11 @@ class LessParser
             $widget = (substr($value, 0, 1) == '#') ? 'color' : ((preg_match("/.*[\d]{2}px;$/", $value) > 0) ? 'default' : 'font');
 
             $this->matches[$attribute] = array('value' => $value, 'widget' => $widget, 'editable' => $editable);
-            if (count($this->matchesComm) != 0)
+            if (count($this->matchesComm) != 0) {
                 $this->matchesComm[count($this->matchesComm) - 1]['attributes'] = $this->matches;
-            else
+            } else {
                 $this->matchesComm[] = array('headerComm' => "", 'attributes' => $this->matches);
+            }
         }
     }
 
@@ -103,10 +107,11 @@ class LessParser
         if ($filename !== null && file_exists($filename)) {
             $this->filename = $filename;
             $this->parse();
-        } elseif ($filename !== null)
-            throw new \Exception('LessParser: file "' . $filename . '" can\'t be load');
-        else
+        } elseif ($filename !== null) {
+            throw new \Exception('LessParser: file "'.$filename.'" can\'t be load');
+        } else {
             $this->filename = "";
+        }
     }
 
     public function loadData($data = array())
@@ -121,13 +126,14 @@ class LessParser
                 $editable = (strpos($value, '@') !== false || in_array($attribute, self::$DISABLE_FILEDS)) ? false : true;
                 $widget = (substr($value, 0, 1) == '#') ? 'color' : ((preg_match("/.*[\d]{2}px;$/", $value) > 0) ? 'default' : 'font');
 
-                if (NULL !== ($attrKey = $this->getAttrKey($data, $attribute)))
+                if (NULL !== ($attrKey = $this->getAttrKey($data, $attribute))) {
                     $buffer .= $this->toLessAttr($attribute, $data[$attrKey]['value']);
-                else
+                } else {
                     $buffer .= $line;
-            }
-            else
+                }
+            } else {
                 $buffer .= $line;
+            }
         }
         $this->data = $buffer;
     }
@@ -143,10 +149,11 @@ class LessParser
 
     public function save($filename = null)
     {
-        if ($filename === null)
+        if ($filename === null) {
             $handle = fopen($this->filename, 'w');
-        else
+        } else {
             $handle = fopen($filename, 'w');
+        }
         fwrite($handle, $this->data);
         fclose($handle);
     }
@@ -154,13 +161,14 @@ class LessParser
     public function addHeader($header)
     {
         $this->matchesComm[] = array('headerComm' => $header, 'attributes' => array());
+
         return $this;
     }
 
     public function addAttribute($attr, $value)
     {
         $this->matchesComm[count($this->matchesComm) - 1]['attributes'][] = array($attr => $value);
+
         return $this;
     }
-
 }

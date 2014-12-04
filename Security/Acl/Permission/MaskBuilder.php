@@ -63,10 +63,8 @@ use Symfony\Component\Security\Acl\Permission\MaskBuilder as sfMaskBuilder;
  */
 class MaskBuilder extends sfMaskBuilder
 {
-
     const MASK_COMMIT = 256;        // 1 << 8
     const MASK_PUBLISH = 512;        // 1 << 9
     const CODE_COMMIT = 'S';
     const CODE_PUBLISH = 'P';
-
 }

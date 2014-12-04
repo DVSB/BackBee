@@ -3,8 +3,6 @@ namespace BackBuilder\Tests\Mock;
 
 use BackBuilder\FrontController\FrontController;
 
-use Faker\Factory;
-
 /**
  * @category    BackBuilder
  * @package     BackBuilder\Tests\Mock
@@ -13,5 +11,4 @@ use Faker\Factory;
  */
 class MockController extends FrontController implements IMock
 {
-    
 }

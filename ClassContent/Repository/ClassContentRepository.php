@@ -27,7 +27,6 @@ use BackBuilder\ClassContent\ContentSet;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Security\Token\BBUserToken;
 use BackBuilder\Util\Doctrine\SettablePaginator;
-
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMapping;
@@ -43,7 +42,6 @@ use Doctrine\ORM\Query\ResultSetMapping;
  */
 class ClassContentRepository extends EntityRepository
 {
-
     /**
      * Get all content uids owning the provided content
      * @param string content uid
@@ -63,7 +61,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Get all content uids owning the provided content
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\ClassContent\AClassContent $content
      * @return array
      */
     public function getParentContentUid(AClassContent $content)
@@ -73,9 +71,9 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Replace root contentset for a page and its descendants
-     * @param \BackBuilder\NestedNode\Page $page
-     * @param \BackBuilder\ClassContent\ContentSet $oldContentSet
-     * @param \BackBuilder\ClassContent\ContentSet $newContentSet
+     * @param \BackBuilder\NestedNode\Page            $page
+     * @param \BackBuilder\ClassContent\ContentSet    $oldContentSet
+     * @param \BackBuilder\ClassContent\ContentSet    $newContentSet
      * @param \BackBuilder\Security\Token\BBUserToken $userToken
      */
     public function updateRootContentSetByPage(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet, BBUserToken $userToken)
@@ -90,7 +88,7 @@ class ClassContentRepository extends EntityRepository
             ->setParameters(array(
                 "contentToReplace" => $oldContentSet,
                 "cpageLeftnode"    => $page->getLeftnode(),
-                "cpageRightnode"   => $page->getRightnode()
+                "cpageRightnode"   => $page->getRightnode(),
             ))
             ->getQuery()->getResult()
         ;
@@ -111,15 +109,15 @@ class ClassContentRepository extends EntityRepository
     /**
      * Get a selection of ClassContent
      *
-     * @param array $selector
-     * @param boolean $multipage
-     * @param boolean $recursive
-     * @param int $start
-     * @param int $limit
-     * @param boolean $limitToOnline
-     * @param boolean $excludedFromSelection
-     * @param array $classnameArr
-     * @param int $delta
+     * @param  array           $selector
+     * @param  boolean         $multipage
+     * @param  boolean         $recursive
+     * @param  int             $start
+     * @param  int             $limit
+     * @param  boolean         $limitToOnline
+     * @param  boolean         $excludedFromSelection
+     * @param  array           $classnameArr
+     * @param  int             $delta
      * @return array|Paginator
      */
     public function getSelection($selector, $multipage = false, $recursive = true, $start = 0, $limit = null, $limitToOnline = true, $excludedFromSelection = false, $classnameArr = array(), $delta = 0)
@@ -136,13 +134,13 @@ class ClassContentRepository extends EntityRepository
                 // ensure Doctrine already known these classname
                 class_exists($classname);
             }
-            $where[] = str_replace('\\', '\\\\', 'c.classname IN ("' . implode('","', $classnameArr) . '")');
+            $where[] = str_replace('\\', '\\\\', 'c.classname IN ("'.implode('","', $classnameArr).'")');
         }
 
         if (true === array_key_exists('content_uid', $selector)) {
             $uids = (array) $selector['content_uid'];
             if (false === empty($uids)) {
-                $where[] = 'c.uid IN ("' . implode('","', $uids) . '")';
+                $where[] = 'c.uid IN ("'.implode('","', $uids).'")';
             }
         }
 
@@ -154,9 +152,9 @@ class ClassContentRepository extends EntityRepository
                     $crit[1] = '=';
                 }
 
-                $alias = uniqid('i' . rand());
-                $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
-                $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value ' . $crit[1] . ' "' . $crit[0] . '"';
+                $alias = uniqid('i'.rand());
+                $join[] = 'LEFT JOIN indexation '.$alias.' ON c.uid  = '.$alias.'.content_uid';
+                $where[] = $alias.'.field = "'.$field.'" AND '.$alias.'.value '.$crit[1].' "'.$crit[0].'"';
             }
         }
 
@@ -166,8 +164,8 @@ class ClassContentRepository extends EntityRepository
                 $values = array_filter((array) $values);
                 if (0 < count($values)) {
                     $alias = md5($field);
-                    $join[] = 'LEFT JOIN indexation ' . $alias . ' ON c.uid  = ' . $alias . '.content_uid';
-                    $where[] = $alias . '.field = "' . $field . '" AND ' . $alias . '.value IN ("' . implode('","', $values) . '")';
+                    $join[] = 'LEFT JOIN indexation '.$alias.' ON c.uid  = '.$alias.'.content_uid';
+                    $where[] = $alias.'.field = "'.$field.'" AND '.$alias.'.value IN ("'.implode('","', $values).'")';
                 }
             }
         }
@@ -182,7 +180,7 @@ class ClassContentRepository extends EntityRepository
                         if (false === empty($selectedKeywords)) {
                             $contentIds = $this->_em->getRepository("BackBuilder\NestedNode\KeyWord")->getContentsIdByKeyWords($selectedKeywords, false);
                             if (true === is_array($contentIds) && false === empty($contentIds)) {
-                                $where[] = 'c.uid IN ("' . implode('","', $contentIds) . '")';
+                                $where[] = 'c.uid IN ("'.implode('","', $contentIds).'")';
                             } else {
                                 return array();
                             }
@@ -209,53 +207,53 @@ class ClassContentRepository extends EntityRepository
                     $pageSelection = array();
                     foreach ($nodes as $node) {
                         if (true === $recursive) {
-                            $pageSelection[] = '(p.root_uid="' . $node->getRoot()->getUid() . '" AND p.leftnode BETWEEN ' . $node->getLeftnode() . ' AND ' . $node->getRightnode() . ')';
+                            $pageSelection[] = '(p.root_uid="'.$node->getRoot()->getUid().'" AND p.leftnode BETWEEN '.$node->getLeftnode().' AND '.$node->getRightnode().')';
                         } else {
-                            $pageSelection[] = '(p.parent_uid="' . $node->getUid() . '")';
+                            $pageSelection[] = '(p.parent_uid="'.$node->getUid().'")';
                         }
                     }
 
                     if (count($pageSelection) != 0) {
-                        $where[] = '(' . implode(' OR ', $pageSelection) . ')';
+                        $where[] = '('.implode(' OR ', $pageSelection).')';
                     }
 
                     if (true === $limitToOnline) {
                         $where[] = 'p.state IN (1, 3)';
-                        $where[] = '(p.publishing IS NULL OR p.publishing <= "' . date('Y-m-d H:i:00', time()) . '")';
-                        $where[] = '(p.archiving IS NULL OR p.archiving >"' . date('Y-m-d H:i:00', time()) . '")';
+                        $where[] = '(p.publishing IS NULL OR p.publishing <= "'.date('Y-m-d H:i:00', time()).'")';
+                        $where[] = '(p.archiving IS NULL OR p.archiving >"'.date('Y-m-d H:i:00', time()).'")';
                     } else {
                         $where[] = 'p.state < 4';
                     }
 
-                    if (true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
-                        $orderby[] = 'p.' . $selector['orderby'][0] . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    } else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
-                        $orderby[] = 'c.' . $selector['orderby'][0] . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                    if (true === property_exists('BackBuilder\NestedNode\Page', '_'.$selector['orderby'][0])) {
+                        $orderby[] = 'p.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                    } elseif (true === property_exists('BackBuilder\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+                        $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
                     } else {
                         $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
-                        $where[] = 'isort.field = "' . $selector['orderby'][0] . '"';
-                        $orderby[] = 'isort.value' . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                        $where[] = 'isort.field = "'.$selector['orderby'][0].'"';
+                        $orderby[] = 'isort.value'.' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
                     }
                 }
             }
         }
 
         if (0 === count($orderby)) {
-            if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
-                $orderby[] = 'c.' . $selector['orderby'][0] . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+            if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+                $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
             } else {
                 $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
-                $where[] = 'isort.field = "' . $selector['orderby'][0] . '"';
-                $orderby[] = 'isort.value' . ' ' . (count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                $where[] = 'isort.field = "'.$selector['orderby'][0].'"';
+                $orderby[] = 'isort.value'.' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
             }
         }
 
         if (0 < count($join)) {
-            $query .= ' ' . implode(' ', $join);
+            $query .= ' '.implode(' ', $join);
         }
 
         if (0 < count($where)) {
-            $query .= ' WHERE ' . implode(' AND ', $where);
+            $query .= ' WHERE '.implode(' AND ', $where);
         }
 
         //Optimize multipage query
@@ -266,13 +264,13 @@ class ClassContentRepository extends EntityRepository
 
         $uids = $this->getEntityManager()
                 ->getConnection()
-                ->executeQuery(str_replace('JOIN content c', 'JOIN opt_content_modified c', $query) . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
+                ->executeQuery(str_replace('JOIN content c', 'JOIN opt_content_modified c', $query).' ORDER BY '.implode(', ', $orderby).' LIMIT '.$limit.' OFFSET '.$offset)
                 ->fetchAll(\PDO::FETCH_COLUMN);
 
         if (count($uids) < $limit) {
             $uids = $this->getEntityManager()
                     ->getConnection()
-                    ->executeQuery($query . ' ORDER BY ' . implode(', ', $orderby) . ' LIMIT ' . $limit . ' OFFSET ' . $offset)
+                    ->executeQuery($query.' ORDER BY '.implode(', ', $orderby).' LIMIT '.$limit.' OFFSET '.$offset)
                     ->fetchAll(\PDO::FETCH_COLUMN);
         }
 
@@ -281,11 +279,11 @@ class ClassContentRepository extends EntityRepository
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
 
-        if (true === $has_page_joined && true === property_exists('BackBuilder\NestedNode\Page', '_' . $selector['orderby'][0])) {
+        if (true === $has_page_joined && true === property_exists('BackBuilder\NestedNode\Page', '_'.$selector['orderby'][0])) {
             $q->join('c._mainnode', 'p')
-                    ->orderBy('p._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-        } else if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_' . $selector['orderby'][0])) {
-            $q->orderBy('c._' . $selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+                    ->orderBy('p._'.$selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
+        } elseif (true === property_exists('BackBuilder\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+            $q->orderBy('c._'.$selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
         } else {
             $q->leftJoin('c._indexation', 'isort')
                     ->andWhere('isort._field = :sort')
@@ -294,7 +292,6 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (true === $multipage) {
-
             $num_results = $this->getEntityManager()->getConnection()->executeQuery('SELECT FOUND_ROWS()')->fetch(\PDO::FETCH_COLUMN);
             $result = $q->getQuery()->getResult();
 
@@ -311,21 +308,23 @@ class ClassContentRepository extends EntityRepository
         }
 
         $result = $q->getQuery()->getResult();
+
         return $result;
     }
 
     /**
      * Returns a set of content by classname
-     * @param array $classnameArr
-     * @param array $orderInfos
-     * @param array $limitInfos
+     * @param  array $classnameArr
+     * @param  array $orderInfos
+     * @param  array $limitInfos
      * @return array
      */
     public function findContentsByClassname($classnameArr = array(), $orderInfos = array(), $limitInfos = array())
     {
         $result = array();
-        if (!is_array($classnameArr))
+        if (!is_array($classnameArr)) {
             return $result;
+        }
         $db = $this->_em->getConnection();
 
         $order = "";
@@ -341,16 +340,18 @@ class ClassContentRepository extends EntityRepository
         if ($items) {
             foreach ($items as $item) {
                 $content = $this->_em->find($item["classname"], $item["uid"]); //@fixme ->use ResultSetMapping
-                if ($content)
+                if ($content) {
                     $result[] = $content;
+                }
             }
         }
+
         return $result;
     }
 
     /**
      * Returns the hydrated content by its uid
-     * @param string $uid
+     * @param  string     $uid
      * @return array|null the content if found
      */
     public function findContentByUid($uid)
@@ -360,12 +361,12 @@ class ClassContentRepository extends EntityRepository
             return reset($results);
         }
 
-        return null;
+        return;
     }
 
     /**
      * Return the classnames from content uids
-     * @param array $uids An array of content uids
+     * @param  array $uids An array of content uids
      * @return array An array of the classnames
      */
     private function _getDistinctClassnamesFromUids(array $uids)
@@ -375,7 +376,7 @@ class ClassContentRepository extends EntityRepository
         try {
             if (0 < count($uids)) {
                 // Data protection
-                array_walk($uids, function(&$item) {
+                array_walk($uids, function (&$item) {
                             $item = addslashes($item);
                         });
 
@@ -385,7 +386,7 @@ class ClassContentRepository extends EntityRepository
                         ->createQueryBuilder()
                         ->select('classname')
                         ->from('content', 'c')
-                        ->andWhere("uid IN ('" . implode("','", $uids) . "')")
+                        ->andWhere("uid IN ('".implode("','", $uids)."')")
                         ->execute()
                         ->fetchAll(\PDO::FETCH_COLUMN);
             }
@@ -398,7 +399,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Returns the hydrated contents from their uids
-     * @param array $uids
+     * @param  array $uids
      * @return array An array of AClassContent
      */
     public function findContentsByUids(array $uids)
@@ -412,7 +413,7 @@ class ClassContentRepository extends EntityRepository
                 // Construct the DQL query
                 $query = $this->createQueryBuilder('c');
                 foreach (array_unique($classnames) as $classname) {
-                    $query = $query->orWhere('c INSTANCE OF ' . $classname);
+                    $query = $query->orWhere('c INSTANCE OF '.$classname);
                 }
                 $query = $query->andWhere('c._uid IN (:uids)')
                         ->setParameter('uids', $uids);
@@ -428,25 +429,28 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Add SQL filter to content search
-     * @param \Doctrine\ORM\Query $query
-     * @param string $name
-     * @param array $classesArray
+     * @param  \Doctrine\ORM\Query $query
+     * @param  string              $name
+     * @param  array               $classesArray
      * @return string
      */
     private function addInstanceFilters(Query $query, $name = null, $classesArray = array())
     {
         $dqlString = "";
-        if (!is_string($name))
+        if (!is_string($name)) {
             return $dqlString;
+        }
         if (is_array($classesArray) && count($classesArray)) {
             $dqlString .= $query->getDql();
             $filters = array();
             foreach ($classesArray as $classname) {
-                $filters[] = "c INSTANCE OF '" . $classname . "'";
+                $filters[] = "c INSTANCE OF '".$classname."'";
             }
             $classFilter = implode(" OR ", $filters);
+
             return $classFilter;
         }
+
         return $qlString;
     }
 
@@ -459,21 +463,22 @@ class ClassContentRepository extends EntityRepository
         $sql = "Select c.uid from content c LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid";
         $sql .= " LEFT JOIN page as p ON p.contentset = sc.parent_uid";
         $sql .= " where p.uid = :selectedNodeUid";
-        $sql .=" AND p.root_uid = :selectedPageRoot";
+        $sql .= " AND p.root_uid = :selectedPageRoot";
         $sql .= " AND p.leftnode >= :selectedPageLeftnode";
         $sql .= " AND p.rightnode <= :selectedPageRightnode";
         if ($online) {
-            $sql .=" AND p.state IN(:selectedPageState)";
+            $sql .= " AND p.state IN(:selectedPageState)";
         }
         $query = $this->_em->createNativeQuery($sql, $rsm);
         $query->setParameters(array(
             "selectedPageRoot" => $selectedNode->getRoot(),
             "selectedNodeUid" => $selectedNode->getUid(),
             "selectedPageLeftnode" => $selectedNode->getLeftnode(),
-            "selectedPageRightnode" => $selectedNode->getRightnode()));
+            "selectedPageRightnode" => $selectedNode->getRightnode(), ));
         if ($online) {
             $query->setParameter("selectedPageState", array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
         }
+
         return $query->getResult();
     }
 
@@ -493,10 +498,10 @@ class ClassContentRepository extends EntityRepository
      *
      * select content where parent_uid
      *
-     * @param array $classnames
-     * @param array $orderInfos
-     * @param array $paging
-     * @param array $cond
+     * @param  array $classnames
+     * @param  array $orderInfos
+     * @param  array $paging
+     * @param  array $cond
      * @return array
      */
     public function findContentsBySearch($classnames = array(), $orderInfos = array(), $paging = array(), $cond = array())
@@ -513,8 +518,8 @@ class ClassContentRepository extends EntityRepository
         } else {
             $result = $qb->getQuery();
         }
-        return $result;
 
+        return $result;
     }
 
     public function countContentsBySearch($classnames = array(), $cond = array())
@@ -533,7 +538,7 @@ class ClassContentRepository extends EntityRepository
     private function addContentBySearchFilters(ClassContentQueryBuilder $qb, $classnames, $orderInfos, $cond)
     {
         if (array_key_exists('selectedpageField', $cond) && !is_null($cond['selectedpageField']) && !empty($cond['selectedpageField'])) {
-        $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
+            $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
             $qb->addPageFilter($selectedNode);
         }
 
@@ -551,21 +556,21 @@ class ClassContentRepository extends EntityRepository
         }
 
         /* limit to online */
-        $limitToOnline = ( array_key_exists('only_online', $cond) && is_bool($cond['only_online']) ) ? $cond['only_online'] : true;
+        $limitToOnline = (array_key_exists('only_online', $cond) && is_bool($cond['only_online'])) ? $cond['only_online'] : true;
         if ($limitToOnline) {
             $qb->limitToOnline();
         }
 
         /* filter by content id */
         if (array_key_exists('contentIds', $cond) && is_array($cond['contentIds']) && !empty($cond['contentIds'])) {
-            $qb->addUidsFilter((array)$cond['contentIds']);
+            $qb->addUidsFilter((array) $cond['contentIds']);
         }
 
         /* handle order info */
         if (is_array($orderInfos) && array_key_exists('column', $orderInfos)) {
-            $orderInfos['column'] = ('_' === $orderInfos['column'][0] ? '' : '_') . $orderInfos['column'];
+            $orderInfos['column'] = ('_' === $orderInfos['column'][0] ? '' : '_').$orderInfos['column'];
             if (property_exists('BackBuilder\ClassContent\AClassContent', $orderInfos['column'])) {
-                $qb->orderBy('cc.' . $orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
+                $qb->orderBy('cc.'.$orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
             } else {
                 $qb->orderByIndex($orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
             }
@@ -574,7 +579,7 @@ class ClassContentRepository extends EntityRepository
         /* else try to use indexation */
         $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
         if (null != $searchField) {
-            $qb->andWhere($qb->expr()->like('cc._label', $qb->expr()->literal('%' . $searchField . '%')));
+            $qb->andWhere($qb->expr()->like('cc._label', $qb->expr()->literal('%'.$searchField.'%')));
         }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
@@ -599,19 +604,21 @@ class ClassContentRepository extends EntityRepository
     {
         $criteria = (is_array($criteria)) ? $criteria : array();
         /* join indexation */
-        if (empty($criteria))
+        if (empty($criteria)) {
             return;
+        }
         foreach ($criteria as $criterion) {
             //ajouter test
-            if (count($criterion) != 3)
+            if (count($criterion) != 3) {
                 continue;
+            }
             $criterion = (object) $criterion;
-            $alias = uniqid("i" . rand());
+            $alias = uniqid("i".rand());
             $qb->leftJoin("cc._indexation", $alias)
-                    ->andWhere($alias . "._field = :field" . $alias)
-                    ->andWhere($alias . "._value " . $criterion->op . " :value" . $alias)
-                    ->setParameter("field" . $alias, $criterion->field)
-                    ->setParameter("value" . $alias, $criterion->value);
+                    ->andWhere($alias."._field = :field".$alias)
+                    ->andWhere($alias."._value ".$criterion->op." :value".$alias)
+                    ->setParameter("field".$alias, $criterion->field)
+                    ->setParameter("value".$alias, $criterion->value);
         }
     }
 
@@ -621,7 +628,7 @@ class ClassContentRepository extends EntityRepository
             $q = $this->createQueryBuilder('c');
 
             foreach ($classnames as $classname) {
-                $q->orWhere('c INSTANCE OF ' . $classname);
+                $q->orWhere('c INSTANCE OF '.$classname);
             }
 
             $q->andWhere('c._mainnode = :node')
@@ -641,22 +648,24 @@ class ClassContentRepository extends EntityRepository
     public function countContentsByClassname($classname = array())
     {
         $result = 0;
-        if (!is_array($classname))
+        if (!is_array($classname)) {
             return $result;
+        }
         $db = $this->_em->getConnection();
         $stmt = $db->executeQuery("SELECT count(*) as total FROM `content` WHERE `classname` IN (?)", array($classname), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY));
 
         $result = $stmt->fetchColumn();
+
         return $result;
     }
 
     /**
      * Do stuf on update by post of the content editing form
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @param stdClass $value
-     * @param \BackBuilder\ClassContent\AClassContent $parent
+     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  stdClass                                $value
+     * @param  \BackBuilder\ClassContent\AClassContent $parent
      * @return \BackBuilder\ClassContent\Element\file
-     * @throws ClassContentException Occures on invalid content type provided
+     * @throws ClassContentException                   Occures on invalid content type provided
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
     {
@@ -690,8 +699,8 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Format a post (place here all other stuffs)
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @param stdClass $value
+     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  stdClass                                $value
      * @return string
      */
     public function formatPost(AClassContent $content, $value)
@@ -704,7 +713,7 @@ class ClassContentRepository extends EntityRepository
                 $pattern = '{<div class=".*aloha-image.*".*>.?<(img[^\>]*).*>.*</div>}si';
                 if (TRUE == preg_match($pattern, $val, $matches)) {
                     if (2 == count($matches)) {
-                        $val = str_replace($matches[0], '<' . $matches[1] . '/>', $val);
+                        $val = str_replace($matches[0], '<'.$matches[1].'/>', $val);
                     }
                 }
                 break;
@@ -715,9 +724,9 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Do stuf removing content from the content editing form
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @param type $value
-     * @param \BackBuilder\ClassContent\AClassContent $parent
+     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  type                                    $value
+     * @param  \BackBuilder\ClassContent\AClassContent $parent
      * @return type
      * @throws ClassContentException
      */
@@ -732,7 +741,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Set the storage directories define by the BB5 application
-     * @param \BackBuilder\BBApplication $application
+     * @param  \BackBuilder\BBApplication                                  $application
      * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
      */
     public function setDirectories(BBApplication $application = null)
@@ -742,7 +751,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Set the temporary directory
-     * @param type $temporary_dir
+     * @param  type                                                        $temporary_dir
      * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
      */
     public function setTemporaryDir($temporary_dir = null)
@@ -752,7 +761,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Set the storage directory
-     * @param type $storage_dir
+     * @param  type                                                        $storage_dir
      * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
      */
     public function setStorageDir($storage_dir = null)
@@ -762,7 +771,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Set the media library directory
-     * @param type $media_dir
+     * @param  type                                                        $media_dir
      * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
      */
     public function setMediaDir($media_dir = null)
@@ -772,9 +781,9 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Load content if need, the user's revision is also set
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @param \BackBuilder\Security\Token\BBUserToken $token
-     * @param boolean $checkoutOnMissing If true, checks out a new revision if none was found
+     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\Security\Token\BBUserToken $token
+     * @param  boolean                                 $checkoutOnMissing If true, checks out a new revision if none was found
      * @return \BackBuilder\ClassContent\AClassContent
      */
     public function load(AClassContent $content, \BackBuilder\Security\Token\BBUserToken $token = null, $checkoutOnMissing = false)
@@ -800,7 +809,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Returns the unordered children uids for $content
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\ClassContent\AClassContent $content
      * @return array
      */
     public function getUnorderedChildrenUids(AClassContent $content)
@@ -812,7 +821,7 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\ClassContent\AClassContent $content
      * @return Collection<Page>
      */
     public function findPagesByContent($content)
@@ -825,6 +834,7 @@ class ClassContentRepository extends EntityRepository
                 ->andWhere('p._contentset IN (:contentset)')
                 ->setParameter('contentset', $rootContents);
         $result = $qb->getQuery()->getResult();
+
         return $result;
     }
 
@@ -839,13 +849,14 @@ class ClassContentRepository extends EntityRepository
                 $this->getRootContentParents($content, $rootContainer);
             }
         }
+
         return $rootContainer;
     }
 
     /**
      * Returns an uid if parent with this classname found, false otherwise
-     * @param string $child_uid
-     * @param string $class_name
+     * @param  string       $child_uid
+     * @param  string       $class_name
      * @return string|false
      */
     public function getParentByClassName($child_uid, $class_name)
@@ -867,7 +878,7 @@ class ClassContentRepository extends EntityRepository
                 $result = $this->getParentByClassName($result['parent_uid'], $class_name);
             }
         } else {
-            return null;
+            return;
         }
 
         return $result;
@@ -881,7 +892,7 @@ class ClassContentRepository extends EntityRepository
     {
         $parents = $content->getParentContent();
         $media = $this->_em->getRepository('BackBuilder\NestedNode\Media')->findOneBy(array(
-            '_content' => $content->getUid()
+            '_content' => $content->getUid(),
         ));
 
         if (($parents->count() <= 1 && null === $media) || true === $mainContent) {
@@ -900,10 +911,10 @@ class ClassContentRepository extends EntityRepository
             }
 
             $this->_em->getConnection()->executeQuery(
-                'DELETE FROM indexation WHERE owner_uid = "' . $content->getUid() . '";'
+                'DELETE FROM indexation WHERE owner_uid = "'.$content->getUid().'";'
             )->execute();
             $this->_em->getConnection()->executeQuery(
-                'DELETE FROM revision WHERE content_uid = "' . $content->getUid() . '";'
+                'DELETE FROM revision WHERE content_uid = "'.$content->getUid().'";'
             )->execute();
             $this->_em->remove($content);
         }
@@ -916,7 +927,7 @@ class ClassContentRepository extends EntityRepository
             return array();
         }
 
-        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("' . implode('","', $content_uids) . '")';
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("'.implode('","', $content_uids).'")';
 
         return $this->getEntityManager()
             ->getConnection()
@@ -924,5 +935,4 @@ class ClassContentRepository extends EntityRepository
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
     }
-
 }

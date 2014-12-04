@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,7 +29,6 @@ namespace BackBuilder\Util;
  */
 class Buffer
 {
-
     private static $cli_colours_foreground = array(
         'black' => '0;30',
         'dark_gray' => '1;30',
@@ -48,7 +47,7 @@ class Buffer
         'white' => '1;37',
         'bold_gray' => '0;37',
        );
-    
+
     public static function flush()
     {
         if (!ob_get_contents()) {
@@ -69,16 +68,15 @@ class Buffer
         print self::formatOutput($string, $color);
         static::flush();
     }
-    
-    private static function formatOutput($string, $color = null) 
+
+    private static function formatOutput($string, $color = null)
     {
-        if("cli" === php_sapi_name()) {
-            if(isset(self::$cli_colours_foreground[$color])) {
-                $string = "\033[" . self::$cli_colours_foreground[$color] . 'm' . $string . "\033[0m";
+        if ("cli" === php_sapi_name()) {
+            if (isset(self::$cli_colours_foreground[$color])) {
+                $string = "\033[".self::$cli_colours_foreground[$color].'m'.$string."\033[0m";
             }
         }
-        
+
         return $string;
     }
-
 }

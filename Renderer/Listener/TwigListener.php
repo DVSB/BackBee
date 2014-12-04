@@ -35,7 +35,7 @@ class TwigListener
     /**
      * occurs on `bbapplication.start`
      *
-     * @param  Event  $event
+     * @param Event $event
      */
     public static function onApplicationStart(Event $event)
     {

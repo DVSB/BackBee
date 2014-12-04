@@ -26,7 +26,7 @@ use BackBuilder\Util\Transport\Exception\TransportException;
 /**
  * SFTP transport
  * Openssl and libssh2 are required
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @subpackage  Transport
@@ -35,7 +35,6 @@ use BackBuilder\Util\Transport\Exception\TransportException;
  */
 class SFTP extends ATransport
 {
-
     /**
      * The default port number
      * @var int
@@ -61,8 +60,8 @@ class SFTP extends ATransport
      * * username
      * * password
      * * remotepath
-     * 
-     * @param array $config
+     *
+     * @param  array                                                    $config
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if extensions OpenSSL or libssh2 are unavailable
      */
     public function __construct(array $config = array())
@@ -87,8 +86,8 @@ class SFTP extends ATransport
 
     /**
      * Establish a SSH connection
-     * @param string $host
-     * @param int $port
+     * @param  string                                                   $host
+     * @param  int                                                      $port
      * @return \BackBuilder\Util\Transport\SFTP
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occurs if connection failed
      */
@@ -99,13 +98,14 @@ class SFTP extends ATransport
         if (false === $this->_ssh_resource = ssh2_connect($this->_host, $this->_port)) {
             throw new TransportException(sprintf('Enable to connect to %s:%i.', $this->_host, $this->_port));
         }
+
         return $this;
     }
 
     /**
      * Authenticate on remote server
-     * @param string $username
-     * @param string $password
+     * @param  string                                                   $username
+     * @param  string                                                   $password
      * @return \BackBuilder\Util\Transport\SFTP
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if authentication failed
      */
@@ -122,7 +122,7 @@ class SFTP extends ATransport
             if (false === ssh2_auth_password($this->_ssh_resource, $this->_username, $this->_password)) {
                 throw new TransportException(sprintf('Could not authenticate with username %s.', $this->_username));
             }
-        }else{
+        } else {
             if (false === ssh2_auth_pubkey_file($this->_ssh_resource, $this->_username, $this->_ssh_key_pub, $this->_ssh_key_priv, $this->_ssh_key_pass)) {
                 throw new TransportException(sprintf('Could not authenticate with keyfile %s.', $this->_keyfile));
             }
@@ -131,12 +131,13 @@ class SFTP extends ATransport
         if (false === $this->_sftp_resource = ssh2_sftp($this->_ssh_resource)) {
             throw new TransportException("Could not initialize SFTP subsystem.");
         }
+
         return $this;
     }
 
     /**
      * Change remote directory
-     * @param string $dir
+     * @param  string                                                   $dir
      * @return \BackBuilder\Util\Transport\SFTP
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
@@ -150,14 +151,15 @@ class SFTP extends ATransport
         if (false === @ssh2_sftp_stat($this->_sftp_resource, $this->_remotepath)) {
             return $this->_trigger_error(sprintf('Unable to change remote directory to %s.', $this->_remotepath));
         }
-        
+
         $this->_remotepath = $dir;
+
         return true;
     }
 
     /**
      * List remote files on $dir
-     * @param string $dir
+     * @param  string                                                   $dir
      * @return array|FALSE
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
@@ -168,13 +170,13 @@ class SFTP extends ATransport
         }
 
         $dir = $this->_getAbsoluteRemotePath($dir);
-        if ('' === $data = $this->exec('ls ' . $dir)) {
+        if ('' === $data = $this->exec('ls '.$dir)) {
             return $this->_trigger_error(sprintf('Unable to list remote directory to %s.', $dir));
         }
 
         $files = array();
         foreach (explode("\n", $data) as $file) {
-            $files[] = $dir . '/' . $file;
+            $files[] = $dir.'/'.$file;
         }
 
         return $files;
@@ -196,10 +198,10 @@ class SFTP extends ATransport
 
     /**
      * Copy a local file to the remote server
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
-     * @return boolean Returns TRUE on success or FALSE on error
+     * @param  string                                                   $local_file
+     * @param  string                                                   $remote_file
+     * @param  boolean                                                  $overwrite
+     * @return boolean                                                  Returns TRUE on success or FALSE on error
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function send($local_file, $remote_file, $overwrite = false)
@@ -215,7 +217,7 @@ class SFTP extends ATransport
 
         $remote_file = $this->_getAbsoluteRemotePath($remote_file);
         @ssh2_sftp_mkdir($this->_sftp_resource, dirname($remote_file), 0777, true);
-        
+
         if (true === $overwrite || false === @ssh2_sftp_stat($this->_sftp_resource, $remote_file)) {
             if (false === @ssh2_scp_send($this->_ssh_resource, $local_file, $remote_file)) {
                 return $this->_trigger_error(sprintf('Could not send data from file %s to file %s.', $local_file, $remote_file));
@@ -229,10 +231,10 @@ class SFTP extends ATransport
 
     /**
      * Copy recursively local files to the remote server
-     * @param string $local_path
-     * @param string $remote_path
-     * @param boolean $overwrite
-     * @return boolean Returns TRUE on success or FALSE on error
+     * @param  string                                                   $local_path
+     * @param  string                                                   $remote_path
+     * @param  boolean                                                  $overwrite
+     * @return boolean                                                  Returns TRUE on success or FALSE on error
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function sendRecursive($local_path, $remote_path, $overwrite = false)
@@ -243,10 +245,10 @@ class SFTP extends ATransport
 
     /**
      * Copy a remote file on local filesystem
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
-     * @return boolean Returns TRUE on success or FALSE on error
+     * @param  string                                                   $local_file
+     * @param  string                                                   $remote_file
+     * @param  boolean                                                  $overwrite
+     * @return boolean                                                  Returns TRUE on success or FALSE on error
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function get($local_file, $remote_file, $overwrite = false)
@@ -274,10 +276,10 @@ class SFTP extends ATransport
 
     /**
      * Copy recursively remote files to the local filesystem
-     * @param string $local_path
-     * @param string $remote_path
-     * @param boolean $overwrite
-     * @return boolean Returns TRUE on success or FALSE on error
+     * @param  string                                                   $local_path
+     * @param  string                                                   $remote_path
+     * @param  boolean                                                  $overwrite
+     * @return boolean                                                  Returns TRUE on success or FALSE on error
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function getRecursive($local_path, $remote_path, $overwrite = false)
@@ -288,9 +290,9 @@ class SFTP extends ATransport
 
     /**
      * Creates a new remote directory
-     * @param string $dir
-     * @param boolean $recursive
-     * @return boolean Returns TRUE on success or FALSE on error
+     * @param  string                                                   $dir
+     * @param  boolean                                                  $recursive
+     * @return boolean                                                  Returns TRUE on success or FALSE on error
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function mkdir($dir, $recursive = false)
@@ -309,9 +311,9 @@ class SFTP extends ATransport
 
     /**
      * Deletes a remote file
-     * @param string $remote_path
-     * @param boolean $recursive
-     * @return boolean Returns TRUE on success or FALSE on error
+     * @param  string                                                   $remote_path
+     * @param  boolean                                                  $recursive
+     * @return boolean                                                  Returns TRUE on success or FALSE on error
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function delete($remote_path, $recursive = false)
@@ -339,9 +341,9 @@ class SFTP extends ATransport
 
     /**
      * Renames a remote file
-     * @param string $old_name
-     * @param string $new_name
-     * @return boolean Returns TRUE on success or FALSE on error
+     * @param  string                                                   $old_name
+     * @param  string                                                   $new_name
+     * @return boolean                                                  Returns TRUE on success or FALSE on error
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function rename($old_name, $new_name)
@@ -379,12 +381,13 @@ class SFTP extends ATransport
             $this->_ssh_resource = null;
             $this->_sftp_resource = null;
         }
+
         return $this;
     }
 
     /**
      * Executes a command on remote server
-     * @param string $command
+     * @param  string                                                   $command
      * @return string
      * @throws \BackBuilder\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
@@ -407,5 +410,4 @@ class SFTP extends ATransport
 
         return $data;
     }
-
 }

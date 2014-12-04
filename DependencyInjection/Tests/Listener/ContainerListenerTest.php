@@ -24,7 +24,6 @@ use BackBuilder\DependencyInjection\ContainerBuilder;
 use BackBuilder\DependencyInjection\Listener\ContainerListener;
 use BackBuilder\Event\Event;
 use BackBuilder\Tests\Mock\ManualBBApplication;
-
 use org\bovigo\vfs\vfsStream;
 
 /**
@@ -37,7 +36,7 @@ use org\bovigo\vfs\vfsStream;
  *
  * @coversDefaultClass \BackBuilder\DependencyInjection\Listener\ContainerListener
  */
-class ContainerTest extends \PHPUnit_Framework_TestCase
+class ContainerListenerTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * test every new and overrided method provided by BackBuilder\DependencyInjection\Container
@@ -46,22 +45,22 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testOnApplicationInitWithDebugTrue()
     {
-        $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Resources/');
+        $resources_directory = realpath(__DIR__.'/../ContainerBuilderTest_Resources/');
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
                     'services' => array(
-                        'services.yml' => file_get_contents($resources_directory . '/backbee/Config/services/services.yml')
-                    )
-                )
+                        'services.yml' => file_get_contents($resources_directory.'/backbee/Config/services/services.yml'),
+                    ),
+                ),
             ),
             'repository' => array(
                 'Config' => array(
-                    'services.yml' => file_get_contents($resources_directory . '/repository/Config/services.yml'),
-                    'bootstrap.yml' => file_get_contents($resources_directory . '/repository/Config/bootstrap.yml')
+                    'services.yml' => file_get_contents($resources_directory.'/repository/Config/services.yml'),
+                    'bootstrap.yml' => file_get_contents($resources_directory.'/repository/Config/bootstrap.yml'),
                 ),
             ),
-            'container' => array()
+            'container' => array(),
         );
 
         vfsStream::setup('full_right_base_directory', 0777, $virtual_structure);
@@ -73,7 +72,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container = $application->getContainer();
         $this->assertInstanceOf('BackBuilder\DependencyInjection\ContainerInterface', $container);
 
-        $container->setParameter('container.dump_directory', $application->getBaseDir() . '/container');
+        $container->setParameter('container.dump_directory', $application->getBaseDir().'/container');
 
         $this->assertFalse($container->isFrozen());
         $event = new Event($application);
@@ -82,7 +81,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFileNotExists(implode(DIRECTORY_SEPARATOR, array(
             $container->getParameter('container.dump_directory'),
-            $container->getParameter('container.filename')
+            $container->getParameter('container.filename'),
         )));
     }
 
@@ -91,32 +90,32 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $basic_services_yml = array(
             'parameters' => array(
                 'bbapp.logger.class'       => 'BackBuilder\Logging\Logger',
-                'bbapp.logger_debug.class' => 'BackBuilder\Logging\DebugStackLogger'
-            )
+                'bbapp.logger_debug.class' => 'BackBuilder\Logging\DebugStackLogger',
+            ),
         );
 
         $bootstrap_yml = array(
             'debug'     => false,
             'container' => array(
                 'dump_directory' => 'vfs://no_rights_base_directory/container',
-                'autogenerate'   => true
-            )
+                'autogenerate'   => true,
+            ),
         );
 
-        $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Ressources/');
+        $resources_directory = realpath(__DIR__.'/../ContainerBuilderTest_Ressources/');
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
                     'services' => array(
-                        'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
-                    )
-                )
+                        'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml),
+                    ),
+                ),
             ),
             'repository' => array(
                 'Config' => array(
-                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml)
+                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml),
                 ),
-            )
+            ),
         );
 
         vfsStream::setup('no_rights_base_directory', 0444, $virtual_structure);
@@ -126,7 +125,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $container = $application->getContainer();
         $application->setDebug_Mode(false);
-        $container->setParameter('container.dump_directory', $application->getBaseDir() . '/container');
+        $container->setParameter('container.dump_directory', $application->getBaseDir().'/container');
 
         $this->assertFalse($container->isFrozen());
         $event = new Event($application);
@@ -146,33 +145,33 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $basic_services_yml = array(
             'parameters' => array(
                 'bbapp.logger.class'       => 'BackBuilder\Logging\Logger',
-                'bbapp.logger_debug.class' => 'BackBuilder\Logging\DebugStackLogger'
-            )
+                'bbapp.logger_debug.class' => 'BackBuilder\Logging\DebugStackLogger',
+            ),
         );
 
         $bootstrap_yml = array(
             'debug'     => false,
             'container' => array(
                 'dump_directory' => 'vfs://no_rights_base_directory/container',
-                'autogenerate'   => true
-            )
+                'autogenerate'   => true,
+            ),
         );
 
-        $resources_directory = realpath(__DIR__ . '/../ContainerBuilderTest_Ressources/');
+        $resources_directory = realpath(__DIR__.'/../ContainerBuilderTest_Ressources/');
         $virtual_structure = array(
             'backbee' => array(
                 'Config' => array(
                     'services' => array(
-                        'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml)
-                    )
-                )
+                        'services.yml' => \Symfony\Component\Yaml\Yaml::dump($basic_services_yml),
+                    ),
+                ),
             ),
             'repository' => array(
                 'Config' => array(
-                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml)
+                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml),
                 ),
             ),
-            'container' => array()
+            'container' => array(),
         );
 
         vfsStream::umask(0222);
@@ -183,7 +182,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $container = $application->getContainer();
         $application->setDebug_Mode(false);
-        $container->setParameter('container.dump_directory', $application->getBaseDir() . '/container');
+        $container->setParameter('container.dump_directory', $application->getBaseDir().'/container');
 
         $this->assertFalse($container->isFrozen());
         $event = new Event($application);
@@ -201,9 +200,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     private function generateManualBBApplication($base_directory)
     {
         $application = new ManualBBApplication();
-        $application->setBase_Repository($base_directory . '/repository');
+        $application->setBase_Repository($base_directory.'/repository');
         $application->setRepository($application->getBaseRepository());
-        $application->setBB_Dir($base_directory . '/backbee');
+        $application->setBB_Dir($base_directory.'/backbee');
         $application->setConfig_Dir($application->getBaseRepository());
         $application->setBase_Dir($base_directory);
 

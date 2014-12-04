@@ -23,7 +23,6 @@ namespace BackBuilder\DependencyInjection\Tests;
 
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\DependencyInjection\Tests\RandomService;
 
 /**
  * RandomServiceProxy is the proxy class for RandomService when container will restore RandomService
@@ -48,8 +47,8 @@ class RandomServiceProxy extends RandomService implements DumpableServiceProxyIn
     /**
      * Restore current service to the dump's state
      *
-     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
-     *                     restore current service
+     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                    restore current service
      */
     public function restore(ContainerInterface $container, array $dump)
     {

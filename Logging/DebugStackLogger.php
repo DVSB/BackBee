@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -32,7 +32,7 @@ use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 class DebugStackLogger extends Logger implements DebugLoggerInterface
 {
     protected $records = array();
-    
+
     /**
      * Executed SQL queries.
      *
@@ -56,9 +56,9 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
      * @var integer
      */
     public $currentQuery = 0;
-    
+
     /**
-     * 
+     *
      * @inheritDoc
      */
     public function startQuery($sql, array $params = null, array $types = null)
@@ -67,7 +67,7 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
             $this->start = microtime(true);
             $this->queries[++$this->currentQuery] = array('sql' => $sql, 'params' => $params, 'types' => $types, 'executionMS' => 0);
         }
-        
+
         parent::startQuery($sql, $params, $types);
     }
 
@@ -82,9 +82,8 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
         parent::stopQuery();
     }
 
-
     /**
-     * 
+     *
      * @inheritDoc
      */
     public function log($level, $message, array $context = array())
@@ -98,7 +97,7 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
             'context'      => isset($context['name']) ? $context['name'] : 'default',
         );
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -106,14 +105,12 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
     {
         return $this->records;
     }
-    
+
     /**
      *
      * @inheritDoc
      */
-    public function countErrors() 
+    public function countErrors()
     {
-        
     }
-
 }

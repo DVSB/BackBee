@@ -22,12 +22,10 @@
 namespace BackBuilder\Routing;
 
 use BackBuilder\BBApplication;
-use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBuilder\Site\Site;
-
 use Symfony\Component\Routing\RouteCollection as sfRouteCollection;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -102,7 +100,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     /**
      * [pushRouteCollection description]
      * @param  array  $routes [description]
-     * @return [type]         [description]
+     * @return [type] [description]
      */
     public function pushRouteCollection(array $routes)
     {
@@ -120,7 +118,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
     /**
      * Return the path associated to a route
-     * @param string $id
+     * @param  string   $id
      * @return url|NULL
      */
     public function getRoutePath($id)
@@ -129,7 +127,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
             return $this->get($id)->getPath();
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -148,13 +146,12 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
         $add_ext = true,
         Site $site = null,
         $build_query = false
-    )
-    {
+    ) {
         $uri = $this->getRoutePath($route_name);
         $params_to_add = array();
         if (null !== $route_params && true === is_array($route_params)) {
             foreach ($route_params as $key => $value) {
-                $uri = str_replace('{' . $key . '}', $value, $uri, $count);
+                $uri = str_replace('{'.$key.'}', $value, $uri, $count);
                 if (0 === $count) {
                     $params_to_add[$key] = $value;
                 }
@@ -162,12 +159,12 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
         }
 
         $path = null !== $base_url && true === is_string($base_url)
-            ? $base_url . $uri . (false === $add_ext ? '' : $this->getDefaultExtFromSite($site))
+            ? $base_url.$uri.(false === $add_ext ? '' : $this->getDefaultExtFromSite($site))
             : $this->getUri($uri, false === $add_ext ? '' : null, $site)
         ;
 
         if (false === empty($params_to_add) && true === $build_query) {
-            $path = $path . '?' . http_build_query($params_to_add);
+            $path = $path.'?'.http_build_query($params_to_add);
         }
 
         return $path;
@@ -176,15 +173,15 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     /**
      * Returns $pathinfo with base url of current page
      * If $site is provided, the url will be pointing on the associate domain
-     * @param string $pathinfo
-     * @param string $defaultExt
-     * @param \BackBuilder\Site\Site $site
+     * @param  string                 $pathinfo
+     * @param  string                 $defaultExt
+     * @param  \BackBuilder\Site\Site $site
      * @return string
      */
     public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
     {
         if (true === array_key_exists((int) $url_type, $this->uri_prefixes)) {
-            $pathinfo = '/' . $this->uri_prefixes[(int) $url_type] . '/' . $pathinfo;
+            $pathinfo = '/'.$this->uri_prefixes[(int) $url_type].'/'.$pathinfo;
         }
 
         // If scheme already provided, return pathinfo
@@ -193,7 +190,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
         }
 
         if ('/' !== substr($pathinfo, 0, 1)) {
-            $pathinfo = '/' . $pathinfo;
+            $pathinfo = '/'.$pathinfo;
         }
 
         // If no BBApplication or no Request, return pathinfo
@@ -230,7 +227,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      */
     public function getClassProxy()
     {
-        return null;
+        return;
     }
 
     /**
@@ -254,7 +251,6 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
         $this->is_restored = true;
     }
-
 
     /**
      * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::isRestored
@@ -295,8 +291,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
     /**
      * Returns uri from pathinfo according to current request BaseUrl()
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param string $pathinfo
+     * @param  \Symfony\Component\HttpFoundation\Request $request
+     * @param  string                                    $pathinfo
      * @return string
      */
     private function getUriFromBaseUrl()
@@ -306,8 +302,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
         if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
             return $request->getSchemeAndHttpHost()
-                    . substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl()))))
-                    . $pathinfo;
+                    .substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl()))))
+                    .$pathinfo;
         } else {
             return $request->getUriForPath($pathinfo);
         }
@@ -315,19 +311,19 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
     /**
      * Returns uri from pathinfo according to site to be reached
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param string $pathinfo
-     * @param \BackBuilder\Site\Site $site
+     * @param  \Symfony\Component\HttpFoundation\Request $request
+     * @param  string                                    $pathinfo
+     * @param  \BackBuilder\Site\Site                    $site
      * @return string
      */
     private function getUriForSite(Request $request, $pathinfo, Site $site)
     {
-        return $request->getScheme() . '://' . $site->getServerName() . $pathinfo;
+        return $request->getScheme().'://'.$site->getServerName().$pathinfo;
     }
 
     /**
      * Returns the default extension for a site
-     * @param \BackBuilder\Site\Site $site
+     * @param  \BackBuilder\Site\Site $site
      * @return string|null
      */
     private function getDefaultExtFromSite(Site $site = null)
@@ -343,5 +339,4 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
         return $extension;
     }
-
 }

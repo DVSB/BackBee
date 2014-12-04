@@ -28,15 +28,12 @@ use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBuilder\Event\Event;
 use BackBuilder\Exception\BBException;
-use BackBuilder\Exception\UnknownContextException;
 use BackBuilder\NestedNode\Repository\NestedNodeRepository;
 use BackBuilder\Site\Site;
 use BackBuilder\Theme\Theme;
 use BackBuilder\Util\File;
-
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\AnnotationReader;
-
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -54,7 +51,6 @@ use Symfony\Component\Finder\Finder;
  */
 class BBApplication implements IApplication, DumpableServiceInterface, DumpableServiceProxyInterface
 {
-
     const VERSION = '0.10.0';
 
     /**
@@ -114,8 +110,8 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * @param string $context
-     * @param true $debug
-     * @param true $overwrite_config set true if you need overide base config with the context config
+     * @param true   $debug
+     * @param true   $overwrite_config set true if you need overide base config with the context config
      */
     public function __construct($context = null, $environment = null, $overwrite_config = false)
     {
@@ -190,13 +186,13 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Returns the associated theme
-     * @param boolean $force_reload Force to reload the theme if true
+     * @param  boolean                  $force_reload Force to reload the theme if true
      * @return \BackBuilder\Theme\Theme
      */
     public function getTheme($force_reload = false)
     {
         if (null === $this->getConfig()->getSection('themes_dir') || null === $this->getConfig()->getThemeConfig()) {
-            return null;
+            return;
         }
 
         if (false === is_object($this->_theme) || true === $force_reload) {
@@ -253,14 +249,14 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @param type $name
+     * @param  type    $name
      * @return ABundle
      */
     public function getBundle($name)
     {
         $bundle = null;
-        if (true === $this->getContainer()->has('bundle.' . $name)) {
-            $bundle = $this->getContainer()->get('bundle.' . $name);
+        if (true === $this->getContainer()->has('bundle.'.$name)) {
+            $bundle = $this->getContainer()->get('bundle.'.$name);
         }
 
         return $bundle;
@@ -395,7 +391,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function getVendorDir()
     {
-        return $this->getBaseDir() . '/vendor';
+        return $this->getBaseDir().'/vendor';
     }
 
     /**
@@ -448,6 +444,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         $conf = $this->getConfig()->getCacheConfig();
         $defaultClass = '\BackBuilder\Cache\DAO\Cache';
         $parentClass = '\BackBuilder\Cache\AExtendedCache';
+
         return (isset($conf['provider']) && is_subclass_of($conf['provider'], $parentClass) ? $conf['provider'] : $defaultClass);
     }
 
@@ -519,12 +516,12 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     public function getConfigDir()
     {
-        return $this->getRepository() . '/' . 'Config';
+        return $this->getRepository().'/'.'Config';
     }
 
     public function getBBConfigDir()
     {
-        return $this->getBaseRepository() . '/' . 'Config';
+        return $this->getBaseRepository().'/'.'Config';
     }
 
     /**
@@ -581,7 +578,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (null === $this->_repository) {
             $this->_repository = $this->getBaseRepository();
             if (true === $this->hasContext()) {
-                $this->_repository .= '/' . $this->_context;
+                $this->_repository .= '/'.$this->_context;
             }
         }
 
@@ -591,8 +588,9 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function getBaseRepository()
     {
         if (null === $this->_base_repository) {
-            $this->_base_repository = $this->getBaseDir() . '/' . 'repository';
+            $this->_base_repository = $this->getBaseDir().'/'.'repository';
         }
+
         return $this->_base_repository;
     }
 
@@ -605,11 +603,11 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (null === $this->_classcontentdir) {
             $this->_classcontentdir = array();
 
-            array_unshift($this->_classcontentdir, $this->getBaseDir() . '/BackBuilder/ClassContent');
-            array_unshift($this->_classcontentdir, $this->getBaseDir() . '/repository/ClassContent');
+            array_unshift($this->_classcontentdir, $this->getBaseDir().'/BackBuilder/ClassContent');
+            array_unshift($this->_classcontentdir, $this->getBaseDir().'/repository/ClassContent');
 
             if (true === $this->hasContext()) {
-                array_unshift($this->_classcontentdir, $this->getRepository() . '/ClassContent');
+                array_unshift($this->_classcontentdir, $this->getRepository().'/ClassContent');
             }
 
             //array_walk($this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
@@ -621,7 +619,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Push one directory at the end of classcontent dirs
-     * @param string $dir
+     * @param  string                     $dir
      * @return \BackBuilder\BBApplication
      */
     public function pushClassContentDir($dir)
@@ -638,7 +636,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Prepend one directory at the beginning of classcontent dirs
-     * @param type $dir
+     * @param  type                       $dir
      * @return \BackBuilder\BBApplication
      */
     public function unshiftClassContentDir($dir)
@@ -662,23 +660,23 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (null === $this->_resourcedir) {
             $this->_resourcedir = array();
 
-            $this->addResourceDir($this->getBBDir() . '/Resources');
+            $this->addResourceDir($this->getBBDir().'/Resources');
 
-            if (true === is_dir($this->getBaseRepository() . '/Resources')) {
-                $this->addResourceDir($this->getBaseRepository() . '/Resources');
+            if (true === is_dir($this->getBaseRepository().'/Resources')) {
+                $this->addResourceDir($this->getBaseRepository().'/Resources');
             }
 
-            if (true === is_dir($this->getBaseRepository() . '/Ressources')) {
-                $this->addResourceDir($this->getBaseRepository() . '/Ressources');
+            if (true === is_dir($this->getBaseRepository().'/Ressources')) {
+                $this->addResourceDir($this->getBaseRepository().'/Ressources');
             }
 
             if (true === $this->hasContext()) {
-                if (true === is_dir($this->getRepository() . '/Resources')) {
-                    $this->addResourceDir($this->getRepository() . '/Resources');
+                if (true === is_dir($this->getRepository().'/Resources')) {
+                    $this->addResourceDir($this->getRepository().'/Resources');
                 }
 
-                if (true === is_dir($this->getRepository() . '/Resources')) {
-                    $this->addResourceDir($this->getRepository() . '/Resources');
+                if (true === is_dir($this->getRepository().'/Resources')) {
+                    $this->addResourceDir($this->getRepository().'/Resources');
                 }
             }
 
@@ -691,7 +689,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Push one directory at the end of resources dirs
-     * @param string $dir
+     * @param  string                     $dir
      * @return \BackBuilder\BBApplication
      */
     public function pushResourceDir($dir)
@@ -708,7 +706,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Prepend one directory at the begining of resources dirs
-     * @param type $dir
+     * @param  type                       $dir
      * @return \BackBuilder\BBApplication
      */
     public function unshiftResourceDir($dir)
@@ -725,9 +723,9 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Prepend one directory of resources
-     * @param String $dir The new resource directory to add
+     * @param  String                     $dir The new resource directory to add
      * @return \BackBuilder\BBApplication The current BBApplication
-     * @throws BBException Occur on invalid path or invalid resource directories
+     * @throws BBException                Occur on invalid path or invalid resource directories
      */
     public function addResourceDir($dir)
     {
@@ -750,7 +748,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Return the current resource dir (ie the first one in those defined)
-     * @return string the file path of the current resource dir
+     * @return string      the file path of the current resource dir
      * @throws BBException Occur when none resource dir is defined
      */
     public function getCurrentResourceDir()
@@ -807,8 +805,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function getSession()
     {
         if (null === $this->getRequest()->getSession()) {
-
-            if('test' === $this->getEnvironment()) {
+            if ('test' === $this->getEnvironment()) {
                 $session = new Session(new MockArraySessionStorage());
             } else {
                 $session = new Session();
@@ -848,7 +845,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function getStorageDir()
     {
         if (null === $this->_storagedir) {
-            $this->_storagedir = $this->_container->getParameter('bbapp.data.dir') . '/' . 'Storage';
+            $this->_storagedir = $this->_container->getParameter('bbapp.data.dir').'/'.'Storage';
         }
 
         return $this->_storagedir;
@@ -860,7 +857,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function getTemporaryDir()
     {
         if (null === $this->_tmpdir) {
-            $this->_tmpdir = $this->_container->getParameter('bbapp.data.dir') . '/' . 'Tmp';
+            $this->_tmpdir = $this->_container->getParameter('bbapp.data.dir').'/'.'Tmp';
         }
 
         return $this->_tmpdir;
@@ -899,16 +896,16 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function registerCommands(Console $console)
     {
-        if (is_dir($dir = $this->getBBDir() . '/Command')) {
+        if (is_dir($dir = $this->getBBDir().'/Command')) {
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
             $ns = 'BackBuilder\\Command';
 
             foreach ($finder as $file) {
                 if ($relativePath = $file->getRelativePath()) {
-                    $ns .= '\\' . strtr($relativePath, '/', '\\');
+                    $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
-                $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
+                $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
                 if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                     $console->add($r->newInstance());
                 }
@@ -916,19 +913,19 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         }
 
         foreach ($this->getBundles() as $bundle) {
-            if (!is_dir($dir = $bundle->getBaseDirectory() . '/Command')) {
+            if (!is_dir($dir = $bundle->getBaseDirectory().'/Command')) {
                 continue;
             }
 
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
-            $ns = $bundle->getNamespace() . '\\Command';
+            $ns = $bundle->getNamespace().'\\Command';
 
             foreach ($finder as $file) {
                 if ($relativePath = $file->getRelativePath()) {
-                    $ns .= '\\' . strtr($relativePath, '/', '\\');
+                    $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
-                $r = new \ReflectionClass($ns . '\\' . $file->getBasename('.php'));
+                $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
                 if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && 0 === $r->getConstructor()->getNumberOfRequiredParameters()) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
@@ -945,7 +942,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function getClassProxy()
     {
-        return null;
+        return;
     }
 
     /**
@@ -958,15 +955,15 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     {
         return array_merge($this->dump_datas, array(
             'classcontent_directories' => $this->_classcontentdir,
-            'resources_directories'    => $this->_resourcedir
+            'resources_directories'    => $this->_resourcedir,
         ));
     }
 
     /**
      * Restore current service to the dump's state
      *
-     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
-     *                     restore current service
+     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                    restore current service
      */
     public function restore(ContainerInterface $container, array $dump)
     {
@@ -995,7 +992,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * [_initContainer description]
      * @param  boolean $force_reload [description]
-     * @return [type]                [description]
+     * @return [type]  [description]
      */
     private function _initContainer()
     {
@@ -1055,7 +1052,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
             ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
             ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')))
-            ->registerNamespace('Respect\Validation\Rules', implode(DIRECTORY_SEPARATOR, array($this->getBBDir(),'Validator','Rules')));
+            ->registerNamespace('Respect\Validation\Rules', implode(DIRECTORY_SEPARATOR, array($this->getBBDir(), 'Validator', 'Rules')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
@@ -1077,8 +1074,8 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     {
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
-            'Symfony\Component\Validator\Constraint' => $this->getVendorDir() . '/symfony/symfony/src/',
-            'JMS\Serializer\Annotation' => $this->getVendorDir() . '/jms/serializer/src/',
+            'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/symfony/src/',
+            'JMS\Serializer\Annotation' => $this->getVendorDir().'/jms/serializer/src/',
             'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
             'BackBuilder' => $this->getBaseDir(),
             //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
@@ -1144,7 +1141,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
             $console_command = $this->_container->getParameter('bbapp.console.command');
             if ('/' !== $console_command[0]) {
-                $console_command = $this->getBaseDir() . '/' . $console_command;
+                $console_command = $this->getBaseDir().'/'.$console_command;
                 $this->_container->setParameter('bbapp.console.command', $console_command);
             }
 
@@ -1170,7 +1167,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         }
 
         if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
-            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir() . '/' . 'Proxies';
+            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir().'/'.'Proxies';
         }
 
         if (true === array_key_exists('orm', $doctrine_config)) {
@@ -1200,7 +1197,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 $doctrine_config['dbal'],
                 new Reference($logger_id),
                 new Reference('doctrine.event_manager'),
-                new Reference('service_container')
+                new Reference('service_container'),
             ));
             $definition->setFactoryClass('BackBuilder\Util\Doctrine\EntityManagerCreator');
             $definition->setFactoryMethod('create');

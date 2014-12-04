@@ -61,9 +61,9 @@ class RightManager
     /**
      * Return true if the $operation is authorized on $entity's $attribute, else false
      *
-     * @param  object $entity
-     * @param  string $attribute
-     * @param  string $operation
+     * @param object $entity
+     * @param string $attribute
+     * @param string $operation
      *
      * @return boolean true if $operation is authorized, else false
      */
@@ -91,7 +91,7 @@ class RightManager
      * Add authorization mapping for entity
      *
      * @param object $entity
-     * @param array $mapping
+     * @param array  $mapping
      *
      * @return self
      */
@@ -105,7 +105,7 @@ class RightManager
     /**
      * Builds the authtorization mapping for the given $classname
      *
-     * @param  string $classname
+     * @param string $classname
      */
     private function buildRights($classname)
     {
@@ -131,7 +131,7 @@ class RightManager
     /**
      * This method will replace '_' by '' of $property_name if its first letter is an underscore (_)
      *
-     * @param  string $property_name the property we want to clean
+     * @param string $property_name the property we want to clean
      *
      * @return string cleaned property name
      */
@@ -144,8 +144,8 @@ class RightManager
      * Builds a valid method name for property name; Replaces every '_' by ''
      * and apply ucfirst to every words seperated by an underscore
      *
-     * @param  string $prefix        the prefix to prepend to the method name (example: 'get', 'set', 'is')
-     * @param  string $property_name
+     * @param string $prefix        the prefix to prepend to the method name (example: 'get', 'set', 'is')
+     * @param string $property_name
      *
      * @return string a valid method name
      */
@@ -156,6 +156,6 @@ class RightManager
             return ucfirst($str);
         }, $method_name);
 
-        return $prefix . implode('', $method_name);
+        return $prefix.implode('', $method_name);
     }
 }

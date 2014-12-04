@@ -22,9 +22,7 @@ namespace BackBuilder\Rest\EventListener;
 
 use BackBuilder\Event\Listener\APathEnabledListener;
 use BackBuilder\Rest\Exception\ValidationException;
-
 use Metadata\MetadataFactory;
-
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator;
@@ -72,14 +70,14 @@ class PaginationListener extends APathEnabledListener
 
         $controller = $event->getController();
 
-        if (false === in_array($request->getMethod(), array('GET', 'HEAD', 'DELETE')))  {
+        if (false === in_array($request->getMethod(), array('GET', 'HEAD', 'DELETE'))) {
             // pagination only makes sense with GET or DELETE methods
             return;
         }
 
         $metadata = $this->getControllerActionMetadata($controller);
 
-        if (null === $metadata || null === $metadata->default_start)  {
+        if (null === $metadata || null === $metadata->default_start) {
             // no annotations defined for this controller
             return;
         }
@@ -103,12 +101,12 @@ class PaginationListener extends APathEnabledListener
             // NB: Type assert must come first as otherwise it won't be called
             new \Symfony\Component\Validator\Constraints\Type(array(
                 'type'    => 'numeric',
-                'message' => 'Headers "Range" attribute first operand (=start) must be a positive integer'
+                'message' => 'Headers "Range" attribute first operand (=start) must be a positive integer',
             )),
             new \Symfony\Component\Validator\Constraints\Range(array(
                 'min'        => 0,
-                'minMessage' => 'Headers "Range" attribute first operand (=start) must be a positive integer'
-            ))
+                'minMessage' => 'Headers "Range" attribute first operand (=start) must be a positive integer',
+            )),
 
         ));
 
@@ -117,13 +115,13 @@ class PaginationListener extends APathEnabledListener
             // NB: Type assert must come first as otherwise it won't be called
             new \Symfony\Component\Validator\Constraints\Type(array(
                 'type' => 'numeric',
-                'message' => "$count_label must be a positive integer"
+                'message' => "$count_label must be a positive integer",
             )),
             new \Symfony\Component\Validator\Constraints\Range(array(
                 'min'        => $metadata->min_count,
-                'minMessage' => "$count_label must be greater than or equal to " . $metadata->min_count,
+                'minMessage' => "$count_label must be greater than or equal to ".$metadata->min_count,
                 'max'        => $metadata->max_count,
-                'maxMessage' => "$count_label must be less than or equal to " . $metadata->max_count
+                'maxMessage' => "$count_label must be less than or equal to ".$metadata->max_count,
             )),
         ));
 
@@ -132,7 +130,7 @@ class PaginationListener extends APathEnabledListener
 
         $violation_param = $this->getViolationsParameterName($metadata);
 
-        if(null !== $violation_param) {
+        if (null !== $violation_param) {
             // if action has an argument for violations, pass it
             $request->attributes->set($violation_param, $violations);
         } elseif (0 < count($violations)) {
@@ -150,7 +148,7 @@ class PaginationListener extends APathEnabledListener
 
     /**
      *
-     * @param mixed $controller
+     * @param  mixed                                    $controller
      * @return \BackBuilder\Rest\Mapping\ActionMetadata
      */
     protected function getControllerActionMetadata($controller)
@@ -162,7 +160,7 @@ class PaginationListener extends APathEnabledListener
         $controllerMetadata = $metadata->getOutsideClassMetadata();
 
         $action_metadatas = null;
-        if(array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
+        if (array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
             $action_metadatas = $controllerMetadata->methodMetadata[$controller[1]];
         }
 
@@ -171,7 +169,7 @@ class PaginationListener extends APathEnabledListener
 
     /**
      *
-     * @param \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata $metadata
+     * @param  \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata $metadata
      * @return string|null
      */
     protected function getViolationsParameterName($metadata)

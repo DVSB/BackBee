@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,15 +22,8 @@
 namespace BackBuilder\Rest\Tests\Encoder;
 
 use BackBuilder\Tests\TestCase;
-
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\Serializer\Encoder\JsonEncoder;
-
-use BackBuilder\Rest\EventListener\BodyListener,
-    BackBuilder\FrontController\FrontController,
-    BackBuilder\Rest\Encoder\ContainerEncoderProvider;
-
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use BackBuilder\Rest\Encoder\ContainerEncoderProvider;
 
 /**
  * Test for Encoder class
@@ -39,12 +32,11 @@ use BackBuilder\Rest\EventListener\BodyListener,
  * @package     BackBuilder\Security
  * @copyright   Lp digital system
  * @author      k.golovin
- * 
+ *
  * @coversDefaultClass \BackBuilder\Rest\Encoder\ContainerEncoderProvider
  */
 class ContainerEncoderProviderTest extends TestCase
 {
-
     /**
      * @covers ::__construct
      */
@@ -53,13 +45,13 @@ class ContainerEncoderProviderTest extends TestCase
         $container = new \BackBuilder\DependencyInjection\Container();
         $jsonEncoderId = 'rest.encoder.json';
         $provider = new ContainerEncoderProvider([
-            'json' => $jsonEncoderId
+            'json' => $jsonEncoderId,
         ]);
         $provider->setContainer($container);
-        
+
         $this->assertInstanceOf('BackBuilder\Rest\Encoder\ContainerEncoderProvider', $provider);
     }
-    
+
     /**
      * @covers ::getEncoder
      */
@@ -68,17 +60,17 @@ class ContainerEncoderProviderTest extends TestCase
         $jsonEncoderId = 'rest.encoder.json';
         $container = new \BackBuilder\DependencyInjection\Container();
         $container->set($jsonEncoderId, new \Symfony\Component\Serializer\Encoder\JsonEncoder());
-        
+
         $provider = new ContainerEncoderProvider([
-            'json' => $jsonEncoderId
+            'json' => $jsonEncoderId,
         ]);
         $provider->setContainer($container);
-        
+
         $encoder = $provider->getEncoder('json');
-        
+
         $this->assertInstanceOf('Symfony\Component\Serializer\Encoder\JsonEncoder', $encoder);
     }
-    
+
     /**
      * @covers ::getEncoder
      * @expectedException \InvalidArgumentException
@@ -89,16 +81,15 @@ class ContainerEncoderProviderTest extends TestCase
         $jsonEncoderId = 'rest.encoder.json';
         $container = new \BackBuilder\DependencyInjection\Container();
         $container->set($jsonEncoderId, new \Symfony\Component\Serializer\Encoder\JsonEncoder());
-        
+
         $provider = new ContainerEncoderProvider([
-            'json' => $jsonEncoderId
+            'json' => $jsonEncoderId,
         ]);
         $provider->setContainer($container);
-        
+
         $encoder = $provider->getEncoder('xml');
     }
-    
-    
+
     /**
      * @covers ::supports
      */
@@ -109,15 +100,13 @@ class ContainerEncoderProviderTest extends TestCase
         $container = new \BackBuilder\DependencyInjection\Container();
         $jsonEncoderId = 'unit_test.json_encoder';
         $container->set($jsonEncoderId, new \Symfony\Component\Serializer\Encoder\JsonEncoder());
-        
+
         $provider = new ContainerEncoderProvider([
-            'json' => $jsonEncoderId
+            'json' => $jsonEncoderId,
         ]);
         $provider->setContainer($container);
-        
+
         $this->assertTrue($provider->supports('json'));
         $this->assertFalse($provider->supports('xml'));
     }
-    
-    
 }

@@ -21,11 +21,10 @@
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\Services\Local\AbstractServiceLocal,
-    BackBuilder\Services\Content\Category,
-    BackBuilder\Services\Content\ContentRender,
-    BackBuilder\Services\Exception\ServicesException,
-    BackBuilder\Util\String;
+use BackBuilder\Services\Content\Category;
+use BackBuilder\Services\Content\ContentRender;
+use BackBuilder\Services\Exception\ServicesException;
+use BackBuilder\Util\String;
 
 /**
  * RPC services for AClassContent management
@@ -38,7 +37,6 @@ use BackBuilder\Services\Local\AbstractServiceLocal,
  */
 class ContentBlocks extends AbstractServiceLocal
 {
-
     const CONTENT_PATH = "BackBuilder\\ClassContent\\";
 
     private $_availableMedias;
@@ -51,7 +49,7 @@ class ContentBlocks extends AbstractServiceLocal
     public function getContentsByCategory($name = "tous")
     {
         $name = ucfirst($name);
-        $cache_id = md5(__CLASS__ . __METHOD__ . $name);
+        $cache_id = md5(__CLASS__.__METHOD__.$name);
         if (false !== $cached = $this->_loadCache($cache_id)) {
             $contents = @unserialize($cached);
             if (false !== $contents) {
@@ -71,6 +69,7 @@ class ContentBlocks extends AbstractServiceLocal
         }
 
         $this->_saveCache($cache_id, serialize(array_values($contents)));
+
         return array_values($contents);
     }
 
@@ -81,7 +80,7 @@ class ContentBlocks extends AbstractServiceLocal
      */
     public function getCategories()
     {
-        $cache_id = md5(__CLASS__ . __METHOD__);
+        $cache_id = md5(__CLASS__.__METHOD__);
         if (false !== $cached = $this->_loadCache($cache_id)) {
             $categories = @unserialize($cached);
             if (false !== $categories) {
@@ -97,13 +96,14 @@ class ContentBlocks extends AbstractServiceLocal
         }
 
         $this->_saveCache($cache_id, serialize($categories));
+
         return $categories;
     }
 
     /**
      * Gets ContentRender for a category
      * @param \BackBuilder\Services\Content\Category $category
-     * @param array $contents
+     * @param array                                  $contents
      */
     private function _getContentsByCategory(Category $category, array &$contents)
     {
@@ -118,7 +118,7 @@ class ContentBlocks extends AbstractServiceLocal
 
     /**
      * Returns the cache element for îd if exists, FALSE otherwise
-     * @param string $id
+     * @param  string $id
      * @return string
      */
     private function _loadCache($id)
@@ -137,8 +137,8 @@ class ContentBlocks extends AbstractServiceLocal
 
     /**
      * Saves the data in cache with id $id if cache exists
-     * @param string $id
-     * @param string $data
+     * @param  string  $id
+     * @param  string  $data
      * @return boolean
      */
     private function _saveCache($id, $data)
@@ -159,12 +159,13 @@ class ContentBlocks extends AbstractServiceLocal
         foreach ($contents as $content) {
             $node = new \stdClass();
             $node->attr = new \stdClass();
-            $node->attr->rel = "contentType_" . $content->name;
-            $node->attr->id = "node_" . uniqid(rand());
+            $node->attr->rel = "contentType_".$content->name;
+            $node->attr->id = "node_".uniqid(rand());
             $node->data = $content->label;
             $node->state = "leaf";
             $result[] = $node;
         }
+
         return $result;
     }
 
@@ -181,6 +182,7 @@ class ContentBlocks extends AbstractServiceLocal
             $std->value = $key->getUid();
             $result[] = $std;
         }
+
         return $result;
     }
 
@@ -189,7 +191,6 @@ class ContentBlocks extends AbstractServiceLocal
      */
     public function getBBContentBrowserTree($filters = array(), $site = null)
     {
-
         $tree = array();
         $children = array();
 
@@ -202,17 +203,17 @@ class ContentBlocks extends AbstractServiceLocal
         $root->state = "open";
         $tree[] = $root;
         $accepts = (array_key_exists("accept", $filters) && $filters["accept"] != 'all') ? explode(',', trim($filters["accept"])) : "all";
-        $useFilter = ( $accepts == "all") ? false : true;
+        $useFilter = ($accepts == "all") ? false : true;
 
         /* all */
         if ($useFilter) {
             /* Ajouter à la racine */
             foreach ($accepts as $accept) {
-                $class = '\BackBuilder\ClassContent\\' . $accept;
+                $class = '\BackBuilder\ClassContent\\'.$accept;
                 $object = new $class();
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
-                $leaf->attr->rel = "contentType_" . $accept;
+                $leaf->attr->rel = "contentType_".$accept;
                 $leaf->attr->id = uniqid(rand());
                 $leaf->data = $object->getProperty('name');
                 $leaf->state = "leaf";
@@ -227,7 +228,7 @@ class ContentBlocks extends AbstractServiceLocal
                     $leaf = new \stdClass();
                     $leaf->attr = new \stdClass();
                     $leaf->attr->rel = $category->name;
-                    $leaf->attr->id = 'node_' . $category->uid;
+                    $leaf->attr->id = 'node_'.$category->uid;
                     $leaf->data = $category->label;
                     $leaf->state = 'leaf';
                     $leaf->children = $this->contentToLeaf($categoryContents);
@@ -245,8 +246,9 @@ class ContentBlocks extends AbstractServiceLocal
     public function getContentsListByCategory($catName = null, $order_sort = '_title', $order_dir = 'asc', $limit = 5, $start = 0)
     {
         $result = array("numResults" => 0, "rows" => array());
-        if (!$catName)
+        if (!$catName) {
             return $result;
+        }
 
         $em = $this->bbapp->getEntityManager();
         $contentsList = array();
@@ -265,7 +267,7 @@ class ContentBlocks extends AbstractServiceLocal
 
         $classnames = array();
         foreach ($contents as $content) {
-            $contentTypeClass = "BackBuilder\ClassContent\\" . $content->name;
+            $contentTypeClass = "BackBuilder\ClassContent\\".$content->name;
             $classnames[] = $contentTypeClass;
         }
 
@@ -277,7 +279,7 @@ class ContentBlocks extends AbstractServiceLocal
                     $itemClass = get_class($item);
                     $itemProperties = $item->getDataToObject();
                     $itemHasATitle = array_key_exists("title", $itemProperties);
-                    $currentItemTitle = ($itemHasATitle && $item->title != null) ? $item->title->getData("value") : $item->getProperty("name") . " " . $item->getUid();
+                    $currentItemTitle = ($itemHasATitle && $item->title != null) ? $item->title->getData("value") : $item->getProperty("name")." ".$item->getUid();
                     $contentInfos = new \stdClass();
                     $contentInfos->uid = $item->getUid();
                     $contentInfos->title = $currentItemTitle;
@@ -293,6 +295,7 @@ class ContentBlocks extends AbstractServiceLocal
             }
             $result["rows"] = $contentsList;
         }
+
         return $result;
     }
 
@@ -326,7 +329,7 @@ class ContentBlocks extends AbstractServiceLocal
 
         $classnames = array();
         foreach ($contents as $content) {
-            $contentTypeClass = "BackBuilder\ClassContent\\" . $content->name;
+            $contentTypeClass = "BackBuilder\ClassContent\\".$content->name;
             if (true === class_exists($contentTypeClass)) {
                 $classnames[] = $contentTypeClass;
             }
@@ -343,11 +346,11 @@ class ContentBlocks extends AbstractServiceLocal
                     $itemProperties = $item->getDataToObject();
                     $itemHasATitle = array_key_exists("title", $itemProperties);
 //                    $currentItemTitle = ($itemHasATitle && $item->title != null) ? $item->title->getData("value") : $item->getProperty("name") . " " . $item->getUid();
-                    $currentItemTitle = (null === $item->getLabel()) ? $item->getProperty("name") . " " . $item->getUid() : $item->getLabel();
+                    $currentItemTitle = (null === $item->getLabel()) ? $item->getProperty("name")." ".$item->getUid() : $item->getLabel();
                     $contentInfos = new \stdClass();
                     $contentInfos->uid = $item->getUid();
                     $contentInfos->title = String::truncateText($currentItemTitle, 50); //truncate
-                    $contentInfos->ico = '/ressources/img/contents/' . str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass) . '.png';
+                    $contentInfos->ico = '/ressources/img/contents/'.str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass).'.png';
                     $contentInfos->type = str_replace(ContentBlocks::CONTENT_PATH, "", $itemClass);
                     $contentInfos->classname = $itemClass;
                     $contentInfos->created = $item->getCreated()->format("d/m/Y");
@@ -360,8 +363,8 @@ class ContentBlocks extends AbstractServiceLocal
                                 $contentInfos->ico = $image->image->path;
                             } else {
                                 $contentInfos->ico = $this->getApplication()->getRenderer()->getUri(
-                                    'images/' . substr($image->image->path, 0, strrpos($image->image->path, '.'))
-                                    . '/' . $image->image->originalname
+                                    'images/'.substr($image->image->path, 0, strrpos($image->image->path, '.'))
+                                    .'/'.$image->image->originalname
                                 );
                             }
                         }
@@ -375,6 +378,7 @@ class ContentBlocks extends AbstractServiceLocal
             }
             $result["rows"] = $contentsList;
         }
+
         return $result;
     }
 
@@ -384,7 +388,6 @@ class ContentBlocks extends AbstractServiceLocal
     public function getInfosContent($name)
     {
         if ($name !== null && $name !== "") {
-
             $contentObject = new ContentRender($name, $this->bbapp);
             $stdClass = new \stdClass();
 
@@ -395,6 +398,7 @@ class ContentBlocks extends AbstractServiceLocal
             $stdClass->max_width_droppable = 16;
             $stdClass->min_width_droppable = 2;
             $stdClass->uid = uniqid(rand());
+
             return $stdClass;
         }
     }
@@ -402,10 +406,11 @@ class ContentBlocks extends AbstractServiceLocal
     /**
      * @exposed(secured=true)
      */
-    public function getDataContentType($name, $mode = null, $uid = NULL, $receiverclass = NULL, $receiveruid = NULL)
+    public function getDataContentType($name, $mode = null, $uid = null, $receiverclass = null, $receiveruid = null)
     {
         $content = new ContentRender($name, $this->bbapp, null, $mode, $uid);
         $result = $content->__toStdObject();
+
         return $result;
     }
 
@@ -435,10 +440,11 @@ class ContentBlocks extends AbstractServiceLocal
     {
         $contentType = (is_array($nodeInfos) && array_key_exists("type", $nodeInfos)) ? $nodeInfos["type"] : null;
         $contentUid = (is_array($nodeInfos) && array_key_exists("uid", $nodeInfos)) ? $nodeInfos["uid"] : null;
-        if (is_null($contentType) || is_null($contentUid))
+        if (is_null($contentType) || is_null($contentUid)) {
             throw new \Exception("params content.type and content.uid can't be null");
+        }
         $contentParams = array();
-        $contentTypeClass = "BackBuilder\ClassContent\\" . $contentType;
+        $contentTypeClass = "BackBuilder\ClassContent\\".$contentType;
 
         $em = $this->bbapp->getEntityManager();
         if (NULL === $contentNode = $em->find($contentTypeClass, $contentUid)) {
@@ -448,12 +454,14 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('VIEW', $contentNode);
 
         // Find a draft if exists
-        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken()))
+        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken())) {
             $contentNode->setDraft($draft);
+        }
 
         $contentParams = $contentNode->getParam();
 
         unset($contentParams["indexation"]);
+
         return $contentParams;
     }
 
@@ -465,7 +473,7 @@ class ContentBlocks extends AbstractServiceLocal
         if (is_null($params) || !is_array($params)) {
             throw new \Exception("params can't be null");
         }
-        $contentTypeClass = "BackBuilder\ClassContent\\" . $contentInfos["contentType"];
+        $contentTypeClass = "BackBuilder\ClassContent\\".$contentInfos["contentType"];
 
         $em = $this->bbapp->getEntityManager();
         if (NULL === $contentNode = $em->find($contentTypeClass, $contentUid)) {
@@ -476,8 +484,9 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('EDIT', $contentNode);
 
         // Find a draft if exists
-        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true))
+        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true)) {
             $contentNode->setDraft($draft);
+        }
 
         foreach ($params as $key => $param) {
             $contentNode->setParam($key, $param, is_array($param) ? 'array' : null);
@@ -493,6 +502,7 @@ class ContentBlocks extends AbstractServiceLocal
     {
         $result = new \StdClass();
         $result->ok = true;
+
         return $result;
     }
 
@@ -501,13 +511,14 @@ class ContentBlocks extends AbstractServiceLocal
      */
     public function showPreview($contentUid, $contentType)
     {
-        $contentTypeClass = self::CONTENT_PATH . $contentType;
+        $contentTypeClass = self::CONTENT_PATH.$contentType;
         $em = $this->bbapp->getEntityManager();
         if (null === $content = $this->em->find($contentTypeClass, $contentUid)) {
             throw new \Exception("Content can't be null");
         }
         $renderer = $this->bbapp->getRenderer();
         $contentRender = $renderer->render($content, null);
+
         return $contentRender;
     }
 
@@ -520,7 +531,7 @@ class ContentBlocks extends AbstractServiceLocal
             throw new ServicesException('No classname provided');
         }
 
-        $content_classname = 'BackBuilder\\ClassContent\\' . $contentType;
+        $content_classname = 'BackBuilder\\ClassContent\\'.$contentType;
         if (false === class_exists($content_classname)) {
             throw new ServicesException(sprintf('Unknown content classname provided `%s`', $content_classname));
         }
@@ -568,7 +579,7 @@ class ContentBlocks extends AbstractServiceLocal
                 $subcontent = (!is_array($subcontent)) ? array($subcontent) : $subcontent;
                 foreach ($subcontent as $index => $value) {
                     if (false === is_object($value)) {
-                        $result->bb5_form->$key->bb5_uid = NULL;
+                        $result->bb5_form->$key->bb5_uid = null;
                         $result->bb5_form->$key->bb5_type = 'scalar';
                         $result->bb5_form->$key->bb5_fieldset = false;
                         $result->bb5_form->$key->bb5_isLoaded = (NULL !== $value) ? true : false;
@@ -604,7 +615,7 @@ class ContentBlocks extends AbstractServiceLocal
             throw new ServicesException('No classname provided');
         }
 
-        $content_classname = 'BackBuilder\\ClassContent\\' . $contentType;
+        $content_classname = 'BackBuilder\\ClassContent\\'.$contentType;
         if (false === class_exists($content_classname)) {
             throw new ServicesException(sprintf('Unknown content classname provided `%s`', $content_classname));
         }
@@ -634,8 +645,9 @@ class ContentBlocks extends AbstractServiceLocal
 
     private function removeKeyword($id, $content)
     {
-        if (NULL === $id)
+        if (NULL === $id) {
             return (0);
+        }
         $realKeyword = $this->bbapp->getEntityManager()->find('BackBuilder\NestedNode\KeyWord', $id);
         $realKeyword->removeContent($content);
         $this->bbapp->getEntityManager()->flush();
@@ -654,8 +666,9 @@ class ContentBlocks extends AbstractServiceLocal
         // Attach the content if not
         if (false === $this->em->contains($content)) {
             $content = $this->em->find(get_class($content), $content->getUid());
-            if (null === $content)
-                return null;
+            if (null === $content) {
+                return;
+            }
         }
 
         // If in media library, do nothing
@@ -712,7 +725,6 @@ class ContentBlocks extends AbstractServiceLocal
                             $subcontent = null;
                         }
 
-
                         // Attach the subcontent if not
                         if (null !== $subcontent && false === $this->em->contains($subcontent)) {
                             $subcontent = $this->em->find(get_class($subcontent), $subcontent->getUid());
@@ -758,6 +770,7 @@ class ContentBlocks extends AbstractServiceLocal
     public function handleContentChange($contentsArr = array())
     {
         $result = array("result" => $contentsArr);
+
         return $result;
     }
 
@@ -777,5 +790,4 @@ class ContentBlocks extends AbstractServiceLocal
 
         return $this->_availableMedias;
     }
-
 }

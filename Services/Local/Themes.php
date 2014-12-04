@@ -2,33 +2,32 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\Services\Local\AbstractServiceLocal,
-    BackBuilder\Theme\PersonalThemesManager,
-    BackBuilder\Theme\ThemesManager,
-    BackBuilder\Theme\Theme;
+use BackBuilder\Theme\PersonalThemesManager;
+use BackBuilder\Theme\ThemesManager;
+use BackBuilder\Theme\Theme;
 
 /**
  * RPC services for User management
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Services
  * @subpackage  Local
@@ -38,13 +37,11 @@ use BackBuilder\Services\Local\AbstractServiceLocal,
  */
 class Themes extends AbstractServiceLocal
 {
-
     /**
      * @exposed(secured=true)
      */
     public function activeTheme($name)
     {
-        
     }
 
     private function getManager()
@@ -63,6 +60,7 @@ class Themes extends AbstractServiceLocal
         } catch (\Exception $exc) {
             return $exc->getMessage();
         }
+
         return true;
     }
 
@@ -84,6 +82,7 @@ class Themes extends AbstractServiceLocal
         } catch (\Exception $exc) {
             return $exc->getMessage();
         }
+
         return true;
     }
 
@@ -93,6 +92,7 @@ class Themes extends AbstractServiceLocal
     public function getThemes()
     {
         $manager = $this->getManager();
+
         return $manager->getThemesCollection();
     }
 
@@ -102,9 +102,7 @@ class Themes extends AbstractServiceLocal
     public function getTheme($name)
     {
         $manager = $this->getManager();
+
         return $manager->getTheme($name);
     }
-
 }
-
-?>

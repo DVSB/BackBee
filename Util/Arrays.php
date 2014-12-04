@@ -29,13 +29,13 @@ namespace BackBuilder\Util;
  */
 class Arrays
 {
-
     public static function toCsv($values, $separator = ';')
     {
         $return = '';
         foreach ($values as $value) {
-            $return .= implode($separator, $value) . "\n";
+            $return .= implode($separator, $value)."\n";
         }
+
         return $return;
     }
 
@@ -43,14 +43,15 @@ class Arrays
     {
         $return = '';
         foreach ($array as $key => $value) {
-            $return .= '<' . $key . '>';
+            $return .= '<'.$key.'>';
             if (is_array($value)) {
                 $return .= static::toBasicXml($value);
             } else {
                 $return .= str_replace('&', '&amp;', $value);
             }
-            $return .= '</' . $key . '>';
+            $return .= '</'.$key.'>';
         }
+
         return $return;
     }
 
@@ -95,7 +96,7 @@ class Arrays
      * </root>
      *
      * @codeCoverageIgnore
-     * @param array $array
+     * @param  array  $array
      * @return string
      */
     public static function toXml(array $array)
@@ -188,19 +189,21 @@ class Arrays
             } else {
                 $return .= self::getTag($tag, $children);
                 $return .= self::getContent($children);
-                $return .= '</' . $tag . '>';
+                $return .= '</'.$tag.'>';
             }
         }
+
         return $return;
     }
 
     private static function getTag($key, $values)
     {
-        $return = '<' . $key;
+        $return = '<'.$key;
         if (is_array($values) && array_key_exists('params', $values)) {
             $return .= self::convertParams($values['params']);
         }
-        return $return . '>';
+
+        return $return.'>';
     }
 
     private static function getContent($values)
@@ -216,8 +219,9 @@ class Arrays
     {
         $return = '';
         foreach ($array as $key => $value) {
-            $return .= ' ' . $key . '="' . $value . '"';
+            $return .= ' '.$key.'="'.$value.'"';
         }
+
         return $return;
     }
 
@@ -228,17 +232,18 @@ class Arrays
             foreach ($values as $value) {
                 $return .= self::getTag($tag, $value);
                 $return .= self::getContent($value);
-                $return .= '</' . $tag . '>';
+                $return .= '</'.$tag.'>';
             }
         }
+
         return $return;
     }
 
     /**
      * Tests if key:subkey exists in array
-     * @param array $array
-     * @param string $key
-     * @param string $separator
+     * @param  array                                           $array
+     * @param  string                                          $key
+     * @param  string                                          $separator
      * @return boolean
      * @throws \BackBuilder\Exception\InvalidArgumentException
      */
@@ -266,10 +271,10 @@ class Arrays
 
     /**
      * Gets the value of key:subkey in array, NULL othewise
-     * @param array $array
-     * @param string $key
-     * @param mixed $default
-     * @param string $separator
+     * @param  array                                           $array
+     * @param  string                                          $key
+     * @param  mixed                                           $default
+     * @param  string                                          $separator
      * @return mixed
      * @throws \BackBuilder\Exception\InvalidArgumentException
      */
@@ -285,14 +290,14 @@ class Arrays
 
     /**
      * Implementation of array_column for PHP lower than 5.5
-     * @param array $array      A multi-dimensional array (record set) from which to pull a column of values.
-     * @param type $column_key  The column of values to return. This value may be the integer key of the column 
-     *                          you wish to retrieve, or it may be the string key name for an associative array. 
-     *                          It may also be NULL to return complete arrays (useful together with index_key to 
-     *                          reindex the array).
-     * @param type $index_key   The column to use as the index/keys for the returned array. This value may be the 
-     *                          integer key of the column, or it may be the string key name.
-     * @return array            An array of values representing a single column from the input array.
+     * @param  array $array      A multi-dimensional array (record set) from which to pull a column of values.
+     * @param  type  $column_key The column of values to return. This value may be the integer key of the column
+     *                           you wish to retrieve, or it may be the string key name for an associative array.
+     *                           It may also be NULL to return complete arrays (useful together with index_key to
+     *                           reindex the array).
+     * @param  type  $index_key  The column to use as the index/keys for the returned array. This value may be the
+     *                           integer key of the column, or it may be the string key name.
+     * @return array An array of values representing a single column from the input array.
      */
     public static function array_column(array $array, $column_key = null, $index_key = null)
     {
@@ -320,5 +325,4 @@ class Arrays
 
         return $result;
     }
-
 }

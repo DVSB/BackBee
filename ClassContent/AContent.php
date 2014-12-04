@@ -25,9 +25,7 @@ use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\Renderer\IRenderable;
 use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
 use BackBuilder\Util\Parameter;
-
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
 
 /**
  * Abstract class for every content and its revisions in BackBuilder
@@ -40,7 +38,6 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  */
 abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerializable
 {
-
     /**
      * Unique identifier
      * @var string
@@ -120,11 +117,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Class constructor
-     * @param string $uid The unique identifier
-     * @param array $options Initial options for the content:
-     *                         - accept      array Acceptable class names for the value
-     *                         - maxentry    int The maxentry in value
-     *                         - default     array default value for datas
+     * @param string $uid     The unique identifier
+     * @param array  $options Initial options for the content:
+     *                        - accept      array Acceptable class names for the value
+     *                        - maxentry    int The maxentry in value
+     *                        - default     array default value for datas
      */
     public function __construct($uid = null, $options = null)
     {
@@ -138,8 +135,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to get value for given element
-     * @param string $var The name of the element
-     * @return mixed The value
+     * @param  string                                                       $var The name of the element
+     * @return mixed                                                        The value
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      */
     public function __get($var)
@@ -153,9 +150,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to set value to given element
-     * @param string $var The name of the element
-     * @param mixed $value The value to set
-     * @return \BackBuilder\ClassContent\AClassContent The current instance content
+     * @param  string                                                       $var   The name of the element
+     * @param  mixed                                                        $value The value to set
+     * @return \BackBuilder\ClassContent\AClassContent                      The current instance content
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      */
     public function __set($var, $value)
@@ -193,8 +190,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to check the setting of an element
-     * @param string $var The name of the element
-     * @return Boolean TRUE if an element is set for $var, FALSE otherwise
+     * @param  string                                                       $var The name of the element
+     * @return Boolean                                                      TRUE if an element is set for $var, FALSE otherwise
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      */
     public function __isset($var)
@@ -208,7 +205,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to unset an element
-     * @param string $var The name of the element to unset
+     * @param  string                                                       $var The name of the element to unset
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      */
     public function __unset($var)
@@ -343,33 +340,35 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets the label
-     * @param string $label
+     * @param  string                             $label
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
     public function setLabel($label)
     {
         $this->_label = $label;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Set the acceptable classname
-     * @param array $accept
+     * @param  array                              $accept
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
     public function setAccept($accept)
     {
         $this->_accept = $accept;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets one or all parameters
-     * @param string $var the parameter name to set, if NULL all the parameters array wil be set
-     * @param mixed $values the parameter value or all the parameters if $var is NULL
-     * @param string $type the optionnal casting type of the value
+     * @param  string                             $var    the parameter name to set, if NULL all the parameters array wil be set
+     * @param  mixed                              $values the parameter value or all the parameters if $var is NULL
+     * @param  string                             $type   the optionnal casting type of the value
      * @return \BackBuilder\ClassContent\AContent The current instance
      */
     public function setParam($var = null, $values = null, $type = null)
@@ -421,7 +420,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         foreach ($paths as $path) {
             if (false === array_key_exists($path, $target)) {
                 throw new InvalidArgumentException(
-                    'Invalid path provided for setting parameter value: ' . implode(':', $paths)
+                    'Invalid path provided for setting parameter value: '.implode(':', $paths)
                 );
             }
 
@@ -433,73 +432,79 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets the maximum number of items for elements
-     * @param array $maxentry
+     * @param  array                              $maxentry
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
     public function setMaxEntry(array $maxentry)
     {
         $this->_maxentry = $maxentry;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets the minimum number of items for elements
-     * @param array $minentry
+     * @param  array                              $minentry
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
     public function setMinEntry(array $minentry = null)
     {
         $this->_minentry = $minentry;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets creation date
-     * @param \DateTime $created Current date time by default
+     * @param  \DateTime                          $created Current date time by default
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
     public function setCreated(\DateTime $created = null)
     {
         $this->_created = (null === $created) ? new \DateTime() : $created;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets the last modification date
-     * @param DateTime $modified Current date time by default
+     * @param  DateTime                           $modified Current date time by default
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
     public function setModified(\DateTime $modified = null)
     {
         $this->_modified = (null === $modified) ? new \DateTime() : $modified;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets the revision number
-     * @param int $revision
+     * @param  int                                $revision
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
     public function setRevision($revision)
     {
         $this->_revision = $revision;
+
         return $this->_getContentInstance();
     }
 
     /**
      * Sets the state
-     * @param int $state
+     * @param  int                                $state
      * @return \BackBuilder\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
     public function setState($state)
     {
         $this->_state = $state;
+
         return $this->_getContentInstance();
     }
 
@@ -515,13 +520,14 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Checks if the element accept subcontent
-     * @param string $var the element
+     * @param  string  $var the element
      * @return Boolean TRUE if a subcontents are accepted, FALSE otherwise
      */
     public function acceptSubcontent($var)
     {
-        if (false === array_key_exists($var, $this->_accept))
+        if (false === array_key_exists($var, $this->_accept)) {
             return false;
+        }
 
         foreach ($this->_accept[$var] as $type) {
             if (0 === strpos($type, 'BackBuilder\ClassContent')) {
@@ -544,8 +550,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Return a subcontent instance by its type and value, FALSE if not found
-     * @param string $type The classname of the subcontent
-     * @param string $value The value of the subcontent (uid)
+     * @param  string                                        $type  The classname of the subcontent
+     * @param  string                                        $value The value of the subcontent (uid)
      * @return \BackBuilder\ClassContent\AClassContent|FALSE
      */
     protected function _getContentByDataValue($type, $value)
@@ -565,8 +571,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets options at the construction of a new instance
-     * @param mixed $options Initial options for the content:
-     *                         - label       the label of the content
+     * @param  mixed                              $options Initial options for the content:
+     *                                                     - label       the label of the content
      * @return \BackBuilder\ClassContent\AContent
      */
     protected function _setOptions($options = null)
@@ -584,7 +590,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Returns the type of a given value, either classname, array or scalar
-     * @param mixed $value
+     * @param  mixed  $value
      * @return string
      */
     protected function _getType($value)
@@ -602,8 +608,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Checks for an accepted type
-     * @param mixed $value the value from which the type will be checked
-     * @param string $var the element to be checks
+     * @param  mixed   $value the value from which the type will be checked
+     * @param  string  $var   the element to be checks
      * @return Boolean
      */
     protected function _isAccepted($value, $var = null)
@@ -635,8 +641,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Adds a subcontent to the colection.
-     * @param \BackBuilder\ClassContent\AClassContent $value
-     * @return string the unique identifier of the add subcontent
+     * @param  \BackBuilder\ClassContent\AClassContent $value
+     * @return string                                  the unique identifier of the add subcontent
      * @codeCoverageIgnore
      */
     protected function _addSubcontent(AClassContent $value)
@@ -656,7 +662,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Return the serialized string of an array
-     * @param array $var
+     * @param  array  $var
      * @return string
      */
     protected function _arrayToStdClass($var)
@@ -686,7 +692,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function getObjectIdentifier()
     {
-        return $this->getType() . '(' . $this->getIdentifier() . ')';
+        return $this->getType().'('.$this->getIdentifier().')';
     }
 
     /**
@@ -713,7 +719,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Checks for an explicit objects equality.
-     * @param \BackBuilder\Security\Acl\Domain\IObjectIdentifiable $identity
+     * @param  \BackBuilder\Security\Acl\Domain\IObjectIdentifiable $identity
      * @return Boolean
      * @see \BackBuilder\Security\Acl\Domain\IObjectIdentifiable
      * @codeCoverageIgnore
@@ -731,11 +737,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Returns the set of data
-     * @param string $var The element to be return, if NULL, all datas are returned
-     * @param Boolean $forceArray Force the return as array
-     * @return mixed Could be either one or array of scalar, array, AClassContent instance
+     * @param  string                                                       $var        The element to be return, if NULL, all datas are returned
+     * @param  Boolean                                                      $forceArray Force the return as array
+     * @return mixed                                                        Could be either one or array of scalar, array, AClassContent instance
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
-     * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
+     * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException     Occurs if the class of a subcontent can not be loaded
      */
     public function getData($var = null, $forceArray = false)
     {
@@ -750,7 +756,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
         if (false === array_key_exists($var, $this->_data)) {
             if ($this->_getContentInstance() instanceof ContentSet) {
-                return null;
+                return;
             } else {
                 throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this)));
             }
@@ -795,7 +801,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Returns TRUE if $var is an declared element of this content
-     * @param string $var
+     * @param  string  $var
      * @return boolean
      */
     public function hasElement($var)
@@ -805,7 +811,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Returns the first element of one of the provided class is exists
-     * @param mixed $classnames
+     * @param  mixed              $classnames
      * @return AClassContent|NULL
      */
     public function getFirstElementOfType($classnames)
@@ -828,7 +834,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             }
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -836,9 +842,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * Upgrade of getParam method - parameter $var can follow this pattern:
      *     rendermode:array:selected
      * this will return $this->_parameters['rendermode']['array']['selected'] is it exists
-     * @param string $var The parameter to be return, if NULL, all parameters are returned
-     * @param string $type The casting type of the parameter
-     * @return mixed the parameter value or NULL if unfound
+     * @param  string $var  The parameter to be return, if NULL, all parameters are returned
+     * @param  string $type The casting type of the parameter
+     * @return mixed  the parameter value or NULL if unfound
      */
     public function getParam($var = null, $type = null)
     {
@@ -849,7 +855,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         $pieces = explode(':', $var);
         $var = array_shift($pieces);
         if (false === array_key_exists($var, $this->_parameters)) {
-            return null;
+            return;
         }
 
         if (null !== $type && true === is_string($type)) {
@@ -863,7 +869,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * Goes all over the $param and keep looping until $pieces is empty to return
      * the values user is looking for
      * @param  mixed $param
-     * @param  array  $pieces
+     * @param  array $pieces
      * @return mixed
      */
     private function _getRecursivelyParam($param, array $pieces)
@@ -874,7 +880,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
         $key = array_shift($pieces);
         if (false === isset($param[$key])) {
-            return null;
+            return;
         }
 
         return $this->_getRecursivelyParam($param[$key], $pieces);
@@ -946,11 +952,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Initialized the instance from a serialized string
-     * @param string $serialized
-     * @param Boolean $strict If TRUE, all missing or additionnal element will generate an error
-     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     * @param  string                                                       $serialized
+     * @param  Boolean                                                      $strict     If TRUE, all missing or additionnal element will generate an error
+     * @return \BackBuilder\ClassContent\AClassContent                      The current instance
      * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
-     *                                                                      property does not match an element
+     *                                                                                 property does not match an element
      */
     public function unserialize($serialized, $strict = false)
     {
@@ -959,21 +965,21 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         }
 
         foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
+            $property = '_'.$property;
 
             if (true === in_array($property, array('_created', '_modified')) || null === $value) {
                 continue;
-            } else if ("_param" === $property) {
+            } elseif ("_param" === $property) {
                 foreach ($value as $param => $paramvalue) {
                     $this->setParam($param, $paramvalue);
                 }
-            } else if ("_data" === $property) {
+            } elseif ("_data" === $property) {
                 foreach ($value as $el => $val) {
                     $this->$el = $val;
                 }
-            } else if ("_value" === $property) {
+            } elseif ("_value" === $property) {
                 $this->value = $value;
-            } else if (false === property_exists($this, $property) && true === $strict) {
+            } elseif (false === property_exists($this, $property) && true === $strict) {
                 throw new Exception\UnknownPropertyException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this->_getContentInstance())));
             }
         }
@@ -981,16 +987,15 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         return $this;
     }
 
-
     public function getTemplateName()
     {
-        return str_replace(array("BackBuilder" . NAMESPACE_SEPARATOR . "ClassContent" . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+        return str_replace(array("BackBuilder".NAMESPACE_SEPARATOR."ClassContent".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
     }
 
     /**
      *
      *
-     * @param  boolean $return_array define if we return an array or the json_encode of array, default setted at false
+     * @param boolean $return_array define if we return an array or the json_encode of array, default setted at false
      *
      * @return string|array
      * @deprecated since version 1.0
@@ -1012,7 +1017,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             'state'     => $this->_state,
             'created'   => $this->_created->getTimestamp(),
             'modified'  => $this->_modified->getTimestamp(),
-            'revision'  => $this->_revision
+            'revision'  => $this->_revision,
         );
     }
 }

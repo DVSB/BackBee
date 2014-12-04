@@ -22,9 +22,7 @@
 namespace BackBuilder\Rest\EventListener;
 
 use BackBuilder\Security\Authorization\ExpressionLanguage;
-
 use Metadata\MetadataFactoryInterface;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -65,11 +63,11 @@ class SecurityListener
     public function onKernelController(FilterControllerEvent $event)
     {
         $token = $this->securityContext->getToken();
-        
-        if(null === $token) {
+
+        if (null === $token) {
             throw new AuthenticationCredentialsNotFoundException('The security context contains no authentication token. One possible reason may be that there is no firewall configured for this URL.');
         }
-        
+
         $request = $event->getRequest();
         $controller = $event->getController();
         $metadata = $this->getControllerActionMetadata($controller);
@@ -111,7 +109,7 @@ class SecurityListener
 
     /**
      *
-     * @param mixed $controller
+     * @param  mixed                                    $controller
      * @return \BackBuilder\Rest\Mapping\ActionMetadata
      */
     protected function getControllerActionMetadata($controller)
@@ -123,7 +121,7 @@ class SecurityListener
         $controllerMetadata = $metadata->getOutsideClassMetadata();
 
         $action_metadatas = null;
-        if(array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
+        if (array_key_exists($controller[1], $controllerMetadata->methodMetadata)) {
             $action_metadatas = $controllerMetadata->methodMetadata[$controller[1]];
         }
 

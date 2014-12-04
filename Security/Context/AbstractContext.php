@@ -33,6 +33,7 @@ abstract class AbstractContext
             $user_provider = $this->_context->getUserProviders();
             $default_provider = $user_provider[$config['provider']];
         }
+
         return $default_provider;
     }
 }

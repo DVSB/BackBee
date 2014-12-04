@@ -24,11 +24,7 @@ namespace BackBuilder\Security\Authentication\Provider;
 use BackBuilder\Security\Encoder\RequestSignatureEncoder;
 use BackBuilder\Security\Exception\SecurityException;
 use BackBuilder\Security\Token\PublicKeyToken;
-
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Authentication provider for username/password firewall
@@ -47,7 +43,7 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
     public function authenticate(TokenInterface $token)
     {
         if (false === $this->supports($token)) {
-            return null;
+            return;
         }
 
         $publicKey = $token->getUsername();

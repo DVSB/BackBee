@@ -37,7 +37,6 @@ use BackBuilder\Rewriting\IUrlGenerator;
  */
 class RewritingListener
 {
-
     /**
      * Occur on classcontent.onflush events
      * @param \BackBuilder\Event\Event $event
@@ -88,8 +87,8 @@ class RewritingListener
     /**
      * Update URL for a page and its descendants according to the application IUrlGenerator
      *
-     * @param \BackBuilder\BBApplication $application
-     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\BBApplication              $application
+     * @param \BackBuilder\NestedNode\Page            $page
      * @param \BackBuilder\ClassContent\AClassContent $maincontent
      */
     private static function _updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = null)
@@ -127,5 +126,4 @@ class RewritingListener
 
         return false;
     }
-
 }

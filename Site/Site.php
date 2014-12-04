@@ -2,41 +2,39 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Site;
 
-use BackBuilder\Site\Metadata\Metadata,
-    BackBuilder\Security\Acl\Domain\AObjectIdentifiable,
-    BackBuilder\Services\Local\IJson;
-
+use BackBuilder\Site\Metadata\Metadata;
+use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
+use BackBuilder\Services\Local\IJson;
 use Doctrine\Common\Collections\ArrayCollection;
-
 use JMS\Serializer\Annotation as Serializer;
 
 /**
  * A BackBuilder website entity
- * 
+ *
  * A website should be associated to:
- * 
+ *
  * * a collection of available layouts
  * * a collection of default metadata sets
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Site
  * @copyright   Lp digital system
@@ -49,7 +47,6 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class Site extends AObjectIdentifiable implements IJson
 {
-
     /**
      * The unique identifier of this website.
      * @var string
@@ -67,7 +64,7 @@ class Site extends AObjectIdentifiable implements IJson
      * @var string
      * @Column(type="string", name="label", nullable=false)
      * @fixture(type="domainWord")
-     * 
+     *
      * @Serializer\Expose
      */
     protected $_label;
@@ -97,7 +94,7 @@ class Site extends AObjectIdentifiable implements IJson
      * @Serializer\Expose
      * @Serializer\SerializedName("server_name")
      * @Serializer\Type("string")
-     * 
+     *
      * @Serializer\Expose
      */
     protected $_server_name;
@@ -111,7 +108,7 @@ class Site extends AObjectIdentifiable implements IJson
     /**
      * The collection of layouts available for this site.
      * @OneToMany(targetEntity="BackBuilder\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
-     * 
+     *
      * @Serializer\Expose
      */
     protected $_layouts;
@@ -123,20 +120,20 @@ class Site extends AObjectIdentifiable implements IJson
      *      joinColumns={@JoinColumn(name="site_uid", referencedColumnName="uid")},
      *      inverseJoinColumns={@JoinColumn(name="metadata_uid", referencedColumnName="uid")}
      *      )
-     * 
+     *
      * @Serializer\Expose
      */
     protected $_metadata;
 
     /**
      * Class constructor.
-     * @param string $uid The unique identifier of the site.
-     * @param array $options Initial options for the content:
-     *                         - label      the default label
+     * @param string $uid     The unique identifier of the site.
+     * @param array  $options Initial options for the content:
+     *                        - label      the default label
      */
-    public function __construct($uid = NULL, $options = NULL)
+    public function __construct($uid = null, $options = null)
     {
-        $this->_uid = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
+        $this->_uid = (is_null($uid)) ? md5(uniqid('', true)) : $uid;
         $this->_created = new \DateTime();
         $this->_modified = new \DateTime();
 
@@ -200,9 +197,9 @@ class Site extends AObjectIdentifiable implements IJson
     {
         return $this->_layouts;
     }
-    
+
     /**
-     * 
+     *
      * @param \BackBuilder\Site\Layout $layout
      */
     public function addLayout(Layout $layout)
@@ -222,35 +219,38 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Sets the label of the website
-     * @param string $label
+     * @param  string                 $label
      * @return \BackBuilder\Site\Site
      */
     public function setLabel($label)
     {
         $this->_label = $label;
+
         return $this;
     }
 
     /**
      * Sets the server name
-     * @param string $server_name
+     * @param  string                 $server_name
      * @return \BackBuilder\Site\Site
      */
     public function setServerName($server_name)
     {
         $this->_server_name = $server_name;
+
         return $this;
     }
 
     /**
      * Adds a new metadata set to the collection of the website.
      * @codeCoverageIgnore
-     * @param \BackBuilder\Site\Metadata\Metadata $metadata
+     * @param  \BackBuilder\Site\Metadata\Metadata $metadata
      * @return \BackBuilder\Site\Site
      */
     public function setMetadata(Metadata $metadata)
     {
         $this->_metadata->add($metadata);
+
         return $this;
     }
 
@@ -265,5 +265,4 @@ class Site extends AObjectIdentifiable implements IJson
 
         return $result;
     }
-
 }

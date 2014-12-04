@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,7 +23,7 @@ namespace BackBuilder\ClassContent;
 
 /**
  * Indexation entry for content
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\ClassContent
  * @copyright   Lp digital system
@@ -33,7 +33,6 @@ namespace BackBuilder\ClassContent;
  */
 class Indexation
 {
-
     /**
      * The indexed content
      * @var string
@@ -75,13 +74,13 @@ class Indexation
 
     /**
      * Class constructor
-     * @param AClassContent $content_uid  The unique identifier of the indexed content
-     * @param string        $field		  The indexed field of the indexed content
-     * @param AClassContent $owner_uid    The unique identifier of the owner content of the field
-     * @param string        $value        The value of the indexed field
-     * @param string        $callback     The optional callback to apply while indexing the value
+     * @param AClassContent $content_uid The unique identifier of the indexed content
+     * @param string        $field       The indexed field of the indexed content
+     * @param AClassContent $owner_uid   The unique identifier of the owner content of the field
+     * @param string        $value       The value of the indexed field
+     * @param string        $callback    The optional callback to apply while indexing the value
      */
-    public function __construct($content = NULL, $field = NULL, $owner = NULL, $value = NULL, $callback = NULL)
+    public function __construct($content = null, $field = null, $owner = null, $value = null, $callback = null)
     {
         $this->setContent($content)
                 ->setField($field)
@@ -128,57 +127,61 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param string $content
+     * @param  string                               $content
      * @return \BackBuilder\ClassContent\Indexation
      */
     public function setContent($content)
     {
         $this->_content = $content;
+
         return $this;
     }
 
     /**
      * @codeCoverageIgnore
-     * @param string $field
+     * @param  string                               $field
      * @return \BackBuilder\ClassContent\Indexation
      */
     public function setField($field)
     {
         $this->_field = $field;
+
         return $this;
     }
 
     /**
      * @codeCoverageIgnore
-     * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $owner
+     * @param  \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $owner
      * @return \BackBuilder\ClassContent\Indexation
      */
     public function setOwner($owner)
     {
         $this->_owner = $owner;
+
         return $this;
     }
 
     /**
      * @codeCoverageIgnore
-     * @param string $value
+     * @param  string                               $value
      * @return \BackBuilder\ClassContent\Indexation
      */
     public function setValue($value)
     {
         $this->_value = $value;
+
         return $this;
     }
 
     /**
      * @codeCoverageIgnore
-     * @param function $callback
+     * @param  function                             $callback
      * @return \BackBuilder\ClassContent\Indexation
      */
     public function setCallback($callback)
     {
         $this->_callback = $callback;
+
         return $this;
     }
-
 }

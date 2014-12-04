@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,13 +22,12 @@
 namespace BackBuilder\Services\Local;
 
 use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\Services\Exception\ServicesException,
-    BackBuilder\ClassContent\Element\file as elementFile,
-    BackBuilder\ClassContent\Element\text as elementText,
-    BackBuilder\ClassContent\Element\image as elementImage,
-    BackBuilder\ClassContent\Exception\ClassContentException;
+use BackBuilder\Services\Exception\ServicesException;
+use BackBuilder\ClassContent\Element\file as elementFile;
+use BackBuilder\ClassContent\Element\text as elementText;
+use BackBuilder\ClassContent\Element\image as elementImage;
+use BackBuilder\ClassContent\Exception\ClassContentException;
 use BackBuilder\Util\File;
-use BackBuilder\Services\Local\AbstractServiceLocal;
 
 /**
  * Description of Media
@@ -41,22 +40,19 @@ use BackBuilder\Services\Local\AbstractServiceLocal;
  */
 class Media extends AbstractServiceLocal
 {
-
     private $_availableMedias;
-
 
     /**
      * @exposed(secured=true)
      */
     public function uploadImage(\Symfony\Component\HttpFoundation\Request $request)
     {
-
         $uploaded_file = new \stdClass();
         $uploaded_file->originalname = \BackBuilder\Util\String::toPath($request->files->get('image')->getClientOriginalName());
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
-        $uploaded_file->filename = basename($request->files->get('image')->getRealPath()) . '.' . $uploaded_file->extension;
+        $uploaded_file->filename = basename($request->files->get('image')->getRealPath()).'.'.$uploaded_file->extension;
         $uploaded_file->src = base64_encode(file_get_contents($request->files->get('image')->getRealPath()));
-        
+
         #move_uploaded_file($request->files->get('image')->getRealPath(), $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $uploaded_file->filename);
         return $uploaded_file;
     }
@@ -67,17 +63,18 @@ class Media extends AbstractServiceLocal
     public function uploadMedia(\Symfony\Component\HttpFoundation\Request $request)
     {
         $request->files->set('image', $request->files->get('uploadedmedia'));
-        if(is_array(@getimagesize($request->files->get('uploadedmedia')->getRealPath()))){
+        if (is_array(@getimagesize($request->files->get('uploadedmedia')->getRealPath()))) {
             return $this->uploadImage($request);
         }
 
         $uploaded_file = new \stdClass();
         $uploaded_file->originalname = \BackBuilder\Util\String::toPath($request->files->get('uploadedmedia')->getClientOriginalName());
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
-        $uploaded_file->filename = basename($request->files->get('uploadedmedia')->getRealPath()) . '.' . $uploaded_file->extension;
-        if (FALSE === is_dir($this->bbapp->getTemporaryDir()))
-            mkdir($this->bbapp->getTemporaryDir(), 0755, TRUE);
-        $isFileIsMoved = move_uploaded_file($request->files->get('uploadedmedia')->getRealPath(), $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $uploaded_file->filename);
+        $uploaded_file->filename = basename($request->files->get('uploadedmedia')->getRealPath()).'.'.$uploaded_file->extension;
+        if (FALSE === is_dir($this->bbapp->getTemporaryDir())) {
+            mkdir($this->bbapp->getTemporaryDir(), 0755, true);
+        }
+        $isFileIsMoved = move_uploaded_file($request->files->get('uploadedmedia')->getRealPath(), $this->bbapp->getTemporaryDir().DIRECTORY_SEPARATOR.$uploaded_file->filename);
         if (!$isFileIsMoved) {
             return "stran";
         }
@@ -93,14 +90,16 @@ class Media extends AbstractServiceLocal
         $em = $this->bbapp->getEntityManager();
         $renderer = $this->bbapp->getRenderer();
 
-        $media_content = new $media_classname;
+        $media_content = new $media_classname();
 
         if (NULL !== $media_id) {
             $media = $em->find('\BackBuilder\NestedNode\Media', $media_id);
 
-            if ($media)
+            if ($media) {
                 $media_content = $media->getContent();
+            }
         }
+
         return $renderer->render($media_content, 'bbselector_edit');
     }
 
@@ -130,9 +129,10 @@ class Media extends AbstractServiceLocal
         foreach ($content_values as $content_value) {
             $content_values_array[$content_value->name] = $content_value->value;
         }
-        
-        if (NULL === $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid))
+
+        if (NULL === $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid)) {
             throw new ServicesException('None folder provided');
+        }
 
         $media_content = new $media_classname();
         if (NULL === $media_id || NULL === $media = $em->find('\BackBuilder\NestedNode\Media', $media_id)) {
@@ -145,30 +145,32 @@ class Media extends AbstractServiceLocal
 
         $media_content = $media->getContent();
         $media_content = $em->find($media_classname, $media_content->getUid());
-        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($media_content, $this->bbapp->getBBUserToken(), true))
+        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($media_content, $this->bbapp->getBBUserToken(), true)) {
             $media_content->setDraft($draft);
+        }
 
         foreach ($content_values_array as $element => $value) {
             try {
                 $subcontent = $media_content->$element;
-                if (!($subcontent instanceof AClassContent))
+                if (!($subcontent instanceof AClassContent)) {
                     continue;
+                }
 
                 if (NULL === $subcontent = $em->find(get_class($subcontent), $subcontent->getUid())) {
                     $subcontent = $media_content->$element;
                     $em->persist($subcontent);
                 }
 
-                if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true))
+                if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true)) {
                     $subcontent->setDraft($draft);
+                }
                 if ($subcontent instanceof elementText) {
                     $subcontent->value = $value;
                     $media_content->$element = $subcontent;
                     $this->bbapp->getEventDispatcher()->triggerEvent('commit', $subcontent);
-                } else if ($subcontent instanceof elementFile) {
+                } elseif ($subcontent instanceof elementFile) {
                     $content_image_obj = json_decode($value);
                     if (isset($content_image_obj->filename)) {
-
                         $subcontent->originalname = \BackBuilder\Util\String::toPath($content_image_obj->originalname);
                         $subcontent->path = \BackBuilder\Util\Media::getPathFromContent($subcontent);
 
@@ -176,11 +178,12 @@ class Media extends AbstractServiceLocal
 
                         #$filename = $this->bbapp->getTemporaryDir() . DIRECTORY_SEPARATOR . $content_image_obj->filename;
                         $moveto = $subcontent->path;
-                        File::resolveFilepath($moveto, NULL, array('base_dir' => $this->bbapp->getMediaDir()));
+                        File::resolveFilepath($moveto, null, array('base_dir' => $this->bbapp->getMediaDir()));
 
-                        if (FALSE === is_dir(dirname($moveto)))
-                            mkdir(dirname($moveto), 0755, TRUE);
-                        
+                        if (FALSE === is_dir(dirname($moveto))) {
+                            mkdir(dirname($moveto), 0755, true);
+                        }
+
                         file_put_contents($moveto, $src_image);
                         #copy($filename, $moveto);
 
@@ -314,6 +317,7 @@ class Media extends AbstractServiceLocal
         $return->content->classname = get_class($media_content);
         $return->created = $media->getCreated()->format('c');
         $return->modified = $media->getModified()->format('c');
+
         return $return;
     }
 
@@ -355,7 +359,7 @@ class Media extends AbstractServiceLocal
             throw new ServicesException('No media classname provided');
         }
 
-        $media_classname = 'BackBuilder\\ClassContent\\' . $media_classname;
+        $media_classname = 'BackBuilder\\ClassContent\\'.$media_classname;
         if (false === class_exists($media_classname)) {
             throw new ServicesException(sprintf('Unknown media classname provided `%s`', $media_classname));
         }
@@ -431,7 +435,7 @@ class Media extends AbstractServiceLocal
     public function getBBSelectorAvailableMedias()
     {
         $availableMedias = array();
-        $classnames = $this->bbapp->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*');
+        $classnames = $this->bbapp->getAutoloader()->glob('Media'.DIRECTORY_SEPARATOR.'*');
         if ($classnames !== false) {
             foreach ($classnames as $classname) {
                 $content = new $classname();
@@ -458,5 +462,4 @@ class Media extends AbstractServiceLocal
 
         return $this->_availableMedias;
     }
-
 }

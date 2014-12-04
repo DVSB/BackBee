@@ -20,7 +20,6 @@ namespace BackBuilder\Rest\Patcher;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Rest\Patcher\PatcherInterface;
 
 /**
  *
@@ -32,11 +31,11 @@ use BackBuilder\Rest\Patcher\PatcherInterface;
 class OperationBuilder
 {
     protected $operations = [];
-    
+
     /**
-     * 
-     * @param string $path
-     * @param mixed $value
+     *
+     * @param  string                                     $path
+     * @param  mixed                                      $value
      * @return \BackBuilder\Rest\Patcher\OperationBuilder
      */
     public function test($path, $value)
@@ -44,31 +43,31 @@ class OperationBuilder
         $this->operations[] = [
             "op" => PatcherInterface::TEST_OPERATION,
             "path" => $path,
-            "value" => $value
+            "value" => $value,
         ];
-        
+
         return $this;
     }
-    
+
     /**
-     * 
-     * @param string $path
+     *
+     * @param  string                                     $path
      * @return \BackBuilder\Rest\Patcher\OperationBuilder
      */
     public function remove($path)
     {
         $this->operations[] = [
             "op" => PatcherInterface::REMOVE_OPERATION,
-            "path" => $path
+            "path" => $path,
         ];
-        
+
         return $this;
     }
-    
+
     /**
-     * 
-     * @param string $path
-     * @param mixed $value
+     *
+     * @param  string                                     $path
+     * @param  mixed                                      $value
      * @return \BackBuilder\Rest\Patcher\OperationBuilder
      */
     public function add($path, $value)
@@ -76,16 +75,16 @@ class OperationBuilder
         $this->operations[] = [
             "op" => PatcherInterface::ADD_OPERATION,
             "path" => $path,
-            "value" => $value
+            "value" => $value,
         ];
-        
+
         return $this;
     }
-    
+
     /**
-     * 
-     * @param string $path
-     * @param mixed $value
+     *
+     * @param  string                                     $path
+     * @param  mixed                                      $value
      * @return \BackBuilder\Rest\Patcher\OperationBuilder
      */
     public function replace($path, $value)
@@ -93,16 +92,16 @@ class OperationBuilder
         $this->operations[] = [
             "op" => PatcherInterface::REPLACE_OPERATION,
             "path" => $path,
-            "value" => $value
+            "value" => $value,
         ];
-        
+
         return $this;
     }
-    
+
     /**
-     * 
-     * @param string $fromPath
-     * @param mixed $toPath
+     *
+     * @param  string                                     $fromPath
+     * @param  mixed                                      $toPath
      * @return \BackBuilder\Rest\Patcher\OperationBuilder
      */
     public function move($fromPath, $toPath)
@@ -110,16 +109,16 @@ class OperationBuilder
         $this->operations[] = [
             "op" => PatcherInterface::MOVE_OPERATION,
             "from" => $fromPath,
-            "path" => $toPath
+            "path" => $toPath,
         ];
-        
+
         return $this;
     }
-    
+
     /**
-     * 
-     * @param string $fromPath
-     * @param mixed $toPath
+     *
+     * @param  string                                     $fromPath
+     * @param  mixed                                      $toPath
      * @return \BackBuilder\Rest\Patcher\OperationBuilder
      */
     public function copy($fromPath, $toPath)
@@ -127,14 +126,14 @@ class OperationBuilder
         $this->operations[] = [
             "op" => PatcherInterface::COPY_OPEARATION,
             "from" => $fromPath,
-            "path" => $toPath
+            "path" => $toPath,
         ];
-        
+
         return $this;
     }
-    
+
     /**
-     * 
+     *
      * @return array
      */
     public function getOperations()

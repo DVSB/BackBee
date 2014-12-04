@@ -32,7 +32,6 @@ namespace BackBuilder\Util\Transport;
  */
 abstract class ATransport
 {
-
     /**
      * The protocol used by transport
      * @var string
@@ -111,7 +110,7 @@ abstract class ATransport
     {
         if (null !== $config) {
             foreach ($config as $key => $value) {
-                $property = '_' . $key;
+                $property = '_'.$key;
                 if (true === property_exists($this, $property)) {
                     $this->$property = $value;
                 }
@@ -122,7 +121,7 @@ abstract class ATransport
 
     /**
      * Returns the absolute remote path of a file
-     * @param string $path
+     * @param  string $path
      * @return string
      */
     protected function _getAbsoluteRemotePath($path = null)
@@ -136,129 +135,130 @@ abstract class ATransport
             $parse_url = array('path' => $path);
         }
 
-        return ('/' === substr($parse_url['path'], 0, 1) ? $path : $this->_remotepath . '/' . $path);
+        return ('/' === substr($parse_url['path'], 0, 1) ? $path : $this->_remotepath.'/'.$path);
     }
 
     /**
      * Trigger en PHP warning
-     * @param string $message
+     * @param  string $message
      * @return FALSE
      */
     protected function _trigger_error($message)
     {
         trigger_error($message, E_USER_WARNING);
+
         return false;
     }
 
     /**
      * Establish a new connection to the remose server
-     * @param string $host
-     * @param string $port
+     * @param  string                                                    $host
+     * @param  string                                                    $port
      * @return \BackBuilder\Util\Transport\ATransport
      * @throws \BackBuilder\Util\Transport\Exception\ConnectionException Occurs if connection failed
      */
-    public abstract function connect($host = null, $port = null);
+    abstract public function connect($host = null, $port = null);
 
     /**
      * Authenticate on remote server
-     * @param string $username
-     * @param string $password
+     * @param  string                                                        $username
+     * @param  string                                                        $password
      * @return \BackBuilder\Util\Transport\ATransport
      * @throws \BackBuilder\Util\Transport\Exception\AuthenticationException Occurs if authentication failed
      */
-    public abstract function login($username = null, $password = null);
+    abstract public function login($username = null, $password = null);
 
     /**
      * Disconnect from the remote server and unset resources
      * @return \BackBuilder\Util\Transport\ATransport
      */
-    public abstract function disconnect();
+    abstract public function disconnect();
 
     /**
      * Change remote directory
      * Should trigger an error on failure
-     * @param string $dir
+     * @param  string  $dir
      * @return boolean TRUE on success, FALSE on failure
      */
-    public abstract function cd($dir = null);
+    abstract public function cd($dir = null);
 
     /**
      * List remote files
-     * @param string $dir
+     * @param  string      $dir
      * @return array|FALSE An array of files
      */
-    public abstract function ls($dir = null);
+    abstract public function ls($dir = null);
 
     /**
      * Returns the current remote path
      * @return string
      */
-    public abstract function pwd();
+    abstract public function pwd();
 
     /**
      * Copy a local file to the remote server
      * Should trigger an error on failure
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
+     * @param  string  $local_file
+     * @param  string  $remote_file
+     * @param  boolean $overwrite
      * @return boolean Returns TRUE on success or FALSE on error
      */
-    public abstract function send($local_file, $remote_file, $overwrite = false);
+    abstract public function send($local_file, $remote_file, $overwrite = false);
 
     /**
      * Copy recursively a local file and subfiles to the remote server
      * Should trigger an error on failure
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
+     * @param  string  $local_file
+     * @param  string  $remote_file
+     * @param  boolean $overwrite
      * @return boolean Returns TRUE on success or FALSE on error
      */
-    public abstract function sendRecursive($local_path, $remote_path, $overwrite = false);
+    abstract public function sendRecursive($local_path, $remote_path, $overwrite = false);
 
     /**
      * Receive a remote file on local filesystem
      * Should trigger an error on failure
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
+     * @param  string  $local_file
+     * @param  string  $remote_file
+     * @param  boolean $overwrite
      * @return boolean Returns TRUE on success or FALSE on error
      */
-    public abstract function get($local_file, $remote_file, $overwrite = false);
+    abstract public function get($local_file, $remote_file, $overwrite = false);
 
     /**
      * Receive recursively a remote file and subfiles on local filesystem
      * Should trigger an error on failure
-     * @param string $local_file
-     * @param string $remote_file
-     * @param boolean $overwrite
+     * @param  string  $local_file
+     * @param  string  $remote_file
+     * @param  boolean $overwrite
      * @return boolean Returns TRUE on success or FALSE on error
      */
-    public abstract function getRecursive($local_path, $remote_path, $overwrite = false);
+    abstract public function getRecursive($local_path, $remote_path, $overwrite = false);
 
     /**
      * Creates a new remote directory
      * Should trigger an error on failure
-     * @param string $dir
-     * @param boolean $recursive
+     * @param  string  $dir
+     * @param  boolean $recursive
      * @return boolean Returns TRUE on success or FALSE on error
      */
-    public abstract function mkdir($dir, $recursive = false);
+    abstract public function mkdir($dir, $recursive = false);
 
     /**
      * Deletes a remote file
      * Should trigger an error on failure
-     * @param string $remote_path
-     * @param boolean $recursive
+     * @param  string  $remote_path
+     * @param  boolean $recursive
      * @return boolean Returns TRUE on success or FALSE on error
      */
-    public abstract function delete($remote_path, $recursive = false);
+    abstract public function delete($remote_path, $recursive = false);
 
     /**
      * Renames a remote file
      * Should trigger an error on failure
-     * @param string $old_name
-     * @param string $new_name
+     * @param  string  $old_name
+     * @param  string  $new_name
      * @return boolean Returns TRUE on success or FALSE on error
      */
-    public abstract function rename($old_name, $new_name);
+    abstract public function rename($old_name, $new_name);
 }

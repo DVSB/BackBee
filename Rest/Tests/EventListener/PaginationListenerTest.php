@@ -24,7 +24,6 @@ use BackBuilder\FrontController\FrontController;
 use BackBuilder\Rest\EventListener\PaginationListener;
 use BackBuilder\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
 use BackBuilder\Tests\TestCase;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\Validation;
@@ -41,7 +40,7 @@ use Symfony\Component\Validator\Validation;
  */
 class PaginationListenerTest extends TestCase
 {
-    public function setUp() 
+    public function setUp()
     {
         parent::setUp();
         // init bbapp to enable autoloading of annotations
@@ -68,7 +67,6 @@ class PaginationListenerTest extends TestCase
         $request = new Request(array());
         $event = new FilterControllerEvent(new FrontController(), $controller, $request, FrontController::MASTER_REQUEST);
 
-
         $listener = $this->getListener();
         $listener->onKernelController($event);
 
@@ -86,7 +84,6 @@ class PaginationListenerTest extends TestCase
         $request = new Request();
         $request->headers->set('Range', '220,50');
         $event = new FilterControllerEvent(new FrontController(), $controller, $request, FrontController::MASTER_REQUEST);
-
 
         $listener = $this->getListener();
 
@@ -135,7 +132,7 @@ class PaginationListenerTest extends TestCase
         $refl = new \ReflectionClass('BackBuilder\Rest\Controller\Annotations\Pagination');
 
         \Doctrine\Common\Annotations\AnnotationRegistry::registerAutoloadNamespaces(array(
-            'BackBuilder\Rest\Controller\Annotations' => dirname($refl->getFileName())
+            'BackBuilder\Rest\Controller\Annotations' => dirname($refl->getFileName()),
         ));
 
         $metadataFactory =  new \Metadata\MetadataFactory(
@@ -148,5 +145,4 @@ class PaginationListenerTest extends TestCase
 
         return $listener;
     }
-
 }

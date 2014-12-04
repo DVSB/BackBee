@@ -2,34 +2,34 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Site;
 
-use Symfony\Component\Security\Core\User\UserInterface,
-    Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
  * UserPreferences object in BackBuilder 5
- * 
+ *
  * User preferences persistence
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Site
  * @copyright   Lp digital system
@@ -39,7 +39,6 @@ use Symfony\Component\Security\Core\User\UserInterface,
  */
 class UserPreferences
 {
-
     /**
      * Unique identifier of the revision
      * @var string
@@ -65,13 +64,13 @@ class UserPreferences
 
     /**
      * Class constructor
-     * 
-     * @param string $uid The unique identifier of the revision
+     *
+     * @param string         $uid   The unique identifier of the revision
      * @param TokenInterface $token The current auth token
      */
-    public function __construct($uid = NULL, $token = NULL)
+    public function __construct($uid = null, $token = null)
     {
-        $this->_uid = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
+        $this->_uid = (is_null($uid)) ? md5(uniqid('', true)) : $uid;
 
         if ($token instanceof TokenInterface) {
             $this->_owner = UserSecurityIdentity::fromToken($token);
@@ -111,31 +110,33 @@ class UserPreferences
     /**
      * Set the user preferences UID
      * @codeCoverageIgnore
-     * @param string $uid
+     * @param  string                            $uid
      * @return \BackBuilder\Site\UserPreferences
      */
     public function setUid($uid)
     {
         $this->_uid = $uid;
+
         return $this;
     }
 
     /**
      * Set the owner of the user preferences
      * @codeCoverageIgnore
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     * @param  \Symfony\Component\Security\Core\User\UserInterface $user
      * @return \BackBuilder\Site\UserPreferences
      */
     public function setOwner(UserInterface $user)
     {
         $this->_owner = UserSecurityIdentity::fromAccount($user);
+
         return $this;
     }
 
     /**
      * Set the preferences of the user
      *
-     * @param mixed $preferences
+     * @param  mixed                             $preferences
      * @return \BackBuilder\Site\UserPreferences
      */
     public function setPreferences($preferences)
@@ -144,7 +145,7 @@ class UserPreferences
             $preferences = json_encode($preferences);
         }
         $this->_preferences = $preferences;
+
         return $this;
     }
-
 }

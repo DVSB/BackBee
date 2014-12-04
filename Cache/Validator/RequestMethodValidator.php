@@ -21,8 +21,6 @@
 
 namespace BackBuilder\Cache\Validator;
 
-use BackBuilder\Cache\Validator\ValidatorInterface;
-
 use Symfony\Component\HttpFoundation\Request;
 
 /**

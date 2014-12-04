@@ -21,17 +21,16 @@
 
 namespace BackBuilder\Services\Rpc;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Services\Rpc\Exception\RpcException,
-    BackBuilder\Services\Utils\Error,
-    BackBuilder\Event\Event,
-    BackBuilder\Exception\BBException,
-    BackBuilder\Exception\MissingApplicationException,
-    BackBuilder\Security\Exception\ForbiddenAccessException,
-    BackBuilder\Services\Rpc\Annotation;
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response,
-    Symfony\Component\DependencyInjection\ContainerBuilder;
+use BackBuilder\BBApplication;
+use BackBuilder\Services\Rpc\Exception\RpcException;
+use BackBuilder\Services\Utils\Error;
+use BackBuilder\Event\Event;
+use BackBuilder\Exception\BBException;
+use BackBuilder\Exception\MissingApplicationException;
+use BackBuilder\Security\Exception\ForbiddenAccessException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
 
 /**
@@ -43,7 +42,6 @@ use Doctrine\Common\Annotations\SimpleAnnotationReader;
  */
 class JsonRPCServer
 {
-
     /**
      * The current BackBuilder application
      * @var \BackBuilder\BBApplication
@@ -69,11 +67,11 @@ class JsonRPCServer
     }
 
     /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param array $request_payload
+     * @param  \Symfony\Component\HttpFoundation\Request $request
+     * @param  array                                     $request_payload
      * @return boolean
      */
-    static public function isRPCInvokedMethodSecured(Request $request, $request_payload = NULL)
+    public static function isRPCInvokedMethodSecured(Request $request, $request_payload = null)
     {
         $self = new self();
 
@@ -94,8 +92,8 @@ class JsonRPCServer
 
     /**
      *
-     * @param Symfony\Component\HttpFoundation\Request $request
-     * @param array $request_payload
+     * @param  Symfony\Component\HttpFoundation\Request  $request
+     * @param  array                                     $request_payload
      * @return Symfony\Component\HttpFoundation\Response
      * @throws RpcException
      */
@@ -108,7 +106,7 @@ class JsonRPCServer
             'jsonrpc' => '2.0',
             'id' => null,
             'result' => null,
-            'error' => true
+            'error' => true,
         );
 
         $response = new Response();
@@ -126,12 +124,12 @@ class JsonRPCServer
 
             $this->_registerAnnotations($reflectionMethod);
 
-            if (false === $this->isExposed())
-                throw new RpcException("Method:" . $method . " not exposed");
+            if (false === $this->isExposed()) {
+                throw new RpcException("Method:".$method." not exposed");
+            }
 
             $object = new $namespaceClass();
             call_user_func_array(array($object, "initService"), array($this->_application));
-
 
             $dispatcher = null;
             if (NULL !== $this->_application) {
@@ -146,7 +144,7 @@ class JsonRPCServer
 
             if (NULL !== $dispatcher) {
                 $event = new Event($object, array('method' => $method, 'params' => $params));
-                $dispatcher->dispatch($dispatcher->getEventNamePrefix($object) . 'precall', $event);
+                $dispatcher->dispatch($dispatcher->getEventNamePrefix($object).'precall', $event);
                 $params = $event->getArgument('params', $params);
             }
 
@@ -158,7 +156,7 @@ class JsonRPCServer
 
             if (NULL !== $dispatcher && true === isset($event)) {
                 $event->setArgument('result', $result);
-                $dispatcher->dispatch($dispatcher->getEventNamePrefix($object) . 'postcall', $event);
+                $dispatcher->dispatch($dispatcher->getEventNamePrefix($object).'postcall', $event);
                 $result = $event->getArgument('result', $result);
             }
 
@@ -193,7 +191,7 @@ class JsonRPCServer
         /* Ne pas afficher les notices */
         $notAllowedErrors = array(E_STRICT, E_NOTICE, E_WARNING, E_STRICT);
         if (is_array($error) && count($error) && !in_array($error["type"], $notAllowedErrors)) {
-            $errMsg = $error["message"] . " - File : " . $error["file"] . " - Line :" . $error["line"];
+            $errMsg = $error["message"]." - File : ".$error["file"]." - Line :".$error["line"];
             try {
                 $error = new \stdClass();
                 $error->message = $errMsg;
@@ -203,15 +201,14 @@ class JsonRPCServer
                 $response->setContent(json_encode($return));
                 exit();
             } catch (BBException $e) {
-
             }
         }
     }
 
     /**
      * Handles a RPC request
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param array $request_payload
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
+     * @param  array                                      $request_payload
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request = null, $request_payload = null)
@@ -236,9 +233,9 @@ class JsonRPCServer
         $profiler = $this->_application->getContainer()->get('profiler');
         $profile = $profiler->collect($request, new Response(), null);
         $debug = new \stdClass();
-        $debug->memory = number_format($profile->getCollector('memory')->getMemory() / 1024 / 1024) . ' MB';
+        $debug->memory = number_format($profile->getCollector('memory')->getMemory() / 1024 / 1024).' MB';
         $debug->db = new \stdClass();
-        $debug->db->time = number_format($profile->getCollector('db')->getTime() * 1000, 2) . ' ms';
+        $debug->db->time = number_format($profile->getCollector('db')->getTime() * 1000, 2).' ms';
         $debug->db->count = $profile->getCollector('db')->getQueryCount();
         $debug->db->queries = $profile->getCollector('db')->getQueries();
         $debug->logger = array();
@@ -296,7 +293,7 @@ class JsonRPCServer
     /**
      * @param string $classname
      * @param string $method
-     * @param array $params
+     * @param array  $params
      */
     protected function logActivity($classname, $method, $params)
     {
@@ -318,13 +315,13 @@ class JsonRPCServer
 
     /**
      *
-     * @param string $request_method
+     * @param  string $request_method
      * @return string
      * @codeCoverageIgnore
      */
     protected function _getClassname($request_method)
     {
-        return "\\" . str_replace("_", "\\", $request_method);
+        return "\\".str_replace("_", "\\", $request_method);
     }
 
     /**
@@ -358,7 +355,7 @@ class JsonRPCServer
      * Validates the RPC request
      * @return \BackBuilder\Services\Rpc\JsonRPCServer
      * @throws \BackBuilder\Services\Rpc\Exception\InvalidRequestException Occurs if the RPC request is invalid
-     * @throws \BackBuilder\Services\Rpc\Exception\InvalidMethodException Occurs if the RPC request method is invalid
+     * @throws \BackBuilder\Services\Rpc\Exception\InvalidMethodException  Occurs if the RPC request method is invalid
      */
     protected function _validateRequest(Request $request)
     {
@@ -375,8 +372,8 @@ class JsonRPCServer
 
     /**
      *
-     * @param string $classname
-     * @param string $method
+     * @param  string            $classname
+     * @param  string            $method
      * @return \ReflectionMethod
      * @throws RpcException
      */
@@ -402,7 +399,7 @@ class JsonRPCServer
     }
 
     /**
-     * @param type $request_payload
+     * @param  type         $request_payload
      * @return array
      * @throws RpcException
      */
@@ -425,7 +422,7 @@ class JsonRPCServer
     /**
      * Checks for a valid BackBuilder5 user on the current Site is need
      * @return \BackBuilder\Services\Rpc\JsonRPCServer
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the user can not admin the current Site
      */
     protected function _checkSecuredAccess()
@@ -451,7 +448,7 @@ class JsonRPCServer
     /**
      * Checks for a valid role for user if need
      * @return \BackBuilder\Services\Rpc\JsonRPCServer
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs none BackBuilder application is defined
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the user has not the expected role
      */
     protected function _checkRestrictedAccess()
@@ -470,5 +467,4 @@ class JsonRPCServer
 
         return $this;
     }
-
 }

@@ -2,32 +2,32 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\ClassContent\Repository\Element;
 
-use BackBuilder\ClassContent\Repository\ClassContentRepository,
-    BackBuilder\ClassContent\Exception\ClassContentException,
-    BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\Element\file as elementFile,
-    BackBuilder\Util\File,
-    BackBuilder\Util\Media,
-    BackBuilder\BBApplication;
+use BackBuilder\ClassContent\Repository\ClassContentRepository;
+use BackBuilder\ClassContent\Exception\ClassContentException;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\Element\file as elementFile;
+use BackBuilder\Util\File;
+use BackBuilder\Util\Media;
+use BackBuilder\BBApplication;
 
 /**
  * file repository
@@ -39,7 +39,6 @@ use BackBuilder\ClassContent\Repository\ClassContentRepository,
  */
 class fileRepository extends ClassContentRepository
 {
-
     /**
      * The temporary directory
      * @var string
@@ -66,7 +65,7 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Move an temporary uploaded file to either media library or storage directory
-     * @param \BackBuilder\ClassContent\Element\file $file
+     * @param  \BackBuilder\ClassContent\Element\file $file
      * @return boolean
      */
     public function commitFile(elementFile $file)
@@ -90,9 +89,9 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Move an uploaded file to the temporary directory and update file content
-     * @param \BackBuilder\ClassContent\AClassContent $file
-     * @param string $newfilename
-     * @param string $originalname
+     * @param  \BackBuilder\ClassContent\AClassContent                   $file
+     * @param  string                                                    $newfilename
+     * @param  string                                                    $originalname
      * @return boolean|string
      * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
@@ -118,13 +117,12 @@ class fileRepository extends ClassContentRepository
         File::resolveFilepath($moveto, null, array('base_dir' => $base_dir));
 
         try {
-            if($src === null) {
+            if ($src === null) {
                 File::resolveFilepath($newfilename, null, array('base_dir' => $this->_temporarydir));
                 File::move($newfilename, $moveto);
-            }else{
-
+            } else {
                 $dir = dirname($moveto);
-                if(!is_dir($dir)){
+                if (!is_dir($dir)) {
                     File::mkdir($dir);
                 }
 
@@ -144,20 +142,21 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Return true if file is in media libray false otherwise
-     * @param \BackBuilder\ClassContent\Element\file $file
+     * @param  \BackBuilder\ClassContent\Element\file $file
      * @return boolean
      */
     public function isInMediaLibrary(elementFile $file)
     {
         $parent_ids = $this->getParentContentUid($file);
-        if (0 === count($parent_ids))
+        if (0 === count($parent_ids)) {
             return false;
+        }
 
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
                 ->select('m.id')
                 ->from('media', 'm')
-                ->andWhere('m.content_uid IN ("' . implode('","', $parent_ids) . '")');
+                ->andWhere('m.content_uid IN ("'.implode('","', $parent_ids).'")');
 
         $medias = $q->execute()->fetchAll(\PDO::FETCH_COLUMN);
 
@@ -166,9 +165,9 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Do stuf on update by post of the content editing form
-     * @param \BackBuilder\ClassContent\AClassContent $content
-     * @param stdClass $value
-     * @param \BackBuilder\ClassContent\AClassContent $parent
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @param  stdClass                                                  $value
+     * @param  \BackBuilder\ClassContent\AClassContent                   $parent
      * @return \BackBuilder\ClassContent\Element\file
      * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
@@ -190,7 +189,7 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Set the storage directories define by the BB5 application
-     * @param \BackBuilder\BBApplication $application
+     * @param  \BackBuilder\BBApplication                                  $application
      * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
      */
     public function setDirectories(BBApplication $application = null)
@@ -208,34 +207,37 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Set the temporary directory
-     * @param type $temporary_dir
+     * @param  type                                                        $temporary_dir
      * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
      */
     public function setTemporaryDir($temporary_dir = null)
     {
         $this->_temporarydir = $temporary_dir;
+
         return $this;
     }
 
     /**
      * Set the storage directory
-     * @param type $storage_dir
+     * @param  type                                                        $storage_dir
      * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
      */
     public function setStorageDir($storage_dir = null)
     {
         $this->_storagedir = $storage_dir;
+
         return $this;
     }
 
     /**
      * Set the media library directory
-     * @param type $media_dir
+     * @param  type                                                        $media_dir
      * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
      */
     public function setMediaDir($media_dir = null)
     {
         $this->_mediadir = $media_dir;
+
         return $this;
     }
 
@@ -252,5 +254,4 @@ class fileRepository extends ClassContentRepository
             $this->_application->getEventDispatcher()->dispatch('file.postupload', $event);
         }
     }
-
 }

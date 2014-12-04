@@ -24,7 +24,6 @@ namespace BackBuilder\Cache\File;
 use BackBuilder\Cache\ACache;
 use BackBuilder\Cache\Exception\CacheException;
 use BackBuilder\Util\String;
-
 use Psr\Log\LoggerInterface;
 
 /**
@@ -40,7 +39,6 @@ use Psr\Log\LoggerInterface;
  */
 class Cache extends ACache
 {
-
     /**
      * The cache directory
      * @var string
@@ -53,17 +51,17 @@ class Cache extends ACache
      */
     protected $_instance_options = array(
         'cachedir'          => null,
-        'cacheautogenerate' => true
+        'cacheautogenerate' => true,
     );
 
     /**
      * Class constructor
-     * @param array $options Initial options for the cache adapter:
-     *                         - cachedir string The cache directory
-     * @param string $context An optional cache context
-     * @param \Psr\Log\LoggerInterface $logger An optional logger
+     * @param  array                                       $options Initial options for the cache adapter:
+     *                                                              - cachedir string The cache directory
+     * @param  string                                      $context An optional cache context
+     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache directory doesn't exist, can not
-     *                                                     be created or is not writable.
+     *                                                             be created or is not writable.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
@@ -72,7 +70,7 @@ class Cache extends ACache
         $this->cachedir = $this->_instance_options['cachedir'];
 
         if (null !== $this->getContext()) {
-            $this->cachedir .= DIRECTORY_SEPARATOR . String::toPath($this->getContext());
+            $this->cachedir .= DIRECTORY_SEPARATOR.String::toPath($this->getContext());
         }
 
         if (true === $this->_instance_options['cacheautogenerate'] && false === is_dir($this->cachedir)
@@ -89,9 +87,9 @@ class Cache extends ACache
 
     /**
      * Returns the available cache for the given id if found returns false else
-     * @param string $id Cache id
-     * @param boolean $bypassCheck Allow to find cache without test it before
-     * @param \DateTime $expire Optionnal, the expiration time (now by default)
+     * @param  string       $id          Cache id
+     * @param  boolean      $bypassCheck Allow to find cache without test it before
+     * @param  \DateTime    $expire      Optionnal, the expiration time (now by default)
      * @return string|FALSE
      */
     public function load($id, $bypassCheck = false, \DateTime $expire = null)
@@ -104,9 +102,9 @@ class Cache extends ACache
         if (true === $bypassCheck
                 || 0 === $last_timestamp
                 || $expire->getTimestamp() <= $last_timestamp) {
-
             if (false !== $data = @file_get_contents($this->getCacheFile($id))) {
                 $this->log('debug', sprintf('Reading file cache data for id `%s`.', $id));
+
                 return $data;
             }
 
@@ -120,7 +118,7 @@ class Cache extends ACache
 
     /**
      * Tests if a cache is available or not (for the given id)
-     * @param string $id Cache id
+     * @param  string    $id Cache id
      * @return int|FALSE the last modified timestamp of the available cache record
      */
     public function test($id)
@@ -134,11 +132,11 @@ class Cache extends ACache
 
     /**
      * Save some string datas into a cache record
-     * @param string $id Cache id
-     * @param string $data Datas to cache
-     * @param int $lifetime Optional, the specific lifetime for this record
-     *                      (by default null, infinite lifetime)
-     * @param string $tag Optional, an associated tag to the data stored
+     * @param  string  $id       Cache id
+     * @param  string  $data     Datas to cache
+     * @param  int     $lifetime Optional, the specific lifetime for this record
+     *                           (by default null, infinite lifetime)
+     * @param  string  $tag      Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     public function save($id, $data, $lifetime = null, $tag = null)
@@ -158,7 +156,7 @@ class Cache extends ACache
 
     /**
      * Removes a cache record
-     * @param  string $id Cache id
+     * @param  string  $id Cache id
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function remove($id)
@@ -179,7 +177,7 @@ class Cache extends ACache
         $result = false;
         if (false !== $files = @scandir($this->cachedir)) {
             foreach ($files as $file) {
-                $file = $this->cachedir . DIRECTORY_SEPARATOR . $file;
+                $file = $this->cachedir.DIRECTORY_SEPARATOR.$file;
                 if (false === is_dir($file)) {
                     if (false === @unlink($file)) {
                         $this->log('warning', sprintf('Enable to remove cache file `%s`.', $file));
@@ -199,13 +197,14 @@ class Cache extends ACache
 
     /**
      * Returns the cache file if a cache is available for the given id
-     * @param string $id Cache id
+     * @param  string $id Cache id
      * @return string The file path of the available cache record
      * @codeCoverageIgnore
      */
     private function getCacheFile($id)
     {
-        $cachefile = $this->cachedir . DIRECTORY_SEPARATOR . $id;
+        $cachefile = $this->cachedir.DIRECTORY_SEPARATOR.$id;
+
         return $cachefile;
     }
 }

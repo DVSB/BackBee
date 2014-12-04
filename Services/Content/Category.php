@@ -21,9 +21,8 @@
 
 namespace BackBuilder\Services\Content;
 
-use Symfony\Component\Yaml\Yaml as parserYaml,
-    BackBuilder\Services\Content\ContentRender,
-    BackBuilder\Util\File;
+use Symfony\Component\Yaml\Yaml as parserYaml;
+use BackBuilder\Util\File;
 
 /**
  * @category    BackBuilder
@@ -34,7 +33,6 @@ use Symfony\Component\Yaml\Yaml as parserYaml,
  */
 class Category
 {
-
     /**
      * All content categories for this BBApp instance
      * @var Category[]
@@ -58,10 +56,11 @@ class Category
         $result = array();
         $lambda = create_function('$cat', 'return strtolower($cat);');
         if (isset($catArray) && is_array($catArray)) {
-            $result = array_map(function($cat) {
+            $result = array_map(function ($cat) {
                 return strtolower($cat);
             }, $catArray);
         }
+
         return $result;
     }
 
@@ -69,13 +68,13 @@ class Category
     {
         $contents = array();
         foreach ($this->application->getClassContentDir() as $classcontentdir) {
-            $files = self::globRecursive($classcontentdir . DIRECTORY_SEPARATOR . '*.yml');
+            $files = self::globRecursive($classcontentdir.DIRECTORY_SEPARATOR.'*.yml');
             foreach ($files as $file) {
                 File::resolveFilepath($file);
                 $dataYaml = parserYaml::parse($file);
                 foreach ($dataYaml as $name => $item) {
                     if (isset($item['properties']['category']) && in_array(strtolower($this->name), $this->lowerCatNames($item['properties']['category']))) {
-                        $str = str_replace($classcontentdir . DIRECTORY_SEPARATOR, '', $file);
+                        $str = str_replace($classcontentdir.DIRECTORY_SEPARATOR, '', $file);
                         $str = str_replace('/', '\\', $str);
                         $name = substr($str, 0, -4);
                         if ($name) {
@@ -105,7 +104,7 @@ class Category
      * @codeCoverageIgnore
      * @return string
      */
-    static function getCacheKey()
+    public static function getCacheKey()
     {
         return md5(__METHOD__);
     }
@@ -121,12 +120,13 @@ class Category
 
     /**
      * @codeCoverageIgnore
-     * @param string $name
+     * @param  string                                 $name
      * @return \BackBuilder\Services\Content\Category
      */
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -161,12 +161,13 @@ class Category
 
     /**
      * @codeCoverageIgnore
-     * @param \BackBuilder\BBApplication $application
+     * @param  \BackBuilder\BBApplication             $application
      * @return \BackBuilder\Services\Content\Category
      */
     public function setApplication($application)
     {
         $this->application = $application;
+
         return $this;
     }
 
@@ -181,12 +182,13 @@ class Category
 
     /**
      * @codeCoverageIgnore
-     * @param type $selected
+     * @param  type                                   $selected
      * @return \BackBuilder\Services\Content\Category
      */
     public function setSelected($selected)
     {
         $this->selected = $selected;
+
         return $this;
     }
 
@@ -201,25 +203,28 @@ class Category
 
     /**
      * @codeCoverageIgnore
-     * @param string $label
+     * @param  string                                 $label
      * @return \BackBuilder\Services\Content\Category
      */
     public function setLabel($label)
     {
         $this->label = $label;
+
         return $this;
     }
 
     public function getContents()
     {
-        if ($this->contents === array())
+        if ($this->contents === array()) {
             $this->setContents();
+        }
+
         return $this->contents;
     }
 
     /**
      * Returns an array of defined categories for the BBApp instance
-     * @param array $classcontent_dirs
+     * @param  array $classcontent_dirs
      * @return array
      */
     public static function getCategories(array $classcontent_dirs)
@@ -227,34 +232,38 @@ class Category
         if (null === self::$_categories) {
             self::$_categories = array("tous" => new Category("Tous", null, true));
             foreach ($classcontent_dirs as $classcontentdir) {
-                if(!is_dir($classcontentdir)) continue;
+                if (!is_dir($classcontentdir)) {
+                    continue;
+                }
                 $files = File::getFilesRecursivelyByExtension($classcontentdir, 'yml');
                 if (true === is_array($files) && 0 < count($files)) {
                     self::_getCategoriesFromFiles($files, $classcontentdir);
                 }
             }
         }
+
         return self::$_categories;
     }
 
     /**
      * Returns the content classname according to a file
      * Can be call by array_walk
-     * @param string $item
-     * @param string $key
-     * @param string $basedir
+     * @param  string $item
+     * @param  string $key
+     * @param  string $basedir
      * @return string
      */
     private static function _getClassNameFromFile(&$item, $key, $basedir)
     {
         $item = str_replace(array($basedir, DIRECTORY_SEPARATOR), array('\BackBuilder\ClassContent', NAMESPACE_SEPARATOR), File::removeExtension($item));
+
         return $item;
     }
 
     /**
      * Returns an array of Category from ClassContent files
-     * @param array $files
-     * @param string $basedir
+     * @param  array  $files
+     * @param  string $basedir
      * @return array
      */
     private static function _getCategoriesFromFiles(array $files, $basedir)
@@ -286,7 +295,7 @@ class Category
 
     /**
      * Returns categories of a content by its classname
-     * @param string $classname
+     * @param  string      $classname
      * @return array|FALSE
      */
     private static function _getContentCategories($classname)
@@ -340,7 +349,7 @@ class Category
 
     /**
      * Add a new content classname for this category
-     * @param string $classname
+     * @param  string                                 $classname
      * @return \BackBuilder\Services\Content\Category
      */
     public function addClassname($classname)
@@ -348,14 +357,16 @@ class Category
         if (false === in_array($classname, $this->_classnames)) {
             $this->_classnames[] = $classname;
         }
+
         return $this;
     }
 
-    static function getFilesCategory($files = array())
+    public static function getFilesCategory($files = array())
     {
         $categories = array();
-        if (!isset($files) && !is_array($files))
+        if (!isset($files) && !is_array($files)) {
             return;
+        }
         foreach ($files as $file) {
             $dataYaml = parserYaml::parse($file);
             foreach ($dataYaml as $name => $item) {
@@ -368,17 +379,22 @@ class Category
                 }
             }
         }
+
         return $categories;
     }
 
     public static function globRecursive($pattern, $flags = 0)
     {
         $files = glob($pattern, $flags);
-        if (!$files)
+        if (!$files) {
             $files = array();
-        if (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT))
-            foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir)
-                $files = array_merge($files, self::globRecursive($dir . '/' . basename($pattern), $flags));
+        }
+        if (glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT)) {
+            foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+                $files = array_merge($files, self::globRecursive($dir.'/'.basename($pattern), $flags));
+            }
+        }
+
         return $files;
     }
 
@@ -386,11 +402,11 @@ class Category
     {
         $stdClass = new \stdClass();
         $stdClass->name = $this->getname();
-        $stdClass->uid = uniqid('', TRUE);
-
+        $stdClass->uid = uniqid('', true);
 
         $stdClass->selected = $this->getSelected();
         $stdClass->label = $this->getLabel();
+
         return $stdClass;
     }
 
@@ -408,4 +424,3 @@ class Category
 //     return $categories;
 //    }
 }
-?>

@@ -24,11 +24,9 @@ namespace BackBuilder\Config;
 use BackBuilder\Cache\ACache;
 use BackBuilder\Config\Exception\InvalidConfigException;
 use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\DispatchTagEventInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\Util\File;
-
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -130,8 +128,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Class constructor
-     * @param string $basedir The base directory in which look for config files
-     * @param \BackBuilder\Cache\ACache $cache Optional cache system
+     * @param string                                     $basedir   The base directory in which look for config files
+     * @param \BackBuilder\Cache\ACache                  $cache     Optional cache system
      * @param \BackBuilder\DependencyInjection\Container $container
      */
     public function __construct($basedir, ACache $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
@@ -152,9 +150,9 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      * for example getDoctrineConfig() aliases getSection('doctrine')
      *
      * @access public
-     * @param string $name The name of the called method
-     * @param array $arguments The arguments passed to the called method
-     * @return array The configuration section if exists NULL else
+     * @param  string $name      The name of the called method
+     * @param  array  $arguments The arguments passed to the called method
+     * @return array  The configuration section if exists NULL else
      */
     public function __call($name, $arguments)
     {
@@ -175,7 +173,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Set the service container to be able to parse parameter and service in config
      * Resets the compiled parameters array
-     * @param \BackBuilder\DependencyInjection\Container $container
+     * @param  \BackBuilder\DependencyInjection\Container $container
      * @return \BackBuilder\Config\Config
      */
     public function setContainer(Container $container = null)
@@ -217,7 +215,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Returns, if exists, the raw parameter section, NULL otherwise
-     * @param string $section
+     * @param  string     $section
      * @return mixed|NULL
      */
     public function getRawSection($section = null)
@@ -228,7 +226,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
             return $this->raw_parameters[$section];
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -242,7 +240,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Returns, if exists, the parameter section
-     * @param string $section
+     * @param  string     $section
      * @return array|NULL
      */
     public function getSection($section = null)
@@ -290,7 +288,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Set environment context
-     * @param string $env
+     * @param  string $env
      * @return self
      */
     public function setEnvironment($env)
@@ -302,7 +300,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Set debug mode
-     * @param boolean $debug
+     * @param  boolean $debug
      * @return self
      */
     public function setDebug($debug)
@@ -314,8 +312,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Checks if the key exists in the parameter section
-     * @param string $section
-     * @param string $key
+     * @param  string  $section
+     * @param  string  $key
      * @return boolean
      */
     public function sectionHasKey($section, $key)
@@ -333,9 +331,9 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Sets a parameter section
-     * @param string $section
-     * @param array $config
-     * @param boolean $overwrite
+     * @param  string                     $section
+     * @param  array                      $config
+     * @param  boolean                    $overwrite
      * @return \BackBuilder\Config\Config The current config object
      */
     public function setSection($section, array $config, $overwrite = false)
@@ -373,9 +371,9 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
         if (
             false === empty($this->environment)
             && false === strpos($this->environment, $basedir)
-            && true === file_exists($basedir . DIRECTORY_SEPARATOR . $this->environment)
+            && true === file_exists($basedir.DIRECTORY_SEPARATOR.$this->environment)
         ) {
-            $this->extend($basedir . DIRECTORY_SEPARATOR . $this->environment, $overwrite);
+            $this->extend($basedir.DIRECTORY_SEPARATOR.$this->environment, $overwrite);
         }
 
         return $this;
@@ -423,7 +421,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
             'debug'               => $this->debug,
             'yml_names_to_ignore' => $this->yml_names_to_ignore,
             'has_cache'           => null !== $this->cache,
-            'has_container'       => null !== $this->container
+            'has_container'       => null !== $this->container,
         );
     }
 
@@ -437,7 +435,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * If a cache system is defined, try to load a cache for the current basedir
-     * @param string $basedir The base directory
+     * @param  string  $basedir The base directory
      * @return boolean Returns TRUE if a valid cache has been found, FALSE otherwise
      */
     private function loadFromCache($basedir)
@@ -469,12 +467,12 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Saves the parameters in cache system if defined
-     * @param string $basedir The base directory
+     * @param  string  $basedir The base directory
      * @return boolean Returns TRUE if a valid cache has been saved, FALSE otherwise
      */
     private function saveToCache($basedir)
     {
-        if(true === $this->debug) {
+        if (true === $this->debug) {
             return false;
         }
 
@@ -487,7 +485,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Returns a cache expiration date time (the newer modification date of files)
-     * @param string $basedir The base directory
+     * @param  string    $basedir The base directory
      * @return \DateTime
      */
     private function getCacheExpire($basedir)
@@ -511,18 +509,18 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Returns a cache id for the current instance
-     * @param string $basedir The base directory
+     * @param  string $basedir The base directory
      * @return string
      */
     private function getCacheId($basedir)
     {
-        return md5('config-' . $basedir . $this->environment);
+        return md5('config-'.$basedir.$this->environment);
     }
 
     /**
      * Returns an array of YAML files in the directory
-     * @param string $basedir
-     * @param string $basedir The base directory
+     * @param  string                                                $basedir
+     * @param  string                                                $basedir The base directory
      * @return array
      * @throws \BackBuilder\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
@@ -530,7 +528,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     {
         $yml_files = File::getFilesByExtension($basedir, self::EXTENSION);
 
-        $default_file = $basedir . DIRECTORY_SEPARATOR . self::CONFIG_FILE . '.' . self::EXTENSION;
+        $default_file = $basedir.DIRECTORY_SEPARATOR.self::CONFIG_FILE.'.'.self::EXTENSION;
 
         if (true === file_exists($default_file) && 1 < count($yml_files)) {
             // Ensure that config.yml is the first one
@@ -550,7 +548,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Loads the config files from the base directory
-     * @param string $basedir The base directory
+     * @param  string                                                $basedir The base directory
      * @throws \BackBuilder\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
     private function loadFromBaseDir($basedir, $overwrite = false)
@@ -562,7 +560,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Try to parse a yaml config file
-     * @param string $filename
+     * @param  string                                               $filename
      * @throws \BackBuilder\Config\Exception\InvalidConfigException Occurs when the file can't be parsed
      */
     private function loadFromFile($filename, $overwrite = false)
@@ -575,17 +573,16 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
                     $this->debug_data[$filename] = $yamlDatas;
                 }
 
-                if (self::CONFIG_FILE . '.' . self::EXTENSION === basename($filename) ||
-                    self::CONFIG_FILE . '.' . $this->environment . '.' . self::EXTENSION === basename($filename)) {
-
+                if (self::CONFIG_FILE.'.'.self::EXTENSION === basename($filename) ||
+                    self::CONFIG_FILE.'.'.$this->environment.'.'.self::EXTENSION === basename($filename)) {
                     foreach ($yamlDatas as $component => $config) {
                         if (false === is_array($config)) {
-                           $this->container->get('logger')->error('Bad configuration, array expected, given : ' . $config);
+                            $this->container->get('logger')->error('Bad configuration, array expected, given : '.$config);
                         }
                         $this->setSection($component, $config, $overwrite);
                     }
                 } else {
-                    $this->setSection(basename($filename, '.' . self::EXTENSION), $yamlDatas, $overwrite);
+                    $this->setSection(basename($filename, '.'.self::EXTENSION), $yamlDatas, $overwrite);
                 }
             }
         } catch (ParseException $e) {
@@ -617,7 +614,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
         }
 
         if (false === array_key_exists($section, $this->raw_parameters)) {
-            return null;
+            return;
         }
 
         if (false === array_key_exists($section, $this->parameters)) {
