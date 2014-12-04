@@ -43,6 +43,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  */
 class PageRepository extends NestedNodeRepository
 {
+
     /**
      * Creates a new Page QueryBuilder instance that is prepopulated for this entity name.
      * @param string $alias      the alias to use
@@ -271,13 +272,13 @@ class PageRepository extends NestedNodeRepository
      */
     public function replaceRootContentSet(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet)
     {
-        $result = false;
-
         try {
             $result = $page->replaceRootContentSet($oldContentSet, $newContentSet);
-        } catch (\Exception $e) { /* nothing to do */ }
 
-        return $result;
+            return $result;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -461,7 +462,7 @@ class PageRepository extends NestedNodeRepository
      * @param array $limit          optional, the query limit restriction, array(0, 10) by default
      * @return array|null
      */
-    public function likeAPage($wordsSearch = '', array $limit = array(0, 10))
+    public function likeAPage($wordsSearch = "", array $limit = array(0, 10))
     {
         $limit = array_replace(array(0, 10), $limit);
 
@@ -490,7 +491,7 @@ class PageRepository extends NestedNodeRepository
      */
     public function duplicate(Page $page, $title = null, Page $parent = null, $recursive = true, BBUserToken $token = null)
     {
-        $new_page = $recursive ? $this->copyRecursively($page, $title, $parent) : $this->copy($page, $title, $parent);
+        $new_page = (true === $recursive) ? $this->copyRecursively($page, $title, $parent) : $this->copy($page, $title, $parent);
 
         // Finally updating contentset and mainnode
         if (null !== $token) {
@@ -499,6 +500,8 @@ class PageRepository extends NestedNodeRepository
                      ->updateMainNodePostCloning($content, $token, $new_page->cloning_datas['pages'])
                 ;
             }
+
+            $this->_em->flush();
         }
 
         return $new_page;
@@ -519,7 +522,6 @@ class PageRepository extends NestedNodeRepository
             ->orderBy('p._leftnode', 'desc')
             ->setParameter('site', $site)
         ;
-
         foreach ($q->getQuery()->execute() as $page) {
             $this->delete($page);
         }
@@ -554,7 +556,9 @@ class PageRepository extends NestedNodeRepository
             $new_page = $this->insertNodeAsFirstChildOf($new_page, $parent);
         }
 
+        // Persisting entities
         $this->_em->persist($new_page);
+        $this->_em->flush();
 
         return $new_page;
     }
@@ -581,7 +585,6 @@ class PageRepository extends NestedNodeRepository
         if (false === $page->isLeaf()) {
             $children = $this->getDescendants($page, 1);
         }
-
         foreach (array_reverse($children) as $child) {
             if (!(Page::STATE_DELETED & $child->getState())) {
                 $this->_em->refresh($new_page);
@@ -590,6 +593,7 @@ class PageRepository extends NestedNodeRepository
                 $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
             }
         }
+        $this->_em->flush();
 
         return $new_page;
     }
@@ -604,11 +608,11 @@ class PageRepository extends NestedNodeRepository
     private function updateRelatedPostCloning(AClassContent $content, BBUserToken $token, array $cloning_datas)
     {
         if (
-            false === ($content instanceof ContentSet)
-            || false === array_key_exists('pages', $cloning_datas)
-            || false === array_key_exists('contents', $cloning_datas)
-            || 0 === count($cloning_datas['pages'])
-            || 0 === count($cloning_datas['contents'])
+                false === ($content instanceof ContentSet) ||
+                false === array_key_exists('pages', $cloning_datas) ||
+                false === array_key_exists('contents', $cloning_datas) ||
+                0 === count($cloning_datas['pages']) ||
+                0 === count($cloning_datas['contents'])
         ) {
             // Nothing to do
             return $this;
@@ -625,9 +629,9 @@ class PageRepository extends NestedNodeRepository
             }
 
             if (
-                null === $subcontent->getMainNode()
-                || false === in_array($subcontent->getMainNode()->getUid(), $copied_pages)
-                || false === in_array($subcontent->getUid(), $copied_contents)
+                    null === $subcontent->getMainNode() ||
+                    false === in_array($subcontent->getMainNode()->getUid(), $copied_pages) ||
+                    false === in_array($subcontent->getUid(), $copied_contents)
             ) {
                 continue;
             }
@@ -656,7 +660,7 @@ class PageRepository extends NestedNodeRepository
         if (null !== $mainnode && true === in_array($mainnode->getUid(), array_keys($cloning_pages))) {
 
             // Loading draft for content
-            if (null !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
+            if (NULL !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
                 $content->setDraft($draft);
             }
 

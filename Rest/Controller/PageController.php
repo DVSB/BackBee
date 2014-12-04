@@ -437,8 +437,6 @@ class PageController extends ARestController
             $this->getApplication()->getBBUserToken()
         );
 
-        $this->getApplication()->getEntityManager()->persist($page);
-
         if (null !== $sibling) {
             $this->granted('EDIT', $sibling->getParent());
             $this->getPageRepository()->moveAsPrevSiblingOf($page, $sibling);
