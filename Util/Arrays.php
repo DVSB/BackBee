@@ -283,4 +283,42 @@ class Arrays
         return $default;
     }
 
+    /**
+     * Implementation of array_column for PHP lower than 5.5
+     * @param array $array      A multi-dimensional array (record set) from which to pull a column of values.
+     * @param type $column_key  The column of values to return. This value may be the integer key of the column 
+     *                          you wish to retrieve, or it may be the string key name for an associative array. 
+     *                          It may also be NULL to return complete arrays (useful together with index_key to 
+     *                          reindex the array).
+     * @param type $index_key   The column to use as the index/keys for the returned array. This value may be the 
+     *                          integer key of the column, or it may be the string key name.
+     * @return array            An array of values representing a single column from the input array.
+     */
+    public static function array_column(array $array, $column_key = null, $index_key = null)
+    {
+        if (true === function_exists('array_column')) {
+            return array_column($array, $column_key, $index_key);
+        }
+
+        $result = array();
+        foreach ($array as $row) {
+            if (false === is_array($row)) {
+                continue;
+            }
+
+            $key = count($result);
+            if (null !== $index_key && true === array_key_exists($index_key, $row)) {
+                $key = (string) $row[$index_key];
+            }
+
+            if (null === $column_key) {
+                $result[$key] = $row;
+            } elseif (true === array_key_exists($column_key, $row)) {
+                $result[$key] = $row[$column_key];
+            }
+        }
+
+        return $result;
+    }
+
 }

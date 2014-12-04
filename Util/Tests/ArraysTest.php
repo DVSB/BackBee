@@ -99,4 +99,80 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(Arrays::get($this->_mock, 'key', null, new \stdClass()));
     }
 
+    /**
+     * @covers \BackBuilder\Util\Arrays::array_column
+     */
+    public function testArray_column()
+    {
+        $mock = array(
+            'unused',
+            array(
+                'id' => 2135,
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+            ),
+            array(
+                'id' => 3245,
+                'first_name' => 'Sally',
+                'last_name' => 'Smith',
+            ),
+            array(
+                'id' => 5342,
+                'first_name' => 'Jane',
+                'last_name' => 'Jones',
+            ),
+            array(
+                'id' => 5623,
+                'first_name' => 'Peter',
+                'last_name' => 'Doe',
+            )
+        );
+
+        $this->assertEquals(array(
+            array(
+                'id' => 2135,
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+            ),
+            array(
+                'id' => 3245,
+                'first_name' => 'Sally',
+                'last_name' => 'Smith',
+            ),
+            array(
+                'id' => 5342,
+                'first_name' => 'Jane',
+                'last_name' => 'Jones',
+            ),
+            array(
+                'id' => 5623,
+                'first_name' => 'Peter',
+                'last_name' => 'Doe',
+            )
+                ), Arrays::array_column($mock));
+        $this->assertEquals(array('John', 'Sally', 'Jane', 'Peter'), Arrays::array_column($mock, 'first_name'));
+        $this->assertEquals(array(2135 => 'John', 3245 => 'Sally', 5342 => 'Jane', 5623 => 'Peter'), Arrays::array_column($mock, 'first_name', 'id'));
+        $this->assertEquals(array(
+            2135 => array(
+                'id' => 2135,
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+            ),
+            3245 => array(
+                'id' => 3245,
+                'first_name' => 'Sally',
+                'last_name' => 'Smith',
+            ),
+            5342 => array(
+                'id' => 5342,
+                'first_name' => 'Jane',
+                'last_name' => 'Jones',
+            ),
+            5623 => array(
+                'id' => 5623,
+                'first_name' => 'Peter',
+                'last_name' => 'Doe',
+            )
+                ), Arrays::array_column($mock, null, 'id'));    }
+
 }
