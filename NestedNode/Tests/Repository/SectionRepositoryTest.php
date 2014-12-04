@@ -58,6 +58,15 @@ class SectionRepositoryTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\SectionRepository::getNativelyNodeChildren
+     */
+    public function testGetNativelyNodeChildren()
+    {
+        $this->assertEquals(array(), $this->repo->getNativelyNodeChildren('test'));
+        $this->assertEquals(array('child2', 'child1'), $this->repo->getNativelyNodeChildren($this->root->getUid()));
+    }
+
+    /**
      * Sets up the fixture
      */
     protected function setUp()
@@ -69,15 +78,19 @@ class SectionRepositoryTest extends TestCase
         $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Section')));
         $st->createSchema(array($em->getClassMetaData('BackBuilder\Site\Site')));
 
+        $this->repo = $em->getRepository('BackBuilder\NestedNode\Section');
+
         $site = new Site('site_uid', array('label' => 'site mock'));
         $em->persist($site);
 
         $this->root = new Section('root_uid', array('site' => $site));
         $em->persist($this->root);
 
-        $em->flush();
+        $child1 = $this->repo->insertNodeAsFirstChildOf(new Section('child1', array('site' => $site)), $this->root);
+        $em->flush($child1);
 
-        $this->repo = $em->getRepository('BackBuilder\NestedNode\Section');
+        $child2 = $this->repo->insertNodeAsFirstChildOf(new Section('child2', array('site' => $site)), $this->root);
+        $em->flush($child2);
     }
 
 }

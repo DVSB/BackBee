@@ -22,6 +22,7 @@
 namespace BackBuilder\NestedNode\Repository;
 
 use BackBuilder\Site\Site;
+use BackBuilder\Util\Arrays;
 use Doctrine\ORM\NoResultException;
 
 /**
@@ -57,6 +58,27 @@ class SectionRepository extends NestedNodeRepository
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Returns an array of uid of the children of $node_uid
+     * @param string $node_uid  The node uid to look for children
+     * @return array
+     */
+    public function getNativelyNodeChildren($node_uid)
+    {
+        $query = $this->createQueryBuilder('s')
+                ->select('s._uid')
+                ->where('s._parent = :node')
+                ->addOrderBy('s._leftnode', 'asc')
+                ->addOrderBy('s._modified', 'desc');
+
+        $result = $this->getEntityManager()
+                ->getConnection()
+                ->executeQuery($query->getQuery()->getSQL(), array($node_uid), array(\Doctrine\DBAL\Types\Type::STRING))
+                ->fetchAll();
+
+        return Arrays::array_column($result, 'uid0');
     }
 
 }
