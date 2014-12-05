@@ -843,6 +843,16 @@ abstract class AClassContent extends AContent
         return $rendermode;
     }
 
+    /**
+     * Computes and returns image name from current class content classname
+     *
+     * @return string
+     */
+    public function getImageName()
+    {
+        return str_replace(array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'), array('', '/'), get_class($this)) . '.png';
+    }
+
     /*     * **************************************************************** */
     /*                                                                        */
     /*                   Implementation of IRenderable                        */
@@ -1063,7 +1073,8 @@ abstract class AClassContent extends AContent
         $datas = array(
             'properties' => $this->getProperty(),
             'main_node'  => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
-            'draft_uid'  => null !== $this->getDraft() ? $this->getDraft()->getUid() : null
+            'draft_uid'  => null !== $this->getDraft() ? $this->getDraft()->getUid() : null,
+            'image'      => $this->getImageName()
         );
 
         $datas = array_merge(parent::jsonSerialize(), $datas);

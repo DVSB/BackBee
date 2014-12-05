@@ -39,6 +39,11 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
 abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerializable
 {
     /**
+     * BackBuilder's class content classname must be prefixed by this
+     */
+    const CLASSCONTENT_BASE_NAMESPACE = 'BackBuilder\ClassContent\\';
+
+    /**
      * Unique identifier
      * @var string
      * @Id @Column(type="string", name="uid")
@@ -1013,7 +1018,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         $datas = array(
             'uid'        => $this->_uid,
             'label'      => $this->_label,
-            'type'       => str_replace('BackBuilder\ClassContent\\', '', get_class($this)),
+            'type'       => str_replace(self::CLASSCONTENT_BASE_NAMESPACE, '', get_class($this)),
             'state'      => $this->_state,
             'created'    => $this->_created->getTimestamp(),
             'modified'   => $this->_modified->getTimestamp(),

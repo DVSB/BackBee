@@ -25,6 +25,8 @@ use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Rest\Controller\Annotations as Rest;
+use BackBuilder\Routing\RouteCollection;
+use BackBuilder\Util\File;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -41,6 +43,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class ClassContentController extends ARestController
 {
+    /**
+     * Contains every potential classcontent thumbnail base folder
+     * @var array
+     */
+    private $thumbnail_base_directory = null;
+
     /**
      * Returns category's datas if $id is valid
      *
@@ -96,7 +104,7 @@ class ClassContentController extends ARestController
             $classnames[] = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $block->type);
         }
 
-        return $this->createResponse(json_encode($this->convertPaginatorToArray($this->findContentsByCriterias(
+        return $this->createResponse(json_encode($this->formatClassContentCollection($this->findContentsByCriterias(
             $classnames, $start, $count
         ))));
     }
@@ -114,7 +122,7 @@ class ClassContentController extends ARestController
     {
         $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $type);
 
-        return $this->createResponse(json_encode($this->convertPaginatorToArray($this->findContentsByCriterias(
+        return $this->createResponse(json_encode($this->formatClassContentCollection($this->findContentsByCriterias(
             (array) $classname, $start, $count
         ))));
     }
@@ -152,7 +160,7 @@ class ClassContentController extends ARestController
             $content = $this->getApplication()->getRenderer()->render($content, $mode);
             $content_type = 'text/html';
         } else {
-            $content = json_encode($content);
+            $content = json_encode($this->updateClassContentImageUrl($content->jsonSerialize()));
         }
 
         return $this->createResponse($content, 200, $content_type);
@@ -273,15 +281,88 @@ class ClassContentController extends ARestController
      *
      * @return array
      */
-    private function convertPaginatorToArray(Paginator $paginator = null)
+    private function formatClassContentCollection(Paginator $paginator = null)
     {
         $contents = array();
         if (null !== $paginator) {
             foreach ($paginator as $content) {
-                $contents[] = $content;
+                $contents[] = $content->jsonSerialize();
             }
         }
 
-        return $contents;
+        return $this->updateClassContentCollectionImageUrl($contents);
+    }
+
+    /**
+     * Update class content collection image url
+     *
+     * @param array $classcontents
+     */
+    private function updateClassContentCollectionImageUrl(array $classcontents)
+    {
+        $result = array();
+        foreach ($classcontents as $classcontent) {
+            $result[] = $this->updateClassContentImageUrl($classcontent);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Update a single classcontent image url
+     *
+     * @param  array  $classcontent the classcontent we want to update its image url
+     *
+     * @return array
+     */
+    private function updateClassContentImageUrl(array $classcontent)
+    {
+        $image_uri = '';
+        $url_type = RouteCollection::RESOURCE_URL;
+        if ('/' === $classcontent['image'][0]) {
+            $image_uri = $classcontent['image'];
+            $url_type = RouteCollection::IMAGE_URL;
+        } else {
+            $image_filepath = $this->getThumbnailBaseFolderPath() . DIRECTORY_SEPARATOR . $classcontent['image'];
+            $base_folder = $this->getApplication()->getContainer()->getParameter('classcontent_thumbnail.base_folder');
+            if (file_exists($image_filepath) && is_readable($image_filepath)) {
+                $image_uri = $base_folder . '/' . $classcontent['image'];
+            } else {
+                $image_uri = $base_folder . '/' . 'default_thumbnail.png';
+            }
+
+        }
+
+        $classcontent['image'] = $this->getApplication()->getRouting()->getUri($image_uri, null, null, $url_type);
+
+        return $classcontent;
+    }
+
+    /**
+     * Getter of class content thumbnail folder path
+     *
+     * @return string
+     */
+    private function getThumbnailBaseFolderPath()
+    {
+        if (null === $this->thumbnail_base_directory) {
+            $base_folder = $this->getApplication()->getContainer()->getParameter('classcontent_thumbnail.base_folder');
+            $this->thumbnail_base_directory = array_map(function ($directory) use ($base_folder) {
+                return str_replace(
+                    DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,
+                    DIRECTORY_SEPARATOR,
+                    $directory.'/'.$base_folder
+                );
+            }, $this->getApplication()->getResourceDir());
+
+            foreach ($this->thumbnail_base_directory as $directory) {
+                if (is_dir($directory)) {
+                    $this->thumbnail_base_directory = $directory;
+                    break;
+                }
+            }
+        }
+
+        return $this->thumbnail_base_directory;
     }
 }
