@@ -495,6 +495,11 @@ abstract class AClassContent extends AContent
     protected function _initData()
     {
         // Has to be overwritten by generalizations
+        if ($this instanceof ContentSet) {
+            $this->setProperty('is_container', true);
+        } else {
+            $this->setProperty('is_container', false);
+        }
     }
 
     /**

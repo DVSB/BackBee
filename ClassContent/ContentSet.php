@@ -119,109 +119,6 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets options at the construction of a new instance
-     * @param  array                                $options Initial options for the content:
-     *                                                       - label       the label of the content
-     *                                                       - maxentry    the maximum number of content accepted
-     *                                                       - minentry    the minimum number of content accepted
-     *                                                       - accept      an array of classname accepted
-     *                                                       - default     array default value for datas
-     * @return \BackBuilder\ClassContent\ContentSet
-     */
-    protected function _setOptions($options = null)
-    {
-        if (null !== $options) {
-            $options = (array) $options;
-            if (true === array_key_exists('label', $options)) {
-                $this->_label = $options['label'];
-            }
-
-            if (true === array_key_exists('maxentry', $options)) {
-                $this->_maxentry = intval($options['maxentry']);
-            }
-
-            if (true === array_key_exists('minentry', $options)) {
-                $this->_minentry = intval($options['minentry']);
-            }
-
-            if (true === array_key_exists('accept', $options)) {
-                $this->_accept = (array) $options['accept'];
-            }
-
-            if (true === array_key_exists('default', $options)) {
-                $options['default'] = (array) $options['default'];
-                foreach ($options['default'] as $value) {
-                    $this->push($value);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Dynamically adds and sets new element to this content
-     * @param  string                                  $var          the name of the element
-     * @param  string                                  $type         the type
-     * @param  array                                   $options      Initial options for the content (see this constructor)
-     * @param  Boolean                                 $updateAccept dynamically accept or not the type for the new element
-     * @return \BackBuilder\ClassContent\AClassContent The current instance
-     */
-    protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
-    {
-        if (true === $updateAccept) {
-            $this->_addAcceptedType($type, $var);
-        }
-
-        if (null !== $options) {
-            $options = (array) $options;
-            if (true === array_key_exists('default', $options)) {
-                $options['default'] = (array) $options['default'];
-                foreach ($options['default'] as $value) {
-                    $this->push($value);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @inherited
-     */
-    protected function _defineParam($var, $type = 'scalar', $options = null)
-    {
-        if ('accept' === $var) {
-            if (true === is_array($options) && true === array_key_exists('default', $options)) {
-                return $this->_addAcceptedType($options['default']);
-            }
-        } else {
-            parent::_defineParam($var, $type, $options);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Adds a new accepted type to the element
-     * @param  string                                  $type the type to accept
-     * @param  string                                  $var  the element
-     * @return \BackBuilder\ClassContent\AClassContent The current instance
-     */
-    protected function _addAcceptedType($type, $var = null)
-    {
-        $types = (array) $type;
-        foreach ($types as $type) {
-            $type = (NAMESPACE_SEPARATOR === substr($type, 0, 1)) ? substr($type, 1) : $type;
-            if (false === in_array($type, $this->_accept)) {
-                $this->_accept[] = $type;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * Empty the current set of contents
      */
     public function clear()
@@ -607,5 +504,121 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         $datas = array_merge(parent::toJson(true), $datas);
 
         return false === $return_array ? json_encode($datas) : $datas;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function _initData()
+    {
+        if (null === $this->getProperty('auto_hydrate')) {
+            $this->setProperty('auto_hydrate', false);
+        }
+
+        parent::_initData();
+    }
+
+    /**
+     * Sets options at the construction of a new instance
+     * @param  array                                $options Initial options for the content:
+     *                                                       - label       the label of the content
+     *                                                       - maxentry    the maximum number of content accepted
+     *                                                       - minentry    the minimum number of content accepted
+     *                                                       - accept      an array of classname accepted
+     *                                                       - default     array default value for datas
+     * @return \BackBuilder\ClassContent\ContentSet
+     */
+    protected function _setOptions($options = null)
+    {
+        if (null !== $options) {
+            $options = (array) $options;
+            if (true === array_key_exists('label', $options)) {
+                $this->_label = $options['label'];
+            }
+
+            if (true === array_key_exists('maxentry', $options)) {
+                $this->_maxentry = intval($options['maxentry']);
+            }
+
+            if (true === array_key_exists('minentry', $options)) {
+                $this->_minentry = intval($options['minentry']);
+            }
+
+            if (true === array_key_exists('accept', $options)) {
+                $this->_accept = (array) $options['accept'];
+            }
+
+            if (true === array_key_exists('default', $options)) {
+                $options['default'] = (array) $options['default'];
+                foreach ($options['default'] as $value) {
+                    $this->push($value);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Dynamically adds and sets new element to this content
+     * @param  string                                  $var          the name of the element
+     * @param  string                                  $type         the type
+     * @param  array                                   $options      Initial options for the content (see this constructor)
+     * @param  Boolean                                 $updateAccept dynamically accept or not the type for the new element
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     * @deprecated since version 1.0
+     */
+    protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
+    {
+        if (true === $updateAccept) {
+            $this->_addAcceptedType($type, $var);
+        }
+
+        if (null !== $options) {
+            $options = (array) $options;
+            if (true === array_key_exists('default', $options)) {
+                $options['default'] = (array) $options['default'];
+                foreach ($options['default'] as $value) {
+                    $this->push($value);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function _defineParam($var, $type = 'scalar', $options = null)
+    {
+        if ('accept' === $var) {
+            if (true === is_array($options) && true === array_key_exists('default', $options)) {
+                return $this->_addAcceptedType($options['default']);
+            }
+        } else {
+            parent::_defineParam($var, $type, $options);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Adds a new accepted type to the element
+     * @param  string                                  $type the type to accept
+     * @param  string                                  $var  the element
+     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     */
+    protected function _addAcceptedType($type, $var = null)
+    {
+        $types = (array) $type;
+        foreach ($types as $type) {
+            $type = (NAMESPACE_SEPARATOR === substr($type, 0, 1)) ? substr($type, 1) : $type;
+            if (false === in_array($type, $this->_accept)) {
+                $this->_accept[] = $type;
+            }
+        }
+
+        return $this;
     }
 }
