@@ -28,7 +28,7 @@ providers:
     bb_user:
         entity:
             class: BackBuilder\Security\User
-        secret: bb5_secret_key
+        secret: %bb5_secret_key%
     public_key:
         entity:
             class: BackBuilder\Security\User
