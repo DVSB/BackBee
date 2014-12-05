@@ -1,13 +1,21 @@
-<?php //if (NULL !== $this->getParam('token') && is_a($this->getParam('token'), 'BackBuilder\Security\Token\BBUserToken')): ?>
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bb5-skin03.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bootsrap-grid.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bootsrap-resp-grid.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/jquery-ui.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/font-awesome.min.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bootstrap.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bb5-ui.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/font-awesome.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/lib/datetimepicker/jquery.datetimepicker.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/fix.css') ?>">
-<?php //endif; ?>
+<?php $current_page = $this->getParam('current_page'); ?>
+
+<div id="bb5-ui"
+     data-site-uid="<?php echo $current_page->getSite()->getUid() ?>"
+     data-page-uid="<?php echo $current_page->getUid() ?>"
+     data-layout-uid="<?php echo $current_page->getLayout()->getUid() ?>"
+></div>
+
+<?php if (null !== $this->getParam('token') && $this->getParam('token') instanceof BackBuilder\Security\Token\BBUserToken): ?>
+    <script>
+        require(['src/tb/init'], function (init) {
+            init.load(true);
+        });
+    </script>
+<?php else: ?>
+    <script>
+        require(['src/tb/init'], function (init) {
+            init.listen();
+        });
+    </script>
+<?php endif; ?>

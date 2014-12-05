@@ -42,7 +42,7 @@ class bb5head extends AHelper
         $tokenArr = array('token' => $token);
         $params = (!is_null($params) && is_array($params) ) ? array_merge($tokenArr, $params) : $tokenArr;
 
-        return $this->_renderer->partial('bb5/_bb5.header.phtml', $params);
+        return $this->_renderer->partial('bb5/head.phtml', $params);
     }
 
 }

@@ -36,11 +36,18 @@ class bb5toolbar extends AHelper
      */
     public function __invoke($params = null)
     {
-        $token = $this->_renderer->getApplication()->getBBUserToken();
+        $application = $this->_renderer->getApplication();
 
-        $tokenArr = array('token' => $token);
-        $params = (!is_null($params) && is_array($params) ) ? array_merge($tokenArr, $params) : $tokenArr;
+        $token = $application->getBBUserToken();
 
-        return $this->_renderer->partial('bb5/_bb5.toolbars.phtml', $params);
+        $customParams = array('token' => $token, 'current_page' => $this->_renderer->getCurrentPage());
+
+        if (null !== $params && true === is_array($params)) {
+            $params = array_merge($customParams, $params);
+        } else {
+            $params = $customParams;
+        }
+
+        return $this->_renderer->partial('bb5/toolbar.phtml', $params);
     }
 }

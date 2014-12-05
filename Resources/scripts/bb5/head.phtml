@@ -1,10 +1,13 @@
-<?php if (null !== $this->getParam('token') && $this->getParam('token') instanceof BackBuilder\Security\Token\BBUserToken): ?>
-    <div id="bb5-ui"></div>
-<?php else: ?>
-    <div id="bb5-ui"></div>
-    <script>
-        require(['src/tb/init'], function (init) {
-            init.listen();
-        });
-    </script>
-<?php endif; ?>
+<?php //if (NULL !== $this->getParam('token') && is_a($this->getParam('token'), 'BackBuilder\Security\Token\BBUserToken')): ?>
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bootstrap.min.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bb5-skin03.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bootsrap-grid.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bootsrap-resp-grid.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/jquery-ui.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/font-awesome.min.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bootstrap.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/bb5-ui.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/font-awesome.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/bower_components/datetimepicker/jquery.datetimepicker.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->getUri('resources/html/css/fix.css') ?>">
+<?php //endif; ?>
