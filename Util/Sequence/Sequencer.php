@@ -117,8 +117,11 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
             throw new \BackBuilder\Exception\InvalidArgumentException('Initial value of a sequence must be a positive integer');
         }
 
-        $query = 'UPDATE '.$this->_table.' SET '.$this->_value.' = :value WHERE '.$this->_name.' = :name';
+        $query = 'UPDATE :_table SET :_value = :value WHERE :_name = :name';
         $params = array(
+            '_table' => $this->_table,
+            '_value' => $this->_value,
+            '_name'  => $this->_name,
             'name' => $name,
             'value' => $value,
         );
