@@ -1,6 +1,6 @@
 {
-    "name": "backbee",
-    "description": "BackBuilder",
+    "name": "Lp-digital/BackBee",
+    "description": "BackBee is the next generation open source CMS",
     "type": "backbee-package",
     "extra": {
         "installer-name": "BackBuilder"
