@@ -21,7 +21,6 @@
 
 namespace BackBuilder\Cache\Validator;
 
-use BackBuilder\Cache\Validator\ValidatorInterface;
 use BackBuilder\NestedNode\Page;
 
 /**
@@ -51,8 +50,8 @@ class PatternValidator implements ValidatorInterface
     /**
      * constructor
      *
-     * @param array   $supported_methods list of supported methods
-     * @param array   $groups            list of groups this validator belongs to
+     * @param array $supported_methods list of supported methods
+     * @param array $groups            list of groups this validator belongs to
      */
     public function __construct(array $patterns_to_exclude, $groups = array('page'))
     {

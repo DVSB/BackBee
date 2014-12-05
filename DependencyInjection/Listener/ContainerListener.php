@@ -28,7 +28,6 @@ use BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableExcep
 use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\Event\Event;
 use BackBuilder\Exception\BBException;
-
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 
 /**
@@ -44,7 +43,7 @@ class ContainerListener
     /**
      * [onApplicationInit description]
      * @param  Event  $event [description]
-     * @return [type]        [description]
+     * @return [type] [description]
      */
     public static function onApplicationInit(Event $event)
     {
@@ -73,10 +72,10 @@ class ContainerListener
             $container_proxy->setParameter('is_compiled', $dump['is_compiled']);
 
             file_put_contents(
-                $container_directory . DIRECTORY_SEPARATOR . $container_filename . '.php',
+                $container_directory.DIRECTORY_SEPARATOR.$container_filename.'.php',
                 (new PhpDumper($container_proxy))->dump(array(
                     'class'      => $container_filename,
-                    'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy'
+                    'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy',
                 ))
             );
         } elseif (true === $application->isDebugMode() && false === $container->isRestored()) {
@@ -88,7 +87,7 @@ class ContainerListener
      * [loadExternalBundleServices description]
      * @param  Container $container [description]
      * @param  [type]    $config    [description]
-     * @return [type]               [description]
+     * @return [type]    [description]
      */
     // private static function loadExternalBundleServices(Container $container, array $config = null)
     // {

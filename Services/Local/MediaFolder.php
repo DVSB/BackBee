@@ -21,8 +21,7 @@
 
 namespace BackBuilder\Services\Local;
 
-use BackBuilder\Services\Local\AbstractServiceLocal,
-    BackBuilder\Util\String;
+use BackBuilder\Util\String;
 use BackBuilder\Services\Exception\ServicesException;
 
 /**
@@ -36,7 +35,6 @@ use BackBuilder\Services\Exception\ServicesException;
  */
 class MediaFolder extends AbstractServiceLocal
 {
-
     const MEDIAFOLDER_TITLE = "Médiathèque";
 
     private function createRoot()
@@ -55,6 +53,7 @@ class MediaFolder extends AbstractServiceLocal
         } catch (\Exception $e) {
             throw new ServicesException("Error while creating the root media folder!");
         }
+
         return $mediaFolderRoot;
     }
 
@@ -74,7 +73,7 @@ class MediaFolder extends AbstractServiceLocal
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
                 $leaf->attr->rel = 'folder';
-                $leaf->attr->id = 'node_' . $child->getUid();
+                $leaf->attr->id = 'node_'.$child->getUid();
                 $leaf->attr->state = 1;
                 $leaf->data = $child->getTitle();
                 $leaf->state = 'closed';
@@ -94,7 +93,7 @@ class MediaFolder extends AbstractServiceLocal
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
                 $leaf->attr->rel = 'root';
-                $leaf->attr->id = 'node_' . $mediafolder->getUid();
+                $leaf->attr->id = 'node_'.$mediafolder->getUid();
                 $leaf->attr->state = 1;
                 $leaf->data = $mediafolder->getTitle();
                 $leaf->state = 'closed';
@@ -119,6 +118,7 @@ class MediaFolder extends AbstractServiceLocal
         $pattern = "/ClassContent/i";
         $result = array();
         $match = preg_match($pattern, $mediaFolder->getTitle(), $result);
+
         return $match;
     }
 
@@ -137,7 +137,7 @@ class MediaFolder extends AbstractServiceLocal
 
             $mediafolder = $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->insertNodeAsFirstChildOf($mediafolder, $root);
 
-            $mediafolder->setUrl($mediafolder->getParent()->getUrl() . '/' . String::urlize($mediafolder->getTitle()));
+            $mediafolder->setUrl($mediafolder->getParent()->getUrl().'/'.String::urlize($mediafolder->getTitle()));
 
             $em->persist($mediafolder);
             $em->flush();
@@ -145,7 +145,7 @@ class MediaFolder extends AbstractServiceLocal
             $leaf = new \stdClass();
             $leaf->attr = new \stdClass();
             $leaf->attr->rel = 'folder';
-            $leaf->attr->id = 'node_' . $mediafolder->getUid();
+            $leaf->attr->id = 'node_'.$mediafolder->getUid();
             $leaf->attr->state = 1;
             $leaf->data = $mediafolder->getTitle();
             $leaf->state = 'leaf';
@@ -167,7 +167,7 @@ class MediaFolder extends AbstractServiceLocal
 
         if ($mediafolder) {
             $mediafolder->setTitle($title);
-            $mediafolder->setUrl($mediafolder->getParent()->getUrl() . '/' . String::urlize($mediafolder->getTitle()));
+            $mediafolder->setUrl($mediafolder->getParent()->getUrl().'/'.String::urlize($mediafolder->getTitle()));
 
             $em->persist($mediafolder);
             $em->flush();
@@ -198,7 +198,7 @@ class MediaFolder extends AbstractServiceLocal
             $leaf = new \stdClass();
             $leaf->attr = new \stdClass();
             $leaf->attr->rel = 'folder';
-            $leaf->attr->id = 'node_' . $mediafolder->getUid();
+            $leaf->attr->id = 'node_'.$mediafolder->getUid();
             $leaf->attr->state = 1;
             $leaf->data = $mediafolder->getTitle();
             $leaf->state = 'closed';
@@ -219,6 +219,7 @@ class MediaFolder extends AbstractServiceLocal
         if ($mediafolder) {
             return $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->delete($mediafolder, $this->bbapp);
         }
+
         return false;
     }
 
@@ -227,14 +228,17 @@ class MediaFolder extends AbstractServiceLocal
      */
     public function delete($uid)
     {
-        if (null === $folder = $this->em->find('\BackBuilder\NestedNode\MediaFolder', $uid))
+        if (null === $folder = $this->em->find('\BackBuilder\NestedNode\MediaFolder', $uid)) {
             throw new ServicesException(sprintf('Unable to delete media folder for `%s` uid', $uid));
+        }
 
-        if (true === $folder->isRoot())
+        if (true === $folder->isRoot()) {
             throw new ServicesException('mediaselector.error.is_root');
+        }
 
-        if (0 < $this->em->getRepository("\BackBuilder\NestedNode\Media")->countMedias($folder))
+        if (0 < $this->em->getRepository("\BackBuilder\NestedNode\Media")->countMedias($folder)) {
             throw new ServicesException('mediaselector.error.is_not_empty');
+        }
 
         return $this->em->getRepository('\BackBuilder\NestedNode\MediaFolder')->delete($folder);
     }
@@ -255,7 +259,7 @@ class MediaFolder extends AbstractServiceLocal
             $pagingInfos = array("start" => (int) $start, "limit" => (int) $limit);
 
             if (null !== $mediafolder) {
-                if (false !== $classnames = $this->bbapp->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*')) {
+                if (false !== $classnames = $this->bbapp->getAutoloader()->glob('Media'.DIRECTORY_SEPARATOR.'*')) {
                     foreach ($classnames as $classname) {
                         class_exists($classname);
                     }
@@ -280,9 +284,9 @@ class MediaFolder extends AbstractServiceLocal
                     $row->created = $media->getCreated()->format('c');
                     $row->modified = $media->getModified()->format('c');
                     $row->type = get_class($media_content);
-                    $view[] = Array(
+                    $view[] = array(
                         'html' => $renderer->render($media_content, 'bbselector_view'),
-                        'media' => $row
+                        'media' => $row,
                     );
                 }
                 $result = array("numResults" => $nbContent, "views" => $view);
@@ -291,5 +295,4 @@ class MediaFolder extends AbstractServiceLocal
 
         return $result;
     }
-
 }

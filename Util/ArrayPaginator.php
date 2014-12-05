@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,7 +29,6 @@ namespace BackBuilder\Util;
  */
 class ArrayPaginator implements \Countable, \IteratorAggregate
 {
-
     private $_collection;
     private $_current_page;
     private $_page_size;
@@ -37,12 +36,12 @@ class ArrayPaginator implements \Countable, \IteratorAggregate
     public static function paginate(array $collection, $page = 1, $page_size = 1)
     {
         $self = new ArrayPaginator($collection, $page, $page_size);
+
         return $self;
     }
 
     public function __construct(array $collection, $page, $page_size)
     {
-
         $this->_page_size = (int) $page_size;
         $this->_current_page = (int) $page;
         $this->_collection = array_chunk($collection, (int) $page_size, true);
@@ -110,5 +109,4 @@ class ArrayPaginator implements \Countable, \IteratorAggregate
     {
         return $this->_current_page;
     }
-
 }

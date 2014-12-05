@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -45,17 +45,17 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     public function testDoUniqueValidator()
     {
         $config = array('error' => 'Value must be unique.');
-        $mock_entity = $this->em->getRepository('BackBuilder\Validator\Tests\Mock\MockEntity')->find(1); 
-        
+        $mock_entity = $this->em->getRepository('BackBuilder\Validator\Tests\Mock\MockEntity')->find(1);
+
         $errors = array();
         $this->entity_validator->doUniqueValidator($mock_entity, $errors, 'name', 'France', $config);
         $this->assertTrue(array_key_exists('name', $errors));
-        
+
         $errors = array();
         $this->entity_validator->doUniqueValidator($mock_entity, $errors, 'name', 'Brazil', $config);
         $this->assertFalse(array_key_exists('name', $errors));
     }
-    
+
     /**
      * @covers BackBuilder\Validator\EntityValidator::doPasswordValidator
      */
@@ -63,16 +63,16 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     {
         $datas = array('conf-password' => 'foo');
         $config = array('error' => 'Password must be equal with confirm password');
-        
+
         $errors = array();
         $this->entity_validator->doPasswordValidator($errors, 'password', 'foo', $datas, $config);
         $this->assertFalse(array_key_exists('password', $errors));
-        
+
         $errors = array();
         $this->entity_validator->doPasswordValidator($errors, 'password', 'bar', $datas, $config);
         $this->assertTrue(array_key_exists('password', $errors));
     }
-    
+
     /*
      * @covers BackBuilder\Validator\EntityValidator::isValid
      */
@@ -92,7 +92,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertInstanceOf('ReflectionClass', $this->entity_validator->getReflectionClass(new MockEntity()));
     }
-    
+
     /**
      * @covers BackBuilder\Validator\ArrayValidator::getReflectionClass
      * @expectedException InvalidArgumentException
@@ -101,7 +101,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     {
         $this->entity_validator->getReflectionClass(array());
     }
-    
+
     /**
      * @covers BackBuilder\Validator\ArrayValidator::getReflectionClass
      * @expectedException InvalidArgumentException
@@ -129,58 +129,58 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
         $this->generateSchema();
         //Test data
         $this->generateData();
-        
+
         $this->entity_validator = new \BackBuilder\Validator\EntityValidator($this->em);
     }
-    
+
     private function generateData()
     {
         $entity1 = new MockEntity();
         $entity1->setName('France')
                 ->setNumericCode('10');
         $this->em->persist($entity1);
-        
+
         $entity2 = new MockEntity();
         $entity2->setName('England')
                 ->setNumericCode('11');
         $this->em->persist($entity2);
-        
+
         $entity3 = new MockEntity();
         $entity3->setName('France')
                 ->setNumericCode('13');
         $this->em->persist($entity3);
-        
-        $this->em->flush(); 
+
+        $this->em->flush();
     }
-    
+
     private function generateSchema()
     {
         $bootstrap_yml = array(
             'debug'     => true,
             'container' => array(
                 'dump_directory' => '',
-                'autogenerate'   => true
-            )
+                'autogenerate'   => true,
+            ),
         );
 
         $mockConfig = array(
             'cache' => array(
-                'default' => array()
+                'default' => array(),
             ),
             'log' => array(),
             'repository' => array(
                 'ClassContent' => array(),
                 'Config' => array(
-                    'config.yml'    => file_get_contents(__DIR__ . '/config.yml'),
-                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml)
+                    'config.yml'    => file_get_contents(__DIR__.'/config.yml'),
+                    'bootstrap.yml' => \Symfony\Component\Yaml\Yaml::dump($bootstrap_yml),
                 ),
                 'Data' => array(
                     'Media' => array(),
                     'Storage' => array(),
-                    'Tmp' => array()
+                    'Tmp' => array(),
                 ),
-                'Ressources' => array()
-            )
+                'Ressources' => array(),
+            ),
         );
 
         $this->application = new MockBBApplication(null, $mockConfig);

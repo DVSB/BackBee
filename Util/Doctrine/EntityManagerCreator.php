@@ -21,23 +21,15 @@
 
 namespace BackBuilder\Util\Doctrine;
 
-use BackBuilder\Annotations\ChainAnnotationReader;
 use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\DependencyInjection\ContainerInterface;
-
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Logging\SQLLogger;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\CachedReader;
-use Doctrine\Common\Annotations\SimpleAnnotationReader;
-use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\EventManager;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
-
 use Psr\Log\LoggerInterface;
 
 /**
@@ -51,19 +43,18 @@ use Psr\Log\LoggerInterface;
  */
 class EntityManagerCreator
 {
-
     /**
      * Creates a new Doctrine entity manager
-     * @param array $options Options provided to get an entity manager, keys should be :
-     *                         - entity_manager \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
-     *                         - connection     \Doctrine\DBAL\Connection    Optional, an already initialized database connection
-     *                         - proxy_dir      string                       The proxy directory
-     *                         - proxy_ns       string                       The namespace for Doctrine proxy
-     *                         - charset        string                       Optional, the charset to use
-     *                         - collation      string                       Optional, the collation to use
-     *                         - ...            mixed                        All the required parameter to open a new connection
-     * @param \Psr\Log\LoggerInterface $logger Optional logger
-     * @param \Doctrine\Common\EventManager $evm Optional event manager
+     * @param  array                                           $options Options provided to get an entity manager, keys should be :
+     *                                                                  - entity_manager \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
+     *                                                                  - connection     \Doctrine\DBAL\Connection    Optional, an already initialized database connection
+     *                                                                  - proxy_dir      string                       The proxy directory
+     *                                                                  - proxy_ns       string                       The namespace for Doctrine proxy
+     *                                                                  - charset        string                       Optional, the charset to use
+     *                                                                  - collation      string                       Optional, the collation to use
+     *                                                                  - ...            mixed                        All the required parameter to open a new connection
+     * @param  \Psr\Log\LoggerInterface                        $logger  Optional logger
+     * @param  \Doctrine\Common\EventManager                   $evm     Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be returned
      */
@@ -87,7 +78,7 @@ class EntityManagerCreator
         self::_setConnectionCharset($em->getConnection(), $options);
         self::_setConnectionCollation($em->getConnection(), $options);
 
-        if('sqlite' === $em->getConnection()->getDatabasePlatform()->getName()) {
+        if ('sqlite' === $em->getConnection()->getDatabasePlatform()->getName()) {
             self::_expandSqlite($em->getConnection());
         }
 
@@ -107,14 +98,14 @@ class EntityManagerCreator
                     return (preg_match(sprintf('%1$s%2$s%1$s%3$s', $delimiter, $pattern, $modifiers), $data) > 0);
                 }
 
-                return null;
+                return;
             }
         );
     }
 
     /**
      * Returns a new ORM Configuration
-     * @param array $options Optional, the options to create the new Configuration
+     * @param  array                       $options Optional, the options to create the new Configuration
      * @return \Doctrine\ORM\Configuration
      * @codeCoverageIgnore
      */
@@ -139,7 +130,6 @@ class EntityManagerCreator
         }
 
         if (true === array_key_exists('metadata_cache', $options) && isset($options['metadata_type'])) {
-
             if ($options['metadata_type'] == 'memcached') {
                 $memcached = new \Memcached();
                 foreach ($options['metadata_cache']['servers'] as $server) {
@@ -149,7 +139,6 @@ class EntityManagerCreator
                 $memcacheDriver->setMemcached($memcached);
 
                 $config->setMetadataCacheImpl($memcacheDriver);
-
             } elseif ($options['metadata_type'] == 'memcache') {
                 $memcache = new \Memcache();
                 foreach ($options['metadata_cache']['servers'] as $server) {
@@ -160,17 +149,13 @@ class EntityManagerCreator
                 $memcacheDriver->setMemcache($memcache);
 
                 $config->setMetadataCacheImpl($memcacheDriver);
-
-            } elseif($options['metadata_type'] == 'apc') {
-
+            } elseif ($options['metadata_type'] == 'apc') {
                 $config->setQueryCacheImpl(new \Doctrine\Common\Cache\ApcCache());
-
             }
         }
 
         if (true === array_key_exists('query_cache', $options) && isset($options['query_type'])) {
             if ($options['query_type'] == 'memcached') {
-
                 $memcached = new \Memcached();
 
                 foreach ($options['query_cache']['servers'] as $server) {
@@ -181,9 +166,7 @@ class EntityManagerCreator
                 $memcachedDriver->setMemcached($memcached);
 
                 $config->setQueryCacheImpl($memcachedDriver);
-
             } elseif ($options['query_type'] == 'memcache') {
-
                 $memcache = new \Memcache();
 
                 foreach ($options['query_cache']['servers'] as $server) {
@@ -194,9 +177,7 @@ class EntityManagerCreator
                 $memcacheDriver->setMemcache($memcache);
 
                 $config->setQueryCacheImpl($memcacheDriver);
-
             }
-
         }
 
         if (true === array_key_exists('orm', $options)) {
@@ -244,8 +225,8 @@ class EntityManagerCreator
 
     /**
      * Adds userdefined functions
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array $options
+     * @param  \Doctrine\ORM\Configuration $config
+     * @param  array                       $options
      * @return \Doctrine\ORM\Configuration
      */
     private static function _addCustomFunctions(Configuration $config, array $options = array())
@@ -279,8 +260,8 @@ class EntityManagerCreator
 
     /**
      * Returns the EntityManager provided
-     * @param \Doctrine\ORM\EntityManager $entity_manager
-     * @param \Doctrine\Common\EventManager $evm Optional event manager
+     * @param  \Doctrine\ORM\EntityManager                     $entity_manager
+     * @param  \Doctrine\Common\EventManager                   $evm            Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager is not an EntityManager
      */
@@ -295,9 +276,9 @@ class EntityManagerCreator
 
     /**
      * Returns a new EntityManager with the provided connection
-     * @param \Doctrine\DBAL\Connection $connection
-     * @param \Doctrine\ORM\Configuration $config
-     * @param \Doctrine\Common\EventManager $evm Optional event manager
+     * @param  \Doctrine\DBAL\Connection                       $connection
+     * @param  \Doctrine\ORM\Configuration                     $config
+     * @param  \Doctrine\Common\EventManager                   $evm        Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
@@ -316,8 +297,8 @@ class EntityManagerCreator
 
     /**
      * Returns a new EntityManager with the provided parameters
-     * @param array $options
-     * @param \Doctrine\ORM\Configuration $config
+     * @param  array                                           $options
+     * @param  \Doctrine\ORM\Configuration                     $config
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
@@ -332,8 +313,8 @@ class EntityManagerCreator
 
     /**
      * Sets the character set for the provided connection
-     * @param \Doctrine\DBAL\Connection $connection
-     * @param array $options
+     * @param  \Doctrine\DBAL\Connection                       $connection
+     * @param  array                                           $options
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if charset is invalid
      */
     private static function _setConnectionCharset(Connection $connection, array $options = array())
@@ -341,9 +322,9 @@ class EntityManagerCreator
         if (true === array_key_exists('charset', $options)) {
             try {
                 if ('pdo_mysql' === $connection->getDriver()->getName()) {
-                    $connection->executeQuery('SET SESSION character_set_client = "' . addslashes($options['charset']) . '";');
-                    $connection->executeQuery('SET SESSION character_set_connection = "' . addslashes($options['charset']) . '";');
-                    $connection->executeQuery('SET SESSION character_set_results = "' . addslashes($options['charset']) . '";');
+                    $connection->executeQuery('SET SESSION character_set_client = "'.addslashes($options['charset']).'";');
+                    $connection->executeQuery('SET SESSION character_set_connection = "'.addslashes($options['charset']).'";');
+                    $connection->executeQuery('SET SESSION character_set_results = "'.addslashes($options['charset']).'";');
                 }
             } catch (\Exception $e) {
                 throw new InvalidArgumentException(sprintf('Invalid database character set `%s`', $options['charset']), InvalidArgumentException::INVALID_ARGUMENT, $e);
@@ -353,8 +334,8 @@ class EntityManagerCreator
 
     /**
      * Sets the collation for the provided connection
-     * @param \Doctrine\DBAL\Connection $connection
-     * @param array $options
+     * @param  \Doctrine\DBAL\Connection                       $connection
+     * @param  array                                           $options
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if collation is invalid
      */
     private static function _setConnectionCollation(Connection $connection, array $options = array())
@@ -362,12 +343,11 @@ class EntityManagerCreator
         if (true === array_key_exists('collation', $options)) {
             try {
                 if ('pdo_mysql' === $connection->getDriver()->getName()) {
-                    $connection->executeQuery('SET SESSION collation_connection = "' . addslashes($options['collation']) . '";');
+                    $connection->executeQuery('SET SESSION collation_connection = "'.addslashes($options['collation']).'";');
                 }
             } catch (\Exception $e) {
                 throw new InvalidArgumentException(sprintf('Invalid database collation `%s`', $options['collation']), InvalidArgumentException::INVALID_ARGUMENT, $e);
             }
         }
     }
-
 }

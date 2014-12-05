@@ -22,8 +22,6 @@
 namespace BackBuilder\Security\Token;
 
 use BackBuilder\Security\User;
-
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -50,7 +48,7 @@ class PublicKeyToken extends BBUserToken
     /**
      * Constructor.
      *
-     * @param array  $roles       An array of roles
+     * @param array $roles An array of roles
      */
     public function __construct(array $roles = array())
     {
@@ -62,7 +60,7 @@ class PublicKeyToken extends BBUserToken
     /**
      * @codeCoverageIgnore
      * @return type
-     * todo Function added: problem with redirection - authentification lost.
+     *              todo Function added: problem with redirection - authentification lost.
      */
     public function isAuthenticated()
     {
@@ -91,7 +89,6 @@ class PublicKeyToken extends BBUserToken
 
         $this->_credentials = null;
     }
-
 
     /**
      * {@inheritdoc}

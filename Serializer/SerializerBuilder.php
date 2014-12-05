@@ -2,23 +2,22 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
-
 
 namespace BackBuilder\Serializer;
 
@@ -31,10 +30,6 @@ use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\Construction\UnserializeObjectConstructor;
 use PhpCollection\Map;
 use JMS\Serializer\EventDispatcher\EventDispatcher;
-use Metadata\Driver\DriverChain;
-use JMS\Serializer\Metadata\Driver\YamlDriver;
-use JMS\Serializer\Metadata\Driver\XmlDriver;
-use Metadata\Driver\FileLocator;
 use JMS\Serializer\Handler\DateHandler;
 use JMS\Serializer\Handler\ArrayCollectionHandler;
 use JMS\Serializer\Construction\ObjectConstructorInterface;
@@ -51,10 +46,8 @@ use Metadata\Driver\DriverInterface;
 use JMS\Serializer\XmlSerializationVisitor;
 use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\YamlSerializationVisitor;
-use JMS\Serializer\YamlDeserializationVisitor;
 use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\JsonDeserializationVisitor;
-
 use JMS\Serializer\Serializer;
 
 /**
@@ -112,10 +105,10 @@ class SerializerBuilder
 
     public function setCacheDir($dir)
     {
-        if ( ! is_dir($dir)) {
+        if (! is_dir($dir)) {
             $this->createDir($dir);
         }
-        if ( ! is_writable($dir)) {
+        if (! is_writable($dir)) {
             throw new InvalidArgumentException(sprintf('The cache directory "%s" is not writable.', $dir));
         }
 
@@ -242,7 +235,7 @@ class SerializerBuilder
     public function setMetadataDirs(array $namespacePrefixToDirMap)
     {
         foreach ($namespacePrefixToDirMap as $dir) {
-            if ( ! is_dir($dir)) {
+            if (! is_dir($dir)) {
                 throw new InvalidArgumentException(sprintf('The directory "%s" does not exist.', $dir));
             }
         }
@@ -251,16 +244,16 @@ class SerializerBuilder
 
         return $this;
     }
-    
+
     /**
-     * 
-     * @param \Metadata\Driver\DriverInterface $metadataDriver
+     *
+     * @param  \Metadata\Driver\DriverInterface          $metadataDriver
      * @return \BackBuilder\Serializer\SerializerBuilder
      */
     public function setMetadataDriver(DriverInterface $metadataDriver)
     {
         $this->metadataDriver = $metadataDriver;
-        
+
         return $this;
     }
 
@@ -282,7 +275,7 @@ class SerializerBuilder
      *
      * Please keep in mind that you currently may only have one directory per namespace prefix.
      *
-     * @param string $dir The directory where metadata files are located.
+     * @param string $dir             The directory where metadata files are located.
      * @param string $namespacePrefix An optional prefix if you only store metadata for specific namespaces in this directory.
      *
      * @return SerializerBuilder
@@ -292,7 +285,7 @@ class SerializerBuilder
      */
     public function addMetadataDir($dir, $namespacePrefix = '')
     {
-        if ( ! is_dir($dir)) {
+        if (! is_dir($dir)) {
             throw new InvalidArgumentException(sprintf('The directory "%s" does not exist.', $dir));
         }
 
@@ -334,11 +327,11 @@ class SerializerBuilder
      */
     public function replaceMetadataDir($dir, $namespacePrefix = '')
     {
-        if ( ! is_dir($dir)) {
+        if (! is_dir($dir)) {
             throw new InvalidArgumentException(sprintf('The directory "%s" does not exist.', $dir));
         }
 
-        if ( ! isset($this->metadataDirs[$namespacePrefix])) {
+        if (! isset($this->metadataDirs[$namespacePrefix])) {
             throw new InvalidArgumentException(sprintf('There is no directory configured for namespace prefix "%s". Please use addMetadataDir() for adding new directories.', $namespacePrefix));
         }
 
@@ -359,7 +352,7 @@ class SerializerBuilder
             }
         }
 
-        if ( ! empty($this->metadataDriver)) {
+        if (! empty($this->metadataDriver)) {
             $metadataDriver = $this->metadataDriver;
         } else {
             $metadataDriver = new AnnotationDriver($annotationReader);
@@ -374,15 +367,15 @@ class SerializerBuilder
             $metadataFactory->setCache(new FileCache($this->cacheDir.'/metadata'));
         }
 
-        if ( ! $this->handlersConfigured) {
+        if (! $this->handlersConfigured) {
             $this->addDefaultHandlers();
         }
 
-        if ( ! $this->listenersConfigured) {
+        if (! $this->listenersConfigured) {
             $this->addDefaultListeners();
         }
 
-        if ( ! $this->visitorsAdded) {
+        if (! $this->visitorsAdded) {
             $this->addDefaultSerializationVisitors();
             $this->addDefaultDeserializationVisitors();
         }

@@ -77,7 +77,7 @@ abstract class AMemcache extends AExtendedCache
         'persistent_id' => null,
         'compression' => false,
         'servers' => array(),
-        'options' => array()
+        'options' => array(),
     );
 
     /**
@@ -96,7 +96,7 @@ abstract class AMemcache extends AExtendedCache
     protected $_default_server = array(
         'host' => self::DEFAULT_HOST,
         'port' => self::DEFAULT_PORT,
-        'weight' => self::DEFAULT_WEIGHT
+        'weight' => self::DEFAULT_WEIGHT,
     );
 
     /**
@@ -106,7 +106,7 @@ abstract class AMemcache extends AExtendedCache
     protected $_cache_options = array(
         2 => 1, // OPT_HASH = HASH_MD5
         9 => 1, // OPT_DISTRIBUTION = DISTRIBUTION_CONSISTENT
-        16 => true // OPT_LIBKETAMA_COMPATIBLE = true
+        16 => true, // OPT_LIBKETAMA_COMPATIBLE = true
     );
 
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -115,7 +115,7 @@ abstract class AMemcache extends AExtendedCache
     }
     /**
      * Adds a set of servers to the memcache instance pool
-     * @param array $servers
+     * @param  array                                       $servers
      * @return boolean
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if one of the server configurations is not an array
      * @link http://php.net/manual/en/Memcache.addservers.php
@@ -135,7 +135,6 @@ abstract class AMemcache extends AExtendedCache
             $this->setServerList($server);
         }
 
-
         return $result;
     }
 
@@ -146,10 +145,10 @@ abstract class AMemcache extends AExtendedCache
 
     /**
      * Adds a server to the server pool
-     * @param string $host  The hostname of the memcache server
-     * @param int $port     The port on which memcache is running, 11211 by default
-     * @param int $weight   The weight of the server
-     * @return boolean      TRUE on success or FALSE on failure.
+     * @param  string  $host   The hostname of the memcache server
+     * @param  int     $port   The port on which memcache is running, 11211 by default
+     * @param  int     $weight The weight of the server
+     * @return boolean TRUE on success or FALSE on failure.
      * @link http://php.net/manual/en/memcached.addserver.php
      */
     public function addServer($host, $port, $weight = 0)
@@ -167,9 +166,9 @@ abstract class AMemcache extends AExtendedCache
 
     /**
      * Returns the available cache for the given id if found returns FALSE else
-     * @param string $id Cache id
-     * @param boolean $bypassCheck Allow to find cache without test it before
-     * @param \DateTime $expire Optionnal, the expiration time (now by default)
+     * @param  string       $id          Cache id
+     * @param  boolean      $bypassCheck Allow to find cache without test it before
+     * @param  \DateTime    $expire      Optionnal, the expiration time (now by default)
      * @return string|FALSE
      */
     public function load($id, $bypassCheck = true, \DateTime $expire = null)
@@ -185,7 +184,6 @@ abstract class AMemcache extends AExtendedCache
         }
 
         if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
-
             if (false === $this->result) {
                 return $this->_onError('load');
             }
@@ -198,7 +196,7 @@ abstract class AMemcache extends AExtendedCache
 
     /**
      * Tests if a cache is available or not (for the given id)
-     * @param string $id Cache id
+     * @param  string    $id Cache id
      * @return int|FALSE the last modified timestamp of the available cache record (0 infinite expiration date)
      */
     public function test($id)
@@ -212,18 +210,18 @@ abstract class AMemcache extends AExtendedCache
 
     /**
      * Saves some string datas into a cache record
-     * @param string $id Cache id
-     * @param string $data Datas to cache
-     * @param int $lifetime Optional, the specific lifetime for this record
-     *                      (by default null, infinite lifetime)
-     * @param string $tag Optional, an associated tag to the data stored
+     * @param  string  $id       Cache id
+     * @param  string  $data     Datas to cache
+     * @param  int     $lifetime Optional, the specific lifetime for this record
+     *                           (by default null, infinite lifetime)
+     * @param  string  $tag      Optional, an associated tag to the data stored
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false)
     {
         $lifetime = $this->getLifeTime($lifetime);
 
-        if (false === $this->_cache->set($id, (is_array($data) ? $data : '' . $data), $this->compression, $lifetime)){
+        if (false === $this->_cache->set($id, (is_array($data) ? $data : ''.$data), $this->compression, $lifetime)) {
             return $this->_onError('save');
         }
 
@@ -236,17 +234,18 @@ abstract class AMemcache extends AExtendedCache
 
     public function saveTag($id, $tag)
     {
-        if (false === $tagged = $this->load(self::TAGS_PREFIX . $tag)) {
+        if (false === $tagged = $this->load(self::TAGS_PREFIX.$tag)) {
             $tagged = array();
         }
 
         if (false === in_array($id, $tagged)) {
             $tagged[] = $id;
-            $this->save(self::TAGS_PREFIX . $tag, $tagged);
+            $this->save(self::TAGS_PREFIX.$tag, $tagged);
         }
     }
 
-    protected function getLifeTime($lifetime){
+    protected function getLifeTime($lifetime)
+    {
         if (null === $lifetime) {
             $lifetime = 0;
         }
@@ -254,11 +253,11 @@ abstract class AMemcache extends AExtendedCache
         $min_lifetime = $this->_instance_options['min_lifetime'];
         $max_lifetime = $this->_instance_options['max_lifetime'];
 
-        if($lifetime == 0 && false === empty($max_lifetime)){
+        if ($lifetime == 0 && false === empty($max_lifetime)) {
             $lifetime = $max_lifetime;
-        }elseif(false === empty($min_lifetime) && $lifetime < $min_lifetime){
+        } elseif (false === empty($min_lifetime) && $lifetime < $min_lifetime) {
             $lifetime = $min_lifetime;
-        }elseif(false === empty($max_lifetime) && $lifetime > $max_lifetime){
+        } elseif (false === empty($max_lifetime) && $lifetime > $max_lifetime) {
             $lifetime = $max_lifetime;
         }
 
@@ -267,7 +266,7 @@ abstract class AMemcache extends AExtendedCache
 
     /**
      * Removes a cache record
-     * @param  string $id Cache id
+     * @param  string  $id Cache id
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function remove($id)
@@ -295,7 +294,7 @@ abstract class AMemcache extends AExtendedCache
     /**
      * Removes all cache records associated to one of the tags
      * @param  string|array $tag
-     * @return boolean TRUE if cache is removed FALSE otherwise
+     * @return boolean      TRUE if cache is removed FALSE otherwise
      */
     public function removeByTag($tag)
     {
@@ -305,11 +304,11 @@ abstract class AMemcache extends AExtendedCache
         }
 
         foreach ($tags as $tag) {
-            if (false !== $tagged = $this->load(self::TAGS_PREFIX . $tag)) {
+            if (false !== $tagged = $this->load(self::TAGS_PREFIX.$tag)) {
                 foreach ($tagged as $id) {
                     $this->remove($id);
                 }
-                $this->remove(self::TAGS_PREFIX . $tag);
+                $this->remove(self::TAGS_PREFIX.$tag);
             }
         }
 
@@ -320,34 +319,32 @@ abstract class AMemcache extends AExtendedCache
      * Updates the expire date time for all cache records
      * associated to one of the provided tags
      * @param  string|array $tag
-     * @param int $lifetime Optional, the specific lifetime for this record
-     *                      (by default null, infinite lifetime)
-     * @return boolean TRUE if cache is removed FALSE otherwise
+     * @param  int          $lifetime Optional, the specific lifetime for this record
+     *                                (by default null, infinite lifetime)
+     * @return boolean      TRUE if cache is removed FALSE otherwise
      */
     public function updateExpireByTag($tag, $lifetime = null)
     {
         return true;
-
     }
 
     /**
      * Returns the minimum expire date time for all cache records
      * associated to one of the provided tags
      * @param  string|array $tag
-     * @param int $lifetime Optional, the specific lifetime for this record
-     *                      (by default 0, infinite lifetime)
+     * @param  int          $lifetime Optional, the specific lifetime for this record
+     *                                (by default 0, infinite lifetime)
      * @return int
      */
     public function getMinExpireByTag($tag, $lifetime = 0)
     {
         return 0;
-
     }
 
     /**
      * Returns TRUE if the server is already added to Memcached, FALSE otherwise
-     * @param string $host
-     * @param int $port
+     * @param  string                                      $host
+     * @param  int                                         $port
      * @return boolean
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if none memcached object is not initialized
      * @codeCoverageIgnore
@@ -366,15 +363,14 @@ abstract class AMemcache extends AExtendedCache
 
     /**
      * Logs error result code and message
-     * @param string $method
+     * @param  string  $method
      * @return boolean
      * @codeCoverageIgnore
      */
     protected function _onError($method)
     {
         $this->log('notice', sprintf('Error occured on Memcached::%s(): [%s] %s.', $method, $this->getResultCode(), $this->getResultMessage()));
+
         return false;
     }
-
-
 }

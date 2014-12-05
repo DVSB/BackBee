@@ -41,7 +41,6 @@ use Symfony\Component\Security\Core\Exception\ProviderNotFoundException;
  */
 class AuthenticationManager implements AuthenticationManagerInterface
 {
-
     private $_providers;
     private $_eraseCredentials;
     private $_eventDispatcher;
@@ -56,8 +55,9 @@ class AuthenticationManager implements AuthenticationManagerInterface
     {
         $this->addProviders($providers);
 
-        if (null !== $dispatcher)
+        if (null !== $dispatcher) {
             $this->setEventDispatcher($dispatcher);
+        }
 
         $this->_eraseCredentials = (Boolean) $eraseCredentials;
     }
@@ -65,19 +65,23 @@ class AuthenticationManager implements AuthenticationManagerInterface
     public function setEventDispatcher(EventDispatcherInterface $dispatcher)
     {
         $this->_eventDispatcher = $dispatcher;
+
         return $this;
     }
 
     public function addProvider(AuthenticationProviderInterface $provider)
     {
         $this->_providers[] = $provider;
+
         return $this;
     }
 
     public function addProviders(array $providers)
     {
-        foreach ($providers as $provider)
+        foreach ($providers as $provider) {
             $this->addProvider($provider);
+        }
+
         return $this;
     }
 
@@ -129,5 +133,4 @@ class AuthenticationManager implements AuthenticationManagerInterface
 
         throw $lastException;
     }
-
 }

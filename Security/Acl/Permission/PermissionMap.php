@@ -35,7 +35,6 @@ use Symfony\Component\Security\Acl\Permission\BasicPermissionMap;
  */
 class PermissionMap extends BasicPermissionMap
 {
-
     const PERMISSION_COMMIT = 'COMMIT';
     const PERMISSION_PUBLISH = 'PUBLISH';
 
@@ -77,11 +76,11 @@ class PermissionMap extends BasicPermissionMap
                 MaskBuilder::MASK_COMMIT,
                 MaskBuilder::MASK_OPERATOR,
                 MaskBuilder::MASK_MASTER,
-                MaskBuilder::MASK_OWNER
+                MaskBuilder::MASK_OWNER,
             ),
             self::PERMISSION_PUBLISH => array(
                 MaskBuilder::MASK_PUBLISH,
-                MaskBuilder::MASK_MASTER
+                MaskBuilder::MASK_MASTER,
             ),
             self::PERMISSION_OPERATOR => array(
                 MaskBuilder::MASK_OPERATOR,
@@ -96,7 +95,6 @@ class PermissionMap extends BasicPermissionMap
                 MaskBuilder::MASK_OWNER,
             ),
         );
-    
     }
 
     /**
@@ -105,7 +103,7 @@ class PermissionMap extends BasicPermissionMap
     public function getMasks($permission, $object)
     {
         if (!isset($this->map[$permission])) {
-            return null;
+            return;
         }
 
         return $this->map[$permission];
@@ -118,5 +116,4 @@ class PermissionMap extends BasicPermissionMap
     {
         return isset($this->map[$permission]);
     }
-
 }

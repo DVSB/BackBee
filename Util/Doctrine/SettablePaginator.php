@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -25,7 +25,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * Settable paginator
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Util
  * @subpackage  Doctrine
@@ -34,7 +34,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  */
 class SettablePaginator extends Paginator
 {
-
     /**
      * @var int
      */
@@ -47,23 +46,25 @@ class SettablePaginator extends Paginator
 
     /**
      * Sets the number of results
-     * @param int $count
+     * @param  int                                          $count
      * @return \BackBuilder\Util\Doctrine\SettablePaginator
      */
     public function setCount($count)
     {
         $this->_count = $count;
+
         return $this;
     }
 
     /**
      * Sets the first set of results
-     * @param array $result
+     * @param  array                                        $result
      * @return \BackBuilder\Util\Doctrine\SettablePaginator
      */
     public function setResult(array $result)
     {
         $this->_result = $result;
+
         return $this;
     }
 
@@ -90,5 +91,4 @@ class SettablePaginator extends Paginator
 
         return new \ArrayIterator($this->_result);
     }
-
 }

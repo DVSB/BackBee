@@ -22,9 +22,7 @@
 namespace BackBuilder\Rest\Controller;
 
 use BackBuilder\Rest\Controller\Annotations as Rest;
-use BackBuilder\Rest\Controller\ARestController;
 use BackBuilder\Site\Layout;
-
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -38,7 +36,7 @@ class LayoutController extends ARestController
     /**
      * Returns every workflow states associated to provided layout
      *
-     * @param  Layout $layout
+     * @param  Layout                                    $layout
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\ParamConverter(name="layout", class="BackBuilder\Site\Layout")
@@ -52,19 +50,19 @@ class LayoutController extends ARestController
 
         $states = array(
             'online'  => array(),
-            'offline' => array()
+            'offline' => array(),
         );
 
         foreach ($layout_states as $state) {
             if (0 < $code = $state->getCode()) {
                 $states['online'][$code] = array(
                     'label' => $state->getLabel(),
-                    'code'  => '1_' . $code
+                    'code'  => '1_'.$code,
                 );
             } else {
                 $states['offline'][$code] = array(
                     'label' => $state->getLabel(),
-                    'code'  => '0_' . $code
+                    'code'  => '0_'.$code,
                 );
             }
         }
@@ -129,7 +127,7 @@ class LayoutController extends ARestController
         $layout->setSite($this->getEntityFromAttributes('site'));
         $layout->setLabel($this->getRequest()->request->get('label'));
         $layout->setPath($this->getRequest()->request->get('path'));
-        $layout->setPicPath('img/layouts/' . $layout->getUid() . '.png');
+        $layout->setPicPath('img/layouts/'.$layout->getUid().'.png');
 
         $this->granted('CREATE', $layout);
 
@@ -177,7 +175,7 @@ class LayoutController extends ARestController
             $this->getEntityManager()->remove($layout);
             $this->getEntityManager()->flush($layout);
         } catch (\Exception $e) {
-            return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
+            return $this->createResponse('Internal server error: '.$e->getMessage(), 500);
         }
 
         return $this->createResponse('', 204);

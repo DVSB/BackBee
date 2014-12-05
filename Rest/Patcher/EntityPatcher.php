@@ -21,8 +21,6 @@ namespace BackBuilder\Rest\Patcher;
  */
 
 use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
-use BackBuilder\Rest\Patcher\PatcherInterface;
-use BackBuilder\Rest\Patcher\RightManager;
 
 /**
  * EntityPatcher helps you to apply patch operations on your entity/object according to
@@ -84,8 +82,8 @@ class EntityPatcher implements PatcherInterface
     /**
      * [applyPatch description]
      *
-     * @param  [type] $entity    [description]
-     * @param  array  $operation [description]
+     * @param [type] $entity    [description]
+     * @param array  $operation [description]
      */
     private function applyPatch($entity, array $operation)
     {
@@ -102,10 +100,10 @@ class EntityPatcher implements PatcherInterface
     /**
      * [buildMethodName description]
      *
-     * @param  [type] $path   [description]
-     * @param  [type] $prefix [description]
+     * @param [type] $path   [description]
+     * @param [type] $prefix [description]
      *
-     * @return [type]         [description]
+     * @return [type] [description]
      */
     private function buildMethodName($path, $prefix = '')
     {

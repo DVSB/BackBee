@@ -10,21 +10,22 @@ class Fixture
 
     public function __construct(array $options = array())
     {
-        $this->_values = (object)$options;
+        $this->_values = (object) $options;
     }
-    
+
     public function getFixture()
     {
-        $fixture = '$this->faker->' . $this->_values->type;
+        $fixture = '$this->faker->'.$this->_values->type;
         if (property_exists($this->_values, 'value')) {
-            $fixture .= '(' . $this->_values->value . ')';
+            $fixture .= '('.$this->_values->value.')';
         }
-        return $fixture . ';';
+
+        return $fixture.';';
     }
-    
+
     public function getType()
     {
-        return function() use ($generator) { return $generator->{$this->_values->type}; };
+        return function () use ($generator) { return $generator->{$this->_values->type}; };
     }
 
     public function __get($name)
@@ -32,6 +33,7 @@ class Fixture
         if (property_exists($this->_values, $name)) {
             return $this->_values->{$name};
         }
+
         return false;
     }
 

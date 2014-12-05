@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -25,7 +25,7 @@ use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 
 /**
  * Base class for BackBuilder token's user
- * 
+ *
  * @category    BackBuilder
  * @package     BackBuilder\Security
  * @subpackage  Token
@@ -34,10 +34,9 @@ use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
  */
 class BBUserToken extends AbstractToken
 {
-
     /**
      * Creation date of the token
-     * @var \DateTime 
+     * @var \DateTime
      */
     private $_created;
 
@@ -55,7 +54,7 @@ class BBUserToken extends AbstractToken
 
     /**
      * Class Constructor.
-     * @param array  $roles       An array of roles
+     * @param array $roles An array of roles
      */
     public function __construct(array $roles = array())
     {
@@ -106,48 +105,52 @@ class BBUserToken extends AbstractToken
     /**
      * Sets the creation date
      * @codeCoverageIgnore
-     * @param type $created
+     * @param  type                                    $created
      * @return \BackBuilder\Security\Token\BBUserToken
      */
     public function setCreated($created)
     {
         $this->_created = $created;
+
         return $this;
     }
 
     /**
      * Sets the digest
      * @codeCoverageIgnore
-     * @param type $digest
+     * @param  type                                    $digest
      * @return \BackBuilder\Security\Token\BBUserToken
      */
     public function setDigest($digest)
     {
         $this->_digest = $digest;
+
         return $this;
     }
 
     /**
      * Sets the user's private nonce
      * @codeCoverageIgnore
-     * @param type $nonce
+     * @param  type                                    $nonce
      * @return \BackBuilder\Security\Token\BBUserToken
      */
     public function setNonce($nonce)
     {
         $this->_nonce = $nonce;
+
         return $this;
     }
 
     /**
      * Sets the user
      * @codeCoverageIgnore
-     * @param type $user
+     * @param  type                                    $user
      * @return \BackBuilder\Security\Token\BBUserToken
      */
     public function setUser($user)
     {
         parent::setUser($user);
+
         return $this;
     }
 
@@ -162,7 +165,7 @@ class BBUserToken extends AbstractToken
                 $this->isAuthenticated(),
                 $this->getRoles(),
                 $this->getAttributes(),
-                $this->_nonce
+                $this->_nonce,
             )
         );
 //        $serialized = unserialize(parent::serialize());
@@ -180,5 +183,4 @@ class BBUserToken extends AbstractToken
 
         parent::unserialize(serialize($array));
     }
-
 }

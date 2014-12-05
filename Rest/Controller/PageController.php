@@ -35,10 +35,9 @@ use BackBuilder\Workflow\State;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
-use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -64,7 +63,7 @@ class PageController extends ARestController
     /**
      * Get page's metadatas
      *
-     * @param  Page $page the page we want to get its metadatas
+     * @param Page $page the page we want to get its metadatas
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -82,8 +81,8 @@ class PageController extends ARestController
     /**
      * Update page's metadatas
      *
-     * @param  Page    $page    the page we want to update its metadatas
-     * @param  Request $request
+     * @param Page    $page    the page we want to update its metadatas
+     * @param Request $request
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -152,7 +151,7 @@ class PageController extends ARestController
         if (null !== $request->query->get('order_by', null)) {
             foreach ($request->query->get('order_by') as $key => $value) {
                 if ('_' !== $key[0]) {
-                    $key = '_' . $key;
+                    $key = '_'.$key;
                 }
 
                 $order_by[$key] = $value;
@@ -175,7 +174,7 @@ class PageController extends ARestController
 
         $result_count = $start + $count;
         $response = $this->createResponse($this->formatCollection($results));
-        $response->headers->set('Content-Range', "$start-$result_count/" . count($results));
+        $response->headers->set('Content-Range', "$start-$result_count/".count($results));
 
         return $response;
     }
@@ -218,14 +217,14 @@ class PageController extends ARestController
      */
     public function postAction(Layout $layout, Request $request, Page $parent = null)
     {
-        if(null !== $parent) {
+        if (null !== $parent) {
             $this->granted(MaskBuilder::MASK_EDIT, $parent);
         }
 
         $builder = $this->getApplication()->getContainer()->get('pagebuilder');
         $builder->setLayout($layout);
 
-        if(null !== $parent) {
+        if (null !== $parent) {
             $builder->setParent($parent);
             $builder->setRoot($parent->getRoot());
             $builder->setSite($parent->getSite());
@@ -262,7 +261,7 @@ class PageController extends ARestController
             $this->getEntityManager()->flush($page);
             $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
         } catch (\Exception $e) {
-            return $this->createResponse('Internal server error: ' . $e->getMessage(), 500);
+            return $this->createResponse('Internal server error: '.$e->getMessage(), 500);
         }
 
         $response = $this->createResponse('', 201);
@@ -270,7 +269,7 @@ class PageController extends ARestController
             'bb.rest.page.get',
             array(
                 'version' => $request->attributes->get('version'),
-                'uid'     => $page->getUid()
+                'uid'     => $page->getUid(),
             ),
             '',
             false
@@ -366,7 +365,7 @@ class PageController extends ARestController
         try {
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
-            throw new AccessDeniedHttpException('Invalid patch operation: ' . $e->getMessage());
+            throw new BadRequestHttpException('Invalid patch operation: ' . $e->getMessage());
         }
 
         if (true === $page->isOnline(true)) {
@@ -386,7 +385,7 @@ class PageController extends ARestController
     public function deleteAction(Page $page)
     {
         if (true === $page->isRoot()) {
-            throw new AccessDeniedHttpException('Cannot remove root page of a site.');
+            throw new BadRequestHttpException('Cannot remove root page of a site.');
         }
 
         $this->granted('EDIT', $page->getParent()); // user must have edit permission on parent
@@ -452,7 +451,7 @@ class PageController extends ARestController
             'bb.rest.page.get',
             array(
                 'version' => $request->attributes->get('version'),
-                'uid'     => $page->getUid()
+                'uid'     => $page->getUid(),
             ),
             '',
             false
@@ -475,8 +474,8 @@ class PageController extends ARestController
     /**
      * Page workflow state setter
      *
-     * @param  Page  $page
-     * @param  State $workflow
+     * @param Page  $page
+     * @param State $workflow
      */
     private function trySetPageWorkflowState(Page $page, State $workflow = null)
     {
@@ -491,8 +490,8 @@ class PageController extends ARestController
     /**
      * Custom patch process for Page's state property
      *
-     * @param  Page   $page
-     * @param  array  $operations passed by reference
+     * @param Page  $page
+     * @param array $operations passed by reference
      */
     private function patchStateOperation(Page $page, array &$operations)
     {
@@ -519,7 +518,7 @@ class PageController extends ARestController
                     ->getRepository('BackBuilder\Workflow\State')
                     ->findOneBy(array(
                         '_code'   => $code,
-                        '_layout' => $page->getLayout()
+                        '_layout' => $page->getLayout(),
                     ))
                 ;
 
@@ -545,8 +544,8 @@ class PageController extends ARestController
     /**
      * Custom patch process for Page's sibling or parent node
      *
-     * @param  Page   $page
-     * @param  array  $operations passed by reference
+     * @param Page  $page
+     * @param array $operations passed by reference
      */
     private function patchSiblingAndParentOperation(Page $page, array &$operations)
     {
@@ -563,7 +562,7 @@ class PageController extends ARestController
 
         if (null !== $sibling_operation || null !== $parent_operation) {
             if ($page->isRoot()) {
-                throw new AccessDeniedHttpException('Cannot move root node of a site.');
+                throw new BadRequestHttpException('Cannot move root node of a site.');
             }
 
             if ($page->isOnline(true)) {
@@ -588,14 +587,14 @@ class PageController extends ARestController
                 $this->getPageRepository()->moveAsLastChildOf($page, $parent);
             }
         } catch (InvalidArgumentException $e) {
-            throw new AccessDeniedHttpException('Invalid node move action: ' . $e->getMessage());
+            throw new BadRequestHttpException('Invalid node move action: '.$e->getMessage());
         }
     }
 
     /**
      * Retrieves page entity with provided uid
      *
-     * @param  string $uid
+     * @param string $uid
      *
      * @return Page
      * @throws NotFoundHttpException raised if page not found with provided uid

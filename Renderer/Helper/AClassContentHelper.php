@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -32,7 +32,6 @@ use BackBuilder\Renderer\Exception\RendererException;
  */
 abstract class AClassContentHelper extends AHelper
 {
-
     protected $object;
 
     public function invoke($instanceOf, $object)
@@ -43,17 +42,18 @@ abstract class AClassContentHelper extends AHelper
             $this->object = $object;
         }
         if (!is_a($this->object, $instanceOf)) {
-            throw new RendererException('The current variable must be an instance of ' . $instanceOf, RendererException::HELPER_ERROR);
+            throw new RendererException('The current variable must be an instance of '.$instanceOf, RendererException::HELPER_ERROR);
         }
+
         return $this;
     }
 
     /**
      * Use invoke for compatibility php 5.4
-     * 
+     *
      * @deprecated since version 1.0
-     * @param string $instanceOf
-     * @param object $object
+     * @param  string              $instanceOf
+     * @param  object              $object
      * @return AClassContentHelper
      */
     // public function __invoke($instanceOf, $object)
@@ -67,7 +67,7 @@ abstract class AClassContentHelper extends AHelper
         if (is_array($object_params) && array_key_exists("array", $object_params)) {
             return $object_params["array"];
         }
-        throw new RendererException('There is no param in ' . $key, RendererException::HELPER_ERROR);
+        throw new RendererException('There is no param in '.$key, RendererException::HELPER_ERROR);
     }
 
     protected function getParameterByKey($parameter_key, $needed_keys)
@@ -78,7 +78,6 @@ abstract class AClassContentHelper extends AHelper
         if (empty($array_diff)) {
             return $params;
         }
-        throw new RendererException($parameter_key . ' params is not correctly formed', RendererException::HELPER_ERROR);
+        throw new RendererException($parameter_key.' params is not correctly formed', RendererException::HELPER_ERROR);
     }
-
 }

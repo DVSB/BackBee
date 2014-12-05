@@ -22,11 +22,8 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use BackBuilder\Util\Dir;
-
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -66,22 +63,21 @@ EOF
     {
         $bbapp = $this->getContainer()->get('bbapp');
         $output->writeln(sprintf('Clearing the cache for the <info>%s</info> environment with debug <info>%s</info>', $bbapp->getEnvironment(), var_export($bbapp->isDebugMode(), true)));
-        
+
         $cacheDir = $this->getContainer()->getParameter("bbapp.cache.dir");
-        
-        $oldCacheDir = $cacheDir . '_old';
-        
-        if(file_exists($oldCacheDir)) {
+
+        $oldCacheDir = $cacheDir.'_old';
+
+        if (file_exists($oldCacheDir)) {
             Dir::delete($oldCacheDir);
         }
-        
+
         Dir::move($cacheDir, $oldCacheDir);
-        
+
         mkdir($cacheDir);
-        
-        if(file_exists($oldCacheDir)) {
+
+        if (file_exists($oldCacheDir)) {
             Dir::delete($oldCacheDir);
         }
     }
-    
 }

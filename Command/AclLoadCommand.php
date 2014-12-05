@@ -22,13 +22,10 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use BackBuilder\Util\Dir;
 /**
  * Install BBApp assets
  *
@@ -50,7 +47,7 @@ class AclLoadCommand extends ACommand
             ->setDescription('Initialize ACL tables')
             ->addOption('truncate', 't', InputOption::VALUE_NONE, 'If set, truncates the acl tables')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> loads acl DB tables: 
+The <info>%command.name%</info> loads acl DB tables:
 
    <info>php acl:load</info>
 EOF
@@ -64,24 +61,17 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $bbapp = $this->getContainer()->get('bbapp');
-        
+
         $file = $input->getArgument('file');
-        
-        if(!file_exists($file)) {
+
+        if (!file_exists($file)) {
             throw new \InvalidArgumentException(sprintf('File not found: %s', $file));
         }
-        
+
         $output->writeln(sprintf('<info>Processing file: %s</info>', $file));
-        
+
         $loader = $bbapp->getContainer()->get('security.acl_loader_yml');
-        
+
         $loader->load(file_get_contents($file));
     }
-    
-    
-    
-    
-
-    
-    
 }

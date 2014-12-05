@@ -2,28 +2,28 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\Security\Listeners;
 
-use Symfony\Component\HttpFoundation\Session\Session,
-    Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\Security\Http\Firewall\ContextListener as sfContextListener;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\Security\Http\Firewall\ContextListener as sfContextListener;
 
 /**
  * @category    BackBuilder
@@ -34,7 +34,6 @@ use Symfony\Component\HttpFoundation\Session\Session,
  */
 class ContextListener extends sfContextListener
 {
-
     /**
      * Initiate session if not available then reads the SecurityContext from it.
      *
@@ -49,7 +48,7 @@ class ContextListener extends sfContextListener
             if (null === $application->getContainer()->get('bb_session')) {
                 $application->getContainer()->set('bb_session', $application->getSession());
             }
-            
+
             $application->getContainer()->get('bb_session')->start();
             $application->info("Session started");
 
@@ -58,5 +57,4 @@ class ContextListener extends sfContextListener
 
         parent::handle($event);
     }
-
 }

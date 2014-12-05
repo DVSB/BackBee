@@ -46,7 +46,7 @@ class BootstrapDirectory
         if (BBApplication::DEFAULT_CONTEXT !== $context) {
             if (BBApplication::DEFAULT_ENVIRONMENT !== $environment) {
                 $bootstrap_directories[] = implode(DIRECTORY_SEPARATOR, array(
-                    $base_directory, $context, 'Config', $environment
+                    $base_directory, $context, 'Config', $environment,
                 ));
             }
 
@@ -55,11 +55,11 @@ class BootstrapDirectory
 
         if (BBApplication::DEFAULT_ENVIRONMENT !== $environment) {
             $bootstrap_directories[] = implode(DIRECTORY_SEPARATOR, array(
-                $base_directory, 'Config', $environment
+                $base_directory, 'Config', $environment,
             ));
         }
 
-        $bootstrap_directories[] = $base_directory . DIRECTORY_SEPARATOR . 'Config';
+        $bootstrap_directories[] = $base_directory.DIRECTORY_SEPARATOR.'Config';
 
         return $bootstrap_directories;
     }

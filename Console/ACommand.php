@@ -33,12 +33,11 @@ use Symfony\Component\Console\Command\Command;
  */
 class ACommand extends Command
 {
-    
     /**
      * @var ContainerInterface|null
      */
     private $container;
-    
+
     /**
      *
      * @var \BackBuilder\Bundle\ABundle
@@ -66,16 +65,16 @@ class ACommand extends Command
     }
 
     /**
-     * 
+     *
      * @param \BackBuilder\Bundle\ABundle $bundle
      */
     public function setBundle($bundle)
     {
         $this->bundle = $bundle;
     }
-    
+
     /**
-     * 
+     *
      * @return \BackBuilder\Bundle\ABundle
      */
     public function getBundle()

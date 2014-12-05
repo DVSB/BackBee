@@ -38,7 +38,7 @@ use BackBuilder\ClassContent\Element\text;
  */
 class MockContent extends AClassContent implements IMock
 {
-    public function __construct($uid = NULL, $options = NULL)
+    public function __construct($uid = null, $options = null)
     {
         parent::__construct($uid, $options);
         $this->_initData();
@@ -49,22 +49,22 @@ class MockContent extends AClassContent implements IMock
         $this->_defineData(
             'title',
             '\BackBuilder\ClassContent\Element\text',
-            array (
-                'default' => array (
+            array(
+                'default' => array(
                     'value' => 'Title here',
                 ),
                 'label' => 'Title',
                 'maxentry' => 1,
-                'parameters' => array (
-                    'aloha' =>  array (
+                'parameters' => array(
+                    'aloha' =>  array(
                         'type' => 'scalar',
-                        'options' => array (
+                        'options' => array(
                             'default' => 'lite',
                         ),
                     ),
-                    'editable' => array (
+                    'editable' => array(
                         'type' => 'boolean',
-                        'options' => array (
+                        'options' => array(
                             'default' => 'true',
                         ),
                     ),
@@ -73,12 +73,12 @@ class MockContent extends AClassContent implements IMock
         )->_defineData(
             'body',
             '\BackBuilder\ClassContent\ContentSet',
-            array ()
+            array()
         )->_defineParam(
             'excludefromautobloc',
             'array',
-            array (
-                'default' => array (
+            array(
+                'default' => array(
                     'rendertype' => 'checkbox',
                     'label' => 'Exclude from autoblocs',
                     'default' => false,
@@ -93,15 +93,15 @@ class MockContent extends AClassContent implements IMock
             'Basic content yml'
         )->_defineProperty(
             'category',
-            array (
+            array(
                 0 => 'Mocks',
             )
         )->_defineProperty(
             'indexation',
-            array (
-                0 => array (
+            array(
+                0 => array(
                     0 => 'title->value',
-                )
+                ),
             )
         );
         parent::_initData();

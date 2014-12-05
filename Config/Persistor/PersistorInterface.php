@@ -42,10 +42,10 @@ interface PersistorInterface
     /**
      * [persist description]
      *
-     * @param  [type] $key    [description]
-     * @param  array  $config [description]
+     * @param [type] $key    [description]
+     * @param array  $config [description]
      *
-     * @return [type]         [description]
+     * @return [type] [description]
      */
     public function persist(Config $config, array $config_to_persist);
 }

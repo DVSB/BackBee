@@ -2,27 +2,26 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\NestedNode;
 
-use BackBuilder\NestedNode\MediaFolder,
-    BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\AClassContent;
 
 /**
  * Media entity in BackBee
@@ -36,7 +35,6 @@ use BackBuilder\NestedNode\MediaFolder,
  */
 class Media
 {
-
     /**
      * Unique identifier of the media
      * @var integer
@@ -91,10 +89,10 @@ class Media
 
     /**
      * Class constructor of a media entity
-     * @param string $title     optional, the title of the new media, 'Untitled media' by default
-     * @param \DateTime $date   optional, the publication date, current time by default
+     * @param string    $title optional, the title of the new media, 'Untitled media' by default
+     * @param \DateTime $date  optional, the publication date, current time by default
      */
-    public function __construct($title = NULL, $date = NULL)
+    public function __construct($title = null, $date = null)
     {
         $this->_title = (is_null($title)) ? 'Untitled media' : $title;
         $this->_date = (is_null($date)) ? new \DateTime() : $date;
@@ -104,21 +102,21 @@ class Media
     }
 
     /**
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\ClassContent\AClassContent $content
      * @return string
      * @deprecated since version 0.10.0
      */
-    public static function getAbsolutePath($content = NULL)
+    public static function getAbsolutePath($content = null)
     {
-        return __DIR__ . '/../../repository/' . Media::getUploadDir();
+        return __DIR__.'/../../repository/'.Media::getUploadDir();
     }
 
     /**
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\ClassContent\AClassContent $content
      * @return string
      * @deprecated since version 0.10.0
      */
-    public static function getWebPath($content = NULL)
+    public static function getWebPath($content = null)
     {
         return '/images/';
     }
@@ -129,7 +127,7 @@ class Media
      */
     public static function getUploadTmpDir()
     {
-        return __DIR__ . '/../../repository/Data/Tmp/';
+        return __DIR__.'/../../repository/Data/Tmp/';
     }
 
     /**
@@ -143,67 +141,73 @@ class Media
 
     /**
      * Sets the media folder
-     * @param \BackBuilder\NestedNode\MediaFolder $media_folder
+     * @param  \BackBuilder\NestedNode\MediaFolder $media_folder
      * @return \BackBuilder\NestedNode\Media
      */
     public function setMediaFolder(MediaFolder $media_folder)
     {
         $this->_media_folder = $media_folder;
+
         return $this;
     }
 
     /**
      * Sets the element content to the media
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBuilder\ClassContent\AClassContent $content
      * @return \BackBuilder\NestedNode\Media
      */
     public function setContent(AClassContent $content)
     {
         $this->_content = $content;
+
         return $this;
     }
 
     /**
      * Sets the title
-     * @param string $title
+     * @param  string                        $title
      * @return \BackBuilder\NestedNode\Media
      */
     public function setTitle($title)
     {
         $this->_title = $title;
+
         return $this;
     }
 
     /**
      * Sets the publication date
-     * @param \DateTime $date
+     * @param  \DateTime                     $date
      * @return \BackBuilder\NestedNode\Media
      */
     public function setDate(\DateTime $date)
     {
         $this->_date = $date;
+
         return $this;
     }
 
     /**
      * Sets the created date
-     * @param \DateTime $created
+     * @param  \DateTime                     $created
      * @return \BackBuilder\NestedNode\Media
      */
     public function setCreated(\DateTime $created)
     {
         $this->_created = $created;
+
         return $this;
     }
 
     /**
      * Sets the last modified date
-     * @param \DateTime $modified
+     * @param  \DateTime                     $modified
      * @return \BackBuilder\NestedNode\Media
      */
     public function setModified(\DateTime $modified)
     {
         $this->_modified = $modified;
+
         return $this;
     }
 
@@ -270,5 +274,4 @@ class Media
     {
         return $this->_content;
     }
-
 }

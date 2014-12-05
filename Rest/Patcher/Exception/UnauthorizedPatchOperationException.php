@@ -34,6 +34,6 @@ class UnauthorizedPatchOperationException extends BBException
 {
     public function __construct($entity, $path, $operation)
     {
-        parent::__construct("You are not allowed to $operation `$path` for " . get_class($entity) . '.');
+        parent::__construct("You are not allowed to $operation `$path` for ".get_class($entity).'.');
     }
 }

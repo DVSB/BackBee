@@ -33,7 +33,6 @@ use BackBuilder\Exception\BBException;
  */
 class Auth
 {
-
     private $secret_key;
     private $validity_time;
     private $public_token;
@@ -43,10 +42,11 @@ class Auth
     public function __construct(BBApplication $application = null)
     {
         try {
-            if (NULL === $application)
+            if (NULL === $application) {
                 throw new BBException("You must intanced Auth class with BBApplication object");
-            else
+            } else {
                 $this->application = $application;
+            }
         } catch (BBException $e) {
             print $e->getMessage();
         }
@@ -61,7 +61,7 @@ class Auth
 
     /**
      * @codeCoverageIgnore
-     * @param type $id_user
+     * @param  type $id_user
      * @return type
      */
     public function getToken($id_user)
@@ -71,7 +71,7 @@ class Auth
 
     public function generatePublicToken()
     {
-        $publicToken = $this->secret_key . "http://" . $this->request->server->get("SERVER_NAME") .
+        $publicToken = $this->secret_key."http://".$this->request->server->get("SERVER_NAME").
                 $this->request->server->get('HTTP_USER_AGENT');
 
         $this->public_token = $publicToken;
@@ -83,7 +83,7 @@ class Auth
      */
     public function initInformation($user_id)
     {
-        $this->application->getSession()->set("session_informations", time() . "-" . $user_id);
+        $this->application->getSession()->set("session_informations", time()."-".$user_id);
     }
 
     /**
@@ -92,20 +92,21 @@ class Auth
      */
     public function encodeToken()
     {
-        return hash('sha256', $this->public_token . $this->application->getSession()->get("session_informations"));
+        return hash('sha256', $this->public_token.$this->application->getSession()->get("session_informations"));
     }
 
     public function initAuth($id_user)
     {
         $this->generatePublicToken();
         $this->initInformation($id_user);
+
         return $this->encodeToken();
     }
 
     /**
      * [isAuth description]
      * @param  [type]  $token [description]
-     * @return boolean        [description]
+     * @return boolean [description]
      *
      * @todo complete doc and remove french commentaries
      */
@@ -117,7 +118,7 @@ class Auth
             list($date, $user) = explode('-', $this->application->getSession()->get("session_informations"));
 
             // On vérifie que la session n'est pas expirée
-            if ($date + $this->validity_time > time() AND $date <= time()) {
+            if ($date + $this->validity_time > time() && $date <= time()) {
                 // On peut aussi vérifier que l'url en referer est cohérente avec l'action entreprise
                 // Par exemple que l'action suppression a bien été précédé de l'action de confirmation
                 //echo "session en cour de validité<br>";
@@ -134,5 +135,4 @@ class Auth
             return false;
         }
     }
-
 }

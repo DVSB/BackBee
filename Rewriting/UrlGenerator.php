@@ -56,7 +56,6 @@ use BackBuilder\Util\String;
  */
 class UrlGenerator implements IUrlGenerator
 {
-
     /**
      * Current BackBuilder application
      * @var BackBuilder\BBApplication
@@ -122,12 +121,12 @@ class UrlGenerator implements IUrlGenerator
 
             if (true === array_key_exists('_content_', $this->schemes)) {
                 foreach (array_keys($this->schemes['_content_']) as $descriminator) {
-                    $this->descriminators[] = 'BackBuilder\ClassContent\\' . $descriminator;
+                    $this->descriminators[] = 'BackBuilder\ClassContent\\'.$descriminator;
 
                     if (null !== $this->application->getEventDispatcher()) {
                         $this->application
                              ->getEventDispatcher()
-                             ->addListener(str_replace(NAMESPACE_SEPARATOR, '.', $descriminator) . '.onflush', array('BackBuilder\Event\Listener\RewritingListener', 'onFlushContent'))
+                             ->addListener(str_replace(NAMESPACE_SEPARATOR, '.', $descriminator).'.onflush', array('BackBuilder\Event\Listener\RewritingListener', 'onFlushContent'))
                         ;
                     }
                 }
@@ -139,9 +138,9 @@ class UrlGenerator implements IUrlGenerator
 
     /**
      * Returns the URL of the page
-     * @param \BackBuilder\NestedNode\Page $page               The page
-     * @param \BackBuilder\ClassContent\AClassContent $content The optionnal main content of the page
-     * @return string The URL                                  The generated URL
+     * @param  \BackBuilder\NestedNode\Page            $page    The page
+     * @param  \BackBuilder\ClassContent\AClassContent $content The optionnal main content of the page
+     * @return string                                  The URL                                  The generated URL
      */
     public function generate(Page $page, AClassContent $content = null, $exceptionOnMissingScheme = true)
     {
@@ -184,15 +183,15 @@ class UrlGenerator implements IUrlGenerator
             throw new RewritingException(sprintf('No rewriting scheme found for Page(%s)', $page->getUid()), RewritingException::MISSING_SCHEME);
         }
 
-        return '/' . $page->getUid();
+        return '/'.$page->getUid();
     }
 
     /**
      * Computes the URL of a page according to a scheme
-     * @param array         $scheme  The scheme to apply
-     * @param Page          $page    The page
-     * @param AClassContent $content The optionnal main content of the page
-     * @return string The generated URL
+     * @param  array         $scheme  The scheme to apply
+     * @param  Page          $page    The page
+     * @param  AClassContent $content The optionnal main content of the page
+     * @return string        The generated URL
      */
     private function doGenerate($scheme, Page $page, AClassContent $content = null)
     {
@@ -201,7 +200,7 @@ class UrlGenerator implements IUrlGenerator
             '$title' => String::urlize($page->getTitle()),
             '$datetime' => $page->getCreated()->format('ymdHis'),
             '$date' => $page->getCreated()->format('ymd'),
-            '$time' => $page->getCreated()->format('His')
+            '$time' => $page->getCreated()->format('His'),
         );
 
         $matches = array();
@@ -227,9 +226,9 @@ class UrlGenerator implements IUrlGenerator
                     ->getAncestor($page, $level)
                 ;
                 if (null !== $ancestor && $page->getLevel() > $level) {
-                    $replacement['$ancestor[' . $level . ']'] = $ancestor->getUrl(false);
+                    $replacement['$ancestor['.$level.']'] = $ancestor->getUrl(false);
                 } else {
-                    $replacement['$ancestor[' . $level . ']'] = '';
+                    $replacement['$ancestor['.$level.']'] = '';
                 }
             }
         }
@@ -244,23 +243,23 @@ class UrlGenerator implements IUrlGenerator
 
     /**
      * Checks for the uniqueness of the URL and postfixe it if need
-     * @param \BackBuilder\NestedNode\Page $page   The page
-     * @param string &$url                         The reference of the generated URL
+     * @param \BackBuilder\NestedNode\Page $page The page
+     * @param string                       &$url The reference of the generated URL
      */
     private function checkUniqueness(Page $page, &$url)
     {
-        $baseurl = $url . '-%d';
+        $baseurl = $url.'-%d';
         $page_repository = $this->application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
 
         $count = 1;
         $existings = array();
         if (1 === preg_match('#(.*)\/$#', $baseurl, $matches)) {
-            $baseurl = $matches[1] . '-%d/';
+            $baseurl = $matches[1].'-%d/';
             $existings = $page_repository->createQueryBuilder('p')
                 ->where('p._root = :root')
                 ->setParameter('root', $page->getRoot())
                 ->andWhere('p._url LIKE :url')
-                ->setParameter('url', $matches[1] . '%/')
+                ->setParameter('url', $matches[1].'%/')
                 ->getQuery()
                 ->getResult()
             ;
@@ -269,7 +268,7 @@ class UrlGenerator implements IUrlGenerator
                 'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
                 array(
                     'root'  => $page->getRoot()->getUid(),
-                    'regex' => $url . '(-[0-9]+)?$'
+                    'regex' => $url.'(-[0-9]+)?$',
                 )
             )->fetchAll();
 

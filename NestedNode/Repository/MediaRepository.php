@@ -34,38 +34,41 @@ use Doctrine\ORM\EntityRepository;
  */
 class MediaRepository extends EntityRepository
 {
-
     public function getMedias(\BackBuilder\NestedNode\MediaFolder $mediafolder, $cond, $order_sort = '_title', $order_dir = 'asc', $paging = array())
     {
         $result = null;
         $q = $this->createQueryBuilder('m')
                 ->leftJoin('m._media_folder', 'mf')
                 ->leftJoin('m._content', 'mc')
-                ->andWhere('mf._root = :root_' . $mediafolder->getUid())
-                ->andWhere('mf._leftnode >= :leftnode_' . $mediafolder->getUid())
-                ->andWhere('mf._rightnode <= :rightnode_' . $mediafolder->getUid())
-                ->orderBy('m.' . $order_sort, $order_dir)
+                ->andWhere('mf._root = :root_'.$mediafolder->getUid())
+                ->andWhere('mf._leftnode >= :leftnode_'.$mediafolder->getUid())
+                ->andWhere('mf._rightnode <= :rightnode_'.$mediafolder->getUid())
+                ->orderBy('m.'.$order_sort, $order_dir)
                 ->setParameters(array(
-            'root_' . $mediafolder->getUid() => $mediafolder->getRoot(),
-            'leftnode_' . $mediafolder->getUid() => $mediafolder->getLeftnode(),
-            'rightnode_' . $mediafolder->getUid() => $mediafolder->getRightnode()
+            'root_'.$mediafolder->getUid() => $mediafolder->getRoot(),
+            'leftnode_'.$mediafolder->getUid() => $mediafolder->getLeftnode(),
+            'rightnode_'.$mediafolder->getUid() => $mediafolder->getRightnode(),
                 ));
 
         $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : null;
-        if (null != $typeField)
-            $q->andWhere('mc INSTANCE OF ' . $typeField);
+        if (null != $typeField) {
+            $q->andWhere('mc INSTANCE OF '.$typeField);
+        }
 
         $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
-        if (null != $searchField)
-            $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%' . $searchField . '%')));
+        if (null != $searchField) {
+            $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%'.$searchField.'%')));
+        }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
-        if (null != $afterPubdateField)
+        if (null != $afterPubdateField) {
             $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
+        }
 
         $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
-        if (null != $beforePubdateField)
+        if (null != $beforePubdateField) {
             $q->andWhere('mc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
+        }
 
         if (is_array($paging)) {
             if (array_key_exists("start", $paging) && array_key_exists("limit", $paging)) {
@@ -76,6 +79,7 @@ class MediaRepository extends EntityRepository
         } else {
             $result = $q->getQuery()->getResult();
         }
+
         return $result;
     }
 
@@ -90,23 +94,23 @@ class MediaRepository extends EntityRepository
                 ->select("COUNT(m)")
                 ->leftJoin('m._media_folder', 'mf')
                 ->leftJoin('m._content', 'mc')
-                ->andWhere('mf._root = :root_' . $mediafolder->getUid())
-                ->andWhere('mf._leftnode >= :leftnode_' . $mediafolder->getUid())
-                ->andWhere('mf._rightnode <= :rightnode_' . $mediafolder->getUid())
+                ->andWhere('mf._root = :root_'.$mediafolder->getUid())
+                ->andWhere('mf._leftnode >= :leftnode_'.$mediafolder->getUid())
+                ->andWhere('mf._rightnode <= :rightnode_'.$mediafolder->getUid())
                 ->setParameters(array(
-            'root_' . $mediafolder->getUid() => $mediafolder->getRoot(),
-            'leftnode_' . $mediafolder->getUid() => $mediafolder->getLeftnode(),
-            'rightnode_' . $mediafolder->getUid() => $mediafolder->getRightnode()
+            'root_'.$mediafolder->getUid() => $mediafolder->getRoot(),
+            'leftnode_'.$mediafolder->getUid() => $mediafolder->getLeftnode(),
+            'rightnode_'.$mediafolder->getUid() => $mediafolder->getRightnode(),
                 ));
 
         $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : null;
         if (null != $typeField) {
-            $q->andWhere('mc INSTANCE OF ' . $typeField);
+            $q->andWhere('mc INSTANCE OF '.$typeField);
         }
 
         $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
         if (null != $searchField) {
-            $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%' . $searchField . '%')));
+            $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%'.$searchField.'%')));
         }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
@@ -128,17 +132,17 @@ class MediaRepository extends EntityRepository
         $q = $this->createQueryBuilder('m')
                 ->leftJoin('m._media_folder', 'mf')
                 ->leftJoin('m._content', 'mc')
-                ->andWhere('mf._root = :root_' . $mediafolder->getUid())
-                ->andWhere('mf._leftnode >= :leftnode_' . $mediafolder->getUid())
-                ->andWhere('mf._rightnode <= :rightnode_' . $mediafolder->getUid())
+                ->andWhere('mf._root = :root_'.$mediafolder->getUid())
+                ->andWhere('mf._leftnode >= :leftnode_'.$mediafolder->getUid())
+                ->andWhere('mf._rightnode <= :rightnode_'.$mediafolder->getUid())
                 ->setParameters(array(
-            'root_' . $mediafolder->getUid() => $mediafolder->getRoot(),
-            'leftnode_' . $mediafolder->getUid() => $mediafolder->getLeftnode(),
-            'rightnode_' . $mediafolder->getUid() => $mediafolder->getRightnode()
+            'root_'.$mediafolder->getUid() => $mediafolder->getRoot(),
+            'leftnode_'.$mediafolder->getUid() => $mediafolder->getLeftnode(),
+            'rightnode_'.$mediafolder->getUid() => $mediafolder->getRightnode(),
                 ));
 
         $result = $q->getQuery()->getResult();
+
         return $result;
     }
-
 }

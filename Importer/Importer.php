@@ -20,12 +20,10 @@
 
 namespace BackBuilder\Importer;
 
-use BackBuilder\BBApplication,
-    BackBuilder\Config\Config,
-    BackBuilder\Util\Buffer,
-    BackBuilder\Importer\Exception\ImporterException;
-
-use Doctrine\DBAL\Driver\PDOStatement;
+use BackBuilder\BBApplication;
+use BackBuilder\Config\Config;
+use BackBuilder\Util\Buffer;
+use BackBuilder\Importer\Exception\ImporterException;
 
 /**
  * @category    BackBuilder
@@ -50,9 +48,9 @@ class Importer
     /**
      * Class constructor
      *
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBuilder\BBApplication               $application
      * @param \BackBuilder\Importer\IImporterConnector $connector
-     * @param \BackBuilder\Config\Config $config
+     * @param \BackBuilder\Config\Config               $config
      */
     public function __construct(BBApplication $application, IImporterConnector $connector, Config $config)
     {
@@ -64,8 +62,8 @@ class Importer
     }
 
     /**
-     * @param type $flush_every if you don't need flush put 0
-     * @param boolean $check_existing
+     * @param  type    $flush_every    if you don't need flush put 0
+     * @param  boolean $check_existing
      * @return boolean
      */
     public function run($class, $config, $flush_every, $check_existing)
@@ -75,7 +73,7 @@ class Importer
         $this->setConverter($this->initConvertion($config));
         $rows = $this->getConverter()->getRows($this);
 
-        if(!is_array($rows) && !($rows instanceof \Countable)) {
+        if (!is_array($rows) && !($rows instanceof \Countable)) {
             throw new ImporterException('Result set must be an array or Countable');
         }
 
@@ -83,15 +81,15 @@ class Importer
         $limit = true === isset($config['limit']) ? $config['limit'] : null;
         if (0 === $items_count) {
             Buffer::dump(
-                '=== Importation of ' . $items_count . ' can\'t be done, there is no item to convert.' . "\n"
+                '=== Importation of '.$items_count.' can\'t be done, there is no item to convert.'."\n"
             );
 
             return;
         }
 
         Buffer::dump(
-            "\n" . '===== Importation of ' . (null !== $limit ? $limit . " (total: $items_count)" : $items_count)
-            . ' ' . $class . ' was started.' . "\n\n"
+            "\n".'===== Importation of '.(null !== $limit ? $limit." (total: $items_count)" : $items_count)
+            .' '.$class.' was started.'."\n\n"
         );
 
         $this->_doImport($rows, $flush_every, $check_existing, $limit);
@@ -102,26 +100,25 @@ class Importer
         gc_collect_cycles();
 
         Buffer::dump(
-            "\n" . $this->_importedItemsCount . ' ' . $class . ' imported in '
-            . (microtime(true) - $starttime) . ' s =====' . "\n\n"
+            "\n".$this->_importedItemsCount.' '.$class.' imported in '
+            .(microtime(true) - $starttime).' s ====='."\n\n"
         );
 
         Buffer::dump(
-            "\n" . $this->_failedItemsCount . ' ' . $class . ' failed items =====' . "\n\n"
-        , 'bold_red');
+            "\n".$this->_failedItemsCount.' '.$class.' failed items ====='."\n\n", 'bold_red');
     }
 
     /**
      *
-     * @param array|\Traversable $rows
-     * @param int $flush_every
-     * @param bool $check_existing
-     * @param int|null $limit
+     * @param  array|\Traversable $rows
+     * @param  int                $flush_every
+     * @param  bool               $check_existing
+     * @param  int|null           $limit
      * @throws ImporterException
      */
     private function _doImport($rows, $flush_every, $check_existing, $limit = null)
     {
-        if(!is_array($rows) && !($rows instanceof \Traversable)) {
+        if (!is_array($rows) && !($rows instanceof \Traversable)) {
             throw new ImporterException('Result set must be an array or Traversable');
         }
 
@@ -133,11 +130,10 @@ class Importer
         foreach ($rows as $row) {
             try {
                 $entity = $this->getConverter()->convert($row);
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $row = null;
                 Buffer::dump(
-                    "===== Exception while processing row: " . $e->getMessage() . "\n"
-                , 'bold_red');
+                    "===== Exception while processing row: ".$e->getMessage()."\n", 'bold_red');
                 $this->_failedItemsCount++;
                 continue;
             }
@@ -158,9 +154,9 @@ class Importer
                 if (self::FLUSH_MEMORY_ON_NULL_EVERY <= $count_null) {
                     $total_ignored += $count_null;
                     Buffer::dump(
-                        'Cleaning memory on null (every ' . self::FLUSH_MEMORY_ON_NULL_EVERY
-                        . ' - total: ' . $total_ignored . ') : [BEFORE] '
-                        .  self::convertMemorySize(memory_get_usage())
+                        'Cleaning memory on null (every '.self::FLUSH_MEMORY_ON_NULL_EVERY
+                        .' - total: '.$total_ignored.') : [BEFORE] '
+                        .self::convertMemorySize(memory_get_usage())
                     );
 
                     if (0 < count($entities)) {
@@ -172,7 +168,7 @@ class Importer
                         $this->flushMemory();
                     }
 
-                    Buffer::dump('; [AFTER] ' . self::convertMemorySize(memory_get_usage()) . "\n");
+                    Buffer::dump('; [AFTER] '.self::convertMemorySize(memory_get_usage())."\n");
                     $count_null = 0;
                 }
             }
@@ -199,7 +195,7 @@ class Importer
 
     /**
      *
-     * @param array $config
+     * @param  array                            $config
      * @return \BackBuilder\Importer\IConverter
      */
     final protected function initConvertion(array $config)
@@ -235,14 +231,15 @@ class Importer
             return new $classname($uid);
         } else {
             $repo = $this->_application->getEntityManager()->getRepository($classname);
+
             return $repo->find($uid);
         }
     }
 
     /**
      * Return an existing class content or a new one if unfound
-     * @param string $classname
-     * @param string $uid
+     * @param  string                                  $classname
+     * @param  string                                  $uid
      * @return \BaclBuilder\ClassContent\AClassContent
      */
     public function getBBEntity($classname, $uid)
@@ -263,10 +260,10 @@ class Importer
      */
     public function save(array $entities, $check_existing = true)
     {
-        $id_label = 'get' . ucfirst(array_key_exists('id_label', $this->_import_config) ? $this->_import_config['id_label'] : 'uid');
+        $id_label = 'get'.ucfirst(array_key_exists('id_label', $this->_import_config) ? $this->_import_config['id_label'] : 'uid');
 
         $starttime = microtime(true);
-        Buffer::dump('Saving ' . count($entities) . ' items...');
+        Buffer::dump('Saving '.count($entities).' items...');
 
         foreach ($entities as $entity) {
             if (null !== $entity && false === $this->_application->getEntityManager()->contains($entity)) {
@@ -280,15 +277,15 @@ class Importer
         $this->getConverter()->afterEntitiesFlush($this, $entities);
         $this->flushMemory();
 
-        Buffer::dump(' in ' . (microtime(true) - $starttime) . ' s (total: '
-            . $this->_importedItemsCount . ' - memory status: ' . self::convertMemorySize(memory_get_usage()) . ")\n");
+        Buffer::dump(' in '.(microtime(true) - $starttime).' s (total: '
+            .$this->_importedItemsCount.' - memory status: '.self::convertMemorySize(memory_get_usage()).")\n");
     }
 
     public static function convertMemorySize($size)
     {
         $unit = array('b','kb','mb','gb','tb','pb');
 
-        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2).' '.$unit[$i];
     }
 
     public function flushMemory()
@@ -314,7 +311,7 @@ class Importer
 
     final protected function _loadRelations()
     {
-       return $this->getConfig()->getSection('relations');
+        return $this->getConfig()->getSection('relations');
     }
 
     final protected function getConfig()

@@ -36,8 +36,8 @@ interface DumpableServiceProxyInterface
     /**
      * Restore current service to the dump's state
      *
-     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
-     *                     restore current service
+     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                    restore current service
      */
     public function restore(ContainerInterface $container, array $dump);
 }

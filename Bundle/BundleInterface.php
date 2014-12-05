@@ -65,7 +65,7 @@ interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
      * Returns bundle property if you provide key, else every properties; a bundle
      * property is any key/value defined in 'bundle'section in config.yml
      *
-     * @param  string $key name of the property
+     * @param string $key name of the property
      *
      * @return string|array value of the property if key is not null, else an array which contains every properties
      */

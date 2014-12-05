@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,10 +22,8 @@
 namespace BackBuilder\Doctrine;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Doctrine\ORM\ORMException;
-use Doctrine\ORM\EntityManager;
 
 /**
  * Doctrine managers registry
@@ -53,8 +51,6 @@ class Registry extends ManagerRegistry
         parent::__construct('BackBee', $connections, $entityManagers, $defaultConnection, $defaultEntityManager, 'Doctrine\ORM\Proxy\Proxy');
     }
 
-    
-    
     /**
      * Resolves a registered namespace alias to the full namespace.
      *
@@ -77,5 +73,4 @@ class Registry extends ManagerRegistry
 
         throw ORMException::unknownEntityNamespace($alias);
     }
-    
 }

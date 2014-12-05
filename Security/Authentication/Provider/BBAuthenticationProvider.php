@@ -26,7 +26,6 @@ use BackBuilder\Security\Encoder\RequestSignatureEncoder;
 use BackBuilder\Security\Exception\SecurityException;
 use BackBuilder\Security\Exception\UnknownUserException;
 use BackBuilder\Security\Token\BBUserToken;
-
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
@@ -45,7 +44,6 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
  */
 class BBAuthenticationProvider implements AuthenticationProviderInterface
 {
-
     /**
      * The nonce directory
      * @var string
@@ -70,7 +68,6 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      */
     private $registry_repository;
 
-
     /**
      * The encoders factory
      * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
@@ -80,9 +77,9 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Class constructor
      * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
-     * @param string $nonceDir
-     * @param int $lifetime
-     * @param \BackBuillder\Bundle\Registry\Repository $registryRepository
+     * @param string                                                      $nonceDir
+     * @param int                                                         $lifetime
+     * @param \BackBuillder\Bundle\Registry\Repository                    $registryRepository
      */
     public function __construct(UserProviderInterface $userProvider, $nonceDir, $lifetime = 300, $registryRepository = null, EncoderFactoryInterface $encoderFactory = null)
     {
@@ -99,13 +96,12 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Attempts to authenticates a TokenInterface object.
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return \BackBuilder\Security\Token\BBUserToken
      * @throws \BackBuilder\Security\Exception\SecurityException
      */
     public function authenticate(TokenInterface $token)
     {
-
         if (false === $this->supports($token)) {
             throw new SecurityException('Invalid token provided', SecurityException::UNSUPPORTED_TOKEN);
         }
@@ -127,9 +123,9 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
                         // NB: only md5 algo without salt is currently supported due to frontend dependency
                     } else {
                         // currently there is a dependency on md5 in frontend so all other encoders can't be supported
-                        throw new \RuntimeException('Encoder is not supported: ' . get_class($encoder));
+                        throw new \RuntimeException('Encoder is not supported: '.get_class($encoder));
                     }
-                } catch(\RuntimeException $e) {
+                } catch (\RuntimeException $e) {
                     // no encoder defined
                     $secret = md5($secret);
                 }
@@ -155,7 +151,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Checks whether this provider supports the given token.
      * @codeCoverageIgnore
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @return boolean
      */
     public function supports(TokenInterface $token)
@@ -176,10 +172,10 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Checks for a valid nonce file according to the WSE
-     * @param string $digest The digest string send by the client
-     * @param string $nonce The nonce file
-     * @param string $created The creation date of the nonce
-     * @param string $secret The secret (ie password) to be check
+     * @param  string                                            $digest  The digest string send by the client
+     * @param  string                                            $nonce   The nonce file
+     * @param  string                                            $created The creation date of the nonce
+     * @param  string                                            $secret  The secret (ie password) to be check
      * @return boolean
      * @throws \BackBuilder\Security\Exception\SecurityException
      */
@@ -193,7 +189,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
             throw new SecurityException('Request expired', SecurityException::EXPIRED_TOKEN);
         }
 
-        if (md5($nonce . $created . $secret) !== $digest) {
+        if (md5($nonce.$created.$secret) !== $digest) {
             throw new SecurityException('Invalid authentication informations', SecurityException::INVALID_CREDENTIALS);
         }
 
@@ -207,7 +203,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Returns the nonce value if found, NULL otherwise
-     * @param type $nonce
+     * @param  type     $nonce
      * @return NULL|int
      */
     protected function readNonceValue($nonce)
@@ -215,8 +211,8 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         $value = null;
 
         if (null === $this->registry_repository) {
-            if (true === is_readable($this->nonce_directory . DIRECTORY_SEPARATOR . $nonce)) {
-                $value = file_get_contents($this->nonce_directory . DIRECTORY_SEPARATOR . $nonce);
+            if (true === is_readable($this->nonce_directory.DIRECTORY_SEPARATOR.$nonce)) {
+                $value = file_get_contents($this->nonce_directory.DIRECTORY_SEPARATOR.$nonce);
             }
         } else {
             $value = $this->getRegistry($nonce)->getValue();
@@ -240,7 +236,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         $signature_generator = new RequestSignatureEncoder();
         $signature = $signature_generator->createSignature($token);
         if (null === $this->registry_repository) {
-            file_put_contents($this->nonce_directory . DIRECTORY_SEPARATOR . $nonce, "$now;$signature");
+            file_put_contents($this->nonce_directory.DIRECTORY_SEPARATOR.$nonce, "$now;$signature");
         } else {
             $registry = $this->getRegistry($nonce)->setValue("$now;$signature");
             $this->registry_repository->save($registry);
@@ -254,7 +250,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     protected function removeNonce($nonce)
     {
         if (null === $this->registry_repository) {
-            @unlink($this->nonce_directory . DIRECTORY_SEPARATOR . $nonce);
+            @unlink($this->nonce_directory.DIRECTORY_SEPARATOR.$nonce);
         } else {
             $registry = $this->getRegistry($nonce);
             $this->registry_repository->remove($registry);
@@ -263,7 +259,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Returns a Registry entry for $nonce
-     * @param string $nonce
+     * @param  string                       $nonce
      * @return \BackBuilder\Bundle\Registry
      */
     private function getRegistry($nonce)

@@ -23,7 +23,6 @@ namespace BackBuilder\Rest\Controller;
 
 use BackBuilder\Bundle\BundleInterface;
 use BackBuilder\Rest\Controller\Annotations as Rest;
-use BackBuilder\Rest\Controller\ARestController;
 use BackBuilder\Rest\Patcher\EntityPatcher;
 use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
@@ -31,9 +30,9 @@ use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
 use BackBuilder\Rest\Patcher\RightManager;
 
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -46,7 +45,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class BundleController extends ARestController
 {
-
     /**
      * Returns a collection of declared bundles
      */
@@ -65,7 +63,7 @@ class BundleController extends ARestController
     /**
      * Returns the bundle with id $id if it exists, else a 404 response will be generated
      *
-     * @param  string $id the id of the bundle we are looking for
+     * @param string $id the id of the bundle we are looking for
      */
     public function getAction($id)
     {
@@ -91,7 +89,7 @@ class BundleController extends ARestController
      *   @Assert\NotBlank(message="Request must contain at least one operation")
      * })
      *
-     * @param  string $id the id of the bundle we are looking for
+     * @param string $id the id of the bundle we are looking for
      */
     public function patchAction($id)
     {
@@ -109,13 +107,13 @@ class BundleController extends ARestController
         $entity_patcher->getRightManager()->addAuthorizationMapping($bundle, array(
             'category'        => array('replace'),
             'config_per_site' => array('replace'),
-            'enable'          => array('replace')
+            'enable'          => array('replace'),
         ));
 
         try {
             $entity_patcher->patch($bundle, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
-            throw new AccessDeniedHttpException('Invalid patch operation: ' . $e->getMessage());
+            throw new BadRequestHttpException('Invalid patch operation: ' . $e->getMessage());
         }
 
         $this->getApplication()->getContainer()->get('config.persistor')->persist(
@@ -131,10 +129,10 @@ class BundleController extends ARestController
     /**
      * This method is the front controller of every bundles exposed actions
      *
-     * @param  string $bundle_name     name of bundle we want to reach its exposed actions
-     * @param  string $controller_name controller name
-     * @param  string $action_name     name of exposed action we want to reach
-     * @param  string  $parameters     optionnal, action's parameters
+     * @param string $bundle_name     name of bundle we want to reach its exposed actions
+     * @param string $controller_name controller name
+     * @param string $action_name     name of exposed action we want to reach
+     * @param string $parameters      optionnal, action's parameters
      */
     public function accessBundleExposedRoutesAction($bundle_name, $controller_name, $action_name, $parameters)
     {
@@ -162,11 +160,11 @@ class BundleController extends ARestController
     {
         try {
             parent::granted($attributes, $object);
-        } catch (AccessDeniedHttpException $e) {
-            throw new AccessDeniedHttpException(
+        } catch (AccessDeniedException $e) {
+            throw new AccessDeniedException(
                 'Acces denied: no "'
-                . (is_array($attributes) ? implode(', ', $attributes) : $attributes)
-                . '" rights for bundle ' . get_class($object) . '.'
+                .(is_array($attributes) ? implode(', ', $attributes) : $attributes)
+                .'" rights for bundle '.get_class($object).'.'
             );
         }
 
@@ -176,7 +174,7 @@ class BundleController extends ARestController
     /**
      * Returns a bundle by id
      *
-     * @param  string $id
+     * @param string $id
      *
      * @throws NotFoundHttpException is raise if no bundle was found with provided id
      *

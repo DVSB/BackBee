@@ -22,14 +22,11 @@
 namespace BackBuilder\Renderer\Adapter;
 
 use Exception;
-
-use Symfony\Component\HttpFoundation\ParameterBag;
-
-use BackBuilder\Renderer\ARenderer,
-    BackBuilder\Renderer\ARendererAdapter,
-    BackBuilder\Renderer\Exception\RendererException,
-    BackBuilder\Site\Layout,
-    BackBuilder\Util\File;
+use BackBuilder\Renderer\ARenderer;
+use BackBuilder\Renderer\ARendererAdapter;
+use BackBuilder\Renderer\Exception\RendererException;
+use BackBuilder\Site\Layout;
+use BackBuilder\Util\File;
 
 /**
  * Rendering adapter for phtml templating files
@@ -73,8 +70,8 @@ class phtml extends ARendererAdapter
 
     /**
      * Magic method to get an assign var
-     * @param string $var the name of the variable
-     * @return mixed the value
+     * @param  string $var the name of the variable
+     * @return mixed  the value
      */
     public function __get($var)
     {
@@ -84,7 +81,7 @@ class phtml extends ARendererAdapter
     /**
      * Magic method to test the setting of an assign var
      * @codeCoverageIgnore
-     * @param string $var the name of the variable
+     * @param  string  $var the name of the variable
      * @return boolean
      */
     public function __isset($var)
@@ -95,8 +92,8 @@ class phtml extends ARendererAdapter
     /**
      * Magic method to assign a var
      * @codeCoverageIgnore
-     * @param string $var the name of the variable
-     * @param mixed $value the value of the variable
+     * @param  string    $var   the name of the variable
+     * @param  mixed     $value the value of the variable
      * @return ARenderer the current renderer
      */
     public function __set($var, $value = null)
@@ -148,22 +145,22 @@ class phtml extends ARendererAdapter
             ob_end_clean();
 
             throw new RendererException(
-                $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
+                $e->getMessage().' in '.$filename, RendererException::RENDERING_ERROR, $e
             );
-
         }
     }
 
     /**
      * Assign one or more variables
-     * @param mixed $var A variable name or an array of variables to set
-     * @param mixed $value The variable value to set
+     * @param  mixed     $var   A variable name or an array of variables to set
+     * @param  mixed     $value The variable value to set
      * @return ARenderer The current renderer
      */
     public function assign($var, $value = null)
     {
         if (true === is_string($var)) {
             $this->vars[$var] = $value;
+
             return $this;
         }
 
@@ -200,8 +197,8 @@ class phtml extends ARendererAdapter
 
     /**
      * Return parameters
-     * @param string $param The parameter to return
-     * @return mixed The parameter value asked or array of the parameters
+     * @param  string $param The parameter to return
+     * @return mixed  The parameter value asked or array of the parameters
      */
     public function getParam($param = null)
     {
@@ -249,11 +246,11 @@ class phtml extends ARendererAdapter
         $layoutid = $layoutNode->getAttribute('id');
 
         $xPath = new \DOMXPath($domlayout);
-        if (($targetNodes = $xPath->query('//div[@id="' . $layoutid . '"]')) && 0 < $targetNodes->length) {
+        if (($targetNodes = $xPath->query('//div[@id="'.$layoutid.'"]')) && 0 < $targetNodes->length) {
             foreach ($targetNodes as $targetNode) {
                 $targetNode->parentNode->replaceChild($layoutNode, $targetNode);
             }
-        } else if (($targetNodes = $domlayout->getElementsByTagName('body')) && 0 < $targetNodes->length) {
+        } elseif (($targetNodes = $domlayout->getElementsByTagName('body')) && 0 < $targetNodes->length) {
             foreach ($targetNodes as $targetNode) {
                 $targetNode->appendChild($layoutNode);
             }
@@ -261,8 +258,9 @@ class phtml extends ARendererAdapter
             $domlayout->appendChild($layoutNode);
         }
 
-        if (!file_put_contents($layoutFile, preg_replace_callback('/(&lt;|<)\?php(.+)\?(&gt;|>)/iu', create_function('$matches', 'return "<?php".html_entity_decode(urldecode($matches[2]))."?".">";'), $domlayout->saveHTML())))
+        if (!file_put_contents($layoutFile, preg_replace_callback('/(&lt;|<)\?php(.+)\?(&gt;|>)/iu', create_function('$matches', 'return "<?php".html_entity_decode(urldecode($matches[2]))."?".">";'), $domlayout->saveHTML()))) {
             throw new RendererException(sprintf('Unable to save layout %s.', $layoutFile), RendererException::LAYOUT_ERROR);
+        }
 
         libxml_clear_errors();
 

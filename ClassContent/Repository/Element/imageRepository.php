@@ -2,27 +2,27 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBuilder\ClassContent\Repository\Element;
 
-use BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\Element\image as elementImage;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\Element\image as elementImage;
 
 /**
  * image repository
@@ -34,13 +34,12 @@ use BackBuilder\ClassContent\AClassContent,
  */
 class imageRepository extends fileRepository
 {
-
     /**
      * Move an uploaded file to the temporary directory and update image content
-     * @param \BackBuilder\ClassContent\AClassContent $file
-     * @param string $newfilename
-     * @param string $originalname
-     * @param string $src
+     * @param  \BackBuilder\ClassContent\AClassContent                   $file
+     * @param  string                                                    $newfilename
+     * @param  string                                                    $originalname
+     * @param  string                                                    $src
      * @return boolean|string
      * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
@@ -62,5 +61,4 @@ class imageRepository extends fileRepository
 
         return $newfilename;
     }
-
 }

@@ -22,14 +22,9 @@
 namespace BackBuilder\Bundle;
 
 use BackBuilder\BBApplication;
-use BackBuilder\Bundle\AbstractBaseBundle;
 use BackBuilder\Bundle\Exception\BundleException;
 use BackBuilder\Logging\Logger;
 use BackBuilder\Routing\RouteCollection as Routing;
-use BackBuilder\Util\Arrays;
-
-use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\ORM\EntityManager;
 
@@ -80,7 +75,7 @@ abstract class ABundle extends AbstractBaseBundle
      * Returns an Entity Manager for the bundle
      * If a valid doctrine configuration is provided, a new connection is established
      * If none doctrine configuration is provided, returns the BBApplication entity manager
-     * @param array $doctrine_config Connection informations
+     * @param  array                                         $doctrine_config Connection informations
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBuilder\Bundle\Exception\BundleException Occure on database connection error
      */
@@ -96,7 +91,7 @@ abstract class ABundle extends AbstractBaseBundle
             }
 
             if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
-                $doctrine_config['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir() . DIRECTORY_SEPARATOR . 'Proxies';
+                $doctrine_config['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir().DIRECTORY_SEPARATOR.'Proxies';
             }
 
             $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogger(), $this->getApplication()->getEntityManager()->getEventManager());
@@ -118,7 +113,7 @@ abstract class ABundle extends AbstractBaseBundle
     {
         $doctrineConfig = $this->getConfig()->getDoctrineConfig();
 
-        if(null === $doctrineConfig) {
+        if (null === $doctrineConfig) {
             $doctrineConfig = $this->getApplication()->getConfig()->getDoctrineConfig();
         }
 
@@ -127,18 +122,17 @@ abstract class ABundle extends AbstractBaseBundle
         }
 
         if (false === array_key_exists('proxy_dir', $doctrineConfig['dbal'])) {
-            $doctrineConfig['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir() . '/Proxies';
+            $doctrineConfig['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir().'/Proxies';
         }
 
         $em = $this->_initEntityManager($doctrineConfig);
 
         // set the path to include only this bundle's entities
-        if(false === file_exists($this->getBaseDir() . '/Entity')) {
+        if (false === file_exists($this->getBaseDir().'/Entity')) {
             // Entity dir doesn't exist
-            mkdir($this->getBaseDir() . '/Entity');
+            mkdir($this->getBaseDir().'/Entity');
         }
-        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array($this->getBaseDir() . '/Entity'));
-
+        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array($this->getBaseDir().'/Entity'));
 
         return $em;
     }
@@ -171,7 +165,7 @@ abstract class ABundle extends AbstractBaseBundle
 
     /**
      * Get update queries
-     * @param EntityManager $em
+     * @param  EntityManager $em
      * @return String[]
      */
     public function getUpdateQueries(EntityManager $em)
@@ -186,7 +180,7 @@ abstract class ABundle extends AbstractBaseBundle
 
     /**
      * Get create queries
-     * @param EntityManager $em
+     * @param  EntityManager $em
      * @return String[]
      */
     public function getCreateQueries(EntityManager $em)
@@ -251,9 +245,9 @@ abstract class ABundle extends AbstractBaseBundle
     {
         //return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
 
-        $resources_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Ressources';
+        $resources_dir = $this->getBaseDir().DIRECTORY_SEPARATOR.'Ressources';
         if ('test' === $this->getApplication()->getEnvironment()) {
-            $test_dir = $this->getBaseDir() . DIRECTORY_SEPARATOR . 'Test' . DIRECTORY_SEPARATOR . 'Ressources';
+            $test_dir = $this->getBaseDir().DIRECTORY_SEPARATOR.'Test'.DIRECTORY_SEPARATOR.'Ressources';
             if (true === file_exists($test_dir)) {
                 $resources_dir = $test_dir;
             }

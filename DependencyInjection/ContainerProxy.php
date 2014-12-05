@@ -21,8 +21,6 @@
 
 namespace BackBuilder\DependencyInjection;
 
-use BackBuilder\DependencyInjection\Container;
-
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
@@ -172,10 +170,10 @@ class ContainerProxy extends Container
     /**
      * Try to load definition by looking for its raw definition with the provided $id
      *
-     * @param  string $id the id of the service we try to load its definition
+     * @param string $id the id of the service we try to load its definition
      *
      * @return null|Symfony\Component\DependencyInjection\Definition return null if no definition has been found
-     *         in raw definitions, else the Definition object newly build
+     *                                                               in raw definitions, else the Definition object newly build
      */
     private function tryLoadDefinitionFromRaw($id)
     {
@@ -203,7 +201,7 @@ class ContainerProxy extends Container
     /**
      * Build a definition from the definition's array provided as current method parameter
      *
-     * @param  array  $array the raw definition's array
+     * @param array $array the raw definition's array
      *
      * @return Symfony\Component\DependencyInjection\Definition the definition object
      */
@@ -303,7 +301,7 @@ class ContainerProxy extends Container
     /**
      * Converts a service string id into Reference if needed
      *
-     * @param  mixed $argument the argument we may convert
+     * @param mixed $argument the argument we may convert
      *
      * @return mixed the argument which may be converted
      */

@@ -21,12 +21,10 @@
 
 namespace BackBuilder\Console;
 
-
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 use BackBuilder\BBApplication;
 
 /**
@@ -55,7 +53,7 @@ class Console extends ConsoleApplication
     {
         $this->_application = $application;
 
-        parent::__construct('BackBuilder', BBApplication::VERSION . ($application->isDebugMode() ? '/debug' : ''));
+        parent::__construct('BackBuilder', BBApplication::VERSION.($application->isDebugMode() ? '/debug' : ''));
 
         $this->getDefinition()->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $this->_application->getEnvironment()));
         $this->getDefinition()->addOption(new InputOption('--no-debug', null, InputOption::VALUE_NONE, 'Switches off debug mode.'));

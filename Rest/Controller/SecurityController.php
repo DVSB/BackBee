@@ -24,7 +24,6 @@ namespace BackBuilder\Rest\Controller;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Security\Token\AnonymousToken;
 use BackBuilder\Security\Token\BBUserToken;
-
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,11 +53,13 @@ class SecurityController extends ARestController
         $token->setUser($request->request->get('username'));
         $token->setCreated($created);
         $token->setNonce(md5(uniqid('', true)));
-        $token->setDigest(md5($token->getNonce() . $created . md5($request->request->get('password'))));
+        $token->setDigest(md5($token->getNonce().$created.md5($request->request->get('password'))));
 
         $tokenAuthenticated = $this->getApplication()->getSecurityContext()->getAuthenticationManager()
             ->authenticate($token)
         ;
+
+        $this->getApplication()->getSecurityContext()->setToken($tokenAuthenticated);
 
         $response = $this->createResponse('', 201);
         $response->headers->set('X-API-KEY', $tokenAuthenticated->getUser()->getApiKeyPublic());
@@ -66,7 +67,6 @@ class SecurityController extends ARestController
 
         return $response;
     }
-
 
     /**
      * Authenticate against a specific firewall
@@ -87,6 +87,7 @@ class SecurityController extends ARestController
         if (0 === count($contexts)) {
             $response = new Response();
             $response->setStatusCode(400, sprintf('No supported security contexts found for firewall: %s', $firewall));
+
             return $response;
         }
 
@@ -95,6 +96,7 @@ class SecurityController extends ARestController
         if (null === $securityContext) {
             $response = new Response();
             $response->setStatusCode(400, sprintf('Firewall not configured: %s', $firewall));
+
             return $response;
         }
 
@@ -119,10 +121,9 @@ class SecurityController extends ARestController
             $response->setContent($this->formatItem([
                 'nonce' => $nonce,
                 'user' => [
-                    'id' => $tokenAuthenticated->getUser()->getId()
-                ]
+                    'id' => $tokenAuthenticated->getUser()->getId(),
+                ],
             ]), 'json');
-
         }
 
         return $response;
@@ -130,7 +131,7 @@ class SecurityController extends ARestController
 
     /**
      *
-     * @param type $firewall
+     * @param  type  $firewall
      * @return array
      */
     private function getSecurityContextConfig($firewall)
@@ -138,7 +139,7 @@ class SecurityController extends ARestController
         $securityConfig = $this->getApplication()->getConfig()->getSection('security');
 
         if (!isset($securityConfig['firewalls'][$firewall])) {
-            return null;
+            return;
         }
 
         $firewallConfig = $securityConfig['firewalls'][$firewall];
@@ -155,7 +156,7 @@ class SecurityController extends ARestController
      */
     public function deleteSessionAction(Request $request)
     {
-        if(null === $request->getSession()) {
+        if (null === $request->getSession()) {
             throw new NotFoundHttpException('Session doesn\'t exist');
         }
 

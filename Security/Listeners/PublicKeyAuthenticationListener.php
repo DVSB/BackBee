@@ -23,10 +23,7 @@ namespace BackBuilder\Security\Listeners;
 
 use BackBuilder\Security\Exception\SecurityException;
 use BackBuilder\Security\Token\PublicKeyToken;
-
 use Psr\Log\LoggerInterface;
-
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\SecurityContextInterface;
@@ -43,7 +40,6 @@ class PublicKeyAuthenticationListener implements ListenerInterface
 {
     const AUTH_PUBLIC_KEY_TOKEN = 'X-API-KEY';
     const AUTH_SIGNATURE_TOKEN = 'X-API-SIGNATURE';
-
 
     private $context;
     private $authenticationManager;

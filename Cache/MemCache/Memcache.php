@@ -37,15 +37,14 @@ use Psr\Log\LoggerInterface;
  */
 class Memcache extends AMemcache
 {
-
     /**
      * Class constructor
-     * @param array $options Initial options for the cache adapter:
-     *                         - persistent_id string Optional persistent key
-     *                         - servers array The Memcache servers to add
-     *                         - options array The Memcache options to set
-     * @param string $context An optional cache context use as prefix key
-     * @param \Psr\Log\LoggerInterface $logger An optional logger
+     * @param  array                                       $options Initial options for the cache adapter:
+     *                                                              - persistent_id string Optional persistent key
+     *                                                              - servers array The Memcache servers to add
+     *                                                              - options array The Memcache options to set
+     * @param  string                                      $context An optional cache context use as prefix key
+     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
      * @throws \BackBuilder\Cache\Exception\CacheException Occurs if Memcache extension is not available.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -71,10 +70,10 @@ class Memcache extends AMemcache
 
     /**
      * Adds a server to the server pool
-     * @param string $host  The hostname of the memcache server
-     * @param int $port     The port on which memcache is running, 11211 by default
-     * @param int $weight   The weight of the server
-     * @return boolean      TRUE on success or FALSE on failure.
+     * @param  string  $host   The hostname of the memcache server
+     * @param  int     $port   The port on which memcache is running, 11211 by default
+     * @param  int     $weight The weight of the server
+     * @return boolean TRUE on success or FALSE on failure.
      * @link http://php.net/manual/en/memcached.addserver.php
      */
     public function addServer($host, $port, $weight = 0)
@@ -113,6 +112,4 @@ class Memcache extends AMemcache
     {
         return;
     }
-
-
 }

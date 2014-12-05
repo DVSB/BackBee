@@ -20,7 +20,6 @@ namespace BackBuilder\Config;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Config\Config;
 use BackBuilder\DependencyInjection\ContainerInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 
@@ -47,8 +46,8 @@ class ConfigProxy extends Config implements DumpableServiceProxyInterface
     /**
      * Restore current service to the dump's state
      *
-     * @param  array $dump the dump provided by DumpableServiceInterface::dump() from where we can
-     *                     restore current service
+     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                    restore current service
      */
     public function restore(ContainerInterface $container, array $dump)
     {

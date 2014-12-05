@@ -21,10 +21,8 @@
 
 namespace BackBuilder\DependencyInjection\Dumper;
 
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\DependencyInjection\Exception\ServiceNotDumpableException;
 use BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException;
-
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
@@ -79,7 +77,7 @@ class PhpArrayDumper implements DumperInterface
             'parameters'    => $this->dumpContainerParameters($options),
             'services'      => $this->dumpContainerDefinitions($options),
             'aliases'       => $this->dumpContainerAliases($options),
-            'is_compiled'   => $compiled
+            'is_compiled'   => $compiled,
         );
 
         return serialize($dumper);
@@ -88,7 +86,7 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Dumps every parameters of current container into an array and returns it
      *
-     * @param  array  $options
+     * @param array $options
      *
      * @return array contains all parameters of current container
      */
@@ -100,7 +98,7 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Dumps every container definitions into array
      *
-     * @param  array $options
+     * @param array $options
      *
      * @return array contains every container definitions converted to array
      */
@@ -118,7 +116,7 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Dumps every container aliases into array
      *
-     * @param  array $options
+     * @param array $options
      *
      * @return array contains container aliases
      */
@@ -135,7 +133,7 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Convert a single definition entity into array
      *
-     * @param  Definition $definition the definition to convert
+     * @param Definition $definition the definition to convert
      *
      * @return array the definition converted into array
      */
@@ -166,7 +164,7 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Convert a synthetic definition entity into a synthetic definition array
      *
-     * @param  Definition $definition the definition to convert
+     * @param Definition $definition the definition to convert
      *
      * @return array the synthetic definition array
      */
@@ -178,8 +176,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition class from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionClass(Definition $definition, array &$definition_array)
     {
@@ -191,8 +189,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition arguments from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionArguments(Definition $definition, array &$definition_array)
     {
@@ -204,8 +202,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition factory class from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionFactoryClass(Definition $definition, array &$definition_array)
     {
@@ -217,8 +215,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition factory service from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionFactoryService(Definition $definition, array &$definition_array)
     {
@@ -230,8 +228,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition factory method from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionFactoryMethod(Definition $definition, array &$definition_array)
     {
@@ -245,14 +243,14 @@ class PhpArrayDumper implements DumperInterface
      * won't do anything; it only converts Symfony\Component\DependencyInjection\Reference into
      * string
      *
-     * @param  mixed          $argument the argument we may do conversion
+     * @param mixed $argument the argument we may do conversion
      *
      * @return boolean|string the argument in acceptable type
      */
     private function convertArgument($argument)
     {
         if (is_object($argument) && is_a($argument, 'Symfony\Component\DependencyInjection\Reference')) {
-            $argument = '@' . $argument->__toString();
+            $argument = '@'.$argument->__toString();
         }
 
         return $argument;
@@ -261,14 +259,14 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Hydrate definition tags from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionTags(Definition $definition, array &$definition_array)
     {
         foreach ($definition->getTags() as $key => $tag) {
             $definition_tag = array(
-                'name' => $key
+                'name' => $key,
             );
 
             foreach (array_shift($tag) as $key => $option) {
@@ -282,8 +280,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Hydrate definition array method calls with definition entity
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionMethodCalls(Definition $definition, array &$definition_array)
     {
@@ -310,8 +308,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition array method calls with definition entity
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionConfigurator(Definition $definition, array &$definition_array)
     {
@@ -327,8 +325,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition array method calls with definition entity
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionParent(Definition $definition, array &$definition_array)
     {
@@ -340,8 +338,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition scope property from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionScopeProperty(Definition $definition, array &$definition_array)
     {
@@ -353,8 +351,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition public property from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionPublicProperty(Definition $definition, array &$definition_array)
     {
@@ -366,8 +364,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition abstract property from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionAbstractProperty(Definition $definition, array &$definition_array)
     {
@@ -379,8 +377,8 @@ class PhpArrayDumper implements DumperInterface
     /**
      * Try to hydrate definition file property from entity into definition array
      *
-     * @param  Definition $definition       the definition to convert
-     * @param  array      $definition_array the definition array (passed by reference)
+     * @param Definition $definition       the definition to convert
+     * @param array      $definition_array the definition array (passed by reference)
      */
     private function hydrateDefinitionFileProperty(Definition $definition, array &$definition_array)
     {
@@ -392,11 +390,11 @@ class PhpArrayDumper implements DumperInterface
     /**
      * [tryHydrateDefinitionForRestoration description]
      *
-     * @param  [type]     $id               [description]
-     * @param  Definition $definition       [description]
-     * @param  array      $definition_array [description]
+     * @param [type]     $id               [description]
+     * @param Definition $definition       [description]
+     * @param array      $definition_array [description]
      *
-     * @return [type]                       [description]
+     * @return [type] [description]
      */
     private function tryHydrateDefinitionForRestoration($id, Definition $definition, array &$definition_array)
     {
@@ -426,7 +424,7 @@ class PhpArrayDumper implements DumperInterface
             $definition_array['calls'] = array();
             $definition_array['calls'][] = array('restore', array(
                 '@service_container',
-                $service->dump()
+                $service->dump(),
             ));
         }
     }

@@ -2,7 +2,7 @@
 
 namespace BackBuilder\TestUnit\BackBuilder\Util;
 
-use \BackBuilder\Util\ArrayPaginator;
+use BackBuilder\Util\ArrayPaginator;
 
 /**
  * @category    BackBuilder
@@ -10,13 +10,14 @@ use \BackBuilder\Util\ArrayPaginator;
  * @copyright   Lp digital system
  * @author      Flavia Fodor
  */
-class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase {
-
+class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase
+{
     /**
      *
      * @covers \BackBuilder\Util\ArrayPaginator::getIterator
      */
-    public function testGetIterator() {
+    public function testGetIterator()
+    {
         $obj = ArrayPaginator::paginate(array('k1' => 'a', 'k2' => 'b', 'k3' => 'c', 'k4' => 'd', 'k5' => 'e'), 2, 1);
         $it = $obj->getIterator();
 
@@ -33,7 +34,8 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase {
      *
      * @covers \BackBuilder\Util\ArrayPaginator::count
      */
-    public function testCount() {
+    public function testCount()
+    {
         $obj = ArrayPaginator::paginate(array('k1' => 'a', 'k2' => 'b', 'k3' => 'c', 'k4' => 'd', 'k5' => 'e'), 2, 1);
         $this->assertEquals(5, $obj->count());
 
@@ -47,7 +49,8 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase {
     /**
      * @covers \BackBuilder\Util\ArrayPaginator::getNextPageNumber
      */
-    public function testGetNextPageNumber() {
+    public function testGetNextPageNumber()
+    {
         $obj = ArrayPaginator::paginate(array('k1' => 'a', 'k2' => 'b', 'k3' => 'c', 'k4' => 'd', 'k5' => 'e'), 2, 1);
         $this->assertEquals(3, $obj->getNextPageNumber());
 
@@ -67,7 +70,8 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase {
     /**
      * @covers \BackBuilder\Util\ArrayPaginator::getPreviousPageNumber
      */
-    public function testGetPreviousPageNumber() {
+    public function testGetPreviousPageNumber()
+    {
         $obj = ArrayPaginator::paginate(array('k1' => 'a', 'k2' => 'b', 'k3' => 'c', 'k4' => 'd', 'k5' => 'e'), 2, 1);
         $this->assertEquals(1, $obj->getPreviousPageNumber());
 
@@ -87,7 +91,8 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase {
     /**
      * @covers \BackBuilder\Util\ArrayPaginator::isNextPage
      */
-    public function testIsNextPage() {
+    public function testIsNextPage()
+    {
         $obj = ArrayPaginator::paginate(array('k1' => 'a', 'k2' => 'b', 'k3' => 'c', 'k4' => 'd', 'k5' => 'e'), 2, 1);
         $this->assertEquals(true, $obj->isNextPage());
 
@@ -104,7 +109,8 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase {
     /**
      * @covers \BackBuilder\Util\ArrayPaginator::isPreviousPage
      */
-    public function testIsPreviousPage() {
+    public function testIsPreviousPage()
+    {
         $obj = ArrayPaginator::paginate(array('k1' => 'a', 'k2' => 'b', 'k3' => 'c', 'k4' => 'd', 'k5' => 'e'), 2, 1);
         $this->assertEquals(true, $obj->isPreviousPage());
 
@@ -118,7 +124,8 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase {
     /**
      * @covers \BackBuilder\Util\ArrayPaginator::getCurrentPageNumber
      */
-    public function testGetCurrentPageNumber() {
+    public function testGetCurrentPageNumber()
+    {
         $obj = ArrayPaginator::paginate(array('k1' => 'a', 'k2' => 'b', 'k3' => 'c', 'k4' => 'd', 'k5' => 'e'), 2, 1);
         $this->assertEquals(2, $obj->getCurrentPageNumber());
 
@@ -128,5 +135,4 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase {
         $obj = ArrayPaginator::paginate(array('k1' => 'a', 'k2' => 'b', 'k3' => 'c', 'k4' => 'd', 'k5' => 'e'), -1, 5);
         $this->assertEquals(-1, $obj->getCurrentPageNumber());
     }
-
 }

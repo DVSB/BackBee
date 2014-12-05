@@ -22,13 +22,10 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use Doctrine\ORM\Tools\SchemaTool;
 
 /**
  * Install bundle command
@@ -51,7 +48,7 @@ class BundleInstallCommand extends ACommand
             ->addOption('force', null, InputOption::VALUE_NONE, 'The install SQL will be executed against the DB')
             ->setDescription('Installs a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> installs a bundle: 
+The <info>%command.name%</info> installs a bundle:
 
    <info>php bundle:install MyBundle</info>
 EOF
@@ -65,29 +62,27 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $name = strtr($input->getArgument('name'), '/', '\\');
-        
+
         $force = $input->getOption('force');
-        
+
         $bbapp = $this->getContainer()->get('bbapp');
-        
+
         $bundle = $bbapp->getBundle($name);
         /* @var $bundle \BackBuilder\Bundle\ABundle */
-        
-        if(null === $bundle) {
+
+        if (null === $bundle) {
             throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
         }
-        
-        
-        $output->writeln('Installing bundle: ' . $bundle->getId() . '');
-        
+
+        $output->writeln('Installing bundle: '.$bundle->getId().'');
+
         $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
-        
-        if($force) {
+
+        if ($force) {
             $output->writeln('<info>Running install</info>');
             $bundle->install();
-        } 
-        
-        $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
+        }
+
+        $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
     }
-    
 }

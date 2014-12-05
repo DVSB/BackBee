@@ -20,7 +20,6 @@ namespace BackBuilder\Config;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Config\Configurator;
 use BackBuilder\Config\Exception\PersistorListNotFoundException;
 use BackBuilder\Config\Persistor\PersistorInterface;
 use BackBuilder\Exception\BBException;
@@ -76,9 +75,9 @@ class Persistor
     /**
      * Persist current settings $config
      *
-     * @param  Config  $config                 the config to persist
-     * @param  boolean $enable_config_per_site if true we only persist difference between current config settings
-     *                                         and default config settings; default: false
+     * @param Config  $config                 the config to persist
+     * @param boolean $enable_config_per_site if true we only persist difference between current config settings
+     *                                        and default config settings; default: false
      */
     public function persist(Config $config, $enable_config_per_site = self::DEFAULT_CONFIG_PER_SITE_VALUE)
     {
@@ -107,8 +106,8 @@ class Persistor
     /**
      * Tries to persist config by calling every declared persistors; it will stop on first success
      *
-     * @param  Config $config            the concern this persist action concern
-     * @param  array  $config_to_persist settings to persist for provided config
+     * @param Config $config            the concern this persist action concern
+     * @param array  $config_to_persist settings to persist for provided config
      */
     private function doPersist(Config $config, array $config_to_persist)
     {
@@ -125,7 +124,7 @@ class Persistor
      *
      * @throws PersistorListNotFoundException occurs if there is no persistor list in config.yml, section: config
      *                                        it also occurs if config section does not exist in application config.yml
-     * @throws InvalidArgumentException raises if one of declared persistors does not implement PersistorInterface
+     * @throws InvalidArgumentException       raises if one of declared persistors does not implement PersistorInterface
      */
     private function loadPersistors()
     {
@@ -141,7 +140,7 @@ class Persistor
                 $persistor = new $persistor_classname($this->application);
                 if (false === ($persistor instanceof PersistorInterface)) {
                     throw new InvalidArgumentException(
-                        get_class($persistor) . ' must implements BackBuilder\Config\Persistor\PersistorInterface'
+                        get_class($persistor).' must implements BackBuilder\Config\Persistor\PersistorInterface'
                     );
                 }
 
@@ -156,7 +155,7 @@ class Persistor
      * Add or update 'override_site' section to provided $config with difference between current config settings
      * and config default settings
      *
-     * @param  Config $config the config we want to add/update its 'override_site' section
+     * @param Config $config the config we want to add/update its 'override_site' section
      */
     private function updateConfigOverridedSectionsForSite(Config $config)
     {

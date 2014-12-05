@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,7 +29,6 @@ namespace BackBuilder\Util;
  */
 class Parameter
 {
-
     /**
      * replaces the values of the first array with the same values from all the following arrays.
      * If a key from the first array exists in the second array, its value will be replaced by the value from the second array.
@@ -37,9 +36,9 @@ class Parameter
      * Mutable specify the value of the first array can be overloaded.
      *
      * @access public
-     * @param array $array1
-     * @param array $array2
-     * @param array $mutableField = false
+     * @param  array $array1
+     * @param  array $array2
+     * @param  array $mutableField = false
      * @return array the cleaned param
      */
     public static function paramsReplaceRecursive(array $array1, $array2, $mutableField = false)
@@ -69,7 +68,7 @@ class Parameter
                 }
             }
         }
+
         return $array1;
     }
-
 }

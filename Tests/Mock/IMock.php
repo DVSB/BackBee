@@ -9,5 +9,4 @@ namespace BackBuilder\Tests\Mock;
  */
 interface IMock
 {
-
 }

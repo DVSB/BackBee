@@ -28,8 +28,7 @@ if (!is_readable($filename)) {
 }
 
 if ($ok != true) {
-	echo 'The *.php files in /app/ needs to be readable.';
+    echo 'The *.php files in /app/ needs to be readable.';
 } else {
-	echo 'OK';
+    echo 'OK';
 }
-?>

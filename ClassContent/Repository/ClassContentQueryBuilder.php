@@ -22,7 +22,6 @@ namespace BackBuilder\ClassContent\Repository;
 
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Site\Site;
-
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query\Expr\Func;
@@ -48,7 +47,7 @@ class ClassContentQueryBuilder extends QueryBuilder
      */
     private $classmap = array(
         'IdxSiteContent' => 'BackBuilder\ClassContent\Indexes\IdxSiteContent',
-        'AClassContent' => 'BackBuilder\ClassContent\AClassContent'
+        'AClassContent' => 'BackBuilder\ClassContent\AClassContent',
     );
 
     /**
@@ -117,7 +116,7 @@ class ClassContentQueryBuilder extends QueryBuilder
                ->setParameters(array(
                     "selectedPageRoot" => $page->getRoot(),
                     "selectedPageLeftnode" => $page->getLeftnode(),
-                    "selectedPageRightnode" => $page->getRightnode()
+                    "selectedPageRightnode" => $page->getRightnode(),
                 ));
         }
     }
@@ -146,7 +145,7 @@ class ClassContentQueryBuilder extends QueryBuilder
         if (is_array($classes) && count($classes) !== 0) {
             $filters = array();
             foreach ($classes as $class) {
-                $filters[] = 'cc INSTANCE OF \'' . $class . '\'';
+                $filters[] = 'cc INSTANCE OF \''.$class.'\'';
             }
             $filter = implode(" OR ", $filters);
 
@@ -180,6 +179,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     {
         $this->setFirstResult($start)
              ->setMaxResults($limit);
+
         return new Paginator($this);
     }
 
@@ -189,7 +189,7 @@ class ClassContentQueryBuilder extends QueryBuilder
             $this->andWhere(
                 $this->expr()->like(
                     'cc._label',
-                    $this->expr()->literal('%' . $expression . '%')
+                    $this->expr()->literal('%'.$expression.'%')
                 )
             );
         }

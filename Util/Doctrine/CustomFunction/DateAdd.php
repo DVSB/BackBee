@@ -21,10 +21,10 @@
 
 namespace BackBuilder\Util\Doctrine\CustomFunction;
 
-use Doctrine\ORM\Query\Lexer,
-Doctrine\ORM\Query\Parser,
-Doctrine\ORM\Query\SqlWalker,
-Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\Parser;
+use Doctrine\ORM\Query\SqlWalker;
+use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 
 /**
  * Utility class to know supported features by the current driver
@@ -64,9 +64,9 @@ class DateAdd extends FunctionNode
 
     public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
-        return 'DATE_ADD(' .
-            $this->firstDateExpression->dispatch($sqlWalker) . ', INTERVAL ' .
-            $this->intervalExpression->dispatch($sqlWalker) . ' ' . $this->unit .
+        return 'DATE_ADD('.
+            $this->firstDateExpression->dispatch($sqlWalker).', INTERVAL '.
+            $this->intervalExpression->dispatch($sqlWalker).' '.$this->unit.
         ')';
     }
 }

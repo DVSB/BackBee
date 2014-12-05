@@ -22,14 +22,10 @@
 namespace BackBuilder\Command\Tests;
 
 use BackBuilder\Tests\TestCase;
-
 use Symfony\Component\Console\Tester\CommandTester;
 use BackBuilder\Console\Console;
-
 use BackBuilder\Command\AclLoadCommand;
-
 use org\bovigo\vfs\vfsStream;
-
 use BackBuilder\Security\Group;
 
 /**
@@ -58,7 +54,6 @@ class AclLoadCommandTest extends TestCase
         $this->bbapp->getEntityManager()->persist($superAdminGroup);
 
         $this->getBBApp()->getEntityManager()->flush();
-
     }
 
     /**
@@ -81,19 +76,18 @@ groups:
     sites:
       resources: all
       actions: all
-            '
+            ',
         ));
 
         $commandTester->execute(
             array(
                 'command' => $command->getName(),
-                'file' => 'vfs://test_dir/file.xml'
+                'file' => 'vfs://test_dir/file.xml',
             )
         );
 
         $this->assertContains('Processing file: vfs://test_dir/file.xml', $commandTester->getDisplay());
     }
-
 
     /**
      * @expectedException \Symfony\Component\Yaml\Exception\ParseException
@@ -108,17 +102,16 @@ groups:
         $command = $application->find('acl:load');
         $commandTester = new CommandTester($command);
 
-
         $this->_mock_basedir = vfsStream::setup('test_dir', 0777, array(
             'fileInvalid.xml' => '
 incorrectly formatted
-yml file'
+yml file',
         ));
 
         $commandTester->execute(
             array(
                 'command' => $command->getName(),
-                'file' => 'vfs://test_dir/fileInvalid.xml'
+                'file' => 'vfs://test_dir/fileInvalid.xml',
             )
         );
     }
@@ -141,7 +134,7 @@ yml file'
         $commandTester->execute(
             array(
                 'command' => $command->getName(),
-                'file' => $file
+                'file' => $file,
             )
         );
     }

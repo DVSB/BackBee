@@ -33,7 +33,7 @@ interface DirectoryInterface
     /**
      * [getDirectories description]
      * @param  BackBuilderIApplication $application [description]
-     * @return [type]                               [description]
+     * @return [type]                  [description]
      */
     public static function getDirectories(\BackBuilder\IApplication $application);
 }

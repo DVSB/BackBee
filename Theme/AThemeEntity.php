@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,7 +29,6 @@ namespace BackBuilder\Theme;
  */
 abstract class AThemeEntity implements IThemeEntity
 {
-
     /**
      * Unique identifier of the object
      * @var string
@@ -142,91 +141,98 @@ abstract class AThemeEntity implements IThemeEntity
     /**
      * Set the theme Unique identifier
      *
-     * @param string $uid
+     * @param  string $uid
      * @return Theme
      * @codeCoverageIgnore
      */
     public function setUid($uid)
     {
         $this->_uid = $uid;
+
         return $this;
     }
 
     /**
      * Set the theme site identifier
      *
-     * @param string $site_uid
+     * @param  string $site_uid
      * @return Theme
      * @codeCoverageIgnore
      */
     public function setSiteUid($site_uid)
     {
         $this->_site_uid = $site_uid;
+
         return $this;
     }
 
     /**
      * Set the theme site identifier
      *
-     * @param string $site_uid
+     * @param  string $site_uid
      * @return Theme
      * @codeCoverageIgnore
      */
     public function setSite_uid($site_uid)
     {
         $this->_site_uid = $site_uid;
+
         return $this;
     }
 
     /**
      * Set the theme name
      *
-     * @param string $name
+     * @param  string $name
      * @return Theme
      * @codeCoverageIgnore
      */
     public function setName($name)
     {
         $this->_name = $name;
+
         return $this;
     }
 
     /**
      * Set the theme description
      *
-     * @param string $description
+     * @param  string $description
      * @return Theme
      * @codeCoverageIgnore
      */
     public function setDescription($description)
     {
         $this->_description = $description;
+
         return $this;
     }
 
     /**
      * Set the theme grafic representation
      *
-     * @param string $file
+     * @param  string $file
      * @return Theme
      * @codeCoverageIgnore
      */
     public function setScreenshot($file)
     {
         $this->_screenshot = $file;
+
         return $this;
     }
 
     /**
      * Set the theme folder name
      *
-     * @param string $folder_name
+     * @param  string $folder_name
      * @return Theme
      * @codeCoverageIgnore
      */
     public function setFolder($folder_name)
     {
         $this->_folder_name = $folder_name;
+
         return $this;
     }
 
@@ -244,14 +250,14 @@ abstract class AThemeEntity implements IThemeEntity
     /**
      * Set the theme architecture
      *
-     * @param array $folder_architecture
+     * @param  array $folder_architecture
      * @return Theme
      * @codeCoverageIgnore
      */
     public function setArchitecture(array $folder_architecture)
     {
         $this->_architecture = json_encode($folder_architecture);
+
         return $this;
     }
-
 }

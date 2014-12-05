@@ -25,7 +25,6 @@ use BackBuilder\BBApplication;
 use BackBuilder\FrontController\Exception\FrontControllerException;
 use BackBuilder\Util\File;
 use BackBuilder\Util\MimeType;
-
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -58,7 +57,7 @@ class MediaController
     /**
      * Handles a media file request
      *
-     * @param string $filename The media file to provide
+     * @param  string                   $filename The media file to provide
      * @throws FrontControllerException
      *
      * @return Response
@@ -76,9 +75,9 @@ class MediaController
 
         $matches = array();
         if (preg_match('/([a-f0-9]{3})\/([a-f0-9]{29})\/(.*)\.([^\.]+)/', $filename, $matches)) {
-            $filename = $matches[1] . '/' . $matches[2] . '.' . $matches[4];
+            $filename = $matches[1].'/'.$matches[2].'.'.$matches[4];
         } elseif (preg_match('/([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})\/.*\.([^\.]+)/', $filename, $matches)) {
-            $filename = $matches[1] . $matches[2] . $matches[3] . $matches[4] . $matches[5] . $matches[6] . $matches[7] . $matches[8] . '.' . $matches[9];
+            $filename = $matches[1].$matches[2].$matches[3].$matches[4].$matches[5].$matches[6].$matches[7].$matches[8].'.'.$matches[9];
             File::resolveMediapath($filename, null, array('include_path' => $includePath));
         }
 
@@ -90,14 +89,13 @@ class MediaController
 
             throw new FrontControllerException(sprintf(
                 'The file `%s` can not be found (referer: %s).',
-                $request->getHost() . '/' . $request->getPathInfo(),
+                $request->getHost().'/'.$request->getPathInfo(),
                 $request->server->get('HTTP_REFERER')
             ), FrontControllerException::NOT_FOUND);
         }
 
         return $this->createMediaResponse($filename);
     }
-
 
     /**
      * Handles an upload by RPC request
@@ -121,7 +119,6 @@ class MediaController
         return $response;
     }
 
-
     /**
      * Create Response object for media
      *
@@ -140,8 +137,8 @@ class MediaController
 
         $response->setCache(array(
             'etag'          => basename($filename),
-            'last_modified' => new \DateTime('@' . $filestats['mtime']),
-            'public'        => 'public'
+            'last_modified' => new \DateTime('@'.$filestats['mtime']),
+            'public'        => 'public',
         ));
 
         $response->setContent(file_get_contents($filename));

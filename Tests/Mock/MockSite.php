@@ -2,7 +2,6 @@
 namespace BackBuilder\Tests\Mock;
 
 use BackBuilder\Site\Site;
-
 use Faker\Factory;
 
 /**

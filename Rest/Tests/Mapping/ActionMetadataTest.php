@@ -22,14 +22,6 @@
 namespace BackBuilder\Rest\Tests\Mapping;
 
 use BackBuilder\Tests\TestCase;
-
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\Serializer\Encoder\JsonEncoder;
-
-use Doctrine\Common\Annotations\AnnotationRegistry,
-    Doctrine\Common\Annotations\AnnotationReader;
-
 use BackBuilder\Rest\Mapping\ActionMetadata;
 
 /**
@@ -44,7 +36,6 @@ use BackBuilder\Rest\Mapping\ActionMetadata;
  */
 class ActionMetadataTest extends TestCase
 {
-
     /**
      * @covers ::__construct
      */
@@ -77,7 +68,6 @@ class ActionMetadataTest extends TestCase
         $this->assertEquals([], $actionMetadata->param_converter_bag);
         $this->assertEquals([], $actionMetadata->security);
 
-
         $this->assertEquals(serialize([
             'BackBuilder\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController',
             'customPaginationAction',
@@ -88,9 +78,8 @@ class ActionMetadataTest extends TestCase
             $actionMetadata->max_count,
             $actionMetadata->min_count,
             [],
-            []
+            [],
         ]), $actionMetadata->serialize());
-
     }
 
     /**
@@ -108,7 +97,7 @@ class ActionMetadataTest extends TestCase
             500,
             2,
             [],
-            []
+            [],
         ]);
 
         $ref = new \ReflectionClass('\BackBuilder\Rest\Mapping\ActionMetadata');
@@ -126,9 +115,5 @@ class ActionMetadataTest extends TestCase
         $this->assertEquals(2, $actionMetadata->min_count);
         $this->assertEquals([], $actionMetadata->param_converter_bag);
         $this->assertEquals([], $actionMetadata->security);
-
     }
-
-
-
 }

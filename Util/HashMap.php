@@ -73,7 +73,7 @@ class HashMap implements \IteratorAggregate, \Countable
     /**
      * Gets a parameter by name.
      *
-     * @param string $key   The key
+     * @param string $key     The key
      * @param mixed  $default The default value
      */
     public function get($key, $default = null)

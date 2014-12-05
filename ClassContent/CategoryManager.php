@@ -22,7 +22,6 @@
 namespace BackBuilder\ClassContent;
 
 use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
-use BackBuilder\Cache\ACache;
 use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Util\File;
 
@@ -43,6 +42,10 @@ class CategoryManager
      */
     private $categories;
 
+    /**
+     * Categories common options (thumbnail_url_pattern, etc.)
+     * @var array
+     */
     private $options;
 
     /**
@@ -56,7 +59,7 @@ class CategoryManager
         $this->options = array(
             'thumbnail_url_pattern' => $application->getRouting()->getUrlByRouteName(
                 'bb.classcontent_thumbnail', array(
-                    'filename' => '%s.' . $application->getContainer()->getParameter('classcontent_thumbnail.extension')
+                    'filename' => '%s.'.$application->getContainer()->getParameter('classcontent_thumbnail.extension'),
                 )
             ),
         );
@@ -67,7 +70,7 @@ class CategoryManager
     /**
      * Returns category by name or id
      *
-     * @param  string $v category name or id
+     * @param string $v category name or id
      *
      * @return Category|null return category object if provided name/id exists, else null
      */
@@ -91,7 +94,7 @@ class CategoryManager
     /**
      * Parse classcontent directories and hydrate categories attribute
      *
-     * @param  array $directories classcontent directories
+     * @param array $directories classcontent directories
      */
     private function loadCategoriesFromClassContentDirectories($directories)
     {
@@ -102,7 +105,7 @@ class CategoryManager
                     return str_replace(
                         DIRECTORY_SEPARATOR,
                         NAMESPACE_SEPARATOR,
-                        'BackBuilder\ClassContent' . str_replace(array($directory, '.yml'), array('', ''), $path)
+                        'BackBuilder\ClassContent'.str_replace(array($directory, '.yml'), array('', ''), $path)
                     );
                 },
                 File::getFilesRecursivelyByExtension($directory, 'yml')
@@ -115,14 +118,15 @@ class CategoryManager
                 if (class_exists($class)) {
                     $this->buildCategoryFromClassContent(new $class());
                 }
-            } catch (ClassNotFoundException $e) { /* nothing to do */ }
+            } catch (ClassNotFoundException $e) { /* nothing to do */
+            }
         }
     }
 
     /**
      * Build and/or hydrate Category object with provided classcontent
      *
-     * @param  AClassContent $content
+     * @param AClassContent $content
      */
     private function buildCategoryFromClassContent(AClassContent $content)
     {
@@ -146,7 +150,7 @@ class CategoryManager
     /**
      * Build id for category by sluggify its name
      *
-     * @param  string $name category's name
+     * @param string $name category's name
      *
      * @return string
      */

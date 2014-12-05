@@ -2,7 +2,7 @@
 
 namespace BackBuilder\TestUnit\BackBuilder\Util;
 
-use \BackBuilder\Util\Arrays;
+use BackBuilder\Util\Arrays;
 
 /**
  * @category    BackBuilder
@@ -12,7 +12,6 @@ use \BackBuilder\Util\Arrays;
  */
 class ArraysTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @var array
      */
@@ -26,9 +25,9 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
         $this->_mock = array(
             'key' => array(
                 'subkey' => array(
-                    'subsubkey' => 'value'
-                )
-            )
+                    'subsubkey' => 'value',
+                ),
+            ),
         );
     }
 
@@ -76,10 +75,10 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
 
         $result = array(
             'subkey' => array(
-                'subsubkey' => 'value'
-        ));
+                'subsubkey' => 'value',
+        ), );
         $this->assertEquals($result, Arrays::get($this->_mock, 'key'));
-    } 
+    }
 
     /**
      * @covers \BackBuilder\Util\Arrays::get
@@ -125,7 +124,7 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
                 'id' => 5623,
                 'first_name' => 'Peter',
                 'last_name' => 'Doe',
-            )
+            ),
         );
 
         $this->assertEquals(array(
@@ -148,7 +147,7 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
                 'id' => 5623,
                 'first_name' => 'Peter',
                 'last_name' => 'Doe',
-            )
+            ),
                 ), Arrays::array_column($mock));
         $this->assertEquals(array('John', 'Sally', 'Jane', 'Peter'), Arrays::array_column($mock, 'first_name'));
         $this->assertEquals(array(2135 => 'John', 3245 => 'Sally', 5342 => 'Jane', 5623 => 'Peter'), Arrays::array_column($mock, 'first_name', 'id'));
@@ -172,7 +171,7 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
                 'id' => 5623,
                 'first_name' => 'Peter',
                 'last_name' => 'Doe',
-            )
-                ), Arrays::array_column($mock, null, 'id'));    }
-
+            ),
+                ), Arrays::array_column($mock, null, 'id'));
+    }
 }

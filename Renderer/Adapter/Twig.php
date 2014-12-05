@@ -20,7 +20,6 @@ namespace BackBuilder\Renderer\Adapter;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Renderer\Adapter\TwigLoaderFilesystem;
 use BackBuilder\Renderer\ARenderer;
 use BackBuilder\Renderer\Exception\RendererException;
 use BackBuilder\Renderer\ARendererAdapter;
@@ -35,7 +34,6 @@ use BackBuilder\Renderer\ARendererAdapter;
  */
 class Twig extends ARendererAdapter
 {
-
     /**
      * @var BackBuilder\Renderer\Adapter\TwigLoaderFilesystem
      */
@@ -53,7 +51,7 @@ class Twig extends ARendererAdapter
     protected $extensions = array(
         '.twig',
         '.html.twig',
-        '.xml.twig'
+        '.xml.twig',
     );
 
     /**
@@ -76,7 +74,7 @@ class Twig extends ARendererAdapter
             $this->twig->addExtension(new \Twig_Extension_Debug());
         } elseif (false === $application->isClientSAPI()) {
             $this->twig->enableAutoReload();
-            $cache_directory = $application->getCacheDir() . DIRECTORY_SEPARATOR . 'twig';
+            $cache_directory = $application->getCacheDir().DIRECTORY_SEPARATOR.'twig';
             $this->setTwigCache($cache_directory);
         }
     }
@@ -98,7 +96,7 @@ class Twig extends ARendererAdapter
      */
     public function setTwigCache($cache_directory)
     {
-        if(
+        if (
             false === is_dir($cache_directory)
             && (false === is_writable(dirname($cache_directory)) || false === @mkdir($cache_directory, 0755))
         ) {
@@ -182,9 +180,8 @@ class Twig extends ARendererAdapter
             throw $fe;
         } catch (\Exception $e) {
             throw new RendererException(
-                $e->getMessage() . ' in ' . $filename, RendererException::RENDERING_ERROR, $e
+                $e->getMessage().' in '.$filename, RendererException::RENDERING_ERROR, $e
             );
-
         }
 
         return $render;
@@ -192,12 +189,11 @@ class Twig extends ARendererAdapter
 
     /**
      *
-     * @param string $filename
+     * @param  string                  $filename
      * @return \Twig_TemplateInterface
      */
     public function loadTemplate($filename)
     {
         return $this->twig->loadTemplate($filename);
     }
-
 }

@@ -25,7 +25,6 @@ use BackBuilder\Config\Config;
 use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
 use BackBuilder\Routing\RouteCollection;
-
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
@@ -185,9 +184,9 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getConfigDirectory()
     {
-        $directory = $this->base_directory . DIRECTORY_SEPARATOR . BundleInterface::CONFIG_DIRECTORY_NAME;
+        $directory = $this->base_directory.DIRECTORY_SEPARATOR.BundleInterface::CONFIG_DIRECTORY_NAME;
         if (false === is_dir($directory)) {
-            $directory = $this->base_directory . DIRECTORY_SEPARATOR . BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
+            $directory = $this->base_directory.DIRECTORY_SEPARATOR.BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
         }
 
         return $directory;
@@ -335,7 +334,7 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getObjectIdentifier()
     {
-        return $this->getType() . '(' . $this->getIdentifier() . ')';
+        return $this->getType().'('.$this->getIdentifier().')';
     }
 
     /**
@@ -393,14 +392,14 @@ abstract class AbstractBaseBundle implements BundleInterface
     /**
      * Returns the associated callback if "controller name/action name" couple is valid
      *
-     * @param  string $controller_name the controller name (ex.: BackBuilder\FrontController\FrontController => front)
-     * @param  string $action_name     the action name (ex.:)
+     * @param string $controller_name the controller name (ex.: BackBuilder\FrontController\FrontController => front)
+     * @param string $action_name     the action name (ex.:)
      *
      * @return callable|null the callback if there is one associated to "controller name/action name" couple, else null
      */
     public function getExposedActionCallback($controller_name, $action_name)
     {
-        $unique_name = $controller_name . '_' . $action_name;
+        $unique_name = $controller_name.'_'.$action_name;
 
         return array_key_exists($unique_name, $this->exposed_actions_callbacks)
             ? $this->exposed_actions_callbacks[$unique_name]
@@ -418,7 +417,7 @@ abstract class AbstractBaseBundle implements BundleInterface
             foreach ((array) $this->getProperty('exposed_actions') as $controller_id => $actions) {
                 if (false === $container->has($controller_id)) {
                     throw new \InvalidArgumentException(
-                        "Exposed controller with id `$controller_id` not found for " . $this->getId()
+                        "Exposed controller with id `$controller_id` not found for ".$this->getId()
                     );
                 }
 
@@ -431,8 +430,8 @@ abstract class AbstractBaseBundle implements BundleInterface
     /**
      * Format a valid map between controller and actions and hydrate
      *
-     * @param  BundleExposedControllerInterface $controller
-     * @param  array                            $actions
+     * @param BundleExposedControllerInterface $controller
+     * @param array                            $actions
      */
     private function formatAndInjectExposedAction($controller, $actions)
     {
@@ -450,7 +449,7 @@ abstract class AbstractBaseBundle implements BundleInterface
         foreach ($actions as $action) {
             if (method_exists($controller, $action)) {
                 $action_id = str_replace('action', '', strtolower($action));
-                $unique_name = $controller_id . '_' . $action_id;
+                $unique_name = $controller_id.'_'.$action_id;
 
                 $this->exposed_actions_callbacks[$unique_name] = array($controller, $action);
                 $this->exposed_actions[$controller_id]['actions'][] = $action_id;

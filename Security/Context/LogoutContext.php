@@ -2,9 +2,8 @@
 
 namespace BackBuilder\Security\Context;
 
-use BackBuilder\Security\Listeners\LogoutListener,
-    BackBuilder\Security\Logout\LogoutSuccessHandler;
-
+use BackBuilder\Security\Listeners\LogoutListener;
+use BackBuilder\Security\Logout\LogoutSuccessHandler;
 use Symfony\Component\Security\Http\HttpUtils;
 
 /**
@@ -29,6 +28,7 @@ class LogoutContext extends AbstractContext implements ContextInterface
                 $this->setHandlers($handlers);
             }
         }
+
         return array();
     }
 

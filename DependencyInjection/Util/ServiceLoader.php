@@ -23,7 +23,6 @@ namespace BackBuilder\DependencyInjection\Util;
 
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\DependencyInjection\ContainerBuilder;
-
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -41,10 +40,10 @@ class ServiceLoader
     /**
      * Load services from yaml file into your container
      *
-     * @param  Container     $container        the container we want to load services into
-     * @param  string|array  $dir              directory (or directories) in where we can find services files
-     * @param  string|null   $service_filename define the service's filename we want to load,
-     *                                         default: ContainerBuilder::SERVICE_FILENAME
+     * @param Container    $container        the container we want to load services into
+     * @param string|array $dir              directory (or directories) in where we can find services files
+     * @param string|null  $service_filename define the service's filename we want to load,
+     *                                       default: ContainerBuilder::SERVICE_FILENAME
      */
     public static function loadServicesFromYamlFile(Container $container, $dir, $service_filename = null)
     {
@@ -52,16 +51,16 @@ class ServiceLoader
             $service_filename = ContainerBuilder::SERVICE_FILENAME;
         }
 
-        (new YamlFileLoader($container, new FileLocator((array) $dir)))->load($service_filename . '.yml');
+        (new YamlFileLoader($container, new FileLocator((array) $dir)))->load($service_filename.'.yml');
     }
 
     /**
      * Load services from xml file into your container
      *
-     * @param  Container     $container the container we want to load services into
-     * @param  string|array  $dir       directory (or directories) in where we can find services files
-     * @param  string|null   $service_filename define the service's filename we want to load,
-     *                                         default: ContainerBuilder::SERVICE_FILENAME
+     * @param Container    $container        the container we want to load services into
+     * @param string|array $dir              directory (or directories) in where we can find services files
+     * @param string|null  $service_filename define the service's filename we want to load,
+     *                                       default: ContainerBuilder::SERVICE_FILENAME
      */
     public static function loadServicesFromXmlFile(Container $container, $dir, $service_filename = null)
     {
@@ -69,6 +68,6 @@ class ServiceLoader
             $service_filename = ContainerBuilder::SERVICE_FILENAME;
         }
 
-        (new XmlFileLoader($container, new FileLocator((array) $dir)))->load($service_filename . '.xml');
+        (new XmlFileLoader($container, new FileLocator((array) $dir)))->load($service_filename.'.xml');
     }
 }

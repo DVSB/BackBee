@@ -21,8 +21,8 @@
 
 namespace BackBuilder\Security\Access;
 
-use Symfony\Component\Security\Core\Authorization\AccessDecisionManager,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
  * Class for all access decision managers that use decision voters.
@@ -35,7 +35,6 @@ use Symfony\Component\Security\Core\Authorization\AccessDecisionManager,
  */
 class DecisionManager extends AccessDecisionManager
 {
-
     /**
      * The current BackBuilder application
      * @var \BackBuilder\BBApplication
@@ -50,11 +49,11 @@ class DecisionManager extends AccessDecisionManager
 
     /**
      * Class constructor
-     * @param VoterInterface[] $voters                             An array of VoterInterface instances
-     * @param string           $strategy                           The vote strategy
-     * @param Boolean          $allowIfAllAbstainDecisions         Whether to grant access if all voters abstained or not
-     * @param Boolean          $allowIfEqualGrantedDeniedDecisions Whether to grant access if result are equals
-     * @param Boolean          $tryBBTokenOnDenied                 Allow to try BBToken in voters if access is not granted
+     * @param  VoterInterface[]          $voters                             An array of VoterInterface instances
+     * @param  string                    $strategy                           The vote strategy
+     * @param  Boolean                   $allowIfAllAbstainDecisions         Whether to grant access if all voters abstained or not
+     * @param  Boolean                   $allowIfEqualGrantedDeniedDecisions Whether to grant access if result are equals
+     * @param  Boolean                   $tryBBTokenOnDenied                 Allow to try BBToken in voters if access is not granted
      * @throws \InvalidArgumentException
      */
     public function __construct(array $voters, $strategy = 'affirmative', $allowIfAllAbstainDecisions = false, $allowIfEqualGrantedDeniedDecisions = true, $tryBBTokenOnDenied = true)
@@ -66,12 +65,13 @@ class DecisionManager extends AccessDecisionManager
 
     /**
      * Sets the current application
-     * @param \BackBuilder\BBApplication $application
+     * @param  \BackBuilder\BBApplication                   $application
      * @return \BackBuilder\Security\Access\DecisionManager
      */
     public function setApplication(\BackBuilder\BBApplication $application)
     {
         $this->_application = $application;
+
         return $this;
     }
 
@@ -93,5 +93,4 @@ class DecisionManager extends AccessDecisionManager
 
         return $result;
     }
-
 }

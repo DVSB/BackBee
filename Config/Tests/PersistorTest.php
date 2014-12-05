@@ -28,7 +28,6 @@ use BackBuilder\Config\Tests\Persistor\FakeContainerBuilder;
 use BackBuilder\DependencyInjection\Container;
 use BackBuilder\Site\Site;
 use BackBuilder\Tests\Mock\ManualBBApplication;
-
 use org\bovigo\vfs\vfsStream;
 
 /**
@@ -68,30 +67,30 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
                 'Config' => array(
                     'config.yml' => \Symfony\Component\Yaml\Yaml::dump(array(
                         'parameters' => array(
-                            'hello' => 'world'
-                        )
-                    ))
-                )
+                            'hello' => 'world',
+                        ),
+                    )),
+                ),
             ),
             'repository' => array(
                 'Config' => array(
                     'config.yml' => \Symfony\Component\Yaml\Yaml::dump(array(
                         'parameters' => array(
-                            'hello' => 'backbee'
-                        )
-                    ))
+                            'hello' => 'backbee',
+                        ),
+                    )),
                 ),
-            )
+            ),
         );
 
         vfsStream::setup('virtual_structure', 0777, $virtual_structure);
 
         // create basic manual application without context and environment
         $application = new ManualBBApplication();
-        $application->setBase_Repository(vfsStream::url('virtual_structure') . '/repository');
+        $application->setBase_Repository(vfsStream::url('virtual_structure').'/repository');
         $application->setRepository($application->getBaseRepository());
-        $application->setBB_Dir(vfsStream::url('virtual_structure') . '/backbee');
-        $application->setConfig_Dir($application->getBBDir() . '/Config');
+        $application->setBB_Dir(vfsStream::url('virtual_structure').'/backbee');
+        $application->setConfig_Dir($application->getBBDir().'/Config');
         $application->setBase_Dir(vfsStream::url('virtual_structure'));
 
         $this->configurator = new Configurator($application);
@@ -147,7 +146,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
     public function test_loadPersistors_RaiseOf_InvalidArgumentException()
     {
         $this->application->getConfig()->setSection('config', array(
-            'persistor' => 'stdClass'
+            'persistor' => 'stdClass',
         ));
 
         try {
@@ -168,7 +167,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
     public function test_updateConfigOverridedSectionsForSite_RaiseOf_BBException()
     {
         $this->application->getConfig()->setSection('config', array(
-            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor'
+            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor',
         ));
 
         try {
@@ -192,7 +191,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
         $this->application->setContainer(new Container());
         $this->application->getContainer()->set('container.builder', new FakeContainerBuilder(true));
         $this->application->getConfig()->setSection('config', array(
-            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor'
+            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor',
         ));
 
         try {
@@ -219,11 +218,11 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
         $this->application->setIs_Started(true);
 
         $this->application->getConfig()->setSection('config', array(
-            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor'
+            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor',
         ));
 
         $this->application->getConfig()->setSection('parameters', array(
-            'hello' => 'foo'
+            'hello' => 'foo',
         ));
 
         $this->application->setContainer(new Container());
@@ -240,13 +239,13 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
             'override_site' => array(
                 $site->getUid() => array(
                     'parameters' => array(
-                        'hello' => 'foo'
+                        'hello' => 'foo',
                     ),
                     'config' => array(
-                        'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor'
-                    )
-                )
-            )
+                        'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor',
+                    ),
+                ),
+            ),
         );
 
         $this->assertEquals(array_merge(

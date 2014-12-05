@@ -23,9 +23,7 @@ namespace BackBuilder\Cache\IdentifierAppender;
 
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\Renderer\IRenderer;
-
 use Doctrine\ORM\EntityManager;
-
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
@@ -84,17 +82,17 @@ class NodeAppender implements IdentifierAppenderInterface
         ) {
             switch ((string) $this->getClassContentCacheNodeParameter($renderer->getObject())) {
                 case self::SELF_NODE:
-                    $identifier .= '-' . $renderer->getCurrentPage()->getUid();
+                    $identifier .= '-'.$renderer->getCurrentPage()->getUid();
 
                     break;
                 case self::PARENT_NODE:
                     if (null !== $renderer->getCurrentPage()->getParent()) {
-                        $identifier .= '-' . $renderer->getCurrentPage()->getParent()->getUid();
+                        $identifier .= '-'.$renderer->getCurrentPage()->getParent()->getUid();
                     }
 
                     break;
                 case self::ROOT_NODE:
-                    $identifier .= '-' . $renderer->getCurrentRoot()->getUid();
+                    $identifier .= '-'.$renderer->getCurrentRoot()->getUid();
 
                 default:
                     break;
@@ -115,7 +113,7 @@ class NodeAppender implements IdentifierAppenderInterface
     /**
      * Try to extract cache node parameter from class content yaml files
      *
-     * @param  AClassContent $content the content which we want to extract cache node parameter
+     * @param AClassContent $content the content which we want to extract cache node parameter
      *
      * @return null|string return the cache node parameter if it exists, else null
      */

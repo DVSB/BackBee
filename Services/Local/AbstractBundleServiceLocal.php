@@ -32,7 +32,6 @@ namespace BackBuilder\Services\Local;
  */
 class AbstractBundleServiceLocal extends AbstractServiceLocal
 {
-
     /**
      * The id of the bundle providing services
      * @var string
@@ -61,9 +60,9 @@ class AbstractBundleServiceLocal extends AbstractServiceLocal
 
     /**
      * Sets the bundle providing services by its id
-     * @param string $bundleId
+     * @param  string                                                 $bundleId
      * @return \BackBuilder\Services\Local\AbstractBundleServiceLocal
-     * @throws \BackBuilder\Services\Exception\ServicesException Occures if the bundle is unknown or invalid
+     * @throws \BackBuilder\Services\Exception\ServicesException      Occures if the bundle is unknown or invalid
      */
     public function setBundle($bundleId = null)
     {
@@ -76,7 +75,7 @@ class AbstractBundleServiceLocal extends AbstractServiceLocal
         }
 
         $this->_bundle = $bundle;
+
         return $this;
     }
-
 }

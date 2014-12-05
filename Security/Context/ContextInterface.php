@@ -2,7 +2,6 @@
 
 namespace BackBuilder\Security\Context;
 
-use BackBuilder\Security\SecurityContext;
 
 /**
  * Description of ContextInterface
@@ -18,7 +17,7 @@ interface ContextInterface
     /**
      * Load the who depends this context.
      *
-     * @param array $config Security config section
+     * @param  array $config Security config section
      * @return array of security listeners
      */
     public function loadListeners($config);

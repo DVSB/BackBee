@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,7 +26,6 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
-
 use BackBuilder\Event\Listener\APathEnabledListener;
 
 /**
@@ -48,13 +47,13 @@ class BodyListener extends APathEnabledListener
      * @var boolean
      */
     private $throwExceptionOnUnsupportedContentType;
-   
+
     /**
      * Constructor.
      *
-     * @param IEncoderProvider $encoderProvider Provider for encoders
-     * @param boolean $throwExceptionOnUnsupportedContentType
-     * @param string $path
+     * @param IEncoderProvider $encoderProvider                        Provider for encoders
+     * @param boolean          $throwExceptionOnUnsupportedContentType
+     * @param string           $path
      */
     public function __construct(IEncoderProvider $encoderProvider, $throwExceptionOnUnsupportedContentType = false)
     {
@@ -65,26 +64,26 @@ class BodyListener extends APathEnabledListener
     /**
      * Core request handler
      *
-     * @param GetResponseEvent $event The event
+     * @param  GetResponseEvent                  $event The event
      * @throws BadRequestHttpException
      * @throws UnsupportedMediaTypeHttpException
      */
     public function onRequest(GetResponseEvent $event)
     {
         $request = $event->getRequest();
-        
+
         // skip if route does not match
-        if(false === $this->isEnabled($request) ) {
+        if (false === $this->isEnabled($request)) {
             return;
         }
-        
+
         $content = $request->getContent();
-        
-        if('' === $content) {
+
+        if ('' === $content) {
             // no content provided
             return;
         }
-        
+
         if (!count($request->request->all())
             && in_array($request->getMethod(), array('POST', 'PUT', 'PATCH', 'DELETE'))
         ) {
@@ -93,12 +92,12 @@ class BodyListener extends APathEnabledListener
             $format = null === $contentType
                 ? $request->getRequestFormat()
                 : $request->getFormat($contentType);
-            
-            
-            if(!$format) {
+
+            if (!$format) {
                 if ($this->throwExceptionOnUnsupportedContentType) {
                     throw new UnsupportedMediaTypeHttpException("Format of the request content was not recognized");
                 }
+
                 return;
             }
 
@@ -118,7 +117,7 @@ class BodyListener extends APathEnabledListener
                 if (is_array($data)) {
                     $request->request = new ParameterBag($data);
                 } else {
-                    throw new BadRequestHttpException('Invalid ' . $format . ' message received');
+                    throw new BadRequestHttpException('Invalid '.$format.' message received');
                 }
             }
         }

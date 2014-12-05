@@ -2,19 +2,19 @@
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
- * 
+ *
  * This file is part of BackBuilder5.
  *
  * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,14 +26,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
-
-use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Types\Type;
-
-use Symfony\Component\DependencyInjection\ContainerAwareInterface,
-    Symfony\Component\DependencyInjection\ContainerInterface;
-
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Doctrine data collector
@@ -54,15 +50,16 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
     public function __construct()
     {
     }
-    
+
     /**
-     * 
+     *
      * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      */
-    public function setContainer(ContainerInterface $container = null) {
+    public function setContainer(ContainerInterface $container = null)
+    {
         $this->container = $container;
     }
-    
+
     /**
      * Adds the stack logger for a connection.
      *
@@ -93,7 +90,6 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
         $errors = array();
         $entities = array();
 
-
         $entities['default'] = array();
         /** @var $factory \Doctrine\ORM\Mapping\ClassMetadataFactory */
         $factory = $this->container->get('em')->getMetadataFactory();
@@ -108,7 +104,6 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
                 $errors['default'][$class->getName()] = $classErrors;
             }
         }
-        
 
         $this->data['entities'] = $entities;
         $this->data['errors'] = $errors;
@@ -145,7 +140,7 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
 
         return $time;
     }
-    
+
     public function getEntities()
     {
         return $this->data['entities'];
@@ -164,9 +159,7 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
 
         return $this->invalidEntityCount;
     }
-    
-    
-    
+
     private function sanitizeQueries($connectionName, $queries)
     {
         foreach ($queries as $i => $query) {
@@ -175,9 +168,9 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
 
         return $queries;
     }
-    
+
     /**
-     * 
+     *
      * @inheritDoc
      */
     private function sanitizeQuery($connectionName, $query)
@@ -202,20 +195,20 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
                 $query['explainable'] = false;
             }
         }
-        
+
         $dumper = new Dumper();
-        
-        if(count($query['params']) > 0) {
+
+        if (count($query['params']) > 0) {
             $query['paramsString'] = $dumper->dump($query['params']);
         } else {
             $query['paramsString'] = null;
         }
-        
+
         $query['sqlInterpolated'] = $this->interpolateQuery($query['sql'], $query['params']);
 
         return $query;
     }
-    
+
     /**
      * Sanitizes a param.
      *
@@ -251,15 +244,15 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
 
         return array($var, true);
     }
-    
+
     /**
      * Interpolate sql query tokens
-     * 
-     * @param string $query
-     * @param array $params
+     *
+     * @param  string $query
+     * @param  array  $params
      * @return string
      */
-    private function interpolateQuery($query, array $params) 
+    private function interpolateQuery($query, array $params)
     {
         $keys = array();
         $values = $params;
@@ -275,7 +268,7 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
             if (is_array($value)) {
                 $values[$key] = implode(',', $value);
             }
-                
+
             if (is_null($value)) {
                 $values[$key] = 'NULL';
             }
@@ -287,8 +280,7 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
 
         return $query;
     }
-    
-    
+
     /**
      * {@inheritdoc}
      */
@@ -296,5 +288,4 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
     {
         return 'db';
     }
-            
 }

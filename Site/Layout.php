@@ -24,11 +24,8 @@ namespace BackBuilder\Site;
 use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
 use BackBuilder\Services\Local\IJson;
-use BackBuilder\Site\Site;
 use BackBuilder\Util\Numeric;
-
 use Doctrine\Common\Collections\ArrayCollection;
-
 use JMS\Serializer\Annotation as Serializer;
 
 /**
@@ -65,7 +62,6 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class Layout extends AObjectIdentifiable implements IJson
 {
-
     /**
      * The unique identifier.
      * @var string
@@ -147,7 +143,7 @@ class Layout extends AObjectIdentifiable implements IJson
      * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
-    
+
     /**
      * The content's parameters
      * @var array
@@ -175,14 +171,14 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Class constructor.
-     * @param string $uid The unique identifier of the layout
-     * @param array $options Initial options for the layout:
-     *                         - label      the default label
-     *                         - path       the path to the template file
+     * @param string $uid     The unique identifier of the layout
+     * @param array  $options Initial options for the layout:
+     *                        - label      the default label
+     *                        - path       the path to the template file
      */
-    public function __construct($uid = NULL, $options = NULL)
+    public function __construct($uid = null, $options = null)
     {
-        $this->_uid = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
+        $this->_uid = (is_null($uid)) ? md5(uniqid('', true)) : $uid;
         $this->_created = new \DateTime();
         $this->_modified = new \DateTime();
 
@@ -305,11 +301,11 @@ class Layout extends AObjectIdentifiable implements IJson
 
         return $this->_zones;
     }
-    
+
     /**
      * Returns defined parameters
-     * @param string $var The parameter to be return, if NULL, all parameters are returned
-     * @return mixed the parameter value or NULL if unfound
+     * @param  string $var The parameter to be return, if NULL, all parameters are returned
+     * @return mixed  the parameter value or NULL if unfound
      */
     public function getParam($var = null)
     {
@@ -318,16 +314,16 @@ class Layout extends AObjectIdentifiable implements IJson
             if (true === isset($this->_parameters[$var])) {
                 $param = $this->_parameters[$var];
             }
-        } 
-        
+        }
+
         return $param;
     }
-    
+
     /**
      * Goes all over the $param and keep looping until $pieces is empty to return
      * the values user is looking for
-     * @param  mixed $param   
-     * @param  array  $pieces 
+     * @param  mixed $param
+     * @param  array $pieces
      * @return mixed
      */
     private function _getRecursivelyParam($param, array $pieces)
@@ -338,7 +334,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
         $key = array_shift($pieces);
         if (false === isset($param[$key])) {
-            return null;
+            return;
         }
 
         return $this->_getRecursivelyParam($param[$key], $pieces);
@@ -346,7 +342,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns the zone at the index $index
-     * @param int $index
+     * @param  int                      $index
      * @return \StdClass|null
      * @throws InvalidArgumentException
      */
@@ -362,7 +358,7 @@ class Layout extends AObjectIdentifiable implements IJson
             }
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -385,23 +381,23 @@ class Layout extends AObjectIdentifiable implements IJson
                 $zones = array();
                 foreach ($this->getDataObject()->templateLayouts as $zone) {
                     $mainId = $zone->defaultContainer;
-                    $class = $zone->gridClassPrefix . $zone->gridSize;
+                    $class = $zone->gridClassPrefix.$zone->gridSize;
 
                     if (true === property_exists($zone, 'alphaClass')) {
-                        $class .= ' ' . $zone->alphaClass;
+                        $class .= ' '.$zone->alphaClass;
                     }
 
                     if (true === property_exists($zone, 'omegaClass')) {
-                        $class .= ' ' . $zone->omegaClass;
+                        $class .= ' '.$zone->omegaClass;
                     }
 
                     if (true === property_exists($zone, 'typeClass')) {
-                        $class .= ' ' . $zone->typeClass;
+                        $class .= ' '.$zone->typeClass;
                     }
 
                     $zoneNode = $mainLayoutRow->createElement('div');
                     $zoneNode->setAttribute('class', trim($class));
-                    $zones['#' . $zone->id] = $zoneNode;
+                    $zones['#'.$zone->id] = $zoneNode;
 
                     $parentNode = isset($zones[$zone->target]) ? $zones[$zone->target] : $mainNode;
                     $parentNode->appendChild($zoneNode);
@@ -434,7 +430,6 @@ class Layout extends AObjectIdentifiable implements IJson
                 if (true === property_exists($data_object, 'templateLayouts')
                         && true === is_array($data_object->templateLayouts)
                         && 0 < count($data_object->templateLayouts)) {
-
                     $this->_isValid = true;
 
                     foreach ($data_object->templateLayouts as $zone) {
@@ -457,31 +452,33 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Sets the label.
      * @codeCoverageIgnore
-     * @param string $label
+     * @param  string                   $label
      * @return \BackBuilder\Site\Layout
      */
     public function setLabel($label)
     {
         $this->_label = $label;
+
         return $this;
     }
 
     /**
      * Set the filename of the layout
      * @codeCoverageIgnore
-     * @param string $path
+     * @param  string                   $path
      * @return \BackBuilder\Site\Layout
      */
     public function setPath($path)
     {
         $this->_path = $path;
+
         return $this;
     }
 
     /**
      * Sets the data associated to the layout.
      * No validation checks are performed at this step.
-     * @param mixed $data
+     * @param  mixed                    $data
      * @return \BackBuilder\Site\Layout
      */
     public function setData($data)
@@ -503,7 +500,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Sets the data associated to the layout.
      * None validity checks are performed at this step.
-     * @param mixed $data
+     * @param  mixed                    $data
      * @return \BackBuilder\Site\Layout
      */
     public function setDataObject($data)
@@ -518,31 +515,33 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Sets the path to the layout icon.
      * @codeCoverageIgnore
-     * @param string $picpath
+     * @param  string                   $picpath
      * @return \BackBuilder\Site\Layout
      */
     public function setPicPath($picpath)
     {
         $this->_picpath = $picpath;
+
         return $this;
     }
 
     /**
      * Associates this layout to a website.
      * @codeCoverageIgnore
-     * @param \BackBuilder\Site\Site $site
+     * @param  \BackBuilder\Site\Site   $site
      * @return \BackBuilder\Site\Layout
      */
     public function setSite(Site $site)
     {
         $this->_site = $site;
+
         return $this;
     }
-    
+
     /**
      * Sets one or all parameters
-     * @param string $var the parameter name to set, if NULL all the parameters array wil be set
-     * @param mixed $values the parameter value or all the parameters if $var is NULL
+     * @param  string                   $var    the parameter name to set, if NULL all the parameters array wil be set
+     * @param  mixed                    $values the parameter value or all the parameters if $var is NULL
      * @return \BackBuilder\Site\Layout
      */
     public function setParam($var = null, $values = null)
@@ -574,7 +573,7 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Returns a contentset options according to the layout zone
-     * @param \StdClass $zone
+     * @param  \StdClass $zone
      * @return array
      */
     private function _getZoneOptions(\stdClass $zone)
@@ -583,20 +582,19 @@ class Layout extends AObjectIdentifiable implements IJson
             'parameters' => array(
                 'class' => array(
                     'type' => 'scalar',
-                    'options' => array('default' => 'row')
-                )
-            )
+                    'options' => array('default' => 'row'),
+                ),
+            ),
         );
 
         if (true === property_exists($zone, 'accept')
                 && true === is_array($zone->accept)
                 && 0 < count($zone->accept)
                 && $zone->accept[0] != '') {
-
             $options['accept'] = $zone->accept;
 
             $func = function (&$item, $key) {
-                        $item = ('' == $item) ? null : 'BackBuilder\ClassContent\\' . $item;
+                        $item = ('' == $item) ? null : 'BackBuilder\ClassContent\\'.$item;
                     };
 
             array_walk($options['accept'], $func);

@@ -21,9 +21,9 @@
 
 namespace BackBuilder\Logging;
 
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
-    Symfony\Component\Security\Acl\Domain\ObjectIdentity,
-    Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @category    BackBuilder Bundle
@@ -34,7 +34,6 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity,
  */
 class AdminLog
 {
-
     /**
      * @var string
      * @Id @Column(type="string", name="uid")
@@ -71,12 +70,13 @@ class AdminLog
      */
     protected $_created_at;
 
-    public function __construct($uid = NULL, $token = NULL)
+    public function __construct($uid = null, $token = null)
     {
-        $this->_uid = (is_null($uid)) ? md5(uniqid('', TRUE)) : $uid;
+        $this->_uid = (is_null($uid)) ? md5(uniqid('', true)) : $uid;
         $this->_created_at = new \DateTime();
-        if ($token instanceof TokenInterface)
+        if ($token instanceof TokenInterface) {
             $this->_owner = UserSecurityIdentity::fromToken($token);
+        }
     }
 
     /**
@@ -90,12 +90,13 @@ class AdminLog
 
     /**
      * Set the owner of the log
-     * @param UserInterface $user
+     * @param  UserInterface $user
      * @return AdminLog
      */
     public function setOwner(UserInterface $user)
     {
         $this->_owner = UserSecurityIdentity::fromAccount($user);
+
         return $this;
     }
 
@@ -110,12 +111,13 @@ class AdminLog
 
     /**
      * Set the controller
-     * @param string $controller
+     * @param  string   $controller
      * @return AdminLog
      */
     public function setController($controller)
     {
         $this->_controller = $controller;
+
         return $this;
     }
 
@@ -130,12 +132,13 @@ class AdminLog
 
     /**
      * Set the action call in the controller
-     * @param String $action
+     * @param  String   $action
      * @return AdminLog
      */
     public function setAction($action)
     {
         $this->_action = $action;
+
         return $this;
     }
 
@@ -150,12 +153,13 @@ class AdminLog
 
     /**
      * Set the entity call in the controller
-     * @param Object $entity
+     * @param  Object   $entity
      * @return AdminLog
      */
     public function setEntity($entity)
     {
         $this->_entity = ObjectIdentity::fromDomainObject($entity);
+
         return $this;
     }
 
@@ -167,5 +171,4 @@ class AdminLog
     {
         return $this->_created_at;
     }
-
 }

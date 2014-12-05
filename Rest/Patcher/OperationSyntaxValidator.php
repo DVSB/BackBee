@@ -20,7 +20,6 @@ namespace BackBuilder\Rest\Patcher;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Rest\Patcher\PatcherInterface;
 use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 
 /**
@@ -35,7 +34,7 @@ class OperationSyntaxValidator
     /**
      * [validate description]
      *
-     * @param  array  $operations [description]
+     * @param array $operations [description]
      *
      * @throws InvalidOperationSyntaxException
      */
@@ -67,7 +66,7 @@ class OperationSyntaxValidator
 
                     break;
                 default:
-                    throw new InvalidOperationSyntaxException('Invalid operation name: ' . $operation['op']);
+                    throw new InvalidOperationSyntaxException('Invalid operation name: '.$operation['op']);
             }
         }
     }

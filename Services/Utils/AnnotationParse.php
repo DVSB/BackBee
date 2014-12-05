@@ -30,7 +30,6 @@ namespace BackBuilder\Services\Utils;
  */
 class AnnotationParse
 {
-
     public static function getAnnotation($object)
     {
         $class_name = get_class($object);
@@ -46,7 +45,7 @@ class AnnotationParse
             $comment = preg_replace(',\/\*\*(.*)\*\/,', '$1', $comment);
             $comments = preg_split(',\n,', $comment);
 
-            $key = $val = NULL;
+            $key = $val = null;
             $schema[$method_name] = array();
 
             foreach ($comments as $comment_line) {
@@ -61,7 +60,4 @@ class AnnotationParse
 
         return $schema;
     }
-
 }
-
-?>

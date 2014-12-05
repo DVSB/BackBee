@@ -14,19 +14,18 @@ use Doctrine\ORM\EntityManager;
  */
 class Database
 {
-
     /**
-     * @var \Doctrine\ORM\EntityManager 
+     * @var \Doctrine\ORM\EntityManager
      */
     private $_em;
 
     /**
-     * @var BBApplication 
+     * @var BBApplication
      */
     private $_application;
 
     /**
-     * @var SchemaTool 
+     * @var SchemaTool
      */
     private $_schemaTool;
 
@@ -36,15 +35,15 @@ class Database
     private $_entityFinder;
 
     /**
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBuilder\BBApplication  $application
      * @param \Doctrine\ORM\EntityManager $em
      */
     public function __construct(BBApplication $application, EntityManager $em = null)
     {
         $this->_application = $application;
-        if(null === $em){
+        if (null === $em) {
             $this->_em = $this->_application->getEntityManager();
-        }else{
+        } else {
             $this->_em = $em;
         }
 
@@ -61,10 +60,10 @@ class Database
     public function createBackbuilderSchema()
     {
         $classes = $this->_getBackbuilderSchema();
-        try{
+        try {
             $this->_schemaTool->dropSchema($classes);
             $this->_schemaTool->createSchema($classes);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             echo $e->getMessage()."\n";
         }
     }
@@ -81,7 +80,7 @@ class Database
 
     /**
      * Create the bundle schema specified in param
-     * 
+     *
      * @param string $bundleName
      */
     public function createBundleSchema($bundleName)
@@ -90,13 +89,13 @@ class Database
             return;
         }
 
-        try{
+        try {
             $schemaTool = new SchemaTool($bundle->getEntityManager());
             $classes = $this->_getBundleSchema($bundle);
             $schemaTool->dropSchema($classes);
             $schemaTool->createSchema($classes);
             unset($schemaTool);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             echo $e->getMessage()."\n";
         }
     }
@@ -121,7 +120,7 @@ class Database
 
     /**
      * update the bundle schema specified in param
-     * 
+     *
      * @param string $bundleName
      */
     public function updateBundleSchema($bundleName)
@@ -130,12 +129,12 @@ class Database
             return;
         }
 
-        try{
+        try {
             $schemaTool = new SchemaTool($bundle->getEntityManager());
             $classes = $this->_getBundleSchema($bundle);
             $schemaTool->updateSchema($classes, true);
             unset($schemaTool);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             //echo $e->getMessage()."\n";
         }
     }
@@ -150,6 +149,7 @@ class Database
             $tmp = $this->_getBundleSchema($bundle);
             $classes = array_merge($classes, $tmp);
         }
+
         return $classes;
     }
 
@@ -162,11 +162,12 @@ class Database
         foreach ($this->_entityFinder->getEntities($this->_application->getBBDir()) as $className) {
             $classes[] = $this->_em->getClassMetadata($className);
         }
+
         return $classes;
     }
 
     /**
-     * @param \BackBuilder\Bundle\ABundle $bundle
+     * @param  \BackBuilder\Bundle\ABundle $bundle
      * @return array
      */
     private function _getBundleSchema($bundle)
@@ -176,6 +177,7 @@ class Database
         foreach ($this->_entityFinder->getEntities(dirname($reflection->getFileName())) as $className) {
             $classes[] = $this->_em->getClassMetadata($className);
         }
+
         return $classes;
     }
 
@@ -187,6 +189,7 @@ class Database
         $sql = array_merge($sql1, $sql2);
 
         $sql = implode(";\n", $sql);
+
         return $sql.';';
     }
 
@@ -203,7 +206,6 @@ class Database
         $sql = array();
 
         foreach ($this->_application->getBundles() as $bundle) {
-
             $classes = $this->_getBundleSchema($bundle);
 
             $sql = array_merge($sql, $this->_schemaTool->getCreateSchemaSql($classes));
@@ -220,10 +222,10 @@ class Database
     public function getUpdateSqlSchema($type = 3)
     {
         $sql1 = $sql2 = array();
-        if($type == 1 || $type & 3 == 3){
+        if ($type == 1 || $type & 3 == 3) {
             $sql1 = $this->getUpdateBackBuilderSqlSchema();
         }
-        if($type == 2 || $type & 3 == 3){
+        if ($type == 2 || $type & 3 == 3) {
             $sql2 = $this->getUpdateBundleSqlSchema();
         }
 
@@ -245,7 +247,6 @@ class Database
         $sql = array();
 
         foreach ($this->_application->getBundles() as $bundle) {
-
             $classes = $this->_getBundleSchema($bundle);
 
             $sql = array_merge($sql, $this->_schemaTool->getUpdateSchemaSql($classes, true));
@@ -253,7 +254,7 @@ class Database
 
         return $sql;
     }
-    
+
     public function getClassMetadata()
     {
         $classes1 = $this->getBackBuilderClassMetadata();
@@ -281,5 +282,4 @@ class Database
 
         return $classes;
     }
-
 }

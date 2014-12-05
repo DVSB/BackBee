@@ -2,8 +2,8 @@
 
 namespace BackBuilder\Tests\Fixtures\Provider;
 
-use Faker\Provider\Lorem,
-    Faker\Provider\Base;
+use Faker\Provider\Lorem;
+use Faker\Provider\Base;
 
 class Theme extends Base
 {
@@ -35,19 +35,20 @@ class Theme extends Base
     public function extend()
     {
         $themes = array('default', 'test-themes');
+
         return $themes[mt_rand(0, (count($themes) - 1))];
     }
 
     public function architecture()
     {
-        return array (
+        return array(
             'listeners_dir' => 'listeners',
             'helpers_dir' => 'helpers',
             'template_dir' => 'scripts',
             'css_dir' => 'css',
             'less_dir' => 'less',
             'js_dir' => 'js',
-            'img_dir' => 'img'
+            'img_dir' => 'img',
         );
     }
 
@@ -61,7 +62,7 @@ class Theme extends Base
             'description' => $this->description(),
             'architecture' => $this->architecture(),
             'dependency' => $this->extend(),
-            'screenshot' => $this->screenshot()
+            'screenshot' => $this->screenshot(),
         );
     }
 }

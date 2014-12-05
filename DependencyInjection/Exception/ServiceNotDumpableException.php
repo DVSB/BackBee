@@ -39,7 +39,7 @@ class ServiceNotDumpableException extends \BackBuilder\Exception\BBException
     {
         parent::__construct(sprintf(
             'You tagged %s as a dumpable service but it did not implement %s.',
-            $id . (null !== $class ? " ($class)" : ''),
+            $id.(null !== $class ? " ($class)" : ''),
             'BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface'
         ));
     }

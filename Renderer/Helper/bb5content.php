@@ -21,8 +21,8 @@
 
 namespace BackBuilder\Renderer\Helper;
 
-use BackBuilder\ClassContent\AClassContent,
-    BackBuilder\ClassContent\ContentSet;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\ContentSet;
 
 /**
  * Helper providing HTML attributes to online-edited content
@@ -50,7 +50,6 @@ use BackBuilder\ClassContent\AClassContent,
  */
 class bb5content extends AHelper
 {
-
     /**
      * The content to be rendered
      * @var \BackBuilder\ClassContent\AClassContent
@@ -83,11 +82,11 @@ class bb5content extends AHelper
      * @var type @var array
      */
     private $already_checked;
-    
+
     /**
      * Returns the HTML formated attributes for content
-     * @param array $datacontent Optional attributes to add
-     * @param array $params Optional parameters
+     * @param  array  $datacontent Optional attributes to add
+     * @param  array  $params      Optional parameters
      * @return string The HTML formated attributes for content
      */
     public function __invoke(AClassContent $element = null, $datacontent = array(), $params = array())
@@ -101,7 +100,6 @@ class bb5content extends AHelper
         if (null !== $this->_content
                 && true === $this->_isGranted()
                 && false !== $this->_content->getParam('bb5.editable')) {
-
             // Defining hierarchical content structure
             $this->_parent_uid = $this->_renderer->getParentUid();
             if ($this->_content === $this->_renderer->getObject()) {
@@ -178,7 +176,7 @@ class bb5content extends AHelper
 
     /**
      * Try to load a content if it is not yet
-     * @param AClassContent $content
+     * @param  AClassContent $content
      * @return AClassContent
      */
     private function getLoadedContent(AClassContent $content)
@@ -198,7 +196,7 @@ class bb5content extends AHelper
 
     /**
      * Adds common BB5 content markups to contents
-     * @param array $params Optional parameters
+     * @param  array                                    $params Optional parameters
      * @return \BackBuilder\Renderer\Helper\datacontent
      */
     private function _addCommonContentMarkup($params = array())
@@ -227,7 +225,7 @@ class bb5content extends AHelper
 
     /**
      * Adds BB5 content markups to contentsets
-     * @param array $params Optional parameters
+     * @param  array                                    $params Optional parameters
      * @return \BackBuilder\Renderer\Helper\datacontent
      */
     private function _addContentSetMarkup($params = array())
@@ -266,7 +264,7 @@ class bb5content extends AHelper
      * Adds draggable and resizable class
      * @todo Add test on autobloc (new forbiddenaction ?)
      * @todo Add test on resizable (new forbiddenaction ?)
-     * @param array $params
+     * @param  array                                    $params
      * @return \BackBuilder\Renderer\Helper\datacontent
      */
     private function _addClassContainerMarkup($params = array())
@@ -291,7 +289,7 @@ class bb5content extends AHelper
 
     /**
      * Adds specific markup to Element\file
-     * @param array $params Optional parameters
+     * @param  array                                    $params Optional parameters
      * @return \BackBuilder\Renderer\Helper\datacontent
      */
     private function _addElementFileMarkup($params = array())
@@ -306,7 +304,7 @@ class bb5content extends AHelper
 
     /**
      * Adds specific Aloha markup on content
-     * @param array $params Optional parameters
+     * @param  array                                    $params Optional parameters
      * @return \BackBuilder\Renderer\Helper\datacontent
      */
     private function _addAlohaMarkup($params = array())
@@ -316,6 +314,7 @@ class bb5content extends AHelper
                 && null !== $this->_element_name) {
             $this->_addValueToAttribute('data-aloha', $this->_element_name);
         }
+
         return $this;
     }
 
@@ -340,9 +339,9 @@ class bb5content extends AHelper
                             $fakeParent = new $parentClassName();
                             $contentData = $fakeParent->{$elementname};
                             $rteconf = $contentData->getParam("aloha", "scalar");
-                            $isEditable = (boolean)$contentData->getParam("editable", "boolean");
+                            $isEditable = (boolean) $contentData->getParam("editable", "boolean");
 
-                            if (!is_null($rteconf) && $isEditable==TRUE) {
+                            if (!is_null($rteconf) && $isEditable == TRUE) {
                                 $this->_addValueToAttribute('data-rteconf', $rteconf);
                             }
                         }
@@ -350,6 +349,7 @@ class bb5content extends AHelper
                 }
             }
         }
+
         return $this;
     }
 
@@ -378,7 +378,7 @@ class bb5content extends AHelper
 
     /**
      * Returns the BB5 class markup from config file
-     * @param string $markup The markup asked
+     * @param  string      $markup The markup asked
      * @return string|NULL
      */
     private function _getClassMarkup($markup)
@@ -397,11 +397,11 @@ class bb5content extends AHelper
 
     /**
      * Adds new values to an attribute, creates it if don't exist
-     * @param string $key
-     * @param mixed $value
+     * @param  string                                   $key
+     * @param  mixed                                    $value
      * @return \BackBuilder\Renderer\Helper\datacontent
      */
-    private function _addValueToAttribute($key, $value = NULL)
+    private function _addValueToAttribute($key, $value = null)
     {
         if (null !== $value) {
             $values = (array) $value;
@@ -417,7 +417,7 @@ class bb5content extends AHelper
 
     /**
      * Splits the values of the provided data by boundary spaces
-     * @param array $data
+     * @param  array $data
      * @return array
      */
     private function _toRegularBag($data = array())
@@ -435,8 +435,8 @@ class bb5content extends AHelper
 
     /**
      * Format an $key/$value association to HTML compliant attribute string
-     * @param string $key
-     * @param mixed $value
+     * @param  string $key
+     * @param  mixed  $value
      * @return string
      * @codeCoverageIgnore
      */
@@ -446,7 +446,7 @@ class bb5content extends AHelper
             $value = implode(' ', $value);
         }
 
-        return $key . '="' . $value . '"';
+        return $key.'="'.$value.'"';
     }
 
     /**
@@ -479,17 +479,17 @@ class bb5content extends AHelper
     private function _getDataType()
     {
         $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($this->_content);
+
         return $this->_unprefixClassname($classname);
     }
 
     /**
      * Unprefixes a BackBuilder content classname
-     * @param string $classname
+     * @param  string $classname
      * @return string
      */
     private function _unprefixClassname($classname)
     {
         return str_replace('BackBuilder\ClassContent\\', '', $classname);
     }
-
 }

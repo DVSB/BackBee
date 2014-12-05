@@ -61,7 +61,6 @@ class AbstractServiceLocal implements IServiceLocal
      */
     public function __construct()
     {
-
     }
 
     /**
@@ -115,10 +114,10 @@ class AbstractServiceLocal implements IServiceLocal
 
     /**
      * Checks if the attributes are granted against the current token.
-     * @param mixed $attributes
-     * @param mixed|null $object
-     * @return boolean Return TRUE if current token if granted
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @param  mixed                                                    $attributes
+     * @param  mixed|null                                               $object
+     * @return boolean                                                  Return TRUE if current token if granted
+     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
      * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the permission
      */
     public function isGranted($attributes, $object = null)
@@ -142,8 +141,8 @@ class AbstractServiceLocal implements IServiceLocal
     /**
      * Render template
      *
-     * @param string $template
-     * @param array $params
+     * @param  string $template
+     * @param  array  $params
      * @return string
      */
     public function render($template, $params = array())
@@ -173,8 +172,7 @@ class AbstractServiceLocal implements IServiceLocal
             return $this->_application;
         }
         if ($name === 'application' || $name === 'em') {
-            return $this->{'_' . $name};
+            return $this->{'_'.$name};
         }
     }
-
 }

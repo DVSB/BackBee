@@ -22,13 +22,9 @@
 namespace BackBuilder\Command;
 
 use BackBuilder\Console\ACommand;
-
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use Doctrine\ORM\Tools\SchemaTool;
 
 /**
  * Update all bundles command
@@ -50,7 +46,7 @@ class BundleUpdateAllCommand extends ACommand
             ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
             ->setDescription('Updates a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> updates all bundles: 
+The <info>%command.name%</info> updates all bundles:
 
    <info>php bundle:update_all </info>
 EOF
@@ -64,23 +60,21 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $force = $input->getOption('force');
-        
+
         $bbapp = $this->getContainer()->get('bbapp');
 
-        foreach($bbapp->getBundles() as $bundle) {
-            $output->writeln('Updating bundle: ' . $bundle->getId() . '');
+        foreach ($bbapp->getBundles() as $bundle) {
+            $output->writeln('Updating bundle: '.$bundle->getId().'');
 
             $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
 
-            if($force) {
+            if ($force) {
                 $output->writeln('<info>Running update</info>');
 
                 $bundle->update();
-            } 
+            }
 
-            $output->writeln('<info>SQL executed: </info>' . PHP_EOL . implode(";" . PHP_EOL, $sqls) . '');
-
+            $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
         }
     }
-    
 }
