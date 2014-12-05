@@ -65,7 +65,12 @@ class ClassContentController extends ARestController
      */
     public function getCategoryCollectionAction()
     {
-        return $this->createResponse(json_encode($this->getCategoryManager()->getCategories()));
+        $categories = array();
+        foreach ($this->getCategoryManager()->getCategories() as $id => $category) {
+            $categories[] = array_merge(array('id' => $id), $category->jsonSerialize());
+        }
+
+        return $this->createResponse(json_encode($categories));
     }
 
     /**

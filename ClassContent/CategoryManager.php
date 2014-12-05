@@ -42,6 +42,10 @@ class CategoryManager
      */
     private $categories;
 
+    /**
+     * Categories common options (thumbnail_url_pattern, etc.)
+     * @var array
+     */
     private $options;
 
     /**
