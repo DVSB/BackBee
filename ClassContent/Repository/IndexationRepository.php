@@ -386,10 +386,11 @@ class IndexationRepository extends EntityRepository
             $insert_children = array();
             foreach ($parent_uids as $parent_uid => $subcontent_uids) {
                 foreach ($subcontent_uids as $subcontent_uid) {
-                    $insert_children[] = 'SELECT "'.$parent_uid.'", "'.$subcontent_uid.'"';
-                    $insert_children[] = 'SELECT '.$meta->getColumnName('content_uid').', "'.$subcontent_uid.'"'.
-                            ' FROM '.$meta->getTableName().
-                            ' WHERE '.$meta->getColumnName('subcontent_uid').' = "'.$parent_uid.'"';
+                    $insert_children[] = sprintf('SELECT %s, %s',$parent_uid, $subcontent_uid);
+                    $insert_children[] = sprintf('SELECT %s, %s
+                        FROM %s
+                        WHERE %s = %s', $meta->getColumnName('content_uid'), $subcontent_uid, $meta->getTableName(), $meta->getColumnName('subcontent_uid'), $parent_uid
+                    );
                 }
             }
 
@@ -400,6 +401,8 @@ class IndexationRepository extends EntityRepository
                 $this->_em->getConnection()->executeQuery($query);
             }
         }
+
+
 
         return $this;
     }
