@@ -145,12 +145,12 @@ class Repository extends EntityRepository
             $identifier = $this->getEntityName();
         }
 
-        $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "' . $descriminator . '"';
+        $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "%s"';
 
         if (class_exists($descriminator) && (new Builder())->isRegistryEntity(new $descriminator())) {
-            $count = $this->countEntities($descriminator, $this->executeSql(sprintf($sql, 'type')));
+            $count = $this->countEntities($descriminator, $this->executeSql(sprintf($sql, 'type', $descriminator)));
         } else {
-            $count = $this->executeSql(sprintf($sql, 'scope'));
+            $count = $this->executeSql(sprintf($sql, 'scope', $descriminator));
         }
 
         return $count;

@@ -253,7 +253,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (0 < count($where)) {
-            $query .= ' WHERE '.implode(' AND ', $where);
+            $query .= sprintf(' WHERE %s', implode(' AND ', $where));
         }
 
         //Optimize multipage query

@@ -83,8 +83,11 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
             throw new \BackBuilder\Exception\InvalidArgumentException('Initial value of a sequence must be a positive integer');
         }
 
-        $query = 'INSERT INTO '.$this->_table.' ('.$this->_name.', '.$this->_value.') VALUE(:name, :value)';
+        $query = 'INSERT INTO :_table (:_name, :_value) VALUE(:name, :value)';
         $params = array(
+            'table' => $this->_table,
+            '_name' => $this->_name,
+            '_value' => $this->_value,
             'name' => $name,
             'value' => $first,
         );
@@ -114,8 +117,11 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
             throw new \BackBuilder\Exception\InvalidArgumentException('Initial value of a sequence must be a positive integer');
         }
 
-        $query = 'UPDATE '.$this->_table.' SET '.$this->_value.' = :value WHERE '.$this->_name.' = :name';
+        $query = 'UPDATE :_table SET :_value = :value WHERE :_name = :name';
         $params = array(
+            '_table' => $this->_table,
+            '_value' => $this->_value,
+            '_name'  => $this->_name,
             'name' => $name,
             'value' => $value,
         );
