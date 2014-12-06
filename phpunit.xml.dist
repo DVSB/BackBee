@@ -28,5 +28,5 @@
           <directory>report</directory>
         </blacklist>
     </filter>
-    
+
 </phpunit>
