@@ -21,8 +21,6 @@
 
 namespace BackBuilder\Cache\Validator;
 
-use BackBuilder\NestedNode\Page;
-
 /**
  * PatternValidator will invalid string that match with pattern to exclude
  *

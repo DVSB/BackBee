@@ -27,7 +27,6 @@ use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBuilder\Exception\BBException;
 use BackBuilder\Event\Dispatcher;
-use BackBuilder\Logging\Logger;
 use BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
 
 if (false === defined('NAMESPACE_SEPARATOR')) {

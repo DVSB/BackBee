@@ -21,7 +21,6 @@ namespace BackBuilder\Config;
  */
 
 use BackBuilder\IApplication;
-use BackBuilder\Bundle\Registry;
 use BackBuilder\Config\Exception\InvalidConfigTypeException;
 use BackBuilder\Event\Event;
 use BackBuilder\Util\Resolver\BundleConfigDirectory;

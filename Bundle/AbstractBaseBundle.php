@@ -21,7 +21,6 @@
 
 namespace BackBuilder\Bundle;
 
-use BackBuilder\Config\Config;
 use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
 use BackBuilder\Routing\RouteCollection;
