@@ -736,8 +736,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     {
         $this->_layout = $layout;
 
+        $count = count($layout->getZones());
         // Add as much ContentSet to the page main ContentSet than defined zones in layout
-        for ($i = $this->getContentSet()->count(); $i < count($layout->getZones()); $i++) {
+        for ($i = $this->getContentSet()->count(); $i < $count; $i++) {
             // Do this case really exist ?
             if (null === $zone = $layout->getZone($i)) {
                 $this->getContentSet()->push(new ContentSet());
@@ -913,7 +914,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
         }
 
         $layoutZones = $this->getLayout()->getZones();
-        for ($i = 0; $i < $this->getParent()->getContentSet()->count(); $i++) {
+        $count = $this->getParent()->getContentSet()->count();
+        for ($i = 0; $i < $count; $i++) {
             $parentContentset = $this->getParent()->getContentSet()->item($i);
 
             if ($contentSet->getUid() === $parentContentset->getUid()) {
@@ -1000,8 +1002,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
         $currentpageRootZones = $this->getContentSet();
         $layoutZones = $this->getLayout()->getZones();
-
-        for ($i = 0; $i < count($layoutZones); $i++) {
+        $count = count($layoutZones);
+        for ($i = 0; $i < $count; $i++) {
             $zoneInfos = $layoutZones[$i];
             $currentZone = $currentpageRootZones->item($i);
 
