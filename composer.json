@@ -1,5 +1,5 @@
 {
-    "name": "Lp-digital/BackBee",
+    "name": "lp-digital/backbee",
     "description": "BackBee is the next generation open source CMS",
     "type": "backbee-package",
     "extra": {
