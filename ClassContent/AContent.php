@@ -39,6 +39,11 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
 abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerializable
 {
     /**
+     * BackBuilder's class content classname must be prefixed by this
+     */
+    const CLASSCONTENT_BASE_NAMESPACE = 'BackBuilder\ClassContent\\';
+
+    /**
      * Unique identifier
      * @var string
      * @Id @Column(type="string", name="uid")
@@ -1006,18 +1011,33 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * {@inherit}
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
-        return array(
-            'uid'       => $this->_uid,
-            'label'     => $this->_label,
-            'type'      => str_replace('BackBuilder\ClassContent\\', '', get_class($this)),
-            'state'     => $this->_state,
-            'created'   => $this->_created->getTimestamp(),
-            'modified'  => $this->_modified->getTimestamp(),
-            'revision'  => $this->_revision,
+        $datas = array(
+            'uid'        => $this->_uid,
+            'label'      => $this->_label,
+            'type'       => str_replace(self::CLASSCONTENT_BASE_NAMESPACE, '', get_class($this)),
+            'state'      => $this->_state,
+            'created'    => $this->_created->getTimestamp(),
+            'modified'   => $this->_modified->getTimestamp(),
+            'revision'   => $this->_revision,
+            'parameters' => $this->getParam(),
+            'accept'     => $this->getAccept(),
+            'minentry'   => $this->getMinEntry(),
+            'maxentry'   => $this->getMaxEntry()
         );
+
+        $datas['elements'] = array();
+        foreach ($this->getData() as $name => $content) {
+            if ($content instanceof AContent) {
+                $datas['elements'][$name] = $content->jsonSerialize();
+            } elseif (is_scalar($content)) {
+                $datas['elements'][$name] = $content;
+            }
+        }
+
+        return $datas;
     }
 }

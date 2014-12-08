@@ -211,7 +211,8 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                     if (false !== preg_match_all('/(\$([a-z_\/\\\\]+)(\[([0-9]+)\]){0,1}(->){0,1})+/i', $this->scheme[$attribute], $matches, PREG_PATTERN_ORDER)) {
                         $this->attributes[$attribute] = $this->scheme[$attribute];
                         $initial_content = $content;
-                        for ($i = 0; $i < count($matches[0]); $i++) {
+                        $count = count($matches[0]);
+                        for ($i = 0; $i < $count; $i++) {
                             $content = $initial_content;
                             foreach (explode('->', $matches[0][$i]) as $scheme) {
                                 $draft = null;

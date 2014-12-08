@@ -21,7 +21,6 @@
 
 namespace BackBuilder\Event\Listener;
 
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 

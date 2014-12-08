@@ -232,7 +232,8 @@ abstract class ARenderer implements IRenderer
             foreach ($array as $key => $value) {
                 if ($value == $new_value) {
                     unset($array[$key]);
-                    for ($i = ($key + 1); $i < count($array); $i++) {
+                    $count = count($array);
+                    for ($i = ($key + 1); $i < $count; $i++) {
                         $array[$i - 1] = $array[$i];
                     }
                     break;

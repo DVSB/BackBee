@@ -495,6 +495,11 @@ abstract class AClassContent extends AContent
     protected function _initData()
     {
         // Has to be overwritten by generalizations
+        if ($this instanceof ContentSet) {
+            $this->setProperty('is_container', true);
+        } else {
+            $this->setProperty('is_container', false);
+        }
     }
 
     /**
@@ -838,6 +843,16 @@ abstract class AClassContent extends AContent
         return $rendermode;
     }
 
+    /**
+     * Computes and returns image name from current class content classname
+     *
+     * @return string
+     */
+    public function getImageName()
+    {
+        return str_replace(array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'), array('', '/'), get_class($this)) . '.png';
+    }
+
     /*     * **************************************************************** */
     /*                                                                        */
     /*                   Implementation of IRenderable                        */
@@ -889,6 +904,7 @@ abstract class AClassContent extends AContent
     /**
      * Return the serialized string of the content
      * @return string
+     * @deprecated since version 1.0
      */
     public function serialize()
     {
@@ -1042,7 +1058,7 @@ abstract class AClassContent extends AContent
     }
 
     /**
-     * {@inheritdoc}
+     * @deprecated since version 1.0
      */
     public function toJson($return_array = false)
     {
@@ -1057,20 +1073,15 @@ abstract class AClassContent extends AContent
         $datas = array(
             'properties' => $this->getProperty(),
             'main_node'  => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
-            'is_loaded'  => $this->_isloaded,
-            'parameters' => $this->getParam(),
+            'draft_uid'  => null !== $this->getDraft() ? $this->getDraft()->getUid() : null,
+            'image'      => $this->getImageName()
         );
 
-        $datas['elements'] = array();
-        foreach ($this->getData() as $name => $content) {
-            if ($content instanceof AClassContent) {
-                $datas['elements'][$name] = $content->toJson(true);
-            } elseif (is_scalar($content)) {
-                $datas['elements'][$name] = $content;
-            }
-        }
-
         $datas = array_merge(parent::jsonSerialize(), $datas);
+
+        if (null === $datas['label']) {
+            $datas['label'] = $this->getProperty('name');
+        }
 
         return $datas;
     }

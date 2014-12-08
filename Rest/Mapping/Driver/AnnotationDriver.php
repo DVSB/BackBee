@@ -1,5 +1,4 @@
 <?php
-namespace BackBuilder\Rest\Mapping\Driver;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
@@ -20,11 +19,14 @@ namespace BackBuilder\Rest\Mapping\Driver;
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace BackBuilder\Rest\Mapping\Driver;
+
 use BackBuilder\Rest\Mapping\ActionMetadata;
+
 use Doctrine\Common\Annotations\AnnotationReader;
+
 use Metadata\ClassMetadata;
 use Metadata\Driver\DriverInterface;
-use Metadata\MethodMetadata;
 
 /**
  * The AnnotationDriver reads the mapping metadata from docblock annotations.

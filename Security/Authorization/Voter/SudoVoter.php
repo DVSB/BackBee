@@ -22,8 +22,7 @@
 namespace BackBuilder\Security\Authorization\Voter;
 
 use BackBuilder\BBApplication;
-use BackBuilder\Security\Token\BBUserToken;
-use BackBuilder\Security\Token\PublicKeyToken;
+
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
@@ -36,8 +35,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
  */
 class SudoVoter implements VoterInterface
 {
-    private $_application;
-    private $_sudoers;
+    private $application;
+    private $sudoers;
 
     /**
      * @codeCoverageIgnore
@@ -45,8 +44,8 @@ class SudoVoter implements VoterInterface
      */
     public function __construct(BBApplication $application)
     {
-        $this->_application = $application;
-        $this->_sudoers = $this->_application->getConfig()->getSecurityConfig('sudoers') ?: array();
+        $this->application = $application;
+        $this->sudoers = $this->application->getConfig()->getSecurityConfig('sudoers') ?: array();
     }
 
     /**
@@ -83,8 +82,8 @@ class SudoVoter implements VoterInterface
                 }
 
                 if (
-                    true === array_key_exists($token->getUser()->getUsername(), $this->_sudoers)
-                    && $token->getUser()->getId() === $this->_sudoers[$token->getUser()->getUsername()]
+                    true === array_key_exists($token->getUser()->getUsername(), $this->sudoers)
+                    && $token->getUser()->getId() === $this->sudoers[$token->getUser()->getUsername()]
                 ) {
                     $result = VoterInterface::ACCESS_GRANTED;
                 }

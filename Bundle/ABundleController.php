@@ -24,11 +24,12 @@ namespace BackBuilder\Bundle;
 use BackBuilder\BBApplication;
 use BackBuilder\FrontController\FrontController;
 use BackBuilder\FrontController\Exception\FrontControllerException;
+use BackBuilder\Util\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Abstract class for bundle controller in BackBuilder5 application
@@ -42,11 +43,11 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
 {
     /* @var \BackBuilder\Config\Config */
 
-    private $_config;
+    private $config;
     /* @var \BackBuilder\Bundle\ABundle */
-    private $_bundle;
+    private $bundle;
     /* @var \BackBuilder\Renderer\ARenderer */
-    private $_renderer;
+    private $renderer;
 
     /**
      * Class constructor
@@ -56,10 +57,10 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function __construct(ABundle $bundle)
     {
-        $this->_application = $bundle->getApplication();
-        $this->_bundle = $bundle;
-        $this->_config = $bundle->getConfig();
-        $this->_renderer = $this->_application->getRenderer();
+        $this->application = $bundle->getApplication();
+        $this->bundle = $bundle;
+        $this->config = $bundle->getConfig();
+        $this->renderer = $this->application->getRenderer();
     }
 
     /**
@@ -70,11 +71,11 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function getRequest()
     {
-        if (NULL === $this->_request) {
-            $this->_request = $this->getApplication()->getRequest();
+        if (null === $this->request) {
+            $this->request = $this->getApplication()->getRequest();
         }
 
-        return $this->_request;
+        return $this->request;
     }
 
     /**
@@ -84,7 +85,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function getConfig()
     {
-        return $this->_config;
+        return $this->config;
     }
 
     /**
@@ -93,7 +94,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function getBundle()
     {
-        return $this->_bundle;
+        return $this->bundle;
     }
 
     /**
@@ -103,12 +104,12 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function getRenderer()
     {
-        return $this->_renderer;
+        return $this->renderer;
     }
 
     protected function rendererOverloaded()
     {
-        $this->_renderer;
+        $this->renderer;
     }
 
     /**
@@ -118,7 +119,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function getTemplateDir()
     {
-        return \BackBuilder\Util\File::realpath($this->_bundle->getResourcesDir().DIRECTORY_SEPARATOR.$this->_config->getBundleConfig('templates_dir')).DIRECTORY_SEPARATOR;
+        return File::realpath($this->bundle->getResourcesDir().DIRECTORY_SEPARATOR.$this->config->getBundleConfig('templates_dir')).DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -128,7 +129,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      */
     public function getLayoutDir()
     {
-        return \BackBuilder\Util\File::realpath($this->_bundle->getResourcesDir().DIRECTORY_SEPARATOR.$this->_config->getBundleConfig('layouts_dir')).DIRECTORY_SEPARATOR;
+        return File::realpath($this->bundle->getResourcesDir().DIRECTORY_SEPARATOR.$this->config->getBundleConfig('layouts_dir')).DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -139,14 +140,14 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
      * @param integer  $type     The type of the request
      *                           (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
      */
-    protected function _send(Response $response, $type = self::MASTER_REQUEST)
+    protected function send(Response $response, $type = self::MASTER_REQUEST)
     {
-        if (NULL !== $this->_application && NULL !== $this->_application->getEventDispatcher()) {
+        if (null !== $this->application && null !== $this->application->getEventDispatcher()) {
             $event = new FilterResponseEvent($this, $this->getRequest(), $type, $response);
             $class = explode('\\', get_class($this));
-            $this->_application->getEventDispatcher()->dispatch(strtolower(end($class)).'.response', $event);
-            $this->_application->getEventDispatcher()->dispatch('frontcontroller.response', $event);
-            $this->_application->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);
+            $this->application->getEventDispatcher()->dispatch(strtolower(end($class)).'.response', $event);
+            $this->application->getEventDispatcher()->dispatch('frontcontroller.response', $event);
+            $this->application->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);
         }
 
         $response->send();
@@ -166,13 +167,13 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     public function handle(Request $request = null, $type = self::MASTER_REQUEST, $catch = true)
     {
         try {
-            $this->_request = $request;
-            $this->_dispatch(strtolower(end(explode('\\', get_class($this)))).'.request');
-            $this->_dispatch('frontcontroller.request');
+            $this->request = $request;
+            $this->dispatch(strtolower(end(explode('\\', get_class($this)))).'.request');
+            $this->dispatch('frontcontroller.request');
 
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
             if ($matches = $urlMatcher->match($this->getRequest()->getPathInfo())) {
-                $this->_invokeAction($matches);
+                $this->invokeAction($matches);
             }
 
             throw new FrontControllerException(sprintf('Unable to handle URL `%s`.', $this->getRequest()->getPathInfo()), FrontControllerException::NOT_FOUND);
@@ -183,9 +184,9 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
         }
     }
 
-    protected function _sendResponse($content, $status = 200, $headers = array())
+    public function sendResponse($content, $status = 200, $headers = array())
     {
         $response = new Response($content, $status, $headers);
-        $this->_send($response);
+        $this->send($response);
     }
 }

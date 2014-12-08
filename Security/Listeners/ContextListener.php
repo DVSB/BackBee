@@ -21,7 +21,6 @@
 
 namespace BackBuilder\Security\Listeners;
 
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Http\Firewall\ContextListener as sfContextListener;
 

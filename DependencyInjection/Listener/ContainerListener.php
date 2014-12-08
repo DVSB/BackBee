@@ -27,7 +27,6 @@ use BackBuilder\DependencyInjection\Exception\CannotCreateContainerDirectoryExce
 use BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException;
 use BackBuilder\DependencyInjection\ContainerProxy;
 use BackBuilder\Event\Event;
-use BackBuilder\Exception\BBException;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 
 /**
