@@ -29,6 +29,7 @@ use BackBuilder\Routing\RouteCollection;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -78,7 +79,10 @@ class ClassContentController extends ARestController
             $categories[] = array_merge(array('id' => $id), $category->jsonSerialize());
         }
 
-        return $this->createResponse(json_encode($categories));
+        $response = $this->createResponse(json_encode($categories));
+        $response->headers->set('Content-Range', '0-' . (count($categories) - 1) . '/' . count($categories));
+
+        return $response;
     }
 
     /**
@@ -104,9 +108,10 @@ class ClassContentController extends ARestController
             $classnames[] = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $block->type);
         }
 
-        return $this->createResponse(json_encode($this->formatClassContentCollection($this->findContentsByCriterias(
-            $classnames, $start, $count
-        ))));
+        $contents = $this->findContentsByCriterias($classnames, $start, $count);
+        $response = $this->createResponse(json_encode($this->formatClassContentCollection($contents)));
+
+        return $this->addContentRangeHeadersToResponse($response, $contents, $start);
     }
 
     /**
@@ -122,9 +127,10 @@ class ClassContentController extends ARestController
     {
         $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $type);
 
-        return $this->createResponse(json_encode($this->formatClassContentCollection($this->findContentsByCriterias(
-            (array) $classname, $start, $count
-        ))));
+        $contents = $this->findContentsByCriterias((array) $classname, $start, $count);
+        $response = $this->createResponse(json_encode($this->formatClassContentCollection($contents)));
+
+        return $this->addContentRangeHeadersToResponse($response, $contents, $start);
     }
 
     /**
@@ -281,13 +287,11 @@ class ClassContentController extends ARestController
      *
      * @return array
      */
-    private function formatClassContentCollection(Paginator $paginator = null)
+    private function formatClassContentCollection(Paginator $paginator)
     {
         $contents = array();
-        if (null !== $paginator) {
-            foreach ($paginator as $content) {
-                $contents[] = $content->jsonSerialize();
-            }
+        foreach ($paginator as $content) {
+            $contents[] = $content->jsonSerialize();
         }
 
         return $this->updateClassContentCollectionImageUrl($contents);
@@ -364,5 +368,25 @@ class ClassContentController extends ARestController
         }
 
         return $this->thumbnail_base_directory;
+    }
+
+    /**
+     * Add 'Content-Range' parameters to $response headers
+     *
+     * @param Response  $response   the response object
+     * @param Paginator $collection collection from where we extract Content-Range data
+     * @param integer   $start      the start value
+     */
+    private function addContentRangeHeadersToResponse(Response $response, Paginator $collection, $start)
+    {
+        $count = 0;
+        foreach ($collection as $row) {
+            $count++;
+        }
+
+        $last_result = $start + $count - 1;
+        $response->headers->set('Content-Range', "$start-$last_result/" . count($collection));
+
+        return $response;
     }
 }
