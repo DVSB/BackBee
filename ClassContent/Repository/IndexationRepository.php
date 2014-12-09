@@ -386,20 +386,28 @@ class IndexationRepository extends EntityRepository
             $insert_children = array();
             foreach ($parent_uids as $parent_uid => $subcontent_uids) {
                 foreach ($subcontent_uids as $subcontent_uid) {
-                    $insert_children[] = 'SELECT "'.$parent_uid.'", "'.$subcontent_uid.'"';
-                    $insert_children[] = 'SELECT '.$meta->getColumnName('content_uid').', "'.$subcontent_uid.'"'.
-                            ' FROM '.$meta->getTableName().
-                            ' WHERE '.$meta->getColumnName('subcontent_uid').' = "'.$parent_uid.'"';
+                    $insert_children[] = sprintf('SELECT "%s", "%s"',$parent_uid, $subcontent_uid);
+                    $insert_children[] = sprintf('SELECT %s, "%s"
+                        FROM %s
+                        WHERE %s = "%s"', $meta->getColumnName('content_uid'), $subcontent_uid, $meta->getTableName(), $meta->getColumnName('subcontent_uid'), $parent_uid
+                    );
                 }
             }
 
             if (0 < count($insert_children)) {
-                $query = $command.' INTO '.$meta->getTableName().
-                        ' ('.$meta->getColumnName('content_uid').', '.$meta->getColumnName('subcontent_uid').') '.
-                        implode(' UNION ALL ', $insert_children);
+                $union_all = implode(' UNION ALL ', $insert_children);
+                $query = sprintf('%s INTO %s (%s, %s) %s',
+                    $command,
+                    $meta->getTableName(),
+                    $meta->getColumnName('content_uid'),
+                    $meta->getColumnName('subcontent_uid'),
+                    $union_all
+                );
                 $this->_em->getConnection()->executeQuery($query);
             }
         }
+
+
 
         return $this;
     }

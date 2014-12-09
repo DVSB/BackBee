@@ -253,7 +253,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (0 < count($where)) {
-            $query .= ' WHERE '.implode(' AND ', $where);
+            $query .= sprintf(' WHERE %s', implode(' AND ', $where));
         }
 
         //Optimize multipage query
@@ -490,11 +490,11 @@ class ClassContentRepository extends EntityRepository
      *
      *
      * SELECT c.uid, c.label, c.classname
-      FROM content_has_subcontent cs
-      INNER JOIN content_has_subcontent cs1 ON cs1.parent_uid  = cs.content_uid
-      left join content c on  cs1.content_uid = c.uid
-      left join page p on p.contentset = cs.parent_uid
-      Where p.uid="f70d5b294dcc4d8d5c7f57b8804f4de2"
+     * FROM content_has_subcontent cs
+     * INNER JOIN content_has_subcontent cs1 ON cs1.parent_uid  = cs.content_uid
+     * left join content c on  cs1.content_uid = c.uid
+     * left join page p on p.contentset = cs.parent_uid
+     * Where p.uid="f70d5b294dcc4d8d5c7f57b8804f4de2"
      *
      * select content where parent_uid
      *
@@ -910,11 +910,14 @@ class ClassContentRepository extends EntityRepository
                 $parent->unsetSubContent($content);
             }
 
+
             $this->_em->getConnection()->executeQuery(
-                'DELETE FROM indexation WHERE owner_uid = "'.$content->getUid().'";'
+                'DELETE FROM indexation WHERE owner_uid = :uid',
+                array('uid' => $content->getUid())
             )->execute();
             $this->_em->getConnection()->executeQuery(
-                'DELETE FROM revision WHERE content_uid = "'.$content->getUid().'";'
+                'DELETE FROM revision WHERE content_uid = :uid',
+                array('uid' => $content->getUid())
             )->execute();
             $this->_em->remove($content);
         }
@@ -927,11 +930,10 @@ class ClassContentRepository extends EntityRepository
             return array();
         }
 
-        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN ("'.implode('","', $content_uids).'")';
-
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN :content_uids';
         return $this->getEntityManager()
             ->getConnection()
-            ->executeQuery($sql)
+            ->executeQuery($sql, array('content_uids' => $content_uids))
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
     }

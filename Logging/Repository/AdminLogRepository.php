@@ -57,8 +57,8 @@ class AdminLogRepository extends EntityRepository
                 'AND entity = "'.str_replace('\\', '\\\\', (string) ObjectIdentity::fromDomainObject($entity)).'" '.
                 'ORDER BY created_at DESC';
 
-        $sql = 'SELECT owner, entity FROM ('.$from.') AS orderer_log GROUP BY owner';
-        $result = $this->getEntityManager()->getConnection()->executeQuery($sql);
+        $sql = 'SELECT owner, entity FROM :from_result AS orderer_log GROUP BY owner';
+        $result = $this->getEntityManager()->getConnection()->executeQuery($sql, array('form_result' => $from));
 
         $verif = $this->_getActualAdminEdition();
         $return = $result->fetchAll(\PDO::FETCH_ASSOC);
@@ -90,8 +90,8 @@ class AdminLogRepository extends EntityRepository
     private function _getActualAdminEdition()
     {
         $date = new \DateTime('@'.strtotime('-30 minutes'));
-        $from = 'SELECT owner, entity FROM admin_log WHERE created_at > "'.$date->format('Y-m-d H:i:s').'" ORDER BY created_at DESC';
-        $sql = 'SELECT owner, entity FROM ('.$from.') AS orderer_log GROUP BY owner';
+        $from = sprintf('SELECT owner, entity FROM admin_log WHERE created_at > "%s" ORDER BY created_at DESC', $date->format('Y-m-d H:i:s'));
+        $sql = sprintf('SELECT owner, entity FROM (%s) AS orderer_log GROUP BY owner', $from);
         $result = $this->getEntityManager()->getConnection()->executeQuery($sql);
 
         $verif = array();
