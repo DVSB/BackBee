@@ -423,7 +423,7 @@ class ClassContentController extends ARestController
         try {
             $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
         } catch (ClassNotFoundException $e) {
-            throw new NotFoundHttpException("No classcontent (:$classname) found with provided type (:$type)");
+            throw new NotFoundHttpException("No classcontent found with provided type (:$type)");
         }
 
         if (null === $content) {

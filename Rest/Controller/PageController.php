@@ -21,6 +21,8 @@
 
 namespace BackBuilder\Rest\Controller;
 
+use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
+use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\Exception\InvalidArgumentException;
 use BackBuilder\MetaData\MetaDataBag;
 use BackBuilder\NestedNode\Page;
@@ -37,6 +39,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -111,6 +114,8 @@ class PageController extends ARestController
     /**
      * Get collection of page entity
      *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
      * @Rest\Pagination(default_count=25, max_count=100)
      *
      * @Rest\QueryParam(name="parent_uid", description="Parent Page UID")
@@ -132,50 +137,21 @@ class PageController extends ARestController
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
      * )
-     *
-     * @return Symfony\Component\HttpFoundation\Response
      */
     public function getCollectionAction(Request $request, $start, $count, Page $parent = null)
     {
-        $qb = $this->getPageRepository()->createQueryBuilder('p');
+        $response = null;
+        $content_uid = $request->query->get('content_uid', null);
+        $content_type = $request->query->get('content_type', null);
 
-        if (null === $parent) {
-            $qb->andSiteIs($this->getApplication()->getSite());
+        if (null !== $content_uid && null !== $content_type) {
+            $response = $this->doGetCollectionByContent($content_type, $content_uid);
+        } elseif ((null === $content_uid && null !== $content_type) || (null !== $content_uid && null === $content_type)) {
+            throw new BadRequestHttpException(
+                'To get page collection by content, you must provide `content_uid` and `content_type` as query parameters.'
+            );
         } else {
-            $this->granted('VIEW', $parent);
-        }
-
-        $qb = $qb->andParentIs($parent);
-
-        $order_by = array();
-        if (null !== $request->query->get('order_by', null)) {
-            foreach ($request->query->get('order_by') as $key => $value) {
-                if ('_' !== $key[0]) {
-                    $key = '_'.$key;
-                }
-
-                $order_by[$key] = $value;
-            }
-        } else {
-            $order_by['_leftnode'] = 'asc';
-        }
-
-        $qb->orderByMultiple($order_by);
-
-        if (null !== $state = $request->query->get('state', null)) {
-            $qb->andStateIsIn((array) $state);
-        }
-
-        $results = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
-        $count = 0;
-        foreach ($results as $row) {
-            $count++;
-        }
-
-        $result_count = $start + $count - 1; // minus 1 cause $start start at 0 and not 1
-        $response = $this->createResponse($this->formatCollection($results));
-        if (0 < $count) {
-            $response->headers->set('Content-Range', "$start-$result_count/".count($results));
+            $response = $this->doClassicGetCollection($request, $start, $count, $parent);
         }
 
         return $response;
@@ -185,6 +161,8 @@ class PageController extends ARestController
      * Get page by uid
      *
      * @param string $uid the unique identifier of the page we want to retrieve
+     *
+     * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      * @Rest\Security(expression="is_granted('VIEW', page)")
@@ -284,6 +262,8 @@ class PageController extends ARestController
     /**
      * Update page
      *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
      * @Rest\RequestParam(name="title", description="Page title", requirements={
      *   @Assert\NotBlank(message="title is required")
      * })
@@ -342,6 +322,8 @@ class PageController extends ARestController
     /**
      * Patch page
      *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
      * @Rest\RequestParam(name="0", description="Patch operations", requirements={
      *   @Assert\NotBlank(message="Request must contain at least one operation")
      * })
@@ -382,6 +364,8 @@ class PageController extends ARestController
     /**
      * Delete page
      *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
      * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
      */
     public function deleteAction(Page $page)
@@ -403,6 +387,8 @@ class PageController extends ARestController
 
     /**
      * Clone a page
+     *
+     * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\RequestParam(name="title", description="Cloning page new title", requirements={
      *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters"),
@@ -471,6 +457,96 @@ class PageController extends ARestController
     private function getPageRepository()
     {
         return $this->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
+    }
+
+    /**
+     * Returns every pages that contains provided classcontent
+     *
+     * @param  string $content_type
+     * @param  string $content_uid
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    private function doGetCollectionByContent($content_type, $content_uid)
+    {
+        $content = null;
+        $classname = AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $content_type);
+        $em = $this->getApplication()->getEntityManager();
+
+        try {
+            $content = $em->find($classname, $content_uid);
+        } catch (ClassNotFoundException $e) {
+            throw new NotFoundHttpException("No classcontent found with provided type (:$content_type)");
+        }
+
+        if (null === $content) {
+            throw new NotFoundHttpException("No `$classname` exists with uid `$content_uid`");
+        }
+
+        $pages = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findPagesByContent($content);
+
+        $response = $this->createResponse($this->formatCollection($pages));
+        if (0 < count($pages)) {
+            $response->headers->set('Content-Range', '0-' . (count($pages) - 1) . '/' . count($pages));
+        }
+
+        return $response;
+    }
+
+    /**
+     * Returns pages collection by doing classic selection and by applying filters provided in request
+     * query parameters
+     *
+     * @param  Request   $request
+     * @param  integer   $start
+     * @param  integer   $count
+     * @param  Page|null $parent
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    private function doClassicGetCollection(Request $request, $start, $count, Page $parent = null)
+    {
+        $qb = $this->getPageRepository()->createQueryBuilder('p');
+        if (null === $parent) {
+            $qb->andSiteIs($this->getApplication()->getSite());
+        } else {
+            $this->granted('VIEW', $parent);
+        }
+
+        $qb = $qb->andParentIs($parent);
+
+        $order_by = array();
+        if (null !== $request->query->get('order_by', null)) {
+            foreach ($request->query->get('order_by') as $key => $value) {
+                if ('_' !== $key[0]) {
+                    $key = '_'.$key;
+                }
+
+                $order_by[$key] = $value;
+            }
+        } else {
+            $order_by['_leftnode'] = 'asc';
+        }
+
+        $qb->orderByMultiple($order_by);
+
+        if (null !== $state = $request->query->get('state', null)) {
+            $qb->andStateIsIn((array) $state);
+        }
+
+        $results = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
+        $count = 0;
+        foreach ($results as $row) {
+            $count++;
+        }
+
+        $result_count = $start + $count - 1; // minus 1 cause $start start at 0 and not 1
+        $response = $this->createResponse($this->formatCollection($results));
+        if (0 < $count) {
+            $response->headers->set('Content-Range', "$start-$result_count/".count($results));
+        }
+
+        return $response;
     }
 
     /**
