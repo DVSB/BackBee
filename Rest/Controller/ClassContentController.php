@@ -199,7 +199,7 @@ class ClassContentController extends ARestController
         }
 
         $content_type = 'application/json';
-        if ('html' === $request->getContentType()) {
+        if (in_array('text/html', $request->getAcceptableContentTypes())) {
             if (null !== $this->getEntityFromAttributes('page')) {
                 $this->getApplication()->getRenderer()->getCurrentPage($page);
             }
