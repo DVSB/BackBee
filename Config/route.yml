@@ -350,6 +350,16 @@ bb.rest.classcontent.get_collection_by_category:
         type: .+
         _method: GET
 
+bb.rest.classcontent.post:
+    pattern: /rest/{version}/classcontent/{type}
+    defaults:
+        _action: postAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: .+
+        _method: POST
+
 bb.rest.classcontent.delete:
     pattern: /rest/{version}/classcontent/{type}/{uid}
     defaults:

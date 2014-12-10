@@ -215,6 +215,47 @@ class ClassContentController extends ARestController
     }
 
     /**
+     * Creates classcontent according to provided type
+     *
+     * @param  string  $type
+     * @param  Request $request
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    public function postAction($type, Request $request)
+    {
+        $classname = $this->getClassnameByType($type);
+        $content = new $classname();
+
+        $em = $this->getApplication()->getEntityManager();
+        $em->persist($content);
+
+        $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft(
+            $content,
+            $this->getApplication()->getBBUserToken(),
+            true
+        );
+
+        $content->setDraft($draft);
+        $em->flush();
+
+        $response = $this->createResponse('', 201);
+        $location = $this->getApplication()->getRouting()->getUrlByRouteName(
+            'bb.rest.classcontent.get',
+            array(
+                'version' => $request->attributes->get('version'),
+                'type'    => $type,
+                'uid'     => $content->getUid()
+            ),
+            '',
+            false
+        );
+        $response->headers->set('Location', $location);
+
+        return $response;
+    }
+
+    /**
      * delete a classcontent
      *
      * @param string $type type of the class content (ex: Element/text)
