@@ -21,6 +21,13 @@
 
 namespace BackBuilder\Util\Sequence;
 
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\Util\Numeric;
+
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadata;
+
 /**
  * Sequence repository
  * Utility class providing db stored sequences
@@ -31,38 +38,51 @@ namespace BackBuilder\Util\Sequence;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Sequencer extends \Doctrine\ORM\EntityRepository
+class Sequencer extends EntityRepository
 {
     /**
      * The table name
      * @var string
      */
-    private $_table;
+    private $table;
 
     /**
      * The fieldname of _name
      * @var string
      */
-    private $_name;
+    private $name;
 
     /**
      * The fieldname of _value
      * @var string
      */
-    private $_value;
+    private $value;
 
     /**
      * Class constructor
-     * @param type                                $em
-     * @param \Doctrine\ORM\Mapping\ClassMetadata $class
+     * @param type          $em
+     * @param ClassMetadata $class
      */
-    public function __construct($em, \Doctrine\ORM\Mapping\ClassMetadata $class)
+    public function __construct(EntityManager $em, ClassMetadata $class)
     {
         parent::__construct($em, $class);
 
-        $this->_table = $this->getClassMetadata()->table['name'];
-        $this->_name = $this->getClassMetadata()->fieldMappings['_name']['columnName'];
-        $this->_value = $this->getClassMetadata()->fieldMappings['_value']['columnName'];
+        $this->table = $this->getClassMetadata()->table['name'];
+        $this->name = $this->getClassMetadata()->fieldMappings['_name']['columnName'];
+        $this->value = $this->getClassMetadata()->fieldMappings['_value']['columnName'];
+    }
+
+    /**
+     * Get the next sequence value
+     * @param  string $name
+     * @param  int    $default
+     * @return int
+     */
+    public function getValue($name, $default = 0)
+    {
+        $current = $this->read($name, $default);
+
+        return $this->update($name, $current + 1);
     }
 
     /**
@@ -70,26 +90,25 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
      * @param  string                                          $name
      * @param  int                                             $first
      * @return int
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occures if sequence $name already exists
+     * @ Occures if sequence $name already exists
      *                                                               or $first is not a positive integer
      */
-    private function _init($name, $first = 0)
+    private function init($name, $first = 0)
     {
         if (null !== $this->find($name)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Sequence with name %s already exists', $name));
+            throw new InvalidArgumentException(sprintf('Sequence with name %s already exists', $name));
         }
 
-        if (false === \BackBuilder\Util\Numeric::isPositiveInteger($first, false)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException('Initial value of a sequence must be a positive integer');
+        if (false === Numeric::isPositiveInteger($first, false)) {
+            throw new InvalidArgumentException('Initial value of a sequence must be a positive integer');
         }
 
-        $query = 'INSERT INTO :_table (:_name, :_value) VALUE(:name, :value)';
+        $query = 'INSERT INTO sequence (:_name, :_value) VALUE(:name, :value)';
         $params = array(
-            'table' => $this->_table,
-            '_name' => $this->_name,
-            '_value' => $this->_value,
-            'name' => $name,
-            'value' => $first,
+            '_name'  => $this->name,
+            '_value' => $this->value,
+            'name'   => $name,
+            'value'  => $first
         );
 
         $this->getEntityManager()
@@ -104,31 +123,29 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
      * @param  string                                          $name
      * @param  int                                             $first
      * @return int
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occures if sequence $name doesn't exist
+     * @throws InvalidArgumentException Occures if sequence $name doesn't exist
      *                                                               or $value is not a positive integer
      */
-    private function _update($name, $value = 0)
+    private function update($name, $value = 0)
     {
         if (null === $this->find($name)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Unknown sequence with name %s', $name));
+            throw new InvalidArgumentException(sprintf('Unknown sequence with name %s', $name));
         }
 
-        if (false === \BackBuilder\Util\Numeric::isPositiveInteger($value, false)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException('Initial value of a sequence must be a positive integer');
+        if (false === Numeric::isPositiveInteger($value, false)) {
+            throw new InvalidArgumentException('Initial value of a sequence must be a positive integer');
         }
 
-        $query = 'UPDATE :_table SET :_value = :value WHERE :_name = :name';
+        $query = 'UPDATE sequence SET value = :value WHERE name = :name';
         $params = array(
-            '_table' => $this->_table,
-            '_value' => $this->_value,
-            '_name'  => $this->_name,
-            'name' => $name,
-            'value' => $value,
+            'name'  => $name,
+            'value' => $value
         );
 
         $this->getEntityManager()
-                ->getConnection()
-                ->executeQuery($query, $params);
+            ->getConnection()
+            ->executeUpdate($query, $params)
+        ;
 
         return $value;
     }
@@ -139,26 +156,13 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
      * @param  int    $default
      * @return int
      */
-    private function _read($name, $default = 0)
+    private function read($name, $default = 0)
     {
         if (null === $seq = $this->find($name)) {
-            return $this->_init($name, $default);
+            return $this->init($name, $default);
         }
 
         return $seq->getValue();
-    }
-
-    /**
-     * Get the next sequence value
-     * @param  string $name
-     * @param  int    $default
-     * @return int
-     */
-    public function getValue($name, $default = 0)
-    {
-        $current = $this->_read($name, $default);
-
-        return $this->_update($name, $current + 1);
     }
 
     /**
@@ -166,17 +170,17 @@ class Sequencer extends \Doctrine\ORM\EntityRepository
      * @param  string                                          $name
      * @param  int                                             $value
      * @return int
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $value is not a positive integer
+     * @throws InvalidArgumentException Occures if $value is not a positive integer
      */
     public function increaseTo($name, $value)
     {
-        if (false === \BackBuilder\Util\Numeric::isPositiveInteger($value, false)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException('Value of a sequence must be a positive integer');
+        if (false === Numeric::isPositiveInteger($value, false)) {
+            throw new InvalidArgumentException('Value of a sequence must be a positive integer');
         }
 
-        $current = $this->_read($name);
+        $current = $this->read($name);
         if ($value > $current) {
-            return $this->_update($name, $value);
+            return $this->update($name, $value);
         }
 
         return $current;
