@@ -304,6 +304,24 @@ bb.rest.classcontent.category.get_collection:
     requirements:
         _method: GET
 
+bb.rest.classcontent.definition.get:
+    pattern: /rest/{version}/classcontent/definition/{type}
+    defaults:
+        _action: getDefinitionAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        type: "[a-zA-Z\/]+"
+        _method: GET
+
+bb.rest.classcontent.definition.get_collection:
+    pattern: /rest/{version}/classcontent/definition
+    defaults:
+        _action: getDefinitionCollectionAction
+        _controller: BackBuilder\Rest\Controller\ClassContentController
+    requirements:
+        type: "[a-zA-Z\/]+"
+        _method: GET
+
 bb.rest.classcontent.get:
     pattern: /rest/{version}/classcontent/{type}/{uid}
     defaults:
