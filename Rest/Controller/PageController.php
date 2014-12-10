@@ -172,9 +172,11 @@ class PageController extends ARestController
             $count++;
         }
 
-        $result_count = $start + $count;
+        $result_count = $start + $count - 1; // minus 1 cause $start start at 0 and not 1
         $response = $this->createResponse($this->formatCollection($results));
-        $response->headers->set('Content-Range', "$start-$result_count/".count($results));
+        if (0 < $count) {
+            $response->headers->set('Content-Range', "$start-$result_count/".count($results));
+        }
 
         return $response;
     }

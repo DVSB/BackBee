@@ -105,13 +105,56 @@ class ClassContentController extends ARestController
 
         $classnames = array();
         foreach ($category->getBlocks() as $block) {
-            $classnames[] = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $block->type);
+            $classnames[] = $this->getClassnameByType($block->type);
         }
 
         $contents = $this->findContentsByCriterias($classnames, $start, $count);
         $response = $this->createResponse(json_encode($this->formatClassContentCollection($contents)));
 
         return $this->addContentRangeHeadersToResponse($response, $contents, $start);
+    }
+
+    /**
+     * Returns definition for provided type
+     *
+     * @param  string $type
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    public function getDefinitionAction($type)
+    {
+        $classname = $this->getClassnameByType($type);
+
+        return $this->createResponse(json_encode($this->getDefinitionFromClassContent(new $classname())));
+    }
+
+    /**
+     * Returns definitions of every declared classcontent in current application; you can also filter it by:
+     *     - category name (provide 'category' as query parameter): returns definitions of every classcontent that
+     *     belong to provided category
+     *     - page uid (provide 'page_uid' as query parameter): returns definitions of every classcontent contained
+     *     by page's contentset
+     *
+     * @param  Resquest $request
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    public function getDefinitionCollectionAction(Request $request)
+    {
+        $definitions = null;
+
+        if (null !== $category = $request->query->get('category', null)) {
+            $definitions = $this->getDefinitionsByCategory($category);
+        } elseif (null !== $page_uid = $request->query->get('page_uid', null)) {
+            $definitions = $this->getDefinitionsByPageUid($page_uid);
+        } else {
+            $definitions = $this->getAllDefinitionsFromCategoryManager();
+        }
+
+        $response = $this->createResponse(json_encode($definitions));
+        $response->headers->set('Content-Range', '0-' . (count($definitions) - 1) . '/' . count($definitions));
+
+        return $response;
     }
 
     /**
@@ -125,8 +168,7 @@ class ClassContentController extends ARestController
      */
     public function getCollectionAction($type, $start, $count)
     {
-        $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $type);
-
+        $classname = $this->getClassnameByType($type);
         $contents = $this->findContentsByCriterias((array) $classname, $start, $count);
         $response = $this->createResponse(json_encode($this->formatClassContentCollection($contents)));
 
@@ -206,6 +248,124 @@ class ClassContentController extends ARestController
     }
 
     /**
+     * Returns complete namespace of classcontent with provided $type
+     *
+     * @param  string $type
+     *
+     * @return string classname associated to provided
+     *
+     * @throws
+     */
+    private function getClassnameByType($type)
+    {
+        $classname = AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $type);
+
+        try {
+            class_exists($classname);
+        } catch (\Exception $e) {
+            throw new NotFoundHttpException("`$type` is not a valid type.");
+        }
+
+        return $classname;
+    }
+
+    /**
+     * Returns provided content definition
+     *
+     * @param  AClassContent $content
+     *
+     * @return array
+     */
+    private function getDefinitionFromClassContent(AClassContent $content)
+    {
+        $definition = $content->jsonSerialize();
+        $definition = $this->updateClassContentImageUrl($definition);
+        unset(
+            $definition['uid'],
+            $definition['state'],
+            $definition['created'],
+            $definition['modified'],
+            $definition['revision'],
+            $definition['elements'],
+            $definition['draft_uid'],
+            $definition['main_node']
+        );
+
+        return $definition;
+    }
+
+    /**
+     * Returns definitions of classcontent that belong to provided category name
+     *
+     * @param  string $category_name
+     *
+     * @return array
+     */
+    private function getDefinitionsByCategory($category_name)
+    {
+        $category = $this->getCategoryManager()->getCategory($category_name);
+        if (null === $category) {
+            throw new NotFoundHttpException("`$category_name` is not a valid classcontent category.");
+        }
+
+        $definitions = array();
+        foreach ($category->getBlocks() as $block) {
+            $classname = $this->getClassnameByType($block->type);
+            $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+        }
+
+        return $definitions;
+    }
+
+    /**
+     * Returns definitions of classcontent contained by provided page contentset
+     *
+     * @param  string $page_uid
+     *
+     * @return array
+     */
+    private function getDefinitionsByPageUid($page_uid)
+    {
+        $classnames = $this->getApplication()->getEntityManager()->getConnection()->executeQuery(
+            'SELECT DISTINCT c.classname
+             FROM idx_content_content icc, content c, page p
+             WHERE p.uid = :page_uid AND p.contentset = icc.content_uid
+             AND icc.subcontent_uid = c.uid AND c.classname != :contentset_classname
+            ',
+            array(
+                'page_uid'             => $page_uid,
+                'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'
+            )
+        )->fetchAll();
+
+        $definitions = array();
+        foreach ($classnames as $classname) {
+            $classname = $classname['classname'];
+                $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+        }
+
+        return $definitions;
+    }
+
+    /**
+     * Returns definitions of every declared classcontent in current application
+     *
+     * @return array
+     */
+    private function getAllDefinitionsFromCategoryManager()
+    {
+        $definitions = array();
+        foreach ($this->getCategoryManager()->getCategories() as $category) {
+            foreach ($category->getBlocks() as $block) {
+                $classname = $this->getClassnameByType($block->type);
+                $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+            }
+        }
+
+        return $definitions;
+    }
+
+    /**
      * Returns classcontent datas if couple (type;uid) is valid
      *
      * @param string $type short namespace of a classcontent
@@ -217,7 +377,7 @@ class ClassContentController extends ARestController
     private function getClassContentByTypeAndUid($type, $uid)
     {
         $content = null;
-        $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $type);
+        $classname = $this->getClassnameByType($type);
 
         try {
             $content = $this->getApplication()->getEntityManager()->find($classname, $uid);

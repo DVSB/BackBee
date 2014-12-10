@@ -22,6 +22,7 @@
 namespace BackBuilder\ClassContent;
 
 use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
+use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\IApplication as ApplicationInterface;
 use BackBuilder\Util\File;
 
@@ -103,9 +104,9 @@ class CategoryManager
             $classcontents = array_merge($classcontents, array_map(
                 function ($path) use ($directory) {
                     return str_replace(
-                        DIRECTORY_SEPARATOR,
-                        NAMESPACE_SEPARATOR,
-                        'BackBuilder\ClassContent'.str_replace(array($directory, '.yml'), array('', ''), $path)
+                        array(DIRECTORY_SEPARATOR, '\\\\'),
+                        array(NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR),
+                        AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace(array($directory, '.yml'), array('', ''), $path)
                     );
                 },
                 File::getFilesRecursivelyByExtension($directory, 'yml')
@@ -118,8 +119,7 @@ class CategoryManager
                 if (class_exists($class)) {
                     $this->buildCategoryFromClassContent(new $class());
                 }
-            } catch (ClassNotFoundException $e) { /* nothing to do */
-            }
+            } catch (ClassNotFoundException $e) { /* nothing to do */ }
         }
     }
 
