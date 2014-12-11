@@ -1071,21 +1071,25 @@ abstract class AClassContent extends AContent
     /**
      * {@inheritdoc}
      */
-    public function jsonSerialize()
+    public function jsonSerialize($verbose = true)
     {
-        $datas = array(
+        $data = array(
             'properties' => $this->getProperty(),
             'main_node'  => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
             'draft_uid'  => null !== $this->getDraft() ? $this->getDraft()->getUid() : null,
             'image'      => $this->getImageName(),
         );
 
-        $datas = array_merge(parent::jsonSerialize(), $datas);
+        $data = array_merge(parent::jsonSerialize($verbose), $data);
 
-        if (null === $datas['label']) {
-            $datas['label'] = $this->getProperty('name');
+        if (null === $data['label']) {
+            $data['label'] = $this->getProperty('name');
         }
 
-        return $datas;
+        if (false === $verbose) {
+            unset($data['properties']);
+        }
+
+        return $data;
     }
 }

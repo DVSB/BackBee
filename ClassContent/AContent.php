@@ -1016,9 +1016,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     /**
      * {@inheritdoc}
      */
-    public function jsonSerialize()
+    public function jsonSerialize($verbose = true)
     {
-        $datas = array(
+        $data = array(
             'uid'        => $this->_uid,
             'label'      => $this->_label,
             'type'       => str_replace(
@@ -1045,15 +1045,19 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             'maxentry'   => $this->getMaxEntry(),
         );
 
-        $datas['elements'] = array();
+        $data['elements'] = array();
         foreach ($this->getData() as $name => $content) {
             if ($content instanceof AContent) {
-                $datas['elements'][$name] = $content->jsonSerialize();
+                $data['elements'][$name] = $content->jsonSerialize($verbose);
             } elseif (is_scalar($content)) {
-                $datas['elements'][$name] = $content;
+                $data['elements'][$name] = $content;
             }
         }
 
-        return $datas;
+        if (false === $verbose) {
+            unset($data['accept'], $data['minentry'], $data['maxentry']);
+        }
+
+        return $data;
     }
 }
