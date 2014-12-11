@@ -29,7 +29,7 @@ namespace BackBuilder\Rest\Controller;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-interface IRestController
+interface RestControllerInterface
 {
     /*
      * Handle OPTIONS method for a given endpoint
