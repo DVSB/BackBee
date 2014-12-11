@@ -29,7 +29,7 @@ namespace BackBuilder\Rest\Formatter;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-interface IFormatter
+interface FormatterInterface
 {
     /*
      * Format an item

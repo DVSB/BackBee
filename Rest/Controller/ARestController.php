@@ -22,7 +22,7 @@
 namespace BackBuilder\Rest\Controller;
 
 use BackBuilder\Controller\Controller;
-use BackBuilder\Rest\Formatter\IFormatter;
+use BackBuilder\Rest\Formatter\FormatterInterface;
 use BackBuilder\Rest\Exception\ValidationException;
 use BackBuilder\Serializer\SerializerBuilder;
 
@@ -44,7 +44,7 @@ use Symfony\Component\Validator\ConstraintViolationList;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-abstract class ARestController extends Controller implements IRestController, IFormatter
+abstract class ARestController extends Controller implements IRestController, FormatterInterface
 {
     /**
      *
@@ -67,7 +67,7 @@ abstract class ARestController extends Controller implements IRestController, IF
     /*
      * Default formatter for a collection of objects
      *
-     * Implements BackBuilder\Rest\Formatter\IFormatter::formatCollection($collection)
+     * Implements FormatterInterface::formatCollection($collection)
      */
     public function formatCollection($collection, $format = 'json')
     {
@@ -83,7 +83,7 @@ abstract class ARestController extends Controller implements IRestController, IF
     /**
      * Serializes an object
      *
-     * Implements BackBuilder\Rest\Formatter\IFormatter::formatItem($item)
+     * Implements FormatterInterface::formatItem($item)
      * @param  mixed $item
      * @return array
      */
@@ -203,7 +203,7 @@ abstract class ARestController extends Controller implements IRestController, IF
     protected function createValidationException($field, $value, $message)
     {
         return new ValidationException(new ConstraintViolationList(array(
-            new ConstraintViolation($message, $message, array(), $field, $field, $value),
+            new ConstraintViolation($message, $message, array(), $field, $field, $value)
         )));
     }
 
