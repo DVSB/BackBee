@@ -30,6 +30,7 @@ use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -44,7 +45,7 @@ use Symfony\Component\Validator\ConstraintViolationList;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-abstract class ARestController extends Controller implements IRestController, FormatterInterface
+abstract class ARestController extends Controller implements RestControllerInterface, FormatterInterface
 {
     /**
      *
@@ -137,6 +138,22 @@ abstract class ARestController extends Controller implements IRestController, Fo
         }
 
         return $this->getSerializer()->deserialize(json_encode($data), $entityOrClass, 'json',  $context);
+    }
+
+    /**
+     * Create a JsonResponse
+     *
+     * @see JsonResponse::__construct()
+     *
+     * @param  mixed   $data
+     * @param  integer $status
+     * @param  array   $headers
+     *
+     * @return JsonResponse
+     */
+    protected function createJsonResponse($data = null, $status = 200, $headers = array())
+    {
+        return new JsonResponse($data, $status, $headers);
     }
 
     /**
