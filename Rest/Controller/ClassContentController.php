@@ -165,6 +165,8 @@ class ClassContentController extends ARestController
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
+     * @Rest\QueryParam(name="verbose", default=true, description="Response will contains classcontent definition and its own data")
+     *
      * @Rest\Pagination(default_count=25, max_count=100)
      */
     public function getCollectionAction($type, $start, $count)
@@ -186,6 +188,7 @@ class ClassContentController extends ARestController
      *
      * @Rest\QueryParam(name="mode", description="The render mode to use")
      * @Rest\QueryParam(name="page_uid", description="The page to set to application's renderer before rendering")
+     * @Rest\QueryParam(name="verbose", default=true, description="Response will contains classcontent definition and its own data")
      *
      * @Rest\ParamConverter(
      *   name="page", id_name="page_uid", id_source="query", class="BackBee\NestedNode\Page", required=false
@@ -210,7 +213,8 @@ class ClassContentController extends ARestController
                 $this->getApplication()->getRenderer()->render($content, $mode), 200, 'text/html'
             );
         } else {
-            $response = $this->createJsonResponse($this->updateClassContentImageUrl($content->jsonSerialize()));
+            $verbose = (boolean) $request->query->get('verbose', true);
+            $response = $this->createJsonResponse($this->updateClassContentImageUrl($content->jsonSerialize($verbose)));
         }
 
         return $response;
@@ -530,8 +534,9 @@ class ClassContentController extends ARestController
     private function formatClassContentCollection(Paginator $paginator)
     {
         $contents = [];
+        $verbose = (boolean) $this->getApplication()->getRequest()->query->get('verbose', true);
         foreach ($paginator as $content) {
-            $contents[] = $content->jsonSerialize();
+            $contents[] = $content->jsonSerialize($verbose);
         }
 
         return $this->updateClassContentCollectionImageUrl($contents);
