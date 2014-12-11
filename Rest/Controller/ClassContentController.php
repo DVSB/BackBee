@@ -64,7 +64,7 @@ class ClassContentController extends ARestController
             throw new NotFoundHttpException("No classcontent category exists for id `$id`.");
         }
 
-        return $this->createResponse(json_encode($category));
+        return $this->createJsonResponse($category);
     }
 
     /**
@@ -79,10 +79,9 @@ class ClassContentController extends ARestController
             $categories[] = array_merge(array('id' => $id), $category->jsonSerialize());
         }
 
-        $response = $this->createResponse(json_encode($categories));
-        $response->headers->set('Content-Range', '0-' . (count($categories) - 1) . '/' . count($categories));
-
-        return $response;
+        return $this->createJsonResponse($categories, 200, array(
+            'Content-Range' => '0-' . (count($categories) - 1) . '/' . count($categories)
+        ));
     }
 
     /**
@@ -109,7 +108,7 @@ class ClassContentController extends ARestController
         }
 
         $contents = $this->findContentsByCriterias($classnames, $start, $count);
-        $response = $this->createResponse(json_encode($this->formatClassContentCollection($contents)));
+        $response = $this->createJsonResponse($this->formatClassContentCollection($contents));
 
         return $this->addContentRangeHeadersToResponse($response, $contents, $start);
     }
@@ -125,7 +124,7 @@ class ClassContentController extends ARestController
     {
         $classname = $this->getClassnameByType($type);
 
-        return $this->createResponse(json_encode($this->getDefinitionFromClassContent(new $classname())));
+        return $this->createJsonResponse($this->getDefinitionFromClassContent(new $classname()));
     }
 
     /**
@@ -151,10 +150,9 @@ class ClassContentController extends ARestController
             $definitions = $this->getAllDefinitionsFromCategoryManager();
         }
 
-        $response = $this->createResponse(json_encode($definitions));
-        $response->headers->set('Content-Range', '0-' . (count($definitions) - 1) . '/' . count($definitions));
-
-        return $response;
+        return $this->createJsonResponse($definitions, 200, array(
+            'Content-Range' => '0-' . (count($definitions) - 1) . '/' . count($definitions)
+        ));
     }
 
     /**
@@ -170,7 +168,7 @@ class ClassContentController extends ARestController
     {
         $classname = $this->getClassnameByType($type);
         $contents = $this->findContentsByCriterias((array) $classname, $start, $count);
-        $response = $this->createResponse(json_encode($this->formatClassContentCollection($contents)));
+        $response = $this->createJsonResponse($this->formatClassContentCollection($contents));
 
         return $this->addContentRangeHeadersToResponse($response, $contents, $start);
     }
@@ -198,20 +196,21 @@ class ClassContentController extends ARestController
             $content->setDraft($draft);
         }
 
-        $content_type = 'application/json';
+        $response = null;
         if (in_array('text/html', $request->getAcceptableContentTypes())) {
             if (null !== $this->getEntityFromAttributes('page')) {
                 $this->getApplication()->getRenderer()->getCurrentPage($page);
             }
 
             $mode = $request->query->get('mode', null);
-            $content = $this->getApplication()->getRenderer()->render($content, $mode);
-            $content_type = 'text/html';
+            $response = $this->createResponse(
+                $this->getApplication()->getRenderer()->render($content, $mode), 200, 'text/html'
+            );
         } else {
-            $content = json_encode($this->updateClassContentImageUrl($content->jsonSerialize()));
+            $response = $this->createJsonResponse($this->updateClassContentImageUrl($content->jsonSerialize()));
         }
 
-        return $this->createResponse($content, 200, $content_type);
+        return $response;
     }
 
     /**
@@ -239,20 +238,18 @@ class ClassContentController extends ARestController
         $content->setDraft($draft);
         $em->flush();
 
-        $response = $this->createResponse('', 201);
-        $location = $this->getApplication()->getRouting()->getUrlByRouteName(
-            'bb.rest.classcontent.get',
-            array(
-                'version' => $request->attributes->get('version'),
-                'type'    => $type,
-                'uid'     => $content->getUid()
-            ),
-            '',
-            false
-        );
-        $response->headers->set('Location', $location);
-
-        return $response;
+        return $this->createJsonResponse(null, 201, array(
+            'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
+                'bb.rest.classcontent.get',
+                array(
+                    'version' => $request->attributes->get('version'),
+                    'type'    => $type,
+                    'uid'     => $content->getUid()
+                ),
+                '',
+                false
+            )
+        ));
     }
 
     /**
@@ -275,7 +272,7 @@ class ClassContentController extends ARestController
             throw new BadRequestHttpException("Unable to delete content with type: `$type` and uid: `$uid`");
         }
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 
     /**
