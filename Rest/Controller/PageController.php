@@ -60,7 +60,7 @@ class PageController extends ARestController
      */
     public function getAvailableStatusAction()
     {
-        return $this->createResponse(json_encode(Page::$STATES));
+        return $this->createJsonResponse(Page::$STATES);
     }
 
     /**
@@ -78,7 +78,7 @@ class PageController extends ARestController
         $default_metadata = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
         $metadata = array_merge($default_metadata->jsonSerialize(), $metadata);
 
-        return $this->createResponse(json_encode($metadata));
+        return $this->createJsonResponse($metadata);
     }
 
     /**
@@ -108,7 +108,7 @@ class PageController extends ARestController
         $page->setMetaData($metadatas->compute($page));
         $this->getApplication()->getEntityManager()->flush($page);
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 
     /**
@@ -244,19 +244,17 @@ class PageController extends ARestController
             return $this->createResponse('Internal server error: '.$e->getMessage(), 500);
         }
 
-        $response = $this->createResponse('', 201);
-        $location = $this->getApplication()->getRouting()->getUrlByRouteName(
-            'bb.rest.page.get',
-            array(
-                'version' => $request->attributes->get('version'),
-                'uid'     => $page->getUid(),
-            ),
-            '',
-            false
-        );
-        $response->headers->set('Location', $location);
-
-        return $response;
+        return $this->createJsonResponse('', 201, array(
+            'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
+                'bb.rest.page.get',
+                array(
+                    'version' => $request->attributes->get('version'),
+                    'uid'     => $page->getUid(),
+                ),
+                '',
+                false
+            )
+        ));
     }
 
     /**
@@ -316,7 +314,7 @@ class PageController extends ARestController
 
         $this->getEntityManager()->flush($page);
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 
     /**
@@ -358,7 +356,7 @@ class PageController extends ARestController
 
         $this->getEntityManager()->flush();
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 
     /**
@@ -382,7 +380,7 @@ class PageController extends ARestController
 
         $this->getPageRepository()->toTrash($page);
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 
     /**
@@ -434,19 +432,17 @@ class PageController extends ARestController
 
         $this->getApplication()->getEntityManager()->flush();
 
-        $response = $this->createResponse('', 201);
-        $location = $this->getApplication()->getRouting()->getUrlByRouteName(
-            'bb.rest.page.get',
-            array(
-                'version' => $request->attributes->get('version'),
-                'uid'     => $page->getUid(),
-            ),
-            '',
-            false
-        );
-        $response->headers->set('Location', $location);
-
-        return $response;
+        return $this->createJsonResponse(null, 201, array(
+            'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
+                'bb.rest.page.get',
+                array(
+                    'version' => $request->attributes->get('version'),
+                    'uid'     => $page->getUid(),
+                ),
+                '',
+                false
+            )
+        ));
     }
 
     /**

@@ -24,6 +24,7 @@ namespace BackBuilder\Rest\Controller;
 use BackBuilder\Rest\Controller\Annotations as Rest;
 use BackBuilder\Security\Token\AnonymousToken;
 use BackBuilder\Security\Token\BBUserToken;
+
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,11 +62,10 @@ class SecurityController extends ARestController
 
         $this->getApplication()->getSecurityContext()->setToken($tokenAuthenticated);
 
-        $response = $this->createResponse('', 201);
-        $response->headers->set('X-API-KEY', $tokenAuthenticated->getUser()->getApiKeyPublic());
-        $response->headers->set('X-API-SIGNATURE', $tokenAuthenticated->getNonce());
-
-        return $response;
+        return $this->createJsonResponse(null, 201, array(
+            'X-API-KEY'       => $tokenAuthenticated->getUser()->getApiKeyPublic(),
+            'X-API-SIGNATURE' => $tokenAuthenticated->getNonce()
+        ));
     }
 
     /**
@@ -131,6 +131,22 @@ class SecurityController extends ARestController
 
     /**
      *
+     * @Rest\Security(expression="is_fully_authenticated()")
+     */
+    public function deleteSessionAction(Request $request)
+    {
+        if (null === $request->getSession()) {
+            throw new NotFoundHttpException('Session doesn\'t exist');
+        }
+
+        $request->getSession()->invalidate();
+        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
+
+        return new Response('', 204);
+    }
+
+    /**
+     *
      * @param  type  $firewall
      * @return array
      */
@@ -148,21 +164,5 @@ class SecurityController extends ARestController
         $contexts = array_intersect(array_keys($firewallConfig), $allowedContexts);
 
         return $contexts;
-    }
-
-    /**
-     *
-     * @Rest\Security(expression="is_fully_authenticated()")
-     */
-    public function deleteSessionAction(Request $request)
-    {
-        if (null === $request->getSession()) {
-            throw new NotFoundHttpException('Session doesn\'t exist');
-        }
-
-        $request->getSession()->invalidate();
-        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
-
-        return new Response('', 204);
     }
 }

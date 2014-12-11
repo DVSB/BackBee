@@ -19,7 +19,7 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Controller;
+namespace BackBuilder\Rest\Formatter;
 
 /**
  * Api controller interface
@@ -29,10 +29,16 @@ namespace BackBuilder\Rest\Controller;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-interface IRestController
+interface FormatterInterface
 {
     /*
-     * Handle OPTIONS method for a given endpoint
+     * Format an item
+     *
      */
-    public function optionsAction($endpoint);
+    public function formatItem($item);
+
+    /*
+     * Format a collection of objects
+     */
+    public function formatCollection($collection);
 }

@@ -261,14 +261,14 @@ bb.rest.layout.get:
         uid: \w{32}
         _method: GET
 
-bb.rest.layout.post:
-    pattern: /rest/{version}/layout
-    defaults:
-        _action: postAction
-        _controller: BackBuilder\Rest\Controller\LayoutController
-    requirements:
-        uid: \w{32}
-        _method: POST
+# bb.rest.layout.post:
+#     pattern: /rest/{version}/layout
+#     defaults:
+#         _action: postAction
+#         _controller: BackBuilder\Rest\Controller\LayoutController
+#     requirements:
+#         uid: \w{32}
+#         _method: POST
 
 bb.rest.layout.put:
     pattern: /rest/{version}/layout/{uid}
