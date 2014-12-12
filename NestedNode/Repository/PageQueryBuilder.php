@@ -85,6 +85,15 @@ class PageQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add query part to select on section page
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andIsSection()
+    {
+        return $this->andWhere($this->getAlias() . '._section = ' . $this->getAlias());
+    }
+
+    /**
      * Add query part to select online pages
      * @param  string                                              $alias optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder

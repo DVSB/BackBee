@@ -60,6 +60,18 @@ class PageQueryBuilderTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsSection
+     */
+    public function testAndIsSection()
+    {
+        $q = $this->repo->createQueryBuilder('p')
+                ->andIsSection();
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._section = p', $q->getDql());
+    }
+
+    /**
      * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsOnline
      */
     public function testAndIsOnline()
