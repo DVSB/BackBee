@@ -105,6 +105,15 @@ class PageQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add query part to select not deleted pages
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andIsNotDeleted()
+    {
+        return $this->andWhere($this->getAlias() . '._state < ' . $this->expr()->literal(Page::STATE_DELETED));
+    }
+
+    /**
      * Add query part to select visible (ie online and not hidden) pages
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */

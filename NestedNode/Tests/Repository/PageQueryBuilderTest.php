@@ -90,6 +90,18 @@ class PageQueryBuilderTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsNotDeleted
+     */
+    public function testAndIsNotDeleted()
+    {
+        $q = $this->repo->createQueryBuilder('p')
+                ->andIsNotDeleted();
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state < 4', $q->getDql());
+    }
+
+    /**
      * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsVisible
      */
     public function testAndIsVisible()
