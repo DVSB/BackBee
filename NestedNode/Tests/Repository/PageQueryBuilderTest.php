@@ -287,6 +287,24 @@ class PageQueryBuilderTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::getAlias
+     */
+    public function testGetAlias()
+    {
+        $q = $this->repo->createQueryBuilder('p');
+        $this->assertEquals('p', $q->getAlias());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::getSectionAlias
+     */
+    public function testGetSectionAlias()
+    {
+        $q = $this->repo->createQueryBuilder('p');
+        $this->assertEquals('p_s', $q->getSectionAlias());
+    }
+
+    /**
      * Sets up the fixture
      */
     public function setUp()

@@ -24,6 +24,7 @@ namespace BackBuilder\NestedNode\Repository;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Site\Layout;
 use BackBuilder\Site\Site;
+use Doctrine\ORM\QueryBuilder;
 
 /**
  * This class is responsible for building DQL query strings for Page
@@ -33,8 +34,37 @@ use BackBuilder\Site\Site;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class PageQueryBuilder extends NestedNodeQueryBuilder
+class PageQueryBuilder extends QueryBuilder
 {
+
+    /**
+     * The root alias of this query
+     * @var string
+     */
+    private $alias;
+
+    /**
+     * The join alias to section of this query
+     * @var string
+     */
+    private $section_alias;
+
+    /**
+     * Joined field of section
+     * @var array
+     */
+    private static $join_criteria = array(
+        '_root',
+        '_parent',
+        '_leftnode',
+        '_rightnode',
+        '_site'
+    );
+
+    /**
+     * Options
+     * @var array 
+     */
     public static $config = array(
         // date scheme to use in order to test publishing and archiving, should be Y-m-d H:i:00 for get 1 minute query cache
         'dateSchemeForPublishing' => 'Y-m-d H:i:00',
@@ -296,4 +326,48 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
         return $this;
     }
+
+    /**
+     * Try to retreive the root alias for this builder
+     * @return string
+     * @throws \BackBuilder\Exception\BBException
+     */
+    public function getAlias()
+    {
+        if (null === $this->alias) {
+            $aliases = $this->getRootAliases();
+            if (0 === count($aliases)) {
+                throw new \BackBuilder\Exception\BBException('Cannot access to root alias');
+            }
+
+            $this->alias = $aliases[0];
+        }
+
+        return $this->alias;
+    }
+
+    /**
+     * Returns the join alias to section
+     * @return string
+     */
+    public function getSectionAlias()
+    {
+        if (null === $this->section_alias) {
+            $this->section_alias = $this->getAlias() . '_s';
+            $this->join($this->getAlias() . '._section', $this->section_alias);
+        }
+
+        return $this->section_alias;
+    }
+
+    /**
+     * Return new suffix for parameters
+     * @return string
+     * @codeCoverageIgnore
+     */
+    protected function getSuffix()
+    {
+        return '' . count($this->getParameters());
+    }
+
 }
