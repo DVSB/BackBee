@@ -116,6 +116,34 @@ class PageQueryBuilderTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsAncestorOf
+     */
+    public function testAndIsAncestorOf()
+    {
+        $page = new Page('test');
+        $q = $this->repo->createQueryBuilder('p')
+                ->andIsAncestorOf($page);
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p._section = p AND p_s._root = :root0 AND p_s._leftnode <= :leftnode0 AND p_s._rightnode >= :rightnode0', $q->getDql());
+        $this->assertEquals($page->getSection()->getRoot(), $q->getParameter('root0')->getValue());
+        $this->assertEquals($page->getSection()->getLeftnode(), $q->getParameter('leftnode0')->getValue());
+        $this->assertEquals($page->getSection()->getRightnode(), $q->getParameter('rightnode0')->getValue());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsAncestorOf($page, true);
+        $this->assertEquals($page->getSection()->getLeftnode() - 1, $q->getParameter('leftnode0')->getValue());
+        $this->assertEquals($page->getSection()->getRightnode() + 1, $q->getParameter('rightnode0')->getValue());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsAncestorOf($page, true, 1);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p._section = p AND p_s._root = :root0 AND p_s._leftnode <= :leftnode0 AND p_s._rightnode >= :rightnode0 AND p_s._level = :level0', $q->getDql());
+        $this->assertEquals(1, $q->getParameter('level0')->getValue());
+    }
+
+    /**
      * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andLayoutIs
      */
     public function testAndLayoutIs()
