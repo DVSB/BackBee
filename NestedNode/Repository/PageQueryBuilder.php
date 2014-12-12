@@ -106,18 +106,16 @@ class PageQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select visible (ie online and not hidden) pages
-     * @param  string                                              $alias optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
-    public function andIsVisible($alias = null)
+    public function andIsVisible()
     {
-        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
-
-        return $this->andWhere($alias.'._state = :states'.$suffix)
-                        ->andWhere($alias.'._publishing IS NULL OR '.$alias.'._publishing <= :now'.$suffix)
-                        ->andWhere($alias.'._archiving IS NULL OR '.$alias.'._archiving > :now'.$suffix)
-                        ->setParameter('states'.$suffix, Page::STATE_ONLINE)
-                        ->setParameter('now'.$suffix, date(self::$config['dateSchemeForPublishing'], time()));
+        $suffix = $this->getSuffix();
+        return $this->andWhere($this->getAlias() . '._state = :states' . $suffix)
+                        ->andWhere($this->getAlias() . '._publishing IS NULL OR ' . $this->getAlias() . '._publishing <= :now' . $suffix)
+                        ->andWhere($this->getAlias() . '._archiving IS NULL OR ' . $this->getAlias() . '._archiving > :now' . $suffix)
+                        ->setParameter('states' . $suffix, Page::STATE_ONLINE)
+                        ->setParameter('now' . $suffix, date(self::$config['dateSchemeForPublishing'], time()));
     }
 
     /**

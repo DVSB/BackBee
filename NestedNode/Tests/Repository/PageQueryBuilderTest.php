@@ -86,6 +86,7 @@ class PageQueryBuilderTest extends TestCase
         $q->resetDQLPart('where')
                 ->andIsOnline();
         $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN (1,3) AND (p._publishing IS NULL OR p._publishing <= \'' . date(PageQueryBuilder::$config['dateSchemeForPublishing'], time()) . '\') AND (p._archiving IS NULL OR p._archiving > \'' . date(PageQueryBuilder::$config['dateSchemeForPublishing'], time()) . '\')', $q->getDql());
+        PageQueryBuilder::$config['dateSchemeForPublishing'] = 'Y-m-d H:i:00';
     }
 
     /**
