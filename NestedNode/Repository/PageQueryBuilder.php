@@ -95,18 +95,13 @@ class PageQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select online pages
-     * @param  string                                              $alias optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
-    public function andIsOnline($alias = null)
+    public function andIsOnline()
     {
-        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
-
-        return $this->andWhere($alias.'._state IN (:states'.$suffix.')')
-                        ->andWhere($alias.'._publishing IS NULL OR '.$alias.'._publishing <= :now'.$suffix)
-                        ->andWhere($alias.'._archiving IS NULL OR '.$alias.'._archiving > :now'.$suffix)
-                        ->setParameter('states'.$suffix, array(Page::STATE_ONLINE, Page::STATE_ONLINE + Page::STATE_HIDDEN))
-                        ->setParameter('now'.$suffix, date(self::$config['dateSchemeForPublishing'], time()));
+        return $this->andWhere($this->getAlias() . '._state IN (' . $this->expr()->literal(Page::STATE_ONLINE) . ',' . $this->expr()->literal(Page::STATE_ONLINE + Page::STATE_HIDDEN) . ')')
+                        ->andWhere($this->getAlias() . '._publishing IS NULL OR ' . $this->getAlias() . '._publishing <= ' . $this->expr()->literal(date(self::$config['dateSchemeForPublishing'], time())))
+                        ->andWhere($this->getAlias() . '._archiving IS NULL OR ' . $this->getAlias() . '._archiving > ' . $this->expr()->literal(date(self::$config['dateSchemeForPublishing'], time())));
     }
 
     /**
