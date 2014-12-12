@@ -23,6 +23,7 @@ namespace BackBuilder\NestedNode\Tests\Repository;
 
 use BackBuilder\Tests\TestCase;
 use BackBuilder\NestedNode\Repository\PageRepository;
+use BackBuilder\NestedNode\Repository\PageQueryBuilder;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Site\Layout;
 
@@ -43,6 +44,20 @@ class PageQueryBuilderTest extends TestCase
      * @var \BackBuilder\NestedNode\Repository\PageRepository
      */
     private $repo;
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::hasJoinCriteria
+     */
+    public function testHasJoinCriteria()
+    {
+        $this->assertFalse(PageQueryBuilder::hasJoinCriteria());
+        $this->assertFalse(PageQueryBuilder::hasJoinCriteria(array('_unknown' => 'fake')));
+        $this->assertTrue(PageQueryBuilder::hasJoinCriteria(array('_root' => 'fake')));
+        $this->assertTrue(PageQueryBuilder::hasJoinCriteria(array('_parent' => 'fake')));
+        $this->assertTrue(PageQueryBuilder::hasJoinCriteria(array('_leftnode' => 'fake')));
+        $this->assertTrue(PageQueryBuilder::hasJoinCriteria(array('_rightnode' => 'fake')));
+        $this->assertTrue(PageQueryBuilder::hasJoinCriteria(array('_site' => 'fake')));
+    }
 
     /**
      * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsOnline
@@ -301,7 +316,9 @@ class PageQueryBuilderTest extends TestCase
     public function testGetSectionAlias()
     {
         $q = $this->repo->createQueryBuilder('p');
+        $this->assertEquals(0, count($q->getDQLPart('join')));
         $this->assertEquals('p_s', $q->getSectionAlias());
+        $this->assertEquals(1, count($q->getDQLPart('join')));
     }
 
     /**

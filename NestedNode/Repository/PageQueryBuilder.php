@@ -71,6 +71,20 @@ class PageQueryBuilder extends QueryBuilder
     );
 
     /**
+     * Are some criteria joined fields of section?
+     * @param array $criteria
+     * @return boolean
+     */
+    public static function hasJoinCriteria(array $criteria = null)
+    {
+        if (null === $criteria) {
+            return false;
+        }
+
+        return (0 < count(array_intersect(self::$join_criteria, array_keys($criteria))));
+    }
+
+    /**
      * Add query part to select online pages
      * @param  string                                              $alias optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
