@@ -401,6 +401,23 @@ class PageQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Adds an ordering to the query results.
+     * @param string|Expr\OrderBy $sort  The ordering expression.
+     * @param string              $order The ordering direction.
+     * @return QueryBuilder This QueryBuilder instance.
+     */
+    public function addOrderBy($sort, $order = null)
+    {
+        if (true === in_array($sort, self::$join_criteria)) {
+            $sort = $this->getSectionAlias() . '.' . $sort;
+        } else if (0 !== strpos($this->getAlias() . '.', $sort)) {
+            $sort = $this->getAlias() . '.' . $sort;
+        }
+
+        return parent::addOrderBy($sort, $order);
+    }
+
+    /**
      * Try to retreive the root alias for this builder
      * @return string
      * @throws \BackBuilder\Exception\BBException
