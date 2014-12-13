@@ -154,6 +154,28 @@ class PageQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add query part to select a specific subbranch of tree
+     * @param \BackBuilder\NestedNode\Page $page  the parent page
+     * @param boolean $strict                     optional, if TRUE $page is excluded from results, FALSE by default
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andParentIs(Page $page = null, $strict = false)
+    {
+        if (null === $page) {
+            return $this->andWhere($this->getSectionAlias() . '._parent IS NULL');
+        }
+
+        $suffix = $this->getSuffix();
+        if (true === $strict) {
+            $this->andWhere($this->getAlias() . ' != :page' . $suffix)
+                    ->setParameter('page' . $suffix, $page);
+        }
+
+        return $this->andWhere($this->getSectionAlias() . '._parent = :parent' . $suffix)
+                        ->setParameter('parent' . $suffix, $page->getSection());
+    }
+
+    /**
      * Add query part to select pages by layout
      * @param  \BackBuilder\Site\Layout                            $layout the layout to look for
      * @param  string                                              $alias  optional, the alias to use

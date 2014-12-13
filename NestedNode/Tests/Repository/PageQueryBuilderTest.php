@@ -35,6 +35,7 @@ use BackBuilder\Site\Layout;
  */
 class PageQueryBuilderTest extends TestCase
 {
+
     /**
      * @var \BackBuilder\TestUnit\Mock\MockBBApplication
      */
@@ -141,6 +142,30 @@ class PageQueryBuilderTest extends TestCase
                 ->andIsAncestorOf($page, true, 1);
         $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p._section = p AND p_s._root = :root0 AND p_s._leftnode <= :leftnode0 AND p_s._rightnode >= :rightnode0 AND p_s._level = :level0', $q->getDql());
         $this->assertEquals(1, $q->getParameter('level0')->getValue());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andParentIs
+     */
+    public function testParentIs()
+    {
+        $q = $this->repo->createQueryBuilder('p')
+                ->andParentIs();
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent IS NULL', $q->getDql());
+
+        $page = new Page('test');
+        $q->resetDQLPart('where')
+                ->andParentIs($page);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent = :parent0', $q->getDql());
+        $this->assertEquals($page->getSection(), $q->getParameter('parent0')->getValue());
+
+        $q->resetDQLPart('where')
+                ->andParentIs($page, true);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p != :page1 AND p_s._parent = :parent1', $q->getDql());
+        $this->assertEquals($page, $q->getParameter('page1')->getValue());
+        $this->assertEquals($page->getSection(), $q->getParameter('parent1')->getValue());
     }
 
     /**
@@ -407,4 +432,5 @@ class PageQueryBuilderTest extends TestCase
 
         return $this;
     }
+
 }
