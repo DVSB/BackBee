@@ -132,7 +132,7 @@ class PageQueryBuilder extends QueryBuilder
      * @param \BackBuilder\NestedNode\Page $page
      * @param boolean $strict   If TRUE, $node is excluded from the selection
      * @param int $at_level     Filter ancestors by their level
-     * @return \BackBuilder\NestedNode\Repository\NestedNodeQueryBuilder
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsAncestorOf(Page $page, $strict = false, $at_level = null)
     {
@@ -404,7 +404,7 @@ class PageQueryBuilder extends QueryBuilder
      * Adds an ordering to the query results.
      * @param string|Expr\OrderBy $sort  The ordering expression.
      * @param string              $order The ordering direction.
-     * @return QueryBuilder This QueryBuilder instance.
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
     public function addOrderBy($sort, $order = null)
     {
@@ -415,6 +415,24 @@ class PageQueryBuilder extends QueryBuilder
         }
 
         return parent::addOrderBy($sort, $order);
+    }
+
+    /**
+     * Add several ordering criteria by array
+     * @param array $criteria       optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function addMultipleOrderBy(array $criteria = array('_position' => 'ASC'))
+    {
+        if (true === empty($criteria)) {
+            $criteria = array('_position' => 'ASC');
+        }
+
+        foreach ($criteria as $sort => $order) {
+            $this->addOrderBy($sort, $order);
+        }
+
+        return $this;
     }
 
     /**

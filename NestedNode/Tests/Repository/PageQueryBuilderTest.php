@@ -403,6 +403,20 @@ class PageQueryBuilderTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::addMultipleOrderBy
+     */
+    public function testAddMultipleOrderBy()
+    {
+        $q = $this->repo->createQueryBuilder('p')
+                ->addMultipleOrderBy();
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p ORDER BY p._position ASC', $q->getDql());
+
+        $q->addMultipleOrderBy(array('_title' => 'ASC', '_leftnode' => 'DESC'));
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s ORDER BY p._position ASC, p._title ASC, p_s._leftnode DESC', $q->getDql());
+    }
+
+    /**
      * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::getAlias
      */
     public function testGetAlias()
