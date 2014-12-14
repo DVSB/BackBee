@@ -459,6 +459,26 @@ class PageQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add query part to math provided criteria
+     * @param array $criteria
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function addSearchCriteria(array $criteria)
+    {
+        $suffix = $this->getSuffix();
+        foreach ($criteria as $crit => $value) {
+            if (false === strpos($crit, '.')) {
+                $crit = (true === in_array($crit, self::$join_criteria) ? $this->getSectionAlias() : $this->getAlias()) . '.' . $crit;
+            }
+
+            $this->andWhere($crit . ' IN (:' . $crit . $suffix . ')')
+                    ->setParameter($crit . $suffix, $value);
+        }
+
+        return $this;
+    }
+
+    /**
      * Adds an ordering to the query results.
      * @param string|Expr\OrderBy $sort  The ordering expression.
      * @param string              $order The ordering direction.

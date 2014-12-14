@@ -447,6 +447,25 @@ class PageQueryBuilderTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::addSearchCriteria
+     */
+    public function testAddSearchCriteria()
+    {
+        $q = $this->repo->createQueryBuilder('p')
+                ->addSearchCriteria(array('_uid' => 'test'));
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._uid IN (:p._uid0)', $q->getDql());
+        $this->assertEquals('test', $q->getParameter('p._uid0')->getValue());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->addSearchCriteria(array('_leftnode' => 1));
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._leftnode IN (:p_s._leftnode0)', $q->getDql());
+        $this->assertEquals('1', $q->getParameter('p_s._leftnode0')->getValue());
+    }
+
+    /**
      * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::addOrderBy
      */
     public function testAddOrderBy()
