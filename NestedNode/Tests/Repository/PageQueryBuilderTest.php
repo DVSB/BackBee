@@ -177,7 +177,7 @@ class PageQueryBuilderTest extends TestCase
     {
         $root = new Page('root');
         $child = new Page('child');
-        $child->setSection($root->getSection());
+        $child->setParent($root);
 
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsSiblingsOf($root);
@@ -205,6 +205,32 @@ class PageQueryBuilderTest extends TestCase
         $q->andIsSiblingsOf($child, false, null, 10, 1);
         $this->assertEquals(10, $q->getMaxResults());
         $this->assertEquals(1, $q->getFirstResult());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsDescendantOf
+     */
+    public function testAndIsDescendantOf()
+    {
+        $page = new Page('test');
+        $q = $this->repo->createQueryBuilder('p')
+                ->andIsDescendantOf($page);
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p._section = p_s AND p_s._root = :root0 AND (p_s._leftnode BETWEEN 1 AND 2)', $q->getDql());
+        $this->assertEquals($page->getSection()->getRoot(), $q->getParameter('root0')->getValue());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsDescendantOf($page, true);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p._section = p_s AND p_s._root = :root0 AND (p_s._leftnode BETWEEN 1 AND 2) AND p != :page0', $q->getDql());
+        $this->assertEquals($page, $q->getParameter('page0')->getValue());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsDescendantOf($page, false, 1);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p._section = p_s AND p_s._root = :root0 AND (p_s._leftnode BETWEEN 1 AND 2) AND p._level = :level0', $q->getDql());
+        $this->assertEquals(1, $q->getParameter('level0')->getValue());
     }
 
     /**

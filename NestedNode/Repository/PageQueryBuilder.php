@@ -207,6 +207,34 @@ class PageQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add query part to select descendants of $page
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param boolean $strict   If TRUE, $node is excluded from the selection
+     * @param int $at_level     Filter ancestors by their level
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andIsDescendantOf(Page $page, $strict = false, $at_level = null)
+    {
+        $suffix = $this->getSuffix();
+        $this->andWhere($this->getAlias() . '._section = ' . $this->getSectionAlias())
+                ->andWhere($this->getSectionAlias() . '._root = :root' . $suffix)
+                ->andWhere($this->expr()->between($this->getSectionAlias() . '._leftnode', $page->getSection()->getLeftnode(), $page->getSection()->getRightnode()))
+                ->setParameter('root' . $suffix, $page->getSection()->getRoot());
+
+        if (true === $strict) {
+            $this->andWhere($this->getAlias() . ' != :page' . $suffix)
+                    ->setParameter('page' . $suffix, $page);
+        }
+
+        if (null !== $at_level) {
+            $this->andWhere($this->getAlias() . '._level = :level' . $suffix)
+                    ->setParameter('level' . $suffix, $at_level);
+        }
+
+        return $this;
+    }
+
+    /**
      * Add query part to select pages by layout
      * @param  \BackBuilder\Site\Layout                            $layout the layout to look for
      * @param  string                                              $alias  optional, the alias to use
