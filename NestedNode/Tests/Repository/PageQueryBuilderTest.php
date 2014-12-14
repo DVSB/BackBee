@@ -149,23 +149,62 @@ class PageQueryBuilderTest extends TestCase
      */
     public function testParentIs()
     {
+        $root = new Page('root');
+        $child = new Page('child');
+        $child->setSection($root->getSection());
+
         $q = $this->repo->createQueryBuilder('p')
                 ->andParentIs();
 
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
         $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent IS NULL', $q->getDql());
 
-        $page = new Page('test');
         $q->resetDQLPart('where')
-                ->andParentIs($page);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent = :parent0', $q->getDql());
-        $this->assertEquals($page->getSection(), $q->getParameter('parent0')->getValue());
+                ->andParentIs($child);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE 1 = 0', $q->getDql());
 
         $q->resetDQLPart('where')
-                ->andParentIs($page, true);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p != :page1 AND p_s._parent = :parent1', $q->getDql());
-        $this->assertEquals($page, $q->getParameter('page1')->getValue());
-        $this->assertEquals($page->getSection(), $q->getParameter('parent1')->getValue());
+                ->andParentIs($root);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent = :parent0 AND p != :page0', $q->getDql());
+        $this->assertEquals($root->getSection(), $q->getParameter('parent0')->getValue());
+        $this->assertEquals($root, $q->getParameter('page0')->getValue());
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsSiblingsOf
+     */
+    public function testAndIsSiblingOf()
+    {
+        $root = new Page('root');
+        $child = new Page('child');
+        $child->setSection($root->getSection());
+
+        $q = $this->repo->createQueryBuilder('p')
+                ->andIsSiblingsOf($root);
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent IS NULL', $q->getDql());
+
+        $q->resetDQLPart('where')
+                ->andIsSiblingsOf($child);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent = :parent0 AND p != :page0', $q->getDql());
+        $this->assertEquals($child->getParent()->getSection(), $q->getParameter('parent0')->getValue());
+        $this->assertEquals($child->getParent(), $q->getParameter('page0')->getValue());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsSiblingsOf($child, true);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent = :parent0 AND p != :page0 AND p != :page2', $q->getDql());
+        $this->assertEquals($child, $q->getParameter('page2')->getValue());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsSiblingsOf($child, false, array('p._position' => 'ASC'));
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent = :parent0 AND p != :page0 ORDER BY p._position ASC', $q->getDql());
+
+        $q->andIsSiblingsOf($child, false, null, 10, 1);
+        $this->assertEquals(10, $q->getMaxResults());
+        $this->assertEquals(1, $q->getFirstResult());
     }
 
     /**

@@ -156,23 +156,54 @@ class PageQueryBuilder extends QueryBuilder
     /**
      * Add query part to select a specific subbranch of tree
      * @param \BackBuilder\NestedNode\Page $page  the parent page
-     * @param boolean $strict                     optional, if TRUE $page is excluded from results, FALSE by default
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
-    public function andParentIs(Page $page = null, $strict = false)
+    public function andParentIs(Page $page = null)
     {
         if (null === $page) {
             return $this->andWhere($this->getSectionAlias() . '._parent IS NULL');
         }
 
+        if (false === $page->hasMainSection()) {
+            return $this->andWhere('1 = 0');
+        }
+
         $suffix = $this->getSuffix();
+        return $this->andWhere($this->getSectionAlias() . '._parent = :parent' . $suffix)
+                        ->andWhere($this->getAlias() . ' != :page' . $suffix)
+                        ->setParameter('page' . $suffix, $page)
+                        ->setParameter('parent' . $suffix, $page->getSection());
+    }
+
+    /**
+     * Add query part to select siblings of page
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param boolean $strict       if TRUE, $node is exclude
+     * @param array $order          ordering spec ( array($field => $sort) )
+     * @param int $limit            max number of results
+     * @param int $start            first result index
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andIsSiblingsOf(Page $page, $strict = false, array $order = null, $limit = null, $start = 0)
+    {
+        $this->andParentIs($page->getParent(), true);
+
         if (true === $strict) {
+            $suffix = $this->getSuffix();
             $this->andWhere($this->getAlias() . ' != :page' . $suffix)
                     ->setParameter('page' . $suffix, $page);
         }
 
-        return $this->andWhere($this->getSectionAlias() . '._parent = :parent' . $suffix)
-                        ->setParameter('parent' . $suffix, $page->getSection());
+        if (null !== $order) {
+            $this->addMultipleOrderBy($order);
+        }
+
+        if (null !== $limit) {
+            $this->setMaxResults($limit)
+                    ->setFirstResult($start);
+        }
+
+        return $this;
     }
 
     /**
@@ -408,6 +439,10 @@ class PageQueryBuilder extends QueryBuilder
      */
     public function addOrderBy($sort, $order = null)
     {
+        if (false !== strpos($sort, '.')) {
+            return parent::addOrderBy($sort, $order);
+        }
+
         if (true === in_array($sort, self::$join_criteria)) {
             $sort = $this->getSectionAlias() . '.' . $sort;
         } else if (0 !== strpos($this->getAlias() . '.', $sort)) {
