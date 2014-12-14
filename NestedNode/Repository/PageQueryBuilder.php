@@ -366,16 +366,15 @@ class PageQueryBuilder extends QueryBuilder
      * @param  string                                              $alias  optional, the alias to use
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
-    public function andStateIsNotIn($states, $alias = null)
+    public function andStateIsNotIn($states)
     {
         if (false === is_array($states)) {
             $states = array($states);
         }
 
-        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
-
-        return $this->andWhere($alias.'._state NOT IN(:states'.$suffix.')')
-                        ->setParameter('states'.$suffix, $states);
+        $suffix = $this->getSuffix();
+        return $this->andWhere($this->getAlias() . '._state NOT IN(:states' . $suffix . ')')
+                        ->setParameter('states' . $suffix, $states);
     }
 
     /**
