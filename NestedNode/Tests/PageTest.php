@@ -854,10 +854,35 @@ class PageTest extends TestCase
      */
     public function testSetParent()
     {
+        $child1 = new Page('child1');
+        $child1->setSection($this->page->getSection());
+        $child1->setParent($this->page);
+        $this->assertEquals($this->page, $child1->getParent());
+        $this->assertEquals($this->page->getSection(), $child1->getSection());
+
+        $child2 = new Page('child2');
+        $child2->setParent($this->page);
+        $this->assertEquals($this->page, $child2->getParent());
+        $this->assertEquals($this->page->getSection(), $child2->getSection());
+
         $subsection = new Section('sub-section');
-        $child = new Page('child', array('main_section' => $subsection));
-        $child->setParent($this->page);
-        $this->assertEquals($this->page, $child->getParent());
+        $subsection->setParent($this->page->getSection());
+        $child3 = new Page('child3', array('main_section' => $subsection));
+        $child3->setParent($this->page);
+        $this->assertEquals($this->page, $child3->getParent());
+        $this->assertEquals($subsection, $child3->getSection());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setParent()
+     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     */
+    public function testSetParentWithLeaf()
+    {
+        $child1 = new Page('child1');
+        $child2 = new Page('child2');
+        $child1->setParent($this->page);
+        $child2->setParent($child1);
     }
 
     /**
@@ -939,4 +964,5 @@ class PageTest extends TestCase
 
         return $data;
     }
+
 }

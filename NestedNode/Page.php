@@ -1651,7 +1651,16 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function setParent(Page $parent)
     {
-        $this->getSection()->setParent($parent->getSection());
+        if (false === $parent->hasMainSection()) {
+            throw new InvalidArgumentException('A parent page must be a section');
+        }
+
+        if (false === $this->hasMainSection() || true === $this->isRoot()) {
+            $this->setSection($parent->getSection());
+        } else {
+            $this->getSection()->setParent($parent->getSection());
+        }
+
         return $this;
     }
 
