@@ -346,20 +346,18 @@ class PageQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select page having specific states
-     * @param  mixed                                               $states one or several states to test
-     * @param  string                                              $alias  optional, the alias to use
+     * @param mixed $states       one or several states to test
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
-    public function andStateIsIn($states, $alias = null)
+    public function andStateIsIn($states)
     {
         if (false === is_array($states)) {
             $states = array($states);
         }
 
-        list($alias, $suffix) = $this->getAliasAndSuffix($alias);
-
-        return $this->andWhere($alias.'._state IN(:states'.$suffix.')')
-                        ->setParameter('states'.$suffix, $states);
+        $suffix = $this->getSuffix();
+        return $this->andWhere($this->getAlias() . '._state IN(:states' . $suffix . ')')
+                        ->setParameter('states' . $suffix, $states);
     }
 
     /**

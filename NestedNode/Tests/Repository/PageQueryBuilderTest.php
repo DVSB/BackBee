@@ -336,13 +336,6 @@ class PageQueryBuilderTest extends TestCase
         $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
         $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN(:states0)', $q->getDql());
         $this->assertEquals(array(Page::STATE_ONLINE), $q->getParameter('states0')->getValue());
-
-        $q->resetDQLPart('where')
-                ->setParameters(array())
-                ->andStateIsIn(array(Page::STATE_ONLINE, Page::STATE_OFFLINE));
-
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN(:states0)', $q->getDql());
-        $this->assertEquals(array(Page::STATE_ONLINE, Page::STATE_OFFLINE), $q->getParameter('states0')->getValue());
     }
 
     /**
