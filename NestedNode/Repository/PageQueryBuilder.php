@@ -418,21 +418,19 @@ class PageQueryBuilder extends QueryBuilder
         return $this->andWhere($this->expr()->like($alias.'._title', $this->expr()->literal('%'.$query.'%')));
     }
 
-    /**
+     /**
      * Add query part to select page matching provided criteria
-     * @param  array                                               $restrictedStates optional, limit to pages having provided states, empty by default
-     * @param  array                                               $options          optional, the search criteria: array('beforePubdateField' => timestamp against page._modified,
-     *                                                                               'afterPubdateField' => timestamp against page._modified,
-     *                                                                               'searchField' => string to search for title
-     * @param  string                                              $alias
+     * @param array $restrictedStates   optional, limit to pages having provided states, empty by default
+     * @param array $options            optional, the search criteria: array('beforePubdateField' => timestamp against page._modified,
+     *                                                                       'afterPubdateField' => timestamp against page._modified,
+     *                                                                       'searchField' => string to search for title
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      * @Todo: more generic search function
      */
-    public function andSearchCriteria($restrictedStates = array(), $options = array(), $alias = null)
+    public function andSearchCriteria($restrictedStates = array(), $options = array())
     {
-        $alias = $this->getFirstAlias($alias);
         if (true === is_array($restrictedStates) && 0 < count($restrictedStates) && false === in_array('all', $restrictedStates)) {
-            $this->andStateIsIn($restrictedStates, $alias);
+            $this->andStateIsIn($restrictedStates);
         }
 
         if (false === is_array($options)) {
@@ -441,16 +439,20 @@ class PageQueryBuilder extends QueryBuilder
 
         if (true === array_key_exists('beforePubdateField', $options)) {
             $date = new \DateTime();
-            $this->andModifiedIsLowerThan($date->setTimestamp($options['beforePubdateField']), $alias);
+            $suffix = $this->getSuffix();
+            $this->andWhere($this->getAlias() . '._modified < :date' . $suffix)
+                    ->setParameter('date' . $suffix, $date->setTimestamp($options['beforePubdateField']));
         }
 
         if (true === array_key_exists('afterPubdateField', $options)) {
             $date = new \DateTime();
-            $this->andModifiedIsGreaterThan($date->setTimestamp($options['afterPubdateField']), $alias);
+            $suffix = $this->getSuffix();
+            $this->andWhere($this->getAlias() . '._modified > :date' . $suffix)
+                    ->setParameter('date' . $suffix, $date->setTimestamp($options['afterPubdateField']));
         }
 
         if (true === array_key_exists('searchField', $options)) {
-            $this->andTitleIsLike($options['searchField'], $alias);
+            $this->andWhere($this->expr()->like($this->getAlias() . '._title', $this->expr()->literal('%' . $options['searchField'] . '%')));
         }
 
         return $this;
