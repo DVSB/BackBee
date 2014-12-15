@@ -930,10 +930,11 @@ class ClassContentRepository extends EntityRepository
             return array();
         }
 
-        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN :content_uids';
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN (:content_uids)';
+
         return $this->getEntityManager()
             ->getConnection()
-            ->executeQuery($sql, array('content_uids' => $content_uids))
+            ->executeQuery($sql, array('content_uids' => implode(', ', $content_uids)))
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
     }
