@@ -89,9 +89,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
         }
 
         if (true === $container->hasParameter('bbapp.routing.resource_uri_prefix')) {
-            // Can't enable it at moment, hard dependency in BackBee JS core
-            // $this->uri_prefixes[self::RESOURCE_URL] = $container->getParameter('bbapp.routing.resource_uri_prefix');
-            $this->uri_prefixes[self::RESOURCE_URL] = 'ressources';
+            $this->uri_prefixes[self::RESOURCE_URL] = $container->getParameter('bbapp.routing.resource_uri_prefix');
         }
 
         $this->is_restored = false;
