@@ -3,29 +3,29 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Authentication\Provider;
+namespace BackBee\Security\Authentication\Provider;
 
-use BackBuilder\Bundle\Registry;
-use BackBuilder\Security\Encoder\RequestSignatureEncoder;
-use BackBuilder\Security\Exception\SecurityException;
-use BackBuilder\Security\Exception\UnknownUserException;
-use BackBuilder\Security\Token\BBUserToken;
+use BackBee\Bundle\Registry;
+use BackBee\Security\Encoder\RequestSignatureEncoder;
+use BackBee\Security\Exception\SecurityException;
+use BackBee\Security\Exception\UnknownUserException;
+use BackBee\Security\Token\BBUserToken;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
@@ -36,8 +36,8 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 /**
  * Retrieves BBUser for BBUserToken
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Authentication\Provider
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -97,8 +97,8 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Attempts to authenticates a TokenInterface object.
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @return \BackBuilder\Security\Token\BBUserToken
-     * @throws \BackBuilder\Security\Exception\SecurityException
+     * @return \BackBee\Security\Token\BBUserToken
+     * @throws \BackBee\Security\Exception\SecurityException
      */
     public function authenticate(TokenInterface $token)
     {
@@ -177,7 +177,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      * @param  string                                            $created The creation date of the nonce
      * @param  string                                            $secret  The secret (ie password) to be check
      * @return boolean
-     * @throws \BackBuilder\Security\Exception\SecurityException
+     * @throws \BackBee\Security\Exception\SecurityException
      */
     protected function checkNonce(BBUserToken $token, $secret)
     {
@@ -260,7 +260,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Returns a Registry entry for $nonce
      * @param  string                       $nonce
-     * @return \BackBuilder\Bundle\Registry
+     * @return \BackBee\Bundle\Registry
      */
     private function getRegistry($nonce)
     {

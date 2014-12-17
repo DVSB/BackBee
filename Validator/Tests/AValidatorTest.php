@@ -3,29 +3,29 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Validator\Tests;
+namespace BackBee\Validator\Tests;
 
 /**
  * Validator test
  *
- * @category    BackBuilder
- * @package     BackBuilder\Validator\Tests
+ * @category    BackBee
+ * @package     BackBee\Validator\Tests
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
@@ -34,7 +34,7 @@ class AValidatorTest extends \PHPUnit_Framework_TestCase
     private $validator_test;
 
     /**
-     * @covers BackBuilder\Validator\AValidator::truncatePrefix
+     * @covers BackBee\Validator\AValidator::truncatePrefix
      */
     public function testTruncatePrefix()
     {
@@ -43,7 +43,7 @@ class AValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers BackBuilder\Validator\AValidator::truncatePrefix
+     * @covers BackBee\Validator\AValidator::truncatePrefix
      */
     public function testDoGeneralValidator()
     {
@@ -78,6 +78,6 @@ class AValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->validator_test = $this->getMockForAbstractClass('BackBuilder\Validator\AValidator');
+        $this->validator_test = $this->getMockForAbstractClass('BackBee\Validator\AValidator');
     }
 }

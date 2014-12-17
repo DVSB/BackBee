@@ -3,38 +3,38 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\AutoLoader;
+namespace BackBee\AutoLoader;
 
-use BackBuilder\BBApplication;
-use BackBuilder\DependencyInjection\ContainerInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\Exception\BBException;
-use BackBuilder\Event\Dispatcher;
-use BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
+use BackBee\BBApplication;
+use BackBee\DependencyInjection\ContainerInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBee\Exception\BBException;
+use BackBee\Event\Dispatcher;
+use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
 
 if (false === defined('NAMESPACE_SEPARATOR')) {
     define('NAMESPACE_SEPARATOR', '\\');
 }
 
 /**
- * AutoLoader implements an autoloader for BackBuilder5
+ * AutoLoader implements an autoloader for BackBee5
  *
  * It allows to load classes that:
  *
@@ -49,30 +49,30 @@ if (false === defined('NAMESPACE_SEPARATOR')) {
  *
  * Example usage:
  *
- *     $autoloader = new \BackBuilder\AutoLoader\AutoLoader();
+ *     $autoloader = new \BackBee\AutoLoader\AutoLoader();
  *
  *     // register classes throw wrappers
- *     $autoloader->registerStreamWrapper('BackBuilder\ClassContent',
+ *     $autoloader->registerStreamWrapper('BackBee\ClassContent',
  *                                        'bb.class',
- *                                        '\BackBuilder\Stream\ClassWrapper\YamlWrapper');
+ *                                        '\BackBee\Stream\ClassWrapper\YamlWrapper');
  *
  *     // register classes by namespaces
- *     $autoloader->registerNamespace('BackBuilder', __DIR__)
+ *     $autoloader->registerNamespace('BackBee', __DIR__)
  *                ->registerNamespace('Symfony', __DIR__.DIRECTORY_SEPARATOR.'vendor');
  *
  *     // activate the auloloader
  *     $autoloader->register();
  *
- * @category    BackBuilder
- * @package     BackBuilder\AutoLoader
+ * @category    BackBee
+ * @package     BackBee\AutoLoader
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
     /**
-     * Current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * Current BackBee application
+     * @var \BackBee\BBApplication
      */
     private $_application;
 
@@ -108,13 +108,13 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      *  Events disptacher
-     * @var \BackBuilder\Event\Dispatcher
+     * @var \BackBee\Event\Dispatcher
      */
     private $_dispatcher;
 
     /**
      * Application logger
-     * @var \BackBuilder\Logging\Logger
+     * @var \BackBee\Logging\Logger
      */
     private $_logger;
 
@@ -126,9 +126,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Class constructor
-     * @param \BackBuilder\BBApplication    $application Optionnal BackBuilder Application
-     * @param \BackBuilder\Event\Dispatcher $dispatcher  Optionnal events dispatcher
-     * @param \BackBuilder\Logging\Logger   $logger      Optionnal logging engine
+     * @param \BackBee\BBApplication    $application Optionnal BackBee Application
+     * @param \BackBee\Event\Dispatcher $dispatcher  Optionnal events dispatcher
+     * @param \BackBee\Logging\Logger   $logger      Optionnal logging engine
      */
     public function __construct(BBApplication $application = null, Dispatcher $dispatcher = null)
     {
@@ -141,9 +141,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     }
 
     /**
-     * Sets the Backbuilder Application
-     * @param  \BackBuilder\BBApplication         $application
-     * @return \BackBuilder\AutoLoader\AutoLoader The current autoloader
+     * Sets the BackBee Application
+     * @param  \BackBee\BBApplication         $application
+     * @return \BackBee\AutoLoader\AutoLoader The current autoloader
      */
     public function setApplication(BBApplication $application = null)
     {
@@ -154,8 +154,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Sets the events dispatcher
-     * @param  \BackBuilder\Event\Dispatcher      $dispatcher
-     * @return \BackBuilder\AutoLoader\AutoLoader The current autoloader
+     * @param  \BackBee\Event\Dispatcher      $dispatcher
+     * @return \BackBee\AutoLoader\AutoLoader The current autoloader
      */
     public function setEventDispatcher(Dispatcher $dispatcher = null)
     {
@@ -169,8 +169,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * @param  string                                                           $namespace the namespace's class
      * @param  string                                                           $classname the class name looked for
      * @return Boolean                                                          TRUE if the class is found FALSE else
-     * @throws \BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException Occurs when the wrapper can not build PHP code
-     * @throws \BackBuilder\AutoLoader\Exception\SyntaxErrorException           Occurs when the generated PHP code is not valid
+     * @throws \BackBee\Stream\ClassWrapper\Exception\ClassWrapperException Occurs when the wrapper can not build PHP code
+     * @throws \BackBee\AutoLoader\Exception\SyntaxErrorException           Occurs when the generated PHP code is not valid
      */
     private function _autoloadThrowWrappers($namespace, $classname)
     {
@@ -213,7 +213,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * @param  string                                                 $namespace the namespace's class
      * @param  string                                                 $classname the class name looked for
      * @return Boolean                                                TRUE if the class is found FALSE else
-     * @throws \BackBuilder\AutoLoader\Exception\SyntaxErrorException Occurs when the found PHP code is not valid
+     * @throws \BackBee\AutoLoader\Exception\SyntaxErrorException Occurs when the found PHP code is not valid
      */
     private function _autoloadThrowFilesystem($namespace, $classname)
     {
@@ -264,8 +264,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * Returns the namespace and the class name to be found
      * @param  string                                                      $classpath the absolute class name
      * @return array                                                       array($namespace, $classname)
-     * @throws \BackBuilder\AutoLoader\Exception\InvalidNamespaceException Occurs when the namespace is not valid
-     * @throws \BackBuilder\AutoLoader\Exception\InvalidClassnameException Occurs when the class name is not valid
+     * @throws \BackBee\AutoLoader\Exception\InvalidNamespaceException Occurs when the namespace is not valid
+     * @throws \BackBee\AutoLoader\Exception\InvalidClassnameException Occurs when the class name is not valid
      */
     private function _normalizeClassname($classpath)
     {
@@ -311,7 +311,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * Looks for the class name, call back function for spl_autolad_register()
      * First using the defined wrappers then throw filesystem
      * @param  string                                                   $classpath
-     * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs when the class can not be found
+     * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException Occurs when the class can not be found
      */
     public function autoload($classpath)
     {
@@ -324,7 +324,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
                 $classpath = substr($classpath, 1);
             }
 
-            if (null !== $this->getEventDispatcher() && is_subclass_of($classpath, 'BackBuilder\ClassContent\AClassContent')) {
+            if (null !== $this->getEventDispatcher() && is_subclass_of($classpath, 'BackBee\ClassContent\AClassContent')) {
                 $this->getEventDispatcher()->triggerEvent('include', new $classpath());
             }
 
@@ -337,8 +337,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     }
 
     /**
-     * Returns the current BackBuilder application if defined, NULL otherwise
-     * @return \BackBuilder\BBApplication | NULL
+     * Returns the current BackBee application if defined, NULL otherwise
+     * @return \BackBee\BBApplication | NULL
      */
     public function getApplication()
     {
@@ -347,7 +347,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Returns the events dispatcher if defined, NULL otherwise
-     * @return \BackBuilder\Event\Dispatcher | NULL
+     * @return \BackBee\Event\Dispatcher | NULL
      */
     public function getEventDispatcher()
     {
@@ -387,7 +387,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     public function glob($pattern)
     {
         // $pattern = 'Media'.DIRECTORY_SEPARATOR.'*'
-        $wrappers = $this->getStreamWrapperClassname('BackBuilder\ClassContent', 'bb.class');
+        $wrappers = $this->getStreamWrapperClassname('BackBee\ClassContent', 'bb.class');
         if (0 == count($wrappers)) {
             return false;
         }
@@ -415,7 +415,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * @param  Boolean                            $prepend [optional] If TRUE, spl_autoload_register will
      *                                                     prepend the autoloader on the autoload stack
      *                                                     instead of appending it.
-     * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
+     * @return \BackBee\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function register($throw = true, $prepend = false)
     {
@@ -428,7 +428,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * Registers namespace parts to look for class name
      * @param  string                             $namespace The namespace
      * @param  string|array                       $paths     One or an array of associated locations
-     * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
+     * @return \BackBee\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerNamespace($namespace, $paths)
     {
@@ -444,15 +444,15 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     /**
      * Registers listeners namespace parts to look for class name
      * @param  string                             $path
-     * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
+     * @return \BackBee\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerListenerNamespace($path)
     {
-        if (false === isset($this->_namespaces['BackBuilder\Event\Listener'])) {
-            $this->_namespaces['BackBuilder\Event\Listener'] = array();
+        if (false === isset($this->_namespaces['BackBee\Event\Listener'])) {
+            $this->_namespaces['BackBee\Event\Listener'] = array();
         }
 
-        array_unshift($this->_namespaces['BackBuilder\Event\Listener'], $path);
+        array_unshift($this->_namespaces['BackBee\Event\Listener'], $path);
 
         return $this;
     }
@@ -462,7 +462,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * @param  string                             $namespace The namespace
      * @param  string                             $protocol  The wrapper's protocol
      * @param  string                             $classname The class name implementing the wrapper
-     * @return \BackBuilder\AutoLoader\AutoLoader The current instance of the autoloader class
+     * @return \BackBee\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerStreamWrapper($namespace, $protocol, $classname)
     {

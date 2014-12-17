@@ -3,59 +3,59 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Tests\Repository;
+namespace BackBee\NestedNode\Tests\Repository;
 
-use BackBuilder\Tests\TestCase;
-use BackBuilder\NestedNode\Repository\NestedNodeRepository;
-use BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
+use BackBee\Tests\TestCase;
+use BackBee\NestedNode\Repository\NestedNodeRepository;
+use BackBee\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests\Repository
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests\Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class NestedNodeRepositoryTest extends TestCase
 {
     /**
-     * @var \BackBuilder\Tests\Mock\MockBBApplication
+     * @var \BackBee\Tests\Mock\MockBBApplication
      */
     private $application;
 
     /**
-     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode
+     * @var \BackBee\NestedNode\Tests\Mock\MockNestedNode
      */
     private $root_asc;
 
     /**
-     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode
+     * @var \BackBee\NestedNode\Tests\Mock\MockNestedNode
      */
     private $root_desc;
 
     /**
-     * @var \BackBuilder\NestedNode\Repository\NestedNodeRepository
+     * @var \BackBee\NestedNode\Repository\NestedNodeRepository
      */
     private $repo;
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::delete
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::shiftRlValues
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::delete
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::shiftRlValues
      */
     public function testDelete()
     {
@@ -77,7 +77,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getAncestor
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::getAncestor
      */
     public function testGetAncestor()
     {
@@ -99,7 +99,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getAncestors
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::getAncestors
      */
     public function testGetAncestors()
     {
@@ -122,7 +122,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getDescendants
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::getDescendants
      */
     public function testGetDescendants()
     {
@@ -139,8 +139,8 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::insertNodeAsFirstChildOf
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::shiftRlValues
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::insertNodeAsFirstChildOf
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::shiftRlValues
      */
     public function testInsertNodeAsFirstChildOf()
     {
@@ -181,8 +181,8 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_insertNode
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::_insertNode
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function test_insertNodeNotLeaf()
     {
@@ -193,8 +193,8 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_insertNode
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::_insertNode
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function test_insertNodeSameAsParent()
     {
@@ -204,8 +204,8 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_refreshExistingNode
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::_refreshExistingNode
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function test_refreshExistingNode()
     {
@@ -216,8 +216,8 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::insertNodeAsLastChildOf
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::shiftRlValues
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::insertNodeAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::shiftRlValues
      */
     public function testInsertNodeAsLastChildOf()
     {
@@ -258,7 +258,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getPrevSibling
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::getPrevSibling
      */
     public function testGetPrevSibling()
     {
@@ -275,7 +275,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getNextSibling
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::getNextSibling
      */
     public function testGetNextSibling()
     {
@@ -292,7 +292,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getSiblings
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::getSiblings
      */
     public function testGetSiblings()
     {
@@ -316,7 +316,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getFirstChild
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::getFirstChild
      */
     public function testGetFirstChild()
     {
@@ -330,7 +330,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::getLastChild
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::getLastChild
      */
     public function testGetLastChild()
     {
@@ -344,7 +344,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::moveAsNextSiblingOf
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::moveAsNextSiblingOf
      */
     public function testMoveAsNextSiblingOf()
     {
@@ -388,7 +388,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::moveAsPrevSiblingOf
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::moveAsPrevSiblingOf
      */
     public function testMoveAsPrevSiblingOf()
     {
@@ -438,7 +438,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::moveAsFirstChildOf
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::moveAsFirstChildOf
      */
     public function testMoveAsFirstChildOf()
     {
@@ -468,7 +468,7 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::moveAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::moveAsLastChildOf
      */
     public function testMoveAsLastChildOf()
     {
@@ -499,8 +499,8 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::moveAsNextSiblingOf
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::moveAsNextSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testMoveAsNextSiblingOfDescendant()
     {
@@ -510,8 +510,8 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::moveAsNextSiblingOf
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::moveAsNextSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testMoveAsNextSiblingOfIself()
     {
@@ -520,8 +520,8 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::moveAsNextSiblingOf
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::moveAsNextSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testMoveAsNextSiblingOfRoot()
     {
@@ -538,7 +538,7 @@ class NestedNodeRepositoryTest extends TestCase
         $em = $this->application->getEntityManager();
 
         $st = new \Doctrine\ORM\Tools\SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Tests\Mock\MockNestedNode')));
+        $st->createSchema(array($em->getClassMetaData('BackBee\NestedNode\Tests\Mock\MockNestedNode')));
 
         $this->root = new MockNestedNode('root');
         $em->persist($this->root);
@@ -551,13 +551,13 @@ class NestedNodeRepositoryTest extends TestCase
 
     /**
      * Sets the NestedNode Repository
-     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
+     * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRepo()
     {
         $this->repo = $this->application
                 ->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Tests\Mock\MockNestedNode');
+                ->getRepository('BackBee\NestedNode\Tests\Mock\MockNestedNode');
 
         NestedNodeRepository::$config = array(
             'nestedNodeCalculateAsync' => false,
@@ -568,7 +568,7 @@ class NestedNodeRepositoryTest extends TestCase
 
     /**
      * Initiate a new tree with node added as last child
-     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
+     * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRootAsc()
     {
@@ -600,7 +600,7 @@ class NestedNodeRepositoryTest extends TestCase
 
     /**
      * Initiate a new tree with node added as firt child
-     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
+     * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRootDesc()
     {

@@ -3,48 +3,48 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Stream\ClassWrapper;
+namespace BackBee\Stream\ClassWrapper;
 
-use BackBuilder\Stream\IStreamWrapper;
-use BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
+use BackBee\Stream\IStreamWrapper;
+use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
 
 /**
- * Abstract class for content wrapper in BackBuilder 4
+ * Abstract class for content wrapper in BackBee 4
  * Implements IClassWrapper
  *
- * BackBuilder defines bb.class protocol to include its class definition
+ * BackBee defines bb.class protocol to include its class definition
  * Several wrappers could be defined for several storing formats:
  *  - yaml files
  *  - xml files
  *  - yaml stream stored in DB
  *  - ...
  *
- * @category    BackBuilder
- * @package     BackBuilder\Stream\ClassWrapper
+ * @category    BackBee
+ * @package     BackBee\Stream\ClassWrapper
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 abstract class AClassWrapper implements IStreamWrapper
 {
     /**
-     * The registered BackBuilder autoloader
-     * @var \BackBuilder\Autoloader\Autoloader
+     * The registered BackBee autoloader
+     * @var \BackBee\Autoloader\Autoloader
      */
     protected $_autoloader;
 
@@ -82,7 +82,7 @@ abstract class AClassWrapper implements IStreamWrapper
      * The class to be extended by the class content loaded
      * @var string
      */
-    protected $extends = '\BackBuilder\ClassContent\AClassContent';
+    protected $extends = '\BackBee\ClassContent\AClassContent';
 
     /**
      * Interface(s) used by the class content
@@ -100,7 +100,7 @@ abstract class AClassWrapper implements IStreamWrapper
      * The doctrine repository associated to the class content loaded
      * @var string
      */
-    protected $repository = 'BackBuilder\ClassContent\Repository\ClassContentRepository';
+    protected $repository = 'BackBee\ClassContent\Repository\ClassContentRepository';
 
     /**
      * The elements of the class content
@@ -112,7 +112,7 @@ abstract class AClassWrapper implements IStreamWrapper
      * The namespace of the class content loaded
      * @var string
      */
-    protected $namespace = "BackBuilder\ClassContent";
+    protected $namespace = "BackBee\ClassContent";
 
     /**
      * the user parameters of the class content
@@ -162,12 +162,12 @@ class <classname> extends <extends> <interface>
 
     /**
      * Class constructor
-     * Retreive the registered BackBuilder autoloader
+     * Retreive the registered BackBee autoloader
      */
     public function __construct()
     {
         foreach (spl_autoload_functions() as $autoloader) {
-            if (true === is_array($autoloader) && $autoloader[0] instanceof \BackBuilder\AutoLoader\AutoLoader) {
+            if (true === is_array($autoloader) && $autoloader[0] instanceof \BackBee\AutoLoader\AutoLoader) {
                 if ($autoloader[0] !== null && $autoloader[0]->getApplication()) {
                     $this->_autoloader = $autoloader[0];
                     break;

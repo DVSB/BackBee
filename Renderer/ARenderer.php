@@ -3,39 +3,39 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer;
+namespace BackBee\Renderer;
 
-use BackBuilder\BBApplication;
-use BackBuilder\NestedNode\ANestedNode;
-use BackBuilder\Renderer\Event\RendererEvent;
-use BackBuilder\Renderer\Exception\RendererException;
-use BackBuilder\Site\Layout;
-use BackBuilder\Site\Site;
-use BackBuilder\Util\File;
-use BackBuilder\Util\String;
+use BackBee\BBApplication;
+use BackBee\NestedNode\ANestedNode;
+use BackBee\Renderer\Event\RendererEvent;
+use BackBee\Renderer\Exception\RendererException;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
+use BackBee\Util\File;
+use BackBee\Util\String;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Abstract class for a renderer
  *
- * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @category    BackBee
+ * @package     BackBee\Renderer
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  *              e.chau <eric.chau@lp-digital.fr>
@@ -46,8 +46,8 @@ abstract class ARenderer implements IRenderer
     const FOOTER_SCRIPT = 'footer';
 
     /**
-     * Current BackBuilder application
-     * @var BackBuilder\BBApplication
+     * Current BackBee application
+     * @var BackBee\BBApplication
      */
     protected $_application;
 
@@ -71,7 +71,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * The current page to be render
-     * @var BackBuilder\NestedNode\Page
+     * @var BackBee\NestedNode\Page
      */
     protected $_currentpage;
 
@@ -181,7 +181,7 @@ abstract class ARenderer implements IRenderer
     public function addHelperDir($dir)
     {
         if (true === file_exists($dir) && true === is_dir($dir)) {
-            $this->getApplication()->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $dir);
+            $this->getApplication()->getAutoloader()->registerNamespace('BackBee\Renderer\Helper', $dir);
         }
 
         return $this;
@@ -282,7 +282,7 @@ abstract class ARenderer implements IRenderer
         if (is_array($config)) {
             if (true === array_key_exists('scriptdir', $config)) {
                 $dirs = (array) $config['scriptdir'];
-                array_walk($dirs, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
+                array_walk($dirs, array('\BackBee\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
                 foreach ($dirs as $dir) {
                     if (true === file_exists($dir) && true === is_dir($dir)) {
                         $this->_scriptdir[] = $dir;
@@ -291,7 +291,7 @@ abstract class ARenderer implements IRenderer
 
                 if (true === $this->getApplication()->hasContext()) {
                     $dirs = (array) $config['scriptdir'];
-                    array_walk($dirs, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
+                    array_walk($dirs, array('\BackBee\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
                     foreach ($dirs as $dir) {
                         if (true === file_exists($dir) && true === is_dir($dir)) {
                             $this->_scriptdir[] = $dir;
@@ -302,7 +302,7 @@ abstract class ARenderer implements IRenderer
 
             if (true === array_key_exists('layoutdir', $config)) {
                 $dirs = (array) $config['layoutdir'];
-                array_walk($dirs, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
+                array_walk($dirs, array('\BackBee\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
                 foreach ($dirs as $dir) {
                     if (true === file_exists($dir) && true === is_dir($dir)) {
                         $this->_layoutdir[] = $dir;
@@ -311,7 +311,7 @@ abstract class ARenderer implements IRenderer
 
                 if (true === $this->getApplication()->hasContext()) {
                     $dirs = (array) $config['layoutdir'];
-                    array_walk($dirs, array('\BackBuilder\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
+                    array_walk($dirs, array('\BackBee\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
                     foreach ($dirs as $dir) {
                         if (true === file_exists($dir) && true === is_dir($dir)) {
                             $this->_layoutdir[] = $dir;
@@ -429,7 +429,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @return \BackBuilder\Renderer\ARenderer
+     * @return \BackBee\Renderer\ARenderer
      */
     private function _resetVars()
     {
@@ -440,7 +440,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @return \BackBuilder\Renderer\ARenderer
+     * @return \BackBee\Renderer\ARenderer
      */
     private function _resetParams()
     {
@@ -465,7 +465,7 @@ abstract class ARenderer implements IRenderer
 
         if (is_array($var)) {
             foreach ($var as $key => $value) {
-                if ($value instanceof \BackBuilder\ClassContent\AClassContent) {
+                if ($value instanceof \BackBee\ClassContent\AClassContent) {
                     // trying to load subcontent
                     $subcontent = $this->getApplication()
                             ->getEntityManager()
@@ -485,7 +485,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function getApplication()
     {
@@ -525,7 +525,7 @@ abstract class ARenderer implements IRenderer
      * If $site is provided, the url will be pointing on the associate domain
      * @param  string                 $pathinfo
      * @param  string                 $defaultExt
-     * @param  \BackBuilder\Site\Site $site
+     * @param  \BackBee\Site\Site $site
      * @return string
      */
     public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
@@ -614,7 +614,7 @@ abstract class ARenderer implements IRenderer
     /**
      * Return the current page to be rendered
      * @codeCoverageIgnore
-     * @return null|BackBuilder\NestedNode\Page
+     * @return null|BackBee\NestedNode\Page
      */
     public function getCurrentPage()
     {
@@ -623,7 +623,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Return the current root of the page to be rendered
-     * @return null|BackBuilder\NestedNode\Page
+     * @return null|BackBee\NestedNode\Page
      */
     public function getCurrentRoot()
     {
@@ -633,7 +633,7 @@ abstract class ARenderer implements IRenderer
             return;
         } else {
             return $this->_application->getEntityManager()
-                            ->getRepository('BackBuilder\NestedNode\Page')
+                            ->getRepository('BackBee\NestedNode\Page')
                             ->getRoot($this->getCurrentSite());
         }
     }
@@ -641,7 +641,7 @@ abstract class ARenderer implements IRenderer
     /**
      * return the current rendered site
      * @codeCoverageIgnore
-     * @return null|BackBuilder\Site\Site
+     * @return null|BackBee\Site\Site
      */
     public function getCurrentSite()
     {
@@ -726,8 +726,8 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @param  \BackBuilder\NestedNode\ANestedNode $node
-     * @return \BackBuilder\Renderer\ARenderer
+     * @param  \BackBee\NestedNode\ANestedNode $node
+     * @return \BackBee\Renderer\ARenderer
      */
     public function setNode(ANestedNode $node)
     {
@@ -759,10 +759,10 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Set the current page
-     * @param  BackBuilder\NestedNode\Page $page
+     * @param  BackBee\NestedNode\Page $page
      * @return ARenderer                   The current renderer
      */
-    public function setCurrentPage(\BackBuilder\NestedNode\Page $page = null)
+    public function setCurrentPage(\BackBee\NestedNode\Page $page = null)
     {
         $this->_currentpage = $page;
 
@@ -795,7 +795,7 @@ abstract class ARenderer implements IRenderer
     /**
      * @codeCoverageIgnore
      * @param  type                            $render
-     * @return \BackBuilder\Renderer\ARenderer
+     * @return \BackBee\Renderer\ARenderer
      */
     public function setRender($render)
     {
@@ -858,13 +858,13 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Return the relative path from the classname of an object
-     * @param  \BackBuilder\Renderer\IRenderable $object
+     * @param  \BackBee\Renderer\IRenderable $object
      * @return string
      */
     protected function _getTemplatePath(IRenderable $object)
     {
         return $object->getTemplateName();
-        //return str_replace(array('BackBuilder' . NAMESPACE_SEPARATOR . 'ClassContent' . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array('', DIRECTORY_SEPARATOR), get_class($object));
+        //return str_replace(array('BackBee' . NAMESPACE_SEPARATOR . 'ClassContent' . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array('', DIRECTORY_SEPARATOR), get_class($object));
     }
 
     /**
@@ -898,7 +898,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Returns the list of available render mode for the provided object
-     * @param  \BackBuilder\Renderer\IRenderable $object
+     * @param  \BackBee\Renderer\IRenderable $object
      * @return array
      */
     public function getAvailableRenderMode(IRenderable $object)
@@ -928,7 +928,7 @@ abstract class ARenderer implements IRenderer
      * Note: guaranteed that two or more scripts with same href will be included only once
      *
      * @param  string                             $href href of the js file to add
-     * @return BackBuilder\Renderer\Adapter\phtml
+     * @return BackBee\Renderer\Adapter\phtml
      */
     public function addHeaderScript($href)
     {
@@ -941,7 +941,7 @@ abstract class ARenderer implements IRenderer
      * only add in the head tag
      *
      * @param  string                             $href
-     * @return BackBuilder\Renderer\Adapter\phtml
+     * @return BackBee\Renderer\Adapter\phtml
      */
     public function addFooterScript($href)
     {
@@ -1033,7 +1033,7 @@ abstract class ARenderer implements IRenderer
     public function createHelper($method, $argv)
     {
         $helper = null;
-        $helperClass = '\BackBuilder\Renderer\Helper\\'.$method;
+        $helperClass = '\BackBee\Renderer\Helper\\'.$method;
         if (true === class_exists($helperClass)) {
             $this->helpers->set($method, new $helperClass($this, $argv));
             $helper = $this->helpers->get($method);

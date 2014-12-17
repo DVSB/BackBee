@@ -1,13 +1,13 @@
 <?php
 
-namespace BackBuilder\Security\Context;
+namespace BackBee\Security\Context;
 
 
 /**
  * Description of ContextInterface
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Context
  * @copyright   Lp digital system
  * @author      nicolas.dufreche <nicolas.dufreche@lp-digital.fr>

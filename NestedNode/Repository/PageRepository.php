@@ -3,39 +3,39 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Repository;
+namespace BackBee\NestedNode\Repository;
 
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\NestedNode\ANestedNode;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Security\Token\BBUserToken;
-use BackBuilder\Site\Layout;
-use BackBuilder\Site\Site;
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\ContentSet;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\NestedNode\ANestedNode;
+use BackBee\NestedNode\Page;
+use BackBee\Security\Token\BBUserToken;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * Page repository
  *
- * @category    BackBuilder
- * @package     BackBuilder/NestedNode
+ * @category    BackBee
+ * @package     BackBee/NestedNode
  * @subpackage  Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -46,7 +46,7 @@ class PageRepository extends NestedNodeRepository
      * Creates a new Page QueryBuilder instance that is prepopulated for this entity name.
      * @param  string                                              $alias   the alias to use
      * @param  string                                              $indexBy optional, the index to use for the query
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function createQueryBuilder($alias, $indexBy = null)
     {
@@ -57,10 +57,10 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the online descendants of $page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
+     * @param  \BackBee\NestedNode\Page   $page        the page to look for
      * @param  int                            $depth       optional, limit to $depth number of generation
      * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
-     * @return \BackBuilder\NestedNode\Page[]
+     * @return \BackBee\NestedNode\Page[]
      */
     public function getOnlineDescendants(Page $page, $depth = null, $includeNode = false)
     {
@@ -79,8 +79,8 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the previous online sibling of $page
-     * @param  \BackBuilder\NestedNode\Page      $page the page to look for
-     * @return \BackBuilder\NestedNode\Page|NULL
+     * @param  \BackBee\NestedNode\Page      $page the page to look for
+     * @return \BackBee\NestedNode\Page|NULL
      */
     public function getOnlinePrevSibling(Page $page)
     {
@@ -93,12 +93,12 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the online siblings of the provided page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
+     * @param  \BackBee\NestedNode\Page   $page        the page to look for
      * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
      * @param  array                          $order       optional, the ordering criteria ( array($field => $sort) )
      * @param  int                            $limit       optional, the maximum number of results
      * @param  int                            $start       optional, the first result index (0 by default)
-     * @return \BackBuilder\NestedNode\Page[]
+     * @return \BackBee\NestedNode\Page[]
      */
     public function getOnlineSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
@@ -111,13 +111,13 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the onlne siblings having layout $layout of the provided page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
-     * @param  \BackBuilder\Site\Layout       $layout      the layout to look for
+     * @param  \BackBee\NestedNode\Page   $page        the page to look for
+     * @param  \BackBee\Site\Layout       $layout      the layout to look for
      * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
      * @param  array                          $order       optional, the ordering criteria ( array($field => $sort) )
      * @param  int                            $limit       optional, the maximum number of results
      * @param  int                            $start       optional, the first result index (0 by default)
-     * @return \BackBuilder\NestedNode\Page[]
+     * @return \BackBee\NestedNode\Page[]
      */
     public function getOnlineSiblingsByLayout(Page $page, Layout $layout, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
@@ -131,8 +131,8 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the next online sibling of $page
-     * @param  \BackBuilder\NestedNode\Page      $page the page to look for
-     * @return \BackBuilder\NestedNode\Page|NULL
+     * @param  \BackBee\NestedNode\Page      $page the page to look for
+     * @return \BackBee\NestedNode\Page|NULL
      */
     public function getOnlineNextSibling(Page $page)
     {
@@ -145,20 +145,20 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Inserts a leaf page in a tree as first child of the provided parent page
-     * @param  \BackBuilder\NestedNode\Page                    $page   the page to be inserted
-     * @param  \BackBuilder\NestedNode\Page                    $parent the parent page
-     * @return \BackBuilder\NestedNode\Page                    the inserted page
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
+     * @param  \BackBee\NestedNode\Page                    $page   the page to be inserted
+     * @param  \BackBee\NestedNode\Page                    $parent the parent page
+     * @return \BackBee\NestedNode\Page                    the inserted page
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
      *                                                                or if $page or $parent are not an instance of Page
      */
     public function insertNodeAsFirstChildOf(ANestedNode $page, ANestedNode $parent)
     {
         if (false === ($page instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($page)));
+            throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($page)));
         }
 
         if (false === ($parent instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($parent)));
+            throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($parent)));
         }
 
         $page = parent::insertNodeAsFirstChildOf($page, $parent);
@@ -168,20 +168,20 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Inserts a leaf page in a tree as last child of the provided parent node
-     * @param  \BackBuilder\NestedNode\Page                    $page   the page to be inserted
-     * @param  \BackBuilder\NestedNode\Page                    $parent the parent page
-     * @return \BackBuilder\NestedNode\Page                    the inserted page
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
+     * @param  \BackBee\NestedNode\Page                    $page   the page to be inserted
+     * @param  \BackBee\NestedNode\Page                    $parent the parent page
+     * @return \BackBee\NestedNode\Page                    the inserted page
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
      *                                                                or if $page or $parent are not an instance of Page
      */
     public function insertNodeAsLastChildOf(ANestedNode $page, ANestedNode $parent)
     {
         if (false === ($page instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($page)));
+            throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($page)));
         }
 
         if (false === ($parent instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($parent)));
+            throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($parent)));
         }
 
         $page = parent::insertNodeAsLastChildOf($page, $parent);
@@ -191,10 +191,10 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the visible (ie online and not hidden) descendants of $page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
+     * @param  \BackBee\NestedNode\Page   $page        the page to look for
      * @param  int                            $depth       optional, limit to $depth number of generation
      * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
-     * @return \BackBuilder\NestedNode\Page[]
+     * @return \BackBee\NestedNode\Page[]
      */
     public function getVisibleDescendants(Page $page, $depth = null, $includeNode = false)
     {
@@ -213,12 +213,12 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the visible (ie online and not hidden) siblings of the provided page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
+     * @param  \BackBee\NestedNode\Page   $page        the page to look for
      * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
      * @param  array                          $order       optional, the ordering criteria ( array($field => $sort) )
      * @param  int                            $limit       optional, the maximum number of results
      * @param  int                            $start       optional, the first result index (0 by default)
-     * @return \BackBuilder\NestedNode\Page[]
+     * @return \BackBee\NestedNode\Page[]
      */
     public function getVisibleSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
@@ -231,8 +231,8 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the previous visible (ie online and not hidden) sibling of $page
-     * @param  \BackBuilder\NestedNode\Page      $page the page to look for
-     * @return \BackBuilder\NestedNode\Page|NULL
+     * @param  \BackBee\NestedNode\Page      $page the page to look for
+     * @return \BackBee\NestedNode\Page|NULL
      */
     public function getVisiblePrevSibling(Page $page)
     {
@@ -245,10 +245,10 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Moves $page as child of $parent by default at last position or, optionaly, before node having uid = $next_uid
-     * @param  \BackBuilder\NestedNode\Page $page     the page to move
-     * @param  \BackBuilder\NestedNode\Page $parent   the page parent to move in
+     * @param  \BackBee\NestedNode\Page $page     the page to move
+     * @param  \BackBee\NestedNode\Page $parent   the page parent to move in
      * @param  string                       $next_uid optional, the uid of the next sibling
-     * @return \BackBuilder\NestedNode\Page the moved page
+     * @return \BackBee\NestedNode\Page the moved page
      */
     public function movePageInTree(Page $page, Page $parent, $next_uid = null)
     {
@@ -263,10 +263,10 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Replaces the ContentSet of $page
-     * @param  \BackBuilder\NestedNode\Page         $page          the page to change
-     * @param  \BackBuilder\ClassContent\ContentSet $oldContentSet the contentset to replace
-     * @param  \BackBuilder\ClassContent\ContentSet $newContentSet the new contentset
-     * @return \BackBuilder\ClassContent\ContentSet the inserted contentset
+     * @param  \BackBee\NestedNode\Page         $page          the page to change
+     * @param  \BackBee\ClassContent\ContentSet $oldContentSet the contentset to replace
+     * @param  \BackBee\ClassContent\ContentSet $newContentSet the new contentset
+     * @return \BackBee\ClassContent\ContentSet the inserted contentset
      */
     public function replaceRootContentSet(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet)
     {
@@ -281,8 +281,8 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the previous visible sibling of $page
-     * @param  \BackBuilder\NestedNode\Page      $page the page to look for
-     * @return \BackBuilder\NestedNode\Page|NULL
+     * @param  \BackBee\NestedNode\Page      $page the page to look for
+     * @return \BackBee\NestedNode\Page|NULL
      */
     public function getVisibleNextSibling(Page $page)
     {
@@ -295,7 +295,7 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the not deleted descendants of $page
-     * @param  \BackBuilder\NestedNode\Page                                            $page         the page to look for
+     * @param  \BackBee\NestedNode\Page                                            $page         the page to look for
      * @param  type                                                                    $depth        optional, limit to $depth number of generation
      * @param  type                                                                    $includeNode  optional, include $page in results if TRUE (false by default)
      * @param  type                                                                    $order        optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
@@ -303,7 +303,7 @@ class PageRepository extends NestedNodeRepository
      * @param  type                                                                    $firstresult  optional, if paginated set the first result index (0 by default)
      * @param  type                                                                    $maxresults   optional, if paginated set the maxmum number of results (25 by default)
      * @param  type                                                                    $having_child optional, limit to descendants having child (false by default)
-     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
+     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBee\NestedNode\Page[]
      */
     public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, array $order = array('_leftnode' => 'asc'), $paginate = false, $firstresult = 0, $maxresults = 25, $having_child = false)
     {
@@ -344,9 +344,9 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the root page for $site
-     * @param  \BackBuilder\Site\Site            $site             the site to test
+     * @param  \BackBee\Site\Site            $site             the site to test
      * @param  array                             $restrictedStates optional, limit to pages having provided states
-     * @return \BackBuilder\NestedNode\Page|NULL
+     * @return \BackBee\NestedNode\Page|NULL
      */
     public function getRoot(Site $site, array $restrictedStates = array())
     {
@@ -365,10 +365,10 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns an array of online children of $page
-     * @param  \BackBuilder\NestedNode\Page   $page       the parent page
+     * @param  \BackBee\NestedNode\Page   $page       the parent page
      * @param  int                            $maxResults optional, the maximum number of results
      * @param  array                          $order      optional, the ordering criteria (array('_leftnode', 'asc') by default)
-     * @return \BackBuilder\NestedNode\Page[]
+     * @return \BackBee\NestedNode\Page[]
      */
     public function getOnlineChildren(Page $page, $maxResults = null, array $order = array('_leftnode', 'asc'))
     {
@@ -389,7 +389,7 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns an array of children of $page
-     * @param  \BackBuilder\NestedNode\Page                   $page             the parent page
+     * @param  \BackBee\NestedNode\Page                   $page             the parent page
      * @param  string                                         $order_sort       optional, the sort field, title by default
      * @param  string                                         $order_dir        optional, the sort direction, asc by default
      * @param  string                                         $paging           optional, the paging criteria: array('start' => xx, 'limit' => xx), empty by default
@@ -420,7 +420,7 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns count of children of $page
-     * @param  \BackBuilder\NestedNode\Page $page             the parent page
+     * @param  \BackBee\NestedNode\Page $page             the parent page
      * @param  array                        $restrictedStates optional, limit to pages having provided states, empty by default
      * @param  array                        $options          optional, the search criteria: array('beforePubdateField' => timestamp against page._modified,
      *                                                        'afterPubdateField' => timestamp against page._modified,
@@ -440,7 +440,7 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Set state of $page and is descendant to STATE_DELETED
-     * @param  \BackBuilder\NestedNode\Page $page the page to delete
+     * @param  \BackBee\NestedNode\Page $page the page to delete
      * @return integer                      the number of page having their state changed
      */
     public function toTrash(Page $page)
@@ -479,13 +479,13 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Duplicate a page and optionnaly its descendants
-     * @param  \BackBuilder\NestedNode\Page                    $page      the page to duplicate
+     * @param  \BackBee\NestedNode\Page                    $page      the page to duplicate
      * @param  string                                          $title     optional, the title of the copy, by default the title of the copied page
-     * @param  \BackBuilder\NestedNode\Page                    $parent    optional, the parent of the copy, by default the parent of the copied page
+     * @param  \BackBee\NestedNode\Page                    $parent    optional, the parent of the copy, by default the parent of the copied page
      * @param  boolean                                         $recursive if true (default) duplicate recursively the descendants of the page
-     * @param \BackBuilder\Security\Token\BBUserToken           the BBuser token to allow the update of revisions
-     * @return \BackBuilder\NestedNode\Page                    the copy of the page
-     * @throws \BackBuilder\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
+     * @param \BackBee\Security\Token\BBUserToken           the BBuser token to allow the update of revisions
+     * @return \BackBee\NestedNode\Page                    the copy of the page
+     * @throws \BackBee\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
      */
     public function duplicate(Page $page, $title = null, Page $parent = null, $recursive = true, BBUserToken $token = null)
     {
@@ -507,7 +507,7 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Removes page with no contentset for $site
-     * @param \BackBuilder\Site\Site $site
+     * @param \BackBee\Site\Site $site
      * @codeCoverageIgnore
      * @Todo: what if the deleted page has chldren ?
      */
@@ -527,11 +527,11 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Copy a page to a new one
-     * @param  \BackBuilder\NestedNode\Page                    $page   the page to copy
+     * @param  \BackBee\NestedNode\Page                    $page   the page to copy
      * @param  string                                          $title  optional, the title of the copy, by default the title of the page
-     * @param  \BackBuilder\NestedNode\Page                    $parent optional, the parent of the copy, by default the parent of the page
-     * @return \BackBuilder\NestedNode\Page                    the copy of the page
-     * @throws \BackBuilder\Exception\InvalidArgumentException occures if the page is deleted
+     * @param  \BackBee\NestedNode\Page                    $parent optional, the parent of the copy, by default the parent of the page
+     * @return \BackBee\NestedNode\Page                    the copy of the page
+     * @throws \BackBee\Exception\InvalidArgumentException occures if the page is deleted
      */
     private function copy(Page $page, $title = null, Page $parent = null)
     {
@@ -563,11 +563,11 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Copy recursively a page to a new one
-     * @param  \BackBuilder\NestedNode\Page                    $page   the page to copy
+     * @param  \BackBee\NestedNode\Page                    $page   the page to copy
      * @param  string                                          $title  optional, the title of the copy, by default the title of the page
-     * @param  \BackBuilder\NestedNode\Page                    $parent optional, the parent of the copy, by default the parent of the page
-     * @return \BackBuilder\NestedNode\Page                    the copy of the page
-     * @throws \BackBuilder\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
+     * @param  \BackBee\NestedNode\Page                    $parent optional, the parent of the copy, by default the parent of the page
+     * @return \BackBee\NestedNode\Page                    the copy of the page
+     * @throws \BackBee\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
      */
     private function copyRecursively(Page $page, $title = null, Page $parent = null)
     {
@@ -598,10 +598,10 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Replace subcontents of ContentSet by their clones if exist
-     * @param  \BackBuilder\ClassContent\AClassContent           $content
-     * @param  \BackBuilder\Security\Token\BBUserToken           $token
+     * @param  \BackBee\ClassContent\AClassContent           $content
+     * @param  \BackBee\Security\Token\BBUserToken           $token
      * @param  array                                             $cloning_datas
-     * @return \BackBuilder\NestedNode\Repository\PageRepository
+     * @return \BackBee\NestedNode\Repository\PageRepository
      */
     private function updateRelatedPostCloning(AClassContent $content, BBUserToken $token, array $cloning_datas)
     {
@@ -635,7 +635,7 @@ class PageRepository extends NestedNodeRepository
             }
 
             // Loading draft for content
-            if (null !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
+            if (null !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, true)) {
                 $content->setDraft($draft);
             }
 
@@ -647,17 +647,17 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Update mainnode of the content if need
-     * @param  \BackBuilder\ClassContent\AClassContent           $content
-     * @param  \BackBuilder\Security\Token\BBUserToken           $token
+     * @param  \BackBee\ClassContent\AClassContent           $content
+     * @param  \BackBee\Security\Token\BBUserToken           $token
      * @param  array                                             $cloning_pages
-     * @return \BackBuilder\NestedNode\Repository\PageRepository
+     * @return \BackBee\NestedNode\Repository\PageRepository
      */
     private function updateMainNodePostCloning(AClassContent $content, BBUserToken $token, array $cloning_pages)
     {
         $mainnode = $content->getMainNode();
         if (null !== $mainnode && true === in_array($mainnode->getUid(), array_keys($cloning_pages))) {
             // Loading draft for content
-            if (NULL !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
+            if (NULL !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, true)) {
                 $content->setDraft($draft);
             }
 

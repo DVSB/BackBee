@@ -1,14 +1,14 @@
 <?php
 
-namespace BackBuilder\Installer;
+namespace BackBee\Installer;
 
-use BackBuilder\BBApplication;
+use BackBee\BBApplication;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\ORM\EntityManager;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Installer
+ * @category    BackBee
+ * @package     BackBee\Installer
  * @copyright   Lp system
  * @author      nicolas dufreche <n.dufreche@lp-digital.fr>
  */
@@ -35,7 +35,7 @@ class Database
     private $_entityFinder;
 
     /**
-     * @param \BackBuilder\BBApplication  $application
+     * @param \BackBee\BBApplication  $application
      * @param \Doctrine\ORM\EntityManager $em
      */
     public function __construct(BBApplication $application, EntityManager $em = null)
@@ -55,11 +55,11 @@ class Database
     }
 
     /**
-     * Create the BackBuilder schema
+     * Create the BackBee schema
      */
-    public function createBackbuilderSchema()
+    public function createBackBeeSchema()
     {
-        $classes = $this->_getBackbuilderSchema();
+        $classes = $this->_getBackBeeSchema();
         try {
             $this->_schemaTool->dropSchema($classes);
             $this->_schemaTool->createSchema($classes);
@@ -101,11 +101,11 @@ class Database
     }
 
     /**
-     * update backbuilder schema.
+     * update BackBee schema.
      */
-    public function updateBackbuilderSchema()
+    public function updateBackBeeSchema()
     {
-        $this->_schemaTool->updateSchema($this->_getBackbuilderSchema(), true);
+        $this->_schemaTool->updateSchema($this->_getBackBeeSchema(), true);
     }
 
     /**
@@ -156,7 +156,7 @@ class Database
     /**
      * @return array
      */
-    private function _getBackbuilderSchema()
+    private function _getBackBeeSchema()
     {
         $classes = array();
         foreach ($this->_entityFinder->getEntities($this->_application->getBBDir()) as $className) {
@@ -167,7 +167,7 @@ class Database
     }
 
     /**
-     * @param  \BackBuilder\Bundle\ABundle $bundle
+     * @param  \BackBee\Bundle\ABundle $bundle
      * @return array
      */
     private function _getBundleSchema($bundle)
@@ -183,7 +183,7 @@ class Database
 
     public function getSqlSchema()
     {
-        $sql1 = $this->getBackBuilderSqlSchema();
+        $sql1 = $this->getBackBeeSqlSchema();
         $sql2 = $this->getBundleSqlSchema();
 
         $sql = array_merge($sql1, $sql2);
@@ -193,9 +193,9 @@ class Database
         return $sql.';';
     }
 
-    private function getBackBuilderSqlSchema()
+    private function getBackBeeSqlSchema()
     {
-        $classes = $this->_getBackbuilderSchema();
+        $classes = $this->_getBackBeeSchema();
         $sql = $this->_schemaTool->getCreateSchemaSql($classes);
 
         return $sql;
@@ -223,7 +223,7 @@ class Database
     {
         $sql1 = $sql2 = array();
         if ($type == 1 || $type & 3 == 3) {
-            $sql1 = $this->getUpdateBackBuilderSqlSchema();
+            $sql1 = $this->getUpdateBackBeeSqlSchema();
         }
         if ($type == 2 || $type & 3 == 3) {
             $sql2 = $this->getUpdateBundleSqlSchema();
@@ -234,9 +234,9 @@ class Database
         return $sql;
     }
 
-    private function getUpdateBackBuilderSqlSchema()
+    private function getUpdateBackBeeSqlSchema()
     {
-        $classes = $this->_getBackbuilderSchema();
+        $classes = $this->_getBackBeeSchema();
         $sql = $this->_schemaTool->getUpdateSchemaSql($classes, true);
 
         return $sql;
@@ -257,7 +257,7 @@ class Database
 
     public function getClassMetadata()
     {
-        $classes1 = $this->getBackBuilderClassMetadata();
+        $classes1 = $this->getBackBeeClassMetadata();
         $classes2 = $this->getBundleClassMetadata();
 
         $classes = array_merge($classes1, $classes2);
@@ -265,9 +265,9 @@ class Database
         return $classes;
     }
 
-    private function getBackBuilderClassMetadata()
+    private function getBackBeeClassMetadata()
     {
-        $classes = $this->_getBackbuilderSchema();
+        $classes = $this->_getBackBeeSchema();
 
         return $classes;
     }

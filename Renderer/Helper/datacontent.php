@@ -3,25 +3,25 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer\Helper;
+namespace BackBee\Renderer\Helper;
 
-use BackBuilder\ClassContent\ContentSet;
+use BackBee\ClassContent\ContentSet;
 
 /**
  * Helper providing HTML attributes to online-edited content
@@ -31,7 +31,7 @@ use BackBuilder\ClassContent\ContentSet;
  *   * data-uid:            The unique identifier of the content
  *   * data-parent:         The unique identifier of the content owner
  *   * data-draftuid:       The unique identifier of the revision
- *   * data-type:           The classname of the content (unprefix from BackBuilder\ClassContent)
+ *   * data-type:           The classname of the content (unprefix from BackBee\ClassContent)
  *   * data-minentry:       The minimum subcontents allowed
  *   * data-maxentry:       The maximum subcontents allowed
  *   * data-accept:         The accepted subcontents
@@ -41,8 +41,8 @@ use BackBuilder\ClassContent\ContentSet;
  *   * data-forbidenactions:The editing forbiden actions
  *   * data-contentplugins: The edting plugins to load
  *
- * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @category    BackBee
+ * @package     BackBee\Renderer
  * @subpackage  Helper
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -51,7 +51,7 @@ class datacontent extends AHelper
 {
     /**
      * The content to be rendered
-     * @var \BackBuilder\ClassContent\AClassContent
+     * @var \BackBee\ClassContent\AClassContent
      */
     private $_content;
 
@@ -81,7 +81,7 @@ class datacontent extends AHelper
      */
     public function __invoke($datacontent = array(), $params = array())
     {
-        if ($datacontent instanceof BackBuilder\Renderer\IRenderable) {
+        if ($datacontent instanceof BackBee\Renderer\IRenderable) {
             $this->_content = $datacontent;
         } else {
             $this->_content = $this->_renderer->getObject();
@@ -114,7 +114,7 @@ class datacontent extends AHelper
     /**
      * Adds common BB5 content markups to contents
      * @param  array                                    $params Optional parameters
-     * @return \BackBuilder\Renderer\Helper\datacontent
+     * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addCommonContentMarkup($params = array())
     {
@@ -143,7 +143,7 @@ class datacontent extends AHelper
     /**
      * Adds BB5 content markups to contentsets
      * @param  array                                    $params Optional parameters
-     * @return \BackBuilder\Renderer\Helper\datacontent
+     * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addContentSetMarkup($params = array())
     {
@@ -182,13 +182,13 @@ class datacontent extends AHelper
      * @todo Add test on autobloc (new forbiddenaction ?)
      * @todo Add test on resizable (new forbiddenaction ?)
      * @param  array                                    $params
-     * @return \BackBuilder\Renderer\Helper\datacontent
+     * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addClassContainerMarkup($params = array())
     {
         if (null !== $class_container = $this->_renderer->getClassContainer()) {
             if ($class_container instanceof ContentSet) {
-                if (false === ($class_container instanceof \BackBuilder\ClassContent\Bloc\autobloc)) {
+                if (false === ($class_container instanceof \BackBee\ClassContent\Bloc\autobloc)) {
                     $this->_addValueToAttribute('class', $this->_getClassMarkup('draggableclass'));
 
                     // @todo Add test on resizable (new forbiddenaction ?)
@@ -207,13 +207,13 @@ class datacontent extends AHelper
     /**
      * Adds specific markup to Element\file
      * @param  array                                    $params Optional parameters
-     * @return \BackBuilder\Renderer\Helper\datacontent
+     * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addElementFileMarkup($params = array())
     {
-        if ($this->_content instanceof \BackBuilder\ClassContent\Element\file) {
+        if ($this->_content instanceof \BackBee\ClassContent\Element\file) {
             $em = $this->_renderer->getApplication()->getEntityManager();
-            $this->_addValueToAttribute('data-library', $em->getRepository('BackBuilder\ClassContent\Element\file')->isInMediaLibrary($this->_content));
+            $this->_addValueToAttribute('data-library', $em->getRepository('BackBee\ClassContent\Element\file')->isInMediaLibrary($this->_content));
         }
 
         return $this;
@@ -222,7 +222,7 @@ class datacontent extends AHelper
     /**
      * Adds specific Aloha markup on content
      * @param  array                                    $params Optional parameters
-     * @return \BackBuilder\Renderer\Helper\datacontent
+     * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addAlohaMarkup($params = array())
     {
@@ -238,13 +238,13 @@ class datacontent extends AHelper
     /**
      * adds specific rte markup on content
      * @params aray $params Optional parameters
-     * @return \BackBuilder\Renderer\Helper\datacontent
+     * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addRteMarkup($params = array())
     {
         $contentParent = $this->getRenderer()->getClassContainer();
         if (!is_null($contentParent)) {
-            if (is_a($contentParent, "BackBuilder\ClassContent\AClassContent") && (!is_a($contentParent, 'BackBuilder\ClassContent\ContentSet'))) {
+            if (is_a($contentParent, "BackBee\ClassContent\AClassContent") && (!is_a($contentParent, 'BackBee\ClassContent\ContentSet'))) {
                 $elementname = $this->_renderer->getCurrentElement();
                 if (!is_null($elementname)) {
                     $contentData = $contentParent->{$elementname};
@@ -270,7 +270,7 @@ class datacontent extends AHelper
 
     /**
      * Adds the boundary entries if exist
-     * @return \BackBuilder\Renderer\Helper\datacontent
+     * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addBoundariesEntries()
     {
@@ -314,7 +314,7 @@ class datacontent extends AHelper
      * Adds new values to an attribute, creates it if don't exist
      * @param  string                                   $key
      * @param  mixed                                    $value
-     * @return \BackBuilder\Renderer\Helper\datacontent
+     * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addValueToAttribute($key, $value = null)
     {
@@ -395,12 +395,12 @@ class datacontent extends AHelper
     }
 
     /**
-     * Unprefixes a BackBuilder content classname
+     * Unprefixes a BackBee content classname
      * @param  string $classname
      * @return string
      */
     private function _unprefixClassname($classname)
     {
-        return str_replace('BackBuilder\ClassContent\\', '', $classname);
+        return str_replace('BackBee\ClassContent\\', '', $classname);
     }
 }

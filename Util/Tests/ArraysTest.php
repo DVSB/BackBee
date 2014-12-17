@@ -1,12 +1,12 @@
 <?php
 
-namespace BackBuilder\TestUnit\BackBuilder\Util;
+namespace BackBee\TestUnit\BackBee\Util;
 
-use BackBuilder\Util\Arrays;
+use BackBee\Util\Arrays;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\TestUnit\BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\TestUnit\BackBee\Util
  * @copyright   Lp digital system
  * @author      c.rouillon <rouillon.charles@gmail.com>
  */
@@ -32,7 +32,7 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Arrays::has
+     * @covers \BackBee\Util\Arrays::has
      */
     public function testHas()
     {
@@ -44,8 +44,8 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Arrays::has
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\Util\Arrays::has
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testHasWithInvalidKey()
     {
@@ -53,8 +53,8 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Arrays::has
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\Util\Arrays::has
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testHasWithInvalidSeparator()
     {
@@ -62,7 +62,7 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Arrays::get
+     * @covers \BackBee\Util\Arrays::get
      */
     public function testGet()
     {
@@ -81,8 +81,8 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Arrays::get
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\Util\Arrays::get
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testGetWithInvalidKey()
     {
@@ -90,8 +90,8 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Arrays::get
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\Util\Arrays::get
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testGetWithInvalidSeparator()
     {
@@ -99,7 +99,7 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Arrays::array_column
+     * @covers \BackBee\Util\Arrays::array_column
      */
     public function testArray_column()
     {

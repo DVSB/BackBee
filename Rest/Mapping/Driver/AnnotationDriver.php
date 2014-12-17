@@ -3,25 +3,25 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Mapping\Driver;
+namespace BackBee\Rest\Mapping\Driver;
 
-use BackBuilder\Rest\Mapping\ActionMetadata;
+use BackBee\Rest\Mapping\ActionMetadata;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 
@@ -33,8 +33,8 @@ use Metadata\Driver\DriverInterface;
  *
  * @Annotation
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -80,7 +80,7 @@ class AnnotationDriver implements DriverInterface
             $annotations = $this->reader->getMethodAnnotations($reflectionMethod);
 
             foreach ($annotations as $annotation) {
-                if ($annotation instanceof \BackBuilder\Rest\Controller\Annotations\QueryParam) {
+                if ($annotation instanceof \BackBee\Rest\Controller\Annotations\QueryParam) {
                     $data = array(
                         'name' => $annotation->name,
                         'key' => $annotation->key ? $annotation->key : $annotation->name,
@@ -90,7 +90,7 @@ class AnnotationDriver implements DriverInterface
                     );
 
                     $methodMetadata->queryParams[] = $data;
-                } elseif ($annotation instanceof \BackBuilder\Rest\Controller\Annotations\RequestParam) {
+                } elseif ($annotation instanceof \BackBee\Rest\Controller\Annotations\RequestParam) {
                     $data = array(
                         'name' => $annotation->name,
                         'key' => $annotation->key ? $annotation->key : $annotation->name,
@@ -100,14 +100,14 @@ class AnnotationDriver implements DriverInterface
                     );
 
                     $methodMetadata->requestParams[] = $data;
-                } elseif ($annotation instanceof \BackBuilder\Rest\Controller\Annotations\Pagination) {
+                } elseif ($annotation instanceof \BackBee\Rest\Controller\Annotations\Pagination) {
                     $methodMetadata->default_start = $annotation->default_start;
                     $methodMetadata->default_count = $annotation->default_count;
                     $methodMetadata->max_count = $annotation->max_count;
                     $methodMetadata->min_count = $annotation->min_count;
-                } elseif ($annotation instanceof \BackBuilder\Rest\Controller\Annotations\ParamConverter) {
+                } elseif ($annotation instanceof \BackBee\Rest\Controller\Annotations\ParamConverter) {
                     $methodMetadata->param_converter_bag[] = $annotation;
-                } elseif ($annotation instanceof \BackBuilder\Rest\Controller\Annotations\Security) {
+                } elseif ($annotation instanceof \BackBee\Rest\Controller\Annotations\Security) {
                     $methodMetadata->security[] = $annotation;
                 }
             }

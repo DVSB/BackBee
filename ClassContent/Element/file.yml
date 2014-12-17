@@ -1,5 +1,5 @@
 file:
-  repository: \BackBuilder\ClassContent\Repository\Element\fileRepository
+  repository: \BackBee\ClassContent\Repository\Element\fileRepository
   properties:
     name: File
     description: An attached file

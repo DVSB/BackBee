@@ -1,15 +1,15 @@
 <?php
 
-namespace BackBuilder\Security\Context;
+namespace BackBee\Security\Context;
 
-use BackBuilder\Security\Authentication\Provider\UserAuthenticationProvider;
-use BackBuilder\Security\Listeners\UsernamePasswordAuthenticationListener;
+use BackBee\Security\Authentication\Provider\UserAuthenticationProvider;
+use BackBee\Security\Listeners\UsernamePasswordAuthenticationListener;
 
 /**
  * Description of AnonymousContext
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Context
  * @copyright   Lp digital system
  * @author      nicolas.dufreche <nicolas.dufreche@lp-digital.fr>

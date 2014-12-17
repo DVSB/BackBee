@@ -1,24 +1,24 @@
 <?php
-namespace BackBuilder\Renderer;
+namespace BackBee\Renderer;
 
-use BackBuilder\BBApplication;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\DependencyInjection\ContainerInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Renderer\Exception\RendererException;
-use BackBuilder\Routing\RouteCollection;
-use BackBuilder\Site\Layout;
-use BackBuilder\Util\File;
-use BackBuilder\Util\String;
+use BackBee\BBApplication;
+use BackBee\ClassContent\AClassContent;
+use BackBee\DependencyInjection\ContainerInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBee\NestedNode\Page;
+use BackBee\Renderer\Exception\RendererException;
+use BackBee\Routing\RouteCollection;
+use BackBee\Site\Layout;
+use BackBee\Util\File;
+use BackBee\Util\String;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Renderer engine class; able to manage multiple template engine
  *
- * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @category    BackBee
+ * @package     BackBee\Renderer
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -249,7 +249,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Getters of renderer adapter by $key
      *
-     * @return BackBuilder\Renderer\IRendererAdapter
+     * @return BackBee\Renderer\IRendererAdapter
      */
     public function getAdapter($key)
     {
@@ -259,7 +259,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Getters of renderer adapters
      *
-     * @return array<BackBuilder\Renderer\IRendererAdapter>
+     * @return array<BackBee\Renderer\IRendererAdapter>
      */
     public function getAdapters()
     {
@@ -267,7 +267,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @see BackBuilder\Renderer\IRenderer::render()
+     * @see BackBee\Renderer\IRenderer::render()
      */
     public function render(IRenderable $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = false)
     {
@@ -367,7 +367,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @see BackBuilder\Renderer\IRenderer::partial()
+     * @see BackBee\Renderer\IRenderer::partial()
      */
     public function partial($template = null, $params = null)
     {
@@ -391,7 +391,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @see BackBuilder\Renderer\IRenderer::error()
+     * @see BackBee\Renderer\IRenderer::error()
      */
     public function error($errorCode, $title = null, $message = null, $trace = null)
     {
@@ -451,7 +451,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         // Rendering subcontent
         if (null !== $contentSet = $this->getObject()->getContentSet()) {
             $bbUserToken = $bbapp->getBBUserToken();
-            $revisionRepo = $bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision');
+            $revisionRepo = $bbapp->getEntityManager()->getRepository('BackBee\ClassContent\Revision');
             if (null !== $bbUserToken && null !== $revision = $revisionRepo->getDraft($contentSet, $bbUserToken)) {
                 $contentSet->setDraft($revision);
             }
@@ -528,7 +528,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
                     $subcontents = (array) $subcontents;
 
                     foreach ($subcontents as $sc) {
-                        if (true === is_a($sc, 'BackBuilder\Renderer\IRenderable')) {
+                        if (true === is_a($sc, 'BackBee\Renderer\IRenderable')) {
                             $scRender = $this->render(
                                 $sc, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable
                             );
@@ -550,7 +550,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         // Assign vars and parameters
         if (null !== $this->_object) {
             $draft = $this->_object->getDraft();
-            $aClassContentClassname = 'BackBuilder\ClassContent\AClassContent';
+            $aClassContentClassname = 'BackBee\ClassContent\AClassContent';
             if (true === is_a($this->_object, $aClassContentClassname) && false === $this->_object->isLoaded()) {
                 // trying to refresh unloaded content
                 $em = $bbapp->getEntityManager();
@@ -691,7 +691,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Returns the list of available render mode for the provided object
      *
-     * @param  \BackBuilder\Renderer\IRenderable $object
+     * @param  \BackBee\Renderer\IRenderable $object
      * @return array
      */
     public function getAvailableRenderMode(IRenderable $object)
@@ -705,7 +705,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @see BackBuilder\Renderer\IRenderer::updateLayout()
+     * @see BackBee\Renderer\IRenderer::updateLayout()
      */
     public function updateLayout(Layout $layout)
     {
@@ -764,7 +764,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * @param  array|null  $route_params
      * @param  string|null $base_url
      * @param  boolean     $add_ext
-     * @param  \BackBuilder\Site\Site
+     * @param  \BackBee\Site\Site
      * @return string
      */
     public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null, $build_query = false)
@@ -776,7 +776,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * Returns image url
      *
      * @param string                $pathinfo
-     * @param BackBuilder\Site\Site $site
+     * @param BackBee\Site\Site $site
      *
      * @return string image url
      */
@@ -789,7 +789,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * Returns image url
      *
      * @param string                $pathinfo
-     * @param BackBuilder\Site\Site $site
+     * @param BackBee\Site\Site $site
      *
      * @return string image url
      */
@@ -802,7 +802,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * Returns resource url
      *
      * @param string                $pathinfo
-     * @param BackBuilder\Site\Site $site
+     * @param BackBee\Site\Site $site
      *
      * @return string resource url
      */

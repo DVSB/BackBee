@@ -3,32 +3,32 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Util;
+namespace BackBee\Util;
 
-use BackBuilder\Exception\BBException;
-use BackBuilder\Exception\InvalidArgumentsException;
+use BackBee\Exception\BBException;
+use BackBee\Exception\InvalidArgumentsException;
 
 /**
  * Set of utility methods to deal with files
  *
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -214,7 +214,7 @@ class File
      * Makes directory
      * @param  string                                           $path The directory path
      * @return boolean                                          Returns TRUE on success
-     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if directory cannot be created
+     * @throws \BackBee\Exception\InvalidArgumentsException Occurs if directory cannot be created
      */
     public static function mkdir($path)
     {
@@ -238,8 +238,8 @@ class File
      * @param  string                                           $from The source file path
      * @param  string                                           $to   The target file path
      * @return boolean                                          Returns TRUE on success
-     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if either $from or $to is invalid
-     * @throws \BackBuilder\Exception\BBException               Occurs if the copy can not be done
+     * @throws \BackBee\Exception\InvalidArgumentsException Occurs if either $from or $to is invalid
+     * @throws \BackBee\Exception\BBException               Occurs if the copy can not be done
      */
     public static function copy($from, $to)
     {
@@ -268,8 +268,8 @@ class File
      * @param  string                                           $from The source file path
      * @param  string                                           $to   The target file path
      * @return boolean                                          Returns TRUE on success
-     * @throws \BackBuilder\Exception\InvalidArgumentsException Occurs if either $from or $to is invalid
-     * @throws \BackBuilder\Exception\BBException               Occurs if $from can not be deleted
+     * @throws \BackBee\Exception\InvalidArgumentsException Occurs if either $from or $to is invalid
+     * @throws \BackBee\Exception\BBException               Occurs if $from can not be deleted
      */
     public static function move($from, $to)
     {
@@ -295,12 +295,12 @@ class File
      * @param  string                                          $basedir
      * @param  string                                          $extension
      * @return array
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
+     * @throws \BackBee\Exception\InvalidArgumentException Occures if $basedir is unreachable
      */
     public static function getFilesRecursivelyByExtension($basedir, $extension)
     {
         if (false === is_readable($basedir)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
+            throw new \BackBee\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
         }
 
         $files = array();
@@ -339,12 +339,12 @@ class File
      * @param  string                                          $basedir
      * @param  string                                          $extension
      * @return array
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occures if $basedir is unreachable
+     * @throws \BackBee\Exception\InvalidArgumentException Occures if $basedir is unreachable
      */
     public static function getFilesByExtension($basedir, $extension)
     {
         if (false === is_readable($basedir)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
+            throw new \BackBee\Exception\InvalidArgumentException(sprintf('Cannot read the directory %s', $basedir));
         }
 
         $files = array();

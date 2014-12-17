@@ -3,36 +3,36 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent\Repository\Element;
+namespace BackBee\ClassContent\Repository\Element;
 
-use BackBuilder\ClassContent\Repository\ClassContentRepository;
-use BackBuilder\ClassContent\Exception\ClassContentException;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\Element\file as elementFile;
-use BackBuilder\Util\File;
-use BackBuilder\Util\Media;
-use BackBuilder\BBApplication;
+use BackBee\ClassContent\Repository\ClassContentRepository;
+use BackBee\ClassContent\Exception\ClassContentException;
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\Element\file as elementFile;
+use BackBee\Util\File;
+use BackBee\Util\Media;
+use BackBee\BBApplication;
 
 /**
  * file repository
- * @category    BackBuilder
- * @package     BackBuilder\ClassContent
+ * @category    BackBee
+ * @package     BackBee\ClassContent
  * @subpackage  Repository\Element
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -59,13 +59,13 @@ class fileRepository extends ClassContentRepository
 
     /**
      * The current application
-     * @var \BackBuilder\BBApplication
+     * @var \BackBee\BBApplication
      */
     private $_application;
 
     /**
      * Move an temporary uploaded file to either media library or storage directory
-     * @param  \BackBuilder\ClassContent\Element\file $file
+     * @param  \BackBee\ClassContent\Element\file $file
      * @return boolean
      */
     public function commitFile(elementFile $file)
@@ -80,7 +80,7 @@ class fileRepository extends ClassContentRepository
             File::move($filename, $currentname);
             $file->path = Media::getPathFromContent($file);
             $this->_dispatchPostUploadEvent($currentname, $file->path);
-        } catch (\BackBuilder\Exception\BBException $e) {
+        } catch (\BackBee\Exception\BBException $e) {
             return false;
         }
 
@@ -89,11 +89,11 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Move an uploaded file to the temporary directory and update file content
-     * @param  \BackBuilder\ClassContent\AClassContent                   $file
+     * @param  \BackBee\ClassContent\AClassContent                   $file
      * @param  string                                                    $newfilename
      * @param  string                                                    $originalname
      * @return boolean|string
-     * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
+     * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
     public function updateFile(AClassContent $file, $newfilename, $originalname = null, $src = null)
     {
@@ -107,7 +107,7 @@ class fileRepository extends ClassContentRepository
 
         $base_dir = $this->_temporarydir;
         $file->originalname = $originalname;
-        $file->path = \BackBuilder\Util\Media::getPathFromContent($file);
+        $file->path = \BackBee\Util\Media::getPathFromContent($file);
 
         if (null === $file->getDraft()) {
             $base_dir = ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir;
@@ -130,7 +130,7 @@ class fileRepository extends ClassContentRepository
             }
 
             $this->_dispatchPostUploadEvent($moveto, $file->path);
-        } catch (\BackBuilder\Exception\BBException $e) {
+        } catch (\BackBee\Exception\BBException $e) {
             return false;
         }
 
@@ -142,7 +142,7 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Return true if file is in media libray false otherwise
-     * @param  \BackBuilder\ClassContent\Element\file $file
+     * @param  \BackBee\ClassContent\Element\file $file
      * @return boolean
      */
     public function isInMediaLibrary(elementFile $file)
@@ -165,11 +165,11 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Do stuf on update by post of the content editing form
-     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @param  \BackBee\ClassContent\AClassContent                   $content
      * @param  stdClass                                                  $value
-     * @param  \BackBuilder\ClassContent\AClassContent                   $parent
-     * @return \BackBuilder\ClassContent\Element\file
-     * @throws \BackBuilder\ClassContent\Exception\ClassContentException Occures on invalid content type provided
+     * @param  \BackBee\ClassContent\AClassContent                   $parent
+     * @return \BackBee\ClassContent\Element\file
+     * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
     {
@@ -189,8 +189,8 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Set the storage directories define by the BB5 application
-     * @param  \BackBuilder\BBApplication                                  $application
-     * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
+     * @param  \BackBee\BBApplication                                  $application
+     * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setDirectories(BBApplication $application = null)
     {
@@ -208,7 +208,7 @@ class fileRepository extends ClassContentRepository
     /**
      * Set the temporary directory
      * @param  type                                                        $temporary_dir
-     * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
+     * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setTemporaryDir($temporary_dir = null)
     {
@@ -220,7 +220,7 @@ class fileRepository extends ClassContentRepository
     /**
      * Set the storage directory
      * @param  type                                                        $storage_dir
-     * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
+     * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setStorageDir($storage_dir = null)
     {
@@ -232,7 +232,7 @@ class fileRepository extends ClassContentRepository
     /**
      * Set the media library directory
      * @param  type                                                        $media_dir
-     * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
+     * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setMediaDir($media_dir = null)
     {
@@ -250,7 +250,7 @@ class fileRepository extends ClassContentRepository
     {
         if (null !== $this->_application &&
                 null !== $this->_application->getEventDispatcher()) {
-            $event = new \BackBuilder\Event\PostUploadEvent($sourcefile, $targetfile);
+            $event = new \BackBee\Event\PostUploadEvent($sourcefile, $targetfile);
             $this->_application->getEventDispatcher()->dispatch('file.postupload', $event);
         }
     }

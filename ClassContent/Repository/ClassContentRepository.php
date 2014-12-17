@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent\Repository;
+namespace BackBee\ClassContent\Repository;
 
-use BackBuilder\BBApplication;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Security\Token\BBUserToken;
-use BackBuilder\Util\Doctrine\SettablePaginator;
+use BackBee\BBApplication;
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\ContentSet;
+use BackBee\NestedNode\Page;
+use BackBee\Security\Token\BBUserToken;
+use BackBee\Util\Doctrine\SettablePaginator;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMapping;
@@ -34,8 +34,8 @@ use Doctrine\ORM\Query\ResultSetMapping;
 /**
  * AClassContent repository
  *
- * @category    BackBuilder
- * @package     BackBuilder\ClassContent
+ * @category    BackBee
+ * @package     BackBee\ClassContent
  * @subpackage  Repository\Element
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -61,7 +61,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Get all content uids owning the provided content
-     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AClassContent $content
      * @return array
      */
     public function getParentContentUid(AClassContent $content)
@@ -71,10 +71,10 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Replace root contentset for a page and its descendants
-     * @param \BackBuilder\NestedNode\Page            $page
-     * @param \BackBuilder\ClassContent\ContentSet    $oldContentSet
-     * @param \BackBuilder\ClassContent\ContentSet    $newContentSet
-     * @param \BackBuilder\Security\Token\BBUserToken $userToken
+     * @param \BackBee\NestedNode\Page            $page
+     * @param \BackBee\ClassContent\ContentSet    $oldContentSet
+     * @param \BackBee\ClassContent\ContentSet    $newContentSet
+     * @param \BackBee\Security\Token\BBUserToken $userToken
      */
     public function updateRootContentSetByPage(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet, BBUserToken $userToken)
     {
@@ -96,7 +96,7 @@ class ClassContentRepository extends EntityRepository
         if ($results) {
             foreach ($results as $parentContentSet) {
                 /* create draft for the main container */
-                if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($parentContentSet, $userToken, true)) {
+                if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($parentContentSet, $userToken, true)) {
                     $parentContentSet->setDraft($draft);
                 }
                 /* Replace the old ContentSet by the new one */
@@ -178,7 +178,7 @@ class ClassContentRepository extends EntityRepository
                     if (true === is_array($selectedKeywords)) {
                         $selectedKeywords = array_filter($selectedKeywords);
                         if (false === empty($selectedKeywords)) {
-                            $contentIds = $this->_em->getRepository("BackBuilder\NestedNode\KeyWord")->getContentsIdByKeyWords($selectedKeywords, false);
+                            $contentIds = $this->_em->getRepository("BackBee\NestedNode\KeyWord")->getContentsIdByKeyWords($selectedKeywords, false);
                             if (true === is_array($contentIds) && false === empty($contentIds)) {
                                 $where[] = 'c.uid IN ("'.implode('","', $contentIds).'")';
                             } else {
@@ -200,7 +200,7 @@ class ClassContentRepository extends EntityRepository
         if (array_key_exists('parentnode', $selector) && true === is_array($selector['parentnode'])) {
             $parentnode = array_filter($selector['parentnode']);
             if (false === empty($parentnode)) {
-                $nodes = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findBy(array('_uid' => $parentnode));
+                $nodes = $this->_em->getRepository('BackBee\NestedNode\Page')->findBy(array('_uid' => $parentnode));
                 if (count($nodes) != 0) {
                     $has_page_joined = true;
                     $query = 'SELECT c.uid FROM page p USE INDEX(IDX_SELECT_PAGE) LEFT JOIN content c ON c.node_uid=p.uid';
@@ -225,9 +225,9 @@ class ClassContentRepository extends EntityRepository
                         $where[] = 'p.state < 4';
                     }
 
-                    if (true === property_exists('BackBuilder\NestedNode\Page', '_'.$selector['orderby'][0])) {
+                    if (true === property_exists('BackBee\NestedNode\Page', '_'.$selector['orderby'][0])) {
                         $orderby[] = 'p.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    } elseif (true === property_exists('BackBuilder\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+                    } elseif (true === property_exists('BackBee\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
                         $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
                     } else {
                         $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
@@ -239,7 +239,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (0 === count($orderby)) {
-            if (true === property_exists('BackBuilder\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+            if (true === property_exists('BackBee\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
                 $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
             } else {
                 $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
@@ -279,10 +279,10 @@ class ClassContentRepository extends EntityRepository
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
 
-        if (true === $has_page_joined && true === property_exists('BackBuilder\NestedNode\Page', '_'.$selector['orderby'][0])) {
+        if (true === $has_page_joined && true === property_exists('BackBee\NestedNode\Page', '_'.$selector['orderby'][0])) {
             $q->join('c._mainnode', 'p')
                     ->orderBy('p._'.$selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-        } elseif (true === property_exists('BackBuilder\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+        } elseif (true === property_exists('BackBee\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
             $q->orderBy('c._'.$selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
         } else {
             $q->leftJoin('c._indexation', 'isort')
@@ -457,7 +457,7 @@ class ClassContentRepository extends EntityRepository
     private function getPageMainContentSets($selectedNode, $online = false)
     {
         $rsm = new ResultSetMapping();
-        $rsm->addEntityResult("BackBuilder\ClassContent\ContentSet", "c");
+        $rsm->addEntityResult("BackBee\ClassContent\ContentSet", "c");
 
         $rsm->addFieldResult('c', 'uid', '_uid');
         $sql = "Select c.uid from content c LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid";
@@ -538,7 +538,7 @@ class ClassContentRepository extends EntityRepository
     private function addContentBySearchFilters(ClassContentQueryBuilder $qb, $classnames, $orderInfos, $cond)
     {
         if (array_key_exists('selectedpageField', $cond) && !is_null($cond['selectedpageField']) && !empty($cond['selectedpageField'])) {
-            $selectedNode = $this->_em->getRepository('BackBuilder\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
+            $selectedNode = $this->_em->getRepository('BackBee\NestedNode\Page')->findOneBy(array('_uid' => $cond['selectedpageField']));
             $qb->addPageFilter($selectedNode);
         }
 
@@ -569,7 +569,7 @@ class ClassContentRepository extends EntityRepository
         /* handle order info */
         if (is_array($orderInfos) && array_key_exists('column', $orderInfos)) {
             $orderInfos['column'] = ('_' === $orderInfos['column'][0] ? '' : '_').$orderInfos['column'];
-            if (property_exists('BackBuilder\ClassContent\AClassContent', $orderInfos['column'])) {
+            if (property_exists('BackBee\ClassContent\AClassContent', $orderInfos['column'])) {
                 $qb->orderBy('cc.'.$orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
             } else {
                 $qb->orderByIndex($orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
@@ -661,10 +661,10 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Do stuf on update by post of the content editing form
-     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AClassContent $content
      * @param  stdClass                                $value
-     * @param  \BackBuilder\ClassContent\AClassContent $parent
-     * @return \BackBuilder\ClassContent\Element\file
+     * @param  \BackBee\ClassContent\AClassContent $parent
+     * @return \BackBee\ClassContent\Element\file
      * @throws ClassContentException                   Occures on invalid content type provided
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
@@ -699,7 +699,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Format a post (place here all other stuffs)
-     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AClassContent $content
      * @param  stdClass                                $value
      * @return string
      */
@@ -708,7 +708,7 @@ class ClassContentRepository extends EntityRepository
         $val = $value->value;
 
         switch (get_class($content)) {
-            case 'BackBuilder\ClassContent\Element\text':
+            case 'BackBee\ClassContent\Element\text':
                 //nettoyage des images => div aloha
                 $pattern = '{<div class=".*aloha-image.*".*>.?<(img[^\>]*).*>.*</div>}si';
                 if (TRUE == preg_match($pattern, $val, $matches)) {
@@ -724,16 +724,16 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Do stuf removing content from the content editing form
-     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AClassContent $content
      * @param  type                                    $value
-     * @param  \BackBuilder\ClassContent\AClassContent $parent
+     * @param  \BackBee\ClassContent\AClassContent $parent
      * @return type
      * @throws ClassContentException
      */
     public function removeFromPost(AClassContent $content, $value = null, AClassContent $parent = null)
     {
         if (null !== $draft = $content->getDraft()) {
-            $draft->setState(\BackBuilder\ClassContent\Revision::STATE_TO_DELETE);
+            $draft->setState(\BackBee\ClassContent\Revision::STATE_TO_DELETE);
         }
 
         return $content;
@@ -741,8 +741,8 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Set the storage directories define by the BB5 application
-     * @param  \BackBuilder\BBApplication                                  $application
-     * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
+     * @param  \BackBee\BBApplication                                  $application
+     * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setDirectories(BBApplication $application = null)
     {
@@ -752,7 +752,7 @@ class ClassContentRepository extends EntityRepository
     /**
      * Set the temporary directory
      * @param  type                                                        $temporary_dir
-     * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
+     * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setTemporaryDir($temporary_dir = null)
     {
@@ -762,7 +762,7 @@ class ClassContentRepository extends EntityRepository
     /**
      * Set the storage directory
      * @param  type                                                        $storage_dir
-     * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
+     * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setStorageDir($storage_dir = null)
     {
@@ -772,7 +772,7 @@ class ClassContentRepository extends EntityRepository
     /**
      * Set the media library directory
      * @param  type                                                        $media_dir
-     * @return \BackBuilder\ClassContent\Repository\Element\fileRepository
+     * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setMediaDir($media_dir = null)
     {
@@ -781,16 +781,16 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Load content if need, the user's revision is also set
-     * @param  \BackBuilder\ClassContent\AClassContent $content
-     * @param  \BackBuilder\Security\Token\BBUserToken $token
+     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\Security\Token\BBUserToken $token
      * @param  boolean                                 $checkoutOnMissing If true, checks out a new revision if none was found
-     * @return \BackBuilder\ClassContent\AClassContent
+     * @return \BackBee\ClassContent\AClassContent
      */
-    public function load(AClassContent $content, \BackBuilder\Security\Token\BBUserToken $token = null, $checkoutOnMissing = false)
+    public function load(AClassContent $content, \BackBee\Security\Token\BBUserToken $token = null, $checkoutOnMissing = false)
     {
         $revision = null;
         if (null !== $token) {
-            $revision = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, $checkoutOnMissing);
+            $revision = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, $checkoutOnMissing);
         }
 
         if (false === $content->isLoaded()) {
@@ -809,7 +809,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Returns the unordered children uids for $content
-     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AClassContent $content
      * @return array
      */
     public function getUnorderedChildrenUids(AClassContent $content)
@@ -821,7 +821,7 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AClassContent $content
      * @return Collection<Page>
      */
     public function findPagesByContent($content)
@@ -830,7 +830,7 @@ class ClassContentRepository extends EntityRepository
         $rootContents = array();
         $this->getRootContentParents($content, $rootContents);
         $qb = $this->_em->createQueryBuilder("p");
-        $qb->select("p")->from("BackBuilder\NestedNode\Page", "p")
+        $qb->select("p")->from("BackBee\NestedNode\Page", "p")
                 ->andWhere('p._contentset IN (:contentset)')
                 ->setParameter('contentset', $rootContents);
         $result = $qb->getQuery()->getResult();
@@ -885,13 +885,13 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param \BackBee\ClassContent\AClassContent $content
      * @return
      */
     public function deleteContent(AClassContent $content, $mainContent = true)
     {
         $parents = $content->getParentContent();
-        $media = $this->_em->getRepository('BackBuilder\NestedNode\Media')->findOneBy(array(
+        $media = $this->_em->getRepository('BackBee\NestedNode\Media')->findOneBy(array(
             '_content' => $content->getUid(),
         ));
 

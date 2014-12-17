@@ -3,48 +3,48 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Tests;
+namespace BackBee\DependencyInjection\Tests;
 
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\ContainerBuilder;
-use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
-use BackBuilder\DependencyInjection\ContainerProxy;
-use BackBuilder\Tests\Mock\ManualBBApplication;
+use BackBee\DependencyInjection\Container;
+use BackBee\DependencyInjection\ContainerBuilder;
+use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
+use BackBee\DependencyInjection\ContainerProxy;
+use BackBee\Tests\Mock\ManualBBApplication;
 use org\bovigo\vfs\vfsStream;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 
 /**
- * Set of tests for BackBuilder\DependencyInjection\ContainerBuilder
+ * Set of tests for BackBee\DependencyInjection\ContainerBuilder
  *
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\DependencyInjection\ContainerBuilder
+ * @coversDefaultClass \BackBee\DependencyInjection\ContainerBuilder
  */
 class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * base application
      *
-     * @var BackBuilder\IApplication
+     * @var BackBee\IApplication
      */
     private $application;
 
@@ -84,7 +84,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $container_builder = new ContainerBuilder($this->application);
 
         $container = $container_builder->getContainer();
-        $this->assertInstanceOf('BackBuilder\DependencyInjection\Container', $container);
+        $this->assertInstanceOf('BackBee\DependencyInjection\Container', $container);
 
         return $container;
     }
@@ -114,9 +114,9 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     public function testLoadApplicationServices(Container $container)
     {
         $this->assertEquals('foo', $container->getParameter('foo'));
-        $this->assertEquals('BackBuilder\Logging\Logger', $container->getParameter('bbapp.logger.class'));
+        $this->assertEquals('BackBee\Logging\Logger', $container->getParameter('bbapp.logger.class'));
         $this->assertEquals(
-            'BackBuilder\Logging\DebugStackLogger',
+            'BackBee\Logging\DebugStackLogger',
             $container->getParameter('bbapp.logger_debug.class')
         );
 
@@ -211,7 +211,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
             $container_builder->getContainer();
             $this->fail('Raise of ContainerAlreadyExistsException expected.');
         } catch (\Exception $e) {
-            $this->assertInstanceOf('BackBuilder\DependencyInjection\Exception\ContainerAlreadyExistsException', $e);
+            $this->assertInstanceOf('BackBee\DependencyInjection\Exception\ContainerAlreadyExistsException', $e);
             $this->assertEquals($e->getContainer(), $container);
         }
     }
@@ -264,7 +264,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
             $dump_directory.DIRECTORY_SEPARATOR.$dump_filename.'.php',
             (new PhpDumper($container_proxy))->dump(array(
                 'class'      => $dump_filename,
-                'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy',
+                'base_class' => 'BackBee\DependencyInjection\ContainerProxy',
             ))
         );
 
@@ -281,7 +281,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $container_proxy = $container_builder->getContainer();
 
         $this->assertInstanceOf($dump_filename, $container_proxy);
-        $this->assertInstanceOf('BackBuilder\DependencyInjection\ContainerProxy', $container_proxy);
+        $this->assertInstanceOf('BackBee\DependencyInjection\ContainerProxy', $container_proxy);
     }
 
     /**
@@ -303,7 +303,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
             $this->fail('Raise of MissingBootstrapParametersException expected.');
         } catch (\Exception $e) {
             $this->assertInstanceOf(
-                'BackBuilder\DependencyInjection\Exception\MissingBootstrapParametersException', $e
+                'BackBee\DependencyInjection\Exception\MissingBootstrapParametersException', $e
             );
         }
     }

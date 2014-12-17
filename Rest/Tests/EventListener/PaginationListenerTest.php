@@ -1,29 +1,29 @@
 <?php
-namespace BackBuilder\Rest\Tests\EventListener;
+namespace BackBee\Rest\Tests\EventListener;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\FrontController\FrontController;
-use BackBuilder\Rest\EventListener\PaginationListener;
-use BackBuilder\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
-use BackBuilder\Tests\TestCase;
+use BackBee\FrontController\FrontController;
+use BackBee\Rest\EventListener\PaginationListener;
+use BackBee\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
+use BackBee\Tests\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\Validation;
@@ -31,12 +31,12 @@ use Symfony\Component\Validator\Validation;
 /**
  * Pagination Listener class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\EventListener\PaginationListener
+ * @coversDefaultClass \BackBee\Rest\EventListener\PaginationListener
  */
 class PaginationListenerTest extends TestCase
 {
@@ -54,7 +54,7 @@ class PaginationListenerTest extends TestCase
     public function test__construct()
     {
         $listener = $this->getListener();
-        $this->assertInstanceOf('BackBuilder\Rest\EventListener\PaginationListener', $listener);
+        $this->assertInstanceOf('BackBee\Rest\EventListener\PaginationListener', $listener);
     }
 
     /**
@@ -94,7 +94,7 @@ class PaginationListenerTest extends TestCase
     }
 
     /**
-     * @expectedException BackBuilder\Rest\Exception\ValidationException
+     * @expectedException BackBee\Rest\Exception\ValidationException
      * @covers ::onKernelController
      */
     public function testInvalidLimitMax()
@@ -111,7 +111,7 @@ class PaginationListenerTest extends TestCase
     }
 
     /**
-     * @expectedException BackBuilder\Rest\Exception\ValidationException
+     * @expectedException BackBee\Rest\Exception\ValidationException
      * @covers ::onKernelController
      */
     public function testInvalidLimitMin()
@@ -129,14 +129,14 @@ class PaginationListenerTest extends TestCase
 
     protected function getListener()
     {
-        $refl = new \ReflectionClass('BackBuilder\Rest\Controller\Annotations\Pagination');
+        $refl = new \ReflectionClass('BackBee\Rest\Controller\Annotations\Pagination');
 
         \Doctrine\Common\Annotations\AnnotationRegistry::registerAutoloadNamespaces(array(
-            'BackBuilder\Rest\Controller\Annotations' => dirname($refl->getFileName()),
+            'BackBee\Rest\Controller\Annotations' => dirname($refl->getFileName()),
         ));
 
         $metadataFactory =  new \Metadata\MetadataFactory(
-            new \BackBuilder\Rest\Mapping\Driver\AnnotationDriver(
+            new \BackBee\Rest\Mapping\Driver\AnnotationDriver(
                 new \Doctrine\Common\Annotations\AnnotationReader()
             )
         );

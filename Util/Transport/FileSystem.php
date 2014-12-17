@@ -3,31 +3,31 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Util\Transport;
+namespace BackBee\Util\Transport;
 
-use BackBuilder\Util\Transport\Exception\TransportException;
+use BackBee\Util\Transport\Exception\TransportException;
 
 /**
  * A local filesystem transport
  *
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @subpackage  Transport
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -56,7 +56,7 @@ class FileSystem extends ATransport
     /**
      * @param  string                                 $host
      * @param  string                                 $port
-     * @return \BackBuilder\Util\Transport\FileSystem
+     * @return \BackBee\Util\Transport\FileSystem
      * @codeCoverageIgnore
      */
     public function connect($host = null, $port = null)
@@ -70,8 +70,8 @@ class FileSystem extends ATransport
      *
      * @param  string                                                        $username
      * @param  string                                                        $password
-     * @return \BackBuilder\Util\Transport\FileSystem
-     * @throws \BackBuilder\Util\Transport\Exception\AuthenticationException
+     * @return \BackBee\Util\Transport\FileSystem
+     * @throws \BackBee\Util\Transport\Exception\AuthenticationException
      */
     public function login($username = null, $password = null)
     {
@@ -88,7 +88,7 @@ class FileSystem extends ATransport
 
     /**
      * Disconnects
-     * @return \BackBuilder\Util\Transport\FileSystem
+     * @return \BackBee\Util\Transport\FileSystem
      * @codeCoverageIgnore
      */
     public function disconnect()

@@ -1,13 +1,13 @@
 <?php
-namespace BackBuilder\Importer;
+namespace BackBee\Importer;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Config\Config;
-use BackBuilder\Importer\Exception\SkippedImportException;
+use BackBee\BBApplication;
+use BackBee\Config\Config;
+use BackBee\Importer\Exception\SkippedImportException;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Import
+ * @category    BackBee
+ * @package     BackBee\Import
  * @copyright   Lp system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -58,7 +58,7 @@ abstract class AImportBundle
             $log_filepath = dirname($log_filepath).'/import.log';
         }
 
-        $logger = new \BackBuilder\Logging\Appender\File(array(
+        $logger = new \BackBee\Logging\Appender\File(array(
             'logfile' => $log_filepath,
         ));
 
@@ -92,7 +92,7 @@ abstract class AImportBundle
 
         $key = (0 === strpos($name, 'import')) ? strtolower(str_replace('import', '', $name)) : '';
         if ($key !== '') {
-            $connectorName = '\BackBuilder\Importer\Connector\\'.$config['connector'];
+            $connectorName = '\BackBee\Importer\Connector\\'.$config['connector'];
 
             $connector = new $connectorName($this->_application, $this->_config->getSection($config['config']));
             $importer = new Importer($this->_application, $connector, $this->_config);

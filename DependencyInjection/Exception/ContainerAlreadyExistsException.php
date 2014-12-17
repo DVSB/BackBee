@@ -3,45 +3,45 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Exception;
+namespace BackBee\DependencyInjection\Exception;
 
-use BackBuilder\DependencyInjection\Container;
+use BackBee\DependencyInjection\Container;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class ContainerAlreadyExistsException extends \BackBuilder\Exception\BBException
+class ContainerAlreadyExistsException extends \BackBee\Exception\BBException
 {
     /**
      * container created by container builder which raise this exception
      *
-     * @var BackBuilder\DependencyInjection\Container
+     * @var BackBee\DependencyInjection\Container
      */
     private $container;
 
     /**
      * ContainerAlreadyExistsException's constructor
      *
-     * @param BackBuilder\DependencyInjection\Container $container the container created by the container builder
+     * @param BackBee\DependencyInjection\Container $container the container created by the container builder
      *                                                             which raise this exception
      */
     public function __construct(Container $container)
@@ -54,7 +54,7 @@ class ContainerAlreadyExistsException extends \BackBuilder\Exception\BBException
     /**
      * Getter of the container created by container builder which raise current exception
      *
-     * @return BackBuilder\DependencyInjection\Container
+     * @return BackBee\DependencyInjection\Container
      */
     public function getContainer()
     {

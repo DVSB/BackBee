@@ -3,32 +3,32 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Local;
+namespace BackBee\Services\Local;
 
-use BackBuilder\Util\String;
-use BackBuilder\Services\Exception\ServicesException;
+use BackBee\Util\String;
+use BackBee\Services\Exception\ServicesException;
 
 /**
  * Description of Media folder
  *
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Local
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
@@ -40,9 +40,9 @@ class MediaFolder extends AbstractServiceLocal
     private function createRoot()
     {
         try {
-            $mediaFolderRoot = $this->em->getRepository("\BackBuilder\NestedNode\MediaFolder")->getRoot();
+            $mediaFolderRoot = $this->em->getRepository("\BackBee\NestedNode\MediaFolder")->getRoot();
             if (is_null($mediaFolderRoot)) {
-                $mediaFolderRoot = new \BackBuilder\NestedNode\MediaFolder();
+                $mediaFolderRoot = new \BackBee\NestedNode\MediaFolder();
                 $mediaFolderRoot->setTitle(self::MEDIAFOLDER_TITLE);
                 $mediaFolderRoot->setLeftnode(1);
                 $mediaFolderRoot->setRightnode(2);
@@ -67,9 +67,9 @@ class MediaFolder extends AbstractServiceLocal
         $tree = array();
 
         if ($root_uid !== null) {
-            $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $root_uid);
+            $mediafolder = $em->find('\BackBee\NestedNode\MediaFolder', $root_uid);
 
-            foreach ($em->getRepository('\BackBuilder\NestedNode\MediaFolder')->getDescendants($mediafolder, 1) as $child) {
+            foreach ($em->getRepository('\BackBee\NestedNode\MediaFolder')->getDescendants($mediafolder, 1) as $child) {
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
                 $leaf->attr->rel = 'folder';
@@ -84,7 +84,7 @@ class MediaFolder extends AbstractServiceLocal
                 $tree[] = $leaf;
             }
         } else {
-            $mediafolder = $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->getRoot();
+            $mediafolder = $em->getRepository('\BackBee\NestedNode\MediaFolder')->getRoot();
             /* create a root */
             if (is_null($mediafolder)) {
                 $mediafolder = $this->createRoot();
@@ -129,13 +129,13 @@ class MediaFolder extends AbstractServiceLocal
     {
         $em = $this->bbapp->getEntityManager();
 
-        $root = $em->find('\BackBuilder\NestedNode\MediaFolder', $root_uid);
+        $root = $em->find('\BackBee\NestedNode\MediaFolder', $root_uid);
 
         if ($root) {
-            $mediafolder = new \BackBuilder\NestedNode\MediaFolder();
+            $mediafolder = new \BackBee\NestedNode\MediaFolder();
             $mediafolder->setTitle($title);
 
-            $mediafolder = $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->insertNodeAsFirstChildOf($mediafolder, $root);
+            $mediafolder = $em->getRepository('\BackBee\NestedNode\MediaFolder')->insertNodeAsFirstChildOf($mediafolder, $root);
 
             $mediafolder->setUrl($mediafolder->getParent()->getUrl().'/'.String::urlize($mediafolder->getTitle()));
 
@@ -163,7 +163,7 @@ class MediaFolder extends AbstractServiceLocal
     {
         $em = $this->bbapp->getEntityManager();
 
-        $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid);
+        $mediafolder = $em->find('\BackBee\NestedNode\MediaFolder', $mediafolder_uid);
 
         if ($mediafolder) {
             $mediafolder->setTitle($title);
@@ -184,14 +184,14 @@ class MediaFolder extends AbstractServiceLocal
     public function moveBBBrowserTree($mediafolder_uid, $root_uid, $next_uid)
     {
         $em = $this->bbapp->getEntityManager();
-        $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid);
-        $root = $em->find('\BackBuilder\NestedNode\MediaFolder', $root_uid);
+        $mediafolder = $em->find('\BackBee\NestedNode\MediaFolder', $mediafolder_uid);
+        $root = $em->find('\BackBee\NestedNode\MediaFolder', $root_uid);
 
         if (!is_null($root) && !is_null($mediafolder)) {
-            $mediafolder = $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->insertNodeAsLastChildOf($mediafolder, $root);
-            $next = ((null != $next_uid) ? $em->find('\BackBuilder\NestedNode\MediaFolder', $next_uid) : null);
+            $mediafolder = $em->getRepository('\BackBee\NestedNode\MediaFolder')->insertNodeAsLastChildOf($mediafolder, $root);
+            $next = ((null != $next_uid) ? $em->find('\BackBee\NestedNode\MediaFolder', $next_uid) : null);
             if (!is_null($next)) {
-                $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->moveAsPrevSiblingOf($mediafolder, $next);
+                $em->getRepository('\BackBee\NestedNode\MediaFolder')->moveAsPrevSiblingOf($mediafolder, $next);
             }
             $em->flush();
 
@@ -215,9 +215,9 @@ class MediaFolder extends AbstractServiceLocal
     public function deleteBBBrowserTree($mediafolder_uid)
     {
         $em = $this->bbapp->getEntityManager();
-        $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid);
+        $mediafolder = $em->find('\BackBee\NestedNode\MediaFolder', $mediafolder_uid);
         if ($mediafolder) {
-            return $em->getRepository('\BackBuilder\NestedNode\MediaFolder')->delete($mediafolder, $this->bbapp);
+            return $em->getRepository('\BackBee\NestedNode\MediaFolder')->delete($mediafolder, $this->bbapp);
         }
 
         return false;
@@ -228,7 +228,7 @@ class MediaFolder extends AbstractServiceLocal
      */
     public function delete($uid)
     {
-        if (null === $folder = $this->em->find('\BackBuilder\NestedNode\MediaFolder', $uid)) {
+        if (null === $folder = $this->em->find('\BackBee\NestedNode\MediaFolder', $uid)) {
             throw new ServicesException(sprintf('Unable to delete media folder for `%s` uid', $uid));
         }
 
@@ -236,11 +236,11 @@ class MediaFolder extends AbstractServiceLocal
             throw new ServicesException('mediaselector.error.is_root');
         }
 
-        if (0 < $this->em->getRepository("\BackBuilder\NestedNode\Media")->countMedias($folder)) {
+        if (0 < $this->em->getRepository("\BackBee\NestedNode\Media")->countMedias($folder)) {
             throw new ServicesException('mediaselector.error.is_not_empty');
         }
 
-        return $this->em->getRepository('\BackBuilder\NestedNode\MediaFolder')->delete($folder);
+        return $this->em->getRepository('\BackBee\NestedNode\MediaFolder')->delete($folder);
     }
 
     /**
@@ -255,7 +255,7 @@ class MediaFolder extends AbstractServiceLocal
         $result = array("numResults" => 0, "views" => $view);
 
         if (null !== $mediafolder_uid) {
-            $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid);
+            $mediafolder = $em->find('\BackBee\NestedNode\MediaFolder', $mediafolder_uid);
             $pagingInfos = array("start" => (int) $start, "limit" => (int) $limit);
 
             if (null !== $mediafolder) {
@@ -265,9 +265,9 @@ class MediaFolder extends AbstractServiceLocal
                     }
                 }
 
-                $nbContent = $em->getRepository("\BackBuilder\NestedNode\Media")->countMedias($mediafolder, $params);
+                $nbContent = $em->getRepository("\BackBee\NestedNode\Media")->countMedias($mediafolder, $params);
 
-                foreach ($em->getRepository('\BackBuilder\NestedNode\Media')->getMedias($mediafolder, $params, $order_sort, $order_dir, $pagingInfos) as $media) {
+                foreach ($em->getRepository('\BackBee\NestedNode\Media')->getMedias($mediafolder, $params, $order_sort, $order_dir, $pagingInfos) as $media) {
                     $media_content = $media->getContent();
                     if (null === $media_content) {
                         continue;

@@ -3,26 +3,26 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Controller;
+namespace BackBee\Rest\Controller;
 
-use BackBuilder\Rest\Controller\Annotations as Rest;
-use BackBuilder\Security\User;
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Security\User;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,8 +34,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * User Controller
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -60,7 +60,7 @@ class UserController extends ARestController
         // TODO
 
 
-        if (!$this->isGranted('VIEW', new ObjectIdentity('class', 'BackBuilder\Security\User'))) {
+        if (!$this->isGranted('VIEW', new ObjectIdentity('class', 'BackBee\Security\User'))) {
             throw new AccessDeniedException(sprintf('You are not authorized to view users'));
         }
 
@@ -78,7 +78,7 @@ class UserController extends ARestController
             throw new AccessDeniedException('You must be authenticated to delete users');
         }
 
-        $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
+        $user = $this->getEntityManager()->getRepository('BackBee\Security\User')->find($id);
 
         if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
@@ -102,7 +102,7 @@ class UserController extends ARestController
             throw new AccessDeniedException('You must be authenticated to delete users');
         }
 
-        $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
+        $user = $this->getEntityManager()->getRepository('BackBee\Security\User')->find($id);
 
         if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
@@ -140,7 +140,7 @@ class UserController extends ARestController
             throw new AccessDeniedException('You must be authenticated to view users');
         }
 
-        $user = $this->getEntityManager()->getRepository('BackBuilder\Security\User')->find($id);
+        $user = $this->getEntityManager()->getRepository('BackBee\Security\User')->find($id);
 
         if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
@@ -185,7 +185,7 @@ class UserController extends ARestController
             throw new AccessDeniedException('You must be authenticated to view users');
         }
 
-        $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Security\User')->findBy(array('_login' => $request->request->get('login')));
+        $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBee\Security\User')->findBy(array('_login' => $request->request->get('login')));
 
         if ($userExists) {
             throw new ConflictHttpException(sprintf('User with that login already exists: %s', $request->request->get('login')));

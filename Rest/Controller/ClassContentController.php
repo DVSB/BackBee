@@ -3,28 +3,28 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Controller;
+namespace BackBee\Rest\Controller;
 
-use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\Rest\Controller\Annotations as Rest;
-use BackBuilder\Routing\RouteCollection;
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
+use BackBee\ClassContent\AClassContent;
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Routing\RouteCollection;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -37,8 +37,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * ClassContent API Controller
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -185,7 +185,7 @@ class ClassContentController extends ARestController
      * @Rest\QueryParam(name="page_uid", description="The page to set to application's renderer before rendering")
      *
      * @Rest\ParamConverter(
-     *   name="page", id_name="page_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
+     *   name="page", id_name="page_uid", id_source="query", class="BackBee\NestedNode\Page", required=false
      * )
      */
     public function getAction($type, $uid, Request $request)
@@ -229,7 +229,7 @@ class ClassContentController extends ARestController
         $em = $this->getApplication()->getEntityManager();
         $em->persist($content);
 
-        $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft(
+        $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft(
             $content,
             $this->getApplication()->getBBUserToken(),
             true
@@ -265,7 +265,7 @@ class ClassContentController extends ARestController
         $content = $this->getClassContentByTypeAndUid($type, $uid);
 
         try {
-            $this->getApplication()->getEntityManager()->getRepository('BackBuilder\ClassContent\AClassContent')
+            $this->getApplication()->getEntityManager()->getRepository('BackBee\ClassContent\AClassContent')
                 ->deleteContent($content)
             ;
         } catch (\Exception $e) {
@@ -278,7 +278,7 @@ class ClassContentController extends ARestController
     /**
      * Getter of classcontent category manager
      *
-     * @return BackBuilder\ClassContent\CategoryManager
+     * @return BackBee\ClassContent\CategoryManager
      */
     private function getCategoryManager()
     {
@@ -407,7 +407,7 @@ class ClassContentController extends ARestController
      * Returns classcontent datas if couple (type;uid) is valid
      *
      * @param string $type short namespace of a classcontent
-     *                     (full: BackBuilder\ClassContent\Block\paragraph => short: Block\paragraph)
+     *                     (full: BackBee\ClassContent\Block\paragraph => short: Block\paragraph)
      * @param string $uid
      *
      * @return
@@ -435,11 +435,11 @@ class ClassContentController extends ARestController
      *
      * @param AClassContent $content content we want to get the latest revision
      *
-     * @return null|BackBuilder\ClassContent\Revision
+     * @return null|BackBee\ClassContent\Revision
      */
     private function getClassContentRevision(AClassContent $content)
     {
-        return $this->getApplication()->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')
+        return $this->getApplication()->getEntityManager()->getRepository('BackBee\ClassContent\Revision')
             ->getDraft($content, $this->getApplication()->getBBUserToken())
         ;
     }
@@ -473,7 +473,7 @@ class ClassContentController extends ARestController
         unset($criterias['order_direction']);
 
         return $this->getApplication()->getEntityManager()
-            ->getRepository('BackBuilder\ClassContent\AClassContent')
+            ->getRepository('BackBee\ClassContent\AClassContent')
             ->findContentsBySearch($classnames, $order_infos, $pagination, $criterias)
         ;
     }

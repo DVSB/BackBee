@@ -3,29 +3,29 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Exception;
+namespace BackBee\Exception;
 
 /**
- * BackBuilder parent class exception
+ * BackBee parent class exception
  *
- * @category    BackBuilder
- * @package     BackBuilder\Exception
+ * @category    BackBee
+ * @package     BackBee\Exception
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -44,7 +44,7 @@ class BBException extends \Exception
     const INVALID_ARGUMENT = 1001;
 
     /**
-     * None Backbuilder application available
+     * None BackBee application available
      * @var int
      */
     const MISSING_APPLICATION = 1002;
@@ -128,7 +128,7 @@ class BBException extends \Exception
     /**
      * Sets the last source file before the exception thrown
      * @param  string                             $source
-     * @return \BackBuilder\Exception\BBException
+     * @return \BackBee\Exception\BBException
      */
     public function setSource($source)
     {
@@ -140,7 +140,7 @@ class BBException extends \Exception
     /**
      * Sets the line of the source file where the exception thrown
      * @param  type                               $seek
-     * @return \BackBuilder\Exception\BBException
+     * @return \BackBee\Exception\BBException
      */
     public function setSeek($seek)
     {
@@ -151,7 +151,7 @@ class BBException extends \Exception
 
     /**
      * Updates the error message according to the source and seek provided
-     * @return \BackBuilder\Exception\BBException
+     * @return \BackBee\Exception\BBException
      */
     private function _updateMessage()
     {

@@ -3,28 +3,28 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent\Repository;
+namespace BackBee\ClassContent\Repository;
 
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\ClassContent\Revision;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\Exception\ClassContentException;
+use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\Revision;
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\Exception\ClassContentException;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Doctrine\ORM\EntityRepository;
@@ -32,8 +32,8 @@ use Doctrine\ORM\EntityRepository;
 /**
  * Revision repository
  *
- * @category    BackBuilder
- * @package     BackBuilder\ClassContent
+ * @category    BackBee
+ * @package     BackBee\ClassContent
  * @subpackage  Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -62,7 +62,7 @@ class RevisionRepository extends EntityRepository
         return $content;
     }
 
-    public function checkout(AClassContent $content, \BackBuilder\Security\Token\BBUserToken $token)
+    public function checkout(AClassContent $content, \BackBee\Security\Token\BBUserToken $token)
     {
         $revision = new Revision();
         $revision->setAccept($content->getAccept());
@@ -212,12 +212,12 @@ class RevisionRepository extends EntityRepository
 
     /**
      * Return the user's draft of a content, optionally checks out a new one if not exists
-     * @param  \BackBuilder\ClassContent\AClassContent $content
-     * @param  \BackBuilder\Security\Token\BBUserToken $token
+     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\Security\Token\BBUserToken $token
      * @param  boolean                                 $checkoutOnMissing If true, checks out a new revision if none was found
-     * @return \BackBuilder\ClassContent\Revision|null
+     * @return \BackBee\ClassContent\Revision|null
      */
-    public function getDraft(AClassContent $content, \BackBuilder\Security\Token\BBUserToken $token, $checkoutOnMissing = false)
+    public function getDraft(AClassContent $content, \BackBee\Security\Token\BBUserToken $token, $checkoutOnMissing = false)
     {
         if (null === $revision = $content->getDraft()) {
             try {
@@ -259,7 +259,7 @@ class RevisionRepository extends EntityRepository
      */
     public function getAllDrafts(TokenInterface $token)
     {
-        $revisions = $this->_em->getRepository('\BackBuilder\ClassContent\Revision')
+        $revisions = $this->_em->getRepository('\BackBee\ClassContent\Revision')
                 ->findBy(array('_owner' => UserSecurityIdentity::fromToken($token),
             '_state' => array(Revision::STATE_ADDED, Revision::STATE_MODIFIED), ));
 
@@ -268,7 +268,7 @@ class RevisionRepository extends EntityRepository
 
     public function getRevisions(AClassContent $content)
     {
-        $revisions = $this->_em->getRepository('\BackBuilder\ClassContent\Revision')
+        $revisions = $this->_em->getRepository('\BackBee\ClassContent\Revision')
                 ->findBy(array('_content' => $content));
 
         return $revisions;

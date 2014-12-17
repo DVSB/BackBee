@@ -14,7 +14,7 @@ BB4.ToolsbarManager.register("editiontb",{
         selectedContentCls: "bb5-content-selected",
         showpageBrowserOnLoad: false,
         webservices: {
-            
+
         },
         siteId : null,
         pageId : null,
@@ -37,12 +37,12 @@ BB4.ToolsbarManager.register("editiontb",{
         },
         formInputLinkDataUid: null
     },
-    
+
     resizeInfos :{
         originalContainerHeight : null,
         resizeStep : 0
     },
-    
+
     _context: {
         mediaSelector: null,
         linkSelector: null,
@@ -54,7 +54,7 @@ BB4.ToolsbarManager.register("editiontb",{
         contextMenu: null,
         popupManager: null
     },
-    
+
     _events: {
         ".bb5-ico-tree click" : "pagebrowser",
         ".bb5-ico-new click" : "pagebrowser_newpage",
@@ -64,7 +64,7 @@ BB4.ToolsbarManager.register("editiontb",{
         ".bb5-onlyShowBlocksBtn change" : "toggle_edition",
         ".bb5-ico-keyword-tree click" : "showkeywordBrowser"
     },
-    
+
     _init: function() {
         bb.jquery('.bb5-onlyShowBlocksBtn').attr('checked', true);
         this.contentFormDialog = bb.PopupManager.init().create("contentFormsEditor",{
@@ -82,18 +82,18 @@ BB4.ToolsbarManager.register("editiontb",{
     },
     _availableBtns : {
         "bb5-ico-parameter" : {
-            btnClass:"bb5-button bb5-ico-parameter bb5-button-square bb5-invert", 
-            btnTitle: bb.i18n.__('contentmanager.parameters'), 
+            btnClass:"bb5-button bb5-ico-parameter bb5-button-square bb5-invert",
+            btnTitle: bb.i18n.__('contentmanager.parameters'),
             btnCallback : "showContentParams"
         },
         "bb5-ico-edit" : {
-            btnClass:"bb5-button bb5-ico-edit bb5-button-square bb5-invert", 
-            btnTitle: bb.i18n.__('contentmanager.edit'), 
+            btnClass:"bb5-button bb5-ico-edit bb5-button-square bb5-invert",
+            btnTitle: bb.i18n.__('contentmanager.edit'),
             btnCallback : "editContent"
         }
     },
-    
-    
+
+
     _contentMenuAction : {
         "showContentParams" : function(contentNode){
             var nodeInfos = {};
@@ -103,18 +103,18 @@ BB4.ToolsbarManager.register("editiontb",{
             var contentEditManager = bb.ManagersContainer.getInstance().getManager("ContentEditionManager");
             contentEditManager.showContentParamsEditor(nodeInfos);
         },
-        
+
         "editContent" :function(){
             this._editContent(this._context.selectedBlock);
             return;
         }
     },
-    
+
     showLinks : function(){
         var bbSelector = bb.jquery(this._context.linkSelector).data('bbSelector');
         bbSelector.open();
-    }, 
-    
+    },
+
     _initEditContentEvent : function(){
         /*moseover on content*/
         /*click on content edit-mode*/
@@ -129,7 +129,7 @@ BB4.ToolsbarManager.register("editiontb",{
             /*addHover for current*/
             bb.jquery(currentTarget).addClass(self._settings.contentHoverClass.replace(".",""));
         });
-     
+
         bb.jquery(contentSelector).live("mouseleave",function(e){
             if(!self._context.isEnable) return true;
             var currentTarget = bb.jquery(e.currentTarget);
@@ -141,7 +141,7 @@ BB4.ToolsbarManager.register("editiontb",{
                 });
             }
         });
-        
+
         bb.jquery(contentSelector).live("click",function(e){
             if(!self._context.isEnable) return true;
             e.stopPropagation();
@@ -151,7 +151,7 @@ BB4.ToolsbarManager.register("editiontb",{
             return true;
         });
     },
-    
+
     _selectNodeContent : function(currentContent){
         bb.ManagersContainer.getInstance().getManager("ContentEditionManager").selectContent(currentContent,false); //false --> don't scoll to content
         this._updateselectedBlock(currentContent);
@@ -160,7 +160,7 @@ BB4.ToolsbarManager.register("editiontb",{
     /*
         var path = _getContentPath(currentContent);
         var pathInfos = {
-            selectedNode : currentContent, 
+            selectedNode : currentContent,
             items : path,
             itemTitleKey : "data-type",
             itemClass : ".contentNodeItem",
@@ -168,21 +168,21 @@ BB4.ToolsbarManager.register("editiontb",{
         };
         bb.jquery(document).trigger("content:ItemClicked",[pathInfos]);*/
     },
-    
+
     _updateselectedBlock : function(content){
-       
+
         if(this._context.selectedBlock){
             bb.jquery(this._context.selectedBlock).removeClass(this._settings.selectedBlockCls);
         }
         this._context.selectedBlock = (bb.jquery(content).length) ? bb.jquery(content) : false;
         if(this._context.selectedBlock){
-            bb.jquery(this._context.selectedBlock).addClass(this._settings.selectedBlockCls);  
+            bb.jquery(this._context.selectedBlock).addClass(this._settings.selectedBlockCls);
         }
-         
+
     },
-    
+
     _buildContentActions : function(){
-        
+
         var btnsContainer = bb.jquery("<div></div>").clone();
         btnsContainer.addClass(this._settings.actionCtnCls);
         var self = this;
@@ -195,19 +195,19 @@ BB4.ToolsbarManager.register("editiontb",{
         });
         return btnsContainer;
     },
-    
+
     _actionsBeforeRender : function(selectedBlock,actionsBar){
         var newContent = actionsBar;
         if(bb.jquery(selectedBlock).hasClass(this._settings.rootContentSetCls)){
             bb.jquery(actionsBar).find("."+this._settings.delBtnCls).remove();
-        } 
+        }
         return newContent;
     },
-     
+
     _getselectedBlock : function(){
         return this._context.selectedBlock;
     },
-     
+
     _showActionsForContent : function(clickedContent){
         /*hideAction*/
         bb.jquery(this._settings.actionCtnClass).remove(); //remove previous actions
@@ -218,27 +218,27 @@ BB4.ToolsbarManager.register("editiontb",{
         bb.jquery(contentAction).css("position","absolute");
         bb.jquery(clickedContent).append(contentAction);
     },
-    
-    
+
+
     _initEvents: function() {
         var self = this;
         /* Aborescence */
         this._callbacks["pagebrowser_action"] = function(){
             //if(!this._context.isEnable) return false;
-            
+
             if (self._context.pageBrowser)
                 self._context.pageBrowser.dialog('open');
         };
-        
+
         /* Créer une nouvelle page */
         this._callbacks["pagebrowser_newpage_action"] = function(){
-            //if(!this._context.isEnable) return false;  
+            //if(!this._context.isEnable) return false;
             var context = bb.jquery('#bb5-dialog-treeview').bbPageBrowser('getContext');
             bb.jquery('#bb5-dialog-treeview').bbPageBrowser('editPage', null, context.selected, function(node) {
                 bb.jquery('#bb5-dialog-treeview').bbPageBrowser('browsePage', node.attr.id.replace('node_',''));
             }, 'toolbar');
         };
-        
+
         this._callbacks["pagebrowser_clonepage_action"] = function () {
             var context = bb.jquery('#bb5-dialog-treeview').bbPageBrowser('getContext');
             //console.log(context.selected);
@@ -247,12 +247,12 @@ BB4.ToolsbarManager.register("editiontb",{
                 bb.jquery('#bb5-dialog-treeview').bbPageBrowser('browsePage', node.attr.id.replace('node_',''));
             });
         };
-		
+
         /* Supprimer la page  courante */
         this._callbacks["pagebrowser_delpage_action"] = function(){
             return bb.StatusManager.getInstance().remove();
         };
-        
+
         /* Médiathèque */
         this._callbacks["mediaselector_action"] = function(){
             //if(!this._context.isEnable) return false;
@@ -261,35 +261,35 @@ BB4.ToolsbarManager.register("editiontb",{
                 self._context.mediaSelector.bbSelector('open');
             }
         };
-        
+
         this._callbacks["toggle_edition_action"] = function(){
             self.toggleEditionMode(bb.jquery('.bb5-onlyShowBlocksBtn').attr('checked'));
         };
-        
+
         this._callbacks["showkeywordBrowser_action"] = function(){
             this.keywordBrowser.show();
         }
-        
+
         /*afficher */
         this._callbacks["showLinks_action"] = bb.jquery.proxy(this.showLinks,this);
         /*initContent*/
         this._initEditContentEvent();
-        
-       
+
+
         /*dont follow any link*/
         bb.jquery(this._settings.contentClass+" a").bind("click",function(e){
             if(self._context.isEnable) e.preventDefault(); //désactiver les liens en mode édition
             return true;
         });
-        
+
         /*bind close dialog*/
         this.contentFormDialog.on("close",function(){
             bb.jquery(this.dialog).find('input[value$="Element\\\\image"]').each(function(){
                 bb.jquery(this).bbMediaImageUpload('destroy');
             });
-            bb.jquery(this.dialog).children().remove();            
+            bb.jquery(this.dialog).children().remove();
         });
-        
+
         /*change all image*/
         bb.jquery('[data-uid]').live('contentchange.image', function(e,data){
             if (typeof data != 'object')
@@ -302,7 +302,7 @@ BB4.ToolsbarManager.register("editiontb",{
     },
     _createkeywordBrowser : function(){
         if(bb.jquery("#keywordbrowser")){
-            var container = bb.jquery("<div id='keywordbrowser'></div>").clone(); 
+            var container = bb.jquery("<div id='keywordbrowser'></div>").clone();
         }
         bb.jquery("body").append(container);
         var keywordBrowser = bb.jquery(container).bbKeywordBrowser({
@@ -310,12 +310,12 @@ BB4.ToolsbarManager.register("editiontb",{
         }).bbKeywordBrowser("getWidgetApi");
         return keywordBrowser;
     },
-    
+
     _beforeShowDatepicker : function(dateField,dpInfos){
         bb.jquery(dpInfos.dpDiv).css('z-index', 901021);
         bb.jquery(dpInfos.dpDiv).addClass('bb5-ui bb5-dialog-wrapper');
     },
-    
+
     _updateDateField : function(dp){
         var selectedDate = (typeof bb.jquery(this).val() == "string" ) ? bb.jquery(this).val().length : false;
         var timestamp = "";
@@ -326,18 +326,18 @@ BB4.ToolsbarManager.register("editiontb",{
             var date = new Date(dp.selectedYear,dp.selectedMonth,parseInt(dp.selectedDay), hoursNow, minutesNow);
             timestamp = date.getTime()/1000; //get ts in sec instead of milisec
         }
-        
+
         bb.jquery(this).attr("data-value",timestamp);
         bb.jquery(this).trigger("change");
     },
-    
+
     _updateDataBeforeSubmit: function() {
         bb.jquery('.date_pick_form').each(function (index, item) {
             var dateTime = bb.jquery(item).attr("data-value");
             bb.jquery(item).val(dateTime);
         });
     },
-    
+
     _initDateWidgets : function(){
         var self = this;
         /*modifierdaterange*/
@@ -352,37 +352,37 @@ BB4.ToolsbarManager.register("editiontb",{
         });
     },
 
-    
+
     bbSelectorHandlers :{
         openHandler : function(selectorType,e,ui){
-            var selectorType = selectorType || "none"; 
-            var widget = bb.jquery(this._context.linkSelector).bbSelector("getWidget",selectorType);  
+            var selectorType = selectorType || "none";
+            var widget = bb.jquery(this._context.linkSelector).bbSelector("getWidget",selectorType);
             if(widget){
                 bb.jquery(widget).data()["bbPageSelector"].fixContainersHeight();
             }
-        },      
+        },
         resizeStartHandler:function(selectorType,e,ui){
             this.resizeInfos.originalContainerHeight = bb.jquery(e.target).height();
             this.resizeInfos.resizeStep = 0;
         },
         resizeHandler : function(selectorType,e,ui){
-            var selectorType = selectorType || "none"; 
+            var selectorType = selectorType || "none";
             var delta =  bb.jquery(e.target).height() - this.resizeInfos.originalContainerHeight;
             var deltaStep = delta - this.resizeInfos.resizeStep;
             var widget = bb.jquery(this._context.linkSelector).bbSelector("getWidget",selectorType);
             if(widget){
-                bb.jquery(widget).data()["bbPageSelector"].updateListSize(deltaStep);  
+                bb.jquery(widget).data()["bbPageSelector"].updateListSize(deltaStep);
             }
             this.resizeInfos.resizeStep = delta;
         }
     },
-    
+
     activate: function() {
         var self = this;
         if(this.isActivated) return;
         // Messagebox
         if (!this._context.popupManager) {
-            this._context.popupManager = bb.PopupManager.init({}); 
+            this._context.popupManager = bb.PopupManager.init({});
             this.alerteBox = this._context.popupManager.create("alertDialog",{
                 dialogType : this._context.popupManager.dialogType.ALERT,
                 title: bb.i18n.__('toolbar.editing.alert'),
@@ -396,7 +396,7 @@ BB4.ToolsbarManager.register("editiontb",{
                 }
             });
         }
-        
+
         // Sélecteur de liens
         if (!this._context.linkSelector) {
             var selectorLink = bb.i18n.__('toolbar.editing.linkselectorLabel');
@@ -416,13 +416,13 @@ BB4.ToolsbarManager.register("editiontb",{
                 beforeWidgetInit:function(){
                     var bbSelector = bb.jquery(this.element).data('bbSelector');
                     /*for internal link*/
-                    bbSelector.onWidgetInit(bbSelector._panel.INTERNAL_LINK, function () { 
+                    bbSelector.onWidgetInit(bbSelector._panel.INTERNAL_LINK, function () {
                         var bbPageSelector = bb.jquery(this).data('bbPageSelector') || false;
                         if(bbPageSelector){
                             bbPageSelector.setCallback(function (params) {
                                 bb.jquery('input#' + self._settings.formInputLinkDataUid).val(params.value);
                                 bbSelector.close();
-                            }); 
+                            });
                         }
                     });
                     /*for External link*/
@@ -434,20 +434,20 @@ BB4.ToolsbarManager.register("editiontb",{
                         });
                     });
                 }
-                
+
             //open: bb.jquery.proxy(self.bbSelectorHandlers.openHandler,self,"bbLinkInternalContainer"),
             //resizeStart: bb.jquery.proxy(this.bbSelectorHandlers.resizeStartHandler,this,"bbLinkInternalContainer"),
             //resize : bb.jquery.proxy(this.bbSelectorHandlers.resizeHandler,this,"bbLinkInternalContainer")
             });
         }
-      
+
         bb.jquery("form .bb5-ShowBBSelector").die().live('click', function () {
             self._settings.formInputLinkDataUid = bb.jquery(this).attr('data-uid');
             var bbSelector = bb.jquery(self._context.linkSelector).data('bbSelector');
             bbSelector.close();
             bbSelector.open();
         });
-        
+
         // Sélecteur de médias
         if (!this._context.mediaSelector) {
             // console.log(this._settings.i18n);
@@ -467,7 +467,7 @@ BB4.ToolsbarManager.register("editiontb",{
                 }
             });
         }
-        
+
         // Arborescence
         if (!this._context.pageBrowser) {
             this._context.pageBrowser = bb.jquery('#bb5-dialog-treeview').bbPageBrowser({
@@ -482,29 +482,29 @@ BB4.ToolsbarManager.register("editiontb",{
                 ready: function() {
                 },
                 select: function(e, data)  {
-                    
+
                 }
             });
         } else {
             if(this._settings.showpageBrowserOnLoad){
                 this._context.pageBrowser.dialog('open');
             }
-            
+
         }
         this._handleContentEdition();
         // Contextmenu
         //var contentSelector = this._settings.contentClass;
-        this.isActivated = true; 	
+        this.isActivated = true;
         return self;
     },
-	
+
     _handleContentEdition : function(){
         var self = this;
-        bb.jquery('[data-uid]').die("contentchange.content").live('contentchange.content', function(e) { 
+        bb.jquery('[data-uid]').die("contentchange.content").live('contentchange.content', function(e) {
             var content = bb.jquery(this);
-            
+
             e.stopPropagation();
-            
+
             bb.webserviceManager.getInstance('ws_local_contentBlock').request('getDataContentType', {
                 params: {
                     name: bb.jquery(this).attr('data-type'),
@@ -529,32 +529,32 @@ BB4.ToolsbarManager.register("editiontb",{
                 }
             });
         });
-        
-        
+
+
         /*click on body*/
         bb.jquery('body').bind('click.contentEdit', function(e){
             if(!self._context.isEnable) return;
             if(bb.jquery(e.target).hasClass("contentNodeItem")) return;
             self._hideContextMenu();
-            return true;            
+            return true;
         });
     },
-    /*all resizeHandler*/       
+    /*all resizeHandler*/
     enable: function() {
         var self = this;
         this.toggleEditionMode(bb.jquery('.bb5-onlyShowBlocksBtn').attr('checked'));
-        
+
         self.activate();
-                       
+
         // Upload drag'n'drop
         bb.jquery('[data-type^="Media\\\\"]').live('mouseover', function() {
             bb.jquery(this).addClass('aloha-editable-active');
         });
-                                
+
         bb.jquery('[data-type^="Media\\\\"]').live('mouseout', function() {
             bb.jquery(this).removeClass('aloha-editable-active');
         });
-         
+
         bb.jquery('[data-type^="Media\\\\"]').live('click', function(e) {
             e.stopPropagation();
             var clickCallback = bb.jquery.proxy(self.selectMedia,self,e.currentTarget);
@@ -563,23 +563,23 @@ BB4.ToolsbarManager.register("editiontb",{
             self._context.mediaSelector.bbSelector('open');
             return false;
         });
-        
+
         //        bb.jquery('img[data-type="Element\\\\image"][data-library=""]').each(function () {
         //            self.mediaImageUploadFn(this)
         //        });
-        //        
+        //
         //        bb.jquery('p[data-type="Media\\\\image"]').each(function () {
         //            self.mediaImageUploadFn(this)
         //        });
-        //        
+        //
         //        bb.jquery('img[data-type="Element\\\\file"][data-library=""]').each(function () {
         //            self.mediaImageUploadFn(this)
         //        });
-        //        
+        //
         //        bb.jquery('p[data-type="Media\\\\file"]').each(function () {
         //            self.mediaImageUploadFn(this)
         //        });
-        
+
         bb.jquery('*[data-type="Media\\\\image"]').each(function () {
             self.mediaImageUploadFn(this)
         });
@@ -594,7 +594,7 @@ BB4.ToolsbarManager.register("editiontb",{
             var contextMenu = self._showContextMenu(e, self._context.selectedBlock);
             return true;
         });*/
-        
+
         /*context menu*/
         if(!this._contextMenu){
             this._contextMenu = bb.ManagersContainer.getInstance().getManager("ContentEditionManager").getContextMenu();
@@ -604,7 +604,7 @@ BB4.ToolsbarManager.register("editiontb",{
         }
 
         //AlohaManager.applyAloha();
-        
+
         /* handle rte manager here use deferred */
         var self = this;
         bb.require(["ManagerFactory"], function(){
@@ -616,15 +616,15 @@ BB4.ToolsbarManager.register("editiontb",{
                 throw e;
             }
         });
-        
-        this._context.isEnable = true;   
+
+        this._context.isEnable = true;
     },
-    
+
     handleNewBbMediaContent : function(prevMedia,newMedia){
         var bbPrevContent = $bb(prevMedia);
         var prevContentClass = bb.jquery(bbPrevContent.contentEl).attr("class");
         var newContent = bb.jquery(newMedia);
-        
+
         newContent.attr("class",prevContentClass);
         var prevSrc = bb.jquery(newContent).find("img").eq(0).attr("src");
         var ctime = new Date();
@@ -637,7 +637,7 @@ BB4.ToolsbarManager.register("editiontb",{
         bbPrevContent.setContentEl(newContent);
         bbPrevContent.parentNode.updateData();
     },
-    
+
     mediaImageUploadFn : function(el) {
         var self  = this;
         var successCallback = function(el,file,result) {
@@ -651,7 +651,7 @@ BB4.ToolsbarManager.register("editiontb",{
                     success: function(response) {
                         if (response.result) {
                             if(bb.jquery(el).bbMediaImageUpload){
-                                bb.jquery(el).bbMediaImageUpload('destroy');  
+                                bb.jquery(el).bbMediaImageUpload('destroy');
                             }
                             self.handleNewBbMediaContent(el,response.result.render);
                             //bb.jquery(el).replaceWith(response.result.render);
@@ -668,25 +668,25 @@ BB4.ToolsbarManager.register("editiontb",{
         bb.jquery(el).bbMediaImageUpload({
             media_uid: bb.jquery(el).attr('data-uid'),
             media_classname: bb.jquery(el).attr('data-type'),
-            
+
             ready: function(){},
             uploadFinishedSuccess: successCallback,
             uploadFinishedError: function(file, result) {},
-       
+
             uploadError: function(file, message) {
             },
-        
+
             uploadStarted: function(i, file, len) {
             },
-        
+
             dragOver: function(e) {
                 bb.jquery(e.target).addClass('aloha-editable-active');
             },
-       
+
             dragLeave: function(e) {
                 bb.jquery(e.target).removeClass('aloha-editable-active');
             },
-        
+
             drop: function(e) {
                 bb.jquery(e.target).removeClass('aloha-editable-active');
             }
@@ -694,10 +694,10 @@ BB4.ToolsbarManager.register("editiontb",{
     },
     selectMedia:  function(prevItem,item) {
         var myself = prevItem;
-        var bbPrevContent = $bb(prevItem);        
+        var bbPrevContent = $bb(prevItem);
         var self = this;
         this._context.mediaSelector.bbSelector('close');
-        if (item.data.content.classname.replace('BackBuilder\\ClassContent\\', '') == bb.jquery(myself).attr('data-type')) {
+        if (item.data.content.classname.replace('BackBee\\ClassContent\\', '') == bb.jquery(myself).attr('data-type')) {
             bb.webserviceManager.getInstance('ws_local_contentBlock').request('getDataContentType', {
                 params: {
                     name: bb.jquery(myself).attr('data-type'),
@@ -724,26 +724,26 @@ BB4.ToolsbarManager.register("editiontb",{
         }
         return false;
     },
-    
+
     toggleEditionMode: function(edition) {
         var self = this;
         this._context.modeEdition = ((edition) ? true : false);
-        
+
         bb.jquery(document).trigger("content:toggleEditionMode", this._context.modeEdition);
-		
+
         /*radical blaze*/
         bb.jquery.each(this._getEditionBlocks(false), function() {
             if (self._context.modeEdition) bb.jquery(this).show();
             else bb.jquery(this).hide();
         });
     },
-    
+
     _editContent: function(content) {
         var myself = this;
         var content = bb.jquery(content);
-        
+
         /*persit changes before edit*/
-        
+
         bb.ContentWrapper.persist(false); //async persist
         bb.webserviceManager.getInstance('ws_local_contentBlock').request('getContentEditionForm', {
             params: {
@@ -759,7 +759,7 @@ BB4.ToolsbarManager.register("editiontb",{
                     bb.jquery(form).find('legend').parent().css({
                         'border' : '1px solid #CCC'
                     });
-                  
+
                     bb.jquery(form).find("input:checkbox").each(function() {
                         var div = bb.jquery('div[id="' + bb.jquery(this).attr('id').replace('_delete', '') + '_container"]');
                         if (bb.jquery(this).is(':checked'))
@@ -767,18 +767,18 @@ BB4.ToolsbarManager.register("editiontb",{
                         else
                             div.show();
                     });
-                    
+
                     bb.jquery(form).find('input:checkbox').bind('click', function(e) {
                         var div = bb.jquery('div[id="' + bb.jquery(this).attr('id').replace('_delete', '') + '_container"]');
-                       
+
                         if (bb.jquery(this).is(':checked'))
                             div.hide('blind');
                         else
                             div.show('blind');
-                       
+
                         return true;
                     });
-                    
+
                     // Image upload
                     bb.jquery(form).find('input[value$="Element\\\\image"]').each(function() {
                         var dropbox = bb.jquery(form).find('div[id="' + bb.jquery(this).attr('id').replace('_type', '') + '_container"]');
@@ -826,9 +826,9 @@ BB4.ToolsbarManager.register("editiontb",{
                             uploadStarted:function(i, file, len) {
                                 myself.contentFormDialog.btnDisable();
                                 dropbox.empty();
-                                var preview = bb.jquery(dropbox.parent().find('#imagebbselector-editpreview-tpl').find(".preview").clone()), 
-                                image = bb.jquery('img', preview); 
-                               
+                                var preview = bb.jquery(dropbox.parent().find('#imagebbselector-editpreview-tpl').find(".preview").clone()),
+                                image = bb.jquery('img', preview);
+
                                 var reader = new FileReader();
 
                                 reader.onload = function(e){
@@ -858,8 +858,8 @@ BB4.ToolsbarManager.register("editiontb",{
 
                         }, dropbox);
                     });
-                   
-                    myself.contentFormDialog.setContent(bb.jquery(form));                  
+
+                    myself.contentFormDialog.setContent(bb.jquery(form));
                     var buttons = {};
                     myself.initAutoComplete(result.result);
                     buttons[bb.i18n.__('toolbar.editing.save')] = function() {
@@ -869,7 +869,7 @@ BB4.ToolsbarManager.register("editiontb",{
                             bb.jquery.each(content, function (key, item) {
                                 bb.jquery.each(item.bb5_form, function(index, value) {
                                     values[index] = new Array();
-                                    if (value.bb5_type != "BackBuilder\\ClassContent\\Element\\keyword") {
+                                    if (value.bb5_type != "BackBee\\ClassContent\\Element\\keyword") {
                                         if (!value.bb5_fieldset) {
                                             if (value.bb5_uid) {
                                                 for (var i=0; i< value.bb5_uid.length; i++) {
@@ -887,17 +887,17 @@ BB4.ToolsbarManager.register("editiontb",{
                                                         var inputField = bb.jquery(field).find("input.param");
                                                         var value = "";
                                                         if(inputField.length > 1){
-                                                            value = bb.jquery(inputField).filter(":checked").val(); 
+                                                            value = bb.jquery(inputField).filter(":checked").val();
                                                         }else{
-                                                            value = inputField.val();  
+                                                            value = inputField.val();
                                                         }
                                                         fieldParams.value = value;
                                                         values[index][key]['parameters'].push(fieldParams);
                                                     });
-                                                    
+
                                                 /*if (bb.jquery(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter').attr('data-param')) {
                                                         values[index][i]['parameters'] = {
-                                                            'name': bb.jquery(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter').attr('data-param'), 
+                                                            'name': bb.jquery(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter').attr('data-param'),
                                                             'value': bb.jquery(dialog).find('[id="' + value.bb5_uid[i] + '_container"] .parameter input:checked.param').val()
                                                         };
                                                     //console.log(values[index][i]['parameters']);
@@ -911,7 +911,7 @@ BB4.ToolsbarManager.register("editiontb",{
                                                 values[index][0]['parameters'] = {};
                                                 if (bb.jquery(dialog).find('[id="' + item.bb5_uid + '_container"] .parameter').attr('data-param'))
                                                     values[index][0]['parameters'] = {
-                                                        'name': bb.jquery(dialog).find('[id="' + item.bb5_uid + '_container"] .parameter').attr('data-param'), 
+                                                        'name': bb.jquery(dialog).find('[id="' + item.bb5_uid + '_container"] .parameter').attr('data-param'),
                                                         'value': bb.jquery(dialog).find('[id="' + item.bb5_uid + '_container"] .parameter input:checked.param').val()
                                                     };
                                             }
@@ -930,24 +930,24 @@ BB4.ToolsbarManager.register("editiontb",{
                                             //console.log(keyword);
                                             var uidNode = bb.jquery(keyword).attr('data-uid-keyword');
                                             values[index][indexKey] = {};
-                                            values[index][indexKey].type = 'BackBuilder\\ClassContent\\Element\\keyword';
+                                            values[index][indexKey].type = 'BackBee\\ClassContent\\Element\\keyword';
                                             values[index][indexKey].uid = uidNode;
                                             values[index][indexKey].value = bb.jquery(keyword).val();
                                             values[index][indexKey]['delete'] = bb.jquery(dialog).find('[id="' + uidNode + '_delete"]').is(':checked');
                                             values[index][indexKey]['parameters'] = [];
                                         });
-                                        
+
                                     }
                                 });
-                            
-                            
+
+
                             });
                             return values;
-                            
+
                         };
-                        
-                        
-                        
+
+
+
                         bb.jquery(dialog).parents('.ui-dialog:first').mask(bb.i18n.__('loading'));
                         bb.webserviceManager.getInstance('ws_local_contentBlock').request('postContentEditionForm', {
                             params: {
@@ -955,7 +955,7 @@ BB4.ToolsbarManager.register("editiontb",{
                                 contentUid: content.attr('data-uid'),
                                 contentValues: JSON.stringify(serialize([result.result]))
                             },
-                
+
                             success: function(result) {
                                 bb.jquery(dialog).parents('.ui-dialog:first').unmask();
                                 myself.contentFormDialog.close();
@@ -963,7 +963,7 @@ BB4.ToolsbarManager.register("editiontb",{
                                     bb.jquery('[data-uid="' + content.attr('data-uid') + '"]').trigger('contentchange');
                                 }
                             },
-                
+
                             error: function(result) {
                                 bb.jquery(dialog).parents('.ui-dialog:first').unmask();
                                 myself._showMessage(bb.i18n.__('toolbar.editing.error'), result.error.message, 'alert');
@@ -973,21 +973,21 @@ BB4.ToolsbarManager.register("editiontb",{
                     buttons[bb.i18n.__('toolbar.editing.close')] = function() {
                         myself.contentFormDialog.close();
                     };
-                    
+
                     bb.jquery(dialog).dialog('option','title', result.result.name);
                     bb.jquery(dialog).dialog('option', 'buttons', buttons );
                     myself.contentFormDialog.show();
                     // date for form
                     myself._initDateWidgets();
-                }    
+                }
             },
-                
+
             error: function(result) {
                 myself._showMessage(bb.i18n.__('toolbar.editing.error'), result.error.message, 'alert');
             }
         });
     },
-    
+
     getDataKeyWordsFormated: function (cond) {
         var options = []
         bb.webserviceManager.getInstance('ws_local_contentBlock').request('getDataKeywordsAutoComplete', {
@@ -1000,25 +1000,25 @@ BB4.ToolsbarManager.register("editiontb",{
                 bb.jquery.each(result.result, function (index, item) {
                     var obj = {};
                     obj[item.uid] = item.name;
-                    options.push(obj); 
+                    options.push(obj);
                 });
                 options = result.result;
             },
             error: function (error) {
-                
+
 
             }
         });
         return options;
     },
-    
+
     _renderContentForm: function(content, isLoaded) {
-        
+
         var myself = this,
         form = '';
-        
+
         form += '<fieldset>';
-        
+
         if (typeof isLoaded != 'undefined') {
             form += '<legend>' + content.name + '</legend>';
             form += '<input id="' + content.uid + '_type" type="hidden" value="' + content.type + '">';
@@ -1037,7 +1037,7 @@ BB4.ToolsbarManager.register("editiontb",{
             bb.jquery.each(item.bb5_form, function(index, value) {
                 if (index == "keywords")
                     form += '<label style="font-weight: bold;">'+bb.i18n.__('contentmanager.keyword')+'</label><div class="contentNewKeywords"></div>'+bb.i18n.__('contentmanager.keyword')+': <input class="typeahead" type="text" name="serchKeyWord" value="" /><br />';
-                if (value.bb5_type != 'BackBuilder\\ClassContent\\Element\\keyword') {
+                if (value.bb5_type != 'BackBee\\ClassContent\\Element\\keyword') {
                     if (!value.bb5_fieldset) {
                         if (value.bb5_uid) {
                             bb.jquery.each(value.bb5_value, function (keyResult, itemResult) {
@@ -1051,7 +1051,7 @@ BB4.ToolsbarManager.register("editiontb",{
                                 form += '<div id="' + item.bb5_uid + '_' + index + '_container">';
                                 if (index == "date")
                                     form += '<input class="date_pick_form" id="' + item.bb5_uid + '_' + index + '" name="' + item.bb5_uid + '_' + index + '" type="text" value="' + itemValue + '" style="width: 100%; margin-bottom: 10px;"/>';
-                                else if (value.bb5_type == "BackBuilder\\ClassContent\\Element\\link")
+                                else if (value.bb5_type == "BackBee\\ClassContent\\Element\\link")
                                     form += '<label>target</label><input type="checkbox" value="0" name="target">';
                                 else {
                                     if ('value' != index)
@@ -1073,33 +1073,33 @@ BB4.ToolsbarManager.register("editiontb",{
                 }
             });
         });
-        
+
         form += '</div>';
         form += '</fieldset>';
-        return form;          
+        return form;
     },
-    
+
     updateContent: function (content, item) {
         if (content.bb5_form.keywords.bb5_value) {
             content.bb5_form.keywords.bb5_value.push(item);
-            content.bb5_form.keywords.bb5_type = "BackBuilder\\ClassContent\\Element\\keyword";
+            content.bb5_form.keywords.bb5_type = "BackBee\\ClassContent\\Element\\keyword";
         }
         else {
             var obj = {
-                bb5_value: [], 
-                bb5_type: "BackBuilder\\ClassContent\\Element\\keyword"
+                bb5_value: [],
+                bb5_type: "BackBee\\ClassContent\\Element\\keyword"
             };
             obj.bb5_value.push(item);
             content.bb5_form['keywords'] = obj;
         }
     },
-    
+
     removeNewKeyword: function () {
         bb.jquery('.newKeywordAutoComplete').live('click', function () {
             bb.jquery(this).parents('.alert-success').remove();
         });
     },
-    
+
     initAutoComplete: function (content) {
         var myself = this;
         var cpt = 0;
@@ -1107,7 +1107,7 @@ BB4.ToolsbarManager.register("editiontb",{
             var inputVal = bb.jquery(this).val();
 
             if (inputVal.length >= 2) {
-              
+
                 //bb.jquery('input.typeahead').autocomplete("destroy");
                 bb.jquery('input.typeahead').autocomplete({
                     source: myself.getDataKeyWordsFormated(inputVal),
@@ -1138,20 +1138,20 @@ BB4.ToolsbarManager.register("editiontb",{
             bb.jquery('input[name="'+ data_uid + '_type"]').remove();
             bb.jquery(this).remove();
         });
-        
+
         return content;
     },
-    
+
     _showMessage: function(title, message, icon) {
         var myself = this;
-        
+
         if (!myself._context.messageBox) {
-            bb.jquery('body').append(bb.jquery('<div id="bb5-ui-edition-message"/>')); 
+            bb.jquery('body').append(bb.jquery('<div id="bb5-ui-edition-message"/>'));
             myself._context.messageBox = bb.jquery('#bb5-ui-edition-message');
         }
-            
+
         myself._context.messageBox.html('<p><span class="ui-icon ui-icon-' + icon + '" style="float:left; margin:0 7px 50px 0;"></span>' + message + '</p>');
-           
+
         myself._context.messageBox.dialog({
             title: title,
             dialogClass: 'bb5-dialog-wrapper',
@@ -1164,60 +1164,60 @@ BB4.ToolsbarManager.register("editiontb",{
             close: function() {
             }
         });
-            
+
         var buttons = {};
         buttons[bb.i18n.__('toolbar.editing.close')] = function() {
             myself._context.messageBox.dialog('close');
         };
-                    
+
         myself._context.messageBox.dialog('option', 'buttons', buttons );
     },
-        
+
     _getEditionBlocks: function(isLoaded) {
         var self = this;
         var blocks = [];
-        
+
         bb.jquery('[data-uid]').each(function() {
             if ( (bb.jquery(this).attr('data-type') != 'ContentSet') && (!bb.jquery(this).attr('contenteditable')) && (!bb.jquery(this).hasClass(self._settings.contentClass.replace('.', ''))) ) {
-                
+
                 if (typeof isLoaded != 'undefined') {
                     if ( bb.jquery(this).attr('data-isloaded') == ((isLoaded) ? 'true' : 'false') ){
                         blocks.push(bb.jquery(this));
-                    }       
+                    }
                 } else {
                     blocks.push(bb.jquery(this));
                 }
             }
         });
-        
+
         return blocks;
     },
-    
+
     _hideContextMenu: function() {
         if(this._contextMenu){
             this._contextMenu.hide();
         }
     },
-    
+
     _unSelectContent:function(){
         bb.jquery(this._settings.actionCtnClass).remove();
         if(this._context.selectedBlock){
             bb.jquery(this._context.selectedBlock).removeClass(this._settings.selectedBlockCls);
             bb.jquery(this._context.selectedBlock).removeClass(this._settings.selectedContentCls);
             this._context.selectedBlock = null;
-        }    
+        }
     },
-    
+
     _showContextMenu: function(e, content) {
         this._hideContextMenu();
-        
+
         this._context.contextMenu.show();
-        
+
         var position = {
             left:e.pageX,
             top:e.pageY
         };
-            
+
         this._context.contextMenu.css({
             border: '1px solid red',
             width: '150px',
@@ -1226,11 +1226,11 @@ BB4.ToolsbarManager.register("editiontb",{
             left: position.left + 'px',
             background : 'white'
         });
-        
+
         // Data
         this._context.contextMenu.data('content', content)
     },
-    
+
     deactivate: function() {
         if (this._context.pageBrowser) {
         //this._context.pageBrowser.dialog('close');
@@ -1239,20 +1239,20 @@ BB4.ToolsbarManager.register("editiontb",{
     },
 
     disable: function() {
-       
+
        console.log("inside disable ");
-        //AlohaManager.stop(); 
+        //AlohaManager.stop();
         if(this.contentManager){
             this.contentManager.disable();
-        }         
+        }
         if (this._context.mediaSelector) {
-            bb.jquery('[data-type^="Media\\\\"]').die('mouseover');            
-            bb.jquery('[data-type^="Media\\\\"]').die('mouseout');                
-            bb.jquery('[data-type^="Media\\\\"]').die('click');         
+            bb.jquery('[data-type^="Media\\\\"]').die('mouseover');
+            bb.jquery('[data-type^="Media\\\\"]').die('mouseout');
+            bb.jquery('[data-type^="Media\\\\"]').die('click');
             bb.jquery('img[data-type="Element\\\\image"]').bbMediaImageUpload('destroy');
             bb.jquery('[data-type="Media\\\\image"]').bbMediaImageUpload('destroy');
         }
-        
+
         this._context.isEnable = false;
         //var contentSelector = this._settings.contentClass;
         //bb.jquery('body.blockEdit').unbind('click');

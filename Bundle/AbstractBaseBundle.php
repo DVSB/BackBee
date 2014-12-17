@@ -3,34 +3,34 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Bundle;
+namespace BackBee\Bundle;
 
-use BackBuilder\IApplication as ApplicationInterface;
-use BackBuilder\Security\Acl\Domain\IObjectIdentifiable;
-use BackBuilder\Routing\RouteCollection;
+use BackBee\IApplication as ApplicationInterface;
+use BackBee\Security\Acl\Domain\IObjectIdentifiable;
+use BackBee\Routing\RouteCollection;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Abstract base class for BackBee's bundle
  *
- * @category    BackBuilder
- * @package     BackBuilder\Bundle
+ * @category    BackBee
+ * @package     BackBee\Bundle
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -39,14 +39,14 @@ abstract class AbstractBaseBundle implements BundleInterface
     /**
      * Application this bundle belongs to
      *
-     * @var BackBuilder\IApplication
+     * @var BackBee\IApplication
      */
     private $application;
 
     /**
      * Bundle loader of current application
      *
-     * @var BackBuilder\Bundle\BundleLoader
+     * @var BackBee\Bundle\BundleLoader
      */
     private $bundle_loader;
 
@@ -116,7 +116,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::getId
+     * @see BackBee\Bundle\BundleInterface::getId
      */
     public function getId()
     {
@@ -124,7 +124,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::getBaseDirectory
+     * @see BackBee\Bundle\BundleInterface::getBaseDirectory
      */
     public function getBaseDirectory()
     {
@@ -132,7 +132,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::getProperty
+     * @see BackBee\Bundle\BundleInterface::getProperty
      */
     public function getProperty($key = null)
     {
@@ -154,7 +154,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::getConfig
+     * @see BackBee\Bundle\BundleInterface::getConfig
      */
     public function getConfig()
     {
@@ -192,7 +192,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::isConfigPerSite
+     * @see BackBee\Bundle\BundleInterface::isConfigPerSite
      */
     public function isConfigPerSite()
     {
@@ -203,7 +203,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::getApplication
+     * @see BackBee\Bundle\BundleInterface::getApplication
      */
     public function getApplication()
     {
@@ -211,7 +211,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::getEntityManager
+     * @see BackBee\Bundle\BundleInterface::getEntityManager
      */
     public function getEntityManager()
     {
@@ -219,7 +219,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::isStarted
+     * @see BackBee\Bundle\BundleInterface::isStarted
      */
     public function isStarted()
     {
@@ -227,7 +227,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::started
+     * @see BackBee\Bundle\BundleInterface::started
      */
     public function started()
     {
@@ -235,7 +235,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     }
 
     /**
-     * @see BackBuilder\Bundle\BundleInterface::isEnabled
+     * @see BackBee\Bundle\BundleInterface::isEnabled
      */
     public function isEnabled()
     {
@@ -338,7 +338,7 @@ abstract class AbstractBaseBundle implements BundleInterface
 
     /**
      * @codeCoverageIgnore
-     * @see BackBuilder\Security\Acl\Domain\IObjectIdentifiable::getIdentifier
+     * @see BackBee\Security\Acl\Domain\IObjectIdentifiable::getIdentifier
      */
     public function getIdentifier()
     {
@@ -347,7 +347,7 @@ abstract class AbstractBaseBundle implements BundleInterface
 
     /**
      * @codeCoverageIgnore
-     * @see BackBuilder\Security\Acl\Domain\IObjectIdentifiable::getType
+     * @see BackBee\Security\Acl\Domain\IObjectIdentifiable::getType
      */
     public function getType()
     {
@@ -356,7 +356,7 @@ abstract class AbstractBaseBundle implements BundleInterface
 
     /**
      * @codeCoverageIgnore
-     * @see BackBuilder\Security\Acl\Domain\IObjectIdentifiable::equals
+     * @see BackBee\Security\Acl\Domain\IObjectIdentifiable::equals
      */
     public function equals(IObjectIdentifiable $identity)
     {
@@ -391,7 +391,7 @@ abstract class AbstractBaseBundle implements BundleInterface
     /**
      * Returns the associated callback if "controller name/action name" couple is valid
      *
-     * @param string $controller_name the controller name (ex.: BackBuilder\FrontController\FrontController => front)
+     * @param string $controller_name the controller name (ex.: BackBee\FrontController\FrontController => front)
      * @param string $action_name     the action name (ex.:)
      *
      * @return callable|null the callback if there is one associated to "controller name/action name" couple, else null

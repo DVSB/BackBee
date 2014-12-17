@@ -46,10 +46,10 @@
                 this.template = $("<label class='fieldLabel'></label><input class='bb5-plugin-form-field fieldDatetime' type='text' value=''></input>").clone();
                 this.fiedId = this.id + "-" + this._settings.fieldInfos.fieldLabel;
                 var defaultSettings = {
-                    dateFormat: 'dd/mm/yy', 
+                    dateFormat: 'dd/mm/yy',
                     timeFormat: 'hh:mm'
                 };
-                
+
             },
             render: function() {
                 $(this.fieldWrapper).append(this.template);
@@ -125,18 +125,18 @@
                 return result;
             }
         });
-        
+
         /* textarea type */
         FormBuilder.registerRenderTypePlugin("textarea",{
             _init: function(){
                 this.id = this._settings.formId + '-' + this.id;
                 this.fieldWrapper = bb.jquery("<p></p>");
                 this.template = bb.jquery("<label class='fieldLabel'></label><textarea style='width:100%' class='bb5-plugin-form-field fieldTextarea'></textarea>").clone();
-                this.fiedId = this.id + "-" + this._settings.fieldInfos.fieldLabel;  
+                this.fiedId = this.id + "-" + this._settings.fieldInfos.fieldLabel;
                 bb.jquery(this.fieldWrapper).append(this.template);
                 this.textarea = this.fieldWrapper.find("textarea").eq(0);
             },
-            
+
             render: function(){
                 bb.jquery(this.fieldWrapper).find('.fieldLabel').html(this._settings.fieldInfos.param.array.label);
                 bb.jquery(this.fieldWrapper).find('.fieldTextarea').attr("id", this.fieldId);
@@ -146,20 +146,20 @@
             populate: function(){
                 this.textarea.val(this._settings.fieldInfos.param.array.value);
             },
-            
+
             parse: function(){
                 var result = {
                     "array": {
                         "value": this.textarea.val()
                     }
-                } 
+                }
                 return result;
             }
-            
+
         });
-        
-        
-        
+
+
+
         /*Radio type*/
         FormBuilder.registerRenderTypePlugin('radio', {
             _init: function() {
@@ -851,7 +851,7 @@
                         bb.jquery(field).val(parentnodeTitle);
                     }
                     if (key == 'classcontent')
-                        bb.jquery(field).val(bb.jquery(field).val().replace('BackBuilder\\ClassContent\\', ''));
+                        bb.jquery(field).val(bb.jquery(field).val().replace('BackBee\\ClassContent\\', ''));
                     if (key != "limit")
                         bb.jquery(field).attr("data-fieldvalue", fieldValue);
                     bb.jquery(field).trigger("change");
@@ -949,8 +949,8 @@
                             var result = pattern.exec(bb.jquery(selectedNode).attr('rel'));
                             fieldValue = result[1];
                         }
-                        if (selectedContentType.indexOf('BackBuilder\\ClassContent\\') === -1) {
-                            fieldValue = 'BackBuilder\\ClassContent\\' + fieldValue;
+                        if (selectedContentType.indexOf('BackBee\\ClassContent\\') === -1) {
+                            fieldValue = 'BackBee\\ClassContent\\' + fieldValue;
                         }
 
                         bb.jquery(formField).attr("data-fieldValue", fieldValue);

@@ -3,33 +3,33 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode;
+namespace BackBee\NestedNode;
 
-use BackBuilder\ClassContent\AClassContent;
+use BackBee\ClassContent\AClassContent;
 
 /**
  * Media entity in BackBee
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode
+ * @category    BackBee
+ * @package     BackBee\NestedNode
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\MediaRepository")
+ * @Entity(repositoryClass="BackBee\NestedNode\Repository\MediaRepository")
  * @Table(name="media")
  * @HasLifecycleCallbacks
  */
@@ -45,16 +45,16 @@ class Media
 
     /**
      * The media folder owning this media
-     * @var \BackBuilder\NestedNode\MediaFolder
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\MediaFolder", inversedBy="_medias", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @var \BackBee\NestedNode\MediaFolder
+     * @ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_medias", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="media_folder_uid", referencedColumnName="uid")
      */
     protected $_media_folder;
 
     /**
      * The element content of this media
-     * @var \BackBuilder\ClassContent\AClassContent
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @var \BackBee\ClassContent\AClassContent
+     * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
@@ -102,7 +102,7 @@ class Media
     }
 
     /**
-     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AClassContent $content
      * @return string
      * @deprecated since version 0.10.0
      */
@@ -112,7 +112,7 @@ class Media
     }
 
     /**
-     * @param  \BackBuilder\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AClassContent $content
      * @return string
      * @deprecated since version 0.10.0
      */
@@ -141,8 +141,8 @@ class Media
 
     /**
      * Sets the media folder
-     * @param  \BackBuilder\NestedNode\MediaFolder $media_folder
-     * @return \BackBuilder\NestedNode\Media
+     * @param  \BackBee\NestedNode\MediaFolder $media_folder
+     * @return \BackBee\NestedNode\Media
      */
     public function setMediaFolder(MediaFolder $media_folder)
     {
@@ -153,8 +153,8 @@ class Media
 
     /**
      * Sets the element content to the media
-     * @param  \BackBuilder\ClassContent\AClassContent $content
-     * @return \BackBuilder\NestedNode\Media
+     * @param  \BackBee\ClassContent\AClassContent $content
+     * @return \BackBee\NestedNode\Media
      */
     public function setContent(AClassContent $content)
     {
@@ -166,7 +166,7 @@ class Media
     /**
      * Sets the title
      * @param  string                        $title
-     * @return \BackBuilder\NestedNode\Media
+     * @return \BackBee\NestedNode\Media
      */
     public function setTitle($title)
     {
@@ -178,7 +178,7 @@ class Media
     /**
      * Sets the publication date
      * @param  \DateTime                     $date
-     * @return \BackBuilder\NestedNode\Media
+     * @return \BackBee\NestedNode\Media
      */
     public function setDate(\DateTime $date)
     {
@@ -190,7 +190,7 @@ class Media
     /**
      * Sets the created date
      * @param  \DateTime                     $created
-     * @return \BackBuilder\NestedNode\Media
+     * @return \BackBee\NestedNode\Media
      */
     public function setCreated(\DateTime $created)
     {
@@ -202,7 +202,7 @@ class Media
     /**
      * Sets the last modified date
      * @param  \DateTime                     $modified
-     * @return \BackBuilder\NestedNode\Media
+     * @return \BackBee\NestedNode\Media
      */
     public function setModified(\DateTime $modified)
     {
@@ -259,7 +259,7 @@ class Media
 
     /**
      * Returns the media folder owning the media
-     * @return \BackBuilder\NestedNode\MediaFolder
+     * @return \BackBee\NestedNode\MediaFolder
      */
     public function getMediaFolder()
     {
@@ -268,7 +268,7 @@ class Media
 
     /**
      * Returns the element content of the media
-     * @return \BackBuilder\ClassContent\AClassContent
+     * @return \BackBee\ClassContent\AClassContent
      */
     public function getContent()
     {

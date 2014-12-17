@@ -3,35 +3,35 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Profiler\DataCollector;
+namespace BackBee\Profiler\DataCollector;
 
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use BackBuilder\BBApplication;
+use BackBee\BBApplication;
 
 /**
  * Config data collector
  *
- * @category    BackBuilder
- * @package     BackBuilder\Profiler
+ * @category    BackBee
+ * @package     BackBee\Profiler
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -72,7 +72,7 @@ class ConfigDataCollector extends DataCollector
             'app_name'         => $this->name,
             'app_version'      => $this->version,
             'token'            => $response->headers->get('X-Debug-Token'),
-            'backbuilder_version'  => BBApplication::VERSION,
+            'BackBee_version'  => BBApplication::VERSION,
             'name'             => $this->kernel->getApplication()->getSite() ? $this->kernel->getApplication()->getSite()->getLabel() : 'n/a',
             'debug'            => isset($this->kernel) ? $this->kernel->getApplication()->isDebugMode() : 'n/a',
             'php_version'      => PHP_VERSION,
@@ -113,13 +113,13 @@ class ConfigDataCollector extends DataCollector
     }
 
     /**
-     * Gets the BackBuilder version.
+     * Gets the BackBee version.
      *
-     * @return string The BackBuilder version
+     * @return string The BackBee version
      */
-    public function getBackBuilderVersion()
+    public function getBackBeeVersion()
     {
-        return $this->data['backbuilder_version'];
+        return $this->data['BackBee_version'];
     }
 
     /**

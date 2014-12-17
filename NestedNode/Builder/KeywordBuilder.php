@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\NestedNode\Builder;
+namespace BackBee\NestedNode\Builder;
 
 /**
  * @author e.chau <eric.chau@lp-digital.fr>
@@ -22,16 +22,16 @@ class KeywordBuilder
     }
 
     /**
-     * Create new entity BackBuilder\NestedNode\KeyWord with $keyword if not exists
+     * Create new entity BackBee\NestedNode\KeyWord with $keyword if not exists
      *
      * @param  string                         $keyword
-     * @return BackBuilder\NestedNode\KeyWord
+     * @return BackBee\NestedNode\KeyWord
      */
     public function createKeywordIfNotExists($keyword, $do_persist = true)
     {
-        if (null === $keyword_object = $this->em->getRepository('BackBuilder\NestedNode\KeyWord')->exists($keyword)) {
-            $keyword_object = new \BackBuilder\NestedNode\KeyWord();
-            $keyword_object->setRoot($this->em->find('BackBuilder\NestedNode\KeyWord', md5('root')));
+        if (null === $keyword_object = $this->em->getRepository('BackBee\NestedNode\KeyWord')->exists($keyword)) {
+            $keyword_object = new \BackBee\NestedNode\KeyWord();
+            $keyword_object->setRoot($this->em->find('BackBee\NestedNode\KeyWord', md5('root')));
             $keyword_object->setKeyWord(preg_replace('#[/\"]#', '', trim($keyword)));
 
             if (true === $do_persist) {

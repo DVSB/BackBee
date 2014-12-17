@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Tests;
+namespace BackBee\NestedNode\Tests;
 
-use BackBuilder\Tests\TestCase;
-use BackBuilder\NestedNode\KeyWord;
+use BackBee\Tests\TestCase;
+use BackBee\NestedNode\KeyWord;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -38,12 +38,12 @@ class KeyWordTest extends TestCase
     private $current_time;
 
     /**
-     * @var \BackBuilder\NestedNode\KeyWord
+     * @var \BackBee\NestedNode\KeyWord
      */
     private $keyword;
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::__construct
+     * @covers BackBee\NestedNode\MediaFolder::__construct
      */
     public function test__construct()
     {
@@ -51,8 +51,8 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::getKeyWord
-     * @covers BackBuilder\NestedNode\MediaFolder::setKeyWord
+     * @covers BackBee\NestedNode\MediaFolder::getKeyWord
+     * @covers BackBee\NestedNode\MediaFolder::setKeyWord
      */
     public function testGetAndSetKeyWord()
     {
@@ -61,7 +61,7 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::getData
+     * @covers BackBee\NestedNode\MediaFolder::getData
      */
     public function testGetData()
     {
@@ -71,7 +71,7 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::getParam
+     * @covers BackBee\NestedNode\MediaFolder::getParam
      */
     public function testGetParam()
     {
@@ -88,7 +88,7 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::toArray
+     * @covers BackBee\NestedNode\MediaFolder::toArray
      */
     public function testToArray()
     {
@@ -108,7 +108,7 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::toStdObject
+     * @covers BackBee\NestedNode\MediaFolder::toStdObject
      */
     public function testToStdObject()
     {

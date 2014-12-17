@@ -3,36 +3,36 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security;
+namespace BackBee\Security;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * User object in BackBuilder5
+ * User object in BackBee5
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\Security\Repository\UserRepository")
+ * @Entity(repositoryClass="BackBee\Security\Repository\UserRepository")
  * @Table(name="user", uniqueConstraints={@UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
  * @fixtures(qty=20)
  */
@@ -96,15 +96,15 @@ class User implements UserInterface
     protected $_lastname;
 
     /**
-     * @var BackBuilder\NestedNode\PageRevision
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_user", fetch="EXTRA_LAZY")
+     * @var BackBee\NestedNode\PageRevision
+     * @OneToMany(targetEntity="BackBee\NestedNode\PageRevision", mappedBy="_user", fetch="EXTRA_LAZY")
      *
      * @Serializer\Exclude()
      */
     protected $_revisions;
 
     /**
-     * @ManyToMany(targetEntity="BackBuilder\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
+     * @ManyToMany(targetEntity="BackBee\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
      *
      * @Serializer\MaxDepth(1)
      */
@@ -203,7 +203,7 @@ class User implements UserInterface
     /**
      *
      * @param  boolean                    $bool
-     * @return \BackBuilder\Security\User
+     * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
     public function setActivated($bool)
@@ -218,7 +218,7 @@ class User implements UserInterface
     /**
      *
      * @param  string                     $login
-     * @return \BackBuilder\Security\User
+     * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
     public function setLogin($login)
@@ -231,7 +231,7 @@ class User implements UserInterface
     /**
      *
      * @param  string                     $password
-     * @return \BackBuilder\Security\User
+     * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
     public function setPassword($password)
@@ -244,7 +244,7 @@ class User implements UserInterface
     /**
      *
      * @param  string                     $firstname
-     * @return \BackBuilder\Security\User
+     * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
     public function setFirstname($firstname)
@@ -257,7 +257,7 @@ class User implements UserInterface
     /**
      *
      * @param  string                     $lastname
-     * @return \BackBuilder\Security\User
+     * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
     public function setLastname($lastname)
@@ -326,7 +326,7 @@ class User implements UserInterface
     }
 
     /**
-     * @return \BackBuilder\Security\Group[]
+     * @return \BackBee\Security\Group[]
      * @codeCoverageIgnore
      */
     public function getGroups()
@@ -414,7 +414,7 @@ class User implements UserInterface
     /**
      *
      * @param  string                     $api_key_public
-     * @return \BackBuilder\Security\User
+     * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
     public function setApiKeyPublic($api_key_public)
@@ -437,7 +437,7 @@ class User implements UserInterface
     /**
      *
      * @param  string                     $api_key_private
-     * @return \BackBuilder\Security\User
+     * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
     public function setApiKeyPrivate($api_key_private)
@@ -460,7 +460,7 @@ class User implements UserInterface
     /**
      *
      * @param  bool                       $api_key_enabled
-     * @return \BackBuilder\Security\User
+     * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
     public function setApiKeyEnabled($api_key_enabled)

@@ -3,31 +3,31 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Token;
+namespace BackBee\Security\Token;
 
 use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 
 /**
- * Base class for BackBuilder token's user
+ * Base class for BackBee token's user
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Token
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -106,7 +106,7 @@ class BBUserToken extends AbstractToken
      * Sets the creation date
      * @codeCoverageIgnore
      * @param  type                                    $created
-     * @return \BackBuilder\Security\Token\BBUserToken
+     * @return \BackBee\Security\Token\BBUserToken
      */
     public function setCreated($created)
     {
@@ -119,7 +119,7 @@ class BBUserToken extends AbstractToken
      * Sets the digest
      * @codeCoverageIgnore
      * @param  type                                    $digest
-     * @return \BackBuilder\Security\Token\BBUserToken
+     * @return \BackBee\Security\Token\BBUserToken
      */
     public function setDigest($digest)
     {
@@ -132,7 +132,7 @@ class BBUserToken extends AbstractToken
      * Sets the user's private nonce
      * @codeCoverageIgnore
      * @param  type                                    $nonce
-     * @return \BackBuilder\Security\Token\BBUserToken
+     * @return \BackBee\Security\Token\BBUserToken
      */
     public function setNonce($nonce)
     {
@@ -145,7 +145,7 @@ class BBUserToken extends AbstractToken
      * Sets the user
      * @codeCoverageIgnore
      * @param  type                                    $user
-     * @return \BackBuilder\Security\Token\BBUserToken
+     * @return \BackBee\Security\Token\BBUserToken
      */
     public function setUser($user)
     {

@@ -1,7 +1,7 @@
 # Profile services and parameters
 parameters:
-    bbapp.toolbar.listener.class: BackBuilder\Profiler\EventListener\ToolbarListener
-    bbapp.profiler.listener.class: BackBuilder\Event\Listener\ProfilerListener
+    bbapp.toolbar.listener.class: BackBee\Profiler\EventListener\ToolbarListener
+    bbapp.profiler.listener.class: BackBee\Event\Listener\ProfilerListener
 
 services:
     profiler.listener:
@@ -26,5 +26,5 @@ services:
             #"@data_collector.time",
 
     profiler.storage:
-        class:      BackBuilder\Profiler\FileProfilerStorage
+        class:      BackBee\Profiler\FileProfilerStorage
         arguments:  [@bbapp, "file:%bbapp.cache.dir%/_profiler/"]

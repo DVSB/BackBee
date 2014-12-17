@@ -3,33 +3,33 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Theme;
+namespace BackBee\Theme;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Theme\Exception\ThemeException;
-use BackBuilder\Util\Dir;
-use BackBuilder\Util\File;
-use BackBuilder\Config\Config;
+use BackBee\BBApplication;
+use BackBee\Theme\Exception\ThemeException;
+use BackBee\Util\Dir;
+use BackBee\Util\File;
+use BackBee\Config\Config;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Theme
+ * @category    BackBee
+ * @package     BackBee\Theme
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -85,14 +85,14 @@ class Theme extends ThemeConst
 
     /**
      * Config
-     * @var BackBuilder\Config\Config
+     * @var BackBee\Config\Config
      */
     private $_config;
 
     /**
      * Theme object constructor
      *
-     * @param  \BackBuilder\BBApplication $bbapp
+     * @param  \BackBee\BBApplication $bbapp
      * @throws ThemeException
      */
     public function __construct(BBApplication $bbapp = null)
@@ -113,7 +113,7 @@ class Theme extends ThemeConst
      */
     public function init()
     {
-        $theme_repository = $this->_application->getEntityManager()->getRepository('BackBuilder\Theme\PersonalThemeEntity');
+        $theme_repository = $this->_application->getEntityManager()->getRepository('BackBee\Theme\PersonalThemeEntity');
         $this->_personal_theme = $theme_repository->retrieveBySiteUid($this->_site_uid);
 
         if (is_object($this->_personal_theme) && $this->_personal_theme->getDependency() != self::DEFAULT_NAME) {
@@ -131,7 +131,7 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Builds the selecteds themes for dispatch in backbuilder.
+     * Builds the selecteds themes for dispatch in BackBee.
      */
     public function build()
     {
@@ -299,7 +299,7 @@ class Theme extends ThemeConst
     private function _initConfig($configdir = null)
     {
         if (null === $this->_application) {
-            throw new \BackBuilder\Exception\MissingApplicationException('Missing BackBuilder application for theme');
+            throw new \BackBee\Exception\MissingApplicationException('Missing BackBee application for theme');
         }
 
         if (is_null($configdir)) {
@@ -314,7 +314,7 @@ class Theme extends ThemeConst
     /**
      * Get config
      *
-     * @return BackBuilder\Config\Config
+     * @return BackBee\Config\Config
      */
     public function getConfig()
     {

@@ -3,26 +3,26 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Util\Doctrine;
+namespace BackBee\Util\Doctrine;
 
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\DependencyInjection\ContainerInterface;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\DependencyInjection\ContainerInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\Common\Cache\MemcacheCache;
@@ -35,8 +35,8 @@ use Psr\Log\LoggerInterface;
 /**
  * Utility class to create a new Doctrine entity manager
  *
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @subpackage  Doctrine
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -56,7 +56,7 @@ class EntityManagerCreator
      * @param  \Psr\Log\LoggerInterface                        $logger  Optional logger
      * @param  \Doctrine\Common\EventManager                   $evm     Optional event manager
      * @return \Doctrine\ORM\EntityManager
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be returned
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be returned
      */
     public static function create(array $options = array(), LoggerInterface $logger = null, EventManager $evm = null, ContainerInterface $container = null)
     {
@@ -231,7 +231,7 @@ class EntityManagerCreator
      */
     private static function _addCustomFunctions(Configuration $config, array $options = array())
     {
-        if (null !== $string_functions = \BackBuilder\Util\Arrays::get($options, 'orm:entity_managers:default:dql:string_functions')) {
+        if (null !== $string_functions = \BackBee\Util\Arrays::get($options, 'orm:entity_managers:default:dql:string_functions')) {
             foreach ($string_functions as $name => $class) {
                 if (true === class_exists($class)) {
                     $config->addCustomStringFunction($name, $class);
@@ -239,7 +239,7 @@ class EntityManagerCreator
             }
         }
 
-        if (null !== $numeric_functions = \BackBuilder\Util\Arrays::get($options, 'orm:entity_managers:default:dql:numeric_functions')) {
+        if (null !== $numeric_functions = \BackBee\Util\Arrays::get($options, 'orm:entity_managers:default:dql:numeric_functions')) {
             foreach ($numeric_functions as $name => $class) {
                 if (true === class_exists($class)) {
                     $config->addCustomNumericFunction($name, $class);
@@ -247,7 +247,7 @@ class EntityManagerCreator
             }
         }
 
-        if (null !== $datetime_functions = \BackBuilder\Util\Arrays::get($options, 'orm:entity_managers:default:dql:datetime_functions')) {
+        if (null !== $datetime_functions = \BackBee\Util\Arrays::get($options, 'orm:entity_managers:default:dql:datetime_functions')) {
             foreach ($datetime_functions as $name => $class) {
                 if (true === class_exists($class)) {
                     $config->addCustomDatetimeFunction($name, $class);
@@ -263,7 +263,7 @@ class EntityManagerCreator
      * @param  \Doctrine\ORM\EntityManager                     $entity_manager
      * @param  \Doctrine\Common\EventManager                   $evm            Optional event manager
      * @return \Doctrine\ORM\EntityManager
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager is not an EntityManager
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager is not an EntityManager
      */
     private static function _getEntityManagerWithEntityManager($entity_manager)
     {
@@ -280,7 +280,7 @@ class EntityManagerCreator
      * @param  \Doctrine\ORM\Configuration                     $config
      * @param  \Doctrine\Common\EventManager                   $evm        Optional event manager
      * @return \Doctrine\ORM\EntityManager
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
     private static function _createEntityManagerWithConnection($connection, Configuration $config, EventManager $evm = null)
     {
@@ -300,7 +300,7 @@ class EntityManagerCreator
      * @param  array                                           $options
      * @param  \Doctrine\ORM\Configuration                     $config
      * @return \Doctrine\ORM\EntityManager
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
     private static function _createEntityManagerWithParameters(array $options, Configuration $config, EventManager $evm = null)
     {
@@ -315,7 +315,7 @@ class EntityManagerCreator
      * Sets the character set for the provided connection
      * @param  \Doctrine\DBAL\Connection                       $connection
      * @param  array                                           $options
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if charset is invalid
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if charset is invalid
      */
     private static function _setConnectionCharset(Connection $connection, array $options = array())
     {
@@ -336,7 +336,7 @@ class EntityManagerCreator
      * Sets the collation for the provided connection
      * @param  \Doctrine\DBAL\Connection                       $connection
      * @param  array                                           $options
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if collation is invalid
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if collation is invalid
      */
     private static function _setConnectionCollation(Connection $connection, array $options = array())
     {

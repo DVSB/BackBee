@@ -3,33 +3,33 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Validator\Tests;
+namespace BackBee\Validator\Tests;
 
-use BackBuilder\Tests\Mock\MockBBApplication;
-use BackBuilder\Validator\Tests\Mock\MockEntity;
-use BackBuilder\Validator\Tests\Mock\MockEntity2;
+use BackBee\Tests\Mock\MockBBApplication;
+use BackBee\Validator\Tests\Mock\MockEntity;
+use BackBee\Validator\Tests\Mock\MockEntity2;
 
 /**
  * Entity's validator
  *
- * @category    BackBuilder
- * @package     BackBuilder\Validator\Tests
+ * @category    BackBee
+ * @package     BackBee\Validator\Tests
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
@@ -40,12 +40,12 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     private $em;
 
     /**
-     * @covers BackBuilder\Validator\EntityValidator::doUniqueValidator
+     * @covers BackBee\Validator\EntityValidator::doUniqueValidator
      */
     public function testDoUniqueValidator()
     {
         $config = array('error' => 'Value must be unique.');
-        $mock_entity = $this->em->getRepository('BackBuilder\Validator\Tests\Mock\MockEntity')->find(1);
+        $mock_entity = $this->em->getRepository('BackBee\Validator\Tests\Mock\MockEntity')->find(1);
 
         $errors = array();
         $this->entity_validator->doUniqueValidator($mock_entity, $errors, 'name', 'France', $config);
@@ -57,7 +57,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers BackBuilder\Validator\EntityValidator::doPasswordValidator
+     * @covers BackBee\Validator\EntityValidator::doPasswordValidator
      */
     public function testDoPasswordValidator()
     {
@@ -74,7 +74,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /*
-     * @covers BackBuilder\Validator\EntityValidator::isValid
+     * @covers BackBee\Validator\EntityValidator::isValid
      */
     public function testIsValid()
     {
@@ -86,7 +86,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers BackBuilder\Validator\EntityValidator::getReflectionClass
+     * @covers BackBee\Validator\EntityValidator::getReflectionClass
      */
     public function testGetReflectionClass()
     {
@@ -94,7 +94,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers BackBuilder\Validator\ArrayValidator::getReflectionClass
+     * @covers BackBee\Validator\ArrayValidator::getReflectionClass
      * @expectedException InvalidArgumentException
      */
     public function testGetReflectionClassIfEntityIsAnArray()
@@ -103,7 +103,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers BackBuilder\Validator\ArrayValidator::getReflectionClass
+     * @covers BackBee\Validator\ArrayValidator::getReflectionClass
      * @expectedException InvalidArgumentException
      */
     public function testGetReflectionClassIfEntityIsNull()
@@ -112,7 +112,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers BackBuilder\Validator\EntityValidator::getReflectionClass
+     * @covers BackBee\Validator\EntityValidator::getReflectionClass
      */
     public function testGetIdProperties()
     {
@@ -130,7 +130,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
         //Test data
         $this->generateData();
 
-        $this->entity_validator = new \BackBuilder\Validator\EntityValidator($this->em);
+        $this->entity_validator = new \BackBee\Validator\EntityValidator($this->em);
     }
 
     private function generateData()
@@ -187,7 +187,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
         $this->em = $this->application->getEntityManager();
 
         $st = new \Doctrine\ORM\Tools\SchemaTool($this->em);
-        $st->createSchema(array($this->em->getClassMetaData('BackBuilder\Validator\Tests\Mock\MockEntity')));
-        $st->createSchema(array($this->em->getClassMetaData('BackBuilder\Validator\Tests\Mock\MockEntity2')));
+        $st->createSchema(array($this->em->getClassMetaData('BackBee\Validator\Tests\Mock\MockEntity')));
+        $st->createSchema(array($this->em->getClassMetaData('BackBee\Validator\Tests\Mock\MockEntity2')));
     }
 }

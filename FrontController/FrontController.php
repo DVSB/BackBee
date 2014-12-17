@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\FrontController;
+namespace BackBee\FrontController;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Event\PageFilterEvent;
-use BackBuilder\FrontController\Exception\FrontControllerException;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Routing\Matcher\UrlMatcher;
-use BackBuilder\Routing\RequestContext;
+use BackBee\BBApplication;
+use BackBee\Event\PageFilterEvent;
+use BackBee\FrontController\Exception\FrontControllerException;
+use BackBee\NestedNode\Page;
+use BackBee\Routing\Matcher\UrlMatcher;
+use BackBee\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
@@ -39,11 +39,11 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * The BackBuilder front controller
+ * The BackBee front controller
  * It handles and dispatches HTTP requests received
  *
- * @category    BackBuilder
- * @package     BackBuilder\FrontController
+ * @category    BackBee
+ * @package     BackBee\FrontController
  * @copyright   Lp system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -52,8 +52,8 @@ class FrontController implements HttpKernelInterface
     const DEFAULT_URL_EXTENSION = 'html';
 
     /**
-     * Current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * Current BackBee application
+     * @var \BackBee\BBApplication
      */
     protected $application;
 
@@ -71,7 +71,7 @@ class FrontController implements HttpKernelInterface
 
     /**
      * Current request context
-     * @var \BackBuilder\Routing\RequestContext
+     * @var \BackBee\Routing\RequestContext
      */
     protected $requestContext;
 
@@ -89,7 +89,7 @@ class FrontController implements HttpKernelInterface
      * Class constructor
      *
      * @access public
-     * @param \BackBuilder\BBApplication $application The current BBapplication
+     * @param \BackBee\BBApplication $application The current BBapplication
      */
     public function __construct(BBApplication $application = null)
     {
@@ -116,7 +116,7 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Returns current Backbuilder application
+     * Returns current BackBee application
      *
      * @access public
      * @return BBApplication
@@ -145,7 +145,7 @@ class FrontController implements HttpKernelInterface
      * Returns the routes collection defined
      *
      * @access public
-     * @return \BackBuilder\Routing\RouteCollection
+     * @return \BackBee\Routing\RouteCollection
      */
     public function getRouteCollection()
     {
@@ -230,11 +230,11 @@ class FrontController implements HttpKernelInterface
     public function defaultAction($uri = null, $sendResponse = true)
     {
         if (null === $this->application) {
-            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
+            throw new FrontControllerException('A valid BackBee application is required.', FrontControllerException::INTERNAL_ERROR);
         }
 
         if (false === $this->application->getContainer()->has('site')) {
-            throw new FrontControllerException('A BackBuilder\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
+            throw new FrontControllerException('A BackBee\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
         }
 
         $site = $this->application->getContainer()->get('site');
@@ -262,12 +262,12 @@ class FrontController implements HttpKernelInterface
 
         if ('_root_' == $uri) {
             $page = $this->application->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page')
+                ->getRepository('BackBee\NestedNode\Page')
                 ->getRoot($site)
             ;
         } else {
             $page = $this->application->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page')
+                ->getRepository('BackBee\NestedNode\Page')
                 ->findOneBy(array(
                     '_site' => $site,
                     '_url' => '/'.$uri,
@@ -323,11 +323,11 @@ class FrontController implements HttpKernelInterface
     public function rssAction($uri = null)
     {
         if (NULL === $this->application) {
-            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
+            throw new FrontControllerException('A valid BackBee application is required.', FrontControllerException::INTERNAL_ERROR);
         }
 
         if (FALSE === $this->application->getContainer()->has('site')) {
-            throw new FrontControllerException('A BackBuilder\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
+            throw new FrontControllerException('A BackBee\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
         }
 
         $site = $this->application->getContainer()->get('site');
@@ -337,11 +337,11 @@ class FrontController implements HttpKernelInterface
 
         if ('_root_' == $uri) {
             $page = $this->application->getEntityManager()
-                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->getRepository('BackBee\NestedNode\Page')
                     ->getRoot($site);
         } else {
             $page = $this->application->getEntityManager()
-                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->getRepository('BackBee\NestedNode\Page')
                     ->findOneBy(array('_site' => $site,
                 '_url' => '/'.$uri,
                 '_state' => Page::getUndeletedStates(), ));
@@ -370,7 +370,7 @@ class FrontController implements HttpKernelInterface
     public function rpcAction()
     {
         if (null === $this->application) {
-            throw new FrontControllerException('A valid BackBuilder application is required.', FrontControllerException::INTERNAL_ERROR);
+            throw new FrontControllerException('A valid BackBee application is required.', FrontControllerException::INTERNAL_ERROR);
         }
 
         try {
@@ -557,7 +557,7 @@ class FrontController implements HttpKernelInterface
 
         if (null !== $controller) {
             $eventName = str_replace('\\', '.', strtolower(get_class($controller[0])));
-            if (0 === strpos($eventName, 'backbuilder.')) {
+            if (0 === strpos($eventName, 'BackBee.')) {
                 $eventName = substr($eventName, 12);
             }
 

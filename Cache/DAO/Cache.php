@@ -3,28 +3,28 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Cache\DAO;
+namespace BackBee\Cache\DAO;
 
-use BackBuilder\Cache\AExtendedCache;
-use BackBuilder\Cache\Exception\CacheException;
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\Util\Doctrine\EntityManagerCreator;
+use BackBee\Cache\AExtendedCache;
+use BackBee\Cache\Exception\CacheException;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\Util\Doctrine\EntityManagerCreator;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 
@@ -33,8 +33,8 @@ use Psr\Log\LoggerInterface;
  *
  * It supports tag and expire features
  *
- * @category    BackBuilder
- * @package     BackBuilder\Cache
+ * @category    BackBee
+ * @package     BackBee\Cache
  * @subpackage  DAO
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -45,7 +45,7 @@ class Cache extends AExtendedCache
      * The cache entity class name
      * @var string
      */
-    const ENTITY_CLASSNAME = 'BackBuilder\Cache\DAO\Entity';
+    const ENTITY_CLASSNAME = 'BackBee\Cache\DAO\Entity';
 
     /**
      * The Doctrine entity manager to use
@@ -61,7 +61,7 @@ class Cache extends AExtendedCache
 
     /**
      * An entity for a store cache
-     * @var \BackBuilder\Cache\DAO\Entity
+     * @var \BackBee\Cache\DAO\Entity
      */
     private $_entity;
 
@@ -93,7 +93,7 @@ class Cache extends AExtendedCache
      *                                                              - ...         mixed                      All the required parameter to open a new connection
      * @param  string                                      $context An optional cache context
      * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
+     * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
@@ -388,7 +388,7 @@ class Cache extends AExtendedCache
     /**
      * Returns the store entity for provided cache id
      * @param  string                        $id Cache id
-     * @return \BackBuilder\Cache\DAO\Entity The cache entity or NULL
+     * @return \BackBee\Cache\DAO\Entity The cache entity or NULL
      * @codeCoverageIgnore
      */
     private function _getCacheEntity($id)
@@ -429,7 +429,7 @@ class Cache extends AExtendedCache
 
     /**
      * Sets the cache prefix key according to the context
-     * @return \BackBuilder\Cache\DAO\Cache
+     * @return \BackBee\Cache\DAO\Cache
      * @codeCoverageIgnore
      */
     private function _setPrefixKey()
@@ -443,8 +443,8 @@ class Cache extends AExtendedCache
 
     /**
      * Sets the entity repository
-     * @return \BackBuilder\Cache\DAO\Cache
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the entity repository cannot be found
+     * @return \BackBee\Cache\DAO\Cache
+     * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity repository cannot be found
      * @codeCoverageIgnore
      */
     private function _setEntityRepository()
@@ -460,8 +460,8 @@ class Cache extends AExtendedCache
 
     /**
      * Sets the entity manager
-     * @return \BackBuilder\Cache\DAO\Cache
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if if enable to create a database connection.
+     * @return \BackBee\Cache\DAO\Cache
+     * @throws \BackBee\Cache\Exception\CacheException Occurs if if enable to create a database connection.
      */
     private function _setEntityManager()
     {

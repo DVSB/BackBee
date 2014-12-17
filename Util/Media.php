@@ -3,32 +3,32 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Util;
+namespace BackBee\Util;
 
-use BackBuilder\ClassContent\Element\file as elementFile;
-use BackBuilder\Exception\InvalidArgumentException;
+use BackBee\ClassContent\Element\file as elementFile;
+use BackBee\Exception\InvalidArgumentException;
 
 /**
  * Set of utility methods to deal with media files
  *
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -36,10 +36,10 @@ class Media
 {
     /**
      * Returns the computed storage filename of an element file
-     * @param  \BackBuilder\ClassContent\Element\file          $content
+     * @param  \BackBee\ClassContent\Element\file          $content
      * @param  int                                             $folder_size Optional, size in characters of the storing folder
      * @return string
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the provided element file is empty
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the provided element file is empty
      */
     public static function getPathFromContent(elementFile $content, $folder_size = 3)
     {
@@ -71,7 +71,7 @@ class Media
      * @param  int                                             $folder_size
      * @param  boolean                                         $include_originalname
      * @return string
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the provided $uid is invalid
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the provided $uid is invalid
      */
     public static function getPathFromUid($uid, $originalname, $folder_size = 3, $include_originalname = false)
     {
@@ -103,13 +103,13 @@ class Media
      * @param  int                                $width
      * @param  int                                $height
      * @return boolean                            Returns TRUE on success, FALSE on failure
-     * @throws \BackBuilder\Exception\BBException Occures if gd extension is not loaded
+     * @throws \BackBee\Exception\BBException Occures if gd extension is not loaded
      * @throws InvalidArgumentException           Occures on unsupported file type or unreadable file source
      */
     public static function resize($source, $dest, $width, $height)
     {
         if (false === extension_loaded('gd')) {
-            throw new \BackBuilder\Exception\BBException('gd extension is required');
+            throw new \BackBee\Exception\BBException('gd extension is required');
         }
 
         if (false === is_readable($source)) {

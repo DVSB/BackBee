@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Config;
+namespace BackBee\Config;
 
-use BackBuilder\Cache\ACache;
-use BackBuilder\Config\Exception\InvalidConfigException;
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\DispatchTagEventInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
-use BackBuilder\Util\File;
+use BackBee\Cache\ACache;
+use BackBee\Config\Exception\InvalidConfigException;
+use BackBee\DependencyInjection\Container;
+use BackBee\DependencyInjection\DispatchTagEventInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\Util\File;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -35,8 +35,8 @@ use Symfony\Component\Yaml\Yaml;
  * The parameters had to be filtered by section
  * Note that parameters and services will be set only if setContainer() is called
  *
- * @category    BackBuilder
- * @package     BackBuilder\Config
+ * @category    BackBee
+ * @package     BackBee\Config
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
@@ -46,7 +46,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      * Config proxy classname
      * @var string
      */
-    const CONFIG_PROXY_CLASSNAME = 'BackBuilder\Config\ConfigProxy';
+    const CONFIG_PROXY_CLASSNAME = 'BackBee\Config\ConfigProxy';
 
     /**
      * Default config file to look for
@@ -80,13 +80,13 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * The optional cache system
-     * @var \BackBuilder\Cache\ACache
+     * @var \BackBee\Cache\ACache
      */
     protected $cache;
 
     /**
      * The service container
-     * @var \BackBuilder\DependencyInjection\Container
+     * @var \BackBee\DependencyInjection\Container
      */
     protected $container;
 
@@ -94,7 +94,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      * Application's environment
      * @var string
      */
-    protected $environment = \BackBuilder\IApplication::DEFAULT_ENVIRONMENT;
+    protected $environment = \BackBee\IApplication::DEFAULT_ENVIRONMENT;
 
     /**
      * Is debug mode enabled
@@ -129,8 +129,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Class constructor
      * @param string                                     $basedir   The base directory in which look for config files
-     * @param \BackBuilder\Cache\ACache                  $cache     Optional cache system
-     * @param \BackBuilder\DependencyInjection\Container $container
+     * @param \BackBee\Cache\ACache                  $cache     Optional cache system
+     * @param \BackBee\DependencyInjection\Container $container
      */
     public function __construct($basedir, ACache $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
     {
@@ -173,8 +173,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Set the service container to be able to parse parameter and service in config
      * Resets the compiled parameters array
-     * @param  \BackBuilder\DependencyInjection\Container $container
-     * @return \BackBuilder\Config\Config
+     * @param  \BackBee\DependencyInjection\Container $container
+     * @return \BackBee\Config\Config
      */
     public function setContainer(Container $container = null)
     {
@@ -334,7 +334,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      * @param  string                     $section
      * @param  array                      $config
      * @param  boolean                    $overwrite
-     * @return \BackBuilder\Config\Config The current config object
+     * @return \BackBee\Config\Config The current config object
      */
     public function setSection($section, array $config, $overwrite = false)
     {
@@ -389,7 +389,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * @see BackBuilder\DependencyInjection\DispatchTagEventInterface::needDispatchEvent
+     * @see BackBee\DependencyInjection\DispatchTagEventInterface::needDispatchEvent
      */
     public function needDispatchEvent()
     {
@@ -522,7 +522,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      * @param  string                                                $basedir
      * @param  string                                                $basedir The base directory
      * @return array
-     * @throws \BackBuilder\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
+     * @throws \BackBee\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
     private function getYmlFiles($basedir)
     {
@@ -549,7 +549,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Loads the config files from the base directory
      * @param  string                                                $basedir The base directory
-     * @throws \BackBuilder\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
+     * @throws \BackBee\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
     private function loadFromBaseDir($basedir, $overwrite = false)
     {
@@ -561,7 +561,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Try to parse a yaml config file
      * @param  string                                               $filename
-     * @throws \BackBuilder\Config\Exception\InvalidConfigException Occurs when the file can't be parsed
+     * @throws \BackBee\Config\Exception\InvalidConfigException Occurs when the file can't be parsed
      */
     private function loadFromFile($filename, $overwrite = false)
     {

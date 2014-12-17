@@ -1,12 +1,12 @@
 <?php
 
-namespace BackBuilder\TestUnit\BackBuilder\Util;
+namespace BackBee\TestUnit\BackBee\Util;
 
-use BackBuilder\Util\ArrayPaginator;
+use BackBee\Util\ArrayPaginator;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\TestUnit\BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\TestUnit\BackBee\Util
  * @copyright   Lp digital system
  * @author      Flavia Fodor
  */
@@ -14,7 +14,7 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase
 {
     /**
      *
-     * @covers \BackBuilder\Util\ArrayPaginator::getIterator
+     * @covers \BackBee\Util\ArrayPaginator::getIterator
      */
     public function testGetIterator()
     {
@@ -32,7 +32,7 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\ArrayPaginator::count
+     * @covers \BackBee\Util\ArrayPaginator::count
      */
     public function testCount()
     {
@@ -47,7 +47,7 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\ArrayPaginator::getNextPageNumber
+     * @covers \BackBee\Util\ArrayPaginator::getNextPageNumber
      */
     public function testGetNextPageNumber()
     {
@@ -68,7 +68,7 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\ArrayPaginator::getPreviousPageNumber
+     * @covers \BackBee\Util\ArrayPaginator::getPreviousPageNumber
      */
     public function testGetPreviousPageNumber()
     {
@@ -89,7 +89,7 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\ArrayPaginator::isNextPage
+     * @covers \BackBee\Util\ArrayPaginator::isNextPage
      */
     public function testIsNextPage()
     {
@@ -107,7 +107,7 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\ArrayPaginator::isPreviousPage
+     * @covers \BackBee\Util\ArrayPaginator::isPreviousPage
      */
     public function testIsPreviousPage()
     {
@@ -122,7 +122,7 @@ class ArrayPaginatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\ArrayPaginator::getCurrentPageNumber
+     * @covers \BackBee\Util\ArrayPaginator::getCurrentPageNumber
      */
     public function testGetCurrentPageNumber()
     {

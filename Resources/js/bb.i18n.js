@@ -2,7 +2,7 @@ var bb = (bb) ? bb : {};
 
 /**
  * Class providing translation features to bb5 toolbars
- * @category    BackBuilder5
+ * @category    BackBee5
  * @copyright   Lp digital system
  * @author      c.rouillon
  */
@@ -136,9 +136,9 @@ var bbTranslator = function(locale, options) {
             bb.jquery.timepicker.regional[_locale] = _translate.timepicker;
             bb.jquery.timepicker.setDefaults(bb.jquery.timepicker.regional[_locale]);
         }
-        
+
         bb.jquery(document).trigger('locale.change');
-        
+
         _log("Locale set to "+_locale);
 
         return this;

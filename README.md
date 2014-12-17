@@ -8,7 +8,7 @@ BackBee core
 The main concept behind BackBee is that "your backend is your frontend", this CMS is
 focused on the continuous improvement of content contribution.
 
-See also [BackBee website](http://backbee.com/what-is-backbee/10-reasons-to-use-backbuilder5)
+See also [BackBee website](http://backbee.com/what-is-backbee/10-reasons-to-use-BackBee5)
 
 Requirements
 ------------

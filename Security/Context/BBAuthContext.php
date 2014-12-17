@@ -3,37 +3,37 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Context;
+namespace BackBee\Security\Context;
 
-use BackBuilder\Security\Authentication\Provider\BBAuthenticationProvider;
-use BackBuilder\Security\Listeners\BBAuthenticationListener;
-use BackBuilder\Security\Listeners\LogoutListener;
-use BackBuilder\Security\Logout\BBLogoutHandler;
-use BackBuilder\Security\Logout\BBLogoutSuccessHandler;
+use BackBee\Security\Authentication\Provider\BBAuthenticationProvider;
+use BackBee\Security\Listeners\BBAuthenticationListener;
+use BackBee\Security\Listeners\LogoutListener;
+use BackBee\Security\Logout\BBLogoutHandler;
+use BackBee\Security\Logout\BBLogoutSuccessHandler;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\HttpUtils;
 
 /**
  * Description of AnonymousContext
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Context
  * @copyright   Lp digital system
  * @author      nicolas.dufreche <nicolas.dufreche@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
@@ -114,7 +114,7 @@ class BBAuthContext extends AbstractContext implements ContextInterface
     {
         $repository = null;
         if (null !== $em = $this->_context->getApplication()->getEntityManager()) {
-            $repository = $em->getRepository('BackBuilder\Bundle\Registry');
+            $repository = $em->getRepository('BackBee\Bundle\Registry');
         }
 
         return $repository;

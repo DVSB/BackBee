@@ -3,35 +3,35 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Console;
+namespace BackBee\Console;
 
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use BackBuilder\BBApplication;
+use BackBee\BBApplication;
 
 /**
- * BackBuilder Console Application
+ * BackBee Console Application
  *
- * @category    BackBuilder
- * @package     BackBuilder\Config
+ * @category    BackBee
+ * @package     BackBee\Config
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -53,14 +53,14 @@ class Console extends ConsoleApplication
     {
         $this->_application = $application;
 
-        parent::__construct('BackBuilder', BBApplication::VERSION.($application->isDebugMode() ? '/debug' : ''));
+        parent::__construct('BackBee', BBApplication::VERSION.($application->isDebugMode() ? '/debug' : ''));
 
         $this->getDefinition()->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $this->_application->getEnvironment()));
         $this->getDefinition()->addOption(new InputOption('--no-debug', null, InputOption::VALUE_NONE, 'Switches off debug mode.'));
     }
 
     /**
-     * Gets the BackBuilder Application
+     * Gets the BackBee Application
      *
      * @return BBApplication
      */

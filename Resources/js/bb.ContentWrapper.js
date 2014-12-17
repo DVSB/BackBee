@@ -47,14 +47,14 @@ bb.ContentWrapper = (function($, global) {
     var _isABbContent = function(contentNode) {
         return (bb.jquery(contentNode).hasClass(_settings.bbContentClass.replace(".", ""))) ? true : false;
     }
-    
+
     var _isASubContent = function(contentNode){
         var dataElement = bb.jquery(contentNode).attr("data-element");
         var isASubContent = (dataElement && dataElement != 0) ? true : false;
 
         return isASubContent;
     }
-           
+
     var _isAnAutoBlock = function(contentNode) {
         var isAnAutoBlock;
         var forbiden_action = bb.jquery(contentNode).attr("data-forbidenactions");
@@ -84,7 +84,7 @@ bb.ContentWrapper = (function($, global) {
      bb.jquery(contentNode).attr("data-itemcontainer",id);
      bb.jquery(hasItemContainer).addClass(id);
      }
-     
+
      }
      }
      return contentNode;
@@ -92,8 +92,8 @@ bb.ContentWrapper = (function($, global) {
 
     var _getContentAccept = function(contentNode) {
         /*not useful for contentSet format {
-         *title:['BackBuilder\ClassContent\Element\text'],
-         *body:['BackBuilder\ClassContent\Element\text']
+         *title:['BackBee\ClassContent\Element\text'],
+         *body:['BackBee\ClassContent\Element\text']
          *}*/
         if (!_isAContentSet(contentNode))
         {
@@ -184,7 +184,7 @@ bb.ContentWrapper = (function($, global) {
 
         /**
          * refparent means this contentEl is in fact a reference to an other contentEl.
-         *  In this case the mainparent that has a ref to an itemcontainer. 
+         *  In this case the mainparent that has a ref to an itemcontainer.
          */
         if ("refparent" in contentParams) {
             if (typeof contentParams.refparent == "string") {
@@ -260,7 +260,7 @@ bb.ContentWrapper = (function($, global) {
                 this.isContentSet = this._contentProperties.isAContentSet; //change to isAContentSet
                 this.isAContentSet = this.isContentSet;
 
-                this.isABbContent = this._contentProperties.isABbContent; //basic subcontents are not bbContent 
+                this.isABbContent = this._contentProperties.isABbContent; //basic subcontents are not bbContent
 
                 this.isASubContent = this._contentProperties.isASubContent;
 
@@ -468,7 +468,7 @@ bb.ContentWrapper = (function($, global) {
             if (!contentEl)
                 throw "contentEl can't be null";
             this.contentEl = contentEl;
-            bb.jquery(this.contentEl).attr("data-bbContentRef", this.id); //update properties from Dom? 
+            bb.jquery(this.contentEl).attr("data-bbContentRef", this.id); //update properties from Dom?
             this.updateContentRendermode();
         }
 
@@ -528,7 +528,7 @@ bb.ContentWrapper = (function($, global) {
             var subContents = bb.jquery(this.contentEl).find("[data-element]");
             var self = this;
             var data = {};
-            //var hasChanged = false; 
+            //var hasChanged = false;
             if(subContents.length){
                 subContents.each(function(i,element){
                     if(bb.jquery(element).attr('data-parent') == self.getUid()){
@@ -542,11 +542,11 @@ bb.ContentWrapper = (function($, global) {
             this.set("data", data, notify);
             return data;
         }
-        
+
         /* return */
         BbContentWrapper.prototype.getSubContents = function(){
             var result = [], self = this;
-            var $ = bb.jquery; 
+            var $ = bb.jquery;
             var subContents = bb.jquery(this.contentEl).find("[data-element]");
             if(subContents.length){
                 subContents.each(function(i,element){

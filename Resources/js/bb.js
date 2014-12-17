@@ -3,7 +3,7 @@
 var bb = (bb) ? bb : {};
 
 (function($){
-    
+
 $.loadScript = function(url, options) {
     options = bb.jquery.extend(options || {}, {
         dataType: 'script',
@@ -11,7 +11,7 @@ $.loadScript = function(url, options) {
         cache: true,
         url: bb.baseurl+url
     });
-    
+
     return bb.jquery.ajax(options);
 };
 
@@ -22,15 +22,15 @@ $.loadScript = function(url, options) {
         resourcesdir: 'ressources/',
         storedsitepadding: 0,
         fixedelements: [],
-        
+
         i18n: {
             loading: 'Loading...'
         },
-        
+
         libs: [
         'js/libs/requirejs/require.js',
         'js/bb.require.map.js',//js module config
-        
+
         'js/libs/jquery.event.mousestop.js', //fix mouseenter/mouseleave when moving fast
         'js/libs/jquery-ui-1.8.24.custom.min.js',//to fix sortable jitter and flaky effects and fucking datepicker
         'js/libs/jquery.loadmask.min.js',
@@ -43,7 +43,7 @@ $.loadScript = function(url, options) {
         'js/libs/jquery.templates.js',
         'js/libs/jquery.layout-latest.min.js',
         'js/libs/jquery.fileDownload.js',
-            
+
         'js/colorpicker.js',
         'js/bb.i18n.js',
         'js/less-1.3.0.min.js',
@@ -54,7 +54,7 @@ $.loadScript = function(url, options) {
         'js/jquery.ui.selectgroup.js',
         'js/script.js',
         'js/Utils.js',
-            
+
         'js/dbmanager.js',
         'js/min/bb.StateManager.js',
         'js/bb.upload.js',
@@ -79,7 +79,7 @@ $.loadScript = function(url, options) {
         'js/lpTab.js',
         'js/lpContextMenu.js',
         'js/bb.ManagersContainer.js',
-            
+
         'js/AlohaManager.js',
         'js/FilterManager.js',
         'js/LayoutManager.js',
@@ -95,11 +95,11 @@ $.loadScript = function(url, options) {
         'js/ToolsbarBundle.js',
         'js/PopupManager.js',
         'js/bb.FormBuilder.plugins.js',
-        'js/FrontApplication.js', 
+        'js/FrontApplication.js',
         'js/i18n/fr.js',
         'js/min/bb.Notify.js'
         ],
-        
+
         config: {
             maxFileSize: 10,
             mediaFileSize:{
@@ -109,95 +109,95 @@ $.loadScript = function(url, options) {
                 zip: 15
             }
         },
-        
+
         webserviceManagerConfig: {
             endPoint: 'index.php',
             webservices: [{
                 name: 'ws_local_user',
-                namespace: 'BackBuilder_Services_Local_User'
+                namespace: 'BackBee_Services_Local_User'
             }, {
                 name: 'ws_local_site',
-                namespace: 'BackBuilder_Services_Local_Site'
+                namespace: 'BackBee_Services_Local_Site'
             }, {
                 name: 'ws_local_page',
-                namespace: 'BackBuilder_Services_Local_Page'
+                namespace: 'BackBee_Services_Local_Page'
             }, {
                 name: 'ws_local_mediafolder',
-                namespace: 'BackBuilder_Services_Local_MediaFolder'
+                namespace: 'BackBee_Services_Local_MediaFolder'
             }, {
                 name: 'ws_local_media',
-                namespace: 'BackBuilder_Services_Local_Media'
+                namespace: 'BackBee_Services_Local_Media'
             }, {
                 name: 'ws_local_layout',
-                namespace: 'BackBuilder_Services_Local_Layout'
+                namespace: 'BackBee_Services_Local_Layout'
             }, {
                 name :'ws_local_less',
-                namespace:'BackBuilder_Services_Local_Less'
+                namespace:'BackBee_Services_Local_Less'
             }, {
                 name : 'ws_local_contentBlock',
-                namespace:'BackBuilder_Services_Local_ContentBlocks'
+                namespace:'BackBee_Services_Local_ContentBlocks'
             }, {
                 name : 'ws_local_revision',
-                namespace:'BackBuilder_Services_Local_Revision'
+                namespace:'BackBee_Services_Local_Revision'
             }, {
                 name: "ws_local_classContent",
-                namespace:"BackBuilder_Services_Local_ClassContent"
+                namespace:"BackBee_Services_Local_ClassContent"
             }, {
                 name: "ws_local_bundle",
-                namespace:"BackBuilder_Services_Local_Bundle"
+                namespace:"BackBee_Services_Local_Bundle"
             },
             {
                 name: "ws_local_keyword",
-                namespace:"BackBuilder_Services_Local_Keyword"
+                namespace:"BackBee_Services_Local_Keyword"
             },
              {
                 name: "ws_local_keyword",
-                namespace:"BackBuilder_Services_Local_Keyword"
+                namespace:"BackBee_Services_Local_Keyword"
             },
             {
                 name: "ws_local_config",
-                namespace:"BackBuilder_Services_Local_Config"
+                namespace:"BackBee_Services_Local_Config"
             }
             ]
         },
-                
+
         uploadManagerConfig: {
             endPoint: 'index.php',
             uploads: [{
                 name: 'ws_local_media',
-                namespace: 'BackBuilder_Services_Local_Media'
+                namespace: 'BackBee_Services_Local_Media'
             }]
         },
-        
+
         init: function() {
             if (bb.isloaded)
                 return;
           bb.jquery(bb).trigger("bb.loading.start");
-           
+
             baseurl = bb.jquery('#bb5-scripts').attr('src');
             if ('undefined' != typeof(baseurl))
                 bb.baseurl = baseurl.replace(bb.resourcesdir+'js/bb.js', '');
-            
+
             bb.loadLibs();
 
             /*Tree themes*/
             bb.jquery.jstree._themes = bb.baseurl+bb.resourcesdir+'css/jstree/';
-            
+
             /*Scripts*/
             //bb.loadScripts();
 
             /*AuthManager*/
             bb.authmanager.init();
-            
+
             /*RPC*/
             bb.webserviceManager.setup(bb.webserviceManagerConfig);
 
             /*Upload*/
-            bb.uploadManager.setup(bb.uploadManagerConfig); 
+            bb.uploadManager.setup(bb.uploadManagerConfig);
              bb.jquery(bb).trigger("bb.loading.end");
             bb.isloaded = true;
         },
-        
+
         loadLibs: function() {
             jQueryTmp = jQuery;
             jQuery = bb.jquery;
@@ -207,13 +207,13 @@ $.loadScript = function(url, options) {
 
             jQuery = jQueryTmp;
         },
-        
+
         loadScripts: function() {
             bb.jquery.each(bb.scripts, function(index, script) {
                 bb.jquery.loadScript(bb.resourcesdir+script);
             });
         },
-        
+
         start: function(event) {
             if ('undefined' != typeof(event)) {
                 if (!event.altKey || !event.ctrlKey || 66 !== event.keyCode) {
@@ -240,7 +240,7 @@ $.loadScript = function(url, options) {
                             return false;
                         }
                         bb.jquery(bb).trigger('bb.started');
-                        bb.frontApplication.init(response.result);                
+                        bb.frontApplication.init(response.result);
                     },
                     error: function(result) {
                         bb.end();
@@ -248,24 +248,24 @@ $.loadScript = function(url, options) {
                 });
             }, 0);
         },
-        
+
         end: function() {
             bb.jquery(bb).trigger('bb.ended');
             bb.authmanager.logoff();
-            
+
             for(i =0; i< bb.fixedelements.length; i++)
                 bb.jquery(bb.fixedelements[i]).css('top', (1*bb.jquery(bb.fixedelements[i]).css('top').replace('px', '') - 3 - 1*bb.jquery('#bb5-toolbar-wrapper').css('height').replace('px', '')) + 'px');
             bb.jquery('#bb5-site-wrapper').css('padding-top', bb.storedsitepadding + 'px');
             bb.jquery('#bb5-toolbar-wrapper').hide();
-            
+
             bb.isloaded = false;
         },
-        
+
         onKeyup: function(event) {
         //console.log(event);
         }
     };
-  bb.core = bb.core || {};  
+  bb.core = bb.core || {};
 
 
 bb.jquery(document).bind('keyup', bb.start);

@@ -27,17 +27,17 @@ firewalls:
 providers:
     bb_user:
         entity:
-            class: BackBuilder\Security\User
+            class: BackBee\Security\User
         secret: %bb5_secret_key%
     public_key:
         entity:
-            class: BackBuilder\Security\User
+            class: BackBee\Security\User
 
 contexts:
-    BackBuilder\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext, RestfulContext]
+    BackBee\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext, RestfulContext]
 
 encoders:
-    BackBuilder\Security\User:
+    BackBee\Security\User:
         class: Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder
         arguments:
             algorithm: md5

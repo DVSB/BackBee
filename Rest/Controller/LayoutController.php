@@ -3,31 +3,31 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Controller;
+namespace BackBee\Rest\Controller;
 
-use BackBuilder\Rest\Controller\Annotations as Rest;
-use BackBuilder\Site\Layout;
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Site\Layout;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -39,12 +39,12 @@ class LayoutController extends ARestController
      * @param  Layout                                    $layout
      * @return Symfony\Component\HttpFoundation\Response
      *
-     * @Rest\ParamConverter(name="layout", class="BackBuilder\Site\Layout")
+     * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
      */
     public function getWorkflowStateAction(Layout $layout)
     {
         $layout_states = $this->getApplication()->getEntityManager()
-            ->getRepository('BackBuilder\Workflow\State')
+            ->getRepository('BackBee\Workflow\State')
             ->getWorkflowStatesForLayout($layout)
         ;
 
@@ -81,7 +81,7 @@ class LayoutController extends ARestController
 
     /**
      * @Rest\ParamConverter(
-     *   name="site", id_name="site_uid", id_source="query", class="BackBuilder\Site\Site", required=false
+     *   name="site", id_name="site_uid", id_source="query", class="BackBee\Site\Site", required=false
      * )
      */
     public function getCollectionAction()
@@ -89,7 +89,7 @@ class LayoutController extends ARestController
         $layouts = null;
         $site = $this->getEntityFromAttributes('site');
         if (null === $site) {
-            $layouts = $this->getEntityManager()->getRepository('BackBuilder\Site\Layout')->getModels();
+            $layouts = $this->getEntityManager()->getRepository('BackBee\Site\Layout')->getModels();
         } else {
             $layouts = $site->getLayouts();
         }
@@ -103,7 +103,7 @@ class LayoutController extends ARestController
     }
 
     /**
-     * @Rest\ParamConverter(name="layout", class="BackBuilder\Site\Layout")
+     * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
      * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
     public function getAction(Layout $layout)
@@ -130,7 +130,7 @@ class LayoutController extends ARestController
      *   @Assert\NotBlank()
      * })
      *
-     * @Rest\ParamConverter(name="site", id_name="site_uid", id_source="request", class="BackBuilder\Site\Site")
+     * @Rest\ParamConverter(name="site", id_name="site_uid", id_source="request", class="BackBee\Site\Site")
      */
     public function postAction()
     {
@@ -165,7 +165,7 @@ class LayoutController extends ARestController
      *   @Assert\NotBlank()
      * })
      *
-     * @Rest\ParamConverter(name="layout", class="BackBuilder\Site\Layout")
+     * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
      * @Rest\Security(expression="is_granted('EDIT', layout)")
      */
     public function putAction(Layout $layout)
@@ -181,7 +181,7 @@ class LayoutController extends ARestController
     }
 
     /**
-     * @Rest\ParamConverter(name="layout", class="BackBuilder\Site\Layout")
+     * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
      */
     public function deleteAction(Layout $layout)
     {

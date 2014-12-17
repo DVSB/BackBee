@@ -3,27 +3,27 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Authorization\Voter;
+namespace BackBee\Security\Authorization\Voter;
 
-use BackBuilder\Bundle\ABundle;
-use BackBuilder\NestedNode\ANestedNode;
-use BackBuilder\ClassContent\AClassContent;
+use BackBee\Bundle\ABundle;
+use BackBee\NestedNode\ANestedNode;
+use BackBee\ClassContent\AClassContent;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 use Symfony\Component\Security\Acl\Voter\AclVoter;
@@ -36,8 +36,8 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Authorization\Voter
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -45,12 +45,12 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 class BBAclVoter extends AclVoter
 {
     /**
-     * The current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * The current BackBee application
+     * @var \BackBee\BBApplication
      */
     private $_application;
 
-    public function __construct(AclProviderInterface $aclProvider, ObjectIdentityRetrievalStrategyInterface $oidRetrievalStrategy, SecurityIdentityRetrievalStrategyInterface $sidRetrievalStrategy, PermissionMapInterface $permissionMap, LoggerInterface $logger = null, $allowIfObjectIdentityUnavailable = true, \BackBuilder\BBApplication $application = null)
+    public function __construct(AclProviderInterface $aclProvider, ObjectIdentityRetrievalStrategyInterface $oidRetrievalStrategy, SecurityIdentityRetrievalStrategyInterface $sidRetrievalStrategy, PermissionMapInterface $permissionMap, LoggerInterface $logger = null, $allowIfObjectIdentityUnavailable = true, \BackBee\BBApplication $application = null)
     {
         parent::__construct($aclProvider, $oidRetrievalStrategy, $sidRetrievalStrategy, $permissionMap, $logger, $allowIfObjectIdentityUnavailable);
         $this->_application = $application;
@@ -108,7 +108,7 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for nested node object, recursively till root
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \BackBuilder\NestedNode\ANestedNode                                  $node
+     * @param  \BackBee\NestedNode\ANestedNode                                  $node
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
@@ -126,7 +126,7 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for class content object, recursively till AClassContent
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \BackBuilder\ClassContent\AClassContent                              $content
+     * @param  \BackBee\ClassContent\AClassContent                              $content
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
@@ -138,7 +138,7 @@ class BBAclVoter extends AclVoter
 
         if (self::ACCESS_DENIED === $result = $this->_vote($token, $content, $attributes)) {
             if (false !== $parent_class = get_parent_class($content)) {
-                if ('BackBuilder\ClassContent\AClassContent' !== $parent_class) {
+                if ('BackBee\ClassContent\AClassContent' !== $parent_class) {
                     $parent_class = NAMESPACE_SEPARATOR.$parent_class;
                     $result = $this->_voteForClassContent($token, new $parent_class('*'), $attributes);
                 }

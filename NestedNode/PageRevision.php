@@ -3,34 +3,34 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode;
+namespace BackBee\NestedNode;
 
 /**
- * PageRevison object in BackBuilder 4
+ * PageRevison object in BackBee 4
  *
  * A page revision is...
  *
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode
+ * @category    BackBee
+ * @package     BackBee\NestedNode
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRevisionRepository")
+ * @Entity(repositoryClass="BackBee\NestedNode\Repository\PageRevisionRepository")
  * @Table(name="page_revision")
  */
 class PageRevision
@@ -66,19 +66,19 @@ class PageRevision
     protected $_version;
 
     /**
-     * @ManyToOne(targetEntity="BackBuilder\Security\User", inversedBy="_revisions", fetch="EXTRA_LAZY")
+     * @ManyToOne(targetEntity="BackBee\Security\User", inversedBy="_revisions", fetch="EXTRA_LAZY")
      * @JoinColumn(name="user_id", referencedColumnName="id")
      */
     protected $_user;
 
     /**
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Page", inversedBy="_revisions", fetch="EXTRA_LAZY")
+     * @ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_revisions", fetch="EXTRA_LAZY")
      * @JoinColumn(name="page_uid", referencedColumnName="uid")
      */
     protected $_page;
 
     /**
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
@@ -92,14 +92,14 @@ class PageRevision
         $this->_version = PageRevision::VERSION_DRAFT;
     }
 
-    public function setUser(\BackBuilder\Security\User $user)
+    public function setUser(\BackBee\Security\User $user)
     {
         $this->_user = $user;
 
         return $this;
     }
 
-    public function setPage(\BackBuilder\NestedNode\Page $page)
+    public function setPage(\BackBee\NestedNode\Page $page)
     {
         $this->_page = $page;
 

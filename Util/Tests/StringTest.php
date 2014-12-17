@@ -2,12 +2,12 @@
 
 namespace bbUnit\Util;
 
-use BackBuilder\Util\String;
+use BackBee\Util\String;
 
 class StringTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @covers \BackBuilder\Util\String::toAscii
+     * @covers \BackBee\Util\String::toAscii
      *
      */
     public function testToASCII()
@@ -32,7 +32,7 @@ class StringTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\String::toUTF8
+     * @covers \BackBee\Util\String::toUTF8
      *
      */
     public function testToUTF8()
@@ -48,7 +48,7 @@ class StringTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\String::toPath
+     * @covers \BackBee\Util\String::toPath
      *
      */
     public function testToPath()
@@ -101,7 +101,7 @@ class StringTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\String::urlize
+     * @covers \BackBee\Util\String::urlize
      *
      */
     public function testUrlize()
@@ -136,7 +136,7 @@ class StringTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\String::toXmlCompliant
+     * @covers \BackBee\Util\String::toXmlCompliant
      *
      */
     public function testToXmlCompliant()
@@ -147,7 +147,7 @@ class StringTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\String::br2nl
+     * @covers \BackBee\Util\String::br2nl
      *
      */
     public function testBr2nl()
@@ -159,7 +159,7 @@ class StringTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\String::truncateText
+     * @covers \BackBee\Util\String::truncateText
      */
     public function testTruncateText()
     {
@@ -171,7 +171,7 @@ class StringTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\String::formatBytes
+     * @covers \BackBee\Util\String::formatBytes
      *
      */
     public function testFormatBytes()

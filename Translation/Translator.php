@@ -1,8 +1,8 @@
 <?php
 
-namespace BackBuilder\Translation;
+namespace BackBee\Translation;
 
-use BackBuilder\BBApplication;
+use BackBee\BBApplication;
 use Symfony\Component\Translation\Loader\XliffFileLoader;
 use Symfony\Component\Translation\Translator as sfTranslator;
 
@@ -15,7 +15,7 @@ class Translator extends sfTranslator
 {
     /**
      * Override Symfony\Component\Translation\Translator to lazy load every catalogues from:
-     *     - BackBuilder\Resources\translations
+     *     - BackBee\Resources\translations
      *     - PATH_TO_REPOSITORY\Ressources\translations
      *     - PATH_TO_CONTEXT_REPOSITORY\Ressources\translations
      *

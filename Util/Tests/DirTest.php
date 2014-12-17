@@ -1,8 +1,8 @@
 <?php
 
-namespace BackBuilder\TestUnit\BackBuilder\Util;
+namespace BackBee\TestUnit\BackBee\Util;
 
-use BackBuilder\Util\Dir;
+use BackBee\Util\Dir;
 use org\bovigo\vfs\vfsStream;
 
 class DirTest extends \PHPUnit_Framework_TestCase
@@ -16,8 +16,8 @@ class DirTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\Dir::copy
-     * @covers \BackBuilder\Util\Dir::getContent
+     * @covers \BackBee\Util\Dir::copy
+     * @covers \BackBee\Util\Dir::getContent
      *
      */
     public function testCopy()
@@ -37,8 +37,8 @@ class DirTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\Dir::copy
-     * @covers \BackBuilder\Util\Dir::getContent
+     * @covers \BackBee\Util\Dir::copy
+     * @covers \BackBee\Util\Dir::getContent
      *
      */
     public function unreadbleCopy()
@@ -55,7 +55,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::getContent
+     * @covers \BackBee\Util\Dir::getContent
      * @expectedException \Exception
      */
     public function testUnknownGetContent()
@@ -65,7 +65,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::getContent
+     * @covers \BackBee\Util\Dir::getContent
      * @expectedException \Exception
      */
     public function testFileGetContent()
@@ -75,7 +75,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::getContent
+     * @covers \BackBee\Util\Dir::getContent
      *
      */
     public function testGetContent()
@@ -91,7 +91,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::getContent
+     * @covers \BackBee\Util\Dir::getContent
      * @expectedException \Exception
      *
      */
@@ -106,7 +106,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::getContent
+     * @covers \BackBee\Util\Dir::getContent
      *
      */
     public function testIsArrayGetContent()
@@ -119,7 +119,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::delete
+     * @covers \BackBee\Util\Dir::delete
      *
      */
     public function testDelete()
@@ -134,7 +134,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::move
+     * @covers \BackBee\Util\Dir::move
      *
      */
     public function testSimpleMove()
@@ -151,7 +151,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::move
+     * @covers \BackBee\Util\Dir::move
      *
      */
     public function testCallback2ParamsMove()
@@ -167,7 +167,7 @@ class DirTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Dir::move
+     * @covers \BackBee\Util\Dir::move
      *
      */
     public function testCallback3ParamsMove()

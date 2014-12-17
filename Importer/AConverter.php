@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Importer;
+namespace BackBee\Importer;
 
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\Util\String;
+use BackBee\ClassContent\AClassContent;
+use BackBee\Util\String;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Importer
+ * @category    BackBee
+ * @package     BackBee\Importer
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -39,7 +39,7 @@ abstract class AConverter implements IConverter
 
     /**
      * The current importer running
-     * @var \BackBuilder\Importer\Importer
+     * @var \BackBee\Importer\Importer
      */
     protected $_importer;
 
@@ -49,7 +49,7 @@ abstract class AConverter implements IConverter
     protected $_availableKeys = null;
     /**
      * Class constructor
-     * @param \BackBuilder\Importer\Importer $importer
+     * @param \BackBee\Importer\Importer $importer
      */
     public function __construct(Importer $importer = null)
     {
@@ -57,7 +57,7 @@ abstract class AConverter implements IConverter
     }
 
     /**
-     * return the BackBuilder Entity Object
+     * return the BackBee Entity Object
      *
      * @return Object
      */
@@ -67,10 +67,10 @@ abstract class AConverter implements IConverter
     }
 
     /**
-     * Set BackBuilder Entity Object
+     * Set BackBee Entity Object
      *
      * @param  Object                           $entity
-     * @return \BackBuilder\Importer\AConverter
+     * @return \BackBee\Importer\AConverter
      */
     public function setBBEntity($entity)
     {
@@ -102,8 +102,8 @@ abstract class AConverter implements IConverter
 
     /**
      * Update Status and revision value
-     * @param  \BackBuilder\ClassContent\AClassContent                $element
-     * @return \BackBuilder\Bundle\WKImporter\Converter\ActuConverter
+     * @param  \BackBee\ClassContent\AClassContent                $element
+     * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
      */
     protected function _updateRevision(AClassContent $element)
     {
@@ -135,9 +135,9 @@ abstract class AConverter implements IConverter
 
     /**
      * Set the value of an Element\Text
-     * @param  \BackBuilder\ClassContent\AClassContent                $element
+     * @param  \BackBee\ClassContent\AClassContent                $element
      * @param  string                                                 $value
-     * @return \BackBuilder\Bundle\WKImporter\Converter\ActuConverter
+     * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
      */
     protected function _setElementText(AClassContent $element, $value)
     {
@@ -148,11 +148,11 @@ abstract class AConverter implements IConverter
 
     /**
      * Set the value of an Element\Date
-     * @param  \BackBuilder\ClassContent\AClassContent                $element
+     * @param  \BackBee\ClassContent\AClassContent                $element
      * @param  string                                                 $value
      * @param  \DateTimeZone                                          $timezone
      * @param  string                                                 $format
-     * @return \BackBuilder\Bundle\WKImporter\Converter\ActuConverter
+     * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
      */
     protected function _setElementDate(AClassContent $element, $value, \DateTimeZone $timezone = null, $format = 'Y-m-d H:i:s')
     {

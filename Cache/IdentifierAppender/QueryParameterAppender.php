@@ -3,26 +3,26 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Cache\IdentifierAppender;
+namespace BackBee\Cache\IdentifierAppender;
 
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\Renderer\IRenderer;
+use BackBee\ClassContent\AClassContent;
+use BackBee\Renderer\IRenderer;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Util\ClassUtils;
@@ -35,8 +35,8 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  *     - CLASSCONTENT_PARAMS_STRATEGY (=2): every request query parameters declared in classcontent yaml file will
  *     be append to cache identifier
  *
- * @category    BackBuilder
- * @package     BackBuilder\Cache
+ * @category    BackBee
+ * @package     BackBee\Cache
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -94,7 +94,7 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     }
 
     /**
-     * @see BackBuilder\Cache\IdentifierAppender\IdentifierAppenderInterface::computeIdentifier
+     * @see BackBee\Cache\IdentifierAppender\IdentifierAppenderInterface::computeIdentifier
      */
     public function computeIdentifier($identifier, IRenderer $renderer = null)
     {
@@ -130,7 +130,7 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     }
 
     /**
-     * @see BackBuilder\Cache\IdentifierAppender\IdentifierAppenderInterface::getGroups
+     * @see BackBee\Cache\IdentifierAppender\IdentifierAppenderInterface::getGroups
      */
     public function getGroups()
     {
@@ -148,14 +148,14 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     {
         $classnames = array(ClassUtils::getRealClass($content));
 
-        $content_uids = $this->em->getRepository('\BackBuilder\ClassContent\Indexes\IdxContentContent')
+        $content_uids = $this->em->getRepository('\BackBee\ClassContent\Indexes\IdxContentContent')
             ->getDescendantsContentUids($content)
         ;
 
         if (0 < count($content_uids)) {
             $classnames = array_merge(
                 $classnames,
-                $this->em->getRepository('\BackBuilder\ClassContent\AClassContent')->getClassnames($content_uids)
+                $this->em->getRepository('\BackBee\ClassContent\AClassContent')->getClassnames($content_uids)
             );
         }
 

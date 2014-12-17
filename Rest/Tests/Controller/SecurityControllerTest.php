@@ -3,40 +3,40 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\Controller;
+namespace BackBee\Rest\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use BackBuilder\Rest\Controller\SecurityController;
-use BackBuilder\Tests\TestCase;
-use BackBuilder\Security\User;
-use BackBuilder\Security\Token\BBUserToken;
+use BackBee\Rest\Controller\SecurityController;
+use BackBee\Tests\TestCase;
+use BackBee\Security\User;
+use BackBee\Security\Token\BBUserToken;
 
 /**
  * Test for SecurityController class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\Controller\SecurityController
+ * @coversDefaultClass \BackBee\Rest\Controller\SecurityController
  */
 class SecurityControllerTest extends TestCase
 {
@@ -64,7 +64,7 @@ class SecurityControllerTest extends TestCase
 
     /**
      *
-     * @return \BackBuilder\Security\Tests\Controller\SecurityController
+     * @return \BackBee\Security\Tests\Controller\SecurityController
      */
     protected function getController()
     {
@@ -106,7 +106,7 @@ class SecurityControllerTest extends TestCase
     }
 
     /**
-     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedException \BackBee\Security\Exception\SecurityException
      * @expectedExceptionMessage Request expired
      *
      * @covers ::firewallAuthenticateAction
@@ -133,7 +133,7 @@ class SecurityControllerTest extends TestCase
     }
 
     /**
-     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedException \BackBee\Security\Exception\SecurityException
      * @expectedExceptionMessage Unknow user
      *
      * @covers ::firewallAuthenticateAction
@@ -159,7 +159,7 @@ class SecurityControllerTest extends TestCase
     }
 
     /**
-     * @expectedException \BackBuilder\Security\Exception\SecurityException
+     * @expectedException \BackBee\Security\Exception\SecurityException
      * @expectedExceptionMessage Invalid authentication informations
      *
      * @covers ::firewallAuthenticateAction
@@ -220,7 +220,7 @@ class SecurityControllerTest extends TestCase
         $controller = $this->getController();
 
         // authenticated anonymously
-        $token = new \BackBuilder\Security\Token\AnonymousToken('test', 'test');
+        $token = new \BackBee\Security\Token\AnonymousToken('test', 'test');
         $this->getSecurityContext()->setToken($token);
         $request = new Request();
         $request->setSession($this->getBBApp()->getSession());

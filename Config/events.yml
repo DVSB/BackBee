@@ -1,35 +1,35 @@
 classcontent.include:
     listeners:
-        - [BackBuilder\Event\Listener\ClassContentListener, onInclude]
+        - [BackBee\Event\Listener\ClassContentListener, onInclude]
 
 classcontent.update:
     listeners:
-        - [BackBuilder\Event\Listener\ClassContentListener, onUpdate]
+        - [BackBee\Event\Listener\ClassContentListener, onUpdate]
 
 classcontent.commit:
     listeners:
-        - [BackBuilder\Event\Listener\ClassContentListener, onCommit]
+        - [BackBee\Event\Listener\ClassContentListener, onCommit]
 
 classcontent.revert:
     listeners:
-        - [BackBuilder\Event\Listener\ClassContentListener, onRevert]
+        - [BackBee\Event\Listener\ClassContentListener, onRevert]
 
 classcontent.onflush:
     listeners:
-        - [BackBuilder\Event\Listener\ClassContentListener, onFlushContent]
-        - [BackBuilder\Event\Listener\RevisionListener, onFlushContent]
-        - [BackBuilder\Event\Listener\IndexationListener, onFlushContent]
+        - [BackBee\Event\Listener\ClassContentListener, onFlushContent]
+        - [BackBee\Event\Listener\RevisionListener, onFlushContent]
+        - [BackBee\Event\Listener\IndexationListener, onFlushContent]
         - [@cache.listener, onFlushContent]
-        - [BackBuilder\Event\Listener\MetaDataListener, onFlushContent]
-        - [BackBuilder\Event\Listener\RewritingListener, onFlushContent]
+        - [BackBee\Event\Listener\MetaDataListener, onFlushContent]
+        - [BackBee\Event\Listener\RewritingListener, onFlushContent]
 
 classcontent.preremove:
     listeners:
-        - [BackBuilder\Event\Listener\ClassContentListener, onPreRemove]
+        - [BackBee\Event\Listener\ClassContentListener, onPreRemove]
 
 classcontent.prerender:
     listeners:
-        - [BackBuilder\Event\Listener\RevisionListener, onPrerenderContent]
+        - [BackBee\Event\Listener\RevisionListener, onPrerenderContent]
         - [@cache.listener, onPreRenderContent]
 
 classcontent.postrender:
@@ -38,7 +38,7 @@ classcontent.postrender:
 
 element.file.postremove:
     listeners:
-        - [BackBuilder\Event\Listener\ClassContentListener, onRemoveElementFile]
+        - [BackBee\Event\Listener\ClassContentListener, onRemoveElementFile]
 
 nestednode.page.prerender:
     listeners:
@@ -46,7 +46,7 @@ nestednode.page.prerender:
 
 nestednode.page.preupdate:
     listeners:
-        - [BackBuilder\Workflow\Listener\pageListener, onPreUpdate]
+        - [BackBee\Workflow\Listener\pageListener, onPreUpdate]
 
 nestednode.page.postrender:
     listeners:
@@ -54,30 +54,30 @@ nestednode.page.postrender:
 
 nestednode.page.onflush:
     listeners:
-        - [BackBuilder\Event\Listener\MetaDataListener, onFlushPage]
-        - [BackBuilder\Event\Listener\IndexationListener, onFlushPage]
-        - [BackBuilder\Event\Listener\RewritingListener, onFlushPage]
+        - [BackBee\Event\Listener\MetaDataListener, onFlushPage]
+        - [BackBee\Event\Listener\IndexationListener, onFlushPage]
+        - [BackBee\Event\Listener\RewritingListener, onFlushPage]
         - [@cache.listener, onFlushPage]
 
 site.layout.prepersist:
     listeners:
-        - [BackBuilder\Event\Listener\LayoutListener, onBeforeSave]
+        - [BackBee\Event\Listener\LayoutListener, onBeforeSave]
 
 site.layout.preupdate:
     listeners:
-        - [BackBuilder\Event\Listener\LayoutListener, onBeforeSave]
+        - [BackBee\Event\Listener\LayoutListener, onBeforeSave]
 
 site.layout.postremove:
     listeners:
-        - [BackBuilder\Event\Listener\LayoutListener, onAfterRemove]
+        - [BackBee\Event\Listener\LayoutListener, onAfterRemove]
 
 revision.postload:
     listeners:
-        - [BackBuilder\Event\Listener\RevisionListener, onPostLoad]
+        - [BackBee\Event\Listener\RevisionListener, onPostLoad]
 
 element.keyword.render:
     listeners:
-        - [BackBuilder\Event\Listener\elementListener, onRender]
+        - [BackBee\Event\Listener\elementListener, onRender]
 
 frontcontroller.request:
     listeners:
@@ -105,7 +105,7 @@ kernel.response:
 
 bbapplication.init:
     listeners:
-        - [BackBuilder\DependencyInjection\Listener\ContainerListener, onApplicationInit]
+        - [BackBee\DependencyInjection\Listener\ContainerListener, onApplicationInit]
 
 nestednode.page.postload:
     listeners:
@@ -113,7 +113,7 @@ nestednode.page.postload:
 
 bbapplication.start:
     listeners:
-        - [BackBuilder\Renderer\Listener\TwigListener, onApplicationStart]
+        - [BackBee\Renderer\Listener\TwigListener, onApplicationStart]
 
 service.tagged.config_per_site:
     listeners:
@@ -121,4 +121,4 @@ service.tagged.config_per_site:
 
 bbapplication.stop:
     listeners:
-        - [BackBuilder\Bundle\Listener\BundleListener, onApplicationStop]
+        - [BackBee\Bundle\Listener\BundleListener, onApplicationStop]

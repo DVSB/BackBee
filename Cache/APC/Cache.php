@@ -1,16 +1,16 @@
 <?php
 
-namespace BackBuilder\Cache\APC;
+namespace BackBee\Cache\APC;
 
-use BackBuilder\Cache\AExtendedCache;
-use BackBuilder\Cache\Exception\CacheException;
+use BackBee\Cache\AExtendedCache;
+use BackBee\Cache\Exception\CacheException;
 use Psr\Log\LoggerInterface;
 
 /**
  * APC cache adapter
  * It supports tag and expire features
- * @category    BackBuilder
- * @package     BackBuilder\Cache\APC
+ * @category    BackBee
+ * @package     BackBee\Cache\APC
  * @copyright   Lp digital system
  * @author      Cédric Bouillot <cedric.bouillot@lp-digital.fr>
  */
@@ -62,7 +62,7 @@ class Cache extends AExtendedCache
      * @param  array                                       $options Initial options for the cache adapter: none to be defined
      * @param  string                                      $context An optional cache context
      * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
+     * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {

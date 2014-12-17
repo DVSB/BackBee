@@ -2,12 +2,12 @@
 
 namespace bbUnit\Util;
 
-use BackBuilder\Util\Numeric;
+use BackBee\Util\Numeric;
 
 class NumericTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @covers \BackBuilder\Util\Numeric::isInteger
+     * @covers \BackBee\Util\Numeric::isInteger
      */
     public function testIsInteger()
     {
@@ -27,7 +27,7 @@ class NumericTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\Numeric::isPositiveInteger
+     * @covers \BackBee\Util\Numeric::isPositiveInteger
      */
     public function testIsPositiveInteger()
     {

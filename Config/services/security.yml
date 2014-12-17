@@ -1,8 +1,8 @@
 # Security Component services and parameters
 
 parameters:
-    bbapp.securitycontext.class: BackBuilder\Security\SecurityContext
-    bbapp.expression_language.class: BackBuilder\Security\Authorization\ExpressionLanguage
+    bbapp.securitycontext.class: BackBee\Security\SecurityContext
+    bbapp.expression_language.class: BackBee\Security\Authorization\ExpressionLanguage
 
 services:
     security.context:
@@ -10,23 +10,23 @@ services:
         arguments:  [@bbapp, @security.authentication.manager, @security.access.decision_manager]
 
     security.authentication.manager:
-        class: BackBuilder\Security\Authentication\AuthenticationManager
+        class: BackBee\Security\Authentication\AuthenticationManager
         arguments: [[], @event.dispatcher]
 
     security.trust_resolver:
-        class: BackBuilder\Security\Authentication\TrustResolver
-        arguments:  [BackBuilder\Security\Token\AnonymousToken, BackBuilder\Security\Token\RememberMeToken]
+        class: BackBee\Security\Authentication\TrustResolver
+        arguments:  [BackBee\Security\Token\AnonymousToken, BackBee\Security\Token\RememberMeToken]
 
     security.voter.sudo:
-        class: BackBuilder\Security\Authorization\Voter\SudoVoter
+        class: BackBee\Security\Authorization\Voter\SudoVoter
         arguments: [@bbapp]
 
     security.voter.bb_role:
-        class: BackBuilder\Security\Authorization\Voter\BBRoleVoter
+        class: BackBee\Security\Authorization\Voter\BBRoleVoter
         arguments: [@security.authorization.yml_adaptor]
 
     security.authorization.yml_adaptor:
-        class: BackBuilder\Security\Authorization\Adaptator\Yml
+        class: BackBee\Security\Authorization\Adaptator\Yml
         arguments: [@bbapp]
         public: false
 
@@ -39,7 +39,7 @@ services:
         arguments: [@security.trust_resolver]
 
     security.voter.bb_acl:
-        class: BackBuilder\Security\Authorization\Voter\BBAclVoter
+        class: BackBee\Security\Authorization\Voter\BBAclVoter
         arguments:
             - @security.acl_provider
             - @security.acl.object_id_retrieval_strategy
@@ -68,22 +68,22 @@ services:
         public: false
 
     security.acl.security_id_retrieval_strategy:
-        class: BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy
+        class: BackBee\Security\Acl\Domain\SecurityIdentityRetrievalStrategy
         arguments: [@security.role_hierarchy, @security.trust_resolver]
 
     security.role_hierarchy:
-        class: BackBuilder\Security\Role\RoleHierarchy
+        class: BackBee\Security\Role\RoleHierarchy
         arguments: [[]]
 
     security.acl.permission.map:
-        class: BackBuilder\Security\Acl\Permission\PermissionMap
+        class: BackBee\Security\Acl\Permission\PermissionMap
 
     security.acl.permission_strategy:
         class: Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy
         public: false
 
     security.access.decision_manager:
-        class: BackBuilder\Security\Access\DecisionManager
+        class: BackBee\Security\Access\DecisionManager
         arguments:
             - [@security.voter.sudo, @security.voter.bb_role, @security.voter.role, @security.voter.authenticated, @security.voter.bb_acl]
             - affirmative
@@ -93,12 +93,12 @@ services:
             - [setApplication, [@bbapp]]
 
     security.acl_loader_yml:
-        class:      BackBuilder\Security\Acl\Loader\YmlLoader
+        class:      BackBee\Security\Acl\Loader\YmlLoader
         calls:
             - [setContainer, [@service_container]]
 
     security.acl_manager:
-        class:      BackBuilder\Security\Acl\AclManager
+        class:      BackBee\Security\Acl\AclManager
         arguments:  [@security.context, @security.acl.permission.map]
 
     bb.expression_language:

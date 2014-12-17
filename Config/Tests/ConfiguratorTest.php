@@ -1,52 +1,52 @@
 <?php
-namespace BackBuilder\Config\Tests;
+namespace BackBee\Config\Tests;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Config\Config;
-use BackBuilder\Config\Configurator;
-use BackBuilder\Tests\Mock\ManualBBApplication;
+use BackBee\Config\Config;
+use BackBee\Config\Configurator;
+use BackBee\Tests\Mock\ManualBBApplication;
 
 /**
- * Set of tests for BackBuilder\Config\Configurator
+ * Set of tests for BackBee\Config\Configurator
  *
- * @category    BackBuilder
- * @package     BackBuilder\Config
+ * @category    BackBee
+ * @package     BackBee\Config
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\Config\Configurator
+ * @coversDefaultClass \BackBee\Config\Configurator
  */
 class ConfiguratorTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * mocked application with minimalist properties setted
      *
-     * @var BackBuilder\Tests\Mock\ManualBBApplication
+     * @var BackBee\Tests\Mock\ManualBBApplication
      */
     private $application;
 
     /**
      * the Configurator we want to test
      *
-     * @var BackBuilder\Config\Configurator
+     * @var BackBee\Config\Configurator
      */
     private $config_builder;
 

@@ -1,33 +1,33 @@
 <?php
-namespace BackBuilder\Tests\Mock;
+namespace BackBee\Tests\Mock;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\BBApplication;
-use BackBuilder\IApplication as ApplicationInterface;
-use BackBuilder\Console\Console;
-use BackBuilder\Site\Site;
+use BackBee\BBApplication;
+use BackBee\IApplication as ApplicationInterface;
+use BackBee\Console\Console;
+use BackBee\Site\Site;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Tests\Mock
+ * @category    BackBee
+ * @package     BackBee\Tests\Mock
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -84,17 +84,17 @@ class ManualBBApplication implements ApplicationInterface
     protected $debug_mode;
 
     /**
-     * @var BackBuilder\DependencyInjection\ContainerInterface
+     * @var BackBee\DependencyInjection\ContainerInterface
      */
     protected $container;
 
     /**
-     * @var BackBuilder\Config\Config
+     * @var BackBee\Config\Config
      */
     protected $config;
 
     /**
-     * @var BackBuilder\Site\Site
+     * @var BackBee\Site\Site
      */
     protected $site;
 
@@ -119,14 +119,14 @@ class ManualBBApplication implements ApplicationInterface
     {
         if (1 === preg_match('#^set([a-zA-Z_]+)$#', $method, $matches) && 0 < count($matches)) {
             $property = strtolower($matches[1]);
-            if (true === property_exists('BackBuilder\Tests\Mock\ManualBBApplication', $property)) {
+            if (true === property_exists('BackBee\Tests\Mock\ManualBBApplication', $property)) {
                 $this->$property = array_shift($arguments);
             }
         }
     }
 
     /**
-     * @param \BackBuilder\Site\Site $site
+     * @param \BackBee\Site\Site $site
      */
     public function start(Site $site = null)
     {
@@ -217,14 +217,14 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * @return BackBuilder\FrontController\FrontController
+     * @return BackBee\FrontController\FrontController
      */
     public function getController()
     {
     }
 
     /**
-     * @return BackBuilder\Routing\RouteCollection
+     * @return BackBee\Routing\RouteCollection
      */
     public function getRouting()
     {
@@ -261,7 +261,7 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * @return BackBuilder\Config\Config
+     * @return BackBee\Config\Config
      */
     public function getConfig()
     {
@@ -269,7 +269,7 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * @return BackBuilder\Site\Site
+     * @return BackBee\Site\Site
      */
     public function getSite()
     {

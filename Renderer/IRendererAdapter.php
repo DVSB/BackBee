@@ -1,14 +1,14 @@
 <?php
 
-namespace BackBuilder\Renderer;
+namespace BackBee\Renderer;
 
-use BackBuilder\Site\Layout;
+use BackBee\Site\Layout;
 
 /**
  * Interface for a renderer adapter
  *
- * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @category    BackBee
+ * @package     BackBee\Renderer
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */

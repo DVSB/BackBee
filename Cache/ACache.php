@@ -3,32 +3,32 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Cache;
+namespace BackBee\Cache;
 
-use BackBuilder\Cache\Exception\CacheException;
+use BackBee\Cache\Exception\CacheException;
 use Psr\Log\LoggerInterface;
 
 /**
  * Abstract class for cache adapters
  *
- * @category    BackBuilder
- * @package     BackBuilder\Cache
+ * @category    BackBee
+ * @package     BackBee\Cache
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -67,7 +67,7 @@ abstract class ACache
      * @param  array                                       $options An array of options allowing to construct the cache adapter
      * @param  string                                      $context An optional cache context
      * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache adapter cannot be construct
+     * @throws \BackBee\Cache\Exception\CacheException Occurs if the cache adapter cannot be construct
      * @codeCoverageIgnore
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -122,7 +122,7 @@ abstract class ACache
     /**
      * Sets the cache logger
      * @param  \Psr\Log\LoggerInterface  $logger
-     * @return \BackBuilder\Cache\ACache
+     * @return \BackBee\Cache\ACache
      * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger = null)
@@ -155,7 +155,7 @@ abstract class ACache
     /**
      * Sets the cache coontext
      * @param  string                    $context
-     * @return \BackBuilder\Cache\ACache
+     * @return \BackBee\Cache\ACache
      * @codeCoverageIgnore
      */
     protected function setContext($context = null)
@@ -168,8 +168,8 @@ abstract class ACache
     /**
      * Sets the cache adapter instance options
      * @param  array                                       $options
-     * @return \BackBuilder\Cache\ACache
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
+     * @return \BackBee\Cache\ACache
+     * @throws \BackBee\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */
     private function setInstanceOptions(array $options = array())
     {

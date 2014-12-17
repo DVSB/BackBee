@@ -3,23 +3,23 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Access;
+namespace BackBee\Security\Access;
 
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -27,8 +27,8 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 /**
  * Class for all access decision managers that use decision voters.
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Access
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -36,8 +36,8 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 class DecisionManager extends AccessDecisionManager
 {
     /**
-     * The current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * The current BackBee application
+     * @var \BackBee\BBApplication
      */
     private $_application;
 
@@ -65,10 +65,10 @@ class DecisionManager extends AccessDecisionManager
 
     /**
      * Sets the current application
-     * @param  \BackBuilder\BBApplication                   $application
-     * @return \BackBuilder\Security\Access\DecisionManager
+     * @param  \BackBee\BBApplication                   $application
+     * @return \BackBee\Security\Access\DecisionManager
      */
-    public function setApplication(\BackBuilder\BBApplication $application)
+    public function setApplication(\BackBee\BBApplication $application)
     {
         $this->_application = $application;
 

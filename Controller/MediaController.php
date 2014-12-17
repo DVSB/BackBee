@@ -3,35 +3,35 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Controller;
+namespace BackBee\Controller;
 
-use BackBuilder\BBApplication;
-use BackBuilder\FrontController\Exception\FrontControllerException;
-use BackBuilder\Util\File;
-use BackBuilder\Util\MimeType;
+use BackBee\BBApplication;
+use BackBee\FrontController\Exception\FrontControllerException;
+use BackBee\Util\File;
+use BackBee\Util\MimeType;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * MediaController provide actions to BackBee medias routes (get and upload)
  *
- * @category    BackBuilder
- * @package     BackBuilder\Controller
+ * @category    BackBee
+ * @package     BackBee\Controller
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -40,7 +40,7 @@ class MediaController
     /**
      * Application this controller belongs to
      *
-     * @var BackBuilder\BBApplication
+     * @var BackBee\BBApplication
      */
     private $application;
 

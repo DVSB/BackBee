@@ -4,20 +4,20 @@ parameters:
 
 # Content Wrapper
 contentwrapper:
-    namespace:    BackBuilder\ClassContent
+    namespace:    BackBee\ClassContent
     protocol:     bb.class
-    adapter:      \BackBuilder\Stream\ClassWrapper\Adapter\Yaml
+    adapter:      \BackBee\Stream\ClassWrapper\Adapter\Yaml
 
 
 # Theme
 themes_dir:
-  default: BackBuilder
+  default: BackBee
   themes: repository/Ressources/themes
   personal: repository/Data/themes
 
 theme:
   name: Default
-  description: BackBuilder 5 default theme.
+  description: BackBee 5 default theme.
   screenshot: screenshoot.png
   folder: Resources
   architecture:
@@ -29,7 +29,7 @@ theme:
     js_dir: js
 
 renderer:
-    adapter:      [\BackBuilder\Renderer\Adapter\Twig, \BackBuilder\Renderer\Adapter\phtml]
+    adapter:      [\BackBee\Renderer\Adapter\Twig, \BackBee\Renderer\Adapter\phtml]
     path:
         scriptdir:    Templates/scripts
         layoutdir:    Layouts

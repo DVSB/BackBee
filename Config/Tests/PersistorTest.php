@@ -3,57 +3,57 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Config\Tests;
+namespace BackBee\Config\Tests;
 
-use BackBuilder\Config\Config;
-use BackBuilder\Config\Configurator;
-use BackBuilder\Config\Persistor;
-use BackBuilder\Config\Tests\Persistor\FakeContainerBuilder;
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\Site\Site;
-use BackBuilder\Tests\Mock\ManualBBApplication;
+use BackBee\Config\Config;
+use BackBee\Config\Configurator;
+use BackBee\Config\Persistor;
+use BackBee\Config\Tests\Persistor\FakeContainerBuilder;
+use BackBee\DependencyInjection\Container;
+use BackBee\Site\Site;
+use BackBee\Tests\Mock\ManualBBApplication;
 use org\bovigo\vfs\vfsStream;
 
 /**
- * Set of tests for BackBuilder\Config\Persistor
+ * Set of tests for BackBee\Config\Persistor
  *
- * @category    BackBuilder
- * @package     BackBuilder\Config
+ * @category    BackBee
+ * @package     BackBee\Config
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass BackBuilder\Config\Persistor
+ * @coversDefaultClass BackBee\Config\Persistor
  */
 class PersistorTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var BackBuilder\Config\Persistor
+     * @var BackBee\Config\Persistor
      */
     private $persistor;
 
     /**
-     * @var BackBuilder\IApplication
+     * @var BackBee\IApplication
      */
     private $application;
 
     /**
-     * @var BackBuilder\Config\Configurator
+     * @var BackBee\Config\Configurator
      */
     private $configurator;
 
@@ -114,7 +114,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
             $this->fail('Raise of BBException expected.');
         } catch (\Exception $e) {
             $this->assertInstanceOf(
-                'BackBuilder\Exception\BBException',
+                'BackBee\Exception\BBException',
                 $e
             );
         }
@@ -133,7 +133,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
             $this->fail('Raise of PersistorListNotFoundException expected.');
         } catch (\Exception $e) {
             $this->assertInstanceOf(
-                'BackBuilder\Config\Exception\PersistorListNotFoundException',
+                'BackBee\Config\Exception\PersistorListNotFoundException',
                 $e
             );
         }
@@ -154,7 +154,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
             $this->fail('Raise of InvalidArgumentException expected.');
         } catch (\Exception $e) {
             $this->assertInstanceOf(
-                'BackBuilder\Exception\InvalidArgumentException',
+                'BackBee\Exception\InvalidArgumentException',
                 $e
             );
         }
@@ -167,7 +167,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
     public function test_updateConfigOverridedSectionsForSite_RaiseOf_BBException()
     {
         $this->application->getConfig()->setSection('config', array(
-            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor',
+            'persistor' => 'BackBee\Config\Tests\Persistor\FakePersistor',
         ));
 
         try {
@@ -175,7 +175,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
             $this->fail('Raise of BBException expected.');
         } catch (\Exception $e) {
             $this->assertInstanceOf(
-                'BackBuilder\Exception\BBException',
+                'BackBee\Exception\BBException',
                 $e
             );
         }
@@ -191,7 +191,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
         $this->application->setContainer(new Container());
         $this->application->getContainer()->set('container.builder', new FakeContainerBuilder(true));
         $this->application->getConfig()->setSection('config', array(
-            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor',
+            'persistor' => 'BackBee\Config\Tests\Persistor\FakePersistor',
         ));
 
         try {
@@ -218,7 +218,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
         $this->application->setIs_Started(true);
 
         $this->application->getConfig()->setSection('config', array(
-            'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor',
+            'persistor' => 'BackBee\Config\Tests\Persistor\FakePersistor',
         ));
 
         $this->application->getConfig()->setSection('parameters', array(
@@ -242,7 +242,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
                         'hello' => 'foo',
                     ),
                     'config' => array(
-                        'persistor' => 'BackBuilder\Config\Tests\Persistor\FakePersistor',
+                        'persistor' => 'BackBee\Config\Tests\Persistor\FakePersistor',
                     ),
                 ),
             ),

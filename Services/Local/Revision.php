@@ -3,32 +3,32 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Local;
+namespace BackBee\Services\Local;
 
-use BackBuilder\Services\Exception\ServicesException;
-use BackBuilder\ClassContent\Exception\ClassContentException;
+use BackBee\Services\Exception\ServicesException;
+use BackBee\ClassContent\Exception\ClassContentException;
 
 /**
  * RPC services for content revisions
  *
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Local
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -48,7 +48,7 @@ class Revision extends AbstractServiceLocal
         $this->_incRunningVariables();
 
         $result = array();
-        $revisions = $this->em->getRepository('\BackBuilder\ClassContent\Revision')->getAllDrafts($token);
+        $revisions = $this->em->getRepository('\BackBee\ClassContent\Revision')->getAllDrafts($token);
 
         foreach ($revisions as $revision) {
             $result[] = json_decode($revision->serialize());
@@ -68,7 +68,7 @@ class Revision extends AbstractServiceLocal
         }
 
         $result = array();
-        $revisions = $this->em->getRepository('\BackBuilder\ClassContent\Revision')->getAllDrafts($token);
+        $revisions = $this->em->getRepository('\BackBee\ClassContent\Revision')->getAllDrafts($token);
         foreach ($revisions as $revision) {
             try {
                 $revision->getContent()->setDraft($revision);
@@ -103,7 +103,7 @@ class Revision extends AbstractServiceLocal
         $this->_incRunningVariables();
 
         $result = array();
-        $revisions = $this->em->getRepository('\BackBuilder\ClassContent\Revision')->getAllDrafts($token);
+        $revisions = $this->em->getRepository('\BackBee\ClassContent\Revision')->getAllDrafts($token);
         foreach ($revisions as $revision) {
             try {
                 $this->bbapp->getEventDispatcher()->triggerEvent('commit', $revision->getContent());
@@ -140,10 +140,10 @@ class Revision extends AbstractServiceLocal
         $this->_incRunningVariables();
 
         $result = array();
-        $revisions = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getAllDrafts($token);
+        $revisions = $this->em->getRepository('BackBee\ClassContent\Revision')->getAllDrafts($token);
         foreach ($revisions as $revision) {
             try {
-                $revision = $this->em->getRepository('BackBuilder\ClassContent\Revision')->revert($revision);
+                $revision = $this->em->getRepository('BackBee\ClassContent\Revision')->revert($revision);
                 $this->em->flush();
 
                 $result[] = array('reverted' => true,
@@ -159,7 +159,7 @@ class Revision extends AbstractServiceLocal
             }
         }
 
-        $this->em->getRepository('\BackBuilder\NestedNode\Page')->removeEmptyPages($this->bbapp->getSite());
+        $this->em->getRepository('\BackBee\NestedNode\Page')->removeEmptyPages($this->bbapp->getSite());
         $this->em > flush();
 
         return $result;

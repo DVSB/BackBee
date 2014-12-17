@@ -3,38 +3,38 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Site;
+namespace BackBee\Site;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
- * UserPreferences object in BackBuilder 5
+ * UserPreferences object in BackBee 5
  *
  * User preferences persistence
  *
- * @category    BackBuilder
- * @package     BackBuilder\Site
+ * @category    BackBee
+ * @package     BackBee\Site
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\Site\Repository\UserPreferencesRepository")
+ * @Entity(repositoryClass="BackBee\Site\Repository\UserPreferencesRepository")
  * @Table(name="user_preferences",indexes={@index(name="IDX_OWNER", columns={"owner"})})
  */
 class UserPreferences
@@ -111,7 +111,7 @@ class UserPreferences
      * Set the user preferences UID
      * @codeCoverageIgnore
      * @param  string                            $uid
-     * @return \BackBuilder\Site\UserPreferences
+     * @return \BackBee\Site\UserPreferences
      */
     public function setUid($uid)
     {
@@ -124,7 +124,7 @@ class UserPreferences
      * Set the owner of the user preferences
      * @codeCoverageIgnore
      * @param  \Symfony\Component\Security\Core\User\UserInterface $user
-     * @return \BackBuilder\Site\UserPreferences
+     * @return \BackBee\Site\UserPreferences
      */
     public function setOwner(UserInterface $user)
     {
@@ -137,7 +137,7 @@ class UserPreferences
      * Set the preferences of the user
      *
      * @param  mixed                             $preferences
-     * @return \BackBuilder\Site\UserPreferences
+     * @return \BackBee\Site\UserPreferences
      */
     public function setPreferences($preferences)
     {

@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace BackBuilder\Rest\Encoder;
+namespace BackBee\Rest\Encoder;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 
 /**
  * Provides encoders through the Symfony2 DIC
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      k.golovin
  */

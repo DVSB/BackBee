@@ -19,17 +19,17 @@
  * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Util\Sequence\Entity;
+namespace BackBee\Util\Sequence\Entity;
 
 /**
  * Sequence Entity
  *
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @subpackage  Sequence\Entity
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\Util\Sequence\Sequencer")
+ * @Entity(repositoryClass="BackBee\Util\Sequence\Sequencer")
  * @Table(name="sequence")
  */
 class Sequence

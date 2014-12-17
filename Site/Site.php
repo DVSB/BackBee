@@ -3,43 +3,43 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Site;
+namespace BackBee\Site;
 
-use BackBuilder\Site\Metadata\Metadata;
-use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
-use BackBuilder\Services\Local\IJson;
+use BackBee\Site\Metadata\Metadata;
+use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Services\Local\IJson;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * A BackBuilder website entity
+ * A BackBee website entity
  *
  * A website should be associated to:
  *
  * * a collection of available layouts
  * * a collection of default metadata sets
  *
- * @category    BackBuilder
- * @package     BackBuilder\Site
+ * @category    BackBee
+ * @package     BackBee\Site
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\Site\Repository\SiteRepository")
+ * @Entity(repositoryClass="BackBee\Site\Repository\SiteRepository")
  * @Table(name="site", indexes={@Index(name="IDX_SERVERNAME", columns={"server_name"}), @Index(name="IDX_LABEL", columns={"label"})})
  * @fixtures(qty=1)
  *
@@ -107,7 +107,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * The collection of layouts available for this site.
-     * @OneToMany(targetEntity="BackBuilder\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
+     * @OneToMany(targetEntity="BackBee\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
      *
      * @Serializer\Expose
      */
@@ -115,7 +115,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * The default metadatas associated tto the pages of this website.
-     * @ManyToMany(targetEntity="BackBuilder\Site\Metadata\Metadata", cascade={"all"}, fetch="EXTRA_LAZY")
+     * @ManyToMany(targetEntity="BackBee\Site\Metadata\Metadata", cascade={"all"}, fetch="EXTRA_LAZY")
      * @JoinTable(name="metadata_site",
      *      joinColumns={@JoinColumn(name="site_uid", referencedColumnName="uid")},
      *      inverseJoinColumns={@JoinColumn(name="metadata_uid", referencedColumnName="uid")}
@@ -200,7 +200,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      *
-     * @param \BackBuilder\Site\Layout $layout
+     * @param \BackBee\Site\Layout $layout
      */
     public function addLayout(Layout $layout)
     {
@@ -220,7 +220,7 @@ class Site extends AObjectIdentifiable implements IJson
     /**
      * Sets the label of the website
      * @param  string                 $label
-     * @return \BackBuilder\Site\Site
+     * @return \BackBee\Site\Site
      */
     public function setLabel($label)
     {
@@ -232,7 +232,7 @@ class Site extends AObjectIdentifiable implements IJson
     /**
      * Sets the server name
      * @param  string                 $server_name
-     * @return \BackBuilder\Site\Site
+     * @return \BackBee\Site\Site
      */
     public function setServerName($server_name)
     {
@@ -244,8 +244,8 @@ class Site extends AObjectIdentifiable implements IJson
     /**
      * Adds a new metadata set to the collection of the website.
      * @codeCoverageIgnore
-     * @param  \BackBuilder\Site\Metadata\Metadata $metadata
-     * @return \BackBuilder\Site\Site
+     * @param  \BackBee\Site\Metadata\Metadata $metadata
+     * @return \BackBee\Site\Site
      */
     public function setMetadata(Metadata $metadata)
     {
@@ -255,7 +255,7 @@ class Site extends AObjectIdentifiable implements IJson
     }
 
     /**
-     * @see BackBuilder\Services\Local\IJson::__toJson()
+     * @see BackBee\Services\Local\IJson::__toJson()
      */
     public function __toJson()
     {

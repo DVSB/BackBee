@@ -3,31 +3,31 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Local;
+namespace BackBee\Services\Local;
 
-use BackBuilder\BBApplication;
+use BackBee\BBApplication;
 
 /**
  * Abstract class for local RPC service
  *
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Local
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
@@ -45,8 +45,8 @@ class AbstractServiceLocal implements IServiceLocal
      */
     protected $identifier;
     /**
-     * Current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * Current BackBee application
+     * @var \BackBee\BBApplication
      */
     private $_application;
     /**
@@ -65,7 +65,7 @@ class AbstractServiceLocal implements IServiceLocal
 
     /**
      * @deprecated since version 1.0
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBee\BBApplication $application
      * @codeCoverageIgnore
      */
     public function __onInit(BBApplication $application)
@@ -74,7 +74,7 @@ class AbstractServiceLocal implements IServiceLocal
     }
 
     /**
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBee\BBApplication $application
      * @codeCoverageIgnore
      */
     public function initService(BBApplication $application)
@@ -90,7 +90,7 @@ class AbstractServiceLocal implements IServiceLocal
 
     /**
      * Returns the current application
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      * @codeCoverageIgnore
      */
     public function getApplication()
@@ -99,14 +99,14 @@ class AbstractServiceLocal implements IServiceLocal
     }
 
     /**
-     * Returns the current entity manager of the BackBuilder application
+     * Returns the current entity manager of the BackBee application
      * @return \Doctrine\ORM\EntityManager
-     * @throws \BackBuilder\Exception\MissingApplicationException Occurs if none BackBuilder application is defined
+     * @throws \BackBee\Exception\MissingApplicationException Occurs if none BackBee application is defined
      */
     public function getEntityManager()
     {
         if (null === $this->_application) {
-            throw new \BackBuilder\Exception\MissingApplicationException('None BackBuilder application defined');
+            throw new \BackBee\Exception\MissingApplicationException('None BackBee application defined');
         }
 
         return $this->_application->getEntityManager();
@@ -117,13 +117,13 @@ class AbstractServiceLocal implements IServiceLocal
      * @param  mixed                                                    $attributes
      * @param  mixed|null                                               $object
      * @return boolean                                                  Return TRUE if current token if granted
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the permission
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the permission
      */
     public function isGranted($attributes, $object = null)
     {
         if (null === $this->_application) {
-            throw new \BackBuilder\Exception\MissingApplicationException('None BackBuilder application defined');
+            throw new \BackBee\Exception\MissingApplicationException('None BackBee application defined');
         }
 
         $securityContext = $this->_application->getSecurityContext();
@@ -132,7 +132,7 @@ class AbstractServiceLocal implements IServiceLocal
             null !== $securityContext->getACLProvider()
             && false === $securityContext->isGranted($attributes, $object)
         ) {
-            throw new \BackBuilder\Security\Exception\ForbiddenAccessException('Forbidden acces');
+            throw new \BackBee\Security\Exception\ForbiddenAccessException('Forbidden acces');
         }
 
         return true;

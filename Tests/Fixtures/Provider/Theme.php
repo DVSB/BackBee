@@ -1,6 +1,6 @@
 <?php
 
-namespace BackBuilder\Tests\Fixtures\Provider;
+namespace BackBee\Tests\Fixtures\Provider;
 
 use Faker\Provider\Lorem;
 use Faker\Provider\Base;

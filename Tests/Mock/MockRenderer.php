@@ -1,11 +1,11 @@
 <?php
-namespace BackBuilder\Tests\Mock;
+namespace BackBee\Tests\Mock;
 
-use BackBuilder\Renderer\ARenderer;
+use BackBee\Renderer\ARenderer;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Tests\Mock
+ * @category    BackBee
+ * @package     BackBee\Tests\Mock
  * @copyright   Lp system
  * @author      n.dufreche
  */

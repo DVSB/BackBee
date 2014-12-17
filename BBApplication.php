@@ -3,35 +3,35 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder;
+namespace BackBee;
 
-use BackBuilder\Console\Console;
-use BackBuilder\DependencyInjection\ContainerBuilder;
-use BackBuilder\DependencyInjection\ContainerInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\Event\Event;
-use BackBuilder\Exception\BBException;
-use BackBuilder\NestedNode\Repository\NestedNodeRepository;
-use BackBuilder\Site\Site;
-use BackBuilder\Theme\Theme;
-use BackBuilder\Util\File;
+use BackBee\Console\Console;
+use BackBee\DependencyInjection\ContainerBuilder;
+use BackBee\DependencyInjection\ContainerInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBee\Event\Event;
+use BackBee\Exception\BBException;
+use BackBee\NestedNode\Repository\NestedNodeRepository;
+use BackBee\Site\Site;
+use BackBee\Theme\Theme;
+use BackBee\Util\File;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\DependencyInjection\Definition;
@@ -42,10 +42,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Finder\Finder;
 
 /**
- * The main BackBuilder5 application
+ * The main BackBee5 application
  *
- * @category    BackBuilder
- * @package     BackBuilder
+ * @category    BackBee
+ * @package     BackBee
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -56,7 +56,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * application's service container
      *
-     * @var BackBuilder\DependencyInjection\ContainerInterface
+     * @var BackBee\DependencyInjection\ContainerInterface
      */
     private $_container;
 
@@ -187,7 +187,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * Returns the associated theme
      * @param  boolean                  $force_reload Force to reload the theme if true
-     * @return \BackBuilder\Theme\Theme
+     * @return \BackBee\Theme\Theme
      */
     public function getTheme($force_reload = false)
     {
@@ -288,12 +288,12 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @param \BackBuilder\Site\Site $site
+     * @param \BackBee\Site\Site $site
      */
     public function start(Site $site = null)
     {
         if (null === $site) {
-            $site = $this->getEntityManager()->getRepository('BackBuilder\Site\Site')->findOneBy(array()); // 40 ms
+            $site = $this->getEntityManager()->getRepository('BackBee\Site\Site')->findOneBy(array()); // 40 ms
         }
 
         if (null !== $site) {
@@ -301,7 +301,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         }
 
         $this->_isstarted = true;
-        $this->info(sprintf('BackBuilder application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
+        $this->info(sprintf('BackBee application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
 
         if (null !== $this->getTheme()) {
             $this->getTheme()->init();
@@ -326,12 +326,12 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (true === $this->isStarted()) {
             // trigger bbapplication.stop
             $this->getEventDispatcher()->dispatch('bbapplication.stop', new Event($this));
-            $this->info('BackBuilder application ended');
+            $this->info('BackBee application ended');
         }
     }
 
     /**
-     * @return \BackBuilder\FrontController\FrontController
+     * @return \BackBee\FrontController\FrontController
      */
     public function getController()
     {
@@ -339,7 +339,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return \BackBuilder\Routing\RouteCollection
+     * @return \BackBee\Routing\RouteCollection
      */
     public function getRouting()
     {
@@ -413,19 +413,19 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return BackBuilder\Security\Token\BBUserToken|null
+     * @return BackBee\Security\Token\BBUserToken|null
      */
     public function getBBUserToken()
     {
         $token = $this->getSecurityContext()->getToken();
-        if ((null === $token || !($token instanceof \BackBuilder\Security\Token\BBUserToken))) {
+        if ((null === $token || !($token instanceof \BackBee\Security\Token\BBUserToken))) {
             if (is_null($this->getContainer()->get('bb_session'))) {
                 $token = null;
             } else {
                 if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
                     $token = unserialize($token);
 
-                    if (!($token instanceof \BackBuilder\Security\Token\BBUserToken)) {
+                    if (!($token instanceof \BackBee\Security\Token\BBUserToken)) {
                         $token = null;
                     }
                 }
@@ -437,19 +437,19 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Get cache provider from config
-     * @return string Cache provider config name or \BackBuilder\Cache\DAO\Cache if not found
+     * @return string Cache provider config name or \BackBee\Cache\DAO\Cache if not found
      */
     public function getCacheProvider()
     {
         $conf = $this->getConfig()->getCacheConfig();
-        $defaultClass = '\BackBuilder\Cache\DAO\Cache';
-        $parentClass = '\BackBuilder\Cache\AExtendedCache';
+        $defaultClass = '\BackBee\Cache\DAO\Cache';
+        $parentClass = '\BackBee\Cache\AExtendedCache';
 
         return (isset($conf['provider']) && is_subclass_of($conf['provider'], $parentClass) ? $conf['provider'] : $defaultClass);
     }
 
     /**
-     * @return \BackBuilder\Cache\DAO\Cache
+     * @return \BackBee\Cache\DAO\Cache
      */
     public function getCacheControl()
     {
@@ -458,7 +458,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      *
-     * @return \BackBuilder\Cache\ACache
+     * @return \BackBee\Cache\ACache
      */
     public function getBootstrapCache()
     {
@@ -475,7 +475,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return \BackBuilder\DependencyInjection\Container
+     * @return \BackBee\DependencyInjection\Container
      */
     public function getContainer()
     {
@@ -603,15 +603,15 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (null === $this->_classcontentdir) {
             $this->_classcontentdir = array();
 
-            array_unshift($this->_classcontentdir, $this->getBaseDir().'/BackBuilder/ClassContent');
+            array_unshift($this->_classcontentdir, $this->getBaseDir().'/BackBee/ClassContent');
             array_unshift($this->_classcontentdir, $this->getBaseDir().'/repository/ClassContent');
 
             if (true === $this->hasContext()) {
                 array_unshift($this->_classcontentdir, $this->getRepository().'/ClassContent');
             }
 
-            //array_walk($this->_classcontentdir, array('BackBuilder\Util\File', 'resolveFilepath'));
-            array_map(array('BackBuilder\Util\File', 'resolveFilepath'), $this->_classcontentdir);
+            //array_walk($this->_classcontentdir, array('BackBee\Util\File', 'resolveFilepath'));
+            array_map(array('BackBee\Util\File', 'resolveFilepath'), $this->_classcontentdir);
         }
 
         return $this->_classcontentdir;
@@ -620,7 +620,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * Push one directory at the end of classcontent dirs
      * @param  string                     $dir
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function pushClassContentDir($dir)
     {
@@ -637,7 +637,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * Prepend one directory at the beginning of classcontent dirs
      * @param  type                       $dir
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function unshiftClassContentDir($dir)
     {
@@ -680,8 +680,8 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 }
             }
 
-            //array_walk($this->_resourcedir, array('BackBuilder\Util\File', 'resolveFilepath'));
-            array_map(array('BackBuilder\Util\File', 'resolveFilepath'), $this->_resourcedir);
+            //array_walk($this->_resourcedir, array('BackBee\Util\File', 'resolveFilepath'));
+            array_map(array('BackBee\Util\File', 'resolveFilepath'), $this->_resourcedir);
         }
 
         return $this->_resourcedir;
@@ -690,7 +690,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * Push one directory at the end of resources dirs
      * @param  string                     $dir
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function pushResourceDir($dir)
     {
@@ -707,7 +707,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * Prepend one directory at the begining of resources dirs
      * @param  type                       $dir
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function unshiftResourceDir($dir)
     {
@@ -724,7 +724,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * Prepend one directory of resources
      * @param  String                     $dir The new resource directory to add
-     * @return \BackBuilder\BBApplication The current BBApplication
+     * @return \BackBee\BBApplication The current BBApplication
      * @throws BBException                Occur on invalid path or invalid resource directories
      */
     public function addResourceDir($dir)
@@ -769,14 +769,14 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function getRequest()
     {
         if (false === $this->isStarted()) {
-            throw new BBException('The BackBuilder application has to be started before to access request');
+            throw new BBException('The BackBee application has to be started before to access request');
         }
 
         return $this->_container->get('request');
     }
 
     /**
-     * @return BackBuilder\Services\Rpc\JsonRPCServer
+     * @return BackBee\Services\Rpc\JsonRPCServer
      */
     public function getRpcServer()
     {
@@ -784,7 +784,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return BackBuilder\Services\Upload\UploadServer
+     * @return BackBee\Services\Upload\UploadServer
      */
     public function getUploadServer()
     {
@@ -792,7 +792,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return BackBuilder\Rewriting\UrlGenerator
+     * @return BackBee\Rewriting\UrlGenerator
      */
     public function getUrlGenerator()
     {
@@ -819,7 +819,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return BackBuilder\Security\SecurityContext
+     * @return BackBee\Security\SecurityContext
      */
     public function getSecurityContext()
     {
@@ -892,21 +892,21 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      * * Commands are in the 'Command' sub-directory
      * * Commands extend Symfony\Component\Console\Command\Command
      *
-     * @param BackBuilder\Console\Console $console An Application instance
+     * @param BackBee\Console\Console $console An Application instance
      */
     public function registerCommands(Console $console)
     {
         if (is_dir($dir = $this->getBBDir().'/Command')) {
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
-            $ns = 'BackBuilder\\Command';
+            $ns = 'BackBee\\Command';
 
             foreach ($finder as $file) {
                 if ($relativePath = $file->getRelativePath()) {
                     $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
-                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                if ($r->isSubclassOf('BackBee\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                     $console->add($r->newInstance());
                 }
             }
@@ -926,7 +926,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                     $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
-                if ($r->isSubclassOf('BackBuilder\\Console\\ACommand') && !$r->isAbstract() && 0 === $r->getConstructor()->getNumberOfRequiredParameters()) {
+                if ($r->isSubclassOf('BackBee\\Console\\ACommand') && !$r->isAbstract() && 0 === $r->getConstructor()->getNumberOfRequiredParameters()) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
                     $console->add($instance);
@@ -1035,7 +1035,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     private function _initAutoloader()
     {
@@ -1045,23 +1045,23 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
         $this->getAutoloader()
             ->register()
-            ->registerNamespace('BackBuilder\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
-            ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getRepository(), 'ClassContent', 'Repositories')))
-            ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getRepository(), 'Templates', 'helpers')))
-            ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
-            ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getRepository(), 'Controller')))
-            ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
-            ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getRepository(), 'Traits')))
+            ->registerNamespace('BackBee\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
+            ->registerNamespace('BackBee\ClassContent\Repository', implode('/', array($this->getRepository(), 'ClassContent', 'Repositories')))
+            ->registerNamespace('BackBee\Renderer\Helper', implode('/', array($this->getRepository(), 'Templates', 'helpers')))
+            ->registerNamespace('BackBee\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
+            ->registerNamespace('BackBee\Controller', implode('/', array($this->getRepository(), 'Controller')))
+            ->registerNamespace('BackBee\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
+            ->registerNamespace('BackBee\Traits', implode('/', array($this->getRepository(), 'Traits')))
             ->registerNamespace('Respect\Validation\Rules', implode(DIRECTORY_SEPARATOR, array($this->getBBDir(), 'Validator', 'Rules')));
 
         if (true === $this->hasContext()) {
             $this->getAutoloader()
-                ->registerNamespace('BackBuilder\ClassContent\Repository', implode('/', array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
-                ->registerNamespace('BackBuilder\Renderer\Helper', implode('/', array($this->getBaseRepository(), 'Templates', 'helpers')))
-                ->registerNamespace('BackBuilder\Event\Listener', implode('/', array($this->getBaseRepository(), 'Listeners')))
-                ->registerNamespace('BackBuilder\Controller', implode('/', array($this->getBaseRepository(), 'Controller')))
-                ->registerNamespace('BackBuilder\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
-                ->registerNamespace('BackBuilder\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
+                ->registerNamespace('BackBee\ClassContent\Repository', implode('/', array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
+                ->registerNamespace('BackBee\Renderer\Helper', implode('/', array($this->getBaseRepository(), 'Templates', 'helpers')))
+                ->registerNamespace('BackBee\Event\Listener', implode('/', array($this->getBaseRepository(), 'Listeners')))
+                ->registerNamespace('BackBee\Controller', implode('/', array($this->getBaseRepository(), 'Controller')))
+                ->registerNamespace('BackBee\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
+                ->registerNamespace('BackBee\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
         }
 
         return $this;
@@ -1076,8 +1076,8 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         AnnotationRegistry::registerAutoloadNamespaces(array(
             'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/symfony/src/',
             'JMS\Serializer\Annotation' => $this->getVendorDir().'/jms/serializer/src/',
-            'BackBuilder\Installer\Annotation' => $this->getBaseDir(),
-            'BackBuilder' => $this->getBaseDir(),
+            'BackBee\Installer\Annotation' => $this->getBaseDir(),
+            'BackBee' => $this->getBaseDir(),
             //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
         ));
 
@@ -1104,7 +1104,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      * @throws BBException
      */
     private function _initContentWrapper()
@@ -1127,7 +1127,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     }
 
     /**
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      * @throws BBException
      */
     private function _initEntityManager()
@@ -1199,7 +1199,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 new Reference('doctrine.event_manager'),
                 new Reference('service_container'),
             ));
-            $definition->setFactoryClass('BackBuilder\Util\Doctrine\EntityManagerCreator');
+            $definition->setFactoryClass('BackBee\Util\Doctrine\EntityManagerCreator');
             $definition->setFactoryMethod('create');
             $this->_container->setDefinition('em', $definition);
 

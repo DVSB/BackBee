@@ -1,11 +1,11 @@
 <?php
 
-namespace BackBuilder\NestedNode\Builder;
+namespace BackBee\NestedNode\Builder;
 
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Site\Layout;
-use BackBuilder\Site\Site;
+use BackBee\ClassContent\AClassContent;
+use BackBee\NestedNode\Page;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
 use Doctrine\ORM\EntityManager;
 
 /**
@@ -53,32 +53,32 @@ class PageBuilder
     private $alt_title;
 
     /**
-     * @var BackBuilder\Site\Site
+     * @var BackBee\Site\Site
      */
     private $site;
 
     /**
-     * @var BackBuilder\NestedNode\Page
+     * @var BackBee\NestedNode\Page
      */
     private $root;
 
     /**
-     * BackBuilder\NestedNode\Page
+     * BackBee\NestedNode\Page
      */
     private $parent;
 
     /**
-     * @var BackBuilder\Site\Layout
+     * @var BackBee\Site\Layout
      */
     private $layout;
 
     /**
-     * @var BackBuilder\ClassContent\AClassContent
+     * @var BackBee\ClassContent\AClassContent
      */
     private $itemToPushInMainZone;
 
     /**
-     * @var array of BackBuilder\ClassContent\AClassContent
+     * @var array of BackBee\ClassContent\AClassContent
      */
     private $elements;
 
@@ -647,7 +647,7 @@ class PageBuilder
         }
 
         if (false === empty($method)) {
-            $this->em->getRepository('BackBuilder\NestedNode\Page')->$method($page, $page->getParent());
+            $this->em->getRepository('BackBee\NestedNode\Page')->$method($page, $page->getParent());
         }
     }
 }

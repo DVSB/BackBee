@@ -3,44 +3,44 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\Controller;
+namespace BackBee\Rest\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use BackBuilder\Rest\Controller\UserController;
-use BackBuilder\Tests\TestCase;
+use BackBee\Rest\Controller\UserController;
+use BackBee\Tests\TestCase;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-use BackBuilder\Security\Acl\Permission\MaskBuilder;
-use BackBuilder\Security\Token\UsernamePasswordToken;
-use BackBuilder\Security\User;
-use BackBuilder\Security\Group;
-use BackBuilder\ApiClient\Auth\PrivateKeyAuth;
+use BackBee\Security\Acl\Permission\MaskBuilder;
+use BackBee\Security\Token\UsernamePasswordToken;
+use BackBee\Security\User;
+use BackBee\Security\Group;
+use BackBee\ApiClient\Auth\PrivateKeyAuth;
 
 /**
  * Test for UserController class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\Controller\UserController
+ * @coversDefaultClass \BackBee\Rest\Controller\UserController
  */
 class UserControllerTest extends TestCase
 {
@@ -145,8 +145,8 @@ class UserControllerTest extends TestCase
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateObjectAce(ObjectIdentity::fromDomainObject($user), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_DELETE);
 
-        $this->assertInstanceOf('BackBuilder\Security\User',
-                $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId));
+        $this->assertInstanceOf('BackBee\Security\User',
+                $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\User')->find($userId));
 
         $controller = $this->getController();
 
@@ -154,7 +154,7 @@ class UserControllerTest extends TestCase
 
         $this->assertEquals(204, $response->getStatusCode());
 
-        $userAfterDelete = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId);
+        $userAfterDelete = $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\User')->find($userId);
         $this->assertTrue(is_null($userAfterDelete));
     }
 
@@ -205,7 +205,7 @@ class UserControllerTest extends TestCase
 
         $this->assertEquals(204, $response->getStatusCode());
 
-        $userUpdated = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($userId);
+        $userUpdated = $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\User')->find($userId);
         /* @var $userUpdated User */
 
         $this->assertEquals($data['login'], $userUpdated->getLogin());
@@ -259,7 +259,7 @@ class UserControllerTest extends TestCase
         ), array(
             'id' => $userId,
             '_action' => 'putAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+            '_controller' => 'BackBee\Rest\Controller\UserController',
         ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -311,8 +311,8 @@ class UserControllerTest extends TestCase
 
         $this->assertArrayHasKey('id', $res);
 
-        $user = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\User')->find($res['id']);
-        $this->assertInstanceOf('BackBuilder\Security\User', $user);
+        $user = $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\User')->find($res['id']);
+        $this->assertInstanceOf('BackBee\Security\User', $user);
     }
 
     /**
@@ -322,7 +322,7 @@ class UserControllerTest extends TestCase
     {
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(), array(
             '_action' => 'postAction',
-            '_controller' => 'BackBuilder\Rest\Controller\UserController',
+            '_controller' => 'BackBee\Rest\Controller\UserController',
         ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -400,10 +400,10 @@ class UserControllerTest extends TestCase
     /**
      *
      * @param  \Symfony\Component\HttpFoundation\Request $request
-     * @param  BackBuilder\Security\User                 $user
+     * @param  BackBee\Security\User                 $user
      * @return self
      */
-    protected static function signRequest(Request $request, BackBuilder\Security\User $user = null)
+    protected static function signRequest(Request $request, BackBee\Security\User $user = null)
     {
         if (null === $user) {
             $user = $this->user;

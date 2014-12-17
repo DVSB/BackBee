@@ -1,41 +1,41 @@
 <?php
-namespace BackBuilder\Renderer\Adapter;
+namespace BackBee\Renderer\Adapter;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\Renderer\ARenderer;
-use BackBuilder\Renderer\Exception\RendererException;
-use BackBuilder\Renderer\ARendererAdapter;
+use BackBee\Renderer\ARenderer;
+use BackBee\Renderer\Exception\RendererException;
+use BackBee\Renderer\ARendererAdapter;
 
 /**
- * twig renderer adapter for BackBuilder\Renderer\Renderer
+ * twig renderer adapter for BackBee\Renderer\Renderer
  *
- * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @category    BackBee
+ * @package     BackBee\Renderer
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class Twig extends ARendererAdapter
 {
     /**
-     * @var BackBuilder\Renderer\Adapter\TwigLoaderFilesystem
+     * @var BackBee\Renderer\Adapter\TwigLoaderFilesystem
      */
     private $loader;
 
@@ -116,7 +116,7 @@ class Twig extends ARendererAdapter
         $this->twig->setCache($cache_directory);
     }
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::getManagedFileExtensions()
+     * @see BackBee\Renderer\IRendererAdapter::getManagedFileExtensions()
      */
     public function getManagedFileExtensions()
     {
@@ -176,7 +176,7 @@ class Twig extends ARendererAdapter
             $params['this'] = $this;
             $params = array_merge($params, $vars);
             $render = $this->twig->render($filename, $params);
-        } catch (\BackBuilder\FrontController\Exception\FrontControllerException $fe) {
+        } catch (\BackBee\FrontController\Exception\FrontControllerException $fe) {
             throw $fe;
         } catch (\Exception $e) {
             throw new RendererException(

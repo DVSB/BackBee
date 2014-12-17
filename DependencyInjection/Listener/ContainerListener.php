@@ -3,37 +3,37 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Listener;
+namespace BackBee\DependencyInjection\Listener;
 
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
-use BackBuilder\DependencyInjection\Exception\CannotCreateContainerDirectoryException;
-use BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException;
-use BackBuilder\DependencyInjection\ContainerProxy;
-use BackBuilder\Event\Event;
+use BackBee\DependencyInjection\Container;
+use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
+use BackBee\DependencyInjection\Exception\CannotCreateContainerDirectoryException;
+use BackBee\DependencyInjection\Exception\ContainerDirectoryNotWritableException;
+use BackBee\DependencyInjection\ContainerProxy;
+use BackBee\Event\Event;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 
 /**
  *
  *
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -74,7 +74,7 @@ class ContainerListener
                 $container_directory.DIRECTORY_SEPARATOR.$container_filename.'.php',
                 (new PhpDumper($container_proxy))->dump(array(
                     'class'      => $container_filename,
-                    'base_class' => 'BackBuilder\DependencyInjection\ContainerProxy',
+                    'base_class' => 'BackBee\DependencyInjection\ContainerProxy',
                 ))
             );
         } elseif (true === $application->isDebugMode() && false === $container->isRestored()) {

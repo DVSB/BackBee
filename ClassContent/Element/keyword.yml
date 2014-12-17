@@ -1,5 +1,5 @@
 keyword:
-  repository: \BackBuilder\ClassContent\Repository\Element\keywordRepository
+  repository: \BackBee\ClassContent\Repository\Element\keywordRepository
   properties:
     name: Keyword
     description: An attached keywords

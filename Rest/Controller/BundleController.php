@@ -3,31 +3,31 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Controller;
+namespace BackBee\Rest\Controller;
 
-use BackBuilder\Bundle\BundleInterface;
-use BackBuilder\Rest\Controller\Annotations as Rest;
-use BackBuilder\Rest\Patcher\EntityPatcher;
-use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
-use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
-use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
-use BackBuilder\Rest\Patcher\RightManager;
+use BackBee\Bundle\BundleInterface;
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Patcher\EntityPatcher;
+use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
+use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
+use BackBee\Rest\Patcher\OperationSyntaxValidator;
+use BackBee\Rest\Patcher\RightManager;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -38,8 +38,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * REST API for application bundles
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -156,7 +156,7 @@ class BundleController extends ARestController
     }
 
     /**
-     * @see BackBuilder\Rest\Controller\ARestController::granted
+     * @see BackBee\Rest\Controller\ARestController::granted
      */
     protected function granted($attributes, $object = null, $message = 'Access denied')
     {
