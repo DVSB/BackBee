@@ -24,6 +24,7 @@ namespace BackBee\Rest\Controller;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Site\Layout;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @category    BackBee
@@ -84,23 +85,33 @@ class LayoutController extends ARestController
      *   name="site", id_name="site_uid", id_source="query", class="BackBee\Site\Site", required=false
      * )
      */
-    public function getCollectionAction()
+    public function getCollectionAction(Request $request)
     {
-        $layouts = null;
-        $site = $this->getEntityFromAttributes('site');
-        if (null === $site) {
-            $layouts = $this->getEntityManager()->getRepository('BackBee\Site\Layout')->getModels();
-        } else {
-            $layouts = $site->getLayouts();
+        $qb = $this->getEntityManager()
+            ->getRepository('BackBee\Site\Layout')
+            ->createQueryBuilder('l')
+            ->orderBy('l._label', 'ASC')
+            ->leftJoin('l._states', 'st')
+        ;
+
+        if(null !== ($site = $request->attributes->get('site'))) {
+            $qb->innerJoin('l.site', 'si')
+                ->andWhere('si._uid = :site_uid')
+                ->setParameter(':site_uid', $site->getUid())
+            ;
         }
+
+        $layouts = $qb->getQuery()->getResult();
 
         $response = $this->createJsonResponse(null, 200, array(
             'Content-Range' => '0-' . (count($layouts) - 1) . '/' . count($layouts)
         ));
+
         $response->setContent($this->formatCollection($layouts));
 
         return $response;
     }
+
 
     /**
      * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")

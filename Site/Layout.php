@@ -143,6 +143,14 @@ class Layout extends AObjectIdentifiable implements IJson
      * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
+    
+    /**
+     * Layout states
+     * 
+     * var \Doctrine\Common\Collections\ArrayCollection
+     * @OneToMany(targetEntity="BackBuilder\Workflow\State", fetch="EXTRA_LAZY", mappedBy="_layout")
+     */
+    protected $_states;
 
     /**
      * The content's parameters
@@ -192,6 +200,8 @@ class Layout extends AObjectIdentifiable implements IJson
                 $this->setPath($options['path']);
             }
         }
+        
+        $this->_states = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -632,5 +642,71 @@ class Layout extends AObjectIdentifiable implements IJson
     public function virtualGetData()
     {
         return json_decode($this->getData(), true);
+    }
+    
+    
+    /**
+     * Add state
+     *
+     * @param \BackBuilder\Workflow\State $state
+     * @return \BackBuilder\Site\Layout
+     */
+    public function addState(\BackBuilder\Workflow\State $state)
+    {
+        $this->_states[] = $state;
+        return $this;
+    }
+    /**
+     * Remove state
+     *
+     * @param \BackBuilder\Workflow\State $state
+     */
+    public function removeState(\BackBuilder\Workflow\State $state)
+    {
+        $this->_states->removeElement($state);
+    }
+    /**
+     * Get states
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getStates()
+    {
+        return $this->_states;
+    }
+    
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("workflow_states")
+     */
+    public function getWokflowStates()
+    {
+        $workflowStates = array(
+            'online'  => array(),
+            'offline' => array(),
+        );
+
+        foreach ($this->getStates() as $state) {
+            if (0 < $code = $state->getCode()) {
+                $workflowStates['online'][$code] = array(
+                    'label' => $state->getLabel(),
+                    'code'  => '1_'.$code,
+                );
+            } else {
+                $workflowStates['offline'][$code] = array(
+                    'label' => $state->getLabel(),
+                    'code'  => '0_'.$code,
+                );
+            }
+        }
+
+        $workflowStates = array_merge(
+            array('0' => array('label' => 'Hors ligne', 'code' => '0')),
+            $workflowStates['offline'],
+            array('1' => array('label' => 'En ligne', 'code' => '1')),
+            $workflowStates['online']
+        );
+        
+        return $workflowStates;
     }
 }
