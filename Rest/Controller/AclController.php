@@ -212,7 +212,6 @@ class AclController extends ARestController
      */
     public function postPermissionMapAction(Request $request)
     {
-        $em = $this->getEntityManager();
         $permissionMap = $request->request->all();
         $aclManager = $this->getContainer()->get("security.acl_manager");
 

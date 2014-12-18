@@ -112,7 +112,6 @@ class RevisionListener
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
 
-        $classname = $revision->getClassname();
         if (NULL !== $application) {
             $em = $application->getEntityManager();
             $revision->setEntityManager($em)
