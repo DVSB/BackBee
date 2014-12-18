@@ -3,41 +3,41 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Local;
+namespace BackBee\Services\Local;
 
-use BackBuilder\Services\Content\Category;
-use BackBuilder\Services\Content\ContentRender;
-use BackBuilder\Services\Exception\ServicesException;
-use BackBuilder\Util\String;
+use BackBee\Services\Content\Category;
+use BackBee\Services\Content\ContentRender;
+use BackBee\Services\Exception\ServicesException;
+use BackBee\Util\String;
 
 /**
  * RPC services for AClassContent management
  *
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Local
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  */
 class ContentBlocks extends AbstractServiceLocal
 {
-    const CONTENT_PATH = "BackBuilder\\ClassContent\\";
+    const CONTENT_PATH = "BackBee\\ClassContent\\";
 
     private $_availableMedias;
 
@@ -102,7 +102,7 @@ class ContentBlocks extends AbstractServiceLocal
 
     /**
      * Gets ContentRender for a category
-     * @param \BackBuilder\Services\Content\Category $category
+     * @param \BackBee\Services\Content\Category $category
      * @param array                                  $contents
      */
     private function _getContentsByCategory(Category $category, array &$contents)
@@ -110,7 +110,7 @@ class ContentBlocks extends AbstractServiceLocal
         foreach ($category->getClassnames() as $classname) {
             if (false === in_array($classname, $contents) &&
                     true === class_exists($classname)) {
-                $content = new ContentRender(str_replace('\BackBuilder\ClassContent\\', '', $classname), $this->getApplication(), $category->getName());
+                $content = new ContentRender(str_replace('\BackBee\ClassContent\\', '', $classname), $this->getApplication(), $category->getName());
                 $contents[$classname] = $content->__toStdObject(false);
             }
         }
@@ -174,7 +174,7 @@ class ContentBlocks extends AbstractServiceLocal
      */
     public function getDataKeywordsAutoComplete($cond)
     {
-        $keyWords = $this->bbapp->getEntityManager()->getRepository('BackBuilder\NestedNode\KeyWord')->getLikeKeyWords($cond);
+        $keyWords = $this->bbapp->getEntityManager()->getRepository('BackBee\NestedNode\KeyWord')->getLikeKeyWords($cond);
         $result = array();
         foreach ($keyWords as $key) {
             $std = new \stdClass();
@@ -209,7 +209,7 @@ class ContentBlocks extends AbstractServiceLocal
         if ($useFilter) {
             /* Ajouter à la racine */
             foreach ($accepts as $accept) {
-                $class = '\BackBuilder\ClassContent\\'.$accept;
+                $class = '\BackBee\ClassContent\\'.$accept;
                 $object = new $class();
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
@@ -267,12 +267,12 @@ class ContentBlocks extends AbstractServiceLocal
 
         $classnames = array();
         foreach ($contents as $content) {
-            $contentTypeClass = "BackBuilder\ClassContent\\".$content->name;
+            $contentTypeClass = "BackBee\ClassContent\\".$content->name;
             $classnames[] = $contentTypeClass;
         }
 
-        $result["numResults"] = $em->getRepository("BackBuilder\ClassContent\AClassContent")->countContentsByClassname($classnames);
-        $items = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findContentsByClassname($classnames, $orderInfos, $limitInfos);
+        $result["numResults"] = $em->getRepository("BackBee\ClassContent\AClassContent")->countContentsByClassname($classnames);
+        $items = $em->getRepository("BackBee\ClassContent\AClassContent")->findContentsByClassname($classnames, $orderInfos, $limitInfos);
         if ($items) {
             foreach ($items as $item) {
                 try {
@@ -329,7 +329,7 @@ class ContentBlocks extends AbstractServiceLocal
 
         $classnames = array();
         foreach ($contents as $content) {
-            $contentTypeClass = "BackBuilder\ClassContent\\".$content->name;
+            $contentTypeClass = "BackBee\ClassContent\\".$content->name;
             if (true === class_exists($contentTypeClass)) {
                 $classnames[] = $contentTypeClass;
             }
@@ -337,8 +337,8 @@ class ContentBlocks extends AbstractServiceLocal
         /* default value is true */
         $params["only_online"] = false;
         $params["site_uid"] = (null === $site_uid) ? $this->bbapp->getSite()->getUid() : $site_uid;
-        $result["numResults"] = $em->getRepository("BackBuilder\ClassContent\AClassContent")->countContentsBySearch($classnames, $conditions = $params);
-        $items = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findContentsBySearch($classnames, $orderInfos, $limitInfos, $conditions = $params);
+        $result["numResults"] = $em->getRepository("BackBee\ClassContent\AClassContent")->countContentsBySearch($classnames, $conditions = $params);
+        $items = $em->getRepository("BackBee\ClassContent\AClassContent")->findContentsBySearch($classnames, $orderInfos, $limitInfos, $conditions = $params);
         if ($items) {
             foreach ($items as $item) {
                 try {
@@ -357,7 +357,7 @@ class ContentBlocks extends AbstractServiceLocal
                     $contentInfos->modified = $item->getModified()->format("d/m/Y");
                     $contentInfos->completeTitle = $currentItemTitle;
 
-                    if (null !== $image = $item->getFirstElementOfType('BackBuilder\ClassContent\Media\image')) {
+                    if (null !== $image = $item->getFirstElementOfType('BackBee\ClassContent\Media\image')) {
                         if (null !== $image->image && $image->image->path) {
                             if (1 === preg_match('#http[s]?://.*#', $image->image->path)) {
                                 $contentInfos->ico = $image->image->path;
@@ -444,7 +444,7 @@ class ContentBlocks extends AbstractServiceLocal
             throw new \Exception("params content.type and content.uid can't be null");
         }
         $contentParams = array();
-        $contentTypeClass = "BackBuilder\ClassContent\\".$contentType;
+        $contentTypeClass = "BackBee\ClassContent\\".$contentType;
 
         $em = $this->bbapp->getEntityManager();
         if (NULL === $contentNode = $em->find($contentTypeClass, $contentUid)) {
@@ -454,7 +454,7 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('VIEW', $contentNode);
 
         // Find a draft if exists
-        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken())) {
+        if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken())) {
             $contentNode->setDraft($draft);
         }
 
@@ -473,7 +473,7 @@ class ContentBlocks extends AbstractServiceLocal
         if (is_null($params) || !is_array($params)) {
             throw new \Exception("params can't be null");
         }
-        $contentTypeClass = "BackBuilder\ClassContent\\".$contentInfos["contentType"];
+        $contentTypeClass = "BackBee\ClassContent\\".$contentInfos["contentType"];
 
         $em = $this->bbapp->getEntityManager();
         if (NULL === $contentNode = $em->find($contentTypeClass, $contentUid)) {
@@ -484,7 +484,7 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('EDIT', $contentNode);
 
         // Find a draft if exists
-        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true)) {
+        if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true)) {
             $contentNode->setDraft($draft);
         }
 
@@ -531,7 +531,7 @@ class ContentBlocks extends AbstractServiceLocal
             throw new ServicesException('No classname provided');
         }
 
-        $content_classname = 'BackBuilder\\ClassContent\\'.$contentType;
+        $content_classname = 'BackBee\\ClassContent\\'.$contentType;
         if (false === class_exists($content_classname)) {
             throw new ServicesException(sprintf('Unknown content classname provided `%s`', $content_classname));
         }
@@ -547,7 +547,7 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('EDIT', $content);
 
         // Find a draft if exists
-        if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
+        if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
             $content->setDraft($draft);
         }
 
@@ -559,11 +559,11 @@ class ContentBlocks extends AbstractServiceLocal
         $result->message = "";
 
         if (is_array($this->_getAvailableMedias()) && true === in_array(get_class($content), $this->_getAvailableMedias())) {
-            $media = $this->em->getRepository('BackBuilder\NestedNode\Media')->findBy(array('_content' => $content));
+            $media = $this->em->getRepository('BackBee\NestedNode\Media')->findBy(array('_content' => $content));
             $result->bb5_media = $disabled = (0 < count($media));
         }
 
-        if (false === ($content instanceof \BackBuilder\ClassContent\ContentSet)) {
+        if (false === ($content instanceof \BackBee\ClassContent\ContentSet)) {
             $renderer = $this->bbapp->getRenderer();
 
             foreach ($content->getData() as $key => $subcontent) {
@@ -584,9 +584,9 @@ class ContentBlocks extends AbstractServiceLocal
                         $result->bb5_form->$key->bb5_fieldset = false;
                         $result->bb5_form->$key->bb5_isLoaded = (NULL !== $value) ? true : false;
                         $result->bb5_form->$key->bb5_value[] = htmlentities($value, ENT_QUOTES, 'UTF-8');
-                    } elseif ($value instanceof \BackBuilder\ClassContent\AClassContent && false === ($value instanceof \BackBuilder\ClassContent\ContentSet)) {
+                    } elseif ($value instanceof \BackBee\ClassContent\AClassContent && false === ($value instanceof \BackBee\ClassContent\ContentSet)) {
                         // Find a draft if exists
-                        if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($value, $this->bbapp->getBBUserToken())) {
+                        if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($value, $this->bbapp->getBBUserToken())) {
                             $value->setDraft($draft);
                         }
 
@@ -597,7 +597,7 @@ class ContentBlocks extends AbstractServiceLocal
 
                         $result->bb5_form->$key->bb5_fieldset = (true === $value->isElementContent()) ? false : true;
                         $result->bb5_form->$key->bb5_isLoaded = $value->isLoaded() ? true : false;
-                        $result->bb5_form->$key->bb5_value[$index] = (true === $value->isElementContent()) ? $renderer->render($value, 'bbcontent_edit', array('disabled' => $disabled)) : $this->getContentEditionForm(str_replace('BackBuilder\ClassContent\\', '', get_class($value)), $value->getUid(), $disabled);
+                        $result->bb5_form->$key->bb5_value[$index] = (true === $value->isElementContent()) ? $renderer->render($value, 'bbcontent_edit', array('disabled' => $disabled)) : $this->getContentEditionForm(str_replace('BackBee\ClassContent\\', '', get_class($value)), $value->getUid(), $disabled);
                     }
                 }
             }
@@ -615,7 +615,7 @@ class ContentBlocks extends AbstractServiceLocal
             throw new ServicesException('No classname provided');
         }
 
-        $content_classname = 'BackBuilder\\ClassContent\\'.$contentType;
+        $content_classname = 'BackBee\\ClassContent\\'.$contentType;
         if (false === class_exists($content_classname)) {
             throw new ServicesException(sprintf('Unknown content classname provided `%s`', $content_classname));
         }
@@ -638,7 +638,7 @@ class ContentBlocks extends AbstractServiceLocal
 
         $return = new \stdClass();
         $return->uid = $content->getUid();
-        $return->classname = str_replace('BackBuilder\\ClassContent\\', '', get_class($content));
+        $return->classname = str_replace('BackBee\\ClassContent\\', '', get_class($content));
 
         return $return;
     }
@@ -648,14 +648,14 @@ class ContentBlocks extends AbstractServiceLocal
         if (NULL === $id) {
             return (0);
         }
-        $realKeyword = $this->bbapp->getEntityManager()->find('BackBuilder\NestedNode\KeyWord', $id);
+        $realKeyword = $this->bbapp->getEntityManager()->find('BackBee\NestedNode\KeyWord', $id);
         $realKeyword->removeContent($content);
         $this->bbapp->getEntityManager()->flush();
     }
 
     private function _postContent($content, $contentValues)
     {
-        if (false === ($content instanceof \BackBuilder\ClassContent\AClassContent)) {
+        if (false === ($content instanceof \BackBee\ClassContent\AClassContent)) {
             return $content;
         }
 
@@ -673,7 +673,7 @@ class ContentBlocks extends AbstractServiceLocal
 
         // If in media library, do nothing
         if (true === in_array(get_class($content), $this->_getAvailableMedias())) {
-            $media = $this->em->getRepository('BackBuilder\NestedNode\Media')->findBy(array('_content' => $content));
+            $media = $this->em->getRepository('BackBee\NestedNode\Media')->findBy(array('_content' => $content));
             if (0 < count($media)) {
                 return $content;
             }
@@ -682,7 +682,7 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('EDIT', $content);
 
         // Find a draft, checkout it if not exists
-        if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
+        if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
             $content->setDraft($draft);
         }
 
@@ -738,7 +738,7 @@ class ContentBlocks extends AbstractServiceLocal
                         }
 
                         // Find a draft, checkout it if not exists
-                        if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true)) {
+                        if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true)) {
                             $subcontent->setDraft($draft);
                         }
 

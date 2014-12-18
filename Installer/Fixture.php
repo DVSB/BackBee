@@ -1,10 +1,10 @@
 <?php
 
-namespace BackBuilder\Installer;
+namespace BackBee\Installer;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Installer\Annotation\Fixture as AnnotationFixture;
-use BackBuilder\Installer\Annotation\Fixtures as AnnotationFixtures;
+use BackBee\BBApplication;
+use BackBee\Installer\Annotation\Fixture as AnnotationFixture;
+use BackBee\Installer\Annotation\Fixtures as AnnotationFixtures;
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -129,7 +129,7 @@ class Fixture
     {
         if (!$this->_annotationReader) {
             $this->_annotationReader = new SimpleAnnotationReader();
-            $this->_annotationReader->addNamespace('BackBuilder\Installer\Annotation');
+            $this->_annotationReader->addNamespace('BackBee\Installer\Annotation');
         }
 
         return $this->_annotationReader;

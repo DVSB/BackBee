@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security;
+namespace BackBee\Security;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Routing\Matcher\RequestMatcher;
-use BackBuilder\Security\Authentication\AuthenticationManager;
-use BackBuilder\Security\Context\ContextInterface;
-use BackBuilder\Security\Exception\SecurityException;
-use BackBuilder\Security\Listeners\LogoutListener;
+use BackBee\BBApplication;
+use BackBee\Routing\Matcher\RequestMatcher;
+use BackBee\Security\Authentication\AuthenticationManager;
+use BackBee\Security\Context\ContextInterface;
+use BackBee\Security\Exception\SecurityException;
+use BackBee\Security\Listeners\LogoutListener;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
@@ -37,8 +37,8 @@ use Symfony\Component\Security\Http\Firewall;
 use Symfony\Component\Security\Http\FirewallMap;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -92,8 +92,8 @@ class SecurityContext extends sfSecurityContext
 
         /*if (null === $accessDecisionManager) {
             $trustResolver = new TrustResolver(
-                'BackBuilder\Security\Token\AnonymousToken',
-                'BackBuilder\Security\Token\RememberMeToken'
+                'BackBee\Security\Token\AnonymousToken',
+                'BackBee\Security\Token\RememberMeToken'
             );
 
             $voters = array();
@@ -106,7 +106,7 @@ class SecurityContext extends sfSecurityContext
                 $voters[] = new Authorization\Voter\BBAclVoter(
                     $this->aclprovider,
                     new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
-                    new \BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
+                    new \BackBee\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
                             new RoleHierarchy(array()),
                             $trustResolver
                     ),
@@ -402,7 +402,7 @@ class SecurityContext extends sfSecurityContext
     /**
      * Create an encoders factory if need
      * @param  array                                 $config
-     * @return \BackBuilder\Security\SecurityContext
+     * @return \BackBee\Security\SecurityContext
      */
     private function createEncoderFactory(array $config)
     {

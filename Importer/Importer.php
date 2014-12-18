@@ -2,32 +2,32 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Importer;
+namespace BackBee\Importer;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Config\Config;
-use BackBuilder\Util\Buffer;
-use BackBuilder\Importer\Exception\ImporterException;
+use BackBee\BBApplication;
+use BackBee\Config\Config;
+use BackBee\Util\Buffer;
+use BackBee\Importer\Exception\ImporterException;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Importer
+ * @category    BackBee
+ * @package     BackBee\Importer
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>, n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -48,9 +48,9 @@ class Importer
     /**
      * Class constructor
      *
-     * @param \BackBuilder\BBApplication               $application
-     * @param \BackBuilder\Importer\IImporterConnector $connector
-     * @param \BackBuilder\Config\Config               $config
+     * @param \BackBee\BBApplication               $application
+     * @param \BackBee\Importer\IImporterConnector $connector
+     * @param \BackBee\Config\Config               $config
      */
     public function __construct(BBApplication $application, IImporterConnector $connector, Config $config)
     {
@@ -196,7 +196,7 @@ class Importer
     /**
      *
      * @param  array                            $config
-     * @return \BackBuilder\Importer\IConverter
+     * @return \BackBee\Importer\IConverter
      */
     final protected function initConvertion(array $config)
     {
@@ -297,7 +297,7 @@ class Importer
     }
 
     /**
-     * @return /BackBuilder/BBApplication
+     * @return /BackBee/BBApplication
      */
     final public function getApplication()
     {
@@ -331,7 +331,7 @@ class Importer
 
     /**
      *
-     * @return \BackBuilder\Importer\IImporterConnector
+     * @return \BackBee\Importer\IImporterConnector
      */
     public function getConnector()
     {

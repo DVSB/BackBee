@@ -3,39 +3,39 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Rpc;
+namespace BackBee\Services\Rpc;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Services\Rpc\Exception\RpcException;
-use BackBuilder\Services\Utils\Error;
-use BackBuilder\Event\Event;
-use BackBuilder\Exception\BBException;
-use BackBuilder\Exception\MissingApplicationException;
-use BackBuilder\Security\Exception\ForbiddenAccessException;
+use BackBee\BBApplication;
+use BackBee\Services\Rpc\Exception\RpcException;
+use BackBee\Services\Utils\Error;
+use BackBee\Event\Event;
+use BackBee\Exception\BBException;
+use BackBee\Exception\MissingApplicationException;
+use BackBee\Security\Exception\ForbiddenAccessException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Rpc
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
@@ -43,8 +43,8 @@ use Doctrine\Common\Annotations\SimpleAnnotationReader;
 class JsonRPCServer
 {
     /**
-     * The current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * The current BackBee application
+     * @var \BackBee\BBApplication
      */
     protected $_application;
 
@@ -56,7 +56,7 @@ class JsonRPCServer
 
     /**
      * Class constructor
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBee\BBApplication $application
      */
     public function __construct(BBApplication $application = null)
     {
@@ -309,7 +309,7 @@ class JsonRPCServer
         }
 
         $this->_application->getEntityManager()
-                ->getRepository('BackBuilder\Logging\AdminLog')
+                ->getRepository('BackBee\Logging\AdminLog')
                 ->log($this->_application->getBBUserToken()->getUser(), $classname, $method, $entity);
     }
 
@@ -330,7 +330,7 @@ class JsonRPCServer
     protected function _registerAnnotations($method)
     {
         $reader = new SimpleAnnotationReader();
-        $reader->addNamespace('BackBuilder\Services\Rpc\Annotation');
+        $reader->addNamespace('BackBee\Services\Rpc\Annotation');
         $this->_annotations->set('exposed', $reader->getMethodAnnotation($method, new Annotation\Exposed()));
         $this->_annotations->set('log', $reader->getMethodAnnotation($method, new Annotation\Log()));
         $this->_annotations->set('restrict', $reader->getMethodAnnotation($method, new Annotation\Restrict()));
@@ -353,9 +353,9 @@ class JsonRPCServer
 
     /**
      * Validates the RPC request
-     * @return \BackBuilder\Services\Rpc\JsonRPCServer
-     * @throws \BackBuilder\Services\Rpc\Exception\InvalidRequestException Occurs if the RPC request is invalid
-     * @throws \BackBuilder\Services\Rpc\Exception\InvalidMethodException  Occurs if the RPC request method is invalid
+     * @return \BackBee\Services\Rpc\JsonRPCServer
+     * @throws \BackBee\Services\Rpc\Exception\InvalidRequestException Occurs if the RPC request is invalid
+     * @throws \BackBee\Services\Rpc\Exception\InvalidMethodException  Occurs if the RPC request method is invalid
      */
     protected function _validateRequest(Request $request)
     {
@@ -385,7 +385,7 @@ class JsonRPCServer
             throw new RpcException(sprintf('JsonRpcServer: unknown service `%s`', $classname));
         }
 
-        if (!$reflectionClass->implementsInterface('BackBuilder\Services\Local\IServiceLocal')) {
+        if (!$reflectionClass->implementsInterface('BackBee\Services\Local\IServiceLocal')) {
             throw new RpcException(sprintf('JsonRpcServer: `%s` is not an AbstractServiceLocal object', $classname));
         }
 
@@ -420,15 +420,15 @@ class JsonRPCServer
     }
 
     /**
-     * Checks for a valid BackBuilder5 user on the current Site is need
-     * @return \BackBuilder\Services\Rpc\JsonRPCServer
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the user can not admin the current Site
+     * Checks for a valid BackBee5 user on the current Site is need
+     * @return \BackBee\Services\Rpc\JsonRPCServer
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the user can not admin the current Site
      */
     protected function _checkSecuredAccess()
     {
         if (null === $this->_application) {
-            throw new MissingApplicationException('None BackBuilder application defined');
+            throw new MissingApplicationException('None BackBee application defined');
         }
 
         if (true === $this->isSecured()) {
@@ -447,14 +447,14 @@ class JsonRPCServer
 
     /**
      * Checks for a valid role for user if need
-     * @return \BackBuilder\Services\Rpc\JsonRPCServer
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the user has not the expected role
+     * @return \BackBee\Services\Rpc\JsonRPCServer
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the user has not the expected role
      */
     protected function _checkRestrictedAccess()
     {
         if (null === $this->_application) {
-            throw new MissingApplicationException('None BackBuilder application defined');
+            throw new MissingApplicationException('None BackBee application defined');
         }
 
         if (true === $this->isRestrict()) {

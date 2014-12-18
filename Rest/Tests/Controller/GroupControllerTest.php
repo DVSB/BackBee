@@ -3,40 +3,40 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\Controller;
+namespace BackBee\Rest\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use BackBuilder\Rest\Controller\GroupController;
-use BackBuilder\Tests\TestCase;
-use BackBuilder\Security\User;
-use BackBuilder\Security\Group;
-use BackBuilder\Site\Site;
+use BackBee\Rest\Controller\GroupController;
+use BackBee\Tests\TestCase;
+use BackBee\Security\User;
+use BackBee\Security\Group;
+use BackBee\Site\Site;
 
 /**
  * Test for GroupController class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\Controller\GroupController
+ * @coversDefaultClass \BackBee\Rest\Controller\GroupController
  */
 class GroupControllerTest extends TestCase
 {
@@ -87,7 +87,7 @@ class GroupControllerTest extends TestCase
         ), array(
             'id' => $this->groupEditor->getId(),
             '_action' => 'getCollectionAction',
-            '_controller' => 'BackBuilder\Rest\Controller\GroupController',
+            '_controller' => 'BackBee\Rest\Controller\GroupController',
         ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $res = json_decode($response->getContent(), true);
@@ -101,7 +101,7 @@ class GroupControllerTest extends TestCase
         ), array(
             'id' => $this->groupEditor->getId(),
             '_action' => 'getCollectionAction',
-            '_controller' => 'BackBuilder\Rest\Controller\GroupController',
+            '_controller' => 'BackBee\Rest\Controller\GroupController',
         ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -123,7 +123,7 @@ class GroupControllerTest extends TestCase
         ), array(
             'id' => $this->groupEditor->getId(),
             '_action' => 'getCollectionAction',
-            '_controller' => 'BackBuilder\Rest\Controller\GroupController',
+            '_controller' => 'BackBee\Rest\Controller\GroupController',
         ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -145,7 +145,7 @@ class GroupControllerTest extends TestCase
         ), array(
             'id' => $this->groupEditor->getId(),
             '_action' => 'getCollectionAction',
-            '_controller' => 'BackBuilder\Rest\Controller\GroupController',
+            '_controller' => 'BackBee\Rest\Controller\GroupController',
         ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -187,7 +187,7 @@ class GroupControllerTest extends TestCase
 
         $this->assertEquals(204, $response->getStatusCode());
 
-        $groupAfterDelete = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($groupId);
+        $groupAfterDelete = $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\Group')->find($groupId);
         $this->assertTrue(is_null($groupAfterDelete));
 
         // invalid group id
@@ -214,7 +214,7 @@ class GroupControllerTest extends TestCase
 
         $this->assertEquals(204, $response->getStatusCode());
 
-        $groupUpdated = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($groupId);
+        $groupUpdated = $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\Group')->find($groupId);
         $this->assertEquals($data['identifier'], $groupUpdated->getIdentifier());
         $this->assertEquals($data['name'], $groupUpdated->getName());
         $this->assertEquals($data['site_uid'], $groupUpdated->getSite()->getUid());
@@ -229,7 +229,7 @@ class GroupControllerTest extends TestCase
         ), array(
             'id' => $this->groupEditor->getId(),
             '_action' => 'putAction',
-            '_controller' => 'BackBuilder\Rest\Controller\GroupController',
+            '_controller' => 'BackBee\Rest\Controller\GroupController',
         ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -267,8 +267,8 @@ class GroupControllerTest extends TestCase
 
         $this->assertArrayHasKey('id', $res);
 
-        $group = $this->getBBApp()->getEntityManager()->getRepository('BackBuilder\Security\Group')->find($res['id']);
-        $this->assertInstanceOf('BackBuilder\Security\Group', $group);
+        $group = $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\Group')->find($res['id']);
+        $this->assertInstanceOf('BackBee\Security\Group', $group);
 
         // duplicate identifier
         $data = array(
@@ -283,7 +283,7 @@ class GroupControllerTest extends TestCase
 
     /**
      * @covers ::postAction
-     * @expectedException \BackBuilder\Rest\Exception\ValidationException
+     * @expectedException \BackBee\Rest\Exception\ValidationException
      */
     public function test_postAction_invalidStie()
     {
@@ -304,7 +304,7 @@ class GroupControllerTest extends TestCase
     {
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(), array(
             '_action' => 'postAction',
-            '_controller' => 'BackBuilder\Rest\Controller\GroupController',
+            '_controller' => 'BackBee\Rest\Controller\GroupController',
         ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $this->assertEquals(400, $response->getStatusCode());

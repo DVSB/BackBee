@@ -26,7 +26,7 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
     <link rel="stylesheet" href="<?php echo $this->getUri($css); ?>" type="text/css">
 <?php endforeach; ?>
 
-<?php if (NULL !== $this->getParam('token') && is_a($this->getParam('token'), 'BackBuilder\Security\Token\BBUserToken')): ?>
+<?php if (NULL !== $this->getParam('token') && is_a($this->getParam('token'), 'BackBee\Security\Token\BBUserToken')): ?>
    <!-- not used <script src="<?php echo $this->getResourceUrl('js/aloha/lib/aloha.js'); ?>" data-aloha-plugins="common/format, common/link, common/highlighteditables, common/paste, common/block, common/commands, extra/bbselector <?php echo (('' != $this->getParam('aloha_extraplugins')) ? (', ' . $this->getParam('aloha_extraplugins')) : ''); ?>" type="text/javascript"></script>-->
     <link rel="stylesheet" href="<?php echo $this->getResourceUrl('js/libs/alohaeditor/aloha/css/aloha.css'); ?>">
 
@@ -42,8 +42,8 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
     <div id="bb5-toolbar-wrapper" data-site="<?php echo $this->getCurrentSite()->getUid(); ?>" data-layout="<?php echo $this->layout()->getUid(); ?>" data-page="<?php echo $this->currentpage()->getUid(); ?>" data-breadcrumb="<?php echo join('-', $this->currentpage()->getBreadcrumb_uids()); ?>">
         <?php // Begin toolbar wrapper ?>
         <p id="bb5-logo">
-            <a href="http://www.backbuilder.fr/" target="_blank">
-                <img src="<?php echo $this->getResourceUrl('img/bb5_logo_full_sm.png'); ?>" alt="BackBuilder5™">
+            <a href="http://www.BackBee.fr/" target="_blank">
+                <img src="<?php echo $this->getResourceUrl('img/bb5_logo_full_sm.png'); ?>" alt="BackBee5™">
             </a>
             <span><b> Create</b> your Website</span>
         </p>
@@ -69,7 +69,7 @@ $layoutCssArr = (is_array($layoutCss)) ? $layoutCss : (array) $layoutCss;
             <div id="bb5-maintabs">
                 <ul class='bb5-tabs'>
                     <li<?php if (false !== $this->getApplication()->getSecurityContext()->isGranted('sudo')
-                && false === $this->getApplication()->getSecurityContext()->isGranted('EDIT', new \BackBuilder\Site\Layout('*')))
+                && false === $this->getApplication()->getSecurityContext()->isGranted('EDIT', new \BackBee\Site\Layout('*')))
             //echo ' style="display:none;"';
         ?>>
                         <a href='#bb5-grid' data-i18n="toolbar.templates.label">Gabarits</a>

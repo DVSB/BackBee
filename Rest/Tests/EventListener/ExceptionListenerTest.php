@@ -3,40 +3,40 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\EventListener;
+namespace BackBee\Rest\Tests\EventListener;
 
-use BackBuilder\Tests\TestCase;
+use BackBee\Tests\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use BackBuilder\Rest\EventListener\ExceptionListener;
-use BackBuilder\FrontController\FrontController;
-use BackBuilder\Security\Exception\SecurityException;
+use BackBee\Rest\EventListener\ExceptionListener;
+use BackBee\FrontController\FrontController;
+use BackBee\Security\Exception\SecurityException;
 
 /**
  * Test for ExceptionListener class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\EventListener\ExceptionListener
+ * @coversDefaultClass \BackBee\Rest\EventListener\ExceptionListener
  */
 class ExceptionListenerTest extends TestCase
 {
@@ -90,7 +90,7 @@ class ExceptionListenerTest extends TestCase
         $this->assertEquals($exception->getStatusCode(), $event->getResponse()->getStatusCode());
 
         // ValidationException
-        $exception = new \BackBuilder\Rest\Exception\ValidationException(
+        $exception = new \BackBee\Rest\Exception\ValidationException(
             new \Symfony\Component\Validator\ConstraintViolationList([
                 new \Symfony\Component\Validator\ConstraintViolation(
                     'Validation Error', 'Validation Error', [], 'root', 'property', 'valueInvalid'

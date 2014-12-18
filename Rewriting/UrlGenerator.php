@@ -3,29 +3,29 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rewriting;
+namespace BackBee\Rewriting;
 
-use BackBuilder\BBApplication;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Rewriting\Exception\RewritingException;
-use BackBuilder\Util\String;
+use BackBee\BBApplication;
+use BackBee\ClassContent\AClassContent;
+use BackBee\NestedNode\Page;
+use BackBee\Rewriting\Exception\RewritingException;
+use BackBee\Util\String;
 
 /**
  * Utility class to generate page URL according config rules
@@ -49,16 +49,16 @@ use BackBuilder\Util\String;
  *    * $content->x : the urlized form of the 'x' property of content
  *    * $ancestor[x]: the ancestor of level x url
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rewriting
+ * @category    BackBee
+ * @package     BackBee\Rewriting
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class UrlGenerator implements IUrlGenerator
 {
     /**
-     * Current BackBuilder application
-     * @var BackBuilder\BBApplication
+     * Current BackBee application
+     * @var BackBee\BBApplication
      */
     private $application;
 
@@ -88,7 +88,7 @@ class UrlGenerator implements IUrlGenerator
 
     /**
      * Class constructor
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBee\BBApplication $application
      */
     public function __construct(BBApplication $application)
     {
@@ -121,12 +121,12 @@ class UrlGenerator implements IUrlGenerator
 
             if (true === array_key_exists('_content_', $this->schemes)) {
                 foreach (array_keys($this->schemes['_content_']) as $descriminator) {
-                    $this->descriminators[] = 'BackBuilder\ClassContent\\'.$descriminator;
+                    $this->descriminators[] = 'BackBee\ClassContent\\'.$descriminator;
 
                     if (null !== $this->application->getEventDispatcher()) {
                         $this->application
                              ->getEventDispatcher()
-                             ->addListener(str_replace(NAMESPACE_SEPARATOR, '.', $descriminator).'.onflush', array('BackBuilder\Event\Listener\RewritingListener', 'onFlushContent'))
+                             ->addListener(str_replace(NAMESPACE_SEPARATOR, '.', $descriminator).'.onflush', array('BackBee\Event\Listener\RewritingListener', 'onFlushContent'))
                         ;
                     }
                 }
@@ -138,8 +138,8 @@ class UrlGenerator implements IUrlGenerator
 
     /**
      * Returns the URL of the page
-     * @param  \BackBuilder\NestedNode\Page            $page    The page
-     * @param  \BackBuilder\ClassContent\AClassContent $content The optionnal main content of the page
+     * @param  \BackBee\NestedNode\Page            $page    The page
+     * @param  \BackBee\ClassContent\AClassContent $content The optionnal main content of the page
      * @return string                                  The URL                                  The generated URL
      */
     public function generate(Page $page, AClassContent $content = null, $exceptionOnMissingScheme = true)
@@ -164,7 +164,7 @@ class UrlGenerator implements IUrlGenerator
         }
 
         if (null !== $content && true === array_key_exists('_content_', $this->schemes)) {
-            $shortClassname = str_replace('BackBuilder\ClassContent\\', '', get_class($content));
+            $shortClassname = str_replace('BackBee\ClassContent\\', '', get_class($content));
             if (true === array_key_exists($shortClassname, $this->schemes['_content_'])) {
                 return $this->doGenerate($this->schemes['_content_'][$shortClassname], $page, $content);
             }
@@ -222,7 +222,7 @@ class UrlGenerator implements IUrlGenerator
             foreach ($matches[2] as $level) {
                 $ancestor = $this->application
                     ->getEntityManager()
-                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->getRepository('BackBee\NestedNode\Page')
                     ->getAncestor($page, $level)
                 ;
                 if (null !== $ancestor && $page->getLevel() > $level) {
@@ -243,13 +243,13 @@ class UrlGenerator implements IUrlGenerator
 
     /**
      * Checks for the uniqueness of the URL and postfixe it if need
-     * @param \BackBuilder\NestedNode\Page $page The page
+     * @param \BackBee\NestedNode\Page $page The page
      * @param string                       &$url The reference of the generated URL
      */
     private function checkUniqueness(Page $page, &$url)
     {
         $baseurl = $url.'-%d';
-        $page_repository = $this->application->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
+        $page_repository = $this->application->getEntityManager()->getRepository('BackBee\NestedNode\Page');
 
         $count = 1;
         $existings = array();

@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Content;
+namespace BackBee\Services\Content;
 
 use Symfony\Component\Yaml\Yaml as parserYaml;
-use BackBuilder\Util\File;
+use BackBee\Util\File;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Content
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
@@ -121,7 +121,7 @@ class Category
     /**
      * @codeCoverageIgnore
      * @param  string                                 $name
-     * @return \BackBuilder\Services\Content\Category
+     * @return \BackBee\Services\Content\Category
      */
     public function setName($name)
     {
@@ -133,7 +133,7 @@ class Category
     /**
      * @deprecated since version 1.0
      * @codeCoverageIgnore
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function getBBapp()
     {
@@ -142,7 +142,7 @@ class Category
 
     /**
      * return $this->application;
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function getApplication()
     {
@@ -152,7 +152,7 @@ class Category
     /**
      * @deprecated since version 1.0
      * @codeCoverageIgnore
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBee\BBApplication $application
      */
     public function setBBapp($application)
     {
@@ -161,8 +161,8 @@ class Category
 
     /**
      * @codeCoverageIgnore
-     * @param  \BackBuilder\BBApplication             $application
-     * @return \BackBuilder\Services\Content\Category
+     * @param  \BackBee\BBApplication             $application
+     * @return \BackBee\Services\Content\Category
      */
     public function setApplication($application)
     {
@@ -183,7 +183,7 @@ class Category
     /**
      * @codeCoverageIgnore
      * @param  type                                   $selected
-     * @return \BackBuilder\Services\Content\Category
+     * @return \BackBee\Services\Content\Category
      */
     public function setSelected($selected)
     {
@@ -204,7 +204,7 @@ class Category
     /**
      * @codeCoverageIgnore
      * @param  string                                 $label
-     * @return \BackBuilder\Services\Content\Category
+     * @return \BackBee\Services\Content\Category
      */
     public function setLabel($label)
     {
@@ -255,7 +255,7 @@ class Category
      */
     private static function _getClassNameFromFile(&$item, $key, $basedir)
     {
-        $item = str_replace(array($basedir, DIRECTORY_SEPARATOR), array('\BackBuilder\ClassContent', NAMESPACE_SEPARATOR), File::removeExtension($item));
+        $item = str_replace(array($basedir, DIRECTORY_SEPARATOR), array('\BackBee\ClassContent', NAMESPACE_SEPARATOR), File::removeExtension($item));
 
         return $item;
     }
@@ -268,7 +268,7 @@ class Category
      */
     private static function _getCategoriesFromFiles(array $files, $basedir)
     {
-        array_walk($files, array('\BackBuilder\Services\Content\Category', '_getClassNameFromfile'), $basedir);
+        array_walk($files, array('\BackBee\Services\Content\Category', '_getClassNameFromfile'), $basedir);
         foreach ($files as $classname) {
             if (false === $properties = self::_getContentCategories($classname)) {
                 continue;
@@ -350,7 +350,7 @@ class Category
     /**
      * Add a new content classname for this category
      * @param  string                                 $classname
-     * @return \BackBuilder\Services\Content\Category
+     * @return \BackBee\Services\Content\Category
      */
     public function addClassname($classname)
     {

@@ -1,12 +1,12 @@
 <?php
-namespace BackBuilder\Tests\Mock;
+namespace BackBee\Tests\Mock;
 
-use BackBuilder\Site\Site;
+use BackBee\Site\Site;
 use Faker\Factory;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Tests\Mock
+ * @category    BackBee
+ * @package     BackBee\Tests\Mock
  * @copyright   Lp system
  * @author      n.dufreche
  */

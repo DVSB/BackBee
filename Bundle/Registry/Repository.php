@@ -3,23 +3,23 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Bundle\Registry;
+namespace BackBee\Bundle\Registry;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
@@ -27,8 +27,8 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Bundle
+ * @category    BackBee
+ * @package     BackBee\Bundle
  * @copyright   Lp digital system
  * @author n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -38,10 +38,10 @@ class Repository extends EntityRepository
 
     /**
      * Saves the registry entry in DB, persist it if need
-     * @param \BackBuilder\Bundle\Registry $registry
-     * @return \BackBuilder\Bundle\Registry
+     * @param \BackBee\Bundle\Registry $registry
+     * @return \BackBee\Bundle\Registry
      */
-    public function save(\BackBuilder\Bundle\Registry $registry)
+    public function save(\BackBee\Bundle\Registry $registry)
     {
         if (false === $this->getEntityManager()->contains($registry)) {
             $this->getEntityManager()->persist($registry);
@@ -54,10 +54,10 @@ class Repository extends EntityRepository
 
     /**
      * Removes the registry entry from DB
-     * @param \BackBuilder\Bundle\Registry $registry
-     * @return \BackBuilder\Bundle\Registry
+     * @param \BackBee\Bundle\Registry $registry
+     * @return \BackBee\Bundle\Registry
      */
-    public function remove(\BackBuilder\Bundle\Registry $registry)
+    public function remove(\BackBee\Bundle\Registry $registry)
     {
         if(\Doctrine\ORM\UnitOfWork::STATE_NEW !== $this->getEntityManager()->getUnitOfWork()->getEntityState($registry)) {
             $this->getEntityManager()->remove($registry);
@@ -71,8 +71,8 @@ class Repository extends EntityRepository
 
     /**
      * Removes the registry entry from DB
-     * @param \BackBuilder\Bundle\Registry $registry
-     * @return \BackBuilder\Bundle\Registry
+     * @param \BackBee\Bundle\Registry $registry
+     * @return \BackBee\Bundle\Registry
      */
     public function removeEntity($entity)
     {
@@ -93,7 +93,7 @@ class Repository extends EntityRepository
 
         $registry = null;
         if (false !== $result) {
-            $registry = new \BackBuilder\Bundle\Registry();
+            $registry = new \BackBee\Bundle\Registry();
             $registry->setKey($result['key']);
             $registry->setValue($result['value']);
             $registry->setScope($result['scope']);
@@ -176,7 +176,7 @@ class Repository extends EntityRepository
     private function getResultSetMapping()
     {
         $rsm = new ResultSetMapping();
-        $rsm->addEntityResult('BackBuilder\Bundle\Registry', 'br');
+        $rsm->addEntityResult('BackBee\Bundle\Registry', 'br');
         $rsm->addFieldResult('br', 'id', 'id');
         $rsm->addFieldResult('br', 'type', 'type');
         $rsm->addMetaResult('br', 'key', 'key');

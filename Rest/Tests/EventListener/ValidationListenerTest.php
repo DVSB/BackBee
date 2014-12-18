@@ -3,40 +3,40 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\EventListener;
+namespace BackBee\Rest\Tests\EventListener;
 
-use BackBuilder\Rest\EventListener\ValidationListener;
+use BackBee\Rest\EventListener\ValidationListener;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpFoundation\Request;
-use BackBuilder\Tests\TestCase;
-use BackBuilder\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
-use BackBuilder\FrontController\FrontController;
+use BackBee\Tests\TestCase;
+use BackBee\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
+use BackBee\FrontController\FrontController;
 
 /**
  * Validation Listener class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\EventListener\ValidationListener
+ * @coversDefaultClass \BackBee\Rest\EventListener\ValidationListener
  */
 class ValidationListenerTest extends TestCase
 {
@@ -47,7 +47,7 @@ class ValidationListenerTest extends TestCase
     {
         $listener = new ValidationListener($this->getBBApp()->getContainer());
 
-        $this->assertInstanceOf('BackBuilder\Rest\EventListener\ValidationListener', $listener);
+        $this->assertInstanceOf('BackBee\Rest\EventListener\ValidationListener', $listener);
     }
 
     /**
@@ -56,7 +56,7 @@ class ValidationListenerTest extends TestCase
      * @covers ::validateParams
      * @covers ::getControllerActionMetadata
      * @covers ::getViolationsParameterName
-     * @expectedException BackBuilder\Rest\Exception\ValidationException
+     * @expectedException BackBee\Rest\Exception\ValidationException
      */
     public function test_onKernelController_invalidInputWithoutViolationsActionArgument()
     {

@@ -3,28 +3,28 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Workflow;
+namespace BackBee\Workflow;
 
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\Site\Layout;
-use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
-use BackBuilder\Util\Numeric;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\Site\Layout;
+use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Util\Numeric;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
@@ -35,11 +35,11 @@ use JMS\Serializer\Annotation as Serializer;
  *
  * A state can be associated to a specific Site\Layout and/or Listener
  *
- * @category    BackBuilder
- * @package     BackBuilder\Workflow
+ * @category    BackBee
+ * @package     BackBee\Workflow
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\Workflow\Repository\StateRepository")
+ * @Entity(repositoryClass="BackBee\Workflow\Repository\StateRepository")
  * @Table(name="workflow")
  *
  * @Serializer\ExclusionPolicy("all")
@@ -79,8 +79,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * The optional layout to be applied for state.
-     * @var \BackBuilder\Site\Layout
-     * @ManyToOne(targetEntity="BackBuilder\Site\Layout", fetch="EXTRA_LAZY")
+     * @var \BackBee\Site\Layout
+     * @ManyToOne(targetEntity="BackBee\Site\Layout", fetch="EXTRA_LAZY")
      * @JoinColumn(name="layout", referencedColumnName="uid")
      */
     protected $_layout;
@@ -133,8 +133,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     /**
      * Sets the code
      * @param  int                                             $code
-     * @return \BackBuilder\Workflow\State
-     * @throws \BackBuilder\Exception\InvalidArgumentException
+     * @return \BackBee\Workflow\State
+     * @throws \BackBee\Exception\InvalidArgumentException
      */
     public function setCode($code)
     {
@@ -159,7 +159,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Returns the layout if defined, NULL otherwise
-     * @return \BackBuilder\Site\Layout
+     * @return \BackBee\Site\Layout
      * @codeCoverageIgnore
      */
     public function getLayout()
@@ -180,7 +180,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     /**
      * Sets the label
      * @param  type                        $label
-     * @return \BackBuilder\Workflow\State
+     * @return \BackBee\Workflow\State
      * @codeCoverageIgnore
      */
     public function setLabel($label)
@@ -192,8 +192,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Sets the layout associated to this state
-     * @param  \BackBuilder\Site\Layout    $layout
-     * @return \BackBuilder\Workflow\State
+     * @param  \BackBee\Site\Layout    $layout
+     * @return \BackBee\Workflow\State
      */
     public function setLayout(Layout $layout = null)
     {
@@ -205,7 +205,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     /**
      * Sets the optional listener classname
      * @param  string                      $listener
-     * @return \BackBuilder\Workflow\State
+     * @return \BackBee\Workflow\State
      * @codeCoverageIgnore
      */
     public function setListener($listener = null)
@@ -249,8 +249,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     /**
      * Constructs the state from a string or object
      * @param  mixed                                           $serialized The string representation of the object.
-     * @return \BackBuilder\Workflow\State
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
+     * @return \BackBee\Workflow\State
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
      *                                                                    with strict mode, if a property does not exists
      * @deprecated since version 1.0
      */

@@ -3,28 +3,28 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Stream\ClassWrapper\Adapter;
+namespace BackBee\Stream\ClassWrapper\Adapter;
 
-use BackBuilder\Exception\BBException;
-use BackBuilder\Util\File;
-use BackBuilder\Stream\ClassWrapper\AClassWrapper;
-use BackBuilder\Stream\ClassWrapper\Exception\ClassWrapperException;
+use BackBee\Exception\BBException;
+use BackBee\Util\File;
+use BackBee\Stream\ClassWrapper\AClassWrapper;
+use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml as parserYaml;
 
@@ -32,8 +32,8 @@ use Symfony\Component\Yaml\Yaml as parserYaml;
  * Stream wrapper to interprate yaml file as class content description
  * Extends AClassWrapper
  *
- * @category    BackBuilder
- * @package     BackBuilder\Stream\ClassWrapper
+ * @category    BackBee
+ * @package     BackBee\Stream\ClassWrapper
  * @subpackage  Adapter
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -41,8 +41,8 @@ use Symfony\Component\Yaml\Yaml as parserYaml;
 class Yaml extends AClassWrapper
 {
     /**
-     * Current BackBuilder application
-     * @var BackBuilder\BBApplication
+     * Current BackBee application
+     * @var BackBee\BBApplication
      */
     private $_application;
 
@@ -72,7 +72,7 @@ class Yaml extends AClassWrapper
         parent::__construct();
 
         if (NULL === $this->_autoloader) {
-            throw new ClassWrapperException('The BackBuilder autoloader can not be retreived.');
+            throw new ClassWrapperException('The BackBee autoloader can not be retreived.');
         }
 
         $this->_application = $this->_autoloader->getApplication();
@@ -290,7 +290,7 @@ class Yaml extends AClassWrapper
 
     /**
      * Opens a stream content for a yaml file
-     * @see BackBuilder\Stream\ClassWrapper.IClassWrapper::stream_open()
+     * @see BackBee\Stream\ClassWrapper.IClassWrapper::stream_open()
      * @throws BBException           Occurs when none yamel files were found
      * @throws ClassWrapperException Occurs when yaml file is not a valid class content description
      */
@@ -341,7 +341,7 @@ class Yaml extends AClassWrapper
 
     /**
      * Retrieve information about a yaml file
-     * @see BackBuilder\Stream\ClassWrapper.AClassWrapper::url_stat()
+     * @see BackBee\Stream\ClassWrapper.AClassWrapper::url_stat()
      */
     public function url_stat($path, $flag)
     {

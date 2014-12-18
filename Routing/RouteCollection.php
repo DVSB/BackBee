@@ -3,29 +3,29 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Routing;
+namespace BackBee\Routing;
 
-use BackBuilder\BBApplication;
-use BackBuilder\DependencyInjection\ContainerInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface;
-use BackBuilder\Site\Site;
+use BackBee\BBApplication;
+use BackBee\DependencyInjection\ContainerInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
+use BackBee\Site\Site;
 use Symfony\Component\Routing\RouteCollection as sfRouteCollection;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -36,8 +36,8 @@ use Symfony\Component\HttpFoundation\Request;
  * with the same name is removed first. So there can only be one route
  * with a given name.
  *
- * @category    BackBuilder
- * @package     BackBuilder\Routing
+ * @category    BackBee
+ * @package     BackBee\Routing
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -50,7 +50,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
     /**
      * The current BBApplication
-     * @var \BackBuilder\BBApplication
+     * @var \BackBee\BBApplication
      */
     private $application;
 
@@ -71,7 +71,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
     /**
      * Class constructor
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBee\BBApplication $application
      */
     public function __construct(BBApplication $application = null)
     {
@@ -89,7 +89,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
         }
 
         if (true === $container->hasParameter('bbapp.routing.resource_uri_prefix')) {
-            // Can't enable it at moment, hard dependency in BackBuilder JS core
+            // Can't enable it at moment, hard dependency in BackBee JS core
             // $this->uri_prefixes[self::RESOURCE_URL] = $container->getParameter('bbapp.routing.resource_uri_prefix');
             $this->uri_prefixes[self::RESOURCE_URL] = 'ressources';
         }
@@ -175,7 +175,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      * If $site is provided, the url will be pointing on the associate domain
      * @param  string                 $pathinfo
      * @param  string                 $defaultExt
-     * @param  \BackBuilder\Site\Site $site
+     * @param  \BackBee\Site\Site $site
      * @return string
      */
     public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
@@ -223,7 +223,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::getClassProxy
+     * @see BackBee\DependencyInjection\Dumper\DumpableServiceInterface::getClassProxy
      */
     public function getClassProxy()
     {
@@ -231,7 +231,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::dump
+     * @see BackBee\DependencyInjection\Dumper\DumpableServiceInterface::dump
      */
     public function dump(array $options = array())
     {
@@ -239,7 +239,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceProxyInterface::restore
+     * @see BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface::restore
      */
     public function restore(ContainerInterface $container, array $dump)
     {
@@ -253,7 +253,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::isRestored
+     * @see BackBee\DependencyInjection\Dumper\DumpableServiceInterface::isRestored
      */
     public function isRestored()
     {
@@ -313,7 +313,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      * Returns uri from pathinfo according to site to be reached
      * @param  \Symfony\Component\HttpFoundation\Request $request
      * @param  string                                    $pathinfo
-     * @param  \BackBuilder\Site\Site                    $site
+     * @param  \BackBee\Site\Site                    $site
      * @return string
      */
     private function getUriForSite(Request $request, $pathinfo, Site $site)
@@ -323,7 +323,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
     /**
      * Returns the default extension for a site
-     * @param  \BackBuilder\Site\Site $site
+     * @param  \BackBee\Site\Site $site
      * @return string|null
      */
     private function getDefaultExtFromSite(Site $site = null)

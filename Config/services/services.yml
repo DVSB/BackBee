@@ -4,23 +4,23 @@ parameters:
     translator.fallback: 'fr'
 
     # bbapp classes
-    bbapp.config.class: BackBuilder\Config\Config
-    bbapp.logger.class: BackBuilder\Logging\Logger
-    bbapp.logger_debug.class: BackBuilder\Logging\DebugStackLogger
-    bbapp.controller.class: BackBuilder\FrontController\FrontController
-    bbapp.media.controller.class: BackBuilder\Controller\MediaController
-    bbapp.resource.controller.class: BackBuilder\Controller\ResourceController
-    bbapp.renderer.class: BackBuilder\Renderer\Renderer
-    bbapp.ed.class: BackBuilder\Event\Dispatcher
-    bbapp.rpcserver.class: BackBuilder\Services\Rpc\JsonRPCServer
-    bbapp.uploadserver.class: BackBuilder\Services\Upload\UploadServer
-    bbapp.urlgenerator.class: BackBuilder\Rewriting\UrlGenerator
-    bbapp.translator.class: BackBuilder\Translation\Translator
-    bbapp.pagebuilder.class: BackBuilder\NestedNode\Builder\PageBuilder
+    bbapp.config.class: BackBee\Config\Config
+    bbapp.logger.class: BackBee\Logging\Logger
+    bbapp.logger_debug.class: BackBee\Logging\DebugStackLogger
+    bbapp.controller.class: BackBee\FrontController\FrontController
+    bbapp.media.controller.class: BackBee\Controller\MediaController
+    bbapp.resource.controller.class: BackBee\Controller\ResourceController
+    bbapp.renderer.class: BackBee\Renderer\Renderer
+    bbapp.ed.class: BackBee\Event\Dispatcher
+    bbapp.rpcserver.class: BackBee\Services\Rpc\JsonRPCServer
+    bbapp.uploadserver.class: BackBee\Services\Upload\UploadServer
+    bbapp.urlgenerator.class: BackBee\Rewriting\UrlGenerator
+    bbapp.translator.class: BackBee\Translation\Translator
+    bbapp.pagebuilder.class: BackBee\NestedNode\Builder\PageBuilder
     bbapp.registry.class: Symfony\Component\HttpFoundation\ParameterBag
-    bbapp.autoloader.class: BackBuilder\AutoLoader\AutoLoader
-    bbapp.keywordbuilder.class: BackBuilder\NestedNode\Builder\KeywordBuilder
-    bbapp.controller_resolver.class: BackBuilder\Controller\ControllerResolver
+    bbapp.autoloader.class: BackBee\AutoLoader\AutoLoader
+    bbapp.keywordbuilder.class: BackBee\NestedNode\Builder\KeywordBuilder
+    bbapp.controller_resolver.class: BackBee\Controller\ControllerResolver
     bbapp.request.class: Symfony\Component\HttpFoundation\Request
 
     bbapp.script.command: php
@@ -28,20 +28,20 @@ parameters:
 
     bbapp.rest_api.path: /rest/
 
-    bbapp.dbal.logger.profiling.class: BackBuilder\Logging\DebugStackLogger
+    bbapp.dbal.logger.profiling.class: BackBee\Logging\DebugStackLogger
 
     # data collectors
-    bbapp.collector.config.class: BackBuilder\Profiler\DataCollector\ConfigDataCollector
+    bbapp.collector.config.class: BackBee\Profiler\DataCollector\ConfigDataCollector
     bbapp.collector.request.class: Symfony\Component\HttpKernel\DataCollector\RequestDataCollector
     bbapp.collector.exception.class: Symfony\Component\HttpKernel\DataCollector\ExceptionDataCollector
     bbapp.collector.events.class: Symfony\Component\HttpKernel\DataCollector\EventDataCollector
     bbapp.collector.logger.class: Symfony\Component\HttpKernel\DataCollector\LoggerDataCollector
     bbapp.collector.time.class: Symfony\Component\HttpKernel\DataCollector\TimeDataCollector
     bbapp.collector.memory.class: Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector
-    bbapp.collector.routing.class: BackBuilder\Profiler\DataCollector\RoutingDataCollector
-    bbapp.collector.doctrine.class: BackBuilder\Profiler\DataCollector\DoctrineDataCollector
+    bbapp.collector.routing.class: BackBee\Profiler\DataCollector\RoutingDataCollector
+    bbapp.collector.doctrine.class: BackBee\Profiler\DataCollector\DoctrineDataCollector
 
-    bbapp.job.queue.registry.class: BackBuilder\Job\Queue\RegistryQueue
+    bbapp.job.queue.registry.class: BackBee\Job\Queue\RegistryQueue
 
     data_collector.templates:
         config: "%bbapp.base.dir%/Resources/scripts/Collector/config.html.twig"
@@ -54,14 +54,14 @@ parameters:
         routing: "%bbapp.base.dir%/Resources/scripts/Collector/routing.html.twig"
         db: "%bbapp.base.dir%/Resources/scripts/Collector/db.html.twig"
 
-    bbapp.analytics.class: BackBuilder\Application\Analytics
+    bbapp.analytics.class: BackBee\Application\Analytics
 
     config.yml_files_to_ignore: ['services', 'bootstrap']
 
-    bbapp.config.configurator.class: BackBuilder\Config\Configurator
-    bbapp.config.persistor.class: BackBuilder\Config\Persistor
-    bbapp.bundle.loader.class: BackBuilder\Bundle\BundleLoader
-    bbapp.classcontent.category_manager.class: BackBuilder\ClassContent\CategoryManager
+    bbapp.config.configurator.class: BackBee\Config\Configurator
+    bbapp.config.persistor.class: BackBee\Config\Persistor
+    bbapp.bundle.loader.class: BackBee\Bundle\BundleLoader
+    bbapp.classcontent.category_manager.class: BackBee\ClassContent\CategoryManager
 
 services:
 
@@ -162,11 +162,11 @@ services:
         arguments: [@bbapp]
 
     analytics:
-        class: BackBuilder\Application\Analytics
+        class: BackBee\Application\Analytics
         arguments:  [@bbapp]
 
     doctrine.listener:
-        class: BackBuilder\Event\Listener\DoctrineListener
+        class: BackBee\Event\Listener\DoctrineListener
         arguments: [@bbapp]
 
     controller_resolver:
@@ -181,7 +181,7 @@ services:
         arguments: [@annotation_reader_chained, @annotation_reader.cache]
 
     annotation_reader_chained:
-        class: BackBuilder\Annotations\ChainAnnotationReader
+        class: BackBee\Annotations\ChainAnnotationReader
         arguments: [[@annotation_reader.full, @annotation_reader.simple]]
 
     annotation_reader.simple:
@@ -253,7 +253,7 @@ services:
         factory_method: getConnection
 
     doctrine:
-        class: BackBuilder\Doctrine\Registry
+        class: BackBee\Doctrine\Registry
         arguments:
             - @service_container
             - {default: @doctrine.connection.default}
@@ -290,11 +290,11 @@ services:
 
     nestednode.page_listener:
         arguments:  [@bbapp]
-        class: BackBuilder\Event\Listener\PageListener
+        class: BackBee\Event\Listener\PageListener
 
     array.validator:
-        class: BackBuilder\Validator\ArrayValidator
+        class: BackBee\Validator\ArrayValidator
 
     entity.validator:
-        class: BackBuilder\Validator\EntityValidator
+        class: BackBee\Validator\EntityValidator
         arguments: ["@em"]

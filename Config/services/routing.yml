@@ -1,7 +1,7 @@
 
 parameters:
 
-    bbapp.routing.class: BackBuilder\Routing\RouteCollection
+    bbapp.routing.class: BackBee\Routing\RouteCollection
 
     bbapp.routing.image_uri_prefix: images
     bbapp.routing.media_uri_prefix: media

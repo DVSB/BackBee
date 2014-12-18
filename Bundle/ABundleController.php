@@ -3,28 +3,28 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Bundle;
+namespace BackBee\Bundle;
 
-use BackBuilder\BBApplication;
-use BackBuilder\FrontController\FrontController;
-use BackBuilder\FrontController\Exception\FrontControllerException;
-use BackBuilder\Util\File;
+use BackBee\BBApplication;
+use BackBee\FrontController\FrontController;
+use BackBee\FrontController\Exception\FrontControllerException;
+use BackBee\Util\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
@@ -32,21 +32,21 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Abstract class for bundle controller in BackBuilder5 application
+ * Abstract class for bundle controller in BackBee5 application
  *
- * @category    BackBuilder
- * @package     BackBuilder\Bundle
+ * @category    BackBee
+ * @package     BackBee\Bundle
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 abstract class ABundleController extends FrontController implements HttpKernelInterface
 {
-    /* @var \BackBuilder\Config\Config */
+    /* @var \BackBee\Config\Config */
 
     private $config;
-    /* @var \BackBuilder\Bundle\ABundle */
+    /* @var \BackBee\Bundle\ABundle */
     private $bundle;
-    /* @var \BackBuilder\Renderer\ARenderer */
+    /* @var \BackBee\Renderer\ARenderer */
     private $renderer;
 
     /**
@@ -81,7 +81,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     /**
      * Returns the current bundle config
      *
-     * @return \BackBuilder\Config\Config
+     * @return \BackBee\Config\Config
      */
     public function getConfig()
     {
@@ -90,7 +90,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
 
     /**
      * Return the bundle
-     * @return \BackBuilder\Bundle\ABundle
+     * @return \BackBee\Bundle\ABundle
      */
     public function getBundle()
     {
@@ -100,7 +100,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     /**
      * Returns the current renderer
      *
-     * @return \BackBuilder\Renderer\ARenderer
+     * @return \BackBee\Renderer\ARenderer
      */
     public function getRenderer()
     {

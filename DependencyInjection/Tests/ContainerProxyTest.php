@@ -3,41 +3,41 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Tests;
+namespace BackBee\DependencyInjection\Tests;
 
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\ContainerInterface;
-use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
-use BackBuilder\DependencyInjection\ContainerProxy;
-use BackBuilder\DependencyInjection\Util\ServiceLoader;
+use BackBee\DependencyInjection\Container;
+use BackBee\DependencyInjection\ContainerInterface;
+use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
+use BackBee\DependencyInjection\ContainerProxy;
+use BackBee\DependencyInjection\Util\ServiceLoader;
 use Symfony\Component\Yaml\Yaml;
 use org\bovigo\vfs\vfsStream;
 
 /**
  * Test for ContainerProxy
  *
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\DependencyInjection\ContainerProxy
+ * @coversDefaultClass \BackBee\DependencyInjection\ContainerProxy
  */
 class ContainerProxyTest extends \PHPUnit_Framework_TestCase
 {
@@ -64,7 +64,7 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     {
         $this->services_yml_array = array(
             'parameters' => array(
-                'service.class' => 'BackBuilder\DependencyInjection\Tests\RandomService',
+                'service.class' => 'BackBee\DependencyInjection\Tests\RandomService',
                 'size_one'      => 300,
                 'size_two'      => 8000,
                 'size_three'    => 44719,
@@ -218,7 +218,7 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
             $this->fail('Raise of InvalidServiceProxyException expected.');
         } catch (\Exception $e) {
             $this->assertInstanceOf(
-                'BackBuilder\DependencyInjection\Exception\InvalidServiceProxyException',
+                'BackBee\DependencyInjection\Exception\InvalidServiceProxyException',
                 $e
             );
         }
@@ -371,7 +371,7 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         $container = new ContainerProxy();
         $container->init(unserialize($dumper->dump(array('do_compile' => false))));
 
-        $this->assertInstanceOf('BackBuilder\DependencyInjection\ContainerProxy', $container);
+        $this->assertInstanceOf('BackBee\DependencyInjection\ContainerProxy', $container);
         $this->assertFalse($container->isCompiled());
 
         // test that ContainerProxy::isCompiled return false value

@@ -1,5 +1,5 @@
 select:
-  extends: \BackBuilder\ClassContent\Element\text
+  extends: \BackBee\ClassContent\Element\text
   properties:
     name: Select
     description: A select input box

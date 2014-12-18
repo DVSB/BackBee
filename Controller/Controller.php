@@ -3,23 +3,23 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Controller;
+namespace BackBee\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,21 +30,21 @@ use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use BackBuilder\IApplication;
+use BackBee\IApplication;
 
 /**
  * Base Controler
  *
- * @category    BackBuilder
- * @package     BackBuilder\Controller
+ * @category    BackBee
+ * @package     BackBee\Controller
  * @copyright   Lp system
  * @author      k.golovin
  */
 class Controller implements ContainerAwareInterface
 {
     /**
-     * Current BackBuilder application
-     * @var \BackBuilder\BBApplication
+     * Current BackBee application
+     * @var \BackBee\BBApplication
      */
     protected $_application;
 
@@ -65,10 +65,10 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     * Returns current Backbuilder application
+     * Returns current BackBee application
      *
      * @access public
-     * @return \BackBuilder\IApplication
+     * @return \BackBee\IApplication
      */
     public function getApplication()
     {

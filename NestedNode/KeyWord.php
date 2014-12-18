@@ -3,37 +3,37 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode;
+namespace BackBee\NestedNode;
 
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\Renderer\IRenderable;
+use BackBee\ClassContent\AClassContent;
+use BackBee\Renderer\IRenderable;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * A keywords entry of a tree in BackBuilder
+ * A keywords entry of a tree in BackBee
  *
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode
+ * @category    BackBee
+ * @package     BackBee\NestedNode
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\KeyWordRepository")
+ * @Entity(repositoryClass="BackBee\NestedNode\Repository\KeyWordRepository")
  * @Table(name="keyword",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_KEYWORD", columns={"root_uid", "leftnode", "rightnode"}), @index(name="IDX_KEYWORD", columns={"keyword"})})
  *
  * @Serializer\ExclusionPolicy("all")
@@ -53,8 +53,8 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * The root node, cannot be NULL.
-     * @var \BackBuilder\NestedNode\KeyWord
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\KeyWord", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @var \BackBee\NestedNode\KeyWord
+     * @ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_descendants", fetch="EXTRA_LAZY")
      * @JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
      * @Serializer\Exclude
      */
@@ -62,8 +62,8 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * The parent node.
-     * @var \BackBuilder\NestedNode\KeyWord
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @var \BackBee\NestedNode\KeyWord
+     * @ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
@@ -82,20 +82,20 @@ class KeyWord extends ANestedNode implements IRenderable
     /**
      * Descendants nodes.
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\KeyWord", mappedBy="_root", fetch="EXTRA_LAZY")
+     * @OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
     /**
      * Direct children nodes.
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\KeyWord", mappedBy="_parent", fetch="EXTRA_LAZY")
+     * @OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
     /**
      * A collection of AClassContent indexed by this keyword
-     * @ManyToMany(targetEntity="BackBuilder\ClassContent\AClassContent", fetch="EXTRA_LAZY")
+     * @ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", fetch="EXTRA_LAZY")
      * @JoinTable(name="keywords_contents",
      *      joinColumns={@JoinColumn(name="keyword_uid", referencedColumnName="uid")},
      *      inverseJoinColumns={@JoinColumn(name="content_uid", referencedColumnName="uid")}
@@ -136,7 +136,7 @@ class KeyWord extends ANestedNode implements IRenderable
     /**
      * Sets the keyword
      * @param  string                          $keyWord
-     * @return \BackBuilder\NestedNode\KeyWord
+     * @return \BackBee\NestedNode\KeyWord
      */
     public function setKeyWord($keyWord)
     {
@@ -147,8 +147,8 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Adds a content to the collection
-     * @param  BackBuilder\ClassContent\AClassContent $content
-     * @return \BackBuilder\NestedNode\KeyWord
+     * @param  BackBee\ClassContent\AClassContent $content
+     * @return \BackBee\NestedNode\KeyWord
      */
     public function addContent(AClassContent $content)
     {
@@ -159,7 +159,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Removes a content from the collection
-     * @param \BackBuilder\ClassContent\AClassContent $content
+     * @param \BackBee\ClassContent\AClassContent $content
      */
     public function removeContent(AClassContent $content)
     {
@@ -239,7 +239,7 @@ class KeyWord extends ANestedNode implements IRenderable
      */
     public function getTemplateName()
     {
-        return str_replace(array("BackBuilder".NAMESPACE_SEPARATOR."NestedNode".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+        return str_replace(array("BackBee".NAMESPACE_SEPARATOR."NestedNode".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
     }
 
     /**

@@ -3,37 +3,37 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Bundle;
+namespace BackBee\Bundle;
 
-use BackBuilder\Config\Config;
-use BackBuilder\DependencyInjection\Util\ServiceLoader;
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\IApplication;
-use BackBuilder\Util\Resolver\BundleConfigDirectory;
+use BackBee\Config\Config;
+use BackBee\DependencyInjection\Util\ServiceLoader;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\IApplication;
+use BackBee\Util\Resolver\BundleConfigDirectory;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * BundleLoader allows us to hydrate bundle into IApplication and its service container
  *
- * @category    BackBuilder
- * @package     BackBuilder/Bundle
+ * @category    BackBee
+ * @package     BackBee/Bundle
  * @copyright   Lp digital system
  * @author      eric.chau <eric.chau@lp-digital.fr>
  */
@@ -176,9 +176,9 @@ class BundleLoader
      */
     private function buildBundleDefinition($classname, $base_directory)
     {
-        if (false === in_array('BackBuilder\Bundle\BundleInterface', class_implements($classname))) {
+        if (false === in_array('BackBee\Bundle\BundleInterface', class_implements($classname))) {
             throw new InvalidArgumentException(
-                "Bundles must implements `BackBuilder\Bundle\BundleInterface`, `$classname` does not."
+                "Bundles must implements `BackBee\Bundle\BundleInterface`, `$classname` does not."
             );
         }
 
@@ -267,7 +267,7 @@ class BundleLoader
      */
     private function buildConfigDefinition($base_directory)
     {
-        $definition = new Definition('BackBuilder\Config\Config', array(
+        $definition = new Definition('BackBee\Config\Config', array(
             $this->getConfigDirectoryByBaseDirectory($base_directory),
             new Reference('cache.bootstrap'),
             null,

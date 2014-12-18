@@ -3,36 +3,36 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent\Tests\Mock;
+namespace BackBee\ClassContent\Tests\Mock;
 
-use BackBuilder\Tests\Mock\IMock;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\ClassContent\Element\text;
+use BackBee\Tests\Mock\IMock;
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\Element\text;
 
 /**
  * ClassContent mock emulate a yml content cached
  *
- * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\ClassContentRepository")
+ * @Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
  * @Table(name="content")
- * @category    BackBuilder
- * @package     BackBuilder\ClassContent\Tests\Mock
+ * @category    BackBee
+ * @package     BackBee\ClassContent\Tests\Mock
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -48,7 +48,7 @@ class MockContent extends AClassContent implements IMock
     {
         $this->_defineData(
             'title',
-            '\BackBuilder\ClassContent\Element\text',
+            '\BackBee\ClassContent\Element\text',
             array(
                 'default' => array(
                     'value' => 'Title here',
@@ -72,7 +72,7 @@ class MockContent extends AClassContent implements IMock
             )
         )->_defineData(
             'body',
-            '\BackBuilder\ClassContent\ContentSet',
+            '\BackBee\ClassContent\ContentSet',
             array()
         )->_defineParam(
             'excludefromautobloc',

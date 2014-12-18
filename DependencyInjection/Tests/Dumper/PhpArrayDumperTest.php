@@ -1,28 +1,28 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests\Dumper;
+namespace BackBee\DependencyInjection\Tests\Dumper;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\Dumper\PhpArrayDumper;
-use BackBuilder\DependencyInjection\Util\ServiceLoader;
+use BackBee\DependencyInjection\Container;
+use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
+use BackBee\DependencyInjection\Util\ServiceLoader;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Yaml\Yaml;
@@ -30,26 +30,26 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Test for PhpArrayDumper
  *
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\DependencyInjection\Dumper\PhpArrayDumper
+ * @coversDefaultClass \BackBee\DependencyInjection\Dumper\PhpArrayDumper
  */
 class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * The dumper we want to test here
      *
-     * @var BackBuilder\DependencyInjection\Dump\PhpArrayDumper
+     * @var BackBee\DependencyInjection\Dump\PhpArrayDumper
      */
     private $dumper;
 
     /**
      * container used for test
      *
-     * @var \BackBuilder\DependencyInjection\Container
+     * @var \BackBee\DependencyInjection\Container
      */
     private $container;
 
@@ -302,10 +302,10 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
         $config_container = $this->container;
         $config_debug = false;
         $config_yml_to_ignore = array('services');
-        $config_class_proxy = '\BackBuilder\Config\ConfigProxy';
+        $config_class_proxy = '\BackBee\Config\ConfigProxy';
 
         $config_definition = new Definition();
-        $config_definition->setClass('BackBuilder\Config\Config');
+        $config_definition->setClass('BackBee\Config\Config');
         $config_definition->addTag('dumpable');
         $config_definition->addArgument($config_base_dir);
         $config_definition->addArgument($config_cache);
@@ -317,7 +317,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
 
         $dump = unserialize($this->dumper->dump());
 
-        $this->assertNotEquals('BackBuilder\Config\ConfigProxy', $dump['services'][$config_service_id]['class']);
+        $this->assertNotEquals('BackBee\Config\ConfigProxy', $dump['services'][$config_service_id]['class']);
 
         $config = $this->container->get($config_service_id);
         $test = array('foo' => 'bar');
@@ -325,7 +325,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
 
         $dump = unserialize($this->dumper->dump());
 
-        $this->assertEquals('BackBuilder\Config\ConfigProxy', $dump['services'][$config_service_id]['class']);
+        $this->assertEquals('BackBee\Config\ConfigProxy', $dump['services'][$config_service_id]['class']);
         $this->assertFalse(array_key_exists('arguments', $dump['services'][$config_service_id]));
         $this->assertTrue(array_key_exists('calls', $dump['services'][$config_service_id]));
 
@@ -384,7 +384,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
             $this->dumper->dump();
             $this->fail('Raise of ServiceNotDumpableException expected.');
         } catch (\Exception $e) {
-            $this->assertInstanceOf('BackBuilder\DependencyInjection\Exception\ServiceNotDumpableException', $e);
+            $this->assertInstanceOf('BackBee\DependencyInjection\Exception\ServiceNotDumpableException', $e);
         }
     }
 

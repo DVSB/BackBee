@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\Util;
+namespace BackBee\Util;
 
 class Server
 {
@@ -17,7 +17,7 @@ class Server
 
     public static function getPhpMemoryUsage()
     {
-        return \BackBuilder\Importer\Importer::convertMemorySize(memory_get_usage(true));
+        return \BackBee\Importer\Importer::convertMemorySize(memory_get_usage(true));
     }
 
     public static function getMemoryUsage()

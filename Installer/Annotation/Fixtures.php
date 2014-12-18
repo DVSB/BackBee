@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\Installer\Annotation;
+namespace BackBee\Installer\Annotation;
 
 /**
  * @Annotation

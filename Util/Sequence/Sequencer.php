@@ -19,10 +19,10 @@
  * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Util\Sequence;
+namespace BackBee\Util\Sequence;
 
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\Util\Numeric;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\Util\Numeric;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -32,8 +32,8 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  * Sequence repository
  * Utility class providing db stored sequences
  *
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @subpackage  Sequence
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>

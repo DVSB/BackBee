@@ -1,3 +1,2 @@
-appender: \BackBuilder\Logging\Appender\Output
-logfile: log/bb5-tests.log
+appender: \BackBee\Logging\Appender\Output
 level: ERROR

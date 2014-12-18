@@ -3,39 +3,39 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\Controller;
+namespace BackBee\Rest\Tests\Controller;
 
-use BackBuilder\Rest\Controller\AclController;
-use BackBuilder\Tests\TestCase;
-use BackBuilder\Site\Site;
-use BackBuilder\Security\User;
-use BackBuilder\Rest\Tests\Fixtures\Model\MockUser;
+use BackBee\Rest\Controller\AclController;
+use BackBee\Tests\TestCase;
+use BackBee\Site\Site;
+use BackBee\Security\User;
+use BackBee\Rest\Tests\Fixtures\Model\MockUser;
 
 /**
  * Test for AclController class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\Controller\ARestController
+ * @coversDefaultClass \BackBee\Rest\Controller\ARestController
  */
 class ARestControllerTest extends TestCase
 {
@@ -53,7 +53,7 @@ class ARestControllerTest extends TestCase
 
     protected function getController()
     {
-        $controller = new \BackBuilder\Rest\Tests\Fixtures\Controller\MockARestImplController();
+        $controller = new \BackBee\Rest\Tests\Fixtures\Controller\MockARestImplController();
         $controller->setContainer($this->getBBApp()->getContainer());
 
         return $controller;
@@ -136,6 +136,6 @@ class ARestControllerTest extends TestCase
     public function test_create404createValidationExceptionAction()
     {
         $response = $this->getController()->createValidationExceptionAction();
-        $this->assertInstanceOf('BackBuilder\Rest\Exception\ValidationException', $response);
+        $this->assertInstanceOf('BackBee\Rest\Exception\ValidationException', $response);
     }
 }

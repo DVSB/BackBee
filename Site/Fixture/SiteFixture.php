@@ -1,7 +1,7 @@
 <?php
-namespace BackBuilder\Site\Fixture;
+namespace BackBee\Site\Fixture;
 
-use BackBuilder\Site\Site;
+use BackBee\Site\Site;
 use Faker\Factory;
 
 /**

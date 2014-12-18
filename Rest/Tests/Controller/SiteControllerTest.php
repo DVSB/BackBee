@@ -3,42 +3,42 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\Controller;
+namespace BackBee\Rest\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use BackBuilder\Rest\Controller\SiteController;
-use BackBuilder\Tests\TestCase;
-use BackBuilder\Security\Acl\Permission\MaskBuilder;
-use BackBuilder\Site\Site;
-use BackBuilder\Site\Layout;
+use BackBee\Rest\Controller\SiteController;
+use BackBee\Tests\TestCase;
+use BackBee\Security\Acl\Permission\MaskBuilder;
+use BackBee\Site\Site;
+use BackBee\Site\Layout;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 /**
  * Test for UserController class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\Controller\SiteController
+ * @coversDefaultClass \BackBee\Rest\Controller\SiteController
  */
 class SiteControllerTest extends TestCase
 {
@@ -107,13 +107,13 @@ class SiteControllerTest extends TestCase
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateObjectAce(
             new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)),
-            new UserSecurityIdentity('super_admin', 'BackBuilder\Security\Group'),
+            new UserSecurityIdentity('super_admin', 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
         $aclManager->insertOrUpdateObjectAce(
-            new ObjectIdentity('class', 'BackBuilder\Site\Layout'),
-            new UserSecurityIdentity('super_admin', 'BackBuilder\Security\Group'),
+            new ObjectIdentity('class', 'BackBee\Site\Layout'),
+            new UserSecurityIdentity('super_admin', 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
@@ -142,7 +142,7 @@ class SiteControllerTest extends TestCase
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateObjectAce(
             new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)),
-            new UserSecurityIdentity('editor_layout', 'BackBuilder\Security\Group'),
+            new UserSecurityIdentity('editor_layout', 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 

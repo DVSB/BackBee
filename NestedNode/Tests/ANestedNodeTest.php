@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Tests;
+namespace BackBee\NestedNode\Tests;
 
-use BackBuilder\Tests\TestCase;
-use BackBuilder\NestedNode\Tests\Mock\MockNestedNode;
+use BackBee\Tests\TestCase;
+use BackBee\NestedNode\Tests\Mock\MockNestedNode;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -38,12 +38,12 @@ class ANestedNodeTest extends TestCase
     private $current_time;
 
     /**
-     * @var \BackBuilder\NestedNode\Tests\Mock\MockNestedNode
+     * @var \BackBee\NestedNode\Tests\Mock\MockNestedNode
      */
     private $mock;
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::__construct
+     * @covers BackBee\NestedNode\ANestedNode::__construct
      */
     public function test__construct()
     {
@@ -61,7 +61,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getUid
+     * @covers BackBee\NestedNode\ANestedNode::getUid
      */
     public function testGetUid()
     {
@@ -69,7 +69,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getRoot
+     * @covers BackBee\NestedNode\ANestedNode::getRoot
      */
     public function testGetRoot()
     {
@@ -77,7 +77,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getParent
+     * @covers BackBee\NestedNode\ANestedNode::getParent
      */
     public function testGetParent()
     {
@@ -88,7 +88,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getLeftnode
+     * @covers BackBee\NestedNode\ANestedNode::getLeftnode
      */
     public function testGetLeftnode()
     {
@@ -96,7 +96,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getRightnode
+     * @covers BackBee\NestedNode\ANestedNode::getRightnode
      */
     public function testGetRightnode()
     {
@@ -104,7 +104,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getWeight
+     * @covers BackBee\NestedNode\ANestedNode::getWeight
      */
     public function testGetWeight()
     {
@@ -112,7 +112,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getCreated
+     * @covers BackBee\NestedNode\ANestedNode::getCreated
      */
     public function testGetCreated()
     {
@@ -120,7 +120,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getModified
+     * @covers BackBee\NestedNode\ANestedNode::getModified
      */
     public function testGetModified()
     {
@@ -128,7 +128,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getDescendants
+     * @covers BackBee\NestedNode\ANestedNode::getDescendants
      */
     public function testGetDescendants()
     {
@@ -137,7 +137,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::getChildren
+     * @covers BackBee\NestedNode\ANestedNode::getChildren
      */
     public function testGetChildren()
     {
@@ -146,7 +146,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::isRoot
+     * @covers BackBee\NestedNode\ANestedNode::isRoot
      */
     public function testIsRoot()
     {
@@ -160,7 +160,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::isLeaf
+     * @covers BackBee\NestedNode\ANestedNode::isLeaf
      */
     public function testIsLeaf()
     {
@@ -171,7 +171,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::isAncestorOf
+     * @covers BackBee\NestedNode\ANestedNode::isAncestorOf
      */
     public function testIsAncestorOf()
     {
@@ -189,7 +189,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::isDescendantOf
+     * @covers BackBee\NestedNode\ANestedNode::isDescendantOf
      */
     public function testIsDescendantOf()
     {
@@ -207,7 +207,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setUid
+     * @covers BackBee\NestedNode\ANestedNode::setUid
      */
     public function testSetUid()
     {
@@ -216,7 +216,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setRoot
+     * @covers BackBee\NestedNode\ANestedNode::setRoot
      */
     public function testSetRoot()
     {
@@ -226,7 +226,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setParent
+     * @covers BackBee\NestedNode\ANestedNode::setParent
      */
     public function testSetParent()
     {
@@ -236,7 +236,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setLeftnode
+     * @covers BackBee\NestedNode\ANestedNode::setLeftnode
      */
     public function testSetLeftnode()
     {
@@ -245,8 +245,8 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setLeftnode
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers BackBee\NestedNode\ANestedNode::setLeftnode
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testSetLeftnodeWithNonNumeric()
     {
@@ -254,7 +254,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setRightnode
+     * @covers BackBee\NestedNode\ANestedNode::setRightnode
      */
     public function testSetRightnode()
     {
@@ -263,8 +263,8 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setRightnode
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers BackBee\NestedNode\ANestedNode::setRightnode
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testSetRightnodeWithNonNumeric()
     {
@@ -272,7 +272,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setLevel
+     * @covers BackBee\NestedNode\ANestedNode::setLevel
      */
     public function testSetLevel()
     {
@@ -281,8 +281,8 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setLevel
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers BackBee\NestedNode\ANestedNode::setLevel
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testSetLevelWithNonNumeric()
     {
@@ -290,7 +290,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setCreated
+     * @covers BackBee\NestedNode\ANestedNode::setCreated
      */
     public function testSetCreated()
     {
@@ -300,7 +300,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::setModified
+     * @covers BackBee\NestedNode\ANestedNode::setModified
      */
     public function testSetModified()
     {
@@ -310,7 +310,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::toArray
+     * @covers BackBee\NestedNode\ANestedNode::toArray
      */
     public function testToArray()
     {
@@ -349,7 +349,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::serialize
+     * @covers BackBee\NestedNode\ANestedNode::serialize
      */
     public function testSerialize()
     {
@@ -358,7 +358,7 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::serialize
+     * @covers BackBee\NestedNode\ANestedNode::serialize
      */
     public function testUnserialize()
     {
@@ -376,8 +376,8 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::serialize
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers BackBee\NestedNode\ANestedNode::serialize
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testUnserializeWithInvalidSerialized()
     {
@@ -387,8 +387,8 @@ class ANestedNodeTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\ANestedNode::serialize
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers BackBee\NestedNode\ANestedNode::serialize
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testUnserializeWithStrictOptionActivated()
     {

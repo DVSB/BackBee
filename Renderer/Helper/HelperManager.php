@@ -1,8 +1,8 @@
 <?php
 
-namespace BackBuilder\Renderer\Helper;
+namespace BackBee\Renderer\Helper;
 
-use BackBuilder\Renderer\ARenderer;
+use BackBee\Renderer\ARenderer;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 class HelperManager
@@ -59,7 +59,7 @@ class HelperManager
      */
     public function create($method, $argv)
     {
-        $helperClass = '\BackBuilder\Renderer\Helper\\'.$method;
+        $helperClass = '\BackBee\Renderer\Helper\\'.$method;
         if (true === class_exists($helperClass)) {
             $this->helpers->set($method, new $helperClass($this->renderer, $argv));
         }

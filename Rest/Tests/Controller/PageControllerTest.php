@@ -3,43 +3,43 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\Controller;
+namespace BackBee\Rest\Tests\Controller;
 
-use BackBuilder\Rest\Controller\PageController;
-use BackBuilder\Rest\Test\RestTestCase;
-use BackBuilder\Site\Site;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Site\Layout;
-use BackBuilder\Security\Acl\Permission\MaskBuilder;
-use BackBuilder\Rest\Patcher\OperationBuilder;
+use BackBee\Rest\Controller\PageController;
+use BackBee\Rest\Test\RestTestCase;
+use BackBee\Site\Site;
+use BackBee\NestedNode\Page;
+use BackBee\Site\Layout;
+use BackBee\Security\Acl\Permission\MaskBuilder;
+use BackBee\Rest\Patcher\OperationBuilder;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 /**
  * Test for PageController class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\Controller\PageController
+ * @coversDefaultClass \BackBee\Rest\Controller\PageController
  */
 class PageControllerTest extends RestTestCase
 {
@@ -61,7 +61,7 @@ class PageControllerTest extends RestTestCase
 
         // permissions
         $this->getContainer()->set('site', $this->site);
-        $this->restUser = $this->createAuthUser('page_admin');
+        self::$restUser = $this->createAuthUser('page_admin');
     }
 
     private function getController()
@@ -90,12 +90,12 @@ class PageControllerTest extends RestTestCase
         $em->flush();
 
         $this->getAclManager()->insertOrUpdateClassAce(
-            new ObjectIdentity('class', 'BackBuilder\NestedNode\Page'),
-            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'),
+            new ObjectIdentity('class', 'BackBee\NestedNode\Page'),
+            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
             MaskBuilder::MASK_CREATE
         )->insertOrUpdateClassAce(
             $layout,
-            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'),
+            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
@@ -137,11 +137,11 @@ class PageControllerTest extends RestTestCase
 
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage,
-            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'),
+            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
             ['PUBLISH', 'EDIT']
         )->insertOrUpdateObjectAce(
             $layout,
-            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'),
+            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
             ['VIEW']
         );
 
@@ -174,7 +174,7 @@ class PageControllerTest extends RestTestCase
 
         $this->getAclManager()->insertOrUpdateObjectAce(
             $page,
-            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'),
+            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
             ['PUBLISH', 'EDIT']
         );
 
@@ -237,7 +237,7 @@ class PageControllerTest extends RestTestCase
         $this->em->persist($onlinePage);
         $this->em->persist($onlinePage2);
 
-        $repo = $this->em->getRepository('BackBuilder\NestedNode\Page');
+        $repo = $this->em->getRepository('BackBee\NestedNode\Page');
 
         $repo->insertNodeAsFirstChildOf($deletedPage, $homePage);
         $repo->insertNodeAsFirstChildOf($offlinePage, $homePage);
@@ -248,7 +248,7 @@ class PageControllerTest extends RestTestCase
 
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage,
-            new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'),
+            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 

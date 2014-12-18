@@ -3,38 +3,38 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Tests;
+namespace BackBee\DependencyInjection\Tests;
 
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
 
 /**
  * This class is used by ContainerProxyTest for its tests
  *
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class RandomService implements DumpableServiceInterface
 {
     const DEFAULT_SIZE = 100;
-    const RANDOM_SERVICE_PROXY_CLASSNAME = 'BackBuilder\DependencyInjection\Tests\RandomServiceProxy';
+    const RANDOM_SERVICE_PROXY_CLASSNAME = 'BackBee\DependencyInjection\Tests\RandomServiceProxy';
 
     /**
      * @var int
@@ -96,7 +96,7 @@ class RandomService implements DumpableServiceInterface
     }
 
     /**
-     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::getClassProxy
+     * @see BackBee\DependencyInjection\Dumper\DumpableServiceInterface::getClassProxy
      */
     public function getClassProxy()
     {
@@ -104,7 +104,7 @@ class RandomService implements DumpableServiceInterface
     }
 
     /**
-     * @see BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface::dump
+     * @see BackBee\DependencyInjection\Dumper\DumpableServiceInterface::dump
      */
     public function dump(array $options = array())
     {

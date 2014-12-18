@@ -3,31 +3,31 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security;
+namespace BackBee\Security;
 
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity()
@@ -68,7 +68,7 @@ class Group implements DomainObjectInterface
 
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBuilder\Security\User", inversedBy="_groups", fetch="EXTRA_LAZY")
+     * @ManyToMany(targetEntity="BackBee\Security\User", inversedBy="_groups", fetch="EXTRA_LAZY")
      * @JoinTable(
      *      name="user_group",
      *      joinColumns={@JoinColumn(name="group_id", referencedColumnName="id")},
@@ -80,8 +80,8 @@ class Group implements DomainObjectInterface
 
     /**
      * Optional site.
-     * @var \BackBuilder\Site\Site
-     * @ManyToOne(targetEntity="BackBuilder\Site\Site", fetch="EXTRA_LAZY")
+     * @var \BackBee\Site\Site
+     * @ManyToOne(targetEntity="BackBee\Site\Site", fetch="EXTRA_LAZY")
      * @JoinColumn(name="site_uid", referencedColumnName="uid")
      *
      */
@@ -107,7 +107,7 @@ class Group implements DomainObjectInterface
     /**
      * @codeCoverageIgnore
      * @param  integer                     $id
-     * @return \BackBuilder\Security\Group
+     * @return \BackBee\Security\Group
      */
     public function setId($id)
     {
@@ -128,7 +128,7 @@ class Group implements DomainObjectInterface
     /**
      * @codeCoverageIgnore
      * @param  string                      $name
-     * @return \BackBuilder\Security\Group
+     * @return \BackBee\Security\Group
      */
     public function setName($name)
     {
@@ -149,7 +149,7 @@ class Group implements DomainObjectInterface
     /**
      * @codeCoverageIgnore
      * @param  string                      $identifier
-     * @return \BackBuilder\Security\Group
+     * @return \BackBee\Security\Group
      */
     public function setIdentifier($identifier)
     {
@@ -170,7 +170,7 @@ class Group implements DomainObjectInterface
     /**
      * @codeCoverageIgnore
      * @param  \Doctrine\Common\Collections\ArrayCollection $users
-     * @return \BackBuilder\Security\Group
+     * @return \BackBee\Security\Group
      */
     public function setUsers(ArrayCollection $users)
     {
@@ -181,8 +181,8 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  \BackBuilder\Security\User  $user
-     * @return \BackBuilder\Security\Group
+     * @param  \BackBee\Security\User  $user
+     * @return \BackBee\Security\Group
      */
     public function setUser(User $user)
     {
@@ -193,7 +193,7 @@ class Group implements DomainObjectInterface
 
     /**
      * Returns the optional site
-     * @return \BackBuilder\Site\Site|NULL
+     * @return \BackBee\Site\Site|NULL
      * @codeCoverageIgnore
      */
     public function getSite()
@@ -203,11 +203,11 @@ class Group implements DomainObjectInterface
 
     /**
      * Sets the optional site
-     * @param  \BackBuilder\Site\Site      $site
-     * @return \BackBuilder\Security\Group
+     * @param  \BackBee\Site\Site      $site
+     * @return \BackBee\Security\Group
      * @codeCoverageIgnore
      */
-    public function setSite(\BackBuilder\Site\Site $site = null)
+    public function setSite(\BackBee\Site\Site $site = null)
     {
         $this->_site = $site;
 

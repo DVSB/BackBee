@@ -1,6 +1,6 @@
 image:
-  repository: \BackBuilder\ClassContent\Repository\Element\imageRepository
-  extends: \BackBuilder\ClassContent\Element\file
+  repository: \BackBee\ClassContent\Repository\Element\imageRepository
+  extends: \BackBee\ClassContent\Element\file
   properties:
     name: Image
     description: An inline image

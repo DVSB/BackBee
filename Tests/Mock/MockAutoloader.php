@@ -1,11 +1,11 @@
 <?php
-namespace BackBuilder\Tests\Mock;
+namespace BackBee\Tests\Mock;
 
-use BackBuilder\AutoLoader\AutoLoader;
+use BackBee\AutoLoader\AutoLoader;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Tests\Mock
+ * @category    BackBee
+ * @package     BackBee\Tests\Mock
  * @copyright   Lp system
  * @author      n.dufreche
  */
@@ -15,14 +15,14 @@ class MockAutoloader extends AutoLoader implements IMock
 
     public function getListenerNamespace()
     {
-        return $this->_fakespaces['BackBuilder\Event\Listener'];
+        return $this->_fakespaces['BackBee\Event\Listener'];
     }
 
     public function registerListenerNamespace($path)
     {
-        if (!isset($this->_fakespaces['BackBuilder\Event\Listener'])) {
-            $this->_fakespaces['BackBuilder\Event\Listener'] = array();
+        if (!isset($this->_fakespaces['BackBee\Event\Listener'])) {
+            $this->_fakespaces['BackBee\Event\Listener'] = array();
         }
-        array_unshift($this->_fakespaces['BackBuilder\Event\Listener'], $path);
+        array_unshift($this->_fakespaces['BackBee\Event\Listener'], $path);
     }
 }

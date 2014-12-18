@@ -3,36 +3,36 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Bundle;
+namespace BackBee\Bundle;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Bundle\Exception\BundleException;
-use BackBuilder\Logging\Logger;
-use BackBuilder\Routing\RouteCollection as Routing;
+use BackBee\BBApplication;
+use BackBee\Bundle\Exception\BundleException;
+use BackBee\Logging\Logger;
+use BackBee\Routing\RouteCollection as Routing;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\ORM\EntityManager;
 
 /**
- * Abstract class for bundle in BackBuilder5 application
+ * Abstract class for bundle in BackBee5 application
  *
- * @category    BackBuilder
- * @package     BackBuilder\Bundle
+ * @category    BackBee
+ * @package     BackBee\Bundle
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
@@ -77,7 +77,7 @@ abstract class ABundle extends AbstractBaseBundle
      * If none doctrine configuration is provided, returns the BBApplication entity manager
      * @param  array                                         $doctrine_config Connection informations
      * @return \Doctrine\ORM\EntityManager
-     * @throws \BackBuilder\Bundle\Exception\BundleException Occure on database connection error
+     * @throws \BackBee\Bundle\Exception\BundleException Occure on database connection error
      */
     private function _initEntityManager($doctrine_config = null)
     {
@@ -94,7 +94,7 @@ abstract class ABundle extends AbstractBaseBundle
                 $doctrine_config['dbal']['proxy_dir'] = $this->getApplication()->getCacheDir().DIRECTORY_SEPARATOR.'Proxies';
             }
 
-            $em = \BackBuilder\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogger(), $this->getApplication()->getEntityManager()->getEventManager());
+            $em = \BackBee\Util\Doctrine\EntityManagerCreator::create($doctrine_config['dbal'], $this->getLogger(), $this->getApplication()->getEntityManager()->getEventManager());
         } catch (\Exception $e) {
             throw new Exception\BundleException('Database connection error', BundleException::INIT_ERROR, $e);
         }

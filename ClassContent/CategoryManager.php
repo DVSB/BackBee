@@ -3,41 +3,41 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent;
+namespace BackBee\ClassContent;
 
-use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\IApplication as ApplicationInterface;
-use BackBuilder\Util\File;
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
+use BackBee\ClassContent\AClassContent;
+use BackBee\IApplication as ApplicationInterface;
+use BackBee\Util\File;
 
 /**
  * CategoryManager provides every classcontent categories of the current application
  *
- * @category    BackBuilder
- * @package     BackBuilder\ClassContent
+ * @category    BackBee
+ * @package     BackBee\ClassContent
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class CategoryManager
 {
     /**
-     * Contains every class content categories (type: BackBuilder\ClassContent\Category)
+     * Contains every class content categories (type: BackBee\ClassContent\Category)
      * of current application and its bundles
      * @var array
      */

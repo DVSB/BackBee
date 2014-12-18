@@ -3,45 +3,45 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection\Tests;
+namespace BackBee\DependencyInjection\Tests;
 
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\Tests\ContainerTest_Resources\Listener\TestListener;
-use BackBuilder\Event\Dispatcher;
+use BackBee\DependencyInjection\Container;
+use BackBee\DependencyInjection\Tests\ContainerTest_Resources\Listener\TestListener;
+use BackBee\Event\Dispatcher;
 use Symfony\Component\DependencyInjection\Definition;
 
 /**
- * Set of tests for BackBuilder\DependencyInjection\Container
+ * Set of tests for BackBee\DependencyInjection\Container
  *
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\DependencyInjection\Container
+ * @coversDefaultClass \BackBee\DependencyInjection\Container
  */
 class ContainerTest extends \PHPUnit_Framework_TestCase
 {
     const NEW_DATE_WITH_TAG_VALUE = 8000;
 
     /**
-     * test every new and overrided method provided by BackBuilder\DependencyInjection\Container
+     * test every new and overrided method provided by BackBee\DependencyInjection\Container
      *
      * @covers ::get
      * @covers ::getContainerValues
@@ -62,7 +62,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->setDefinition('date_without_tag', $definition);
 
         // creating a definition with one tag, `test` (definition of service with id `date_with_tag`)
-        $definition = new Definition('BackBuilder\DependencyInjection\Tests\ContainerTest_Resources\DateTime');
+        $definition = new Definition('BackBee\DependencyInjection\Tests\ContainerTest_Resources\DateTime');
         $definition->addTag('test');
         $container->setDefinition('date_with_tag', $definition);
 

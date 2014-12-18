@@ -1,6 +1,6 @@
 <?php
 
-namespace BackBuilder\Util;
+namespace BackBee\Util;
 
 /**
  * File: Browser.php

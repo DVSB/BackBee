@@ -3,33 +3,33 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Event\Listener;
+namespace BackBee\Event\Listener;
 
-use BackBuilder\Util\File;
-use BackBuilder\Event\Event;
-use BackBuilder\Exception\BBException;
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\ClassContent\Revision;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\Element\file as elementFile;
-use BackBuilder\ClassContent\Exception\ClassContentException;
-use BackBuilder\Security\Exception\SecurityException;
+use BackBee\Util\File;
+use BackBee\Event\Event;
+use BackBee\Exception\BBException;
+use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\Revision;
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\Element\file as elementFile;
+use BackBee\ClassContent\Exception\ClassContentException;
+use BackBee\Security\Exception\SecurityException;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
@@ -37,8 +37,8 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  *    - classcontent.onflush: occurs when a classcontent entity is mentioned for current flush
  *    - classcontent.include: occurs when autoloader include a classcontent definition
  *
- * @category    BackBuilder
- * @package     BackBuilder\Event
+ * @category    BackBee
+ * @package     BackBee\Event
  * @subpackage  Listener
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -60,7 +60,7 @@ class ClassContentListener
             foreach (class_parents($discriminatorValue) as $classname) {
                 $em->getClassMetadata($classname)->addDiscriminatorMapClass($discriminatorValue, $discriminatorValue);
 
-                if ('BackBuilder\ClassContent\AClassContent' === $classname) {
+                if ('BackBee\ClassContent\AClassContent' === $classname) {
                     break;
                 }
             }
@@ -112,7 +112,7 @@ class ClassContentListener
 //                        $method = 'recomputeSingleEntityChangeSet';
 //                    }
 //
-//                    $uow->$method($em->getClassMetadata('BackBuilder\NestedNode\Page'), $page);
+//                    $uow->$method($em->getClassMetadata('BackBee\NestedNode\Page'), $page);
 //                }
 //            }
             //self::HandleContentMainnode($content,$application);
@@ -128,7 +128,7 @@ class ClassContentListener
 
     /**
      * Occur on clascontent.preremove event
-     * @param  \BackBuilder\Event\Event $event
+     * @param  \BackBee\Event\Event $event
      * @return type
      */
     public static function onPreRemove(Event $event)
@@ -139,18 +139,18 @@ class ClassContentListener
     /**
      * Occurs on classcontent.update event
      * @param  Event       $event
-     * @throws BBException Occurs on illegal targeted object or missing BackBuilder Application
+     * @throws BBException Occurs on illegal targeted object or missing BackBee Application
      */
     public static function onUpdate(Event $event)
     {
         $content = $event->getTarget();
         if (!($content instanceof AClassContent)) {
-            throw new BBException('Enable to update object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBuilder\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
+            throw new BBException('Enable to update object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBee\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
         }
 
         $dispatcher = $event->getDispatcher();
         if (null === $application = $dispatcher->getApplication()) {
-            throw new BBException('Enable to update object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBuilder application has to be initialized'));
+            throw new BBException('Enable to update object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBee application has to be initialized'));
         }
 
         if (null === $token = $application->getBBUserToken()) {
@@ -159,7 +159,7 @@ class ClassContentListener
 
         $em = $dispatcher->getApplication()->getEntityManager();
         if (null === $revision = $content->getDraft()) {
-            if (null === $revision = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token)) {
+            if (null === $revision = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token)) {
                 throw new ClassContentException('Enable to get draft', ClassContentException::REVISION_MISSING);
             }
             $content->setDraft($revision);
@@ -170,7 +170,7 @@ class ClassContentListener
             throw new ClassContentException('Content is up to date', ClassContentException::REVISION_UPTODATE);
         }
 
-        $lastCommitted = $em->getRepository('BackBuilder\ClassContent\Revision')->findBy(array('_content' => $content, '_revision' => $content->getRevision(), '_state' => Revision::STATE_COMMITTED));
+        $lastCommitted = $em->getRepository('BackBee\ClassContent\Revision')->findBy(array('_content' => $content, '_revision' => $content->getRevision(), '_state' => Revision::STATE_COMMITTED));
         if (null === $lastCommitted) {
             throw new ClassContentException('Enable to get last committed revision', ClassContentException::REVISION_MISSING);
         }
@@ -181,7 +181,7 @@ class ClassContentListener
     /**
      * Occurs on classcontent.commit event
      * @param  Event                 $event
-     * @throws BBException           Occurs on illegal targeted object or missing BackBuilder Application
+     * @throws BBException           Occurs on illegal targeted object or missing BackBee Application
      * @throws SecurityException     Occurs on missing valid BBUserToken
      * @throws ClassContentException Occurs on missing revision
      */
@@ -189,12 +189,12 @@ class ClassContentListener
     {
         $content = $event->getTarget();
         if (false === ($content instanceof AClassContent)) {
-            throw new BBException('Enable to commit object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBuilder\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
+            throw new BBException('Enable to commit object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBee\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
         }
 
         $dispatcher = $event->getDispatcher();
         if (null === $application = $dispatcher->getApplication()) {
-            throw new BBException('Enable to commit object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBuilder application has to be initialized'));
+            throw new BBException('Enable to commit object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBee application has to be initialized'));
         }
 
         if (null === $token = $application->getBBUserToken()) {
@@ -233,7 +233,7 @@ class ClassContentListener
             }
 
             if ($content instanceof elementFile) {
-                $em->getRepository('BackBuilder\ClassContent\Element\file')
+                $em->getRepository('BackBee\ClassContent\Element\file')
                         ->setDirectories($dispatcher->getApplication())
                         ->commitFile($content);
             }
@@ -245,7 +245,7 @@ class ClassContentListener
     /**
      * Occurs on classcontent.revert event
      * @param  Event       $event
-     * @throws BBException Occurs on illegal targeted object or missing BackBuilder Application
+     * @throws BBException Occurs on illegal targeted object or missing BackBee Application
      */
     public static function onRevert(Event $event)
     {
@@ -259,7 +259,7 @@ class ClassContentListener
 
         try {
             $content = $event->getEventArgs()->getEntity();
-            if (!($content instanceof \BackBuilder\ClassContent\Element\file)) {
+            if (!($content instanceof \BackBee\ClassContent\Element\file)) {
                 return;
             }
 
@@ -279,12 +279,12 @@ class ClassContentListener
 
     /**
      * Occure on services.local.classcontent.postcall
-     * @param \BackBuilder\Event\Event $event
+     * @param \BackBee\Event\Event $event
      */
     public static function onServicePostCall(Event $event)
     {
         $service = $event->getTarget();
-        if (false === is_a($service, 'BackBuilder\Services\Local\ClassContent')) {
+        if (false === is_a($service, 'BackBee\Services\Local\ClassContent')) {
             return;
         }
 
@@ -293,7 +293,7 @@ class ClassContentListener
 
     /**
      * Dynamically add render modes options to the class
-     * @param \BackBuilder\Event\Event $event
+     * @param \BackBee\Event\Event $event
      */
     private static function _setRendermodeParameter(Event $event)
     {
@@ -326,7 +326,7 @@ class ClassContentListener
             return;
         }
 
-        $classname = '\BackBuilder\ClassContent\\'.$params['nodeInfos']['type'];
+        $classname = '\BackBee\ClassContent\\'.$params['nodeInfos']['type'];
         if (false === class_exists($classname)) {
             return;
         }

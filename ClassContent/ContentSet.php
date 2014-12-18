@@ -3,36 +3,36 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent;
+namespace BackBee\ClassContent;
 
-use BackBuilder\NestedNode\Page;
-use BackBuilder\ClassContent\Exception\UnknownPropertyException;
+use BackBee\NestedNode\Page;
+use BackBee\ClassContent\Exception\UnknownPropertyException;
 
 /**
- * A set of content objects in BackBuilder
+ * A set of content objects in BackBee
  * Implements Iterator, Countable
  *
- * @category    BackBuilder
- * @package     BackBuilder\ClassContent
+ * @category    BackBee
+ * @package     BackBee\ClassContent
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\ClassContentRepository")
+ * @Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
  * @Table(name="content")
  * @HasLifecycleCallbacks
  */
@@ -48,7 +48,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * Pages owning this contentset
      * @var \Doctrine\Common\Collections\ArrayCollection
      *
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_contentset", fetch="EXTRA_LAZY")
+     * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_contentset", fetch="EXTRA_LAZY")
      */
     protected $_pages;
 
@@ -76,7 +76,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
                 $type = key($data);
             }
 
-            if (0 === strpos($type, 'BackBuilder\ClassContent')) {
+            if (0 === strpos($type, 'BackBee\ClassContent')) {
                 class_exists($type);
             }
         }
@@ -86,8 +86,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Alternative recursive clone method, created because of problems related to doctrine clone method
-     * @param  \BackBuilder\NestedNode\Page         $origin_page
-     * @return \BackBuilder\ClassContent\ContentSet
+     * @param  \BackBee\NestedNode\Page         $origin_page
+     * @return \BackBee\ClassContent\ContentSet
      */
     public function createClone(Page $origin_page = null)
     {
@@ -212,13 +212,13 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @param int                                     $index
-     * @param \BackBuilder\ClassContent\AClassContent $contentSet
+     * @param \BackBee\ClassContent\AClassContent $contentSet
      */
     public function replaceChildAtBy($index, AClassContent $contentSet)
     {
         $index = (isset($index) && is_int($index)) ? $index : false;
         if (is_bool($index)) {
-            throw new \BackBuilder\Exception\BBException(__METHOD__." index  parameter must be an integer");
+            throw new \BackBee\Exception\BBException(__METHOD__." index  parameter must be an integer");
         }
         $newContentsetArr = array();
         /** revoir * */
@@ -238,8 +238,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * @param \BackBuilder\ClassContent\AClassContent $prevContentSet
-     * @param \BackBuilder\ClassContent\AClassContent $nextContentSet
+     * @param \BackBee\ClassContent\AClassContent $prevContentSet
+     * @param \BackBee\ClassContent\AClassContent $nextContentSet
      *                                                                Replace prevContentSet by nextContentSet
      */
     public function replaceChildBy(AClassContent $prevContentSet, AClassContent $nextContentSet)
@@ -437,7 +437,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * @param $var string The element to be return, if NULL, all datas are returned
      * @param $forceArray Boolean Force the return as array
      * @return mixed                                                    Could be either NULL or one or array of scalar, array, AClassContent instance
-     * @throws \BackBuilder\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
+     * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
      */
     public function getData($var = null, $forceArray = false)
     {
@@ -458,8 +458,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * Initialized the instance from a serialized string
      * @param  string                                                       $serialized
      * @param  Boolean                                                      $strict     If TRUE, all missing or additionnal element will generate an error
-     * @return \BackBuilder\ClassContent\AClassContent                      The current instance
-     * @throws \BackBuilder\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
+     * @return \BackBee\ClassContent\AClassContent                      The current instance
+     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
      *                                                                                 property does not match an element
      */
     public function unserialize($serialized, $strict = false)
@@ -497,7 +497,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         foreach ($this->getData() as $content) {
             $datas['elements'][] = array(
                 'uid'  => $content->getUid(),
-                'type' => str_replace('BackBuilder\ClassContent\\', '', get_class($content)),
+                'type' => str_replace('BackBee\ClassContent\\', '', get_class($content)),
             );
         }
 
@@ -526,7 +526,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      *                                                       - minentry    the minimum number of content accepted
      *                                                       - accept      an array of classname accepted
      *                                                       - default     array default value for datas
-     * @return \BackBuilder\ClassContent\ContentSet
+     * @return \BackBee\ClassContent\ContentSet
      */
     protected function _setOptions($options = null)
     {
@@ -565,7 +565,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * @param  string                                  $type         the type
      * @param  array                                   $options      Initial options for the content (see this constructor)
      * @param  Boolean                                 $updateAccept dynamically accept or not the type for the new element
-     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     * @return \BackBee\ClassContent\AClassContent The current instance
      * @deprecated since version 1.0
      */
     protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
@@ -607,7 +607,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * Adds a new accepted type to the element
      * @param  string                                  $type the type to accept
      * @param  string                                  $var  the element
-     * @return \BackBuilder\ClassContent\AClassContent The current instance
+     * @return \BackBee\ClassContent\AClassContent The current instance
      */
     protected function _addAcceptedType($type, $var = null)
     {

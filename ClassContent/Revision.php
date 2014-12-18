@@ -3,32 +3,32 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent;
+namespace BackBee\ClassContent;
 
-use BackBuilder\ClassContent\Exception\ClassContentException;
+use BackBee\ClassContent\Exception\ClassContentException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
- * Revision of a content in BackBuilder.
+ * Revision of a content in BackBee.
  *
  * A revision is owned by a valid user and has several states :
  *
@@ -42,11 +42,11 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * When a revision is defined as a draft of a content (ie STATE_ADDED or STATE_MODIFIED),
  * it overloads all getters and setters of its content except getUid() and setUid().
  *
- * @category    BackBuilder
- * @package     BackBuilder\ClassContent
+ * @category    BackBee
+ * @package     BackBee\ClassContent
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\ClassContent\Repository\RevisionRepository")
+ * @Entity(repositoryClass="BackBee\ClassContent\Repository\RevisionRepository")
  * @Table(name="revision", indexes={@index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}), @index(name="IDX_DRAFT", columns={"owner", "state"})})
  * @HasLifecycleCallbacks
  */
@@ -91,8 +91,8 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * The attached revisionned content
-     * @var \BackBuilder\ClassContent\AClassContent
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\AClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
+     * @var \BackBee\ClassContent\AClassContent
+     * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     private $_content;
@@ -130,14 +130,14 @@ class Revision extends AContent implements \Iterator, \Countable
     private $_em;
 
     /**
-     * @var \BackBuilder\Security\Token\BBUserToken
+     * @var \BackBee\Security\Token\BBUserToken
      */
     private $_token;
 
     /**
      * Sets the current entity manager to dynamicaly load subrevisions
      * @param  \Doctrine\ORM\EntityManager        $em
-     * @return \BackBuilder\ClassContent\Revision
+     * @return \BackBee\ClassContent\Revision
      */
     public function setEntityManager(\Doctrine\ORM\EntityManager $em = null)
     {
@@ -148,10 +148,10 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the current BB user's token to dynamically load subrevisions
-     * @param  \BackBuilder\Security\Token\BBUserToken $token
-     * @return \BackBuilder\ClassContent\Revision
+     * @param  \BackBee\Security\Token\BBUserToken $token
+     * @return \BackBee\ClassContent\Revision
      */
-    public function setToken(\BackBuilder\Security\Token\BBUserToken $token = null)
+    public function setToken(\BackBee\Security\Token\BBUserToken $token = null)
     {
         $this->_token = $token;
 
@@ -162,7 +162,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * Return a subcontent instance by its type and value, FALSE if not found
      * @param  string                                        $type  The classname of the subcontent
      * @param  string                                        $value The value of the subcontent (uid)
-     * @return \BackBuilder\ClassContent\AClassContent|FALSE
+     * @return \BackBee\ClassContent\AClassContent|FALSE
      */
     protected function _getContentByDataValue($type, $value)
     {
@@ -195,7 +195,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Returns the revisionned content
-     * @return \BackBuilder\ClassContent\AClassContent
+     * @return \BackBee\ClassContent\AClassContent
      * @codeCoverageIgnore
      */
     public function getContent()
@@ -236,7 +236,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Sets the whole datas of the revision
      * @param  array                                   $data
-     * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @return \BackBee\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setData(array $data)
@@ -248,8 +248,8 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the attached revisionned content
-     * @param  \BackBuilder\ClassContent\AClassContent $content
-     * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @param  \BackBee\ClassContent\AClassContent $content
+     * @return \BackBee\ClassContent\AClassContent the current instance content
      */
     public function setContent(AClassContent $content = null)
     {
@@ -265,7 +265,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Sets the entity target content classname
      * @param  string                                  $classname
-     * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @return \BackBee\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setClassname($classname)
@@ -278,7 +278,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Sets the owner of the revision
      * @param  \Symfony\Component\Security\Core\User\UserInterface $user
-     * @return \BackBuilder\ClassContent\AClassContent             the current instance content
+     * @return \BackBee\ClassContent\AClassContent             the current instance content
      * @codeCoverageIgnore
      */
     public function setOwner(UserInterface $user)
@@ -291,7 +291,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Sets the comment associated to the revision
      * @param  string                                  $comment
-     * @return \BackBuilder\ClassContent\AClassContent the current instance content
+     * @return \BackBee\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setComment($comment)
@@ -303,7 +303,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Returns the revision content
-     * @return \BackBuilder\ClassContent\AClassContent
+     * @return \BackBee\ClassContent\AClassContent
      * @codeCoverageIgnore
      */
     protected function _getContentInstance()
@@ -314,7 +314,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Sets options at the construction of a new revision
      * @param  mixed                              $options
-     * @return \BackBuilder\ClassContent\AContent
+     * @return \BackBee\ClassContent\AContent
      */
     protected function _setOptions($options = null)
     {

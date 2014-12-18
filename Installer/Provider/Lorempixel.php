@@ -1,5 +1,5 @@
 <?php
-namespace BackBuilder\Installer\Provider;
+namespace BackBee\Installer\Provider;
 
 use Faker\Provider\Base;
 

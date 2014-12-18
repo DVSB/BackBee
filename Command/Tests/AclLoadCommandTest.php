@@ -3,40 +3,40 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Command\Tests;
+namespace BackBee\Command\Tests;
 
-use BackBuilder\Tests\TestCase;
+use BackBee\Tests\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
-use BackBuilder\Console\Console;
-use BackBuilder\Command\AclLoadCommand;
+use BackBee\Console\Console;
+use BackBee\Command\AclLoadCommand;
 use org\bovigo\vfs\vfsStream;
-use BackBuilder\Security\Group;
+use BackBee\Security\Group;
 
 /**
  * AclDbInitCommand Test
  *
- * @category    BackBuilder
- * @package     BackBuilder\Command
+ * @category    BackBee
+ * @package     BackBee\Command
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Command\AclLoadCommand
+ * @coversDefaultClass \BackBee\Command\AclLoadCommand
  */
 class AclLoadCommandTest extends TestCase
 {

@@ -3,27 +3,27 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Util;
+namespace BackBee\Util;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -245,16 +245,16 @@ class Arrays
      * @param  string                                          $key
      * @param  string                                          $separator
      * @return boolean
-     * @throws \BackBuilder\Exception\InvalidArgumentException
+     * @throws \BackBee\Exception\InvalidArgumentException
      */
     public static function has(array $array, $key, $separator = ':', &$traverse = array())
     {
         if (false === is_string($key)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException('$key parameter as to be a string');
+            throw new \BackBee\Exception\InvalidArgumentException('$key parameter as to be a string');
         }
 
         if (false === is_string($separator)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException('$separator parameter as to be a string');
+            throw new \BackBee\Exception\InvalidArgumentException('$separator parameter as to be a string');
         }
 
         $traverse = $array;
@@ -276,7 +276,7 @@ class Arrays
      * @param  mixed                                           $default
      * @param  string                                          $separator
      * @return mixed
-     * @throws \BackBuilder\Exception\InvalidArgumentException
+     * @throws \BackBee\Exception\InvalidArgumentException
      */
     public static function get(array $array, $key, $default = null, $separator = ':')
     {

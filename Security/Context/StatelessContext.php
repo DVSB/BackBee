@@ -1,14 +1,14 @@
 <?php
 
-namespace BackBuilder\Security\Context;
+namespace BackBee\Security\Context;
 
-use BackBuilder\Security\Listeners\ContextListener;
+use BackBee\Security\Listeners\ContextListener;
 
 /**
  * Description of AnonymousContext
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Context
  * @copyright   Lp digital system
  * @author      nicolas.dufreche <nicolas.dufreche@lp-digital.fr>

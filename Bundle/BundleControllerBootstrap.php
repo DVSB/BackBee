@@ -3,43 +3,43 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Bundle;
+namespace BackBee\Bundle;
 
-use BackBuilder\Bundle\Exception\RequestErrorException;
-use BackBuilder\FrontController\Exception\FrontControllerException;
+use BackBee\Bundle\Exception\RequestErrorException;
+use BackBee\FrontController\Exception\FrontControllerException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Bundle
+ * @category    BackBee
+ * @package     BackBee\Bundle
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class BundleControllerBootstrap
 {
     /**
-     * @var BackBuilder\Bundle\ABundle
+     * @var BackBee\Bundle\ABundle
      */
     protected $_bundle;
 
     /**
-     * @var BackBuilder\BBApplication
+     * @var BackBee\BBApplication
      */
     protected $_application;
 
@@ -54,7 +54,7 @@ class BundleControllerBootstrap
      *     - $_application
      *     - $_em
      *
-     * @param BackBuilder\Bundle\ABundle $bundle
+     * @param BackBee\Bundle\ABundle $bundle
      */
     public function __construct(BundleInterface $bundle)
     {
@@ -69,7 +69,7 @@ class BundleControllerBootstrap
      *
      * @param  string                                                         $method
      * @param  mixed                                                          $args
-     * @throws BackBuilder\FrontController\Exception\FrontControllerException if called action is not available
+     * @throws BackBee\FrontController\Exception\FrontControllerException if called action is not available
      */
     public function __call($method, $args)
     {
@@ -111,7 +111,7 @@ class BundleControllerBootstrap
     /**
      * Throws exception and stop current action if current user is not a bbuser
      *
-     * @throws BackBuilder\Bundle\Exception\RequestErrorException if current user is not a bbuser
+     * @throws BackBee\Bundle\Exception\RequestErrorException if current user is not a bbuser
      */
     protected function throwExceptionIfNotBBUser()
     {

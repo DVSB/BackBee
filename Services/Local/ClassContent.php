@@ -3,31 +3,31 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Local;
+namespace BackBee\Services\Local;
 
-use BackBuilder\Services\Content\ContentRender;
-use BackBuilder\Services\Content\Category;
-use BackBuilder\Services\Exception\ServicesException;
+use BackBee\Services\Content\ContentRender;
+use BackBee\Services\Content\Category;
+use BackBee\Services\Exception\ServicesException;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Local
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -45,7 +45,7 @@ class ClassContent extends AbstractServiceLocal
     public function find($classname, $uid)
     {
         $em = $this->getApplication()->getEntityManager();
-        $content = $em->getRepository('\BackBuilder\ClassContent\\'.$classname)->find($uid);
+        $content = $em->getRepository('\BackBee\ClassContent\\'.$classname)->find($uid);
 
         if (null === $content) {
             throw new ServicesException(sprintf('Unable to find content for `%s` uid', $uid));
@@ -76,12 +76,12 @@ class ClassContent extends AbstractServiceLocal
                 $createDraft = true;
                 if ($isParentAContentSet) {
                     $contentInfo = (object) $contentInfo;
-                    $contentType = 'BackBuilder\ClassContent\\'.$contentInfo->nodeType;
+                    $contentType = 'BackBee\ClassContent\\'.$contentInfo->nodeType;
                     $contentUid = $contentInfo->uid;
                 } else {
                     $contentType = (is_array($accept[$key])) ? $accept[$key][0] : $accept[$key];
-                    if (0 !== strpos($contentType, 'BackBuilder\ClassContent\\')) {
-                        $contentType = 'BackBuilder\ClassContent\\'.$contentType;
+                    if (0 !== strpos($contentType, 'BackBee\ClassContent\\')) {
+                        $contentType = 'BackBee\ClassContent\\'.$contentType;
                     }
                     $contentUid = $contentInfo;
                 }
@@ -92,7 +92,7 @@ class ClassContent extends AbstractServiceLocal
                 } elseif (null !== $exists = $em->find($contentType, $contentUid)) {
                     $result[$key] = $exists;
                 } else {
-                    $content = ($initial_content instanceof \BackBuilder\ClassContent\ContentSet) ? $initial_content->item($key) : $initial_content->$key;
+                    $content = ($initial_content instanceof \BackBee\ClassContent\ContentSet) ? $initial_content->item($key) : $initial_content->$key;
                     if (null !== $content) {
                         $result[$key] = $content;
                     }
@@ -132,20 +132,20 @@ class ClassContent extends AbstractServiceLocal
         if (FALSE === array_key_exists('uid', $srzContent)) {
             throw new ServicesException('An uid must be provided');
         }
-        $content = $this->getApplication()->getEntityManager()->find('BackBuilder\ClassContent\\'.$srzContent->type, $srzContent->uid);
+        $content = $this->getApplication()->getEntityManager()->find('BackBee\ClassContent\\'.$srzContent->type, $srzContent->uid);
         if (null === $content) {
-            $classname = 'BackBuilder\ClassContent\\'.$srzContent->type;
+            $classname = 'BackBee\ClassContent\\'.$srzContent->type;
             $content = new $classname($srzContent->uid);
         }
 
         $this->isGranted('VIEW', $content);
 
         $srzContent->data = null;
-        if (null !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->getApplication()->getBBUserToken(), true)) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->getApplication()->getBBUserToken(), true)) {
             $content->setDraft($draft);
         }
         $content = $content->unserialize($srzContent);
-        if (null !== $page_uid && (null !== $page = $em->find('BackBuilder\NestedNode\Page', $page_uid))) {
+        if (null !== $page_uid && (null !== $page = $em->find('BackBee\NestedNode\Page', $page_uid))) {
             $this->getApplication()->getRenderer()->setCurrentPage($page);
         }
 
@@ -174,8 +174,8 @@ class ClassContent extends AbstractServiceLocal
             return $this->_processedContent[$srzContent->uid];
         }
 
-        if (0 !== strpos($srzContent->type, 'BackBuilder\ClassContent\\')) {
-            $srzContent->type = 'BackBuilder\ClassContent\\'.$srzContent->type;
+        if (0 !== strpos($srzContent->type, 'BackBee\ClassContent\\')) {
+            $srzContent->type = 'BackBee\ClassContent\\'.$srzContent->type;
         }
         //if (!$srzContent->isAContentSet) {
         $content = $this->getApplication()->getEntityManager()->find($srzContent->type, $srzContent->uid);
@@ -189,7 +189,7 @@ class ClassContent extends AbstractServiceLocal
         $this->isGranted('EDIT', $content);
 
         //Find a draft for content if exists
-        if (null !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->getApplication()->getBBUserToken(), true)) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->getApplication()->getBBUserToken(), true)) {
             $content->setDraft($draft);
         }
 
@@ -222,7 +222,7 @@ class ClassContent extends AbstractServiceLocal
             $receiver = null;
             $em = $this->getApplication()->getEntityManager();
 
-            if (null !== $page_uid && (null !== $page = $em->find('BackBuilder\NestedNode\Page', $page_uid))) {
+            if (null !== $page_uid && (null !== $page = $em->find('BackBee\NestedNode\Page', $page_uid))) {
                 $this->getApplication()->getRenderer()->setCurrentPage($page);
             }
 
@@ -230,7 +230,7 @@ class ClassContent extends AbstractServiceLocal
                 $content = (object) $content;
                 $cRender = new ContentRender($content->type, $this->getApplication(), null, $renderType, $content->uid);
                 if ($cRender) {
-                    $classname = '\BackBuilder\ClassContent\\'.$content->type;
+                    $classname = '\BackBee\ClassContent\\'.$content->type;
                     if (null === $nwContent = $em->find($classname, $content->uid)) {
                         $nwContent = new $classname();
                     }
@@ -262,7 +262,7 @@ class ClassContent extends AbstractServiceLocal
             throw new \Exception("params content.type and content.uid can't be null");
         }
         $contentParams = array();
-        $contentTypeClass = "BackBuilder\ClassContent\\".$contentType;
+        $contentTypeClass = "BackBee\ClassContent\\".$contentType;
 
         $em = $this->getApplication()->getEntityManager();
         if (null === $contentNode = $em->find($contentTypeClass, $contentUid)) {
@@ -274,7 +274,7 @@ class ClassContent extends AbstractServiceLocal
         $default = $contentNode->getDefaultParameters();
 
         // Find a draft if exists
-        if (null !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($contentNode, $this->getApplication()->getBBUserToken())) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($contentNode, $this->getApplication()->getBBUserToken())) {
             $contentNode->setDraft($draft);
         }
         $contentParams = $contentNode->getParam();
@@ -288,7 +288,7 @@ class ClassContent extends AbstractServiceLocal
             $parentnodeTitle = array();
             $parentnode = array_filter($contentParams['selector']['array']['parentnode']);
             foreach ($parentnode as $page_uid) {
-                if (null !== $page = $em->find('BackBuilder\NestedNode\Page', $page_uid)) {
+                if (null !== $page = $em->find('BackBee\NestedNode\Page', $page_uid)) {
                     $parentnodeTitle[] = $page->getTitle();
                 } else {
                     $parentnodeTitle[] = '';
@@ -333,20 +333,20 @@ class ClassContent extends AbstractServiceLocal
         $contentSetId = (!is_null($contentSetId)) ? $contentSetId : false;
         $result = false;
         if (!$pageId || !$contentSetId) {
-            throw new \BackBuilder\Exception\BBException(" a ContentSetId and a PageId must be provided");
+            throw new \BackBee\Exception\BBException(" a ContentSetId and a PageId must be provided");
         }
 
         $em = $this->getApplication()->getEntityManager();
-        $currentPage = $em->find("BackBuilder\NestedNode\\Page", $pageId);
-        $contentSetToReplace = $em->find("BackBuilder\ClassContent\ContentSet", $contentSetId);
+        $currentPage = $em->find("BackBee\NestedNode\\Page", $pageId);
+        $contentSetToReplace = $em->find("BackBee\ClassContent\ContentSet", $contentSetId);
 
         if (is_null($contentSetToReplace) || is_null($currentPage)) {
-            throw new \BackBuilder\Exception\BBException(" a ContentSet and a Page must be provided");
+            throw new \BackBee\Exception\BBException(" a ContentSet and a Page must be provided");
         }
 
         /* current page main contentSet will be modified a draft should be created */
         $pageRootContentSet = $currentPage->getContentSet();
-        if (null !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($pageRootContentSet, $this->getApplication()->getBBUserToken(), true)) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($pageRootContentSet, $this->getApplication()->getBBUserToken(), true)) {
             $pageRootContentSet->setDraft($draft);
         }
 
@@ -354,18 +354,18 @@ class ClassContent extends AbstractServiceLocal
         $newEmptyContentSet = $contentSetToReplace->createClone();
         $em->persist($newEmptyContentSet);
 
-        //$newEmptyContentSet = new \BackBuilder\ClassContent\ContentSet();
+        //$newEmptyContentSet = new \BackBee\ClassContent\ContentSet();
 
-        if (null !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($newEmptyContentSet, $this->getApplication()->getBBUserToken(), true)) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($newEmptyContentSet, $this->getApplication()->getBBUserToken(), true)) {
             $newEmptyContentSet->setDraft($draft);
         }
         $newEmptyContentSet->clear();
         $em->flush();
 
         /* unlink and update */
-        $replace = $em->getRepository('BackBuilder\NestedNode\Page')->replaceRootContentSet($currentPage, $contentSetToReplace, $newEmptyContentSet);
+        $replace = $em->getRepository('BackBee\NestedNode\Page')->replaceRootContentSet($currentPage, $contentSetToReplace, $newEmptyContentSet);
         if ($replace) {
-            $em->getRepository("BackBuilder\ClassContent\ContentSet")->updateRootContentSetByPage($currentPage, $contentSetToReplace, $newEmptyContentSet, $this->getApplication()->getBBUserToken());
+            $em->getRepository("BackBee\ClassContent\ContentSet")->updateRootContentSetByPage($currentPage, $contentSetToReplace, $newEmptyContentSet, $this->getApplication()->getBBUserToken());
 
             $em->persist($pageRootContentSet);
             $em->flush();
@@ -375,7 +375,7 @@ class ClassContent extends AbstractServiceLocal
             $render = $this->getApplication()->getRenderer()->render($newEmptyContentSet, null);
             $result = array("render" => $render);
         } else {
-            throw new \BackBuilder\Exception\BBException("Error while unlinking zone!");
+            throw new \BackBee\Exception\BBException("Error while unlinking zone!");
         }
 
         return $result;
@@ -393,15 +393,15 @@ class ClassContent extends AbstractServiceLocal
 
         $contentSetId = (!is_null($contentSetId)) ? $contentSetId : false;
 
-        $contentSetToReplace = $em->find("BackBuilder\ClassContent\\ContentSet", $contentSetId);
-        $currentPage = $em->find("BackBuilder\NestedNode\\Page", $pageId);
+        $contentSetToReplace = $em->find("BackBee\ClassContent\\ContentSet", $contentSetId);
+        $currentPage = $em->find("BackBee\NestedNode\\Page", $pageId);
 
         if (is_null($contentSetToReplace) || is_null($currentPage)) {
-            throw new \BackBuilder\Exception\BBException(" a ContentSet and a Page must be provided");
+            throw new \BackBee\Exception\BBException(" a ContentSet and a Page must be provided");
         }
         /* draft for page's maicontainer */
         $pageRootContentSet = $currentPage->getContentSet();
-        if (null !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($pageRootContentSet, $this->getApplication()->getBBUserToken(), true)) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($pageRootContentSet, $this->getApplication()->getBBUserToken(), true)) {
             $pageRootContentSet->setDraft($draft);
         }
 
@@ -411,20 +411,20 @@ class ClassContent extends AbstractServiceLocal
         }
 
         /* draft for parentSimilaireZone */
-        if (null !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($parentZoneAtSamePosition, $this->getApplication()->getBBUserToken(), true)) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($parentZoneAtSamePosition, $this->getApplication()->getBBUserToken(), true)) {
             $parentZoneAtSamePosition->setDraft($draft);
         }
 
         /* replace page's zone here */
         $replace = $currentPage->replaceRootContentSet($contentSetToReplace, $parentZoneAtSamePosition, false);
         if ($replace) {
-            $em->getRepository("BackBuilder\ClassContent\ContentSet")->updateRootContentSetByPage($currentPage, $contentSetToReplace, $parentZoneAtSamePosition, $this->getApplication()->getBBUserToken());
+            $em->getRepository("BackBee\ClassContent\ContentSet")->updateRootContentSetByPage($currentPage, $contentSetToReplace, $parentZoneAtSamePosition, $this->getApplication()->getBBUserToken());
             $em->persist($pageRootContentSet);
             $em->flush();
             $render = $this->getApplication()->getRenderer()->render($parentZoneAtSamePosition, null);
             $result = array("render" => $render, "newContentUid" => $parentZoneAtSamePosition->getUid());
         } else {
-            throw new \BackBuilder\Exception\BBException("Error while linking zone!");
+            throw new \BackBee\Exception\BBException("Error while linking zone!");
         }
 
         return $result;
@@ -440,11 +440,11 @@ class ClassContent extends AbstractServiceLocal
     public function showContentsPage($contentUid, $contentType)
     {
         $em = $this->getApplication()->getEntityManager();
-        $content = $em->find("BackBuilder\\ClassContent\\".$contentType, $contentUid);
+        $content = $em->find("BackBee\\ClassContent\\".$contentType, $contentUid);
         if ($content == null) {
             throw new \Exception("content can't be null");
         }
-        $pages = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findPagesByContent($content);
+        $pages = $em->getRepository("BackBee\ClassContent\AClassContent")->findPagesByContent($content);
         $results = new \stdClass();
         $results->pages = array();
         if (is_array($pages) && !empty($pages)) {
@@ -466,11 +466,11 @@ class ClassContent extends AbstractServiceLocal
     {
         try {
             $em = $this->getApplication()->getEntityManager();
-            $content = $em->find("BackBuilder\\ClassContent\\".$contentType, $contentUid);
+            $content = $em->find("BackBee\\ClassContent\\".$contentType, $contentUid);
             if ($content == null) {
                 throw new \Exception("content can't be null");
             }
-            $em->getRepository("BackBuilder\ClassContent\AClassContent")->deleteContent($content);
+            $em->getRepository("BackBee\ClassContent\AClassContent")->deleteContent($content);
             $em->flush();
         } catch (\Exception $e) {
             throw new \Exception("Content can't be deleted");
@@ -488,7 +488,7 @@ class ClassContent extends AbstractServiceLocal
             return $result;
         }
         $em = $this->getApplication()->getEntityManager();
-        $currentPage = $em->find("BackBuilder\NestedNode\\Page", $pageId);
+        $currentPage = $em->find("BackBee\NestedNode\\Page", $pageId);
         $mainZones = null;
         if (!is_null($currentPage)) {
             $mainZones = $currentPage->getPageMainZones();
@@ -508,10 +508,10 @@ class ClassContent extends AbstractServiceLocal
      */
     public function getContentsRteParams($contentType = null, $rte = null)
     {
-        $contentTypeClass = "BackBuilder\ClassContent\\".$contentType;
+        $contentTypeClass = "BackBee\ClassContent\\".$contentType;
         $content = new $contentTypeClass();
         $editable = array();
-        if (!is_a($contentTypeClass, 'BackBuilder\ClassContent\ContentSet')) {
+        if (!is_a($contentTypeClass, 'BackBee\ClassContent\ContentSet')) {
             $config = $this->getApplication()->getConfig();
             $rteMainConfig = $config->getSection("rteconfig");
             if (!array_key_exists("config", $rteMainConfig) || !is_array($rteMainConfig["config"])) {
@@ -531,7 +531,7 @@ class ClassContent extends AbstractServiceLocal
                 $elements = $content->getData();
                 $editable = new \stdClass();
                 foreach ($elements as $key => $item) {
-                    if (is_a($content->$key, "BackBuilder\ClassContent\AClassContent")) {
+                    if (is_a($content->$key, "BackBee\ClassContent\AClassContent")) {
                         $rteStyle = $content->{$key}->getParam('aloha', 'scalar');
                         if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == true && null !== $rteStyle)) {
                             /* if the style doesn't exist */

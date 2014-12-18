@@ -2,12 +2,12 @@
 
 namespace bbUnit\Util;
 
-use BackBuilder\Util\Parameter;
+use BackBee\Util\Parameter;
 
 class ParameterTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @covers \BackBuilder\Util\Parameter::paramsReplaceRecursive
+     * @covers \BackBee\Util\Parameter::paramsReplaceRecursive
      */
     public function testParamsReplaceRecursive()
     {

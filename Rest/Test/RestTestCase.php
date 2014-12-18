@@ -3,34 +3,34 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Test;
+namespace BackBee\Rest\Test;
 
-use BackBuilder\ApiClient\Auth\PrivateKeyAuth;
-use BackBuilder\Security\User;
-use BackBuilder\Tests\TestCase;
+use BackBee\ApiClient\Auth\PrivateKeyAuth;
+use BackBee\Security\User;
+use BackBee\Tests\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Test Case for REST
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -118,7 +118,7 @@ class RestTestCase extends TestCase
     /**
      *
      * @param  \Symfony\Component\HttpFoundation\Request $request
-     * @param  BackBuilder\Security\User                 $user
+     * @param  BackBee\Security\User                 $user
      * @return self
      */
     protected static function signRequest(Request $request, User $user = null)
@@ -141,7 +141,7 @@ class RestTestCase extends TestCase
     /**
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  \BackBuilder\Security\User                 $apiUser
+     * @param  \BackBee\Security\User                 $apiUser
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function sendRequest(Request $request, User $apiUser = null)

@@ -3,38 +3,38 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Acl\Loader;
+namespace BackBee\Security\Acl\Loader;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-use BackBuilder\Security\Acl\Permission\PermissionMap;
-use BackBuilder\Security\Acl\Permission\MaskBuilder;
+use BackBee\Security\Acl\Permission\PermissionMap;
+use BackBee\Security\Acl\Permission\MaskBuilder;
 
 /**
  * Yml Loader
  *
  * Loads yml acl data into the DB
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Acl\Loader
  * @copyright   Lp digital system
  * @author      k.golovin
@@ -62,9 +62,9 @@ class YmlLoader extends ContainerAware
         }
 
         foreach ($grid['groups'] as $group_identifier => $rights) {
-            if (null === $group = $this->em->getRepository('BackBuilder\Security\Group')->findOneBy(array('_identifier' => $group_identifier))) {
+            if (null === $group = $this->em->getRepository('BackBee\Security\Group')->findOneBy(array('_identifier' => $group_identifier))) {
                 // ensure group exists
-                $group = new \BackBuilder\Security\Group();
+                $group = new \BackBee\Security\Group();
                 $group->setIdentifier($group_identifier)
                         ->setName($group_identifier);
                 $this->em->persist($group);
@@ -114,7 +114,7 @@ class YmlLoader extends ContainerAware
         $sites = array();
         if (true === is_array($sites_def['resources'])) {
             foreach ($sites_def['resources'] as $site_label) {
-                if (null === $site = $this->em->getRepository('BackBuilder\Site\Site')->findOneBy(array('_label' => $site_label))) {
+                if (null === $site = $this->em->getRepository('BackBee\Site\Site')->findOneBy(array('_label' => $site_label))) {
                     continue;
                 }
 
@@ -122,8 +122,8 @@ class YmlLoader extends ContainerAware
                 $this->addObjectAcl($site, $aclProvider, $securityIdentity, $actions);
             }
         } elseif ('all' === $sites_def['resources']) {
-            $sites = $this->em->getRepository('BackBuilder\Site\Site')->findAll();
-            $this->addClassAcl(new \Backbuilder\Site\Site('*'), $aclProvider, $securityIdentity, $actions);
+            $sites = $this->em->getRepository('BackBee\Site\Site')->findAll();
+            $this->addClassAcl(new \BackBee\Site\Site('*'), $aclProvider, $securityIdentity, $actions);
         }
 
         return $sites;
@@ -143,14 +143,14 @@ class YmlLoader extends ContainerAware
         foreach ($sites as $site) {
             if (true === is_array($layout_def['resources'])) {
                 foreach ($layout_def['resources'] as $layout_label) {
-                    if (null === $layout = $this->em->getRepository('BackBuilder\Site\Layout')->findOneBy(array('_site' => $site, '_label' => $layout_label))) {
+                    if (null === $layout = $this->em->getRepository('BackBee\Site\Layout')->findOneBy(array('_site' => $site, '_label' => $layout_label))) {
                         continue;
                     }
 
                     $this->addObjectAcl($layout, $aclProvider, $securityIdentity, $actions);
                 }
             } elseif ('all' === $layout_def['resources']) {
-                $this->addClassAcl(new \Backbuilder\Site\Layout('*'), $aclProvider, $securityIdentity, $actions);
+                $this->addClassAcl(new \BackBee\Site\Layout('*'), $aclProvider, $securityIdentity, $actions);
             }
         }
     }
@@ -168,13 +168,13 @@ class YmlLoader extends ContainerAware
 
         if (true === is_array($page_def['resources'])) {
             foreach ($page_def['resources'] as $page_url) {
-                $pages = $this->em->getRepository('BackBuilder\Site\Layout')->findBy(array('_url' => $page_url));
+                $pages = $this->em->getRepository('BackBee\Site\Layout')->findBy(array('_url' => $page_url));
                 foreach ($pages as $page) {
                     $this->addObjectAcl($page, $aclProvider, $securityIdentity, $actions);
                 }
             }
         } elseif ('all' === $page_def['resources']) {
-            $this->addClassAcl(new \BackBuilder\NestedNode\Page('*'), $aclProvider, $securityIdentity, $actions);
+            $this->addClassAcl(new \BackBee\NestedNode\Page('*'), $aclProvider, $securityIdentity, $actions);
         }
     }
 
@@ -190,7 +190,7 @@ class YmlLoader extends ContainerAware
         }
 
         if ('all' === $folder_def['resources']) {
-            $this->addClassAcl(new \BackBuilder\NestedNode\MediaFolder('*'), $aclProvider, $securityIdentity, $actions);
+            $this->addClassAcl(new \BackBee\NestedNode\MediaFolder('*'), $aclProvider, $securityIdentity, $actions);
         }
     }
 
@@ -200,7 +200,7 @@ class YmlLoader extends ContainerAware
             return;
         }
 
-        $service = new \BackBuilder\Services\Local\ContentBlocks();
+        $service = new \BackBee\Services\Local\ContentBlocks();
         $service->initService($this->bbapp);
         $all_classes = $service->getContentsByCategory();
 
@@ -210,10 +210,10 @@ class YmlLoader extends ContainerAware
                 return array();
             }
 
-            $service = new \BackBuilder\Services\Local\ContentBlocks();
+            $service = new \BackBee\Services\Local\ContentBlocks();
             $service->initService($this->bbapp);
             foreach ($all_classes as $content) {
-                $classname = '\BackBuilder\ClassContent\\'.$content->name;
+                $classname = '\BackBee\ClassContent\\'.$content->name;
                 $this->addClassAcl(new $classname('*'), $aclProvider, $securityIdentity, $actions);
             }
         } elseif (true === is_array($content_def['resources']) && 0 < count($content_def['resources'])) {
@@ -228,7 +228,7 @@ class YmlLoader extends ContainerAware
 
                     if ('remains' === $resources_def) {
                         foreach ($all_classes as $content) {
-                            $classname = '\BackBuilder\ClassContent\\'.$content->name;
+                            $classname = '\BackBee\ClassContent\\'.$content->name;
                             if (false === in_array($classname, $used_classes)) {
                                 $used_classes[] = $classname;
                                 if (0 < count($actions)) {
@@ -238,11 +238,11 @@ class YmlLoader extends ContainerAware
                         }
                     } elseif (true === is_array($resources_def)) {
                         foreach ($resources_def as $content) {
-                            $classname = '\BackBuilder\ClassContent\\'.$content;
+                            $classname = '\BackBee\ClassContent\\'.$content;
                             if (substr($classname, -1) === '*') {
                                 $classname = substr($classname, 0 - 1);
                                 foreach ($all_classes as $content) {
-                                    $fullclass = '\BackBuilder\ClassContent\\'.$content->name;
+                                    $fullclass = '\BackBee\ClassContent\\'.$content->name;
                                     if (0 === strpos($fullclass, $classname)) {
                                         $used_classes[] = $fullclass;
                                         if (0 < count($actions)) {
@@ -266,11 +266,11 @@ class YmlLoader extends ContainerAware
                 }
 
                 foreach ($content_def['resources'] as $content) {
-                    $classname = '\BackBuilder\ClassContent\\'.$content;
+                    $classname = '\BackBee\ClassContent\\'.$content;
                     if (substr($classname, -1) === '*') {
                         $classname = substr($classname, 0 -1);
                         foreach ($all_classes as $content) {
-                            $fullclass = '\BackBuilder\ClassContent\\'.$content->name;
+                            $fullclass = '\BackBee\ClassContent\\'.$content->name;
                             if (0 === strpos($fullclass, $classname)) {
                                 $this->addClassAcl(new $fullclass('*'), $aclProvider, $securityIdentity, $actions);
                             }

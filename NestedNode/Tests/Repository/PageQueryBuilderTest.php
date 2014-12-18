@@ -3,77 +3,77 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Tests\Repository;
+namespace BackBee\NestedNode\Tests\Repository;
 
-use BackBuilder\Tests\TestCase;
-use BackBuilder\NestedNode\Repository\PageRepository;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Site\Layout;
+use BackBee\Tests\TestCase;
+use BackBee\NestedNode\Repository\PageRepository;
+use BackBee\NestedNode\Page;
+use BackBee\Site\Layout;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests\Repository
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests\Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class PageQueryBuilderTest extends TestCase
 {
     /**
-     * @var \BackBuilder\TestUnit\Mock\MockBBApplication
+     * @var \BackBee\TestUnit\Mock\MockBBApplication
      */
     private $application;
 
     /**
-     * @var \BackBuilder\NestedNode\Repository\PageRepository
+     * @var \BackBee\NestedNode\Repository\PageRepository
      */
     private $repo;
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsOnline
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsOnline
      */
     public function testAndIsOnline()
     {
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsOnline();
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN (:states0) AND (p._publishing IS NULL OR p._publishing <= :now0) AND (p._archiving IS NULL OR p._archiving > :now0)', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state IN (:states0) AND (p._publishing IS NULL OR p._publishing <= :now0) AND (p._archiving IS NULL OR p._archiving > :now0)', $q->getDql());
         $this->assertEquals(array(Page::STATE_ONLINE, Page::STATE_ONLINE + Page::STATE_HIDDEN), $q->getParameter('states0')->getValue());
         $this->assertEquals(date('Y-m-d H:i:00', time()), $q->getParameter('now0')->getValue());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsVisible
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsVisible
      */
     public function testAndIsVisible()
     {
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsVisible();
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state = :states0 AND (p._publishing IS NULL OR p._publishing <= :now0) AND (p._archiving IS NULL OR p._archiving > :now0)', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state = :states0 AND (p._publishing IS NULL OR p._publishing <= :now0) AND (p._archiving IS NULL OR p._archiving > :now0)', $q->getDql());
         $this->assertEquals(Page::STATE_ONLINE, $q->getParameter('states0')->getValue());
         $this->assertEquals(date('Y-m-d H:i:00', time()), $q->getParameter('now0')->getValue());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andLayoutIs
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andLayoutIs
      */
     public function testAndLayoutIs()
     {
@@ -81,13 +81,13 @@ class PageQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('p')
                 ->andLayoutIs($layout);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._layout = :layout0', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._layout = :layout0', $q->getDql());
         $this->assertEquals($layout, $q->getParameter('layout0')->getValue());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsOnlineSiblingsOf
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsOnlineSiblingsOf
      */
     public function testAndIsOnlineSiblingsOf()
     {
@@ -95,12 +95,12 @@ class PageQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsOnlineSiblingsOf($page);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._uid = :uid0 AND p._parent IS NULL AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode asc', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._uid = :uid0 AND p._parent IS NULL AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode asc', $q->getDql());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsPreviousOnlineSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsPreviousOnlineSiblingOf
      */
     public function testAndIsPreviousOnlineSiblingOf()
     {
@@ -108,12 +108,12 @@ class PageQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsPreviousOnlineSiblingOf($page);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode <= :leftnode0 AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode DESC', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode <= :leftnode0 AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode DESC', $q->getDql());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsNextOnlineSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsNextOnlineSiblingOf
      */
     public function testAndIsNextOnlineSiblingOf()
     {
@@ -121,12 +121,12 @@ class PageQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsNextOnlineSiblingOf($page);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode >= :leftnode0 AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode ASC', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode >= :leftnode0 AND p._state IN (:states1) AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode ASC', $q->getDql());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsVisibleSiblingsOf
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsVisibleSiblingsOf
      */
     public function testAndIsVisibleSiblingsOf()
     {
@@ -134,12 +134,12 @@ class PageQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsVisibleSiblingsOf($page);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._uid = :uid0 AND p._parent IS NULL AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode asc', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._uid = :uid0 AND p._parent IS NULL AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode asc', $q->getDql());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsPreviousVisibleSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsPreviousVisibleSiblingOf
      */
     public function testAndIsPreviousVisibleSiblingOf()
     {
@@ -147,12 +147,12 @@ class PageQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsPreviousVisibleSiblingOf($page);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode <= :leftnode0 AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode DESC', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode <= :leftnode0 AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode DESC', $q->getDql());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andIsNextVisibleSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsNextVisibleSiblingOf
      */
     public function testAndIsNextVisibleSiblingOf()
     {
@@ -160,91 +160,91 @@ class PageQueryBuilderTest extends TestCase
         $q = $this->repo->createQueryBuilder('p')
                 ->andIsNextVisibleSiblingOf($page);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode >= :leftnode0 AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode ASC', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._parent IS NULL AND p._leftnode >= :leftnode0 AND p._state = :states1 AND (p._publishing IS NULL OR p._publishing <= :now1) AND (p._archiving IS NULL OR p._archiving > :now1) ORDER BY p._leftnode ASC', $q->getDql());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andStateIsIn
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andStateIsIn
      */
     public function testAndStateIsIn()
     {
         $q = $this->repo->createQueryBuilder('p')
                 ->andStateIsIn(Page::STATE_ONLINE);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN(:states0)', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state IN(:states0)', $q->getDql());
         $this->assertEquals(array(Page::STATE_ONLINE), $q->getParameter('states0')->getValue());
 
         $q->resetDQLPart('where')
                 ->setParameters(array())
                 ->andStateIsIn(array(Page::STATE_ONLINE, Page::STATE_OFFLINE));
 
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN(:states0)', $q->getDql());
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state IN(:states0)', $q->getDql());
         $this->assertEquals(array(Page::STATE_ONLINE, Page::STATE_OFFLINE), $q->getParameter('states0')->getValue());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andStateIsNotIn
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andStateIsNotIn
      */
     public function testAndStateIsNotIn()
     {
         $q = $this->repo->createQueryBuilder('p')
                 ->andStateIsNotIn(Page::STATE_ONLINE);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state NOT IN(:states0)', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state NOT IN(:states0)', $q->getDql());
         $this->assertEquals(array(Page::STATE_ONLINE), $q->getParameter('states0')->getValue());
 
         $q->resetDQLPart('where')
                 ->setParameters(array())
                 ->andStateIsNotIn(array(Page::STATE_ONLINE, Page::STATE_OFFLINE));
 
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state NOT IN(:states0)', $q->getDql());
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state NOT IN(:states0)', $q->getDql());
         $this->assertEquals(array(Page::STATE_ONLINE, Page::STATE_OFFLINE), $q->getParameter('states0')->getValue());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andStateIsLowerThan
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andStateIsLowerThan
      */
     public function testAndStateIsLowerThan()
     {
         $q = $this->repo->createQueryBuilder('p')
                 ->andStateIsLowerThan(Page::STATE_DELETED);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state < :state0', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state < :state0', $q->getDql());
         $this->assertEquals(Page::STATE_DELETED, $q->getParameter('state0')->getValue());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andSiteIs
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andSiteIs
      */
     public function testAndSiteIs()
     {
-        $site = new \BackBuilder\Site\Site();
+        $site = new \BackBee\Site\Site();
         $q = $this->repo->createQueryBuilder('p')
                 ->andSiteIs($site);
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._site = :site0', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._site = :site0', $q->getDql());
         $this->assertEquals($site, $q->getParameter('site0')->getValue());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andTitleIsLike
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andTitleIsLike
      */
     public function testAndTitleIsLike()
     {
         $q = $this->repo->createQueryBuilder('p')
                 ->andTitleIsLike('test');
 
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals("SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._title LIKE '%test%'", $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals("SELECT p FROM BackBee\NestedNode\Page p WHERE p._title LIKE '%test%'", $q->getDql());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andSearchCriteria
+     * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andSearchCriteria
      */
     public function testAndSearchCriteria()
     {
@@ -252,38 +252,38 @@ class PageQueryBuilderTest extends TestCase
 
         $q = $this->repo->createQueryBuilder('p')
                 ->andSearchCriteria('fake');
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p', $q->getDql());
 
         $q->resetDQLPart('where')
                 ->andSearchCriteria(array(), 'fake');
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p', $q->getDql());
 
         $q->resetDQLPart('where')
                 ->andSearchCriteria(array('all'));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p', $q->getDql());
 
         $q->resetDQLPart('where')
                 ->andSearchCriteria(array(), array('beforePubdateField' => $now->getTimestamp()));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._modified < :date0', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._modified < :date0', $q->getDql());
 
         $q->resetDQLPart('where')
                 ->andSearchCriteria(array(), array('afterPubdateField' => $now->getTimestamp()));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._modified > :date1', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._modified > :date1', $q->getDql());
 
         $q->resetDQLPart('where')
                 ->andSearchCriteria(array(Page::STATE_ONLINE));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._state IN(:states2)', $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state IN(:states2)', $q->getDql());
 
         $q->resetDQLPart('where')
                 ->andSearchCriteria(array(), array('searchField' => 'test'));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
-        $this->assertEquals("SELECT p FROM BackBuilder\NestedNode\Page p WHERE p._title LIKE '%test%'", $q->getDql());
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals("SELECT p FROM BackBee\NestedNode\Page p WHERE p._title LIKE '%test%'", $q->getDql());
     }
 
     /**
@@ -295,20 +295,20 @@ class PageQueryBuilderTest extends TestCase
         $em = $this->application->getEntityManager();
 
         $st = new \Doctrine\ORM\Tools\SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Page')));
+        $st->createSchema(array($em->getClassMetaData('BackBee\NestedNode\Page')));
 
         $this->_setRepo();
     }
 
     /**
      * Sets the NestedNode Repository
-     * @return \BackBuilder\NestedNode\Tests\Repository\NestedNodeRepositoryTest
+     * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
     private function _setRepo()
     {
         $this->repo = $this->application
                 ->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page');
+                ->getRepository('BackBee\NestedNode\Page');
 
         PageRepository::$config = array(
             'nestedNodeCalculateAsync' => false,

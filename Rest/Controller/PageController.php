@@ -3,37 +3,37 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Controller;
+namespace BackBee\Rest\Controller;
 
-use BackBuilder\AutoLoader\Exception\ClassNotFoundException;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\MetaData\MetaDataBag;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Rest\Controller\Annotations as Rest;
-use BackBuilder\Rest\Patcher\EntityPatcher;
-use BackBuilder\Rest\Patcher\Exception\InvalidOperationSyntaxException;
-use BackBuilder\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
-use BackBuilder\Rest\Patcher\OperationSyntaxValidator;
-use BackBuilder\Rest\Patcher\RightManager;
-use BackBuilder\Site\Layout;
-use BackBuilder\Workflow\State;
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
+use BackBee\ClassContent\AClassContent;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\MetaData\MetaDataBag;
+use BackBee\NestedNode\Page;
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Patcher\EntityPatcher;
+use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
+use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
+use BackBee\Rest\Patcher\OperationSyntaxValidator;
+use BackBee\Rest\Patcher\RightManager;
+use BackBee\Site\Layout;
+use BackBee\Workflow\State;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -46,8 +46,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Page Controller
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -70,7 +70,7 @@ class PageController extends ARestController
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
-     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      */
     public function getMetadataAction(Page $page)
     {
@@ -89,7 +89,7 @@ class PageController extends ARestController
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
-     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      */
     public function putMetadataAction(Page $page, Request $request)
     {
@@ -135,7 +135,7 @@ class PageController extends ARestController
      * })
      *
      * @Rest\ParamConverter(
-     *   name="parent", id_name="parent_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
+     *   name="parent", id_name="parent_uid", id_source="query", class="BackBee\NestedNode\Page", required=false
      * )
      */
     public function getCollectionAction(Request $request, $start, $count, Page $parent = null)
@@ -164,7 +164,7 @@ class PageController extends ARestController
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
-     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      * @Rest\Security(expression="is_granted('VIEW', page)")
      */
     public function getAction(Page $page)
@@ -181,16 +181,16 @@ class PageController extends ARestController
      * })
      *
      * @Rest\ParamConverter(
-     *   name="layout", id_name="layout_uid", id_source="request", class="BackBuilder\Site\Layout", required=true
+     *   name="layout", id_name="layout_uid", id_source="request", class="BackBee\Site\Layout", required=true
      * )
      * @Rest\ParamConverter(
-     *   name="parent", id_name="parent_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=false
+     *   name="parent", id_name="parent_uid", id_source="request", class="BackBee\NestedNode\Page", required=false
      * )
      * @Rest\ParamConverter(
-     *   name="source", id_name="source_uid", id_source="query", class="BackBuilder\NestedNode\Page", required=false
+     *   name="source", id_name="source_uid", id_source="query", class="BackBee\NestedNode\Page", required=false
      * )
      * @Rest\ParamConverter(
-     *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBuilder\Workflow\State", required=false
+     *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBee\Workflow\State", required=false
      * )
      *
      * @Rest\Security(expression="is_granted('VIEW', layout)")
@@ -281,10 +281,10 @@ class PageController extends ARestController
      *   @Assert\Type(type="digit", message="The value should be a positive number")
      * })
      *
-     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
-     * @Rest\ParamConverter(name="layout", id_name="layout_uid", class="BackBuilder\Site\Layout", id_source="request")
+     * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
+     * @Rest\ParamConverter(name="layout", id_name="layout_uid", class="BackBee\Site\Layout", id_source="request")
      * @Rest\ParamConverter(
-     *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBuilder\Workflow\State", required=false
+     *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBee\Workflow\State", required=false
      * )
      * @Rest\Security(expression="is_granted('EDIT', page)")
      * @Rest\Security(expression="is_granted('VIEW', layout)")
@@ -326,7 +326,7 @@ class PageController extends ARestController
      *   @Assert\NotBlank(message="Request must contain at least one operation")
      * })
      *
-     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      * @Rest\Security(expression="is_granted('EDIT', page)")
      */
     public function patchAction(Page $page, Request $request)
@@ -364,7 +364,7 @@ class PageController extends ARestController
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
-     * @Rest\ParamConverter(name="page", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      */
     public function deleteAction(Page $page)
     {
@@ -393,12 +393,12 @@ class PageController extends ARestController
      *   @Assert\NotBlank
      * })
      *
-     * @Rest\ParamConverter(name="source", class="BackBuilder\NestedNode\Page")
+     * @Rest\ParamConverter(name="source", class="BackBee\NestedNode\Page")
      * @Rest\ParamConverter(
-     *   name="parent", id_name="parent_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=false
+     *   name="parent", id_name="parent_uid", id_source="request", class="BackBee\NestedNode\Page", required=false
      * )
      * @Rest\ParamConverter(
-     *   name="sibling", id_name="sibling_uid", id_source="request", class="BackBuilder\NestedNode\Page", required=false
+     *   name="sibling", id_name="sibling_uid", id_source="request", class="BackBee\NestedNode\Page", required=false
      * )
      *
      * @Rest\Security(expression="is_granted('CREATE', source)")
@@ -448,11 +448,11 @@ class PageController extends ARestController
     /**
      * Getter for page entity repository
      *
-     * @return \BackBuilder\NestedNode\Repository\PageRepository
+     * @return \BackBee\NestedNode\Repository\PageRepository
      */
     private function getPageRepository()
     {
-        return $this->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
+        return $this->getEntityManager()->getRepository('BackBee\NestedNode\Page');
     }
 
     /**
@@ -479,7 +479,7 @@ class PageController extends ARestController
             throw new NotFoundHttpException("No `$classname` exists with uid `$content_uid`");
         }
 
-        $pages = $em->getRepository("BackBuilder\ClassContent\AClassContent")->findPagesByContent($content);
+        $pages = $em->getRepository("BackBee\ClassContent\AClassContent")->findPagesByContent($content);
 
         $response = $this->createResponse($this->formatCollection($pages));
         if (0 < count($pages)) {
@@ -589,7 +589,7 @@ class PageController extends ARestController
 
             if ($code = (int) array_shift($states)) {
                 $workflow_state = $this->getApplication()->getEntityManager()
-                    ->getRepository('BackBuilder\Workflow\State')
+                    ->getRepository('BackBee\Workflow\State')
                     ->findOneBy(array(
                         '_code'   => $code,
                         '_layout' => $page->getLayout(),
@@ -675,7 +675,7 @@ class PageController extends ARestController
      */
     private function getPageByUid($uid)
     {
-        if (null === $page = $this->getApplication()->getEntityManager()->find('BackBuilder\NestedNode\Page', $uid)) {
+        if (null === $page = $this->getApplication()->getEntityManager()->find('BackBee\NestedNode\Page', $uid)) {
             throw new NotFoundHttpException("Unable to find page with uid `$uid`");
         }
 

@@ -3,27 +3,27 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\MetaData;
+namespace BackBee\MetaData;
 
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\NestedNode\Page;
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\ContentSet;
+use BackBee\NestedNode\Page;
 
 /**
  * A metadata
@@ -47,8 +47,8 @@ use BackBuilder\NestedNode\Page;
  * `content` will set according to the scheme:
  * value of the element `chapo` of the first `content `actu` in the first column.
  *
- * @category    BackBuilder
- * @package     BackBuilder\MetaData
+ * @category    BackBee
+ * @package     BackBee\MetaData
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -106,13 +106,13 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     /**
      * Sets the name of the metadata
      * @param  string                             $name
-     * @return \BackBuilder\MetaData\MetaData
-     * @throws \BackBuilder\Exception\BBException Occurs if $name if not a valid string
+     * @return \BackBee\MetaData\MetaData
+     * @throws \BackBee\Exception\BBException Occurs if $name if not a valid string
      */
     public function setName($name)
     {
         if (false === preg_match('/[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/', $name)) {
-            throw new \BackBuilder\Exception\InvalidArgumentException('Invalid name for metadata: \'%s\'', $name);
+            throw new \BackBee\Exception\InvalidArgumentException('Invalid name for metadata: \'%s\'', $name);
         }
 
         $this->name = $name;
@@ -146,9 +146,9 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
      * Sets the value of the attribute
      * @param  string                                  $attribute
      * @param  string                                  $value
-     * @param  \BackBuilder\ClassContent\AClassContent $content   Optional, if the attribute is computed
+     * @param  \BackBee\ClassContent\AClassContent $content   Optional, if the attribute is computed
      *                                                            the content on which apply the scheme
-     * @return \BackBuilder\MetaData\MetaData
+     * @return \BackBee\MetaData\MetaData
      */
     public function setAttribute($attribute, $value, AClassContent $content = null)
     {
@@ -176,9 +176,9 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
      * Updates the scheme of the attribute
      * @param  string                                  $attribute
      * @param  string                                  $scheme
-     * @param  \BackBuilder\ClassContent\AClassContent $content   Optional, if the attribute is computed
+     * @param  \BackBee\ClassContent\AClassContent $content   Optional, if the attribute is computed
      *                                                            the content on which apply the scheme
-     * @return \BackBuilder\MetaData\MetaData
+     * @return \BackBee\MetaData\MetaData
      */
     public function updateAttributeScheme($attribute, $scheme, AClassContent $content = null)
     {
@@ -198,8 +198,8 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Compute values of attributes according to the AClassContent provided
-     * @param  \BackBuilder\ClassContent\AClassContent $content
-     * @return \BackBuilder\MetaData\MetaData
+     * @param  \BackBee\ClassContent\AClassContent $content
+     * @return \BackBee\MetaData\MetaData
      */
     public function computeAttributes(AClassContent $content, Page $page = null)
     {
@@ -229,7 +229,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                         $newcontent = $content->item($m[3]);
                                     } elseif (3 < count($m) && $content instanceof ContentSet) {
                                         $index = intval($m[3]);
-                                        $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $m[1]);
+                                        $classname = 'BackBee\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $m[1]);
                                         foreach ($content as $subcontent) {
                                             if (get_class($subcontent) == $classname) {
                                                 if (0 === $index) {
@@ -244,7 +244,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                         try {
                                             $newcontent = $content->$property;
                                         } catch (\Exception $e) {
-                                            $newcontent = new \BackBuilder\ClassContent\Element\text();
+                                            $newcontent = new \BackBee\ClassContent\Element\text();
                                         }
                                     }
                                 }
@@ -261,7 +261,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                     $content->releaseDraft();
                                 }
 
-                                if ($content instanceof \BackBuilder\ClassContent\Element\File) {
+                                if ($content instanceof \BackBee\ClassContent\Element\File) {
                                     $new_value = $content->path;
                                 } else {
                                     $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$content)));
@@ -275,7 +275,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                             } elseif (true === is_array($content)) {
                                 $v = array();
                                 foreach ($content as $c) {
-                                    if ($c instanceof \BackBuilder\ClassContent\Element\keyword) {
+                                    if ($c instanceof \BackBee\ClassContent\Element\keyword) {
                                     }
                                     $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$c)));
                                 }

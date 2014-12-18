@@ -1,24 +1,24 @@
 <?php
-namespace BackBuilder\Tests;
+namespace BackBee\Tests;
 
 use Doctrine\ORM\Tools\SchemaTool;
-use BackBuilder\AutoLoader\AutoLoader;
-use BackBuilder\Installer\EntityFinder;
-use BackBuilder\Security\Token\BBUserToken;
-use BackBuilder\Security\User;
-use BackBuilder\Security\Group;
-use BackBuilder\Tests\Mock\MockBBApplication;
+use BackBee\AutoLoader\AutoLoader;
+use BackBee\Installer\EntityFinder;
+use BackBee\Security\Token\BBUserToken;
+use BackBee\Security\User;
+use BackBee\Security\Group;
+use BackBee\Tests\Mock\MockBBApplication;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Tests
+ * @category    BackBee
+ * @package     BackBee\Tests
  * @copyright   Lp system
  * @author      n.dufreche
  */
 class TestCase extends \PHPUnit_Framework_TestCase
 {
     private $root_folder;
-    private $backbuilder_folder;
+    private $BackBee_folder;
     private $repository_folder;
     private $mock_container = array();
 
@@ -30,20 +30,20 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function initAutoload()
     {
         $this->root_folder = self::getRootFolder();
-        $this->backbuilder_folder = $this->root_folder.DIRECTORY_SEPARATOR.'BackBuilder';
+        $this->BackBee_folder = $this->root_folder.DIRECTORY_SEPARATOR.'BackBee';
         $this->repository_folder = $this->root_folder.DIRECTORY_SEPARATOR.'repository';
 
-        $backbuilder_autoloader = new AutoLoader();
+        $BackBee_autoloader = new AutoLoader();
 
-        $backbuilder_autoloader->setApplication($this->getBBApp())
+        $BackBee_autoloader->setApplication($this->getBBApp())
                 ->register()
-                ->registerNamespace('BackBuilder\Bundle\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Tests')))
-                ->registerNamespace('BackBuilder\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
-                ->registerNamespace('BackBuilder\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
-                ->registerNamespace('BackBuilder\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'ClassContent', 'Repositories')))
-                ->registerNamespace('BackBuilder\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Templates', 'helpers')))
-                ->registerNamespace('BackBuilder\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Listeners')))
-                ->registerNamespace('BackBuilder\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Services', 'Public')))
+                ->registerNamespace('BackBee\Bundle\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Tests')))
+                ->registerNamespace('BackBee\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
+                ->registerNamespace('BackBee\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
+                ->registerNamespace('BackBee\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'ClassContent', 'Repositories')))
+                ->registerNamespace('BackBee\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Templates', 'helpers')))
+                ->registerNamespace('BackBee\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Listeners')))
+                ->registerNamespace('BackBee\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Services', 'Public')))
                 ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'vendor', 'doctrine', 'orm', 'tests', 'Doctrine', 'Tests')));
     }
 
@@ -51,7 +51,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         return array(
             $this->repository_folder.DIRECTORY_SEPARATOR.'ClassContent',
-            $this->backbuilder_folder.DIRECTORY_SEPARATOR.'ClassContent',
+            $this->BackBee_folder.DIRECTORY_SEPARATOR.'ClassContent',
         );
     }
 
@@ -65,7 +65,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         try {
             if (!file_exists($this->root_folder.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $namespace).'.php')) {
-                throw new \Exception('BackBuilderTestUnit could not find file associeted this namespace '.$namespace);
+                throw new \Exception('BackBeeTestUnit could not find file associeted this namespace '.$namespace);
             } else {
                 include_once $this->root_folder.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $namespace).'.php';
             }
@@ -75,7 +75,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * get the root folder BackBuilder application
+     * get the root folder BackBee application
      *
      * @return string
      */
@@ -85,17 +85,17 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * get the BackBuilder application folder
+     * get the BackBee application folder
      *
      * @return string
      */
-    public static function getBackbuilderFolder()
+    public static function getBackBeeFolder()
     {
-        return realpath(self::getRootFolder().DIRECTORY_SEPARATOR.'BackBuilder');
+        return realpath(self::getRootFolder().DIRECTORY_SEPARATOR.'BackBee');
     }
 
     /**
-     * get the repository BackBuilder application folder
+     * get the repository BackBee application folder
      *
      * @return string
      */
@@ -113,7 +113,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function getMockObjectContainer($obj_name)
     {
         if (!array_key_exists($obj_name, $this->mock_container)) {
-            $class_name = '\BackBuilder\Tests\Mock\Mock'.ucfirst($obj_name);
+            $class_name = '\BackBee\Tests\Mock\Mock'.ucfirst($obj_name);
             $this->mock_container[$obj_name] = new $class_name();
         }
 
@@ -174,7 +174,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     /**
      *
      * @param  type                       $config
-     * @return \BackBuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function getBBApp(array $config = null)
     {
@@ -193,7 +193,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     /**
      * Creates a user for the specified group, and authenticates a BBUserToken
      * @param  string                                  $groupId
-     * @return \BackBuilder\Security\Token\BBUserToken
+     * @return \BackBee\Security\Token\BBUserToken
      */
     protected function createAuthUser($groupId, $roles = array())
     {
@@ -208,7 +208,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         ;
 
         $group = $this->getBBApp()->getEntityManager()
-            ->getRepository('BackBuilder\Security\Group')
+            ->getRepository('BackBee\Security\Group')
             ->findOneBy(array('_identifier' => $groupId))
         ;
 
@@ -230,7 +230,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @return \BackBuilder\Security\SecurityContext
+     * @return \BackBee\Security\SecurityContext
      */
     protected function getSecurityContext()
     {
@@ -248,7 +248,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @return \BackBuilder\Security\Acl\AclManager
+     * @return \BackBee\Security\Acl\AclManager
      */
     protected function getAclManager()
     {

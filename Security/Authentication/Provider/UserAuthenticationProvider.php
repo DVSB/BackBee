@@ -3,27 +3,27 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Authentication\Provider;
+namespace BackBee\Security\Authentication\Provider;
 
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use BackBuilder\Security\Token\UsernamePasswordToken;
-use BackBuilder\Security\Exception\SecurityException;
+use BackBee\Security\Token\UsernamePasswordToken;
+use BackBee\Security\Exception\SecurityException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
@@ -32,8 +32,8 @@ use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProvid
 /**
  * Authentication provider for username/password firewall
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Authentication\Provider
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -115,7 +115,7 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
      * Authenticate a token accoridng to the user provided
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
-     * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
+     * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
     private function _authenticateUser(TokenInterface $token, UserInterface $user)
     {
@@ -130,7 +130,7 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
      * Authenticate a token according to the user provided with password encoder
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
-     * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
+     * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
     private function _authenticateWithEncoder(TokenInterface $token, UserInterface $user)
     {
@@ -150,7 +150,7 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
      * Authenticate a token according to the user provided without any password encoders
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
-     * @return boolean|\BackBuilder\Security\Token\UsernamePasswordToken
+     * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
     private function _authenticateWithoutEncoder(TokenInterface $token, UserInterface $user)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace BackBuilder\Config\Tests\Persistor;
+namespace BackBee\Config\Tests\Persistor;
 
 /**
  *

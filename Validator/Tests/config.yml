@@ -8,7 +8,7 @@ bundles:
 
 theme:
   name: Default
-  description: BackBuilder 5 default theme.
+  description: BackBee 5 default theme.
   screenshot: screenshoot.png
   folder: Resources
   architecture:
@@ -20,17 +20,17 @@ theme:
     js_dir: js
 
 logging:
-  appender: \BackBuilder\Logging\Appender\File
+  appender: \BackBee\Logging\Appender\File
   logfile: log/bb5-tests.log
   level: ERROR
 
 contentwrapper:
-  namespace:    BackBuilder\ClassContent
+  namespace:    BackBee\ClassContent
   protocol:     bb.class
-  adapter:      \BackBuilder\Stream\ClassWrapper\Adapter\Yaml
+  adapter:      \BackBee\Stream\ClassWrapper\Adapter\Yaml
 
 route:
-  # BackBuilder RPC services
+  # BackBee RPC services
   bb.method:
       pattern: /
       defaults:
@@ -39,7 +39,7 @@ route:
           HTTP-X-Requested-With:  XMLHttpRequest
           HTTP-X-BB-METHOD:       JsonRpc
 
-  # BackBuilder RPC upload service
+  # BackBee RPC upload service
   bb.upload:
       pattern: /
       defaults:
@@ -48,7 +48,7 @@ route:
           HTTP-X-Requested-With:  XMLHttpRequest
           HTTP-X-BB-METHOD:       Upload
 
-  # BackBuilder resources
+  # BackBee resources
   bb.resources:
       pattern: /ressources/{filename}
       defaults:
@@ -56,7 +56,7 @@ route:
       requirements:
           filename: .+
 
-  # BackBuilder media files
+  # BackBee media files
   bb.images:
       pattern: /{type}/{filename}
       defaults:
@@ -65,7 +65,7 @@ route:
           type: (images|media)
           filename: .+
 
-  # BackBuilder rss
+  # BackBee rss
   bb.rss:
       pattern: /rss/{uri}
       defaults:
@@ -102,8 +102,8 @@ security:
   providers:
     bb_user:
       entity:
-        class: BackBuilder\Security\User
+        class: BackBee\Security\User
       secret: bb5_demo_secret_key
 
   contexts:
-    BackBuilder\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext]
+    BackBee\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext]

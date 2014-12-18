@@ -3,28 +3,28 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Site;
+namespace BackBee\Site;
 
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
-use BackBuilder\Services\Local\IJson;
-use BackBuilder\Util\Numeric;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Services\Local\IJson;
+use BackBee\Util\Numeric;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -50,11 +50,11 @@ use JMS\Serializer\Annotation as Serializer;
  *   ]
  * }
  *
- * @category    BackBuilder
- * @package     BackBuilder\Site
+ * @category    BackBee
+ * @package     BackBee\Site
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBuilder\Site\Repository\LayoutRepository")
+ * @Entity(repositoryClass="BackBee\Site\Repository\LayoutRepository")
  * @Table(name="layout",indexes={@index(name="IDX_SITE", columns={"site_uid"})})
  * @HasLifecycleCallbacks
  *
@@ -131,8 +131,8 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Optional owner site.
-     * @var \BackBuilder\Site\Site
-     * @ManyToOne(targetEntity="BackBuilder\Site\Site", inversedBy="_layouts", fetch="EXTRA_LAZY")
+     * @var \BackBee\Site\Site
+     * @ManyToOne(targetEntity="BackBee\Site\Site", inversedBy="_layouts", fetch="EXTRA_LAZY")
      * @JoinColumn(name="site_uid", referencedColumnName="uid")
      */
     protected $_site;
@@ -140,7 +140,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Store pages using this layout.
      * var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
+     * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
 
@@ -257,7 +257,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Returns the owner site if defined, NULL otherwise
      * @codeCoverageIgnore
-     * @return \BackBuilder\Site\Site|NULL
+     * @return \BackBee\Site\Site|NULL
      */
     public function getSite()
     {
@@ -453,7 +453,7 @@ class Layout extends AObjectIdentifiable implements IJson
      * Sets the label.
      * @codeCoverageIgnore
      * @param  string                   $label
-     * @return \BackBuilder\Site\Layout
+     * @return \BackBee\Site\Layout
      */
     public function setLabel($label)
     {
@@ -466,7 +466,7 @@ class Layout extends AObjectIdentifiable implements IJson
      * Set the filename of the layout
      * @codeCoverageIgnore
      * @param  string                   $path
-     * @return \BackBuilder\Site\Layout
+     * @return \BackBee\Site\Layout
      */
     public function setPath($path)
     {
@@ -479,7 +479,7 @@ class Layout extends AObjectIdentifiable implements IJson
      * Sets the data associated to the layout.
      * No validation checks are performed at this step.
      * @param  mixed                    $data
-     * @return \BackBuilder\Site\Layout
+     * @return \BackBee\Site\Layout
      */
     public function setData($data)
     {
@@ -501,7 +501,7 @@ class Layout extends AObjectIdentifiable implements IJson
      * Sets the data associated to the layout.
      * None validity checks are performed at this step.
      * @param  mixed                    $data
-     * @return \BackBuilder\Site\Layout
+     * @return \BackBee\Site\Layout
      */
     public function setDataObject($data)
     {
@@ -516,7 +516,7 @@ class Layout extends AObjectIdentifiable implements IJson
      * Sets the path to the layout icon.
      * @codeCoverageIgnore
      * @param  string                   $picpath
-     * @return \BackBuilder\Site\Layout
+     * @return \BackBee\Site\Layout
      */
     public function setPicPath($picpath)
     {
@@ -528,8 +528,8 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Associates this layout to a website.
      * @codeCoverageIgnore
-     * @param  \BackBuilder\Site\Site   $site
-     * @return \BackBuilder\Site\Layout
+     * @param  \BackBee\Site\Site   $site
+     * @return \BackBee\Site\Layout
      */
     public function setSite(Site $site)
     {
@@ -542,7 +542,7 @@ class Layout extends AObjectIdentifiable implements IJson
      * Sets one or all parameters
      * @param  string                   $var    the parameter name to set, if NULL all the parameters array wil be set
      * @param  mixed                    $values the parameter value or all the parameters if $var is NULL
-     * @return \BackBuilder\Site\Layout
+     * @return \BackBee\Site\Layout
      */
     public function setParam($var = null, $values = null)
     {
@@ -556,7 +556,7 @@ class Layout extends AObjectIdentifiable implements IJson
     }
 
     /**
-     * @see BackBuilder\Services\Local\IJson::__toJson()
+     * @see BackBee\Services\Local\IJson::__toJson()
      */
     public function __toJson()
     {
@@ -594,7 +594,7 @@ class Layout extends AObjectIdentifiable implements IJson
             $options['accept'] = $zone->accept;
 
             $func = function (&$item, $key) {
-                        $item = ('' == $item) ? null : 'BackBuilder\ClassContent\\'.$item;
+                        $item = ('' == $item) ? null : 'BackBee\ClassContent\\'.$item;
                     };
 
             array_walk($options['accept'], $func);

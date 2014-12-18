@@ -3,36 +3,36 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Renderer\Adapter;
+namespace BackBee\Renderer\Adapter;
 
 use Exception;
-use BackBuilder\Renderer\ARenderer;
-use BackBuilder\Renderer\ARendererAdapter;
-use BackBuilder\Renderer\Exception\RendererException;
-use BackBuilder\Site\Layout;
-use BackBuilder\Util\File;
+use BackBee\Renderer\ARenderer;
+use BackBee\Renderer\ARendererAdapter;
+use BackBee\Renderer\Exception\RendererException;
+use BackBee\Site\Layout;
+use BackBee\Util\File;
 
 /**
  * Rendering adapter for phtml templating files
  *
- * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @category    BackBee
+ * @package     BackBee\Renderer
  * @subpackage  Adapter
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -104,7 +104,7 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::getManagedFileExtensions()
+     * @see BackBee\Renderer\IRendererAdapter::getManagedFileExtensions()
      */
     public function getManagedFileExtensions()
     {
@@ -138,7 +138,7 @@ class phtml extends ARendererAdapter
             include $filename;
 
             return ob_get_clean();
-        } catch (\BackBuilder\FrontController\Exception\FrontControllerException $fe) {
+        } catch (\BackBee\FrontController\Exception\FrontControllerException $fe) {
             ob_end_clean();
             throw $fe;
         } catch (Exception $e) {
@@ -176,7 +176,7 @@ class phtml extends ARendererAdapter
     /**
      * Return the current page to be rendered
      * @codeCoverageIgnore
-     * @return null|BackBuilder\NestedNode\Page
+     * @return null|BackBee\NestedNode\Page
      */
     public function setParam($param, $value = null)
     {
@@ -210,7 +210,7 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::updateLayout()
+     * @see BackBee\Renderer\IRendererAdapter::updateLayout()
      */
     public function updateLayout(Layout $layout, $layoutFile)
     {
@@ -268,7 +268,7 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::onRestorePreviousRenderer()
+     * @see BackBee\Renderer\IRendererAdapter::onRestorePreviousRenderer()
      */
     public function onRestorePreviousRenderer(ARenderer $renderer)
     {

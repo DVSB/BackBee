@@ -3,27 +3,27 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Cache\File;
+namespace BackBee\Cache\File;
 
-use BackBuilder\Cache\ACache;
-use BackBuilder\Cache\Exception\CacheException;
-use BackBuilder\Util\String;
+use BackBee\Cache\ACache;
+use BackBee\Cache\Exception\CacheException;
+use BackBee\Util\String;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -31,8 +31,8 @@ use Psr\Log\LoggerInterface;
  *
  * A simple cache system storing data in files, it does not provide tag or expire features
  *
- * @category    BackBuilder
- * @package     BackBuilder\Cache
+ * @category    BackBee
+ * @package     BackBee\Cache
  * @subpackage  File
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -60,7 +60,7 @@ class Cache extends ACache
      *                                                              - cachedir string The cache directory
      * @param  string                                      $context An optional cache context
      * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
-     * @throws \BackBuilder\Cache\Exception\CacheException Occurs if the cache directory doesn't exist, can not
+     * @throws \BackBee\Cache\Exception\CacheException Occurs if the cache directory doesn't exist, can not
      *                                                             be created or is not writable.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -99,9 +99,11 @@ class Cache extends ACache
         }
 
         $last_timestamp = $this->test($id);
-        if (true === $bypassCheck
-                || 0 === $last_timestamp
-                || $expire->getTimestamp() <= $last_timestamp) {
+        if (
+            true === $bypassCheck
+            || 0 === $last_timestamp
+            || $expire->getTimestamp() <= $last_timestamp
+        ) {
             if (false !== $data = @file_get_contents($this->getCacheFile($id))) {
                 $this->log('debug', sprintf('Reading file cache data for id `%s`.', $id));
 
@@ -123,11 +125,14 @@ class Cache extends ACache
      */
     public function test($id)
     {
-        if (false === $stat = @stat($this->getCacheFile($id))) {
-            return false;
+        $result = false;
+        $cache_file = $this->getCacheFile($id);
+        if (is_readable($cache_file)) {
+            $result = stat($cache_file);
+            $result = $result['mtime'];
         }
 
-        return $stat['mtime'];
+        return $result;
     }
 
     /**

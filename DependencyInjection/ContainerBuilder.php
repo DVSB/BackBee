@@ -3,29 +3,29 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\DependencyInjection;
+namespace BackBee\DependencyInjection;
 
-use BackBuilder\IApplication;
-use BackBuilder\DependencyInjection\Exception\ContainerAlreadyExistsException;
-use BackBuilder\DependencyInjection\Exception\MissingBootstrapParametersException;
-use BackBuilder\DependencyInjection\Util\ServiceLoader;
-use BackBuilder\Util\Resolver\ConfigDirectory;
+use BackBee\IApplication;
+use BackBee\DependencyInjection\Exception\ContainerAlreadyExistsException;
+use BackBee\DependencyInjection\Exception\MissingBootstrapParametersException;
+use BackBee\DependencyInjection\Util\ServiceLoader;
+use BackBee\Util\Resolver\ConfigDirectory;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -36,8 +36,8 @@ use Symfony\Component\DependencyInjection\Reference;
  *
  * ContainerBuilder also manage container dump to not reload and parse every xml and yml.
  *
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -66,14 +66,14 @@ class ContainerBuilder
     /**
      * Current application which we are building a container for
      *
-     * @var BackBuilder\IApplication
+     * @var BackBee\IApplication
      */
     private $application;
 
     /**
      * The container we are building
      *
-     * @var BackBuilder\DependencyInjection\Container
+     * @var BackBee\DependencyInjection\Container
      */
     private $container;
 
@@ -101,7 +101,7 @@ class ContainerBuilder
     /**
      * ContainerBuilder's constructor;
      *
-     * @param BackBuilder\IApplication $application the application we want to build a container for
+     * @param BackBee\IApplication $application the application we want to build a container for
      */
     public function __construct(IApplication $application)
     {
@@ -112,9 +112,9 @@ class ContainerBuilder
     }
 
     /**
-     * Every time you invoke this method it will return a new BackBuilder\DependencyInjection\Container
+     * Every time you invoke this method it will return a new BackBee\DependencyInjection\Container
      *
-     * @return BackBuilder\DependencyInjection\Container
+     * @return BackBee\DependencyInjection\Container
      *
      * @throws ContainerAlreadyExistsException will be raise if you try to call more than one time
      *                                         getContainer

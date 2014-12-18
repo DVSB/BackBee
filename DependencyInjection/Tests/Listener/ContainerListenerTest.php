@@ -1,45 +1,45 @@
 <?php
-namespace BackBuilder\DependencyInjection\Tests\Listener;
+namespace BackBee\DependencyInjection\Tests\Listener;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\DependencyInjection\ContainerBuilder;
-use BackBuilder\DependencyInjection\Listener\ContainerListener;
-use BackBuilder\Event\Event;
-use BackBuilder\Tests\Mock\ManualBBApplication;
+use BackBee\DependencyInjection\ContainerBuilder;
+use BackBee\DependencyInjection\Listener\ContainerListener;
+use BackBee\Event\Event;
+use BackBee\Tests\Mock\ManualBBApplication;
 use org\bovigo\vfs\vfsStream;
 
 /**
- * Set of tests for BackBuilder\DependencyInjection\Listener\ContainerListener
+ * Set of tests for BackBee\DependencyInjection\Listener\ContainerListener
  *
- * @category    BackBuilder
- * @package     BackBuilder\DependencyInjection
+ * @category    BackBee
+ * @package     BackBee\DependencyInjection
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
- * @coversDefaultClass \BackBuilder\DependencyInjection\Listener\ContainerListener
+ * @coversDefaultClass \BackBee\DependencyInjection\Listener\ContainerListener
  */
 class ContainerListenerTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * test every new and overrided method provided by BackBuilder\DependencyInjection\Container
+     * test every new and overrided method provided by BackBee\DependencyInjection\Container
      *
      * @covers ::onApplicationInit
      */
@@ -70,7 +70,7 @@ class ContainerListenerTest extends \PHPUnit_Framework_TestCase
         $application->setContainer((new ContainerBuilder($application))->getContainer());
 
         $container = $application->getContainer();
-        $this->assertInstanceOf('BackBuilder\DependencyInjection\ContainerInterface', $container);
+        $this->assertInstanceOf('BackBee\DependencyInjection\ContainerInterface', $container);
 
         $container->setParameter('container.dump_directory', $application->getBaseDir().'/container');
 
@@ -89,8 +89,8 @@ class ContainerListenerTest extends \PHPUnit_Framework_TestCase
     {
         $basic_services_yml = array(
             'parameters' => array(
-                'bbapp.logger.class'       => 'BackBuilder\Logging\Logger',
-                'bbapp.logger_debug.class' => 'BackBuilder\Logging\DebugStackLogger',
+                'bbapp.logger.class'       => 'BackBee\Logging\Logger',
+                'bbapp.logger_debug.class' => 'BackBee\Logging\DebugStackLogger',
             ),
         );
 
@@ -134,7 +134,7 @@ class ContainerListenerTest extends \PHPUnit_Framework_TestCase
             $this->fail('Raise of CannotCreateContainerDirectoryException expected.');
         } catch (\Exception $e) {
             $this->assertInstanceOf(
-                'BackBuilder\DependencyInjection\Exception\CannotCreateContainerDirectoryException',
+                'BackBee\DependencyInjection\Exception\CannotCreateContainerDirectoryException',
                 $e
             );
         }
@@ -144,8 +144,8 @@ class ContainerListenerTest extends \PHPUnit_Framework_TestCase
     {
         $basic_services_yml = array(
             'parameters' => array(
-                'bbapp.logger.class'       => 'BackBuilder\Logging\Logger',
-                'bbapp.logger_debug.class' => 'BackBuilder\Logging\DebugStackLogger',
+                'bbapp.logger.class'       => 'BackBee\Logging\Logger',
+                'bbapp.logger_debug.class' => 'BackBee\Logging\DebugStackLogger',
             ),
         );
 
@@ -191,7 +191,7 @@ class ContainerListenerTest extends \PHPUnit_Framework_TestCase
             $this->fail('Raise of ContainerDirectoryNotWritableException expected.');
         } catch (\Exception $e) {
             $this->assertInstanceOf(
-                'BackBuilder\DependencyInjection\Exception\ContainerDirectoryNotWritableException',
+                'BackBee\DependencyInjection\Exception\ContainerDirectoryNotWritableException',
                 $e
             );
         }

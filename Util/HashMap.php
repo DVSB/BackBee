@@ -1,12 +1,12 @@
 <?php
 
-namespace BackBuilder\Util;
+namespace BackBee\Util;
 
 /**
  * Description of HashMap
  *
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @subpackage  BBAbstract
  * @copyright   Lp digital system
  * @author      nicolas.dufreche <nicolas.dufreche@lp-digital.fr>

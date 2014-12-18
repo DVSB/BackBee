@@ -3,35 +3,35 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Local;
+namespace BackBee\Services\Local;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\MetaData\MetaDataBag;
-use BackBuilder\NestedNode\Page as NestedPage;
-use BackBuilder\Site\Layout as SiteLayout;
+use BackBee\BBApplication;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\MetaData\MetaDataBag;
+use BackBee\NestedNode\Page as NestedPage;
+use BackBee\Site\Layout as SiteLayout;
 
 /**
  * RPC services for NestedNode\Page
  *
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Local
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
@@ -40,13 +40,13 @@ class Page extends AbstractServiceLocal
 {
     /**
      * Page entities repository
-     * @var \BackBuilder\NestedNode\Repository\PageRepository
+     * @var \BackBee\NestedNode\Repository\PageRepository
      */
     private $_repo;
 
     /**
      * Initialize the service
-     * @param \BackBuilder\BBApplication $application
+     * @param \BackBee\BBApplication $application
      * @codeCoverageIgnore
      */
     public function initService(BBApplication $application)
@@ -54,7 +54,7 @@ class Page extends AbstractServiceLocal
         parent::initService($application);
 
         $this->_repo = $this->getEntityManager()
-                ->getRepository('\BackBuilder\NestedNode\Page');
+                ->getRepository('\BackBee\NestedNode\Page');
     }
 
     /**
@@ -73,7 +73,7 @@ class Page extends AbstractServiceLocal
     public function duplicate($uid)
     {
         $em = $this->bbapp->getEntityManager();
-        $page = $em->getRepository('\BackBuilder\NestedNode\Page')->find($uid);
+        $page = $em->getRepository('\BackBee\NestedNode\Page')->find($uid);
 
         if (NULL === $page) {
             throw new ServicesException(sprintf('Unable to find page for `%s` uid', $uid));
@@ -87,19 +87,19 @@ class Page extends AbstractServiceLocal
      * Returns the available workflow states for NestedNode\Page and Site\Layout
      * @param  string                                          $layout_uid
      * @return array
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if $layout_uid is invalid
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if $layout_uid is invalid
      * @exposed(secured=true)
      */
     public function getWorkflowStatus($layout_uid)
     {
-        if (null === $layout = $this->getEntityManager()->find('BackBuilder\Site\Layout', strval($layout_uid))) {
+        if (null === $layout = $this->getEntityManager()->find('BackBee\Site\Layout', strval($layout_uid))) {
             throw new InvalidArgumentException(sprintf('None layout exists with uid `%s`.', $layout_uid));
         }
 
         $this->isGranted('VIEW', $layout);
 
         $layout_states = $this->getEntityManager()
-                ->getRepository('BackBuilder\Workflow\State')
+                ->getRepository('BackBee\Workflow\State')
                 ->getWorkflowStatesForLayout($layout);
 
         $result = array();
@@ -114,9 +114,9 @@ class Page extends AbstractServiceLocal
      * Get the page info
      * @param  string                                                   $page_uid The unique identifier of the page
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $page_uid is invalid
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $page_uid is invalid
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function find($page_uid)
@@ -143,9 +143,9 @@ class Page extends AbstractServiceLocal
      * Updates a page
      * @param  string                                                   $serialized The serialized page
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $serialized is not valid
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $serialized is not valid
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function update($serialized)
@@ -190,7 +190,7 @@ class Page extends AbstractServiceLocal
             $page->setWorkflowState(null);
         } else {
             $layout_states = $this->getEntityManager()
-                    ->getRepository('BackBuilder\Workflow\State')
+                    ->getRepository('BackBee\Workflow\State')
                     ->getWorkflowStatesForLayout($page->getLayout());
 
             foreach ($layout_states as $state) {
@@ -203,7 +203,7 @@ class Page extends AbstractServiceLocal
 
         if (null === $page->getMetaData()) {
             $metadata_config = $this->getApplication()->getConfig()->getSection('metadata');
-            $metadata = new \BackBuilder\MetaData\MetaDataBag($metadata_config, $page);
+            $metadata = new \BackBee\MetaData\MetaDataBag($metadata_config, $page);
             $page->setMetaData($metadata->compute($page));
         }
 
@@ -227,14 +227,14 @@ class Page extends AbstractServiceLocal
      * @param  string                                                   $page_uid    The parent uid of the part of the tree
      * @param  string                                                   $current_uid
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $site_uid is not valid
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $site_uid is not valid
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function getBBBrowserTree($site_uid, $page_uid, $current_uid = null, $firstresult = 0, $maxresult = 25, $having_child = false)
     {
-        if (null === $site = $this->getEntityManager()->find('\BackBuilder\Site\Site', strval($site_uid))) {
+        if (null === $site = $this->getEntityManager()->find('\BackBee\Site\Site', strval($site_uid))) {
             throw new InvalidArgumentException(sprintf('Site with uid `%s` does not exist', $site_uid));
         }
         $tree = array();
@@ -274,7 +274,7 @@ class Page extends AbstractServiceLocal
                 } else {
                     return;
                 }
-            } catch (\BackBuilder\Security\Exception\ForbiddenAccessException $e) {
+            } catch (\BackBee\Security\Exception\ForbiddenAccessException $e) {
                 // Ignore it
             }
         }
@@ -287,9 +287,9 @@ class Page extends AbstractServiceLocal
      * @param  string                                                   $page_uid The unique identifier of the page
      * @param  string                                                   $title    The title of the clone
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $page_uid is invalid
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $page_uid is invalid
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function cloneBBPage($page_uid, $title)
@@ -331,9 +331,9 @@ class Page extends AbstractServiceLocal
      * @param  string                                                   $parent_uid The unique identifier of the new parent page
      * @param  string                                                   $next_uid   Optional, the unique identifier of the previous sibling
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $page_uid or $parent_uid are invalid
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $page_uid or $parent_uid are invalid
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function moveBBBrowserTree($page_uid, $parent_uid, $next_uid)
@@ -385,9 +385,9 @@ class Page extends AbstractServiceLocal
      * Removes the page off the tree
      * @param  string                                                   $page_uid The unique identifier of the page
      * @return \stdClass                                                The serialized parent
-     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if $page_uid is invalid or page is root
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $page_uid is invalid or page is root
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function delete($page_uid)
@@ -419,14 +419,14 @@ class Page extends AbstractServiceLocal
      * Returns the serialize page to edit it
      * @param  string                                                   $page_uid The unique identifier of the page
      * @return \stdClass
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function getBBSelectorForm($page_uid)
     {
         if (null === $page = $this->_repo->find(strval($page_uid))) {
-            $page = new \BackBuilder\NestedNode\Page();
+            $page = new \BackBee\NestedNode\Page();
             $page->setSite($this->getApplication()->getSite());
         } else {
             // User must have edit permission on page
@@ -452,9 +452,9 @@ class Page extends AbstractServiceLocal
      * @param  string                                                   $layout_uid The unique identifier of the layout to use
      * @param  string                                                   $alttitle   The alternate title bb5 #366
      * @return \stdClass
-     * @throws \BackBuilder\Exception\InvalidArgumentException          Occurs if the layout is undefined
-     * @throws \BackBuilder\Exception\MissingApplicationException       Occurs if none BackBuilder application is defined
-     * @throws \BackBuilder\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
+     * @throws \BackBee\Exception\InvalidArgumentException          Occurs if the layout is undefined
+     * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
+     * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
      * @exposed(secured=true)
      */
     public function postBBSelectorForm($page_uid, $parent_uid, $title, $url, $target, $redirect, $layout_uid, $alttitle, $flag = "", $is_sibling = false, $move_node_uid = null)
@@ -462,7 +462,7 @@ class Page extends AbstractServiceLocal
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
-        if (null === $layout = $this->getEntityManager()->find('\BackBuilder\Site\Layout', strval($layout_uid))) {
+        if (null === $layout = $this->getEntityManager()->find('\BackBee\Site\Layout', strval($layout_uid))) {
             throw new InvalidArgumentException(sprintf('None Layout exists with uid `%s`.', $layout_uid));
         }
 
@@ -563,17 +563,17 @@ class Page extends AbstractServiceLocal
     {
         $em = $this->bbapp->getEntityManager();
 
-        $root = $em->find('\BackBuilder\NestedNode\Page', $root_uid);
+        $root = $em->find('\BackBee\NestedNode\Page', $root_uid);
         if (NULL !== $root) {
-            $page = new \BackBuilder\NestedNode\Page();
+            $page = new \BackBee\NestedNode\Page();
             $page->setTitle($title)
                     ->setSite($root->getSite())
                     ->setRoot($root->getRoot())
                     ->setParent($root)
                     ->setLayout($root->getLayout())
-                    ->setState(\BackBuilder\NestedNode\Page::STATE_HIDDEN);
+                    ->setState(\BackBee\NestedNode\Page::STATE_HIDDEN);
 
-            $page = $em->getRepository('\BackBuilder\NestedNode\Page')->insertNodeAsLastChildOf($page, $root);
+            $page = $em->getRepository('\BackBee\NestedNode\Page')->insertNodeAsLastChildOf($page, $root);
 
             $em->persist($page);
             $em->flush();
@@ -596,7 +596,7 @@ class Page extends AbstractServiceLocal
     {
         $em = $this->bbapp->getEntityManager();
 
-        $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
+        $page = $em->find('\BackBee\NestedNode\Page', $page_uid);
 
         if ($page) {
             $page->setTitle($title);
@@ -616,14 +616,14 @@ class Page extends AbstractServiceLocal
     public function getBBSelectorTree($site_uid, $root_uid)
     {
         $em = $this->bbapp->getEntityManager();
-        $site = $em->find('\BackBuilder\Site\Site', $site_uid);
+        $site = $em->find('\BackBee\Site\Site', $site_uid);
         $tree = array();
 
         if ($site) {
             if ($root_uid !== null) {
-                $page = $em->find('\BackBuilder\NestedNode\Page', $root_uid);
+                $page = $em->find('\BackBee\NestedNode\Page', $root_uid);
 
-                foreach ($em->getRepository('\BackBuilder\NestedNode\Page')->getNotDeletedDescendants($page, 1) as $child) {
+                foreach ($em->getRepository('\BackBee\NestedNode\Page')->getNotDeletedDescendants($page, 1) as $child) {
                     $leaf = new \stdClass();
                     $leaf->attr = new \stdClass();
                     $leaf->attr->rel = 'folder';
@@ -637,7 +637,7 @@ class Page extends AbstractServiceLocal
                     $tree[] = $leaf;
                 }
             } else {
-                $page = $em->getRepository('\BackBuilder\NestedNode\Page')->getRoot($site);
+                $page = $em->getRepository('\BackBee\NestedNode\Page')->getRoot($site);
 
                 if ($page) {
                     $leaf = new \stdClass();
@@ -686,17 +686,17 @@ class Page extends AbstractServiceLocal
         }
         $em = $this->bbapp->getEntityManager();
 
-        $site = $em->find('\BackBuilder\Site\Site', $site_uid);
+        $site = $em->find('\BackBee\Site\Site', $site_uid);
 
         $view = array();
         $result = array();
         if ($site) {
             if ($page_uid !== null) {
-                $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
+                $page = $em->find('\BackBee\NestedNode\Page', $page_uid);
 
-                $nbChildren = $em->getRepository('\BackBuilder\NestedNode\Page')->countChildren($page, $typeField, $options);
+                $nbChildren = $em->getRepository('\BackBee\NestedNode\Page')->countChildren($page, $typeField, $options);
                 $pagingInfos = array("start" => (int) $start, "limit" => (int) $limit);
-                foreach ($em->getRepository('\BackBuilder\NestedNode\Page')->getChildren($page, $order_sort, $order_dir, $pagingInfos, $typeField, $options) as $child) {
+                foreach ($em->getRepository('\BackBee\NestedNode\Page')->getChildren($page, $order_sort, $order_dir, $pagingInfos, $typeField, $options) as $child) {
                     $row = new \stdClass();
                     $row->uid = $child->getUid();
                     $row->title = $child->getTitle();
@@ -707,7 +707,7 @@ class Page extends AbstractServiceLocal
                     $view[] = $row;
                 }
             } else {
-                $page = $em->getRepository('\BackBuilder\NestedNode\Page')->getRoot($site);
+                $page = $em->getRepository('\BackBee\NestedNode\Page')->getRoot($site);
                 $nbChildren = 1;
                 $row = new \stdClass();
                 $row->uid = $page->getUid();

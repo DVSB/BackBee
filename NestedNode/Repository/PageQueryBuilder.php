@@ -3,33 +3,33 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode\Repository;
+namespace BackBee\NestedNode\Repository;
 
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Site\Layout;
-use BackBuilder\Site\Site;
+use BackBee\NestedNode\Page;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
 
 /**
  * This class is responsible for building DQL query strings for Page
  *
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Repository
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -43,7 +43,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
     /**
      * Add query part to select online pages
      * @param  string                                              $alias optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsOnline($alias = null)
     {
@@ -59,7 +59,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
     /**
      * Add query part to select visible (ie online and not hidden) pages
      * @param  string                                              $alias optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsVisible($alias = null)
     {
@@ -74,9 +74,9 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
     /**
      * Add query part to select pages by layout
-     * @param  \BackBuilder\Site\Layout                            $layout the layout to look for
+     * @param  \BackBee\Site\Layout                            $layout the layout to look for
      * @param  string                                              $alias  optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andLayoutIs(Layout $layout, $alias = null)
     {
@@ -88,13 +88,13 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
     /**
      * Add query part to select online siblings of $page
-     * @param  \BackBuilder\NestedNode\Page                        $page   the page to test
+     * @param  \BackBee\NestedNode\Page                        $page   the page to test
      * @param  boolean                                             $strict optional, if TRUE $page is excluded from results, FALSE by default
      * @param  array                                               $order  optional, the ordering criteria ( array($field => $sort) )
      * @param  int                                                 $limit  optional, the maximum number of results
      * @param  int                                                 $start  optional, the first result index, 0 by default
      * @param  string                                              $alias  optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsOnlineSiblingsOf(Page $page, $strict = false, array $order = null, $limit = null, $start = 0, $alias = null)
     {
@@ -104,9 +104,9 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
     /**
      * Add query part to select previous online sibling of page
-     * @param  \BackBuilder\NestedNode\Page                        $page  the page to test
+     * @param  \BackBee\NestedNode\Page                        $page  the page to test
      * @param  string                                              $alias optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsPreviousOnlineSiblingOf(Page $page, $alias = null)
     {
@@ -120,9 +120,9 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
     /**
      * Add query part to select next online sibling of page
-     * @param  \BackBuilder\NestedNode\Page                        $page  the page to test
+     * @param  \BackBee\NestedNode\Page                        $page  the page to test
      * @param  string                                              $alias optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsNextOnlineSiblingOf(Page $page, $alias = null)
     {
@@ -136,13 +136,13 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
     /**
      * Add query part to select visible siblings of $page
-     * @param  \BackBuilder\NestedNode\Page                        $page   the page to test
+     * @param  \BackBee\NestedNode\Page                        $page   the page to test
      * @param  boolean                                             $strict optional, if TRUE $page is excluded from results, FALSE by default
      * @param  array                                               $order  optional, the ordering criteria ( array($field => $sort) )
      * @param  int                                                 $limit  optional, the maximum number of results
      * @param  int                                                 $start  optional, the first result index, 0 by default
      * @param  string                                              $alias  optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsVisibleSiblingsOf(Page $page, $strict = false, array $order = null, $limit = null, $start = 0, $alias = null)
     {
@@ -152,9 +152,9 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
     /**
      * Add query part to select previous visible sibling of page
-     * @param  \BackBuilder\NestedNode\Page                        $page  the page to test
+     * @param  \BackBee\NestedNode\Page                        $page  the page to test
      * @param  string                                              $alias optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsPreviousVisibleSiblingOf(Page $page, $alias = null)
     {
@@ -168,9 +168,9 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
     /**
      * Add query part to select next online sibling of page
-     * @param  \BackBuilder\NestedNode\Page                        $page  the page to test
+     * @param  \BackBee\NestedNode\Page                        $page  the page to test
      * @param  string                                              $alias optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andIsNextVisibleSiblingOf(Page $page, $alias = null)
     {
@@ -186,7 +186,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      * Add query part to select page having specific states
      * @param  mixed                                               $states one or several states to test
      * @param  string                                              $alias  optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andStateIsIn($states, $alias = null)
     {
@@ -204,7 +204,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      * Add query part to select page having not specific states
      * @param  mixed                                               $states one or several states to test
      * @param  string                                              $alias  optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andStateIsNotIn($states, $alias = null)
     {
@@ -222,7 +222,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      * Add query part to select page having state lower than $state
      * @param  mixed                                               $state the state to test
      * @param  string                                              $alias optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andStateIsLowerThan($state, $alias = null)
     {
@@ -234,9 +234,9 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
 
     /**
      * Add query part to select page owned by $site
-     * @param  \BackBuilder\Site\Site                              $site  the site to test
+     * @param  \BackBee\Site\Site                              $site  the site to test
      * @param  string                                              $alias optional, the alias to use
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andSiteIs(Site $site, $alias = null)
     {
@@ -250,7 +250,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      * Add query part to select page having title like $query
      * @param  string                                              $query
      * @param  string                                              $alias
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andTitleIsLike($query, $alias = null)
     {
@@ -266,7 +266,7 @@ class PageQueryBuilder extends NestedNodeQueryBuilder
      *                                                                               'afterPubdateField' => timestamp against page._modified,
      *                                                                               'searchField' => string to search for title
      * @param  string                                              $alias
-     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      * @Todo: more generic search function
      */
     public function andSearchCriteria($restrictedStates = array(), $options = array(), $alias = null)

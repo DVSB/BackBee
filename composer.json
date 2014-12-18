@@ -15,7 +15,7 @@
         }
     ],
     "extra": {
-        "installer-name": "BackBuilder"
+        "installer-name": "BackBee"
     },
     "repositories": [
         {
@@ -45,7 +45,7 @@
     },
     "autoload": {
         "psr-4": {
-            "BackBuilder\\": ""
+            "BackBee\\": ""
         }
     },
     "require-dev": {

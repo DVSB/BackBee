@@ -3,28 +3,28 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Local;
+namespace BackBee\Services\Local;
 
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Local
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
@@ -59,9 +59,9 @@ class Keyword extends AbstractServiceLocal
         $em = $this->bbapp->getEntityManager();
         $tree = array();
         if ($root_uid && $root_uid !== null) {
-            $keywordFolder = $em->find('\BackBuilder\NestedNode\KeyWord', $root_uid);
+            $keywordFolder = $em->find('\BackBee\NestedNode\KeyWord', $root_uid);
             if ($keywordFolder) {
-                foreach ($em->getRepository('\BackBuilder\NestedNode\KeyWord')->getDescendants($keywordFolder, 1) as $child) {
+                foreach ($em->getRepository('\BackBee\NestedNode\KeyWord')->getDescendants($keywordFolder, 1) as $child) {
                     $leaf = new \stdClass();
                     $leaf->attr = new \stdClass();
                     $leaf->attr->rel = 'folder';
@@ -77,7 +77,7 @@ class Keyword extends AbstractServiceLocal
                 }
             }
         } else {
-            $keyword = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->getRoot();
+            $keyword = $em->getRepository('\BackBee\NestedNode\KeyWord')->getRoot();
             if ($keyword) {
                 $leaf = new \stdClass();
                 $leaf->attr = new \stdClass();
@@ -110,7 +110,7 @@ class Keyword extends AbstractServiceLocal
         $em = $this->bbapp->getEntityManager();
         $leaf = false;
 
-        if (null !== $em->getRepository('BackBuilder\NestedNode\KeyWord')->exists($keywordInfos->keyword)) {
+        if (null !== $em->getRepository('BackBee\NestedNode\KeyWord')->exists($keywordInfos->keyword)) {
             throw new \Exception('Keyword with `'.$keywordInfos->keyword.'` as value already exists!');
         }
 
@@ -120,17 +120,17 @@ class Keyword extends AbstractServiceLocal
                 false
             );
 
-            $parent = $em->find('BackBuilder\NestedNode\KeyWord', $keywordInfos->parentUid);
+            $parent = $em->find('BackBee\NestedNode\KeyWord', $keywordInfos->parentUid);
 
             /* add as first of parent child */
             if ($parent) {
-                $keyword = $em->getRepository('\BackBuilder\NestedNode\KeyWord')->insertNodeAsFirstChildOf(
+                $keyword = $em->getRepository('\BackBee\NestedNode\KeyWord')->insertNodeAsFirstChildOf(
                     $keyword,
                     $parent
                 );
             }
         } else {
-            $keyword = $em->find("BackBuilder\NestedNode\Keyword", $keywordInfos->keywordUid);
+            $keyword = $em->find("BackBee\NestedNode\Keyword", $keywordInfos->keywordUid);
             $keyword->setKeyWord($keywordInfos->keyword);
         }
 
@@ -159,7 +159,7 @@ class Keyword extends AbstractServiceLocal
         }
         $result = false;
         $em = $this->bbapp->getEntityManager();
-        $keyword = $em->find('\BackBuilder\NestedNode\KeyWord', $keywordId);
+        $keyword = $em->find('\BackBee\NestedNode\KeyWord', $keywordId);
         if (!is_null($keyword)) {
             $em->remove($keyword);
             $em->flush();
@@ -177,7 +177,7 @@ class Keyword extends AbstractServiceLocal
     {
         $em = $this->bbapp->getEntityManager();
 
-        $q = $em->getRepository("\BackBuilder\NestedNode\KeyWord")
+        $q = $em->getRepository("\BackBee\NestedNode\KeyWord")
                 ->createQueryBuilder('k')
                 ->orderBy('k._keyWord', 'ASC')
                 ->setMaxResults($limit);
@@ -214,7 +214,7 @@ class Keyword extends AbstractServiceLocal
         if (0 < count($uids)) {
             $keywords = $this->bbapp
                     ->getEntityManager()
-                    ->getRepository("\BackBuilder\NestedNode\KeyWord")
+                    ->getRepository("\BackBee\NestedNode\KeyWord")
                     ->createQueryBuilder('k')
                     ->where('k._uid IN (:uids)')
                     ->orderBy('k._keyWord', 'ASC')

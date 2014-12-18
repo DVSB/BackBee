@@ -1,22 +1,22 @@
 <?php
 
-namespace BackBuilder\Renderer;
+namespace BackBee\Renderer;
 
-use BackBuilder\Renderer\Helper\HelperManager;
-use BackBuilder\Site\Layout;
+use BackBee\Renderer\Helper\HelperManager;
+use BackBee\Site\Layout;
 
 /**
  * abstract class for renderer adapter
  *
- * @category    BackBuilder
- * @package     BackBuilder\Renderer
+ * @category    BackBee
+ * @package     BackBee\Renderer
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 abstract class ARendererAdapter implements IRendererAdapter
 {
     /**
-     * @var BackBuilder\Renderer\ARenderer
+     * @var BackBee\Renderer\ARenderer
      */
     protected $renderer;
 
@@ -52,7 +52,7 @@ abstract class ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::getManagedFileExtensions()
+     * @see BackBee\Renderer\IRendererAdapter::getManagedFileExtensions()
      */
     public function getManagedFileExtensions()
     {
@@ -60,7 +60,7 @@ abstract class ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::isValidTemplateFile()
+     * @see BackBee\Renderer\IRendererAdapter::isValidTemplateFile()
      */
     public function isValidTemplateFile($filename, array $templateDir)
     {
@@ -68,7 +68,7 @@ abstract class ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::renderTemplate()
+     * @see BackBee\Renderer\IRendererAdapter::renderTemplate()
      */
     public function renderTemplate($filename, array $templateDir, array $params = array(), array $vars = array())
     {
@@ -76,14 +76,14 @@ abstract class ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::updateLayout()
+     * @see BackBee\Renderer\IRendererAdapter::updateLayout()
      */
     public function updateLayout(Layout $layout, $layoutFile)
     {
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::onNewRenderer()
+     * @see BackBee\Renderer\IRendererAdapter::onNewRenderer()
      */
     public function onNewRenderer(ARenderer $renderer)
     {
@@ -91,7 +91,7 @@ abstract class ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBuilder\Renderer\IRendererAdapter::onRestorePreviousRenderer()
+     * @see BackBee\Renderer\IRendererAdapter::onRestorePreviousRenderer()
      */
     public function onRestorePreviousRenderer(ARenderer $renderer)
     {

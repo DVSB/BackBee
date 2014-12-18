@@ -3,30 +3,30 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Content;
+namespace BackBee\Services\Content;
 
 use Symfony\Component\Yaml\Yaml as parserYaml;
-use BackBuilder\ClassContent\AClassContent;
+use BackBee\ClassContent\AClassContent;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Content
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
@@ -77,13 +77,13 @@ class ContentRender
     public function initContentObject()
     {
         if (NULL === $this->content) {
-            $classname = "BackBuilder\ClassContent\\".$this->name;
+            $classname = "BackBee\ClassContent\\".$this->name;
             if (NULL !== $this->uid) {
                 $this->content = $this->bbapp->getEntityManager()->find($classname, $this->uid);
             }
 //            if (NULL !== $content) {
 //
-//                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
+//                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
 //                    $content->setDraft($draft);
 //                    $this->content = $content;
 //                }
@@ -93,7 +93,7 @@ class ContentRender
             }
 
             if (null !== $this->bbapp->getBBUserToken()) {
-                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBuilder\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
+                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBee\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
                     $this->content->setDraft($draft);
                 }
             }
@@ -105,10 +105,10 @@ class ContentRender
         $fields = array();
         $alohaConf = $this->bbapp->getConfig()->getSection('alohapluginstable');
         $content = $this->content;
-        if (!is_a($content, 'BackBuilder\ClassContent\ContentSet')) {
+        if (!is_a($content, 'BackBee\ClassContent\ContentSet')) {
             $elements = $content->getData();
             foreach ($elements as $key => $item) {
-                if (is_a($content->$key, "BackBuilder\ClassContent\AClassContent")) {
+                if (is_a($content->$key, "BackBee\ClassContent\AClassContent")) {
                     if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == TRUE && NULL !== ($content->{$key}->getParam('aloha', 'scalar')))) {
                         $stdClassObj = new \stdClass();
                         $stdClassObj->{$key} = $alohaConf[$content->{$key}->getParam('aloha', 'scalar')];
@@ -134,7 +134,7 @@ class ContentRender
         $this->content = null;
 
         $this->initContentObject();
-        // Useless init because it's already done by BackBuilder\Services\Local\ClassContent::getContentsRteParams(); and it used the wrong config.yml's section
+        // Useless init because it's already done by BackBee\Services\Local\ClassContent::getContentsRteParams(); and it used the wrong config.yml's section
         // (alohapluginstable instead of rteconfig)
         //$this->initFields();
     }
@@ -178,7 +178,7 @@ class ContentRender
     /**
      * @codeCoverageIgnore
      * @param  string                                      $label
-     * @return \BackBuilder\Services\Content\ContentRender
+     * @return \BackBee\Services\Content\ContentRender
      */
     public function setLabel($label)
     {

@@ -3,43 +3,43 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\NestedNode;
+namespace BackBee\NestedNode;
 
-use BackBuilder\Util\Numeric;
-use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
-use BackBuilder\Exception\InvalidArgumentException;
+use BackBee\Util\Numeric;
+use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Exception\InvalidArgumentException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * Abstract class for nested node object in BackBuilder.
+ * Abstract class for nested node object in BackBee.
  *
  * A nested node is used to build nested tree.
  * Nested nodes are used by:
  *
- * * \BackBuilder\NestedNode\Page        The page tree of a website
- * * \BackBuilder\NestedNode\Mediafolder The folder tree of the library
- * * \BackBuilder\NestedNode\KeyWord     The keywords trees
+ * * \BackBee\NestedNode\Page        The page tree of a website
+ * * \BackBee\NestedNode\Mediafolder The folder tree of the library
+ * * \BackBee\NestedNode\KeyWord     The keywords trees
  *
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode
+ * @category    BackBee
+ * @package     BackBee\NestedNode
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @MappedSuperclass
@@ -58,14 +58,14 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * The root node, cannot be NULL.
-     * @var \BackBuilder\NestedNode\ANestedNode
+     * @var \BackBee\NestedNode\ANestedNode
      * @Serializer\Exclude
      */
     protected $_root;
 
     /**
      * The parent node.
-     * @var \BackBuilder\NestedNode\ANestedNode
+     * @var \BackBee\NestedNode\ANestedNode
      */
     protected $_parent;
 
@@ -152,7 +152,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Returns the root node.
-     * @return \BackBuilder\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\ANestedNode
      */
     public function getRoot()
     {
@@ -161,7 +161,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Returns the parent node, NULL if this node is root
-     * @return \BackBuilder\NestedNode\ANestedNode|NULL
+     * @return \BackBee\NestedNode\ANestedNode|NULL
      */
     public function getParent()
     {
@@ -260,7 +260,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Is this node is an ancestor of the provided one ?
-     * @param  \BackBuilder\NestedNode\ANestedNode $node
+     * @param  \BackBee\NestedNode\ANestedNode $node
      * @param  Boolean                             $strict Optional, if TRUE (default) this node is excluded of ancestors list
      * @return Boolean                             TRUE if this node is an anscestor or provided node, FALSE otherwise
      */
@@ -275,7 +275,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Is this node is a descendant of the provided one ?
-     * @param  \BackBuilder\NestedNode\ANestedNode $node
+     * @param  \BackBee\NestedNode\ANestedNode $node
      * @param  Boolean                             $strict Optional, if TRUE (default) this node is excluded of descendants list
      * @return Boolean                             TRUE if this node is a descendant or provided node, FALSE otherwise
      */
@@ -311,8 +311,8 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the root node.
-     * @param  \BackBuilder\NestedNode\ANestedNode $root
-     * @return \BackBuilder\NestedNode\ANestedNode
+     * @param  \BackBee\NestedNode\ANestedNode $root
+     * @return \BackBee\NestedNode\ANestedNode
      */
     public function setRoot(ANestedNode $root)
     {
@@ -323,8 +323,8 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the parent node.
-     * @param  \BackBuilder\NestedNode\ANestedNode $parent
-     * @return \BackBuilder\NestedNode\ANestedNode
+     * @param  \BackBee\NestedNode\ANestedNode $parent
+     * @return \BackBee\NestedNode\ANestedNode
      */
     public function setParent(ANestedNode $parent)
     {
@@ -336,8 +336,8 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the left position.
      * @param  int                                             $leftnode
-     * @return \BackBuilder\NestedNode\ANestedNode
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     * @return \BackBee\NestedNode\ANestedNode
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
     public function setLeftnode($leftnode)
     {
@@ -353,8 +353,8 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the right position.
      * @param  int                                             $rightnode
-     * @return \BackBuilder\NestedNode\ANestedNode
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     * @return \BackBee\NestedNode\ANestedNode
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
     public function setRightnode($rightnode)
     {
@@ -370,8 +370,8 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the level.
      * @param  type                                            $level
-     * @return \BackBuilder\NestedNode\ANestedNode
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     * @return \BackBee\NestedNode\ANestedNode
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
     public function setLevel($level)
     {
@@ -387,7 +387,7 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the creation date
      * @param  \DateTime                           $created
-     * @return \BackBuilder\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\ANestedNode
      */
     public function setCreated(\DateTime $created)
     {
@@ -399,7 +399,7 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the last modified date
      * @param  \DateTime                           $modified
-     * @return \BackBuilder\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\ANestedNode
      */
     public function setModified($modified)
     {
@@ -443,8 +443,8 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Constructs the node from a string or object
      * @param  mixed                                           $serialized The string representation of the object.
-     * @return \BackBuilder\NestedNode\ANestedNode
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
+     * @return \BackBee\NestedNode\ANestedNode
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
      *                                                                    with strict mode, if a property does not exists
      */
     public function unserialize($serialized, $strict = false)

@@ -1,8 +1,8 @@
 parameters:
     foo: bar
 
-    bbapp.logger.class: BackBuilder\Logging\Logger
-    bbapp.logger_debug.class: BackBuilder\Logging\DebugStackLogger
+    bbapp.logger.class: BackBee\Logging\Logger
+    bbapp.logger_debug.class: BackBee\Logging\DebugStackLogger
 
 services:
     core_service:

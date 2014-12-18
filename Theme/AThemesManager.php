@@ -3,32 +3,32 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Theme;
+namespace BackBee\Theme;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-use BackBuilder\Theme\Exception\ThemeException;
-use BackBuilder\Util\Dir;
+use BackBee\Theme\Exception\ThemeException;
+use BackBee\Util\Dir;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Theme
+ * @category    BackBee
+ * @package     BackBee\Theme
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -61,7 +61,7 @@ abstract class AThemesManager implements IThemesManager
     /**
      * Update the config.yml
      *
-     * @param \BackBuilder\Theme\ThemeEntity $theme
+     * @param \BackBee\Theme\ThemeEntity $theme
      */
     public function updateConfig(IThemeEntity $theme)
     {
@@ -135,7 +135,7 @@ abstract class AThemesManager implements IThemesManager
      * Return the configuration of the specified theme
      *
      * @param  string                  $name
-     * @return BackBuilder\Theme\Theme
+     * @return BackBee\Theme\Theme
      * @throws ThemeException
      */
     public function getTheme($name)

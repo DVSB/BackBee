@@ -7,7 +7,7 @@ if (isset($this->image)) {
 <li class="bb5-selector-item">
     <p><a href=""><?php echo $this->render($this->image, 'bbselector_view'); ?></a></p>
     <p><a href=""><?php echo substr($this->title, 0, 80); ?></a></p>
-    <p><span data-i18n="mediaselector.width">L :</span> <?php echo $this->image->getParam('width', 'scalar'); ?>px, <span data-i18n="mediaselector.height">H :</span> <?php echo $this->image->getParam('height', 'scalar'); ?>px<?php if (is_array($stat) && array_key_exists("size", $stat)) echo ", " . \BackBuilder\Util\File::readableFilesize($stat['size']); ?></p>
+    <p><span data-i18n="mediaselector.width">L :</span> <?php echo $this->image->getParam('width', 'scalar'); ?>px, <span data-i18n="mediaselector.height">H :</span> <?php echo $this->image->getParam('height', 'scalar'); ?>px<?php if (is_array($stat) && array_key_exists("size", $stat)) echo ", " . \BackBee\Util\File::readableFilesize($stat['size']); ?></p>
     <p><button class="bb5-button bb5-ico-preview" data-i18n="popupmanager.button.view" data-uri="<?php echo $this->getImageUrl($this->image->path); ?>">Voir</button> <button class="bb5-button bb5-ico-edit" data-i18n="popupmanager.button.edit">Editer</button> <button class="bb5-button bb5-ico-del" data-i18n="popupmanager.button.delete">Supprimer</button></p>
     <!-- -->
 </li>

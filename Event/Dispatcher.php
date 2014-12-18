@@ -3,53 +3,53 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Event;
+namespace BackBee\Event;
 
-use BackBuilder\BBApplication;
-use BackBuilder\Config\Config;
-use BackBuilder\DependencyInjection\Container;
-use BackBuilder\DependencyInjection\Dumper\DumpableServiceInterface;
-use BackBuilder\Event\Exception\ContainerNotFoundException;
+use BackBee\BBApplication;
+use BackBee\Config\Config;
+use BackBee\DependencyInjection\Container;
+use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\Event\Exception\ContainerNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\Event as sfEvent;
 
 /**
  * An event dispatcher for BB application
  *
- * @category    BackBuilder
- * @package     BackBuilder\Event
+ * @category    BackBee
+ * @package     BackBee\Event
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 {
     /**
-     * Current BackBuilder application
+     * Current BackBee application
      *
-     * @var BackBuilder\BBApplication
+     * @var BackBee\BBApplication
      */
     protected $application;
 
     /**
      * Container we use to get services as listener
      *
-     * @var BackBuilder\DependencyInjection\Container
+     * @var BackBee\DependencyInjection\Container
      */
     protected $container;
 
@@ -70,7 +70,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     /**
      * Dispatcher constructor
      *
-     * @param \BackBuilder\BBApplication $application The current instance of BB application
+     * @param \BackBee\BBApplication $application The current instance of BB application
      */
     public function __construct(BBApplication $application = null, Config $config = null)
     {
@@ -137,7 +137,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * Trigger a BackBuilder\Event\Event depending on the entity and event name
+     * Trigger a BackBee\Event\Event depending on the entity and event name
      * @param string    $eventName The doctrine event name
      * @param Object    $entity    The entity instance
      * @param EventArgs $eventArgs The doctrine event arguments
@@ -148,11 +148,11 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $event = new Event($entity, $eventArgs);
         }
 
-        if (is_a($entity, 'BackBuilder\ClassContent\AClassContent')) {
+        if (is_a($entity, 'BackBee\ClassContent\AClassContent')) {
             $this->dispatch(strtolower('classcontent.'.$eventName), $event);
 
             foreach (class_parents($entity) as $class) {
-                if ($class === 'BackBuilder\ClassContent\AClassContent') {
+                if ($class === 'BackBee\ClassContent\AClassContent') {
                     break;
                 }
 
@@ -165,7 +165,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 
     /**
      * Return the current instance of BBapplication
-     * @return \Backbuilder\BBApplication
+     * @return \BackBee\BBApplication
      */
     public function getApplication()
     {
@@ -191,12 +191,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $eventPrefix = str_replace(strtolower($prefix), '', $eventPrefix);
         }
 
-        if (0 === strpos($eventPrefix, 'backbuilder.')) {
-            $eventPrefix = substr($eventPrefix, 12);
-        }
-        if (0 === strpos($eventPrefix, 'classcontent.')) {
-            $eventPrefix = substr($eventPrefix, 13);
-        }
+        $eventPrefix = str_replace(array('backbee.', 'classcontent.'), array('', ''), $eventPrefix);
 
         return $eventPrefix;
     }
@@ -210,6 +205,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $priority = $listener[2];
             unset($listener[2]);
         }
+
         parent::addListener($eventName, $listener, $priority);
 
         $this->raw_listeners[$eventName][$priority][] = $listener;
@@ -222,7 +218,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
      */
     public function getClassProxy()
     {
-        return 'BackBuilder\Event\DispatcherProxy';
+        return 'BackBee\Event\DispatcherProxy';
     }
 
     /**
@@ -322,13 +318,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $event_name = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', $entity).'.'.$event_name);
         }
 
-        if (0 === strpos($event_name, 'backbuilder.')) {
-            $event_name = substr($event_name, 12);
-        }
-
-        if (0 === strpos($event_name, 'classcontent.')) {
-            $event_name = substr($event_name, 13);
-        }
+        $event_name = str_replace(array('backbee.', 'classcontent.'), array('', ''), $event_name);
 
         return $event_name;
     }

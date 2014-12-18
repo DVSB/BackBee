@@ -1,15 +1,15 @@
 <?php
 
-namespace BackBuilder\TestUnit\BackBuilder\Util;
+namespace BackBee\TestUnit\BackBee\Util;
 
-use BackBuilder\Util\File;
+use BackBee\Util\File;
 use org\bovigo\vfs\vfsStream;
 
 class FileTest extends \PHPUnit_Framework_TestCase
 {
     /**
      *
-     * @covers \BackBuilder\Util\File::realpath
+     * @covers \BackBee\Util\File::realpath
      *
      */
     public function testRealpath()
@@ -32,7 +32,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \BackBuilder\Util\File::normalizePath
+     * @covers \BackBee\Util\File::normalizePath
      */
     public function testNormalizePath()
     {
@@ -52,7 +52,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::readableFilesize
+     * @covers \BackBee\Util\File::readableFilesize
      *
      */
     public function testReadableFilesize()
@@ -65,7 +65,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     *  @covers \BackBuilder\Util\File::getExtension
+     *  @covers \BackBee\Util\File::getExtension
      */
     public function testGetExtension()
     {
@@ -78,7 +78,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::removeExtension
+     * @covers \BackBee\Util\File::removeExtension
      *
      */
     public function testRemoveExtension()
@@ -91,7 +91,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::mkdir
+     * @covers \BackBee\Util\File::mkdir
      *
      */
     public function testExistingDirMkdir()
@@ -103,8 +103,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::mkdir
-     * @expectedException \BackBuilder\Exception\InvalidArgumentsException
+     * @covers \BackBee\Util\File::mkdir
+     * @expectedException \BackBee\Exception\InvalidArgumentsException
      */
     public function testExistingDirMkdirWithBadRights()
     {
@@ -116,8 +116,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::mkdir
-     * @expectedException \BackBuilder\Exception\InvalidArgumentsException
+     * @covers \BackBee\Util\File::mkdir
+     * @expectedException \BackBee\Exception\InvalidArgumentsException
      */
     public function testUnknownDirMkdir()
     {
@@ -127,8 +127,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::copy
-     * @expectedException \BackBuilder\Exception\InvalidArgumentsException
+     * @covers \BackBee\Util\File::copy
+     * @expectedException \BackBee\Exception\InvalidArgumentsException
      *
      */
     public function unreadbleCopy()
@@ -143,8 +143,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::getFilesRecursivelyByExtension
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\Util\File::getFilesRecursivelyByExtension
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testUnredableGetFilesRecursivelyByExtension()
     {
@@ -156,7 +156,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::getFilesRecursivelyByExtension
+     * @covers \BackBee\Util\File::getFilesRecursivelyByExtension
      */
     public function testGetFilesRecursivelyByExtension()
     {
@@ -176,8 +176,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::getFilesByExtension
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\Util\File::getFilesByExtension
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testUnredableGetFilesByExtension()
     {
@@ -189,7 +189,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::getFilesByExtension
+     * @covers \BackBee\Util\File::getFilesByExtension
      */
     public function testGetFilesByExtension()
     {
@@ -205,7 +205,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::extractZipArchive
+     * @covers \BackBee\Util\File::extractZipArchive
      * @expectedException Exception
      */
     public function testExtractZipArchiveNonexistentDir()
@@ -215,7 +215,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::extractZipArchive
+     * @covers \BackBee\Util\File::extractZipArchive
      * @expectedException Exception
      */
     public function testExtractZipArchiveUnreadableDir()
@@ -227,16 +227,15 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @covers \BackBuilder\Util\File::extractZipArchive
+     * @covers \BackBee\Util\File::extractZipArchive
      * @expectedException Exception
      */
-    public function testExtractZipArchiveExistingDir()
+    public function extractZipArchiveExistingDir()
     {
         /**
          * @todo ext/zip PHP extension does not work with vfsStream
          * @link https://github.com/mikey179/vfsStream/wiki/Known-Issues
          */
-        $this->markTestSkipped();
 
         vfsStream::setup('dirzip', 0777);
         $path_zip = vfsStream::url('dirzip');

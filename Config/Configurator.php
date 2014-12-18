@@ -1,38 +1,38 @@
 <?php
-namespace BackBuilder\Config;
+namespace BackBee\Config;
 
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBuilder\IApplication;
-use BackBuilder\Config\Exception\InvalidConfigTypeException;
-use BackBuilder\Event\Event;
-use BackBuilder\Util\Resolver\BundleConfigDirectory;
-use BackBuilder\Util\Resolver\ConfigDirectory;
+use BackBee\IApplication;
+use BackBee\Config\Exception\InvalidConfigTypeException;
+use BackBee\Event\Event;
+use BackBee\Util\Resolver\BundleConfigDirectory;
+use BackBee\Util\Resolver\ConfigDirectory;
 use Doctrine\DBAL\DBALException;
 
 /**
  * Allow us to build and extend config depending on the type (which can be equals to
  * self::APPLICATION_CONFIG and self::BUNDLE_CONFIG)
  *
- * @category    BackBuilder
- * @package     BackBuilder\Config
+ * @category    BackBee
+ * @package     BackBee\Config
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -290,7 +290,7 @@ class Configurator
      *
      * @param string $bundle_id the id of the bundle we are looking for override config in registry
      *
-     * @return \BackBuilder\Bundle\Registry
+     * @return \BackBee\Bundle\Registry
      */
     private function getRegistryConfig($bundle_id)
     {
@@ -298,7 +298,7 @@ class Configurator
 
         try {
             if (null !== $em = $this->application->getEntityManager()) {
-                $registry = $em->getRepository('BackBuilder\Bundle\Registry')->findOneBy(array(
+                $registry = $em->getRepository('BackBee\Bundle\Registry')->findOneBy(array(
                     'key' => $bundle_id,
                     'scope' => 'BUNDLE_CONFIG.'.$this->context.'.'.$this->environment,
                 ));

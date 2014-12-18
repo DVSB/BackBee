@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace BackBuilder\Tests\Mock\EventDispatcher;
+namespace BackBee\Tests\Mock\EventDispatcher;
 
 use Symfony\Component\EventDispatcher\Event;
-use BackBuilder\Event\Dispatcher;
+use BackBee\Event\Dispatcher;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Tests\Mock\EventDispatcher
+ * @category    BackBee
+ * @package     BackBee\Tests\Mock\EventDispatcher
  * @copyright   Lp system
  * @author      k.golovin
  */

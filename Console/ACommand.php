@@ -3,31 +3,31 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Console;
+namespace BackBee\Console;
 
 use Symfony\Component\Console\Command\Command;
 
 /**
  * Abstract Command
  *
- * @category    BackBuilder
- * @package     BackBuilder\Console
+ * @category    BackBee
+ * @package     BackBee\Console
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -40,7 +40,7 @@ class ACommand extends Command
 
     /**
      *
-     * @var \BackBuilder\Bundle\ABundle
+     * @var \BackBee\Bundle\ABundle
      */
     protected $bundle;
 
@@ -66,7 +66,7 @@ class ACommand extends Command
 
     /**
      *
-     * @param \BackBuilder\Bundle\ABundle $bundle
+     * @param \BackBee\Bundle\ABundle $bundle
      */
     public function setBundle($bundle)
     {
@@ -75,7 +75,7 @@ class ACommand extends Command
 
     /**
      *
-     * @return \BackBuilder\Bundle\ABundle
+     * @return \BackBee\Bundle\ABundle
      */
     public function getBundle()
     {

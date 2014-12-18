@@ -35,7 +35,7 @@ services:
         arguments: [@service_container]
 
     serializer.object_constructor:
-        class: BackBuilder\Serializer\Construction\DoctrineObjectConstructor
+        class: BackBee\Serializer\Construction\DoctrineObjectConstructor
         arguments:
             - @doctrine
             - @serializer.object_fallback_constructor
@@ -73,11 +73,11 @@ services:
         #JMS\Serializer\Metadata\Driver
 
     serializer.metadata.cache:
-        class: BackBuilder\Rest\Metadata\Cache\FileCache
+        class: BackBee\Rest\Metadata\Cache\FileCache
         arguments:  ["%bbapp.cache.dir%/"]
 
     serializer.naming_strategy:
-        class: BackBuilder\Serializer\Naming\DoctrinePropertyNamingStrategy
+        class: BackBee\Serializer\Naming\DoctrinePropertyNamingStrategy
         arguments:  [@doctrine, @serializer.serialized_naming_strategy]
 
     serializer.serialized_naming_strategy:
@@ -88,5 +88,5 @@ services:
         class: JMS\Serializer\Naming\CamelCaseNamingStrategy
 
     serializer.doctrine_property_naming_strategy:
-        class: BackBuilder\Serializer\Naming\DoctrinePropertyNamingStrategy
+        class: BackBee\Serializer\Naming\DoctrinePropertyNamingStrategy
         arguments:  [@doctrine]

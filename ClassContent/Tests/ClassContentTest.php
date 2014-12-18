@@ -3,33 +3,33 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent\Tests;
+namespace BackBee\ClassContent\Tests;
 
-use BackBuilder\ClassContent\Tests\Mock\MockContent;
-use BackBuilder\ClassContent\Element\image;
-use BackBuilder\ClassContent\Revision;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\Exception\BBException;
+use BackBee\ClassContent\Tests\Mock\MockContent;
+use BackBee\ClassContent\Element\image;
+use BackBee\ClassContent\Revision;
+use BackBee\ClassContent\AClassContent;
+use BackBee\Exception\BBException;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -44,7 +44,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test getProperty
      *
-     * @coverage \BackBuilder\ClassContent\AClassContent::getProperty
+     * @coverage \BackBee\ClassContent\AClassContent::getProperty
      */
     public function testGetProperty()
     {
@@ -56,7 +56,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test setProperty
      *
-     * @coverage \BackBuilder\ClassContent\AClassContent::setProperty
+     * @coverage \BackBee\ClassContent\AClassContent::setProperty
      */
     public function testSetProperty()
     {
@@ -67,7 +67,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test createClone
      *
-     * @coverage \BackBuilder\ClassContent\AClassContent::createClone
+     * @coverage \BackBee\ClassContent\AClassContent::createClone
      */
     public function testCreateClone()
     {
@@ -75,7 +75,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->content->title->value = 'baz';
         $clone = $this->content->createClone();
 
-        $this->assertInstanceOf('BackBuilder\ClassContent\Tests\Mock\MockContent', $clone);
+        $this->assertInstanceOf('BackBee\ClassContent\Tests\Mock\MockContent', $clone);
         $this->assertNull($clone->getProperty('foo'));
         $this->assertEquals('baz', $clone->title->value);
         $this->assertNotEquals($this->content->getUid(), $clone->getUid());
@@ -84,7 +84,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test setProperty
      *
-     * @coverage \BackBuilder\ClassContent\AContent::_isAccepted
+     * @coverage \BackBee\ClassContent\AContent::_isAccepted
      */
     public function testAcceptedType()
     {
@@ -98,7 +98,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test defineProperty
      *
-     * @coverage \BackBuilder\ClassContent\AClassContent::_defineProperty
+     * @coverage \BackBee\ClassContent\AClassContent::_defineProperty
      */
     public function testDefineProperty()
     {
@@ -114,7 +114,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test defineParam
      *
-     * @coverage \BackBuilder\ClassContent\AClassContent::_defineParam
+     * @coverage \BackBee\ClassContent\AClassContent::_defineParam
      */
     public function testDefineParam()
     {
@@ -145,20 +145,20 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test defineData
      *
-     * @coverage \BackBuilder\ClassContent\AClassContent::_defineData
+     * @coverage \BackBee\ClassContent\AClassContent::_defineData
      */
     public function testDefineData()
     {
         $this->content->defineData(
             'title',
-            '\BackBuilder\ClassContent\Element\date',
+            '\BackBee\ClassContent\Element\date',
             array(
                 'default' => array('value' => 'Foo Bar Baz'),
             )
         );
         $this->content->defineData(
             'title',
-            '\BackBuilder\ClassContent\Element\image',
+            '\BackBee\ClassContent\Element\image',
             array(
                 'default' => array('value' => 'Foo Bar Baz'),
             ),
@@ -166,7 +166,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         );
         $this->content->defineData(
             'date',
-            '\BackBuilder\ClassContent\Element\date',
+            '\BackBee\ClassContent\Element\date',
             array(
                 'default' => array('value' => 'A date'),
             ),
@@ -174,7 +174,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertNotEquals('Foo Bar Baz', $this->content->title->value);
-        $this->assertInstanceOf('BackBuilder\ClassContent\Element\date', $this->content->date);
+        $this->assertInstanceOf('BackBee\ClassContent\Element\date', $this->content->date);
 
         $this->assertTrue($this->content->isAccepted($this->content->date, 'title'));
         $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
@@ -186,7 +186,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test prepareCommitDraft
      *
-     * @coverage \BackBuilder\ClassContent\AClassContent::prepareCommitDraft
+     * @coverage \BackBee\ClassContent\AClassContent::prepareCommitDraft
      */
     public function prepareCommitDraft()
     {
@@ -194,7 +194,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
             $this->content->prepareCommitDraft();
             $this->fail('RevisionMissingException not raise');
         } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBuilder\ClassContent\Exception\RevisionMissingException', $expected);
+            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionMissingException', $expected);
         }
 
         $revision = new Revision();
@@ -202,13 +202,13 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->content->setDraft($revision);
         $revision->setState(Revision::STATE_CONFLICTED);
 
-        $this->assertInstanceOf('BackBuilder\ClassContent\Element\text', $this->content->getDraft()->getData('title'));
+        $this->assertInstanceOf('BackBee\ClassContent\Element\text', $this->content->getDraft()->getData('title'));
 
         try {
             $this->content->prepareCommitDraft();
             $this->fail('RevisionConflictedException not raise');
         } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBuilder\ClassContent\Exception\RevisionConflictedException', $expected);
+            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionConflictedException', $expected);
         }
 
         $revision->setState('bad case');
@@ -216,7 +216,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
             $this->content->prepareCommitDraft();
             $this->fail('RevisionUptodateException not raise');
         } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBuilder\ClassContent\Exception\RevisionUptodateException', $expected);
+            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionUptodateException', $expected);
         }
     }
 }

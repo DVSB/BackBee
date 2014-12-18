@@ -7,7 +7,7 @@
             {% if collector.applicationname %}
                 {{ collector.applicationname }} {{ collector.applicationversion }}
             {% else %}
-                {{ collector.backbuilderversion }}
+                {{ collector.BackBeeversion }}
             {% endif %}
         </span>
     {% endset %}
@@ -49,8 +49,8 @@
                 <th>Application</th>
                 <td>{{ collector.applicationname }} {{ collector.applicationversion }} (on Symfony {{ collector.symfonyversion }})</td>
             {% else %}
-                <th>BackBuilder version</th>
-                <td>{{ collector.backbuilder_version }}</td>
+                <th>BackBee version</th>
+                <td>{{ collector.BackBee_version }}</td>
             {% endif %}
         </tr>
         {% if 'n/a' != collector.appname %}

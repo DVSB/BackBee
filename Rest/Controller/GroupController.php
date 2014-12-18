@@ -3,35 +3,35 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Controller;
+namespace BackBee\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use BackBuilder\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Controller\Annotations as Rest;
 use Symfony\Component\Validator\Constraints as Assert;
-use BackBuilder\Security\Group;
+use BackBee\Security\Group;
 
 /**
  * User Controller
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -46,11 +46,11 @@ class GroupController extends ARestController
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('g')
-            ->from('BackBuilder\Security\Group', 'g')
+            ->from('BackBee\Security\Group', 'g')
         ;
 
         if ($request->request->get('site_uid')) {
-            $site = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($request->request->get('site_uid'));
+            $site = $this->getApplication()->getEntityManager()->getRepository('BackBee\Site\Site')->find($request->request->get('site_uid'));
 
             if (!$site) {
                 throw $this->createValidationException('site_uid', $request->request->get('site_uid'), 'Site is not valid: '.$request->request->get('site_uid'));
@@ -70,7 +70,7 @@ class GroupController extends ARestController
     /**
      * GET Group
      *
-     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBuilder\Security\Group")
+     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
      */
     public function getAction(Group $group)
     {
@@ -80,7 +80,7 @@ class GroupController extends ARestController
     /**
      * DELETE
      *
-     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBuilder\Security\Group")
+     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
      */
     public function deleteAction(Group $group)
     {
@@ -105,7 +105,7 @@ class GroupController extends ARestController
      *   @Assert\Length(max=50)
      * })
      *
-     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBuilder\Security\Group")
+     * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
      *
      */
     public function putAction(Group $group, Request $request)
@@ -139,7 +139,7 @@ class GroupController extends ARestController
     {
         $groupExists = $this->getApplication()
             ->getEntityManager()
-            ->getRepository('BackBuilder\Security\Group')
+            ->getRepository('BackBee\Security\Group')
             ->findBy(['_identifier' => $request->request->get('identifier')])
         ;
 
@@ -154,7 +154,7 @@ class GroupController extends ARestController
         $group = new Group();
 
         if ($request->request->get('site_uid')) {
-            $site = $this->getApplication()->getEntityManager()->getRepository('BackBuilder\Site\Site')->find($request->request->get('site_uid'));
+            $site = $this->getApplication()->getEntityManager()->getRepository('BackBee\Site\Site')->find($request->request->get('site_uid'));
 
             if (!$site) {
                 throw $this->createValidationException('site_uid', $request->request->get('site_uid'), 'Site is not valid: '.$request->request->get('site_uid'));

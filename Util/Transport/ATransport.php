@@ -3,29 +3,29 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Util\Transport;
+namespace BackBee\Util\Transport;
 
 /**
  * Abstract class for transport
  *
- * @category    BackBuilder
- * @package     BackBuilder\Util
+ * @category    BackBee
+ * @package     BackBee\Util
  * @subpackage  Transport
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -101,7 +101,7 @@ abstract class ATransport
      * * password
      * * remotepath
      *
-     * Should throw a \BackBuilder\Util\Transport\Exception\MisconfigurationException
+     * Should throw a \BackBee\Util\Transport\Exception\MisconfigurationException
      * on failure
      *
      * @param array $config
@@ -154,8 +154,8 @@ abstract class ATransport
      * Establish a new connection to the remose server
      * @param  string                                                    $host
      * @param  string                                                    $port
-     * @return \BackBuilder\Util\Transport\ATransport
-     * @throws \BackBuilder\Util\Transport\Exception\ConnectionException Occurs if connection failed
+     * @return \BackBee\Util\Transport\ATransport
+     * @throws \BackBee\Util\Transport\Exception\ConnectionException Occurs if connection failed
      */
     abstract public function connect($host = null, $port = null);
 
@@ -163,14 +163,14 @@ abstract class ATransport
      * Authenticate on remote server
      * @param  string                                                        $username
      * @param  string                                                        $password
-     * @return \BackBuilder\Util\Transport\ATransport
-     * @throws \BackBuilder\Util\Transport\Exception\AuthenticationException Occurs if authentication failed
+     * @return \BackBee\Util\Transport\ATransport
+     * @throws \BackBee\Util\Transport\Exception\AuthenticationException Occurs if authentication failed
      */
     abstract public function login($username = null, $password = null);
 
     /**
      * Disconnect from the remote server and unset resources
-     * @return \BackBuilder\Util\Transport\ATransport
+     * @return \BackBee\Util\Transport\ATransport
      */
     abstract public function disconnect();
 

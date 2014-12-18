@@ -3,42 +3,42 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\Controller;
+namespace BackBee\Rest\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use BackBuilder\Rest\Controller\AclController;
-use BackBuilder\Tests\TestCase;
-use BackBuilder\Security\Group;
-use BackBuilder\Site\Site;
+use BackBee\Rest\Controller\AclController;
+use BackBee\Tests\TestCase;
+use BackBee\Security\Group;
+use BackBee\Site\Site;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-use BackBuilder\Security\Acl\Permission\MaskBuilder;
+use BackBee\Security\Acl\Permission\MaskBuilder;
 
 /**
  * Test for AclController class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\Controller\AclController
+ * @coversDefaultClass \BackBee\Rest\Controller\AclController
  */
 class AclControllerTest extends TestCase
 {
@@ -73,7 +73,7 @@ class AclControllerTest extends TestCase
         $acl = $aclProvider->createAcl($objectIdentity);
 
          // retrieving the security identity of the currently logged-in user
-        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getName(), 'BackBuilder\Security\Group');
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getName(), 'BackBee\Security\Group');
 
         // grant owner access
         $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_EDIT);
@@ -214,7 +214,7 @@ class AclControllerTest extends TestCase
             [
                 // class scope
                 'sid' => $this->groupEditor->getId(),
-                'object_class' => 'BackBuilder\Site\Layout',
+                'object_class' => 'BackBee\Site\Layout',
                 'permissions' => [
                     'view' => 'true',
                     'create' => '1',
@@ -232,7 +232,7 @@ class AclControllerTest extends TestCase
 
         $this->assertEquals(204, $response->getStatusCode());
 
-        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBee\Security\Group');
 
         $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
 
@@ -241,7 +241,7 @@ class AclControllerTest extends TestCase
         $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $ace);
         $this->assertEquals(687, $ace->getMask());
 
-        $objectIdentity = new ObjectIdentity('class', 'BackBuilder\Site\Layout');
+        $objectIdentity = new ObjectIdentity('class', 'BackBee\Site\Layout');
         $ace = $aclManager->getClassAce($objectIdentity, $securityIdentity);
         $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $ace);
         $this->assertEquals(7, $ace->getMask());
@@ -282,7 +282,7 @@ class AclControllerTest extends TestCase
     {
         // save the ACE
         $objectIdentity = new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site));
-        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBee\Security\Group');
         $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
         $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, MaskBuilder::MASK_VIEW);
 
@@ -324,7 +324,7 @@ class AclControllerTest extends TestCase
     {
         // save the ACE
         $objectIdentity = new ObjectIdentity('class', get_class($this->site));
-        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBuilder\Security\Group');
+        $securityIdentity = new UserSecurityIdentity($this->groupEditor->getId(), 'BackBee\Security\Group');
         $aclManager = $this->getBBApp()->getContainer()->get("security.acl_manager");
         $aclManager->insertOrUpdateClassAce($objectIdentity, $securityIdentity, MaskBuilder::MASK_VIEW);
 
@@ -466,6 +466,6 @@ class AclControllerTest extends TestCase
 
         $this->assertInternalType('array', $res);
         $this->assertCount(1, $res);
-        $this->assertEquals('BackBuilder\Site\Site', $res[0]['class_type']);
+        $this->assertEquals('BackBee\Site\Site', $res[0]['class_type']);
     }
 }

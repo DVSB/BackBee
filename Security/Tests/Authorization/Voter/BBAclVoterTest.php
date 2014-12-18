@@ -3,34 +3,34 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Security\Tests\Authorization\Voter;
+namespace BackBee\Security\Tests\Authorization\Voter;
 
-use BackBuilder\Tests\TestCase;
-use BackBuilder\Security\Role\RoleHierarchy;
-use BackBuilder\Security\Acl\Domain\SecurityIdentityRetrievalStrategy;
-use BackBuilder\Security\Authentication\TrustResolver;
-use BackBuilder\Security\Acl\Permission\PermissionMap;
-use BackBuilder\Security\Acl\Permission\MaskBuilder;
-use BackBuilder\Security\Token\UsernamePasswordToken;
-use BackBuilder\Security\Authorization\Voter\BBAclVoter;
-use BackBuilder\Security\User;
-use BackBuilder\Security\Group;
+use BackBee\Tests\TestCase;
+use BackBee\Security\Role\RoleHierarchy;
+use BackBee\Security\Acl\Domain\SecurityIdentityRetrievalStrategy;
+use BackBee\Security\Authentication\TrustResolver;
+use BackBee\Security\Acl\Permission\PermissionMap;
+use BackBee\Security\Acl\Permission\MaskBuilder;
+use BackBee\Security\Token\UsernamePasswordToken;
+use BackBee\Security\Authorization\Voter\BBAclVoter;
+use BackBee\Security\User;
+use BackBee\Security\Group;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy;
 use Symfony\Component\Security\Acl\Dbal\MutableAclProvider;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
@@ -38,13 +38,13 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\Security
+ * @category    BackBee
+ * @package     BackBee\Security
  * @subpackage  Authorization\Voter
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Security\Authorization\Voter\BBAclVoter
+ * @coversDefaultClass \BackBee\Security\Authorization\Voter\BBAclVoter
  */
 class BBAclVoterTest extends TestCase
 {
@@ -74,12 +74,12 @@ class BBAclVoterTest extends TestCase
             ]
         );
 
-        $this->aclVoter = new \BackBuilder\Security\Authorization\Voter\BBAclVoter(
+        $this->aclVoter = new \BackBee\Security\Authorization\Voter\BBAclVoter(
             $aclprovider,
             new ObjectIdentityRetrievalStrategy(),
             new SecurityIdentityRetrievalStrategy(
                 new RoleHierarchy(array()),
-                new TrustResolver('BackBuilder\Security\Token\AnonymousToken', 'BackBuilder\Security\Token\RememberMeToken')
+                new TrustResolver('BackBee\Security\Token\AnonymousToken', 'BackBee\Security\Token\RememberMeToken')
             ),
             new PermissionMap(),
             $this->getBBApp()->getLogging(),

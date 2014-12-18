@@ -3,25 +3,25 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
-namespace BackBuilder\ClassContent\Repository;
+namespace BackBee\ClassContent\Repository;
 
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Site\Site;
+use BackBee\NestedNode\Page;
+use BackBee\Site\Site;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query\Expr\Func;
@@ -30,8 +30,8 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 /**
  * AClassContent repository
  *
- * @category    BackBuilder
- * @package     BackBuilder\ClassContent
+ * @category    BackBee
+ * @package     BackBee\ClassContent
  * @subpackage  Repository\Element
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
@@ -46,8 +46,8 @@ class ClassContentQueryBuilder extends QueryBuilder
      * @var array
      */
     private $classmap = array(
-        'IdxSiteContent' => 'BackBuilder\ClassContent\Indexes\IdxSiteContent',
-        'AClassContent' => 'BackBuilder\ClassContent\AClassContent',
+        'IdxSiteContent' => 'BackBee\ClassContent\Indexes\IdxSiteContent',
+        'AClassContent' => 'BackBee\ClassContent\AClassContent',
     );
 
     /**
@@ -67,7 +67,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Add site filter to the query
      *
-     * @param $site mixed (BackBuilder/Site/Site|String)
+     * @param $site mixed (BackBee/Site/Site|String)
      */
     public function addSiteFilter($site)
     {
@@ -75,7 +75,7 @@ class ClassContentQueryBuilder extends QueryBuilder
             $site = $site->getUid();
         }
         $this->andWhere(
-            'cc._uid IN (SELECT i.content_uid FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)'
+            'cc._uid IN (SELECT i.content_uid FROM BackBee\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)'
         )->setParameter('site_uid', $site);
     }
 
@@ -104,7 +104,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Set a page to filter the query on a nested portion
      *
-     * @param $page BackBuilder\NestedNode\Page
+     * @param $page BackBee\NestedNode\Page
      */
     public function addPageFilter(Page $page)
     {
@@ -128,7 +128,7 @@ class ClassContentQueryBuilder extends QueryBuilder
      */
     public function addKeywordsFilter($keywords)
     {
-        $contentIds = $this->_em->getRepository('BackBuilder\NestedNode\KeyWord')
+        $contentIds = $this->_em->getRepository('BackBee\NestedNode\KeyWord')
                                 ->getContentsIdByKeyWords($keywords);
         if (is_array($contentIds) && !empty($contentIds)) {
             $this->andWhere('cc._uid in(:keywords)')->setParameter('keywords', $contentIds);

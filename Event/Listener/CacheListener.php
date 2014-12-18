@@ -3,43 +3,43 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Event\Listener;
+namespace BackBee\Event\Listener;
 
-use BackBuilder\IApplication as ApplicationInterface;
-use BackBuilder\Cache\AExtendedCache;
-use BackBuilder\Cache\CacheIdentifierGenerator;
-use BackBuilder\Cache\CacheValidator;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\Event\Event;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Renderer\ARenderer;
-use BackBuilder\Renderer\Event\RendererEvent;
-use BackBuilder\Util\Doctrine\ScheduledEntities;
+use BackBee\IApplication as ApplicationInterface;
+use BackBee\Cache\AExtendedCache;
+use BackBee\Cache\CacheIdentifierGenerator;
+use BackBee\Cache\CacheValidator;
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\ContentSet;
+use BackBee\Event\Event;
+use BackBee\NestedNode\Page;
+use BackBee\Renderer\ARenderer;
+use BackBee\Renderer\Event\RendererEvent;
+use BackBee\Util\Doctrine\ScheduledEntities;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Listener to Cache events
  *
- * @category    BackBuilder
- * @package     BackBuilder\Event
+ * @category    BackBee
+ * @package     BackBee\Event
  * @subpackage  Listener
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
@@ -49,42 +49,42 @@ class CacheListener implements EventSubscriberInterface
     /**
      * The current application instance
      *
-     * @var \BackBuilder\BBApplication
+     * @var \BackBee\BBApplication
      */
     private $application;
 
     /**
      * cache validator
      *
-     * @var BackBuilder\Cache\CacheValidator
+     * @var BackBee\Cache\CacheValidator
      */
     private $validator;
 
     /**
      * cache identifier generator
      *
-     * @var BackBuilder\Cache\CacheIdentifierGenerator
+     * @var BackBee\Cache\CacheIdentifierGenerator
      */
     private $identifier_generator;
 
     /**
      * The page cache system
      *
-     * @var \BackBuilder\Cache\AExtendedCache
+     * @var \BackBee\Cache\AExtendedCache
      */
     private $cache_page;
 
     /**
      * The content cache system
      *
-     * @var \BackBuilder\Cache\AExtendedCache
+     * @var \BackBee\Cache\AExtendedCache
      */
     private $cache_content;
 
     /**
      * The object to be rendered
      *
-     * @var \BackBuilder\Renderer\IRenderable
+     * @var \BackBee\Renderer\IRenderable
      */
     private $object;
 
@@ -149,7 +149,7 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Looks for available cached data before rendering a content
-     * @param \BackBuilder\Event\Event $event
+     * @param \BackBee\Event\Event $event
      */
     public function onPreRenderContent(RendererEvent $event)
     {
@@ -180,7 +180,7 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Saves in cache the rendered cache data
-     * @param \BackBuilder\Event\Event $event
+     * @param \BackBee\Event\Event $event
      */
     public function onPostRenderContent(RendererEvent $event)
     {
@@ -222,7 +222,7 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Clears cached data associated to the content to be flushed
-     * @param \BackBuilder\Event\Event $event
+     * @param \BackBee\Event\Event $event
      */
     public function onFlushContent(Event $event)
     {
@@ -233,7 +233,7 @@ class CacheListener implements EventSubscriberInterface
         }
 
         $parent_uids = $this->application->getEntityManager()
-            ->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
+            ->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
             ->getParentContentUids(array($this->object))
         ;
 
@@ -257,7 +257,7 @@ class CacheListener implements EventSubscriberInterface
         $cache_page = $this->application->getContainer()->get('cache.page');
         if (true === ($cache_page instanceof AExtendedCache)) {
             $node_uids = $this->application->getEntityManager()
-                ->getRepository('BackBuilder\ClassContent\Indexes\IdxContentContent')
+                ->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
                 ->getNodeUids($content_uids)
             ;
             $cache_page->removeByTag($node_uids);
@@ -267,7 +267,7 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Looks for available cached data before rendering a page
-     * @param \BackBuilder\Event\Event $event
+     * @param \BackBee\Event\Event $event
      */
     public function onPreRenderPage(RendererEvent $event)
     {
@@ -298,7 +298,7 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Saves in cache the rendered page data
-     * @param \BackBuilder\Event\Event $event
+     * @param \BackBee\Event\Event $event
      */
     public function onPostRenderPage(RendererEvent $event)
     {
@@ -335,7 +335,7 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Clears cached data associated to the page to be flushed
-     * @param \BackBuilder\Event\Event $event
+     * @param \BackBee\Event\Event $event
      */
     public function onFlushPage(Event $event)
     {
@@ -350,7 +350,7 @@ class CacheListener implements EventSubscriberInterface
         }
 
         $pages = ScheduledEntities::getScheduledEntityUpdatesByClassname(
-            $this->application->getEntityManager(), 'BackBuilder\NestedNode\Page'
+            $this->application->getEntityManager(), 'BackBee\NestedNode\Page'
         );
         if (0 === count($pages)) {
             return;
@@ -372,7 +372,7 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Checks the event and system validity then returns the content target, FALSE otherwise
-     * @param  \BackBuilder\Event\Event $event
+     * @param  \BackBee\Event\Event $event
      * @param  boolean                  $check_status
      * @return boolean
      */
@@ -397,7 +397,7 @@ class CacheListener implements EventSubscriberInterface
 
     /**
      * Checks the event and system validity then returns the page target, FALSE otherwise
-     * @param  \BackBuilder\Event\Event $event
+     * @param  \BackBee\Event\Event $event
      * @param  boolean                  $check_status
      * @return boolean
      */

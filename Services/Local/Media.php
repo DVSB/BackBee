@@ -3,37 +3,37 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Services\Local;
+namespace BackBee\Services\Local;
 
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\Services\Exception\ServicesException;
-use BackBuilder\ClassContent\Element\file as elementFile;
-use BackBuilder\ClassContent\Element\text as elementText;
-use BackBuilder\ClassContent\Element\image as elementImage;
-use BackBuilder\ClassContent\Exception\ClassContentException;
-use BackBuilder\Util\File;
+use BackBee\ClassContent\AClassContent;
+use BackBee\Services\Exception\ServicesException;
+use BackBee\ClassContent\Element\file as elementFile;
+use BackBee\ClassContent\Element\text as elementText;
+use BackBee\ClassContent\Element\image as elementImage;
+use BackBee\ClassContent\Exception\ClassContentException;
+use BackBee\Util\File;
 
 /**
  * Description of Media
  *
- * @category    BackBuilder
- * @package     BackBuilder\Services
+ * @category    BackBee
+ * @package     BackBee\Services
  * @subpackage  Local
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
@@ -48,7 +48,7 @@ class Media extends AbstractServiceLocal
     public function uploadImage(\Symfony\Component\HttpFoundation\Request $request)
     {
         $uploaded_file = new \stdClass();
-        $uploaded_file->originalname = \BackBuilder\Util\String::toPath($request->files->get('image')->getClientOriginalName());
+        $uploaded_file->originalname = \BackBee\Util\String::toPath($request->files->get('image')->getClientOriginalName());
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
         $uploaded_file->filename = basename($request->files->get('image')->getRealPath()).'.'.$uploaded_file->extension;
         $uploaded_file->src = base64_encode(file_get_contents($request->files->get('image')->getRealPath()));
@@ -68,7 +68,7 @@ class Media extends AbstractServiceLocal
         }
 
         $uploaded_file = new \stdClass();
-        $uploaded_file->originalname = \BackBuilder\Util\String::toPath($request->files->get('uploadedmedia')->getClientOriginalName());
+        $uploaded_file->originalname = \BackBee\Util\String::toPath($request->files->get('uploadedmedia')->getClientOriginalName());
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
         $uploaded_file->filename = basename($request->files->get('uploadedmedia')->getRealPath()).'.'.$uploaded_file->extension;
         if (FALSE === is_dir($this->bbapp->getTemporaryDir())) {
@@ -93,7 +93,7 @@ class Media extends AbstractServiceLocal
         $media_content = new $media_classname();
 
         if (NULL !== $media_id) {
-            $media = $em->find('\BackBuilder\NestedNode\Media', $media_id);
+            $media = $em->find('\BackBee\NestedNode\Media', $media_id);
 
             if ($media) {
                 $media_content = $media->getContent();
@@ -130,13 +130,13 @@ class Media extends AbstractServiceLocal
             $content_values_array[$content_value->name] = $content_value->value;
         }
 
-        if (NULL === $mediafolder = $em->find('\BackBuilder\NestedNode\MediaFolder', $mediafolder_uid)) {
+        if (NULL === $mediafolder = $em->find('\BackBee\NestedNode\MediaFolder', $mediafolder_uid)) {
             throw new ServicesException('None folder provided');
         }
 
         $media_content = new $media_classname();
-        if (NULL === $media_id || NULL === $media = $em->find('\BackBuilder\NestedNode\Media', $media_id)) {
-            $media = new \BackBuilder\NestedNode\Media();
+        if (NULL === $media_id || NULL === $media = $em->find('\BackBee\NestedNode\Media', $media_id)) {
+            $media = new \BackBee\NestedNode\Media();
             $media->setContent($media_content);
 
             $em->persist($media);
@@ -145,7 +145,7 @@ class Media extends AbstractServiceLocal
 
         $media_content = $media->getContent();
         $media_content = $em->find($media_classname, $media_content->getUid());
-        if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($media_content, $this->bbapp->getBBUserToken(), true)) {
+        if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($media_content, $this->bbapp->getBBUserToken(), true)) {
             $media_content->setDraft($draft);
         }
 
@@ -161,7 +161,7 @@ class Media extends AbstractServiceLocal
                     $em->persist($subcontent);
                 }
 
-                if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true)) {
+                if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true)) {
                     $subcontent->setDraft($draft);
                 }
                 if ($subcontent instanceof elementText) {
@@ -171,8 +171,8 @@ class Media extends AbstractServiceLocal
                 } elseif ($subcontent instanceof elementFile) {
                     $content_image_obj = json_decode($value);
                     if (isset($content_image_obj->filename)) {
-                        $subcontent->originalname = \BackBuilder\Util\String::toPath($content_image_obj->originalname);
-                        $subcontent->path = \BackBuilder\Util\Media::getPathFromContent($subcontent);
+                        $subcontent->originalname = \BackBee\Util\String::toPath($content_image_obj->originalname);
+                        $subcontent->path = \BackBee\Util\Media::getPathFromContent($subcontent);
 
                         $src_image = base64_decode($content_image_obj->src);
 
@@ -188,7 +188,7 @@ class Media extends AbstractServiceLocal
                         #copy($filename, $moveto);
 
                         if (null !== $this->getApplication()->getEventDispatcher()) {
-                            $event = new \BackBuilder\Event\PostUploadEvent($moveto, $moveto);
+                            $event = new \BackBee\Event\PostUploadEvent($moveto, $moveto);
                             $this->getApplication()->getEventDispatcher()->dispatch('file.postupload', $event);
                         }
 
@@ -226,22 +226,22 @@ class Media extends AbstractServiceLocal
         /*
           //media content
           switch ($media_classname) {
-          case 'BackBuilder\\ClassContent\\Media\\image':
+          case 'BackBee\\ClassContent\\Media\\image':
           $title = $media_content->title;
-          if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($title, $this->bbapp->getBBUserToken(), true))
+          if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($title, $this->bbapp->getBBUserToken(), true))
           $title->setDraft($draft);
           $title->value = $content_values_array['title'];
           $media_content->title = $title;
 
           $description = $media_content->description;
-          if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($description, $this->bbapp->getBBUserToken(), true))
+          if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($description, $this->bbapp->getBBUserToken(), true))
           $description->setDraft($draft);
           $description->value = $content_values_array['description'];
           $media_content->description = $description;
 
 
           $copyrights = $media_content->copyrights;
-          if (NULL !== $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($copyrights, $this->bbapp->getBBUserToken(), true))
+          if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($copyrights, $this->bbapp->getBBUserToken(), true))
           $copyrights->setDraft($draft);
           $copyrights->value = $content_values_array['copyrights'];
           $media_content->copyrights = $copyrights;
@@ -279,7 +279,7 @@ class Media extends AbstractServiceLocal
 
           break;
 
-          case 'BackBuilder\\ClassContent\\Media\\video':
+          case 'BackBee\\ClassContent\\Media\\video':
           $title = $media_content->title;
           if (NULL !== $draft = $title->getDraft()) {
           $title->releaseDraft();
@@ -331,7 +331,7 @@ class Media extends AbstractServiceLocal
             class_exists($media_type->classname);
         }
 
-        if (null === $media = $this->em->find('\BackBuilder\NestedNode\Media', $id)) {
+        if (null === $media = $this->em->find('\BackBee\NestedNode\Media', $id)) {
             throw new ServicesException(sprintf('Unable to delete media for `%s` id', $id));
         }
 
@@ -359,7 +359,7 @@ class Media extends AbstractServiceLocal
             throw new ServicesException('No media classname provided');
         }
 
-        $media_classname = 'BackBuilder\\ClassContent\\'.$media_classname;
+        $media_classname = 'BackBee\\ClassContent\\'.$media_classname;
         if (false === class_exists($media_classname)) {
             throw new ServicesException(sprintf('Unknown media classname provided `%s`', $media_classname));
         }
@@ -383,14 +383,14 @@ class Media extends AbstractServiceLocal
                 throw new ServicesException('Provided content is neither an element file nor an media');
             }
 
-            $media = $this->em->getRepository('BackBuilder\NestedNode\Media')->findBy(array('_content' => $content));
+            $media = $this->em->getRepository('BackBee\NestedNode\Media')->findBy(array('_content' => $content));
             if (0 < count($media)) {
                 // Library media, create a new one
                 $content = new $media_classname();
                 $this->em->persist($content);
             }
 
-            if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
+            if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
                 $content->setDraft($draft);
             }
 
@@ -402,15 +402,15 @@ class Media extends AbstractServiceLocal
                 }
             }
 
-            $this->postBBMediaUpload($elementContent->getUid(), str_replace('BackBuilder\\ClassContent\\', '', get_class($elementContent)), $content_values);
+            $this->postBBMediaUpload($elementContent->getUid(), str_replace('BackBee\\ClassContent\\', '', get_class($elementContent)), $content_values);
         } else {
-            if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
+            if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
                 $content->setDraft($draft);
             }
 
             $repository = $this->em->getRepository(get_class($content));
-            if ('BackBuilder\ClassContent\Repository\ClassContentRepository' === get_class($repository)) {
-                $repository = $this->em->getRepository('BackBuilder\ClassContent\Element\file');
+            if ('BackBee\ClassContent\Repository\ClassContentRepository' === get_class($repository)) {
+                $repository = $this->em->getRepository('BackBee\ClassContent\Element\file');
             }
 
             if (false === $newfilename = $repository->setDirectories($this->bbapp)
