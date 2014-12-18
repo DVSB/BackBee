@@ -226,8 +226,8 @@ class File
             throw new InvalidArgumentsException(sprintf('Directory `%s` already exists and is no writable.', $path));
         }
 
-        if (false === @mkdir($path, 0755, true)) {
-            throw new InvalidArgumentsException(sprintf('Enable to make directory `%s`.', $path));
+        if (false === is_writable(dirname($path)) || false === @mkdir($path, 0755, true)) {
+            throw new InvalidArgumentsException(sprintf('Unable to create directory `%s`.', $path));
         }
 
         return true;
