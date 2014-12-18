@@ -191,12 +191,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $eventPrefix = str_replace(strtolower($prefix), '', $eventPrefix);
         }
 
-        if (0 === strpos($eventPrefix, 'BackBee.')) {
-            $eventPrefix = substr($eventPrefix, 12);
-        }
-        if (0 === strpos($eventPrefix, 'classcontent.')) {
-            $eventPrefix = substr($eventPrefix, 13);
-        }
+        $eventPrefix = str_replace(array('backbee.', 'classcontent.'), array('', ''), $eventPrefix);
 
         return $eventPrefix;
     }
@@ -210,6 +205,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $priority = $listener[2];
             unset($listener[2]);
         }
+
         parent::addListener($eventName, $listener, $priority);
 
         $this->raw_listeners[$eventName][$priority][] = $listener;
@@ -322,13 +318,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $event_name = strtolower(str_replace(NAMESPACE_SEPARATOR, '.', $entity).'.'.$event_name);
         }
 
-        if (0 === strpos($event_name, 'BackBee.')) {
-            $event_name = substr($event_name, 12);
-        }
-
-        if (0 === strpos($event_name, 'classcontent.')) {
-            $event_name = substr($event_name, 13);
-        }
+        $event_name = str_replace(array('backbee.', 'classcontent.'), array('', ''), $event_name);
 
         return $event_name;
     }
