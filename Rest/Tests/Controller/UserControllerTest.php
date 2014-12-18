@@ -21,16 +21,16 @@
 
 namespace BackBee\Rest\Tests\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
 use BackBee\Rest\Controller\UserController;
-use BackBee\Tests\TestCase;
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use BackBee\Rest\Test\RestTestCase;
 use BackBee\Security\Acl\Permission\MaskBuilder;
+use BackBee\Security\Group;
 use BackBee\Security\Token\UsernamePasswordToken;
 use BackBee\Security\User;
-use BackBee\Security\Group;
-use BackBee\ApiClient\Auth\PrivateKeyAuth;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
 /**
  * Test for UserController class
@@ -42,7 +42,7 @@ use BackBee\ApiClient\Auth\PrivateKeyAuth;
  *
  * @coversDefaultClass \BackBee\Rest\Controller\UserController
  */
-class UserControllerTest extends TestCase
+class UserControllerTest extends RestTestCase
 {
     protected $user;
 
@@ -409,13 +409,7 @@ class UserControllerTest extends TestCase
             $user = $this->user;
         }
 
-        $auth = new PrivateKeyAuth();
-        $auth->setPrivateKey($user->getApiKeyPrivate());
-        $auth->setPublicKey($user->getApiKeyPublic());
-        $request->headers->add([
-            PrivateKeyAuth::AUTH_PUBLIC_KEY_TOKEN => $user->getApiKeyPublic(),
-            PrivateKeyAuth::AUTH_SIGNATURE_TOKEN => $auth->getRequestSignature($request->getMethod(), $request->getRequestUri()),
-        ]);
+
 
         return self;
     }

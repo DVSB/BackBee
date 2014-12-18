@@ -21,9 +21,9 @@
 
 namespace BackBee\Rest\Test;
 
-use BackBee\ApiClient\Auth\PrivateKeyAuth;
 use BackBee\Security\User;
 use BackBee\Tests\TestCase;
+
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -127,13 +127,7 @@ class RestTestCase extends TestCase
             $user = self::$restUser;
         }
 
-        $auth = new PrivateKeyAuth();
-        $auth->setPrivateKey($user->getApiKeyPrivate());
-        $auth->setPublicKey($user->getApiKeyPublic());
-        $request->headers->add([
-            PrivateKeyAuth::AUTH_PUBLIC_KEY_TOKEN => $user->getApiKeyPublic(),
-            PrivateKeyAuth::AUTH_SIGNATURE_TOKEN => $auth->getRequestSignature($request->getMethod(), $request->getRequestUri()),
-        ]);
+        // @todo: complete this method if needed
 
         return self;
     }
