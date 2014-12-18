@@ -38,33 +38,33 @@ abstract class AValidator
     const CONFIG_PARAMETER_MANDATORY = 'mandatory';
 
     /**
-     * Validate all datas with config
+     * Validate all data with config
      *
      * @param mixed  $owner
-     * @param array  $datas
+     * @param array  $data
      * @param array  $errors
      * @param array  $config
      * @param string $prefix
      */
-    abstract public function validate($owner, array $datas = array(), array &$errors = array(), array $config = array(), $prefix = '');
+    abstract public function validate($owner, array $data = array(), array &$errors = array(), array $config = array(), $prefix = '');
 
     /**
      * Delete element without prefix
-     * @param  array  $datas
+     * @param  array  $data
      * @param  string $prefix
      * @return array
      */
-    public function deleteElementWhenPrefix($datas, $prefix = '')
+    public function deleteElementWhenPrefix($data, $prefix = '')
     {
         if (false === empty($prefix)) {
-            foreach ($datas as $key => $data) {
+            foreach (array_keys($data) as $key) {
                 if (false === strpos($key, $prefix)) {
-                    unset($datas[$key]);
+                    unset($data[$key]);
                 }
             }
         }
 
-        return $datas;
+        return $data;
     }
 
     /**
