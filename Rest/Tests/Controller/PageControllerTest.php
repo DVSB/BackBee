@@ -61,7 +61,7 @@ class PageControllerTest extends RestTestCase
 
         // permissions
         $this->getContainer()->set('site', $this->site);
-        $this->restUser = $this->createAuthUser('page_admin');
+        self::$restUser = $this->createAuthUser('page_admin');
     }
 
     private function getController()
