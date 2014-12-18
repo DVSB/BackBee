@@ -58,9 +58,9 @@ class DirTest extends \PHPUnit_Framework_TestCase
      * @covers \BackBee\Util\Dir::getContent
      * @expectedException \Exception
      */
-    public function testUnknownGetContent()
+    public function unknownGetContent()
     {
-        $this->markTestSkipped('Exception catching don\'t work');
+        // Exception catching don't work
         Dir::getContent('unknow');
     }
 
@@ -68,9 +68,9 @@ class DirTest extends \PHPUnit_Framework_TestCase
      * @covers \BackBee\Util\Dir::getContent
      * @expectedException \Exception
      */
-    public function testFileGetContent()
+    public function fileGetContent()
     {
-        $this->markTestSkipped('Exception catching don\'t work');
+        // Exception catching don't work
         Dir::getContent('/DirTest.php');
     }
 
@@ -95,9 +95,9 @@ class DirTest extends \PHPUnit_Framework_TestCase
      * @expectedException \Exception
      *
      */
-    public function testModeFilesGetContent()
+    public function modeFilesGetContent()
     {
-        $this->markTestSkipped('Exception catching don\'t work');
+        // Exception catching don't work
         $test_dir = vfsStream::setup('test_dir', 0000, array('file1' => 'file1 data', 'file2' => 'file2 data'));
         $path_dir = vfsStream::url('test_dir');
 

@@ -230,13 +230,12 @@ class FileTest extends \PHPUnit_Framework_TestCase
      * @covers \BackBee\Util\File::extractZipArchive
      * @expectedException Exception
      */
-    public function testExtractZipArchiveExistingDir()
+    public function extractZipArchiveExistingDir()
     {
         /**
          * @todo ext/zip PHP extension does not work with vfsStream
          * @link https://github.com/mikey179/vfsStream/wiki/Known-Issues
          */
-        $this->markTestSkipped();
 
         vfsStream::setup('dirzip', 0777);
         $path_zip = vfsStream::url('dirzip');
