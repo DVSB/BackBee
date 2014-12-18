@@ -65,7 +65,7 @@ class EntityValidator extends AValidator
             return $entity;
         }
         if (false === empty($prefix)) {
-            $datas = $this->truncatePrefix($datas, $prefix);
+            $datas = $this->deleteElementWhenPrefix($datas, $prefix);
         }
 
         foreach ($datas as $key => $data) {

@@ -34,12 +34,12 @@ class AValidatorTest extends \PHPUnit_Framework_TestCase
     private $validator_test;
 
     /**
-     * @covers BackBee\Validator\AValidator::truncatePrefix
+     * @covers BackBee\Validator\AValidator::deleteElementWhenPrefix
      */
-    public function testTruncatePrefix()
+    public function testdeleteElementWhenPrefix()
     {
-        $this->assertEquals(array('bar' => 'foo'), $this->validator_test->truncatePrefix(array('foo_bar' => 'foo'), 'foo_'));
-        $this->assertEquals(array('foo_bar' => 'foo'), $this->validator_test->truncatePrefix(array('foo_bar' => 'foo')));
+        $this->assertEquals(array('foo_bar' => 'foo'), $this->validator_test->deleteElementWhenPrefix(array('foo_bar' => 'foo'), 'foo_'));
+        $this->assertEquals(array(), $this->validator_test->deleteElementWhenPrefix(array('bar' => 'foo'), 'foo_'));
     }
 
     /**

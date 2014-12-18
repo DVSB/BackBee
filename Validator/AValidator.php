@@ -49,23 +49,22 @@ abstract class AValidator
     abstract public function validate($owner, array $datas = array(), array &$errors = array(), array $config = array(), $prefix = '');
 
     /**
-     * Truncate prefix of data keys
+     * Delete element without prefix
      * @param  array  $datas
      * @param  string $prefix
      * @return array
      */
-    public function truncatePrefix($datas, $prefix = '')
+    public function deleteElementWhenPrefix($datas, $prefix = '')
     {
-        $array = array();
-        $callback = function ($value, $key) use (&$array, $prefix) {
+        if (false === empty($prefix)) {
+            foreach ($datas as $key => $data) {
+                if (false === strpos($key, $prefix)) {
+                    unset($datas[$key]);
+                }
+            }
+        }
 
-            $key = preg_replace('/'.$prefix.'/', '', $key, 1);
-            $array[$key] = $value;
-        };
-
-        array_walk($datas, $callback);
-
-        return $array;
+        return $datas;
     }
 
     /**
