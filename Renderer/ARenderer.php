@@ -37,31 +37,21 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  * @category    BackBee
  * @package     BackBee\Renderer
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- *              e.chau <eric.chau@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 abstract class ARenderer implements IRenderer
 {
-    const HEADER_SCRIPT = 'header';
-    const FOOTER_SCRIPT = 'footer';
-
     /**
      * Current BackBee application
      * @var BackBee\BBApplication
      */
-    protected $_application;
+    protected $application;
 
     /**
      * Contains evey helpers
      * @var ParameterBag
      */
     protected $helpers;
-
-    /**
-     * Contains every header and footer scripts
-     * @var ParameterBag
-     */
-    protected $scripts;
 
     /**
      * The current object to be render
@@ -124,145 +114,6 @@ abstract class ARenderer implements IRenderer
     private $__overloaded = 0;
     protected $__render;
 
-    public function __call($method, $argv)
-    {
-        // FIXME
-        if ('getRenderer' === $method) {
-            return $this;
-        }
-
-        $helper = $this->getHelper($method);
-        if (null === $helper) {
-            $helper = $this->createHelper($method, $argv);
-        }
-
-        $helper->setRenderer($this);
-
-        if (is_callable($helper)) {
-            return call_user_func_array($helper, $argv);
-        }
-
-        return $helper;
-    }
-
-    public function __($string)
-    {
-        return $this->translate($string);
-    }
-
-    public function __clone()
-    {
-        $this->_cache()
-                ->reset();
-
-        $this->updateHelpers();
-    }
-
-    protected function updateHelpers()
-    {
-        foreach ($this->helpers->all() as $h) {
-            $h->setRenderer($this);
-        }
-    }
-
-    public function overload($new_dir)
-    {
-        array_unshift($this->_scriptdir, $new_dir);
-        $this->__overloaded = $this->__overloaded + 1;
-    }
-
-    /**
-     * Add new helper directory in the choosen position.
-     *
-     * @codeCoverageIgnore
-     * @param string  $new_dir  location of the new directory
-     * @param integer $position position in the array
-     */
-    public function addHelperDir($dir)
-    {
-        if (true === file_exists($dir) && true === is_dir($dir)) {
-            $this->getApplication()->getAutoloader()->registerNamespace('BackBee\Renderer\Helper', $dir);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add new layout directory in the choosen position.
-     *
-     * @codeCoverageIgnore
-     * @param string  $new_dir  location of the new directory
-     * @param integer $position position in the array
-     */
-    public function addLayoutDir($new_dir, $position = 0)
-    {
-        if (true === file_exists($new_dir) && true === is_dir($new_dir)) {
-            $this->insertInArrayOnPostion($this->_layoutdir, $new_dir, $position);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add new script directory in the choosen position.
-     *
-     * @codeCoverageIgnore
-     * @param strimg  $new_dir  location of the new directory
-     * @param integer $position position in the array
-     */
-    public function addScriptDir($new_dir, $position = 0)
-    {
-        if (true === file_exists($new_dir) && true === is_dir($new_dir)) {
-            $this->insertInArrayOnPostion($this->_scriptdir, $new_dir, $position);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add new entry in the choosen position.
-     *
-     * @param array   $array     Arry to modify
-     * @param string  $new_value location of the new directory
-     * @param integer $position  position in the array
-     */
-    protected function insertInArrayOnPostion(array &$array, $new_value, $position)
-    {
-        if (in_array($new_value, $array)) {
-            foreach ($array as $key => $value) {
-                if ($value == $new_value) {
-                    unset($array[$key]);
-                    $count = count($array);
-                    for ($i = ($key + 1); $i < $count; $i++) {
-                        $array[$i - 1] = $array[$i];
-                    }
-                    break;
-                }
-            }
-        }
-        if ($position <= 0) {
-            $position = 0;
-            array_unshift($array, $new_value);
-        } elseif ($position >= count($array)) {
-            $array[count($array) - 1] = $new_value;
-        } else {
-            for ($i = (count($array) - 1); $i >= $position; $i--) {
-                $array[$i + 1] = $array[$i];
-            }
-            $array[$position] = $new_value;
-        }
-        ksort($array);
-    }
-
-    public function release()
-    {
-        for ($i = 0; $i < $this->__overloaded; $i++) {
-            unset($this->_scriptdir[$i]);
-        }
-        $this->_scriptdir = array_values($this->_scriptdir);
-        $this->__overloaded = 0;
-    }
-
     /**
      * Class constructor
      * @param BBAplication $application The current BBapplication
@@ -271,9 +122,9 @@ abstract class ARenderer implements IRenderer
     public function __construct(BBApplication $application = null, $config = null)
     {
         if (null !== $application) {
-            $this->_application = $application;
+            $this->application = $application;
 
-            $rendererConfig = $this->_application->getConfig()->getRendererConfig();
+            $rendererConfig = $this->application->getConfig()->getRendererConfig();
             if (is_array($rendererConfig) && isset($rendererConfig['path'])) {
                 $config = (null === $config) ? $rendererConfig['path'] : array_merge_recursive($config, $rendererConfig['path']);
             }
@@ -321,7 +172,7 @@ abstract class ARenderer implements IRenderer
             }
         }
 
-        if (null !== $this->_application) {
+        if (null !== $this->application) {
             $renderer_config = $application->getConfig()->getRendererConfig();
             if (true === isset($renderer_config['bb_scripts_directory'])) {
                 $directories = (array) $renderer_config['bb_scripts_directory'];
@@ -334,7 +185,27 @@ abstract class ARenderer implements IRenderer
         }
 
         $this->helpers = new ParameterBag();
-        $this->scripts = new ParameterBag();
+    }
+
+    public function __call($method, $argv)
+    {
+        // FIXME
+        if ('getRenderer' === $method) {
+            return $this;
+        }
+
+        $helper = $this->getHelper($method);
+        if (null === $helper) {
+            $helper = $this->createHelper($method, $argv);
+        }
+
+        $helper->setRenderer($this);
+
+        if (is_callable($helper)) {
+            return call_user_func_array($helper, $argv);
+        }
+
+        return $helper;
     }
 
     /**
@@ -383,70 +254,137 @@ abstract class ARenderer implements IRenderer
         }
     }
 
-    /**
-     * Return the file path to current layout, try to create it if not exists
-     * @param  Layout            $layout
-     * @return string            the file path
-     * @throws RendererException
-     */
-    protected function _getLayoutFile(Layout $layout)
+    public function __($string)
     {
-        $layoutfile = $layout->getPath();
-        if (null === $layoutfile && 0 < count($this->_includeExtensions)) {
-            $ext = reset($this->_includeExtensions);
-            $layoutfile = String::toPath($layout->getLabel(), array('extension' => $ext));
-            $layout->setPath($layoutfile);
-        }
-
-        return $layoutfile;
+        return $this->translate($string);
     }
 
-    protected function _triggerEvent($name = 'render', $object = null, $render = null)
+    public function __clone()
     {
-        if (null === $this->_application) {
-            return;
-        }
-
-        $dispatcher = $this->_application->getEventDispatcher();
-        if (null != $dispatcher) {
-            $object = null !== $object ? $object : $this->getObject();
-            $event = new RendererEvent($object, null === $render ? $this : array($this, $render));
-            $dispatcher->triggerEvent($name, $object, null, $event);
-        }
-    }
-
-    protected function _cache()
-    {
-        if (null !== $this->_object) {
-            $this->_parentuid = $this->_object->getUid();
-            $this->__object = $this->_object;
-        }
-
-        $this->__vars = $this->_vars;
-
-        return $this;
+        $this->cache()
+             ->reset()
+             ->updateHelpers()
+        ;
     }
 
     /**
+     * Add new helper directory in the choosen position.
+     *
      * @codeCoverageIgnore
-     * @return \BackBee\Renderer\ARenderer
+     * @param string  $new_dir  location of the new directory
+     * @param integer $position position in the array
      */
-    private function _resetVars()
+    public function addHelperDir($dir)
     {
-        $this->_vars = array();
+        if (true === file_exists($dir) && true === is_dir($dir)) {
+            $this->getApplication()->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $dir);
+        }
 
         return $this;
     }
 
     /**
+     * Add new layout directory in the choosen position.
+     *
      * @codeCoverageIgnore
-     * @return \BackBee\Renderer\ARenderer
+     * @param string  $new_dir  location of the new directory
+     * @param integer $position position in the array
      */
-    private function _resetParams()
+    public function addLayoutDir($new_dir, $position = 0)
     {
-        $this->_params = array();
+        if (true === file_exists($new_dir) && true === is_dir($new_dir)) {
+            $this->insertInArrayOnPostion($this->_layoutdir, $new_dir, $position);
+        }
 
         return $this;
+    }
+
+    /**
+     * Add new script directory in the choosen position.
+     *
+     * @codeCoverageIgnore
+     * @param strimg  $new_dir  location of the new directory
+     * @param integer $position position in the array
+     */
+    public function addScriptDir($new_dir, $position = 0)
+    {
+        if (true === file_exists($new_dir) && true === is_dir($new_dir)) {
+            $this->insertInArrayOnPostion($this->_scriptdir, $new_dir, $position);
+        }
+
+        return $this;
+    }
+
+    public function overload($new_dir)
+    {
+        array_unshift($this->_scriptdir, $new_dir);
+        $this->__overloaded = $this->__overloaded + 1;
+    }
+
+    public function release()
+    {
+        for ($i = 0; $i < $this->__overloaded; $i++) {
+            unset($this->_scriptdir[$i]);
+        }
+        $this->_scriptdir = array_values($this->_scriptdir);
+        $this->__overloaded = 0;
+    }
+
+    /**
+     * Returns an array of template files according the provided pattern
+     * @param  string $pattern
+     * @return array
+     */
+    public function getTemplatesByPattern($pattern)
+    {
+        File::resolveFilepath($pattern);
+
+        $templates = array();
+        foreach ($this->_scriptdir as $dir) {
+            if (true === is_array(glob($dir.DIRECTORY_SEPARATOR.$pattern))) {
+                $templates = array_merge($templates, glob($dir.DIRECTORY_SEPARATOR.$pattern));
+            }
+        }
+
+        return $templates;
+    }
+
+    /**
+     * Return the current token
+     * @codeCoverageIgnore
+     * @return \Symfony\Component\Security\Core\Authentication\Token\AbstractToken
+     */
+    public function getToken()
+    {
+        return $this->getApplication()->getSecurityContext()->getToken();
+    }
+
+    /**
+     * Returns the list of available render mode for the provided object
+     * @param  \BackBuilder\Renderer\IRenderable $object
+     * @return array
+     */
+    public function getAvailableRenderMode(IRenderable $object)
+    {
+        $templatePath = $this->getTemplatePath($object);
+        $templates = $this->getTemplatesByPattern($templatePath.'.*');
+        foreach ($templates as &$template) {
+            $template = basename(str_replace($templatePath.'.', '', $template));
+        }
+
+        unset($template);
+
+        return $templates;
+    }
+
+    /**
+     * Returns the ignore state of rendering if render mode is not available
+     * @return Boolean
+     * @codeCoverageIgnore
+     */
+    public function getIgnoreIfNotAvailable()
+    {
+        return $this->_ignoreIfRenderModeNotAvailable;
     }
 
     /**
@@ -489,7 +427,7 @@ abstract class ARenderer implements IRenderer
      */
     public function getApplication()
     {
-        return $this->_application;
+        return $this->application;
     }
 
     /**
@@ -537,8 +475,8 @@ abstract class ARenderer implements IRenderer
     {
         $url = $uri;
 
-        if ($this->_application->isStarted() && null !== $this->_application->getRequest()) {
-            $request = $this->_application->getRequest();
+        if ($this->application->isStarted() && null !== $this->application->getRequest()) {
+            $request = $this->application->getRequest();
             $baseurl = str_replace('\\', '/', $request->getSchemeAndHttpHost().dirname($request->getBaseUrl()));
             $url = str_replace($baseurl, '', $uri);
 
@@ -632,9 +570,10 @@ abstract class ARenderer implements IRenderer
         } elseif (null === $this->getCurrentSite()) {
             return;
         } else {
-            return $this->_application->getEntityManager()
-                            ->getRepository('BackBee\NestedNode\Page')
-                            ->getRoot($this->getCurrentSite());
+            return $this->application->getEntityManager()
+                ->getRepository('BackBuilder\NestedNode\Page')
+                ->getRoot($this->getCurrentSite())
+            ;
         }
     }
 
@@ -645,7 +584,7 @@ abstract class ARenderer implements IRenderer
      */
     public function getCurrentSite()
     {
-        return $this->_application->getSite();
+        return $this->application->getSite();
     }
 
     /**
@@ -700,8 +639,8 @@ abstract class ARenderer implements IRenderer
 
     public function reset()
     {
-        $this->_resetVars()
-             ->_resetParams();
+        $this->resetVars()
+             ->resetParams();
 
         $this->__render = null;
 
@@ -726,8 +665,8 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @param  \BackBee\NestedNode\ANestedNode $node
-     * @return \BackBee\Renderer\ARenderer
+     * @param  ANestedNode $node
+     * @return self
      */
     public function setNode(ANestedNode $node)
     {
@@ -795,7 +734,7 @@ abstract class ARenderer implements IRenderer
     /**
      * @codeCoverageIgnore
      * @param  type                            $render
-     * @return \BackBee\Renderer\ARenderer
+     * @return self
      */
     public function setRender($render)
     {
@@ -824,7 +763,7 @@ abstract class ARenderer implements IRenderer
             return false;
         }
 
-        $layoutfile = $this->_getLayoutFile($layout);
+        $layoutfile = $this->getLayoutFile($layout);
         File::resolveFilepath($layoutfile, null, array('include_path' => $this->_layoutdir));
 
         if (false === file_exists($layoutfile)) {
@@ -852,160 +791,8 @@ abstract class ARenderer implements IRenderer
             return false;
         }
 
-        $layoutfile = $this->_getLayoutFile($layout);
+        $layoutfile = $this->getLayoutFile($layout);
         @unlink($layoutfile);
-    }
-
-    /**
-     * Return the relative path from the classname of an object
-     * @param  \BackBee\Renderer\IRenderable $object
-     * @return string
-     */
-    protected function _getTemplatePath(IRenderable $object)
-    {
-        return $object->getTemplateName();
-        //return str_replace(array('BackBee' . NAMESPACE_SEPARATOR . 'ClassContent' . NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array('', DIRECTORY_SEPARATOR), get_class($object));
-    }
-
-    /**
-     * Returns an array of template files according the provided pattern
-     * @param  string $pattern
-     * @return array
-     */
-    public function getTemplatesByPattern($pattern)
-    {
-        File::resolveFilepath($pattern);
-
-        $templates = array();
-        foreach ($this->_scriptdir as $dir) {
-            if (true === is_array(glob($dir.DIRECTORY_SEPARATOR.$pattern))) {
-                $templates = array_merge($templates, glob($dir.DIRECTORY_SEPARATOR.$pattern));
-            }
-        }
-
-        return $templates;
-    }
-
-    /**
-     * Return the current token
-     * @codeCoverageIgnore
-     * @return \Symfony\Component\Security\Core\Authentication\Token\AbstractToken
-     */
-    public function getToken()
-    {
-        return $this->getApplication()->getSecurityContext()->getToken();
-    }
-
-    /**
-     * Returns the list of available render mode for the provided object
-     * @param  \BackBee\Renderer\IRenderable $object
-     * @return array
-     */
-    public function getAvailableRenderMode(IRenderable $object)
-    {
-        $templatePath = $this->_getTemplatePath($object);
-        $templates = $this->getTemplatesByPattern($templatePath.'.*');
-        foreach ($templates as &$template) {
-            $template = basename(str_replace($templatePath.'.', '', $template));
-        }
-        unset($template);
-
-        return $templates;
-    }
-
-    /**
-     * Returns the ignore state of rendering if render mode is not available
-     * @return Boolean
-     * @codeCoverageIgnore
-     */
-    public function getIgnoreIfNotAvailable()
-    {
-        return $this->_ignoreIfRenderModeNotAvailable;
-    }
-
-    /**
-     * Helper: generate javascript's tag with $href and add it to head tag children
-     * Note: guaranteed that two or more scripts with same href will be included only once
-     *
-     * @param  string                             $href href of the js file to add
-     * @return BackBee\Renderer\Adapter\phtml
-     */
-    public function addHeaderScript($href)
-    {
-        $this->addScript(self::HEADER_SCRIPT, $href);
-    }
-
-    /**
-     * Helper: generate javascript's tag with $href and add it to body tag children
-     * Note: if header and footer scripts contains same href string, the script will be
-     * only add in the head tag
-     *
-     * @param  string                             $href
-     * @return BackBee\Renderer\Adapter\phtml
-     */
-    public function addFooterScript($href)
-    {
-        $this->addScript(self::FOOTER_SCRIPT, $href);
-    }
-
-    /**
-     * Generic add script used by self::addHeaderScript() and self::addFooterScript()
-     * @param string $type
-     * @param string $href
-     */
-    private function addScript($type, $href)
-    {
-        $scripts = array();
-        if ($this->scripts->has($type)) {
-            $scripts = $this->scripts->get($type);
-        }
-
-        if (!in_array($href, $scripts)) {
-            $scripts[] = $href;
-        }
-
-        $this->scripts->set($type, $scripts);
-    }
-
-    /**
-     * Insert header and footer scripts with HTML tag on the render of the current
-     * ARenderer; it inserts header and footer scripts at the right location of the DOM
-     */
-    public function insertHeaderAndFooterScript()
-    {
-        if (null === $this->scripts) {
-            return;
-        }
-
-        $footerScripts = $this->scripts->get(self::FOOTER_SCRIPT, array());
-        $headerScripts = $this->scripts->get(self::HEADER_SCRIPT, array());
-        $footerScripts = array_diff($footerScripts, $headerScripts);
-        if (0 < count($headerScripts)) {
-            $this->setRender(strstr($this->getRender(), '</head>', true).$this->_generateScriptCode($headerScripts).strstr($this->getRender(), '</head>'));
-        }
-
-        if (0 < count($footerScripts)) {
-            $this->setRender(strstr($this->getRender(), '</body>', true).$this->_generateScriptCode($footerScripts).strstr($this->getRender(), '</body>'));
-        }
-
-        // Reset scripts array
-        $this->scripts->remove(self::FOOTER_SCRIPT);
-        $this->scripts->remove(self::HEADER_SCRIPT);
-    }
-
-    /**
-     * Generate HTML script tag from given array $scripts
-     * @param  array  $scripts
-     * @return string
-     */
-    private function _generateScriptCode(array $scripts)
-    {
-        $result = '';
-        foreach ($scripts as $href) {
-            $result .= '<script type="text/javascript" src="'.$href.'"></script>';
-        }
-
-        return $result;
     }
 
     /**
@@ -1033,7 +820,7 @@ abstract class ARenderer implements IRenderer
     public function createHelper($method, $argv)
     {
         $helper = null;
-        $helperClass = '\BackBee\Renderer\Helper\\'.$method;
+        $helperClass = 'BackBee\Renderer\Helper\\'.$method;
         if (true === class_exists($helperClass)) {
             $this->helpers->set($method, new $helperClass($this, $argv));
             $helper = $this->helpers->get($method);
@@ -1045,5 +832,123 @@ abstract class ARenderer implements IRenderer
     protected function setCurrentElement($key)
     {
         $this->__currentelement = $key;
+    }
+
+    /**
+     * Return the relative path from the classname of an object
+     * @param  \BackBuilder\Renderer\IRenderable $object
+     * @return string
+     */
+    protected function getTemplatePath(IRenderable $object)
+    {
+        return $object->getTemplateName();
+    }
+
+    protected function updateHelpers()
+    {
+        foreach ($this->helpers->all() as $h) {
+            $h->setRenderer($this);
+        }
+    }
+
+    /**
+     * Add new entry in the choosen position.
+     *
+     * @param array   $array     Arry to modify
+     * @param string  $new_value location of the new directory
+     * @param integer $position  position in the array
+     */
+    protected function insertInArrayOnPostion(array &$array, $new_value, $position)
+    {
+        if (in_array($new_value, $array)) {
+            foreach ($array as $key => $value) {
+                if ($value == $new_value) {
+                    unset($array[$key]);
+                    $count = count($array);
+                    for ($i = ($key + 1); $i < $count; $i++) {
+                        $array[$i - 1] = $array[$i];
+                    }
+                    break;
+                }
+            }
+        }
+        if ($position <= 0) {
+            $position = 0;
+            array_unshift($array, $new_value);
+        } elseif ($position >= count($array)) {
+            $array[count($array) - 1] = $new_value;
+        } else {
+            for ($i = (count($array) - 1); $i >= $position; $i--) {
+                $array[$i + 1] = $array[$i];
+            }
+            $array[$position] = $new_value;
+        }
+        ksort($array);
+    }
+
+    /**
+     * Return the file path to current layout, try to create it if not exists
+     * @param  Layout            $layout
+     * @return string            the file path
+     * @throws RendererException
+     */
+    protected function getLayoutFile(Layout $layout)
+    {
+        $layoutfile = $layout->getPath();
+        if (null === $layoutfile && 0 < count($this->_includeExtensions)) {
+            $ext = reset($this->_includeExtensions);
+            $layoutfile = String::toPath($layout->getLabel(), array('extension' => $ext));
+            $layout->setPath($layoutfile);
+        }
+
+        return $layoutfile;
+    }
+
+    protected function triggerEvent($name = 'render', $object = null, $render = null)
+    {
+        if (null === $this->application) {
+            return;
+        }
+
+        $dispatcher = $this->application->getEventDispatcher();
+        if (null != $dispatcher) {
+            $object = null !== $object ? $object : $this->getObject();
+            $event = new RendererEvent($object, null === $render ? $this : array($this, $render));
+            $dispatcher->triggerEvent($name, $object, null, $event);
+        }
+    }
+
+    protected function cache()
+    {
+        if (null !== $this->_object) {
+            $this->_parentuid = $this->_object->getUid();
+            $this->__object = $this->_object;
+        }
+
+        $this->__vars = $this->_vars;
+
+        return $this;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return \BackBuilder\Renderer\ARenderer
+     */
+    private function resetVars()
+    {
+        $this->_vars = array();
+
+        return $this;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return \BackBuilder\Renderer\ARenderer
+     */
+    private function resetParams()
+    {
+        $this->_params = array();
+
+        return $this;
     }
 }

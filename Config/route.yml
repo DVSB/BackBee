@@ -20,7 +20,6 @@ bb.upload:
 # BackBee resources
 bb.classcontent_thumbnail:
     pattern: /%bbapp.routing.resource_uri_prefix%/%classcontent_thumbnail.base_folder%/{filename}
-    # pattern: /ressources/%classcontent_thumbnail.base_folder%/{filename}
     defaults:
         _action: getClassContentThumbnailAction
         _controller: resource.controller
@@ -28,8 +27,7 @@ bb.classcontent_thumbnail:
         filename: .+
 
 bb.resources:
-    # pattern: /%bbapp.routing.resource_uri_prefix%/{filename}
-    pattern: /ressources/{filename}
+    pattern: /%bbapp.routing.resource_uri_prefix%/{filename}
     defaults:
         _action: resourcesAction
         _controller: resource.controller

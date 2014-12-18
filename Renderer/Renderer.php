@@ -1,4 +1,24 @@
 <?php
+
+/*
+ * Copyright (c) 2011-2013 Lp digital system
+ *
+ * This file is part of BackBee5.
+ *
+ * BackBee5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBee5 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace BackBee\Renderer;
 
 use BackBee\BBApplication;
@@ -25,34 +45,47 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 class Renderer extends ARenderer implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
     /**
+     * constants used to manage external resources
+     */
+    const CSS_LINK = 'css';
+    const HEADER_JS = 'js_header';
+    const FOOTER_JS = 'js_footer';
+
+    /**
      * contains every IRendererAdapter added by user
      * @var ParameterBag
      */
-    private $rendererAdapters;
+    private $renderer_adapters;
 
     /**
      * contains every extensions that Renderer can manage thanks to registered IRendererAdapter
      * @var ParameterBag
      */
-    private $manageableExt;
+    private $manageable_ext;
 
     /**
      * key of the default adapter to use when there is a conflict
      * @var string
      */
-    private $defaultAdapter;
+    private $default_adapter;
 
     /**
      * The file path to the template
      * @var string
      */
-    private $templateFile;
+    private $template_file;
 
     /**
      * define if renderer has been restored by container or not
      * @var boolean
      */
     private $is_restored;
+
+    /**
+     * contains every external resources of current page (js and css)
+     * @var ParameterBag
+     */
+    private $external_resources;
 
     /**
      * Constructor
@@ -64,8 +97,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     public function __construct(BBApplication $application = null, $config = null, $autoloadRendererApdater = true)
     {
         parent::__construct($application, $config);
-        $this->rendererAdapters = new ParameterBag();
-        $this->manageableExt = new ParameterBag();
+        $this->renderer_adapters = new ParameterBag();
+        $this->manageable_ext = new ParameterBag();
+        $this->external_resources = new ParameterBag();
 
         if (null !== $application && true === $autoloadRendererApdater) {
             $rendererConfig = $this->getApplication()->getConfig()->getRendererConfig();
@@ -85,22 +119,8 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     public function updatesAfterClone()
     {
         $this->updateHelpers();
-        foreach ($this->rendererAdapters->all() as $ra) {
+        foreach ($this->renderer_adapters->all() as $ra) {
             $ra->onNewRenderer($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Update every helpers and every registered renderer adapters with the right ARenderer;
-     * this method is called everytime we unset a renderer
-     */
-    protected function updatesAfterUnset()
-    {
-        $this->updateHelpers();
-        foreach ($this->rendererAdapters->all() as $ra) {
-            $ra->onRestorePreviousRenderer($this);
         }
 
         return $this;
@@ -115,92 +135,14 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     public function addRendererAdapter(IRendererAdapter $rendererAdapter)
     {
         $key = $this->getRendererAdapterKey($rendererAdapter);
-        if (false === $this->rendererAdapters->has($key)) {
-            $this->rendererAdapters->set($key, $rendererAdapter);
+        if (false === $this->renderer_adapters->has($key)) {
+            $this->renderer_adapters->set($key, $rendererAdapter);
             $this->addManagedExtensions($rendererAdapter);
         }
 
-        if (null === $this->defaultAdapter) {
-            $this->defaultAdapter = $key;
+        if (null === $this->default_adapter) {
+            $this->default_adapter = $key;
         }
-    }
-
-    /**
-     * Compute a key for renderer adapter ($rendererAdapter)
-     *
-     * @param  IRendererAdapter $rendererAdapter
-     * @return string
-     */
-    private function getRendererAdapterKey(IRendererAdapter $rendererAdapter)
-    {
-        $key = explode(NAMESPACE_SEPARATOR, get_class($rendererAdapter));
-
-        return strtolower($key[count($key) - 1]);
-    }
-
-    /**
-     * Extract managed extensions from rendererAdapter and store it
-     *
-     * @param IRendererAdapter $rendererAdapter
-     */
-    private function addManagedExtensions(IRendererAdapter $rendererAdapter)
-    {
-        $key = $this->getRendererAdapterKey($rendererAdapter);
-        foreach ($rendererAdapter->getManagedFileExtensions() as $ext) {
-            $rendererAdapters = array($key);
-            if ($this->manageableExt->has($ext)) {
-                $rendererAdapters = $this->manageableExt->get($ext);
-                $rendererAdapters[] = $key;
-            }
-
-            $this->manageableExt->set($ext, $rendererAdapters);
-        }
-    }
-
-    /**
-     * Returns an adapter containing in $adapeters; it will returns in prior
-     * the defaultAdpater if it is in $adapters or the first adapter found
-     *
-     * @param  array            $adapters contains object of type IRendererAdapter
-     * @return IRendererAdapter
-     */
-    private function getRightAdapter(array $adapters)
-    {
-        $adapter = null;
-        if (1 < count($adapters) && true === in_array($this->defaultAdapter, $adapters)) {
-            $adapter = $this->defaultAdapter;
-        } else {
-            $adapter = reset($adapters);
-        }
-
-        return $adapter;
-    }
-
-    /**
-     * Returns the right adapter to use according to the filename extension
-     *
-     * @return IRendererAdapter
-     */
-    private function determineWhichAdapterToUse($filename = null)
-    {
-        if (null === $filename || false === is_string($filename)) {
-            return;
-        }
-
-        $pieces = explode('.', $filename);
-        if (1 > count($pieces)) {
-            return;
-        }
-
-        $ext = '.'.$pieces[count($pieces) - 1];
-        $adaptersForExt = $this->manageableExt->get($ext);
-        if (false === is_array($adaptersForExt) || 0 === count($adaptersForExt)) {
-            return;
-        }
-
-        $adapter = $this->getRightAdapter($adaptersForExt);
-
-        return $this->rendererAdapters->get($adapter);
     }
 
     /**
@@ -227,8 +169,8 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     public function defaultAdapter($adapterKey)
     {
         $exists = false;
-        if (true === in_array($adapterKey, $this->rendererAdapters->keys())) {
-            $this->defaultAdapter = $adapterKey;
+        if (true === in_array($adapterKey, $this->renderer_adapters->keys())) {
+            $this->default_adapter = $adapterKey;
             $exists = true;
         }
 
@@ -241,7 +183,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function getDefaultAdapterExt()
     {
-        $managedExt = $this->rendererAdapters->get($this->defaultAdapter)->getManagedFileExtensions();
+        $managedExt = $this->renderer_adapters->get($this->default_adapter)->getManagedFileExtensions();
 
         return array_shift($managedExt);
     }
@@ -253,7 +195,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function getAdapter($key)
     {
-        return $this->rendererAdapters->get($key);
+        return $this->renderer_adapters->get($key);
     }
 
     /**
@@ -263,7 +205,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function getAdapters()
     {
-        return $this->rendererAdapters->all();
+        return $this->renderer_adapters->all();
     }
 
     /**
@@ -275,12 +217,12 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             return;
         }
 
-        $bbapp = $this->getApplication();
-        if (false === $obj->isRenderable() && null === $bbapp->getBBUserToken()) {
+        $application = $this->getApplication();
+        if (false === $obj->isRenderable() && null === $application->getBBUserToken()) {
             return;
         }
 
-        $bbapp->debug(sprintf(
+        $application->debug(sprintf(
             'Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($obj), $obj->getUid(), $mode, $ignoreModeIfNotSet
         ));
 
@@ -293,30 +235,23 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         $this->setRenderParams($renderer, $params);
 
         $renderer->setObject($obj)
-                ->setMode($mode, $ignoreModeIfNotSet)
-                ->_triggerEvent('prerender');
-
-        // if (
-        //     null !== $renderer->getClassContainer() &&
-        //     ($renderer->getClassContainer() instanceof AClassContent) &&
-        //     null === $renderer->getCurrentElement()
-        // ) {
-        //     $renderer->tryResolveParentObject($renderer->getClassContainer(), $obj);
-        // }
+            ->setMode($mode, $ignoreModeIfNotSet)
+            ->triggerEvent('prerender')
+        ;
 
         if (null === $renderer->__render) {
             // Rendering a page with layout
             if (true === ($obj instanceof Page)) {
                 $renderer->setCurrentPage($obj);
                 $renderer->__render = $renderer->renderPage($template, $params);
-                $renderer->insertHeaderAndFooterScript();
-                $bbapp->debug('Rendering Page OK');
+                $renderer->insertExternalResources();
+                $application->debug('Rendering Page OK');
             } else {
                 // Rendering a content
                 $renderer->__render = $renderer->renderContent($params, $template);
             }
 
-            $renderer->_triggerEvent('postrender', null, $renderer->__render);
+            $renderer->triggerEvent('postrender', null, $renderer->__render);
         }
 
         $render = $renderer->__render;
@@ -371,9 +306,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     public function partial($template = null, $params = null)
     {
-        $this->templateFile = $template;
-        File::resolveFilepath($this->templateFile, null, array('include_path' => $this->_scriptdir));
-        if (false === is_file($this->templateFile) || false === is_readable($this->templateFile)) {
+        $this->template_file = $template;
+        File::resolveFilepath($this->template_file, null, array('include_path' => $this->_scriptdir));
+        if (false === is_file($this->template_file) || false === is_readable($this->template_file)) {
             throw new RendererException(sprintf(
                 'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
             ), RendererException::SCRIPTFILE_ERROR);
@@ -396,18 +331,18 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     public function error($errorCode, $title = null, $message = null, $trace = null)
     {
         $found = false;
-        foreach ($this->manageableExt->keys() as $ext) {
-            $this->templateFile = 'error'.DIRECTORY_SEPARATOR.$errorCode.$ext;
-            if (true === $this->isValidTemplateFile($this->templateFile, true)) {
+        foreach ($this->manageable_ext->keys() as $ext) {
+            $this->template_file = 'error'.DIRECTORY_SEPARATOR.$errorCode.$ext;
+            if (true === $this->isValidTemplateFile($this->template_file, true)) {
                 $found = true;
                 break;
             }
         }
 
         if (false === $found) {
-            foreach ($this->manageableExt->keys() as $ext) {
-                $this->templateFile = 'error'.DIRECTORY_SEPARATOR.'default'.$ext;
-                if (true === $this->isValidTemplateFile($this->templateFile)) {
+            foreach ($this->manageable_ext->keys() as $ext) {
+                $this->template_file = 'error'.DIRECTORY_SEPARATOR.'default'.$ext;
+                if (true === $this->isValidTemplateFile($this->template_file)) {
                     $found = true;
                     break;
                 }
@@ -437,6 +372,418 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
+     * Returns image url
+     *
+     * @param string                $pathinfo
+     * @param BackBee\Site\Site $site
+     *
+     * @return string image url
+     */
+    public function getImageUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri($pathinfo, null, $site, RouteCollection::IMAGE_URL);
+    }
+
+    /**
+     * Returns image url
+     *
+     * @param string                $pathinfo
+     * @param BackBee\Site\Site $site
+     *
+     * @return string image url
+     */
+    public function getMediaUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri($pathinfo, null, $site, RouteCollection::MEDIA_URL);
+    }
+
+    /**
+     * Returns resource url
+     *
+     * @param string                $pathinfo
+     * @param BackBee\Site\Site $site
+     *
+     * @return string resource url
+     */
+    public function getResourceUrl($pathinfo, Site $site = null)
+    {
+        return $this->getUri($pathinfo, null, $site, RouteCollection::RESOURCE_URL);
+    }
+
+    /**
+     * Compute route which matched with route_name and replace every token by its values specified in route_params;
+     * You can also give base url (by default current site base url will be used)
+     * @param  string      $route_name
+     * @param  array|null  $route_params
+     * @param  string|null $base_url
+     * @param  boolean     $add_ext
+     * @param  \BackBee\Site\Site
+     * @return string
+     */
+    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null, $build_query = false)
+    {
+        return $this->application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext, $site, $build_query);
+    }
+
+    /**
+     * Returns an array of template files according the provided pattern
+     *
+     * @param  string $pattern
+     * @return array
+     */
+    public function getTemplatesByPattern($pattern)
+    {
+        $templates = array();
+        foreach ($this->manageable_ext->keys() as $ext) {
+            $templates = array_merge($templates, parent::getTemplatesByPattern($pattern.$ext));
+        }
+
+        return $templates;
+    }
+
+    /**
+     * Returns the list of available render mode for the provided object
+     *
+     * @param  \BackBee\Renderer\IRenderable $object
+     * @return array
+     */
+    public function getAvailableRenderMode(IRenderable $object)
+    {
+        $modes = parent::getAvailableRenderMode($object);
+        foreach ($modes as &$mode) {
+            $mode = str_replace($this->manageable_ext->keys(), '', $mode);
+        }
+
+        return array_unique($modes);
+    }
+
+    /**
+     * @see BackBee\Renderer\IRenderer::updateLayout()
+     */
+    public function updateLayout(Layout $layout)
+    {
+        $layoutFile = parent::updateLayout($layout);
+        $adapter = $this->determineWhichAdapterToUse($layoutFile);
+
+        if (false === is_array($this->_layoutdir) || 0 === count($this->_layoutdir)) {
+            throw new RendererException('None layout directory defined', RendererException::SCRIPTFILE_ERROR);
+        }
+
+        if (null === $adapter) {
+            throw new RendererException(sprintf(
+                'Unable to manage file \'%s\' in path (%s)', $layoutFile, $this->_layoutdir[0]
+            ), RendererException::SCRIPTFILE_ERROR);
+        }
+
+        return $adapter->updateLayout($layout, $layoutFile);
+    }
+
+    /**
+     * Adds provided href as stylesheet to add to current page head tag
+     * Note: provided href will be added only if it does not already exist in stylesheet list
+     *
+     * @param string $href
+     */
+    public function addStylesheet($href)
+    {
+        $this->addExternalResources(self::CSS_LINK, $href);
+    }
+
+    /**
+     * Adds provided href as javascript script to add to current page head tag
+     * Note: provided href will be added only if it does not already exist in javascript script list
+     *
+     * @param string $href
+     */
+    public function addHeaderJs($href)
+    {
+        $this->addExternalResources(self::HEADER_JS, $href);
+    }
+
+    /**
+     * Adds provided href as javascript script to add to current page footer
+     * Note: provided href will be added only if it does not already exist in javascript script list
+     *
+     * @param string $href
+     */
+    public function addFooterJs($href)
+    {
+        $this->addExternalResources(self::FOOTER_JS, $href);
+    }
+
+    /**
+     * Alias to self::addHeaderJs()
+     *
+     * @deprecated since version 0.12
+     */
+    public function addHeaderScript($src)
+    {
+        $this->addHeaderJs($src);
+    }
+
+    /**
+     * Alias to self::addFooterJs()
+     *
+     * @deprecated since version 0.12
+     */
+    public function addFooterScript($src)
+    {
+        $this->addFooterJs($src);
+    }
+
+    /**
+     * Returns the namespace of the class proxy to use or null if no proxy is required
+     *
+     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     */
+    public function getClassProxy()
+    {
+        return;
+    }
+
+    /**
+     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
+     * with the dump array produced by this method
+     *
+     * @return array contains every datas required by this service to be restored at the same state
+     */
+    public function dump(array $options = array())
+    {
+        return array(
+            'template_directories' => $this->_scriptdir,
+            'layout_directories'   => $this->_layoutdir
+        );
+    }
+
+    /**
+     * Restore current service to the dump's state
+     *
+     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                    restore current service
+     */
+    public function restore(ContainerInterface $container, array $dump)
+    {
+        $this->_scriptdir = $dump['template_directories'];
+        $this->_layoutdir = $dump['layout_directories'];
+
+        $this->is_restored = true;
+    }
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->is_restored;
+    }
+
+    /**
+     * Return the file path to current layout, try to create it if not exists
+     *
+     * @param  Layout            $layout
+     * @return string            the file path
+     * @throws RendererException
+     */
+    protected function getLayoutFile(Layout $layout)
+    {
+        $layoutfile = $layout->getPath();
+        if (null === $layoutfile && 0 < $this->manageable_ext->count()) {
+            $adapter = null;
+            if (null !== $this->default_adapter && null !== $adapter = $this->renderer_adapters->get($this->default_adapter)) {
+                $extensions = $adapter->getManagedFileExtensions();
+            } else {
+                $extensions = $this->manageable_ext->keys();
+            }
+
+            if (0 === count($extensions)) {
+                throw new RendererException(
+                        'Declared adapter(s) (count:'.$this->renderer_adapters->count().') is/are not able to manage '.
+                        'any file extensions at moment.'
+                );
+            }
+
+            $layoutfile = String::toPath($layout->getLabel(), array('extension' => reset($extensions)));
+            $layout->setPath($layoutfile);
+        }
+
+        return $layoutfile;
+    }
+
+    /**
+     * Update every helpers and every registered renderer adapters with the right ARenderer;
+     * this method is called everytime we unset a renderer
+     */
+    protected function updatesAfterUnset()
+    {
+        $this->updateHelpers();
+        foreach ($this->renderer_adapters->all() as $ra) {
+            $ra->onRestorePreviousRenderer($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Generic method to add an external resource (css, javascript in page header or footer)
+     *
+     * @param string $type
+     * @param string $href
+     */
+    private function addExternalResources($type, $href)
+    {
+        $resources = array();
+        if ($this->external_resources->has($type)) {
+            $resources = $this->external_resources->get($type);
+        }
+
+        if (!in_array($href, $resources)) {
+            $resources[] = $href;
+        }
+
+        $this->external_resources->set($type, $resources);
+    }
+
+    /**
+     * Insert every external resources: css and header js will be added before page '</head>' and
+     * footer javascript will be added before page '</body>'
+     *
+     * @return self
+     */
+    private function insertExternalResources()
+    {
+        $header_render = '';
+        foreach ($this->external_resources->get(self::CSS_LINK, array()) as $href) {
+            $header_render .= $this->generateStylesheetTag($href);
+        }
+
+        foreach ($header_js = $this->external_resources->get(self::HEADER_JS, array()) as $src) {
+            $header_render .= $this->generateJavascriptTag($src);
+        }
+
+        if (false === empty($header_render)) {
+            $this->setRender(str_replace('</head>', "$header_render</head>", $this->getRender()));
+        }
+
+        $footer_render = '';
+        $footer_js = array_diff($this->external_resources->get(self::FOOTER_JS, array()), $header_js);
+        foreach ($footer_js as $src) {
+            $footer_render .= $this->generateJavascriptTag($src);
+        }
+
+        if (false === empty($footer_render)) {
+            $this->setRender(str_replace('</body>', "$footer_render</body>", $this->getRender()));
+        }
+
+        $this->external_resources->remove(self::CSS_LINK);
+        $this->external_resources->remove(self::HEADER_JS);
+        $this->external_resources->remove(self::FOOTER_JS);
+
+        return $this;
+    }
+
+    /**
+     * Generates HTML5 link tag with provided href
+     *
+     * @param  string $href
+     *
+     * @return string
+     */
+    private function generateStylesheetTag($href)
+    {
+        return '<link rel="stylesheet" href="' . $href . '" type="text/css">';
+    }
+
+    /**
+     * Generates HTML5 script tag with provided src
+     *
+     * @param  string $src
+     *
+     * @return string
+     */
+    private function generateJavascriptTag($src)
+    {
+        return '<script src="' . $src . '"></script>';
+    }
+
+    /**
+     * Compute a key for renderer adapter ($rendererAdapter)
+     *
+     * @param  IRendererAdapter $rendererAdapter
+     * @return string
+     */
+    private function getRendererAdapterKey(IRendererAdapter $rendererAdapter)
+    {
+        $key = explode(NAMESPACE_SEPARATOR, get_class($rendererAdapter));
+
+        return strtolower($key[count($key) - 1]);
+    }
+
+    /**
+     * Extract managed extensions from rendererAdapter and store it
+     *
+     * @param IRendererAdapter $rendererAdapter
+     */
+    private function addManagedExtensions(IRendererAdapter $rendererAdapter)
+    {
+        $key = $this->getRendererAdapterKey($rendererAdapter);
+        foreach ($rendererAdapter->getManagedFileExtensions() as $ext) {
+            $rendererAdapters = array($key);
+            if ($this->manageable_ext->has($ext)) {
+                $rendererAdapters = $this->manageable_ext->get($ext);
+                $rendererAdapters[] = $key;
+            }
+
+            $this->manageable_ext->set($ext, $rendererAdapters);
+        }
+    }
+
+    /**
+     * Returns an adapter containing in $adapeters; it will returns in prior
+     * the defaultAdpater if it is in $adapters or the first adapter found
+     *
+     * @param  array            $adapters contains object of type IRendererAdapter
+     * @return IRendererAdapter
+     */
+    private function getRightAdapter(array $adapters)
+    {
+        $adapter = null;
+        if (1 < count($adapters) && true === in_array($this->default_adapter, $adapters)) {
+            $adapter = $this->default_adapter;
+        } else {
+            $adapter = reset($adapters);
+        }
+
+        return $adapter;
+    }
+
+    /**
+     * Returns the right adapter to use according to the filename extension
+     *
+     * @return IRendererAdapter
+     */
+    private function determineWhichAdapterToUse($filename = null)
+    {
+        if (null === $filename || false === is_string($filename)) {
+            return;
+        }
+
+        $pieces = explode('.', $filename);
+        if (1 > count($pieces)) {
+            return;
+        }
+
+        $ext = '.'.$pieces[count($pieces) - 1];
+        $adaptersForExt = $this->manageable_ext->get($ext);
+        if (false === is_array($adaptersForExt) || 0 === count($adaptersForExt)) {
+            return;
+        }
+
+        $adapter = $this->getRightAdapter($adaptersForExt);
+
+        return $this->renderer_adapters->get($adapter);
+    }
+
+    /**
      * Render a page object
      *
      * @param  string            $layoutfile A force layout script to be rendered
@@ -447,11 +794,11 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     {
         $this->setNode($this->getObject());
 
-        $bbapp = $this->getApplication();
+        $application = $this->getApplication();
         // Rendering subcontent
         if (null !== $contentSet = $this->getObject()->getContentSet()) {
-            $bbUserToken = $bbapp->getBBUserToken();
-            $revisionRepo = $bbapp->getEntityManager()->getRepository('BackBee\ClassContent\Revision');
+            $bbUserToken = $application->getBBUserToken();
+            $revisionRepo = $application->getEntityManager()->getRepository('BackBee\ClassContent\Revision');
             if (null !== $bbUserToken && null !== $revision = $revisionRepo->getDraft($contentSet, $bbUserToken)) {
                 $contentSet->setDraft($revision);
             }
@@ -475,18 +822,18 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         }
 
         // Check for a valid layout file
-        $this->templateFile = $layoutFile;
-        if (null === $this->templateFile) {
-            $this->templateFile = $this->_getLayoutFile($this->layout());
+        $this->template_file = $layoutFile;
+        if (null === $this->template_file) {
+            $this->template_file = $this->getLayoutFile($this->layout());
         }
 
-        if (false === $this->isValidTemplateFile($this->templateFile, true)) {
+        if (false === $this->isValidTemplateFile($this->template_file, true)) {
             throw new RendererException(
-                sprintf('Unable to read layout %s.', $this->templateFile), RendererException::LAYOUT_ERROR
+                sprintf('Unable to read layout %s.', $this->template_file), RendererException::LAYOUT_ERROR
             );
         }
 
-        $bbapp->info(sprintf('Rendering page `%s`.', $this->getObject()->getNormalizeUri()));
+        $application->info(sprintf('Rendering page `%s`.', $this->getObject()->getNormalizeUri()));
 
         return $this->renderTemplate(false, true);
     }
@@ -502,19 +849,19 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     {
         try {
             $mode = null !== $this->getMode() ? $this->getMode() : $this->_object->getMode();
-            $this->templateFile = $template;
-            if (null === $this->templateFile && null !== $this->_object) {
-                $this->templateFile = $this->getTemplateFile($this->_object, $mode);
-                if (false === $this->templateFile) {
-                    $this->templateFile = $this->getTemplateFile($this->_object, $this->getMode());
+            $this->template_file = $template;
+            if (null === $this->template_file && null !== $this->_object) {
+                $this->template_file = $this->getTemplateFile($this->_object, $mode);
+                if (false === $this->template_file) {
+                    $this->template_file = $this->getTemplateFile($this->_object, $this->getMode());
                 }
 
-                if (false === $this->templateFile && false === $this->_ignoreIfRenderModeNotAvailable) {
-                    $this->templateFile = $this->getTemplateFile($this->_object);
+                if (false === $this->template_file && false === $this->_ignoreIfRenderModeNotAvailable) {
+                    $this->template_file = $this->getTemplateFile($this->_object);
                 }
             }
 
-            if (false === $this->isValidTemplateFile($this->templateFile)) {
+            if (false === $this->isValidTemplateFile($this->template_file)) {
                 throw new RendererException(sprintf(
                         'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
                 ), RendererException::SCRIPTFILE_ERROR);
@@ -546,14 +893,14 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             return $render;
         }
 
-        $bbapp = $this->getApplication();
+        $application = $this->getApplication();
         // Assign vars and parameters
         if (null !== $this->_object) {
             $draft = $this->_object->getDraft();
             $aClassContentClassname = 'BackBee\ClassContent\AClassContent';
             if (true === is_a($this->_object, $aClassContentClassname) && false === $this->_object->isLoaded()) {
                 // trying to refresh unloaded content
-                $em = $bbapp->getEntityManager();
+                $em = $application->getEntityManager();
 
                 $classname = get_class($this->_object);
                 $uid = $this->_object->getUid();
@@ -572,8 +919,8 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             $this->setParam($this->_object->getParam());
         }
 
-        if (null !== $bbapp) {
-            $bbapp->debug(sprintf('Rendering content `%s(%s)`.', get_class($this->_object), $this->_object->getUid()));
+        if (null !== $application) {
+            $application->debug(sprintf('Rendering content `%s(%s)`.', get_class($this->_object), $this->_object->getUid()));
         }
 
         return $this->renderTemplate();
@@ -606,13 +953,13 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     private function getTemplateFile(IRenderable $object, $mode = null)
     {
-        $tmpStorage = $this->templateFile;
-        $template = $this->_getTemplatePath($object);
-        foreach ($this->manageableExt->keys() as $ext) {
-            $this->templateFile = $template.(null !== $mode ? '.'.$mode : '').$ext;
-            if (true === $this->isValidTemplateFile($this->templateFile)) {
-                $filename = $this->templateFile;
-                $this->templateFile = $tmpStorage;
+        $tmpStorage = $this->template_file;
+        $template = $this->getTemplatePath($object);
+        foreach ($this->manageable_ext->keys() as $ext) {
+            $this->template_file = $template.(null !== $mode ? '.'.$mode : '').$ext;
+            if (true === $this->isValidTemplateFile($this->template_file)) {
+                $filename = $this->template_file;
+                $this->template_file = $tmpStorage;
 
                 return $filename;
             }
@@ -655,215 +1002,20 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      */
     private function renderTemplate($isPartial = false, $isLayout = false)
     {
-        $adapter = $this->determineWhichAdapterToUse($this->templateFile);
+        $adapter = $this->determineWhichAdapterToUse($this->template_file);
         $dirs = true === $isLayout ? $this->_layoutdir : $this->_scriptdir;
 
         if (null === $adapter) {
             throw new RendererException(sprintf(
-                'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
+                'Unable to manage file \'%s\' in path (%s)', $this->template_file, implode(', ', $dirs)
             ), RendererException::SCRIPTFILE_ERROR);
         }
 
-        $this->getApplication()->debug(sprintf('Rendering file `%s`.', $this->templateFile));
+        $this->getApplication()->debug(sprintf('Rendering file `%s`.', $this->template_file));
         if (false === $isPartial) {
-            $this->_triggerEvent();
+            $this->triggerEvent();
         }
 
-        return $adapter->renderTemplate($this->templateFile, $dirs, $this->getParam(), $this->getAssignedVars());
-    }
-
-    /**
-     * Returns an array of template files according the provided pattern
-     *
-     * @param  string $pattern
-     * @return array
-     */
-    public function getTemplatesByPattern($pattern)
-    {
-        $templates = array();
-        foreach ($this->manageableExt->keys() as $ext) {
-            $templates = array_merge($templates, parent::getTemplatesByPattern($pattern.$ext));
-        }
-
-        return $templates;
-    }
-
-    /**
-     * Returns the list of available render mode for the provided object
-     *
-     * @param  \BackBee\Renderer\IRenderable $object
-     * @return array
-     */
-    public function getAvailableRenderMode(IRenderable $object)
-    {
-        $modes = parent::getAvailableRenderMode($object);
-        foreach ($modes as &$mode) {
-            $mode = str_replace($this->manageableExt->keys(), '', $mode);
-        }
-
-        return array_unique($modes);
-    }
-
-    /**
-     * @see BackBee\Renderer\IRenderer::updateLayout()
-     */
-    public function updateLayout(Layout $layout)
-    {
-        $layoutFile = parent::updateLayout($layout);
-        $adapter = $this->determineWhichAdapterToUse($layoutFile);
-
-        if (false === is_array($this->_layoutdir) || 0 === count($this->_layoutdir)) {
-            throw new RendererException('None layout directory defined', RendererException::SCRIPTFILE_ERROR);
-        }
-
-        if (null === $adapter) {
-            throw new RendererException(sprintf(
-                    'Unable to manage file \'%s\' in path (%s)', $layoutFile, $this->_layoutdir[0]
-            ), RendererException::SCRIPTFILE_ERROR);
-        }
-
-        return $adapter->updateLayout($layout, $layoutFile);
-    }
-
-    /**
-     * Return the file path to current layout, try to create it if not exists
-     *
-     * @param  Layout            $layout
-     * @return string            the file path
-     * @throws RendererException
-     */
-    protected function _getLayoutFile(Layout $layout)
-    {
-        $layoutfile = $layout->getPath();
-        if (null === $layoutfile && 0 < $this->manageableExt->count()) {
-            $adapter = null;
-            if (null !== $this->defaultAdapter && null !== $adapter = $this->rendererAdapters->get($this->defaultAdapter)) {
-                $extensions = $adapter->getManagedFileExtensions();
-            } else {
-                $extensions = $this->manageableExt->keys();
-            }
-
-            if (0 === count($extensions)) {
-                throw new RendererException(
-                        'Declared adapter(s) (count:'.$this->rendererAdapters->count().') is/are not able to manage '.
-                        'any file extensions at moment.'
-                );
-            }
-
-            $layoutfile = String::toPath($layout->getLabel(), array('extension' => reset($extensions)));
-            $layout->setPath($layoutfile);
-        }
-
-        return $layoutfile;
-    }
-
-    /**
-     * Compute route which matched with route_name and replace every token by its values specified in route_params;
-     * You can also give base url (by default current site base url will be used)
-     * @param  string      $route_name
-     * @param  array|null  $route_params
-     * @param  string|null $base_url
-     * @param  boolean     $add_ext
-     * @param  \BackBee\Site\Site
-     * @return string
-     */
-    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null, $build_query = false)
-    {
-        return $this->_application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext, $site, $build_query);
-    }
-
-    /**
-     * Returns image url
-     *
-     * @param string                $pathinfo
-     * @param BackBee\Site\Site $site
-     *
-     * @return string image url
-     */
-    public function getImageUrl($pathinfo, Site $site = null)
-    {
-        return $this->getUri($pathinfo, null, $site, RouteCollection::IMAGE_URL);
-    }
-
-    /**
-     * Returns image url
-     *
-     * @param string                $pathinfo
-     * @param BackBee\Site\Site $site
-     *
-     * @return string image url
-     */
-    public function getMediaUrl($pathinfo, Site $site = null)
-    {
-        return $this->getUri($pathinfo, null, $site, RouteCollection::MEDIA_URL);
-    }
-
-    /**
-     * Returns resource url
-     *
-     * @param string                $pathinfo
-     * @param BackBee\Site\Site $site
-     *
-     * @return string resource url
-     */
-    public function getResourceUrl($pathinfo, Site $site = null)
-    {
-        return $this->getUri('ressources/'.$pathinfo, null, $site);
-        // return $this->getUri($pathinfo, null, $site, RouteCollection::RESOURCE_URL);
-    }
-
-    /**
-     * Returns the namespace of the class proxy to use or null if no proxy is required
-     *
-     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
-     */
-    public function getClassProxy()
-    {
-        return;
-    }
-
-    /**
-     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
-     * with the dump array produced by this method
-     *
-     * @return array contains every datas required by this service to be restored at the same state
-     */
-    public function dump(array $options = array())
-    {
-        return array(
-            'template_directories' => $this->_scriptdir,
-            'layout_directories'   => $this->_layoutdir,
-            // 'default_adapter'      => $this->defaultAdapter
-        );
-    }
-
-    /**
-     * Restore current service to the dump's state
-     *
-     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
-     *                    restore current service
-     */
-    public function restore(ContainerInterface $container, array $dump)
-    {
-        // $this->_application = $container->get('bbapp');
-        // $this->defaultAdapter = $dump['default_adapter'];
-        $this->_scriptdir = $dump['template_directories'];
-        $this->_layoutdir = $dump['layout_directories'];
-
-        // $renderer_config = $container->get('config')->getRendererConfig();
-        // $adapters = (array) $renderer_config['adapter'];
-        // foreach ($adapters as $adapter) {
-        //     $this->addRendererAdapter(new $adapter($this));
-        // }
-
-        $this->is_restored = true;
-    }
-
-    /**
-     * @return boolean true if current service is already restored, otherwise false
-     */
-    public function isRestored()
-    {
-        return $this->is_restored;
+        return $adapter->renderTemplate($this->template_file, $dirs, $this->getParam(), $this->getAssignedVars());
     }
 }
