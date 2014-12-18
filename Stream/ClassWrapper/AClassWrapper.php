@@ -178,6 +178,10 @@ class <classname> extends <extends> <interface>
         if (NULL !== $this->_autoloader && NULL !== $this->_autoloader->getApplication()) {
             $this->_cache = $this->_autoloader->getApplication()->getBootstrapCache();
         }
+
+        $this->elements = array();
+        $this->properties = array();
+        $this->parameters = array();
     }
 
     /**
@@ -188,6 +192,7 @@ class <classname> extends <extends> <interface>
     protected function _buildClass()
     {
         $defineDatas = $this->_extractDatas($this->elements);
+
         $defineParam = $this->_extractDatas($this->parameters);
         $defineProps = $this->properties;
 
@@ -197,7 +202,8 @@ class <classname> extends <extends> <interface>
             if ('scalar' === $type) {
                 $type = 'string';
             }
-            $docBlock .= "\n * @property ".$type.' $'.$key.' '.$element['options']['label'];
+
+            $docBlock .= "\n * @property ".$type.' $'.$key.' '.(isset($element['options']['label']) ? $element['options']['label'] : '');
         }
 
         array_walk($defineDatas, function (&$value, $key) {
