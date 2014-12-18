@@ -99,9 +99,11 @@ class Cache extends ACache
         }
 
         $last_timestamp = $this->test($id);
-        if (true === $bypassCheck
-                || 0 === $last_timestamp
-                || $expire->getTimestamp() <= $last_timestamp) {
+        if (
+            true === $bypassCheck
+            || 0 === $last_timestamp
+            || $expire->getTimestamp() <= $last_timestamp
+        ) {
             if (false !== $data = @file_get_contents($this->getCacheFile($id))) {
                 $this->log('debug', sprintf('Reading file cache data for id `%s`.', $id));
 
@@ -123,11 +125,14 @@ class Cache extends ACache
      */
     public function test($id)
     {
-        if (false === $stat = @stat($this->getCacheFile($id))) {
-            return false;
+        $result = false;
+        $cache_file = $this->getCacheFile($id);
+        if (is_readable($cache_file)) {
+            $result = stat($cache_file);
+            $result = $result['mtime'];
         }
 
-        return $stat['mtime'];
+        return $result;
     }
 
     /**
