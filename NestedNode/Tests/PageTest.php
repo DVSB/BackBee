@@ -452,6 +452,24 @@ class PageTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Page::setLevel
+     */
+    public function testSetLevel()
+    {
+        $this->assertEquals($this->page, $this->page->setLevel(10));
+        $this->assertEquals(10, $this->page->getLevel());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setLevel
+     * @expectedException BackBuilder\Exception\InvalidArgumentException
+     */
+    public function testSetNonNumericLevel()
+    {
+        $this->page->setLevel('test');
+    }
+
+    /**
      * @covers BackBuilder\NestedNode\Page::getInheritedContensetZoneParams
      */
     public function testGetInheritedContensetZoneParams()

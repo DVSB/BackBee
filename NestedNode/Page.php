@@ -30,6 +30,7 @@ use BackBuilder\Renderer\IRenderable;
 use BackBuilder\Site\Layout;
 use BackBuilder\Site\Site;
 use BackBuilder\Workflow\State;
+use BackBuilder\Util\Numeric;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
@@ -1517,6 +1518,22 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     public function getLevel()
     {
         return $this->_level;
+    }
+
+    /**
+     * Sets the level.
+     * @param type $level
+     * @return \BackBuilder\NestedNode\Page
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     */
+    public function setLevel($level)
+    {
+        if (false === Numeric::isPositiveInteger($level, false)) {
+            throw new InvalidArgumentException('A nested level must be a positive integer.');
+        }
+
+        $this->_level = $level;
+        return $this;
     }
 
     /**
