@@ -90,14 +90,19 @@ class LayoutController extends ARestController
         $qb = $this->getEntityManager()
             ->getRepository('BackBee\Site\Layout')
             ->createQueryBuilder('l')
+            ->select('l, st')
             ->orderBy('l._label', 'ASC')
             ->leftJoin('l._states', 'st')
         ;
 
         if(null !== ($site = $request->attributes->get('site'))) {
-            $qb->innerJoin('l.site', 'si')
-                ->andWhere('si._uid = :site_uid')
-                ->setParameter(':site_uid', $site->getUid())
+            $qb->select('l, st, si')
+                ->innerJoin('l._site', 'si', 'WITH', 'si._uid = :site_uid')
+                ->setParameter('site_uid', $site->getUid())
+            ;
+        } else {
+            $qb->select('l, st')
+                ->andWhere('l._site IS NULL')
             ;
         }
 

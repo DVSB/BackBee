@@ -22,12 +22,11 @@
 namespace BackBuilder\Rest\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use BackBuilder\Rest\Controller\LayoutController;
-use BackBuilder\Tests\TestCase;
+use BackBuilder\Rest\Test\RestTestCase;
 use BackBuilder\Security\User;
-use BackBuilder\Security\Token\BBUserToken;
 use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
 use BackBuilder\Workflow\State;
 
 /**
@@ -40,7 +39,7 @@ use BackBuilder\Workflow\State;
  *
  * @coversDefaultClass \BackBuilder\Rest\Controller\LayoutController
  */
-class LayoutControllerTest extends TestCase
+class LayoutControllerTest extends RestTestCase
 {
     protected $bbapp;
 
@@ -60,23 +59,40 @@ class LayoutControllerTest extends TestCase
         $user->setActivated(true);
         $this->getEntityManager()->persist($user);
         
-        // create layout
-        $layout = (new Layout('test1'))
-            ->setLabel('Test layout')
-            ->setData("{}")
-            ->setPath($this->getBBApp()->getBaseRepository())
+        // create site
+        $this->site =( new Site())
+            ->setLabel('Default Site')
         ;
-        $this->getEntityManager()->persist($layout);
+        $this->getEntityManager()->persist($this->site);
+        
+        // create site layout
+        $this->siteLayout = (new Layout('site1'))
+            ->setLabel('Site layout')
+            ->setData("{}")
+            ->setSite($this->site)
+            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts')
+        ;
+        $this->getEntityManager()->persist($this->siteLayout);
         
         $state = (new State())
             ->setCode(2)
             ->setLabel('Layout 1 state')
-            ->setLayout($layout)
+            ->setLayout($this->siteLayout)
             ->setListener('stdClass')
         ;
         
         $this->getEntityManager()->persist($state);
-        $layout->addState($state);
+        $this->siteLayout->addState($state);
+        
+        
+        // create global layout
+        $this->globalLayout = (new Layout('global1'))
+            ->setLabel('Global layout')
+            ->setData("{}")
+            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts')
+        ;
+        $this->getEntityManager()->persist($this->globalLayout);
+        
         
         $this->getEntityManager()->flush();
     }
@@ -97,18 +113,38 @@ class LayoutControllerTest extends TestCase
      * @covers ::getCollectionAction
      *
      */
-    public function test_getCollectionAction()
+    public function test_getCollectionAction_global()
     {
         $request = new Request();
+        
         $response = $this->getController()->getCollectionAction($request);
         $content = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $content);
+        
+        $this->assertCount(1, $content);
+        $layoutTest = $content[0];
+
+
+        $this->assertArrayHasKey('workflow_states', $layoutTest);
+        $this->assertCount(2, $layoutTest['workflow_states']);
+    }
+
+    /**
+     * @covers ::getCollectionAction
+     *
+     */
+    public function test_getCollectionAction_site()
+    {
+        $request = new Request([], [], ['site' => $this->site]);
+        $response = $this->getController()->getCollectionAction($request);
+        $content = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $content);
+        var_dump($content);
         $this->assertCount(1, $content);
         $layoutTest = $content[0];
 
         $this->assertArrayHasKey('workflow_states', $layoutTest);
         $this->assertCount(3, $layoutTest['workflow_states']);
-        
     }
 
     protected function tearDown()
