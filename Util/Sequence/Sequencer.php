@@ -87,11 +87,10 @@ class Sequencer extends EntityRepository
 
     /**
      * Initiate a new sequence with name $name
-     * @param  string                                          $name
-     * @param  int                                             $first
+     * @param  string $name
+     * @param  int    $first
      * @return int
-     * @ Occures if sequence $name already exists
-     *                                                               or $first is not a positive integer
+     * @throws InvalidArgumentException Occures if sequence $name already exists or $first is not a positive integer
      */
     private function init($name, $first = 0)
     {
@@ -103,17 +102,16 @@ class Sequencer extends EntityRepository
             throw new InvalidArgumentException('Initial value of a sequence must be a positive integer');
         }
 
-        $query = 'INSERT INTO sequence (:_name, :_value) VALUE(:name, :value)';
+        $query = 'INSERT INTO sequence (name, value) VALUE(:name, :value)';
         $params = array(
-            '_name'  => $this->name,
-            '_value' => $this->value,
             'name'   => $name,
             'value'  => $first
         );
 
         $this->getEntityManager()
-                ->getConnection()
-                ->executeQuery($query, $params);
+            ->getConnection()
+            ->executeQuery($query, $params)
+        ;
 
         return $first;
     }
