@@ -470,6 +470,24 @@ class PageTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Page::setPosition
+     */
+    public function testSetPosition()
+    {
+        $this->assertEquals($this->page, $this->page->setPosition(10));
+        $this->assertEquals(10, $this->page->getPosition());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setPosition
+     * @expectedException BackBuilder\Exception\InvalidArgumentException
+     */
+    public function testSetNonNumericPosition()
+    {
+        $this->page->setPosition('test');
+    }
+
+    /**
      * @covers BackBuilder\NestedNode\Page::getInheritedContensetZoneParams
      */
     public function testGetInheritedContensetZoneParams()

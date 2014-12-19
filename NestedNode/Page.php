@@ -1522,7 +1522,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the level.
-     * @param type $level
+     * @param int $level
      * @return \BackBuilder\NestedNode\Page
      * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
@@ -1544,6 +1544,22 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     public function getPosition()
     {
         return $this->_position;
+    }
+
+    /**
+     * Sets the position.
+     * @param int $position
+     * @return \BackBuilder\NestedNode\Page
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     */
+    public function setPosition($position)
+    {
+        if (false === Numeric::isPositiveInteger($position, false)) {
+            throw new InvalidArgumentException('A position must be a positive integer.');
+        }
+
+        $this->_position = $position;
+        return $this;
     }
 
     /**
