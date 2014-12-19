@@ -3,41 +3,41 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\Rest\Tests\Controller;
+namespace BackBee\Rest\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use BackBuilder\Rest\Controller\LayoutController;
-use BackBuilder\Rest\Test\RestTestCase;
-use BackBuilder\Security\User;
-use BackBuilder\Site\Layout;
-use BackBuilder\Site\Site;
-use BackBuilder\Workflow\State;
+use BackBee\Rest\Controller\LayoutController;
+use BackBee\Rest\Test\RestTestCase;
+use BackBee\Security\User;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
+use BackBee\Workflow\State;
 
 /**
  * Test for SecurityController class
  *
- * @category    BackBuilder
- * @package     BackBuilder\Rest
+ * @category    BackBee
+ * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Rest\Controller\LayoutController
+ * @coversDefaultClass \BackBee\Rest\Controller\LayoutController
  */
 class LayoutControllerTest extends RestTestCase
 {
@@ -58,13 +58,13 @@ class LayoutControllerTest extends RestTestCase
         $user->setPassword(md5('password123'));
         $user->setActivated(true);
         $this->getEntityManager()->persist($user);
-        
+
         // create site
         $this->site =( new Site())
             ->setLabel('Default Site')
         ;
         $this->getEntityManager()->persist($this->site);
-        
+
         // create site layout
         $this->siteLayout = (new Layout('site1'))
             ->setLabel('Site layout')
@@ -73,18 +73,18 @@ class LayoutControllerTest extends RestTestCase
             ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts')
         ;
         $this->getEntityManager()->persist($this->siteLayout);
-        
+
         $state = (new State())
             ->setCode(2)
             ->setLabel('Layout 1 state')
             ->setLayout($this->siteLayout)
             ->setListener('stdClass')
         ;
-        
+
         $this->getEntityManager()->persist($state);
         $this->siteLayout->addState($state);
-        
-        
+
+
         // create global layout
         $this->globalLayout = (new Layout('global1'))
             ->setLabel('Global layout')
@@ -92,14 +92,14 @@ class LayoutControllerTest extends RestTestCase
             ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts')
         ;
         $this->getEntityManager()->persist($this->globalLayout);
-        
-        
+
+
         $this->getEntityManager()->flush();
     }
 
     /**
      *
-     * @return \BackBuilder\Security\Tests\Controller\LayoutController
+     * @return \BackBee\Security\Tests\Controller\LayoutController
      */
     protected function getController()
     {
@@ -116,11 +116,11 @@ class LayoutControllerTest extends RestTestCase
     public function test_getCollectionAction_global()
     {
         $request = new Request();
-        
+
         $response = $this->getController()->getCollectionAction($request);
         $content = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $content);
-        
+
         $this->assertCount(1, $content);
         $layoutTest = $content[0];
 
@@ -139,7 +139,7 @@ class LayoutControllerTest extends RestTestCase
         $response = $this->getController()->getCollectionAction($request);
         $content = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $content);
-        
+
         $this->assertCount(1, $content);
         $layoutTest = $content[0];
 

@@ -143,12 +143,12 @@ class Layout extends AObjectIdentifiable implements IJson
      * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
-    
+
     /**
      * Layout states
-     * 
+     *
      * var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\Workflow\State", fetch="EXTRA_LAZY", mappedBy="_layout")
+     * @OneToMany(targetEntity="BackBee\Workflow\State", fetch="EXTRA_LAZY", mappedBy="_layout")
      */
     protected $_states;
 
@@ -200,7 +200,7 @@ class Layout extends AObjectIdentifiable implements IJson
                 $this->setPath($options['path']);
             }
         }
-        
+
         $this->_states = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -643,15 +643,15 @@ class Layout extends AObjectIdentifiable implements IJson
     {
         return json_decode($this->getData(), true);
     }
-    
-    
+
+
     /**
      * Add state
      *
-     * @param \BackBuilder\Workflow\State $state
-     * @return \BackBuilder\Site\Layout
+     * @param \BackBee\Workflow\State $state
+     * @return \BackBee\Site\Layout
      */
-    public function addState(\BackBuilder\Workflow\State $state)
+    public function addState(\BackBee\Workflow\State $state)
     {
         $this->_states[] = $state;
         return $this;
@@ -659,22 +659,22 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Remove state
      *
-     * @param \BackBuilder\Workflow\State $state
+     * @param \BackBee\Workflow\State $state
      */
-    public function removeState(\BackBuilder\Workflow\State $state)
+    public function removeState(\BackBee\Workflow\State $state)
     {
         $this->_states->removeElement($state);
     }
     /**
      * Get states
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getStates()
     {
         return $this->_states;
     }
-    
+
     /**
      * @Serializer\VirtualProperty
      * @Serializer\SerializedName("workflow_states")
@@ -706,7 +706,7 @@ class Layout extends AObjectIdentifiable implements IJson
             array('1' => array('label' => 'En ligne', 'code' => '1')),
             $workflowStates['online']
         );
-        
+
         return $workflowStates;
     }
 }
