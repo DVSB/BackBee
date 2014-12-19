@@ -139,7 +139,7 @@ class LayoutControllerTest extends RestTestCase
         $response = $this->getController()->getCollectionAction($request);
         $content = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $content);
-        var_dump($content);
+        
         $this->assertCount(1, $content);
         $layoutTest = $content[0];
 
