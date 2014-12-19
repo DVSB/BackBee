@@ -320,8 +320,9 @@ class PageQueryBuilder extends QueryBuilder
                 $crit = (true === in_array($crit, self::$join_criteria) ? $this->getSectionAlias() : $this->getAlias()) . '.' . $crit;
             }
 
-            $this->andWhere($crit . ' IN (:' . $crit . $suffix . ')')
-                    ->setParameter($crit . $suffix, $value);
+            $param = str_replace('.', '_', $crit) . $suffix;
+            $this->andWhere($crit . ' IN (:' . $param . ')')
+                    ->setParameter($param, $value);
         }
 
         return $this;
