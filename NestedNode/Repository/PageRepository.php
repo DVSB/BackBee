@@ -135,6 +135,29 @@ class PageRepository extends EntityRepository
     }
 
     /**
+     * Returns the ancestors of the provided page
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param int     $depth        Returns only ancestors from $depth number of generation
+     * @param boolean $includeNode  Returns also the node itsef if TRUE
+     * @return array
+     */
+    public function getAncestors(Page $page, $depth = null, $includeNode = false)
+    {
+        $q = $this->createQueryBuilder('p')
+                ->andIsAncestorOf($page, !$includeNode, null === $depth ? null : $page->getLevel() - $depth);
+
+        $results = $q->orderBy($q->getSectionAlias() . '._leftnode', 'asc')
+                ->getQuery()
+                ->getResult();
+
+        if (true === $includeNode && false === $page->hasMainSection()) {
+            $results[] = $page;
+        }
+
+        return $results;
+    }
+
+    /**
      * Returns the online descendants of $page
      * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
      * @param  int                            $depth       optional, limit to $depth number of generation
