@@ -113,6 +113,28 @@ class PageRepository extends EntityRepository
     }
 
     /**
+     * Returns the ancestor at level $level of the provided page
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param int $level
+     * @return \BackBuilder\NestedNode\Page|NULL
+     */
+    public function getAncestor(Page $page, $level = 0)
+    {
+        if ($page->getLevel() < $level) {
+            return null;
+        }
+
+        if ($page->getLevel() === $level) {
+            return $page;
+        }
+
+        return $this->createQueryBuilder('p')
+                        ->andIsAncestorOf($page, false, $level)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }
+
+    /**
      * Returns the online descendants of $page
      * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
      * @param  int                            $depth       optional, limit to $depth number of generation
