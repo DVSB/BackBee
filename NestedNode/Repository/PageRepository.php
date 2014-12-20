@@ -24,11 +24,12 @@ namespace BackBuilder\NestedNode\Repository;
 use BackBuilder\ClassContent\AClassContent;
 use BackBuilder\ClassContent\ContentSet;
 use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\NestedNode\Section;
 use BackBuilder\NestedNode\Page;
 use BackBuilder\Security\Token\BBUserToken;
 use BackBuilder\Site\Layout;
 use BackBuilder\Site\Site;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -40,8 +41,9 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class PageRepository extends NestedNodeRepository
+class PageRepository extends EntityRepository
 {
+
     /**
      * Creates a new Page QueryBuilder instance that is prepopulated for this entity name.
      * @param  string                                              $alias   the alias to use
@@ -51,8 +53,63 @@ class PageRepository extends NestedNodeRepository
     public function createQueryBuilder($alias, $indexBy = null)
     {
         $qb = new PageQueryBuilder($this->_em);
-
         return $qb->select($alias)->from($this->_entityName, $alias, $indexBy);
+    }
+
+    /**
+     * Finds entities by a set of criteria with automatic join on section if need due to retro-compatibility
+     * @param array      $criteria
+     * @param array|null $orderBy
+     * @param int|null   $limit
+     * @param int|null   $offset
+     * @return array
+     */
+    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+    {
+        if (
+                false === PageQueryBuilder::hasJoinCriteria($criteria) &&
+                false === PageQueryBuilder::hasJoinCriteria($orderBy)
+        ) {
+            return parent::findBy($criteria, $orderBy, $limit, $offset);
+        }
+
+        $query = $this->createQueryBuilder('p')
+                        ->addSearchCriteria($criteria);
+
+        if (false === empty($orderBy)) {
+            $query->addMultipleOrderBy($orderBy);
+        }
+
+        return $query->setMaxResults($limit)
+                        ->setFirstResult($offset)
+                        ->getQuery()
+                        ->getResult();
+    }
+
+    /**
+     * Finds a single entity by a set of criteria with automatic join on section if need due to retro-compatibility
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @return \BackBuilder\NestedNode\Page|null The page instance or NULL if the entity can not be found.
+     */
+    public function findOneBy(array $criteria, array $orderBy = null)
+    {
+        if (
+                false === PageQueryBuilder::hasJoinCriteria($criteria) &&
+                false === PageQueryBuilder::hasJoinCriteria($orderBy)
+        ) {
+            return parent::findOneBy($criteria, $orderBy);
+        }
+
+        $query = $this->createQueryBuilder('p')
+                ->addSearchCriteria($criteria);
+
+        if (false === empty($orderBy)) {
+            $query->addMultipleOrderBy($orderBy);
+        }
+
+        return $query->getQuery()
+                        ->getOneOrNullResult();
     }
 
     /**
@@ -144,49 +201,54 @@ class PageRepository extends NestedNodeRepository
     }
 
     /**
-     * Inserts a leaf page in a tree as first child of the provided parent page
-     * @param  \BackBuilder\NestedNode\Page                    $page   the page to be inserted
-     * @param  \BackBuilder\NestedNode\Page                    $parent the parent page
-     * @return \BackBuilder\NestedNode\Page                    the inserted page
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
-     *                                                                or if $page or $parent are not an instance of Page
+     * Inserts a page in a tree at first position
+     * @param \BackBuilder\NestedNode\Page $page     The page to be inserted
+     * @param \BackBuilder\NestedNode\Page $parent   The parent node
+     * @param boolean $section                       If TRUE, the page is inserted with a section
+     * @return \BackBuilder\NestedNode\Page          The inserted page
      */
-    public function insertNodeAsFirstChildOf(ANestedNode $page, ANestedNode $parent)
+    public function insertNodeAsFirstChildOf(Page $page, Page $parent, $section = false)
     {
-        if (false === ($page instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($page)));
-        }
-
-        if (false === ($parent instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($parent)));
-        }
-
-        $page = parent::insertNodeAsFirstChildOf($page, $parent);
-
-        return $page->setSite($parent->getSite());
+        return $this->insertNode($page, $parent, 1, $section);
     }
 
     /**
-     * Inserts a leaf page in a tree as last child of the provided parent node
-     * @param  \BackBuilder\NestedNode\Page                    $page   the page to be inserted
-     * @param  \BackBuilder\NestedNode\Page                    $parent the parent page
-     * @return \BackBuilder\NestedNode\Page                    the inserted page
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
-     *                                                                or if $page or $parent are not an instance of Page
+     * Inserts a page in a tree at last position
+     * @param \BackBuilder\NestedNode\Page $page     The page to be inserted
+     * @param \BackBuilder\NestedNode\Page $parent   The parent node
+     * @param boolean $section                       If TRUE, the page is inserted with a section
+     * @return \BackBuilder\NestedNode\Page          The inserted page
      */
-    public function insertNodeAsLastChildOf(ANestedNode $page, ANestedNode $parent)
+    public function insertNodeAsLastChildOf(Page $page, Page $parent, $section = false)
     {
-        if (false === ($page instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($page)));
+        return $this->insertNode($page, $parent, $this->getMaxPosition($parent) + 1, $section);
+    }
+
+    /**
+     * Inserts a page in a tree
+     * @param \BackBuilder\NestedNode\Page $page     The page to be inserted
+     * @param \BackBuilder\NestedNode\Page $parent   The parent node
+     * @param int $position                          The position of the inserted page
+     * @param boolean $section                       If TRUE, the page is inserted with a section
+     * @return \BackBuilder\NestedNode\Page          The inserted page
+     */
+    public function insertNode(Page $page, Page $parent, $position, $section = false)
+    {
+        if (false === $parent->hasMainSection()) {
+            throw new InvalidArgumentException('Parent page is not a section');
         }
 
-        if (false === ($parent instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBuilder\NestedNode\Page get %s', get_class($parent)));
+        $page->setSection($parent->getSection())
+                ->setPosition($position)
+                ->setLevel($parent->getSection()->getLevel() + 1);
+
+        if (true === $section) {
+            $page = $this->saveWithSection($page);
+        } else {
+            $this->shiftPosition($page, 1, true);
         }
 
-        $page = parent::insertNodeAsLastChildOf($page, $parent);
-
-        return $page->setSite($parent->getSite());
+        return $page;
     }
 
     /**
@@ -344,23 +406,24 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the root page for $site
-     * @param  \BackBuilder\Site\Site            $site             the site to test
-     * @param  array                             $restrictedStates optional, limit to pages having provided states
+     * @param \BackBuilder\Site\Site $site   the site to test
+     * @param array $restrictedStates        optional, limit to pages having provided states
      * @return \BackBuilder\NestedNode\Page|NULL
      */
     public function getRoot(Site $site, array $restrictedStates = array())
     {
         $q = $this->createQueryBuilder('p')
-            ->andSiteIs($site)
-            ->andParentIs(null)
-            ->setMaxResults(1)
-        ;
+                ->andParentIs(null)
+                ->orderby('p._position', 'asc')
+                ->setMaxResults(1);
 
         if (0 < count($restrictedStates)) {
             $q->andStateIsIn($restrictedStates);
         }
 
-        return $q->getQuery()->getOneOrNullResult();
+        return $q->andWhere($q->getSectionAlias() . '._site = :site')
+                        ->setParameter('site', $site)
+                        ->getQuery()->getOneOrNullResult();
     }
 
     /**
@@ -523,6 +586,88 @@ class PageRepository extends NestedNodeRepository
         foreach ($q->getQuery()->execute() as $page) {
             $this->delete($page);
         }
+    }
+    /**
+     * Saves a page with a section and returns it
+     * @param \BackBuilder\NestedNode\Page $page
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function saveWithSection(Page $page)
+    {
+        if (true === $page->hasMainSection()) {
+            return $page;
+        }
+
+        if (false === $this->_em->contains($page)) {
+            $this->_em->persist($page);
+        }
+
+        $parent = $page->getSection();
+        $section = new Section($page->getUid(), array('page' => $page, 'site' => $page->getSite()));
+
+        $this->getEntityManager()
+                ->getRepository('BackBuilder\NestedNode\Section')
+                ->insertNodeAsFirstChildOf($section, $parent);
+
+        return $page->setPosition(0)
+                    ->setLevel($section->getLevel());
+    }
+
+    /**
+     * Shift position values for pages siblings of and after $page by $delta
+     * @param Page $page
+     * @param int $delta        The shift value of position
+     * @param boolean $strict   Does $page is include (TRUE) or not (FALSE)
+     * @return \BackBuilder\NestedNode\Repository\PageRepository
+     */
+    public function shiftPosition(Page $page, $delta, $strict = false)
+    {
+        if (true === $page->hasMainSection()) {
+            return $this;
+        }
+
+        $query = $this->createQueryBuilder('p')
+                ->set('p._position', 'p._position + :delta_node')
+                ->andWhere('p._section = :section')
+                ->andWhere('p._position >= :position')
+                ->setParameters(array(
+            'delta_node' => $delta,
+            'section' => $page->getSection(),
+            'position' => $page->getPosition()
+        ));
+
+        if (true === $strict) {
+            $query->andWhere('p != :page')
+                    ->setParameter('page', $page);
+        } else {
+            $page->setPosition($page->getPosition() + $delta);
+        }
+
+        $query->update()
+                ->getQuery()
+                ->execute();
+
+        return $this;
+    }
+
+    /**
+     * Returns the maximum position of children of $page
+     * @param Page $page
+     * @return int
+     */
+    private function getMaxPosition(Page $page)
+    {
+        if (false === $page->hasMainSection()) {
+            return 0;
+        }
+
+        $query = $this->createQueryBuilder('p');
+        $max = $query->select($query->expr()->max('p._position'))
+                ->andParentIs($page)
+                ->getQuery()
+                ->getResult(Query::HYDRATE_SINGLE_SCALAR);
+
+        return (null === $max) ? 0 : $max;
     }
 
     /**
