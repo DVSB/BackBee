@@ -92,6 +92,15 @@ class PageQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Add query part to select on not-section page
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andIsNotSection()
+    {
+        return $this->andWhere($this->getAlias() . '._section != ' . $this->getAlias());
+    }
+
+    /**
      * Add query part to select online pages
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
