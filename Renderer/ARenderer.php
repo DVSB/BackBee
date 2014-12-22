@@ -277,7 +277,7 @@ abstract class ARenderer implements IRenderer
     public function addHelperDir($dir)
     {
         if (true === file_exists($dir) && true === is_dir($dir)) {
-            $this->getApplication()->getAutoloader()->registerNamespace('BackBuilder\Renderer\Helper', $dir);
+            $this->getApplication()->getAutoloader()->registerNamespace('BackBee\Renderer\Helper', $dir);
         }
 
         return $this;
@@ -361,7 +361,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Returns the list of available render mode for the provided object
-     * @param  \BackBuilder\Renderer\IRenderable $object
+     * @param  \BackBee\Renderer\IRenderable $object
      * @return array
      */
     public function getAvailableRenderMode(IRenderable $object)
@@ -571,7 +571,7 @@ abstract class ARenderer implements IRenderer
             return;
         } else {
             return $this->application->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page')
+                ->getRepository('BackBee\NestedNode\Page')
                 ->getRoot($this->getCurrentSite())
             ;
         }
@@ -836,7 +836,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Return the relative path from the classname of an object
-     * @param  \BackBuilder\Renderer\IRenderable $object
+     * @param  \BackBee\Renderer\IRenderable $object
      * @return string
      */
     protected function getTemplatePath(IRenderable $object)
@@ -932,7 +932,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @return \BackBuilder\Renderer\ARenderer
+     * @return \BackBee\Renderer\ARenderer
      */
     private function resetVars()
     {
@@ -943,7 +943,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @return \BackBuilder\Renderer\ARenderer
+     * @return \BackBee\Renderer\ARenderer
      */
     private function resetParams()
     {
