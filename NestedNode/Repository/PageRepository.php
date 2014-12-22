@@ -158,39 +158,26 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Returns the online descendants of $page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
-     * @param  int                            $depth       optional, limit to $depth number of generation
-     * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
-     * @return \BackBuilder\NestedNode\Page[]
-     */
-    public function getOnlineDescendants(Page $page, $depth = null, $includeNode = false)
-    {
-        $q = $this->createQueryBuilder('p')
-            ->andIsDescendantOf($page, !$includeNode)
-            ->andIsOnline()
-            ->orderBy('p._leftnode', 'asc')
-        ;
-
-        if (null !== $depth) {
-            $q->andLevelIsLowerThan($page->getLevel() + $depth);
-        }
-
-        return $q->getQuery()->getResult();
-    }
-
-    /**
      * Returns the previous online sibling of $page
      * @param  \BackBuilder\NestedNode\Page      $page the page to look for
      * @return \BackBuilder\NestedNode\Page|NULL
      */
     public function getOnlinePrevSibling(Page $page)
     {
-        return $this->createQueryBuilder('p')
-            ->andIsPreviousOnlineSiblingOf($page)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $query = $this->createQueryBuilder('p')
+                ->andIsSiblingsOf($page, true, array('_leftnode' => 'DESC', '_position' => 'DESC'), 1, 0)
+                ->andIsOnline();
+
+        if (true === $page->hasMainSection()) {
+            $query->andWhere($query->getSectionAlias() . '._leftnode < :leftnode')
+                    ->setParameter('leftnode', $page->getLeftnode());
+        } else {
+            $query->andWhere('p._position < :position')
+                    ->setParameter('position', $page->getPosition());
+        }
+
+        return $query->getQuery()
+                        ->getOneOrNullResult();
     }
 
     /**
