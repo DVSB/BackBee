@@ -1583,6 +1583,17 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     }
 
     /**
+     * Sets the date modified
+     * @param \Datetime $modified
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setModified(\Datetime $modified)
+    {
+        $this->_modified = $modified;
+        return $this;
+    }
+
+    /**
      * Is this page has an associated section
      * @return boolean
      */

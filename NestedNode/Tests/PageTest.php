@@ -488,6 +488,16 @@ class PageTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Page::setPosition
+     */
+    public function testSetModified()
+    {
+        $now = new \Datetime;
+        $this->assertEquals($this->page, $this->page->setModified($now));
+        $this->assertEquals($now, $this->page->getModified());
+    }
+    
+    /**
      * @covers BackBuilder\NestedNode\Page::getInheritedContensetZoneParams
      */
     public function testGetInheritedContensetZoneParams()
