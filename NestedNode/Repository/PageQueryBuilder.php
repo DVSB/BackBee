@@ -22,8 +22,6 @@
 namespace BackBuilder\NestedNode\Repository;
 
 use BackBuilder\NestedNode\Page;
-use BackBuilder\Site\Layout;
-use BackBuilder\Site\Site;
 use Doctrine\ORM\QueryBuilder;
 
 /**
@@ -186,7 +184,11 @@ class PageQueryBuilder extends QueryBuilder
      */
     public function andIsSiblingsOf(Page $page, $strict = false, array $order = null, $limit = null, $start = 0)
     {
-        $this->andParentIs($page->getParent(), true);
+        if (true === $page->isRoot()) {
+            $this->andParentIs(null);
+        } else {
+            $this->andIsDescendantOf($page->getParent(), false, $page->getLevel());
+        }
 
         if (true === $strict) {
             $suffix = $this->getSuffix();
@@ -216,8 +218,7 @@ class PageQueryBuilder extends QueryBuilder
     public function andIsDescendantOf(Page $page, $strict = false, $at_level = null)
     {
         $suffix = $this->getSuffix();
-        $this->andWhere($this->getAlias() . '._section = ' . $this->getSectionAlias())
-                ->andWhere($this->getSectionAlias() . '._root = :root' . $suffix)
+        $this->andWhere($this->getSectionAlias() . '._root = :root' . $suffix)
                 ->andWhere($this->expr()->between($this->getSectionAlias() . '._leftnode', $page->getSection()->getLeftnode(), $page->getSection()->getRightnode()))
                 ->setParameter('root' . $suffix, $page->getSection()->getRoot());
 
