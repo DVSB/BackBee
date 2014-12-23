@@ -314,24 +314,6 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Returns the visible (ie online and not hidden) siblings of the provided page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
-     * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
-     * @param  array                          $order       optional, the ordering criteria ( array($field => $sort) )
-     * @param  int                            $limit       optional, the maximum number of results
-     * @param  int                            $start       optional, the first result index (0 by default)
-     * @return \BackBuilder\NestedNode\Page[]
-     */
-    public function getVisibleSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
-    {
-        return $this->createQueryBuilder('p')
-            ->andIsVisibleSiblingsOf($page, !$includeNode, $order, $limit, $start)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
      * Returns the previous visible (ie online and not hidden) sibling of $page
      * @param  \BackBuilder\NestedNode\Page      $page the page to look for
      * @return \BackBuilder\NestedNode\Page|NULL
