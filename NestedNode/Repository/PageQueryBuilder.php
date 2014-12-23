@@ -126,12 +126,9 @@ class PageQueryBuilder extends QueryBuilder
      */
     public function andIsVisible()
     {
-        $suffix = $this->getSuffix();
-        return $this->andWhere($this->getAlias() . '._state = :states' . $suffix)
-                        ->andWhere($this->getAlias() . '._publishing IS NULL OR ' . $this->getAlias() . '._publishing <= :now' . $suffix)
-                        ->andWhere($this->getAlias() . '._archiving IS NULL OR ' . $this->getAlias() . '._archiving > :now' . $suffix)
-                        ->setParameter('states' . $suffix, Page::STATE_ONLINE)
-                        ->setParameter('now' . $suffix, date(self::$config['dateSchemeForPublishing'], time()));
+        return $this->andWhere($this->getAlias() . '._state = ' . $this->expr()->literal(Page::STATE_ONLINE))
+                        ->andWhere($this->getAlias() . '._publishing IS NULL OR ' . $this->getAlias() . '._publishing <= ' . $this->expr()->literal(date(self::$config['dateSchemeForPublishing'], time())))
+                        ->andWhere($this->getAlias() . '._archiving IS NULL OR ' . $this->getAlias() . '._archiving > ' . $this->expr()->literal(date(self::$config['dateSchemeForPublishing'], time())));
     }
 
     /**
