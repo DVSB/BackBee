@@ -314,20 +314,6 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Returns the previous visible (ie online and not hidden) sibling of $page
-     * @param  \BackBuilder\NestedNode\Page      $page the page to look for
-     * @return \BackBuilder\NestedNode\Page|NULL
-     */
-    public function getVisiblePrevSibling(Page $page)
-    {
-        return $this->createQueryBuilder('p')
-            ->andIsPreviousVisibleSiblingOf($page)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-
-    /**
      * Moves $page as child of $parent by default at last position or, optionaly, before node having uid = $next_uid
      * @param  \BackBuilder\NestedNode\Page $page     the page to move
      * @param  \BackBuilder\NestedNode\Page $parent   the page parent to move in
