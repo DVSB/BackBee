@@ -25,6 +25,7 @@ use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AClassContent;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Routing\RouteCollection;
+use BackBee\Util\File;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -147,7 +148,8 @@ class ClassContentController extends ARestController
         } elseif (null !== $page_uid = $request->query->get('page_uid', null)) {
             $definitions = $this->getDefinitionsByPageUid($page_uid);
         } else {
-            $definitions = $this->getAllDefinitionsFromCategoryManager();
+            $definitions = $this->getAllElementDefinitions();
+            $definitions = array_merge($definitions, $this->getAllDefinitionsFromCategoryManager());
         }
 
         return $this->createJsonResponse($definitions, 200, array(
@@ -392,12 +394,51 @@ class ClassContentController extends ARestController
      */
     private function getAllDefinitionsFromCategoryManager()
     {
-        $definitions = array();
+        $classnames = array();
         foreach ($this->getCategoryManager()->getCategories() as $category) {
             foreach ($category->getBlocks() as $block) {
-                $classname = $this->getClassnameByType($block->type);
-                $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+                $classnames[] = $this->getClassnameByType($block->type);
             }
+        }
+
+        return $this->getDefinitionsFromClassnames($classnames);
+    }
+
+    /**
+     * Returns definitions of every element classcontent
+     *
+     * @return array
+     */
+    private function getAllElementDefinitions()
+    {
+        $directory = $this->getApplication()->getBBDir() . DIRECTORY_SEPARATOR . 'ClassContent';
+        $classnames = array_map(
+            function ($path) use ($directory) {
+                return str_replace(
+                    array(DIRECTORY_SEPARATOR, '\\\\'),
+                    array(NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR),
+                    AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace(array($directory, '.yml'), array('', ''), $path)
+                );
+            },
+            File::getFilesRecursivelyByExtension($directory, 'yml')
+        );
+        $classnames[] = AClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet';
+
+        return $this->getDefinitionsFromClassnames($classnames);
+    }
+
+    /**
+     * Returns every classcontent definitions of provided classnames
+     *
+     * @param  array  $classnames
+     *
+     * @return array
+     */
+    private function getDefinitionsFromClassnames(array $classnames)
+    {
+        $definitions = array();
+        foreach ($classnames as $classname) {
+            $definitions[] = $this->getDefinitionFromClassContent(new $classname());
         }
 
         return $definitions;
@@ -410,7 +451,7 @@ class ClassContentController extends ARestController
      *                     (full: BackBee\ClassContent\Block\paragraph => short: Block\paragraph)
      * @param string $uid
      *
-     * @return
+     * @return AClassContent
      */
     private function getClassContentByTypeAndUid($type, $uid)
     {
