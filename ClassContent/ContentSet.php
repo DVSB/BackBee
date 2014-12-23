@@ -53,6 +53,16 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     protected $_pages;
 
     /**
+     * {@inheritdoc}
+     */
+    public function __construct($uid = null, $options = null)
+    {
+        parent::__construct($uid, $options);
+
+        $this->_initData();
+    }
+
+    /**
      * Returns the owning pages
      * @return \Doctrine\Common\Collections\ArrayCollection
      */

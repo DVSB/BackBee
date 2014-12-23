@@ -25,6 +25,7 @@ use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AClassContent;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Routing\RouteCollection;
+use BackBee\Util\File;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -74,14 +75,14 @@ class ClassContentController extends ARestController
      */
     public function getCategoryCollectionAction()
     {
-        $categories = array();
+        $categories = [];
         foreach ($this->getCategoryManager()->getCategories() as $id => $category) {
-            $categories[] = array_merge(array('id' => $id), $category->jsonSerialize());
+            $categories[] = array_merge(['id' => $id], $category->jsonSerialize());
         }
 
-        return $this->createJsonResponse($categories, 200, array(
+        return $this->createJsonResponse($categories, 200, [
             'Content-Range' => '0-' . (count($categories) - 1) . '/' . count($categories)
-        ));
+        ]);
     }
 
     /**
@@ -102,7 +103,7 @@ class ClassContentController extends ARestController
             throw new NotFoundHttpException("`$category_name` is not a valid classcontent category.");
         }
 
-        $classnames = array();
+        $classnames = [];
         foreach ($category->getBlocks() as $block) {
             $classnames[] = $this->getClassnameByType($block->type);
         }
@@ -147,12 +148,13 @@ class ClassContentController extends ARestController
         } elseif (null !== $page_uid = $request->query->get('page_uid', null)) {
             $definitions = $this->getDefinitionsByPageUid($page_uid);
         } else {
-            $definitions = $this->getAllDefinitionsFromCategoryManager();
+            $definitions = $this->getAllElementDefinitions();
+            $definitions = array_merge($definitions, $this->getAllDefinitionsFromCategoryManager());
         }
 
-        return $this->createJsonResponse($definitions, 200, array(
+        return $this->createJsonResponse($definitions, 200, [
             'Content-Range' => '0-' . (count($definitions) - 1) . '/' . count($definitions)
-        ));
+        ]);
     }
 
     /**
@@ -238,18 +240,18 @@ class ClassContentController extends ARestController
         $content->setDraft($draft);
         $em->flush();
 
-        return $this->createJsonResponse(null, 201, array(
+        return $this->createJsonResponse(null, 201, [
             'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
                 'bb.rest.classcontent.get',
-                array(
+                [
                     'version' => $request->attributes->get('version'),
                     'type'    => $type,
                     'uid'     => $content->getUid()
-                ),
+                ],
                 '',
                 false
             )
-        ));
+        ]);
     }
 
     /**
@@ -346,7 +348,7 @@ class ClassContentController extends ARestController
             throw new NotFoundHttpException("`$category_name` is not a valid classcontent category.");
         }
 
-        $definitions = array();
+        $definitions = [];
         foreach ($category->getBlocks() as $block) {
             $classname = $this->getClassnameByType($block->type);
             $definitions[] = $this->getDefinitionFromClassContent(new $classname());
@@ -370,13 +372,13 @@ class ClassContentController extends ARestController
              WHERE p.uid = :page_uid AND p.contentset = icc.content_uid
              AND icc.subcontent_uid = c.uid AND c.classname != :contentset_classname
             ',
-            array(
+            [
                 'page_uid'             => $page_uid,
                 'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'
-            )
+            ]
         )->fetchAll();
 
-        $definitions = array();
+        $definitions = [];
         foreach ($classnames as $classname) {
             $classname = $classname['classname'];
                 $definitions[] = $this->getDefinitionFromClassContent(new $classname());
@@ -392,12 +394,51 @@ class ClassContentController extends ARestController
      */
     private function getAllDefinitionsFromCategoryManager()
     {
-        $definitions = array();
+        $classnames = [];
         foreach ($this->getCategoryManager()->getCategories() as $category) {
             foreach ($category->getBlocks() as $block) {
-                $classname = $this->getClassnameByType($block->type);
-                $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+                $classnames[] = $this->getClassnameByType($block->type);
             }
+        }
+
+        return $this->getDefinitionsFromClassnames($classnames);
+    }
+
+    /**
+     * Returns definitions of every element classcontent
+     *
+     * @return array
+     */
+    private function getAllElementDefinitions()
+    {
+        $directory = $this->getApplication()->getBBDir() . DIRECTORY_SEPARATOR . 'ClassContent';
+        $classnames = array_map(
+            function ($path) use ($directory) {
+                return str_replace(
+                    [DIRECTORY_SEPARATOR, '\\\\'],
+                    [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
+                    AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
+                );
+            },
+            File::getFilesRecursivelyByExtension($directory, 'yml')
+        );
+        $classnames[] = AClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet';
+
+        return $this->getDefinitionsFromClassnames($classnames);
+    }
+
+    /**
+     * Returns every classcontent definitions of provided classnames
+     *
+     * @param  array  $classnames
+     *
+     * @return array
+     */
+    private function getDefinitionsFromClassnames(array $classnames)
+    {
+        $definitions = [];
+        foreach ($classnames as $classname) {
+            $definitions[] = $this->getDefinitionFromClassContent(new $classname());
         }
 
         return $definitions;
@@ -410,7 +451,7 @@ class ClassContentController extends ARestController
      *                     (full: BackBee\ClassContent\Block\paragraph => short: Block\paragraph)
      * @param string $uid
      *
-     * @return
+     * @return AClassContent
      */
     private function getClassContentByTypeAndUid($type, $uid)
     {
@@ -455,19 +496,19 @@ class ClassContentController extends ARestController
      */
     private function findContentsByCriterias(array $classnames, $start, $count)
     {
-        $criterias = array_merge(array(
+        $criterias = array_merge([
             'only_online' => false,
-            'site_uid'    => $this->getApplication()->getSite()->getUid(),
-        ), $this->getApplication()->getRequest()->query->all());
+            'site_uid'    => $this->getApplication()->getSite()->getUid()
+        ], $this->getApplication()->getRequest()->query->all());
 
         $criterias['only_online'] = (boolean) $criterias['only_online'];
 
-        $order_infos = array(
+        $order_infos = [
             'column'    => isset($criterias['order_by']) ? $criterias['order_by'] : '_modified',
-            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc',
-        );
+            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc'
+        ];
 
-        $pagination = array('start' => $start, 'limit' => $count);
+        $pagination = ['start' => $start, 'limit' => $count];
 
         unset($criterias['order_by']);
         unset($criterias['order_direction']);
@@ -487,7 +528,7 @@ class ClassContentController extends ARestController
      */
     private function formatClassContentCollection(Paginator $paginator)
     {
-        $contents = array();
+        $contents = [];
         foreach ($paginator as $content) {
             $contents[] = $content->jsonSerialize();
         }
@@ -502,7 +543,7 @@ class ClassContentController extends ARestController
      */
     private function updateClassContentCollectionImageUrl(array $classcontents)
     {
-        $result = array();
+        $result = [];
         foreach ($classcontents as $classcontent) {
             $result[] = $this->updateClassContentImageUrl($classcontent);
         }
