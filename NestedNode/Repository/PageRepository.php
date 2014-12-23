@@ -287,14 +287,27 @@ class PageRepository extends EntityRepository
      */
     public function getVisibleDescendants(Page $page, $depth = null, $includeNode = false)
     {
-        $q = $this->createQueryBuilder('p')
-            ->andIsDescendantOf($page, !$includeNode)
-            ->andIsVisible()
-            ->orderBy('p._leftnode', 'asc')
-        ;
+        if (true === $page->isLeaf()) {
+            return array();
+        }
+
+        $q = $this->createQueryBuilder('p')->andIsDescendantOf($page)->andIsVisible()->addMultipleOrderBy(
+                array(
+                    '_leftnode' => 'ASC',
+                    '_level' => 'ASC',
+                    '_position' => 'ASC',
+                )
+        );
 
         if (null !== $depth) {
-            $q->andLevelIsLowerThan($page->getLevel() + $depth);
+            $q->andWhere('p._level <= :level')->setParameter('level', $page->getLevel() + $depth);
+            if (1 === $depth) {
+                $q->orderBy('p._position', 'ASC')->addOrderBy('_leftnode', 'ASC');
+            }
+        }
+
+        if (false === $includeNode) {
+            $q->andWhere('p <> :page')->setParameter('page', $page);
         }
 
         return $q->getQuery()->getResult();
