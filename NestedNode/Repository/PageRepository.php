@@ -182,24 +182,6 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Returns the online siblings of the provided page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
-     * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
-     * @param  array                          $order       optional, the ordering criteria ( array($field => $sort) )
-     * @param  int                            $limit       optional, the maximum number of results
-     * @param  int                            $start       optional, the first result index (0 by default)
-     * @return \BackBuilder\NestedNode\Page[]
-     */
-    public function getOnlineSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
-    {
-        return $this->createQueryBuilder('p')
-            ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
      * Returns the online siblings having layout $layout of the provided page
      * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
      * @param  \BackBuilder\Site\Layout       $layout      the layout to look for
