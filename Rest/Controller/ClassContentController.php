@@ -75,14 +75,14 @@ class ClassContentController extends ARestController
      */
     public function getCategoryCollectionAction()
     {
-        $categories = array();
+        $categories = [];
         foreach ($this->getCategoryManager()->getCategories() as $id => $category) {
-            $categories[] = array_merge(array('id' => $id), $category->jsonSerialize());
+            $categories[] = array_merge(['id' => $id], $category->jsonSerialize());
         }
 
-        return $this->createJsonResponse($categories, 200, array(
+        return $this->createJsonResponse($categories, 200, [
             'Content-Range' => '0-' . (count($categories) - 1) . '/' . count($categories)
-        ));
+        ]);
     }
 
     /**
@@ -103,7 +103,7 @@ class ClassContentController extends ARestController
             throw new NotFoundHttpException("`$category_name` is not a valid classcontent category.");
         }
 
-        $classnames = array();
+        $classnames = [];
         foreach ($category->getBlocks() as $block) {
             $classnames[] = $this->getClassnameByType($block->type);
         }
@@ -152,9 +152,9 @@ class ClassContentController extends ARestController
             $definitions = array_merge($definitions, $this->getAllDefinitionsFromCategoryManager());
         }
 
-        return $this->createJsonResponse($definitions, 200, array(
+        return $this->createJsonResponse($definitions, 200, [
             'Content-Range' => '0-' . (count($definitions) - 1) . '/' . count($definitions)
-        ));
+        ]);
     }
 
     /**
@@ -240,18 +240,18 @@ class ClassContentController extends ARestController
         $content->setDraft($draft);
         $em->flush();
 
-        return $this->createJsonResponse(null, 201, array(
+        return $this->createJsonResponse(null, 201, [
             'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
                 'bb.rest.classcontent.get',
-                array(
+                [
                     'version' => $request->attributes->get('version'),
                     'type'    => $type,
                     'uid'     => $content->getUid()
-                ),
+                ],
                 '',
                 false
             )
-        ));
+        ]);
     }
 
     /**
@@ -348,7 +348,7 @@ class ClassContentController extends ARestController
             throw new NotFoundHttpException("`$category_name` is not a valid classcontent category.");
         }
 
-        $definitions = array();
+        $definitions = [];
         foreach ($category->getBlocks() as $block) {
             $classname = $this->getClassnameByType($block->type);
             $definitions[] = $this->getDefinitionFromClassContent(new $classname());
@@ -372,13 +372,13 @@ class ClassContentController extends ARestController
              WHERE p.uid = :page_uid AND p.contentset = icc.content_uid
              AND icc.subcontent_uid = c.uid AND c.classname != :contentset_classname
             ',
-            array(
+            [
                 'page_uid'             => $page_uid,
                 'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'
-            )
+            ]
         )->fetchAll();
 
-        $definitions = array();
+        $definitions = [];
         foreach ($classnames as $classname) {
             $classname = $classname['classname'];
                 $definitions[] = $this->getDefinitionFromClassContent(new $classname());
@@ -394,7 +394,7 @@ class ClassContentController extends ARestController
      */
     private function getAllDefinitionsFromCategoryManager()
     {
-        $classnames = array();
+        $classnames = [];
         foreach ($this->getCategoryManager()->getCategories() as $category) {
             foreach ($category->getBlocks() as $block) {
                 $classnames[] = $this->getClassnameByType($block->type);
@@ -415,9 +415,9 @@ class ClassContentController extends ARestController
         $classnames = array_map(
             function ($path) use ($directory) {
                 return str_replace(
-                    array(DIRECTORY_SEPARATOR, '\\\\'),
-                    array(NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR),
-                    AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace(array($directory, '.yml'), array('', ''), $path)
+                    [DIRECTORY_SEPARATOR, '\\\\'],
+                    [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
+                    AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
                 );
             },
             File::getFilesRecursivelyByExtension($directory, 'yml')
@@ -436,7 +436,7 @@ class ClassContentController extends ARestController
      */
     private function getDefinitionsFromClassnames(array $classnames)
     {
-        $definitions = array();
+        $definitions = [];
         foreach ($classnames as $classname) {
             $definitions[] = $this->getDefinitionFromClassContent(new $classname());
         }
@@ -496,19 +496,19 @@ class ClassContentController extends ARestController
      */
     private function findContentsByCriterias(array $classnames, $start, $count)
     {
-        $criterias = array_merge(array(
+        $criterias = array_merge([
             'only_online' => false,
-            'site_uid'    => $this->getApplication()->getSite()->getUid(),
-        ), $this->getApplication()->getRequest()->query->all());
+            'site_uid'    => $this->getApplication()->getSite()->getUid()
+        ], $this->getApplication()->getRequest()->query->all());
 
         $criterias['only_online'] = (boolean) $criterias['only_online'];
 
-        $order_infos = array(
+        $order_infos = [
             'column'    => isset($criterias['order_by']) ? $criterias['order_by'] : '_modified',
-            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc',
-        );
+            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc'
+        ];
 
-        $pagination = array('start' => $start, 'limit' => $count);
+        $pagination = ['start' => $start, 'limit' => $count];
 
         unset($criterias['order_by']);
         unset($criterias['order_direction']);
@@ -528,7 +528,7 @@ class ClassContentController extends ARestController
      */
     private function formatClassContentCollection(Paginator $paginator)
     {
-        $contents = array();
+        $contents = [];
         foreach ($paginator as $content) {
             $contents[] = $content->jsonSerialize();
         }
@@ -543,7 +543,7 @@ class ClassContentController extends ARestController
      */
     private function updateClassContentCollectionImageUrl(array $classcontents)
     {
-        $result = array();
+        $result = [];
         foreach ($classcontents as $classcontent) {
             $result[] = $this->updateClassContentImageUrl($classcontent);
         }
