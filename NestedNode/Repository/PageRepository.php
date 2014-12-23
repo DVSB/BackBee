@@ -692,7 +692,7 @@ class PageRepository extends EntityRepository
         $max = $query->select($query->expr()->max('p._position'))
                 ->andParentIs($page)
                 ->getQuery()
-                ->getResult(Query::HYDRATE_SINGLE_SCALAR);
+                ->getResult(\Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
 
         return (null === $max) ? 0 : $max;
     }
