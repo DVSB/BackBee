@@ -169,7 +169,8 @@ class PageRepository extends EntityRepository
                 ->andIsOnline();
 
         if (true === $page->hasMainSection()) {
-            $query->andWhere($query->getSectionAlias() . '._leftnode < :leftnode')
+            $query->andIsSection()
+                    ->andWhere($query->getSectionAlias() . '._leftnode < :leftnode')
                     ->setParameter('leftnode', $page->getLeftnode());
         } else {
             $query->andWhere('p._position < :position')
@@ -225,11 +226,22 @@ class PageRepository extends EntityRepository
      */
     public function getOnlineNextSibling(Page $page)
     {
-        return $this->createQueryBuilder('p')
-            ->andIsNextOnlineSiblingOf($page)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $query = $this->createQueryBuilder('p');
+
+        if (true === $page->hasMainSection()) {
+            $query->andWhere($query->getSectionAlias() . '._leftnode >= :leftnode')
+                    ->orWhere('p._section IN (:sections)')
+                    ->setParameter('leftnode', $page->getLeftnode())
+                    ->setParameter('sections', array($page->getSection(), $page->getSection()->getParent()));
+        } else {
+            $query->andWhere('p._position > :position')
+                    ->setParameter('position', $page->getPosition());
+        }
+
+        return $query->andIsSiblingsOf($page, true, array('_position' => 'ASC', '_leftnode' => 'ASC'), 1, 0)
+                        ->andIsOnline()
+                        ->getQuery()
+                        ->getOneOrNullResult();
     }
 
     /**
