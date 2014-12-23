@@ -350,20 +350,6 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Returns the previous visible sibling of $page
-     * @param  \BackBuilder\NestedNode\Page      $page the page to look for
-     * @return \BackBuilder\NestedNode\Page|NULL
-     */
-    public function getVisibleNextSibling(Page $page)
-    {
-        return $this->createQueryBuilder('p')
-            ->andIsNextVisibleSiblingOf($page)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-
-    /**
      * Returns the not deleted descendants of $page
      * @param  \BackBuilder\NestedNode\Page                                            $page         the page to look for
      * @param  type                                                                    $depth        optional, limit to $depth number of generation
