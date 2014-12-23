@@ -200,7 +200,7 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Returns the onlne siblings having layout $layout of the provided page
+     * Returns the online siblings having layout $layout of the provided page
      * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
      * @param  \BackBuilder\Site\Layout       $layout      the layout to look for
      * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
@@ -212,11 +212,12 @@ class PageRepository extends EntityRepository
     public function getOnlineSiblingsByLayout(Page $page, Layout $layout, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
         return $this->createQueryBuilder('p')
-            ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
-            ->andLayoutIs($layout)
-            ->getQuery()
-            ->getResult()
-        ;
+                        ->andIsSiblingsOf($page, !$includeNode, $order, $limit, $start)
+                        ->andIsOnline()
+                        ->andWhere('p._layout = :layout')
+                        ->setParameter('layout', $layout)
+                        ->getQuery()
+                        ->getResult();
     }
 
     /**
