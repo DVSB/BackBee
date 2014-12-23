@@ -645,6 +645,48 @@ class PageRepository extends EntityRepository
     }
 
     /**
+     * Shift level values for pages descendants of $page by $delta
+     * @param Page $page
+     * @param int $delta        The shift value of level
+     * @param boolean $strict   Does $page is include (TRUE) or not (FALSE)
+     * @return \BackBuilder\NestedNode\Repository\PageRepository
+     */
+    private function shiftLevel(Page $page, $delta, $strict = false)
+    {
+        if (false === $page->hasMainSection() && true === $strict) {
+            return $this;
+        }
+
+        $query = $this->createQueryBuilder('p')
+                ->update()
+                ->set('p._level', 'p._level + :delta');
+
+        if (true === $page->hasMainSection()) {
+            $subquery = $this->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Section')
+                    ->createQueryBuilder('n')
+                    ->select('n._uid')
+                    ->andIsDescendantOf($page->getSection());
+
+            $query->andWhere('p._section IN (' . $subquery->getDQL() . ')')
+                    ->setParameters($subquery->getParameters());
+
+            if (true === $strict) {
+                $query->andWhere('p <> :page')
+                        ->setParameter('page', $page);
+            }
+        } else {
+            $query->andWhere('p = :page')
+                    ->setParameter('page', $page);
+        }
+
+        $query->setParameter('delta', $delta)->getQuery()
+                ->execute();
+
+        return $this;
+    }
+
+    /**
      * Returns the maximum position of children of $page
      * @param Page $page
      * @return int
