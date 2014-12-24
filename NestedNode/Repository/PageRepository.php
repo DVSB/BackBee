@@ -258,11 +258,12 @@ class PageRepository extends EntityRepository
      * @param int $position                          The position of the inserted page
      * @param boolean $section                       If TRUE, the page is inserted with a section
      * @return \BackBuilder\NestedNode\Page          The inserted page
+     * @throws BackBuilder\Exception\InvalidArgumentException  Occures if parent page is not a section
      */
     public function insertNode(Page $page, Page $parent, $position, $section = false)
     {
         if (false === $parent->hasMainSection()) {
-            throw new InvalidArgumentException('Parent page is not a section');
+            throw new InvalidArgumentException('Parent page is not a section.');
         }
 
         $page->setSection($parent->getSection())
@@ -314,21 +315,195 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Moves $page as child of $parent by default at last position or, optionaly, before node having uid = $next_uid
-     * @param  \BackBuilder\NestedNode\Page $page     the page to move
-     * @param  \BackBuilder\NestedNode\Page $parent   the page parent to move in
-     * @param  string                       $next_uid optional, the uid of the next sibling
-     * @return \BackBuilder\NestedNode\Page the moved page
+     * Move page as first child of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @return \BackBuilder\NestedNode\Page
      */
-    public function movePageInTree(Page $page, Page $parent, $next_uid = null)
+    public function moveAsFirstChildOf(Page $page, Page $target)
     {
-        $next = ($next_uid !== null) ? $this->find($next_uid) : null;
+        return $this->moveAsChildOf($page, $target, true);
+    }
 
-        if (null !== $next && $next->getParent() === $parent) {
-            return $this->moveAsPrevSiblingOf($page, $next);
+    /**
+     * Move page as last child of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function moveAsLastChildOf(Page $page, Page $target)
+    {
+        return $this->moveAsChildOf($page, $target, false);
+    }
+
+    /**
+     * Move page as child of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @param boolean $as_first Move page as first child of $target if TRUE, last child elsewhere
+     * @return \BackBuilder\NestedNode\Page
+     * @throws BackBuilder\Exception\InvalidArgumentException  Occures if target page is not a section
+     */
+    private function moveAsChildOf(Page $page, Page $target, $as_first = true)
+    {
+        if (false === $target->hasMainSection()) {
+            throw new InvalidArgumentException('Cannot move page into a non-section page.');
         }
 
-        return $this->moveAsLastChildOf($page, $parent);
+        if (false === $page->hasMainSection()) {
+            $this->movePageAsChildOf($page, $target, $as_first);
+        } else {
+            $this->moveSectionAsChildOf($page, $target, $as_first);
+        }
+
+        return $page->setParent($target)
+                        ->setLevel($target->getLevel() + 1);
+    }
+
+    /**
+     * Move a non-section page as child of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @param boolean $as_first Move page as first child of $target if TRUE, last child elsewhere
+     * @return \BackBuilder\NestedNode\Page
+     */
+    private function movePageAsChildOf(Page $page, Page $target, $as_first = true)
+    {
+        if (true === $as_first) {
+            return $this->shiftPosition($page, -1, true)
+                            ->insertNodeAsFirstChildOf($page, $target);
+        } else {
+            return $this->shiftPosition($page, -1, true)
+                            ->insertNodeAsLastChildOf($page, $target);
+        }
+    }
+
+    /**
+     * Move a section page as child of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @param boolean $as_first Move page as first child of $target if TRUE, last child elsewhere
+     * @return \BackBuilder\NestedNode\Page
+     */
+    private function moveSectionAsChildOf(Page $page, Page $target, $as_first = true)
+    {
+        $delta = $target->getLevel() - $page->getLevel() + 1;
+        $this->shiftLevel($page, $delta);
+
+        if (true === $as_first) {
+            $this->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Section')
+                    ->moveAsFirstChildOf($page->getSection(), $target->getSection());
+        } else {
+            $this->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Section')
+                    ->moveAsLastChildOf($page->getSection(), $target->getSection());
+        }
+
+        return $page;
+    }
+
+    /**
+     * Move a page as previous sibling of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function moveAsPrevSiblingOf(Page $page, Page $target)
+    {
+        return $this->moveAsSiblingOf($page, $target, true);
+    }
+
+    /**
+     * Move a page as next sibling of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function moveAsNextSiblingOf(Page $page, Page $target)
+    {
+        return $this->moveAsSiblingOf($page, $target, false);
+    }
+
+    /**
+     * Move a page as sibling of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @param boolean $as_previous Move page as previous sibling of $target if TRUE, next sibling elsewhere
+     * @return \BackBuilder\NestedNode\Page
+     * @throws BackBuilder\Exception\InvalidArgumentException  Occures if $target is a root
+     */
+    private function moveAsSiblingOf(Page $page, Page $target, $as_previous = true)
+    {
+        if (true === $target->isRoot()) {
+            throw new InvalidArgumentException('Cannot move a page as sibling of a root.');
+        }
+
+        if (false === $page->hasMainSection()) {
+            $this->movePageAsSiblingOf($page, $target, $as_previous);
+        } else {
+            $this->moveSectionAsSiblingOf($page, $target, $as_previous);
+        }
+
+        return $page->setParent($target->getParent());
+    }
+
+    /**
+     * Move a non-section page as sibling of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @param boolean $as_previous Move page as previous sibling of $target if TRUE, next sibling elsewhere
+     * @return \BackBuilder\NestedNode\Page
+     * @throws BackBuilder\Exception\InvalidArgumentException  Occures if target page is a section
+     */
+    private function movePageAsSiblingOf(Page $page, Page $target, $as_previous = true)
+    {
+        if (true === $target->hasMainSection()) {
+            throw new InvalidArgumentException('Cannot move a non-section page as sibling of a section page.');
+        }
+
+        $this->shiftPosition($page, -1, true);
+        $this->_em->refresh($target);
+
+        if (true === $as_previous) {
+            $page->setPosition($target->getPosition());
+            $this->shiftPosition($target, 1);
+        } else {
+            $page->setPosition($target->getPosition() + 1);
+            $this->shiftPosition($target, 1, true);
+        }
+
+        return $page;
+    }
+
+    /**
+     * Move a section page as sibling of $target
+     * @param \BackBuilder\NestedNode\Page $page
+     * @param \BackBuilder\NestedNode\Page $target
+     * @param boolean $as_previous Move page as previous sibling of $target if TRUE, next sibling elsewhere
+     * @return \BackBuilder\NestedNode\Page
+     * @throws BackBuilder\Exception\InvalidArgumentException  Occures if target page is not a section
+     */
+    private function moveSectionAsSiblingOf(Page $page, Page $target, $as_previous = true)
+    {
+        if (false === $target->hasMainSection()) {
+            throw new InvalidArgumentException('Cannot move a section page as sibling of a non-section page.');
+        }
+
+        $delta = $page->getLevel() - $target->getLevel();
+        $this->shiftLevel($page, $delta);
+
+        if (true === $as_previous) {
+            $this->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Section')
+                    ->moveAsPrevSiblingOf($page->getSection(), $target->getSection());
+        } else {
+            $this->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Section')
+                    ->moveAsNextSiblingOf($page->getSection(), $target->getSection());
+        }
+
+        return $page;
     }
 
     /**
@@ -614,7 +789,7 @@ class PageRepository extends EntityRepository
      * @param boolean $strict   Does $page is include (TRUE) or not (FALSE)
      * @return \BackBuilder\NestedNode\Repository\PageRepository
      */
-    public function shiftPosition(Page $page, $delta, $strict = false)
+    private function shiftPosition(Page $page, $delta, $strict = false)
     {
         if (true === $page->hasMainSection()) {
             return $this;
