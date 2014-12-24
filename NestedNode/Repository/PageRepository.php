@@ -173,8 +173,14 @@ class PageRepository extends EntityRepository
                     ->andWhere($query->getSectionAlias() . '._leftnode < :leftnode')
                     ->setParameter('leftnode', $page->getLeftnode());
         } else {
+            $qOR = $query->expr()->orX();
+            $qOR->add('p._section != p')
+                    ->add($query->getSectionAlias() . '._parent = :parent');
+
             $query->andWhere('p._position < :position')
-                    ->setParameter('position', $page->getPosition());
+                    ->andWhere($qOR)
+                    ->setParameter('position', $page->getPosition())
+                    ->setParameter('parent', $page->getParent()->getSection());
         }
 
         return $query->getQuery()
@@ -198,6 +204,8 @@ class PageRepository extends EntityRepository
                         ->andIsOnline()
                         ->andWhere('p._layout = :layout')
                         ->setParameter('layout', $layout)
+                        ->andWhere('p._level = :level')
+                        ->setParameter('level', $page->getLevel())
                         ->getQuery()
                         ->getResult();
     }

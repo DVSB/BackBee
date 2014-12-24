@@ -218,10 +218,10 @@ class PageQueryBuilder extends QueryBuilder
      * Add query part to select descendants of $page
      * @param \BackBuilder\NestedNode\Page $page
      * @param boolean $strict   If TRUE, $node is excluded from the selection
-     * @param int $at_level     Filter ancestors by their level
+     * @param int $depth        Filter ancestors by their level
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
-    public function andIsDescendantOf(Page $page, $strict = false, $at_level = null)
+    public function andIsDescendantOf(Page $page, $strict = false, $depth = null)
     {
         $suffix = $this->getSuffix();
         $this->andWhere($this->getSectionAlias() . '._root = :root' . $suffix)
@@ -233,9 +233,9 @@ class PageQueryBuilder extends QueryBuilder
                     ->setParameter('page' . $suffix, $page);
         }
 
-        if (null !== $at_level) {
-            $this->andWhere($this->getAlias() . '._level = :level' . $suffix)
-                    ->setParameter('level' . $suffix, $at_level);
+        if (null !== $depth) {
+            $this->andWhere($this->getAlias() . '._level <= :level' . $suffix)
+                    ->setParameter('level' . $suffix, $depth);
         }
 
         return $this;
