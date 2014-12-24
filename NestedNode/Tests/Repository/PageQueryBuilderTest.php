@@ -210,6 +210,10 @@ class PageQueryBuilderTest extends TestCase
                 ->andIsSiblingsOf($child, false, array('p._position' => 'ASC'));
         $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._root = :root0 AND (p_s._leftnode BETWEEN 1 AND 2) AND p._level <= :level0 ORDER BY p._position ASC', $q->getDql());
 
+        $q->andIsSiblingsOf($child, false, null, 10);
+        $this->assertEquals(10, $q->getMaxResults());
+        $this->assertEquals(0, $q->getFirstResult());
+
         $q->andIsSiblingsOf($child, false, null, 10, 1);
         $this->assertEquals(10, $q->getMaxResults());
         $this->assertEquals(1, $q->getFirstResult());
@@ -239,6 +243,28 @@ class PageQueryBuilderTest extends TestCase
                 ->andIsDescendantOf($page, false, 1);
         $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._root = :root0 AND (p_s._leftnode BETWEEN 1 AND 2) AND p._level <= :level0', $q->getDql());
         $this->assertEquals(1, $q->getParameter('level0')->getValue());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsDescendantOf($page, false, 1, null, null, 0, true);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._root = :root0 AND (p_s._leftnode BETWEEN 1 AND 2) AND p._level <= :level0 AND p._section = p', $q->getDql());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsDescendantOf($page, false, 1, null, 10);
+        $this->assertEquals(10, $q->getMaxResults());
+        $this->assertEquals(0, $q->getFirstResult());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsDescendantOf($page, false, 1, null, 10, 2);
+        $this->assertEquals(10, $q->getMaxResults());
+        $this->assertEquals(2, $q->getFirstResult());
+
+        $q->resetDQLPart('where')
+                ->setParameters(array())
+                ->andIsDescendantOf($page, false, 1, array('_leftnode' => 'ASC'));
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._root = :root0 AND (p_s._leftnode BETWEEN 1 AND 2) AND p._level <= :level0 ORDER BY p_s._leftnode ASC', $q->getDql());
     }
 
     /**

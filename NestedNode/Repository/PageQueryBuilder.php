@@ -217,11 +217,15 @@ class PageQueryBuilder extends QueryBuilder
     /**
      * Add query part to select descendants of $page
      * @param \BackBuilder\NestedNode\Page $page
-     * @param boolean $strict   If TRUE, $node is excluded from the selection
-     * @param int $depth        Filter ancestors by their level
+     * @param boolean $strict       If TRUE, $node is excluded from the selection
+     * @param int $depth            Filter ancestors by their level
+     * @param array $order          Ordering spec ( array($field => $sort) )
+     * @param type $limit           Max number of results
+     * @param type $start           First result index
+     * @param type $limitToSection  Limit to descendants being section
      * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
      */
-    public function andIsDescendantOf(Page $page, $strict = false, $depth = null)
+    public function andIsDescendantOf(Page $page, $strict = false, $depth = null, array $order = null, $limit = null, $start = 0, $limitToSection = false)
     {
         $suffix = $this->getSuffix();
         $this->andWhere($this->getSectionAlias() . '._root = :root' . $suffix)
@@ -236,6 +240,19 @@ class PageQueryBuilder extends QueryBuilder
         if (null !== $depth) {
             $this->andWhere($this->getAlias() . '._level <= :level' . $suffix)
                     ->setParameter('level' . $suffix, $depth);
+        }
+
+        if (null !== $order) {
+            $this->addMultipleOrderBy($order);
+        }
+
+        if (null !== $limit) {
+            $this->setMaxResults($limit)
+                    ->setFirstResult($start);
+        }
+
+        if (true === $limitToSection) {
+            $this->andIsSection();
         }
 
         return $this;
