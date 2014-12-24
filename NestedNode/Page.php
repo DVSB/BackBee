@@ -1640,8 +1640,11 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     {
         if ($section !== $this->_mainsection) {
             $this->_mainsection = null;
-            $this->_position = 1;
             $this->_level = $section->getLevel() + 1;
+            
+            if (0 === $this->_position) {
+                $this->_position = 1;
+            }
         }
 
         $this->_section = $section;
