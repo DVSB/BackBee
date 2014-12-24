@@ -694,9 +694,18 @@ class Page extends AbstractServiceLocal
             if ($page_uid !== null) {
                 $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
 
-                $nbChildren = $em->getRepository('\BackBuilder\NestedNode\Page')->countChildren($page, $typeField, $options);
-                $pagingInfos = array("start" => (int) $start, "limit" => (int) $limit);
-                foreach ($em->getRepository('\BackBuilder\NestedNode\Page')->getChildren($page, $order_sort, $order_dir, $pagingInfos, $typeField, $options) as $child) {
+                $children = array();
+                $nbChildren = 0;
+                if (false === $page->isLeaf()) {
+                    $qChildren = $em->getRepository('\BackBuilder\NestedNode\Page')
+                                    ->createQueryBuilder('p')
+                                    ->andIsDescendantOf($page, true, 1, array($order_sort => $order_dir), (int) $limit, (int) $start, false)
+                                    ->andSearchCriteria($typeField, $options);
+                    $children = new \Doctrine\ORM\Tools\Pagination\Paginator($qChildren);
+                    $nbChildren = $children->count();
+                }
+
+                foreach ($children as $child) {
                     $row = new \stdClass();
                     $row->uid = $child->getUid();
                     $row->title = $child->getTitle();

@@ -344,6 +344,30 @@ class PageRepository extends EntityRepository
     }
 
     /**
+     * Returns the online descendants of $page
+     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
+     * @param  int                            $depth       optional, limit to $depth number of generation
+     * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
+     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
+     */
+    public function getOnlineDescendants(Page $page, $depth = null, $includeNode = false, $order = array(), $paginate = false, $start = 0, $limit = 25, $limitToSection = false)
+    {
+        if (true === $page->isLeaf()) {
+            return array();
+        }
+
+        $query = $this->createQueryBuilder('p')
+                ->andIsOnline()
+                ->andIsDescendantOf($page, !$includeNode, $depth, $this->getOrderingDescendants($depth, $order), (true === $paginate) ? $limit : null, $start, $limitToSection);
+
+        if (true === $paginate) {
+            return new Paginator($query);
+        }
+
+        return $query->getQuery()->getResult();
+    }
+
+    /**
      * Returns the visible (ie online and not hidden) descendants of $page
      * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
      * @param  int                            $depth       optional, limit to $depth number of generation
@@ -624,22 +648,19 @@ class PageRepository extends EntityRepository
      * @param  int                            $maxResults optional, the maximum number of results
      * @param  array                          $order      optional, the ordering criteria (array('_leftnode', 'asc') by default)
      * @return \BackBuilder\NestedNode\Page[]
+     * @deprecated since version 0.11
      */
     public function getOnlineChildren(Page $page, $maxResults = null, array $order = array('_leftnode', 'asc'))
     {
-        $order = array_replace(array('_leftnode', 'asc'), $order);
-
-        $q = $this->createQueryBuilder('p')
-            ->andParentIs($page)
-            ->andIsOnline()
-            ->orderBy('p.'.$order[0], $order[1])
-        ;
-
-        if (null !== $maxResults) {
-            $q->setMaxResults($maxResults);
+        if (true === $page->isLeaf()) {
+            return array();
         }
 
-        return $q->getQuery()->getResult();
+        $query = $this->createQueryBuilder('p')
+                ->andIsOnline()
+                ->andIsDescendantOf($page, true, 1, $this->getOrderingDescendants(1, null), $maxResults, 0, false);
+
+        return $query->getQuery()->getResult();
     }
 
     /**
@@ -653,24 +674,24 @@ class PageRepository extends EntityRepository
      *                                                                          'afterPubdateField' => timestamp against page._modified,
      *                                                                          'searchField' => string to search for title
      * @return array|\Doctrine\ORM\Tools\Pagination\Paginator Returns Paginaor is paging criteria provided, array otherwise
+     * @deprecated since version 0.11
      */
     public function getChildren(Page $page, $order_sort = '_title', $order_dir = 'asc', $paging = array(), $restrictedStates = array(), $options = array())
     {
-        $q = $this->createQueryBuilder('p')
-            ->andParentIs($page)
-            ->andSearchCriteria($restrictedStates, $options)
-            ->orderBy('p.'.$order_sort, $order_dir)
-        ;
-
-        if (is_array($paging) && array_key_exists('start', $paging) && array_key_exists('limit', $paging)) {
-            $q->setFirstResult($paging['start'])
-              ->setMaxResults($paging['limit'])
-            ;
-
-            return new Paginator($q);
+        if (true === $page->isLeaf()) {
+            return array();
         }
 
-        return $q->getQuery()->getResult();
+        $paginate = (is_array($paging) && array_key_exists('start', $paging) && array_key_exists('limit', $paging));
+        $query = $this->createQueryBuilder('p')
+                ->andIsDescendantOf($page, true, 1, array($order_sort => $order_dir), $paginate ? $paging['limit'] : null, $paginate ? $paging['start'] : 0, false)
+                ->andSearchCriteria($restrictedStates, $options);
+
+        if (true === $paginate) {
+            return new Paginator($query);
+        }
+
+        return $query->getQuery()->getResult();
     }
 
     /**
@@ -681,16 +702,20 @@ class PageRepository extends EntityRepository
      *                                                        'afterPubdateField' => timestamp against page._modified,
      *                                                        'searchField' => string to search for title
      * @return int                          the children count
+     * @deprecated since version 0.11
      */
     public function countChildren(Page $page, $restrictedStates = array(), $options = array())
     {
+        if (true === $page->isLeaf()) {
+            return 0;
+        }
+
         return $this->createQueryBuilder('p')
-            ->select("COUNT(p)")
-            ->andParentIs($page)
-            ->andSearchCriteria($restrictedStates, $options)
-            ->getQuery()
-            ->getSingleScalarResult()
-        ;
+                        ->select("COUNT(p)")
+                        ->andIsDescendantOf($page, true, 1, array($order_sort => $order_dir), null, 0, false)
+                        ->andSearchCriteria($restrictedStates, $options)
+                        ->getQuery()
+                        ->getSingleScalarResult();
     }
 
     /**
