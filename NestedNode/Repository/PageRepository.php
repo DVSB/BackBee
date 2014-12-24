@@ -288,38 +288,120 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Returns the visible (ie online and not hidden) descendants of $page
-     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
-     * @param  int                            $depth       optional, limit to $depth number of generation
-     * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
-     * @return \BackBuilder\NestedNode\Page[]
+     * Returns default ordering criteria for descendants if none provided
+     * @param int $depth    Optional, limit to $depth number of generation
+     * @param array $order  Optional, the ordering criteria ( array() by default )
+     * @return array        If none ordering criteria provided and only one descendant generation is requested
+     *                      the result will be array('_position' => 'ASC', '_leftnode' => 'ASC')
+     *                      If none ordering criteria provided and several generations requested the result
+     *                      will be array('_leftnode' => 'ASC', '_level' => 'ASC', '_position' => 'ASC')
+     *                      Elsewhere $order
      */
-    public function getVisibleDescendants(Page $page, $depth = null, $includeNode = false)
+    private function getOrderingDescendants($depth = null, $order = array())
+    {
+        if (1 === $depth && true === empty($order)) {
+            $order = array(
+                '_position' => 'ASC',
+                '_leftnode' => 'ASC',
+            );
+        } elseif (true === empty($order)) {
+            $order = array(
+                '_leftnode' => 'ASC',
+                '_level' => 'ASC',
+                '_position' => 'ASC',
+            );
+        }
+
+        return $order;
+    }
+
+    /**
+     * Returns the not deleted descendants of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @param type $depth                           optional, limit to $depth number of generation
+     * @param type $includeNode                     optional, include $page in results if TRUE (false by default)
+     * @param type $order                           optional, the ordering criteria ( array() by default )
+     * @param type $paginate                        optional, if TRUE return a paginator rather than an array (false by default)
+     * @param type $start                           optional, if paginated set the first result index (0 by default)
+     * @param type $limit                           optional, if paginated set the maxmum number of results (25 by default)
+     * @param type $limitToSection                  optional, limit to descendants having child (false by default)
+     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
+     */
+    public function getDescendants(Page $page, $depth = null, $includeNode = false, $order = array(), $paginate = false, $start = 0, $limit = 25, $limitToSection = false)
     {
         if (true === $page->isLeaf()) {
             return array();
         }
 
-        $q = $this->createQueryBuilder('p')->andIsDescendantOf($page)->andIsVisible()->addMultipleOrderBy(
-                array(
-                    '_leftnode' => 'ASC',
-                    '_level' => 'ASC',
-                    '_position' => 'ASC',
-                )
-        );
+        $query = $this->createQueryBuilder('p')
+                ->andIsDescendantOf($page, !$includeNode, $depth, $this->getOrderingDescendants($depth, $order), (true === $paginate) ? $limit : null, $start, $limitToSection);
 
-        if (null !== $depth) {
-            $q->andWhere('p._level <= :level')->setParameter('level', $page->getLevel() + $depth);
-            if (1 === $depth) {
-                $q->orderBy('p._position', 'ASC')->addOrderBy('_leftnode', 'ASC');
-            }
+        if (true === $paginate) {
+            return new Paginator($query);
         }
 
-        if (false === $includeNode) {
-            $q->andWhere('p <> :page')->setParameter('page', $page);
+        return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Returns the visible (ie online and not hidden) descendants of $page
+     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
+     * @param  int                            $depth       optional, limit to $depth number of generation
+     * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
+     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
+     */
+    public function getVisibleDescendants(Page $page, $depth = null, $includeNode = false, $order = array(), $paginate = false, $start = 0, $limit = 25, $limitToSection = false)
+    {
+        if (true === $page->isLeaf()) {
+            return array();
         }
 
-        return $q->getQuery()->getResult();
+        $query = $this->createQueryBuilder('p')
+                ->andIsVisible()
+                ->andIsDescendantOf($page, !$includeNode, $depth, $this->getOrderingDescendants($depth, $order), (true === $paginate) ? $limit : null, $start, $limitToSection);
+
+        if (true === $paginate) {
+            return new Paginator($query);
+        }
+
+        return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Returns the visible (ie online and not hidden) children of $page
+     * @param \BackBuilder\NestedNode\Page $page    the page to look for
+     * @param int $depth                            optional, limit to $depth number of generation
+     * @param boolean $includeNode                  optional, include $page in results if TRUE (false by default)
+     * @return \BackBuilder\NestedNode\Page[]
+     * @deprecated since version 0.11
+     */
+    public function getVisibleDescendantsFromParent(Page $page, $depth = null, $includeNode = false)
+    {
+        return $this->getVisibleDescendants($page, 1, $includeNode);
+    }
+
+    /**
+     * Returns the visible (ie online and not hidden) descendants of $page
+     * @param  \BackBuilder\NestedNode\Page   $page        the page to look for
+     * @param  int                            $depth       optional, limit to $depth number of generation
+     * @param  boolean                        $includeNode optional, include $page in results if TRUE (false by default)
+     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
+     */
+    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, $order = array(), $paginate = false, $start = 0, $limit = 25, $limitToSection = false)
+    {
+        if (true === $page->isLeaf()) {
+            return array();
+        }
+
+        $query = $this->createQueryBuilder('p')
+                ->andIsNotDeleted()
+                ->andIsDescendantOf($page, !$includeNode, $depth, $this->getOrderingDescendants($depth, $order), (true === $paginate) ? $limit : null, $start, $limitToSection);
+
+        if (true === $paginate) {
+            return new Paginator($query);
+        }
+
+        return $query->getQuery()->getResult();
     }
 
     /**
@@ -512,55 +594,6 @@ class PageRepository extends EntityRepository
         }
 
         return $page;
-    }
-
-    /**
-     * Returns the not deleted descendants of $page
-     * @param  \BackBuilder\NestedNode\Page                                            $page         the page to look for
-     * @param  type                                                                    $depth        optional, limit to $depth number of generation
-     * @param  type                                                                    $includeNode  optional, include $page in results if TRUE (false by default)
-     * @param  type                                                                    $order        optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
-     * @param  type                                                                    $paginate     optional, if TRUE return a paginator rather than an array (false by default)
-     * @param  type                                                                    $firstresult  optional, if paginated set the first result index (0 by default)
-     * @param  type                                                                    $maxresults   optional, if paginated set the maxmum number of results (25 by default)
-     * @param  type                                                                    $having_child optional, limit to descendants having child (false by default)
-     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBuilder\NestedNode\Page[]
-     */
-    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, array $order = array('_leftnode' => 'asc'), $paginate = false, $firstresult = 0, $maxresults = 25, $having_child = false)
-    {
-        // @Todo: search for calls with wrong ordering criteria format and solve them
-        if (true === array_key_exists('field', $order)) {
-            if ('_' !== substr($order['field'], 0, 1)) {
-                $order['field'] = '_'.$order['field'];
-            }
-
-            $order = array($order['field'] => (true === array_key_exists('sort', $order) ? $order['sort'] : 'asc'));
-        }
-
-        $q = $this->createQueryBuilder('p')
-            ->andIsDescendantOf($page, !$includeNode)
-            ->andStateIsLowerThan(Page::STATE_DELETED)
-            ->orderByMultiple($order)
-        ;
-
-        if (null !== $depth) {
-            $q->andLevelIsLowerThan($page->getLevel() + $depth);
-        }
-
-        if (true === $having_child) {
-            $q->andWhere('p._rightnode > (p._leftnode + 1)');
-        }
-
-        if (false === $paginate) {
-            return $q->getQuery()->getResult();
-        }
-
-        //@Todo: allow use of $firstresult or $maxresults without paginator
-        $q->setFirstResult($firstresult)
-          ->setMaxResults($maxresults)
-        ;
-
-        return new Paginator($q);
     }
 
     /**
