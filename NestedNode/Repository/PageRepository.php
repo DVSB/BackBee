@@ -747,29 +747,6 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Returns an array of pages having title like $wordSearch
-     * @param  string     $wordsSearch the string to test against title page
-     * @param  array      $limit       optional, the query limit restriction, array(0, 10) by default
-     * @return array|null
-     */
-    public function likeAPage($wordsSearch = "", array $limit = array(0, 10))
-    {
-        $limit = array_replace(array(0, 10), $limit);
-
-        if ('' === $wordsSearch) {
-            return;
-        }
-
-        return $this->createQueryBuilder('p')
-            ->andTitleIsLike($wordsSearch)
-            ->setFirstResult($limit[0])
-            ->setMaxResults($limit[1])
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
      * Duplicate a page and optionnaly its descendants
      * @param  \BackBuilder\NestedNode\Page                    $page      the page to duplicate
      * @param  string                                          $title     optional, the title of the copy, by default the title of the copied page
