@@ -719,19 +719,31 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Set state of $page and is descendant to STATE_DELETED
+     * Sets state of $page and is descendant to STATE_DELETED
      * @param  \BackBuilder\NestedNode\Page $page the page to delete
      * @return integer                      the number of page having their state changed
      */
     public function toTrash(Page $page)
     {
+        if (true === $page->isLeaf()) {
+            $page->setState(Page::STATE_DELETED);
+            $this->getEntityManager()->flush($page);
+            return 1;
+        }
+
+        $subquery = $this->getEntityManager()
+                ->getRepository('BackBuilder\NestedNode\Section')
+                ->createQueryBuilder('n')
+                ->select('n._uid')
+                ->andIsDescendantOf($page->getSection());
+
         return $this->createQueryBuilder('p')
-            ->update()
-            ->set('p._state', Page::STATE_DELETED)
-            ->andIsDescendantOf($page)
-            ->getQuery()
-            ->execute()
-        ;
+                        ->update()
+                        ->set('p._state', Page::STATE_DELETED)
+                        ->andWhere('p._section IN (' . $subquery->getDQL() . ')')
+                        ->setParameters($subquery->getParameters())
+                        ->getQuery()
+                        ->execute();
     }
 
     /**
