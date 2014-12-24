@@ -1204,9 +1204,23 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     }
 
     /**
+     * Returns chidren of ths page
+     * @return array
+     * @deprecated since version 0.11
+     */
+    public function getChildren()
+    {
+        if (false === $this->hasMainSection()) {
+            return array();
+        }
+        
+        return $this->getSection()->getPages();
+    }
+
+    /**
      * Looks for at least one online children
      * @return boolean TRUE if at least one children of the page is online
-     * @deprecated
+     * @deprecated since version 0.11
      */
     public function hasChildrenVisible()
     {
