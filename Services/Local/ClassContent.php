@@ -363,20 +363,16 @@ class ClassContent extends AbstractServiceLocal
         $em->flush();
 
         /* unlink and update */
-        $replace = $em->getRepository('BackBuilder\NestedNode\Page')->replaceRootContentSet($currentPage, $contentSetToReplace, $newEmptyContentSet);
-        if ($replace) {
-            $em->getRepository("BackBuilder\ClassContent\ContentSet")->updateRootContentSetByPage($currentPage, $contentSetToReplace, $newEmptyContentSet, $this->getApplication()->getBBUserToken());
+        $currentPage->replaceRootContentSet($contentSetToReplace, $newEmptyContentSet);
+        $em->getRepository("BackBuilder\ClassContent\ContentSet")->updateRootContentSetByPage($currentPage, $contentSetToReplace, $newEmptyContentSet, $this->getApplication()->getBBUserToken());
 
-            $em->persist($pageRootContentSet);
-            $em->flush();
+        $em->persist($pageRootContentSet);
+        $em->flush();
 
-            //$em->persist($newEmptyContentSet);
-            /* render the new contentSet */
-            $render = $this->getApplication()->getRenderer()->render($newEmptyContentSet, null);
-            $result = array("render" => $render);
-        } else {
-            throw new \BackBuilder\Exception\BBException("Error while unlinking zone!");
-        }
+        //$em->persist($newEmptyContentSet);
+        /* render the new contentSet */
+        $render = $this->getApplication()->getRenderer()->render($newEmptyContentSet, null);
+        $result = array("render" => $render);
 
         return $result;
     }

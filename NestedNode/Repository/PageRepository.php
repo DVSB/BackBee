@@ -507,24 +507,6 @@ class PageRepository extends EntityRepository
     }
 
     /**
-     * Replaces the ContentSet of $page
-     * @param  \BackBuilder\NestedNode\Page         $page          the page to change
-     * @param  \BackBuilder\ClassContent\ContentSet $oldContentSet the contentset to replace
-     * @param  \BackBuilder\ClassContent\ContentSet $newContentSet the new contentset
-     * @return \BackBuilder\ClassContent\ContentSet the inserted contentset
-     */
-    public function replaceRootContentSet(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet)
-    {
-        try {
-            $result = $page->replaceRootContentSet($oldContentSet, $newContentSet);
-
-            return $result;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    /**
      * Returns the not deleted descendants of $page
      * @param  \BackBuilder\NestedNode\Page                                            $page         the page to look for
      * @param  type                                                                    $depth        optional, limit to $depth number of generation
