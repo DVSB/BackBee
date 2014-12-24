@@ -173,9 +173,9 @@ class PageQueryBuilderTest extends TestCase
 
         $q->resetDQLPart('where')
                 ->andParentIs($root);
-        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._parent = :parent0 AND p != :page0', $q->getDql());
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE (p_s._parent = :parent0 OR p = :parent0) AND p._level = :level0', $q->getDql());
         $this->assertEquals($root->getSection(), $q->getParameter('parent0')->getValue());
-        $this->assertEquals($root, $q->getParameter('page0')->getValue());
+        $this->assertEquals($root->getLevel() + 1, $q->getParameter('level0')->getValue());
     }
 
     /**

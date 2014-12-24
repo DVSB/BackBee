@@ -173,10 +173,14 @@ class PageQueryBuilder extends QueryBuilder
         }
 
         $suffix = $this->getSuffix();
-        return $this->andWhere($this->getSectionAlias() . '._parent = :parent' . $suffix)
-                        ->andWhere($this->getAlias() . ' != :page' . $suffix)
-                        ->setParameter('page' . $suffix, $page)
-                        ->setParameter('parent' . $suffix, $page->getSection());
+        $qOr = $this->expr()->orX();
+        $qOr->add($this->getSectionAlias() . '._parent = :parent' . $suffix)
+                ->add($this->getAlias() . ' = :parent' . $suffix);
+
+        return $this->andWhere($qOr)
+                        ->andWhere($this->getAlias() . '._level = :level' . $suffix)
+                        ->setParameter('parent' . $suffix, $page->getSection())
+                        ->setParameter('level' . $suffix, $page->getLevel() + 1);
     }
 
     /**
