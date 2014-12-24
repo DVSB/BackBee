@@ -239,7 +239,7 @@ class PageQueryBuilder extends QueryBuilder
 
         if (null !== $depth) {
             $this->andWhere($this->getAlias() . '._level <= :level' . $suffix)
-                    ->setParameter('level' . $suffix, $depth);
+                    ->setParameter('level' . $suffix, $page->getLevel() + $depth);
         }
 
         if (null !== $order) {
