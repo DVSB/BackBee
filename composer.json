@@ -1,5 +1,5 @@
 {
-    "name": "backbee/BackBee",
+    "name": "backbee/backbee",
     "description": "BackBee is the next generation open source CMS",
     "keywords": ["CMS", "Core", "Content Management", "No backend CMS", "User Management"],
     "type": "backbee-package",
