@@ -326,7 +326,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      * Utility property used on cloning page
      * @var array
      */
-    public $cloning_datas;
+    public $cloning_data;
 
     /**
      * old state of current object (equals to null if it's not updated);
@@ -398,7 +398,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     public function __clone()
     {
         $source_uid = $this->_uid;
-        $this->cloning_datas = array(
+        $this->cloning_data = array(
             'pages' => array(),
             'contents' => array()
         );
@@ -421,7 +421,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
         $this->_revisions = new ArrayCollection();
 
-        $this->cloning_datas['pages'][$source_uid] = $this;
+        $this->cloning_data['pages'][$source_uid] = $this;
     }
 
     /**

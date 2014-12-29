@@ -104,10 +104,10 @@ class PageTest extends TestCase
         $this->assertFalse($clone->isStatic());
         $this->assertEquals($child->getTitle(), $clone->getTitle());
         $this->assertEquals($child->getUrl(), $clone->getUrl());
-        $this->assertTrue(is_array($clone->cloning_datas));
-        $this->assertTrue(isset($clone->cloning_datas['pages']));
-        $this->assertTrue(isset($clone->cloning_datas['pages'][$child->getUid()]));
-        $this->assertEquals($clone, $clone->cloning_datas['pages'][$child->getUid()]);
+        $this->assertTrue(is_array($clone->cloning_data));
+        $this->assertTrue(isset($clone->cloning_data['pages']));
+        $this->assertTrue(isset($clone->cloning_data['pages'][$child->getUid()]));
+        $this->assertEquals($clone, $clone->cloning_data['pages'][$child->getUid()]);
         $this->assertEquals(0, $clone->getRevisions()->count());
 
         $clone2 = clone $this->page;

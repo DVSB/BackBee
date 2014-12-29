@@ -779,22 +779,22 @@ class PageRepository extends EntityRepository
     /**
      * Replace subcontent of ContentSet by their clone if exist
      * @param \BackBuilder\ClassContent\AClassContent   $content        The cloned content
-     * @param array                                     $cloning_datas  The cloned data array
+     * @param array                                     $cloning_data   The cloned data array
      * @param \BackBuilder\Security\Token\BBUserToken   $token          Optional, the BBuser token to allow the update of revisions
      * @return \BackBuilder\NestedNode\Repository\PageRepository
      */
-    private function updateRelatedPostCloning(AClassContent $content, array $cloning_datas, BBUserToken $token = null)
+    private function updateRelatedPostCloning(AClassContent $content, array $cloning_data, BBUserToken $token = null)
     {
         if (
                 $content instanceof ContentSet &&
-                true === array_key_exists('pages', $cloning_datas) &&
-                true === array_key_exists('contents', $cloning_datas) &&
-                0 < count($cloning_datas['pages']) &&
-                0 < count($cloning_datas['contents'])
+                true === array_key_exists('pages', $cloning_data) &&
+                true === array_key_exists('contents', $cloning_data) &&
+                0 < count($cloning_data['pages']) &&
+                0 < count($cloning_data['contents'])
         ) {
             // reading copied elements
-            $copied_pages = array_keys($cloning_datas['pages']);
-            $copied_contents = array_keys($cloning_datas['contents']);
+            $copied_pages = array_keys($cloning_data['pages']);
+            $copied_contents = array_keys($cloning_data['contents']);
 
             // Updating subcontent if needed
             foreach ($content as $subcontent) {
@@ -814,7 +814,7 @@ class PageRepository extends EntityRepository
                         ) {
                         $content->setDraft($draft);
                     }
-                    $content->replaceChildBy($subcontent, $cloning_datas['contents'][$subcontent->getUid()]);
+                    $content->replaceChildBy($subcontent, $cloning_data['contents'][$subcontent->getUid()]);
                 }
             }
         }
@@ -875,7 +875,7 @@ class PageRepository extends EntityRepository
         foreach (array_reverse($children) as $child) {
             if (!(Page::STATE_DELETED & $child->getState())) {
                 $new_child = $this->duplicateRecursively($child, null, $new_page);
-                $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
+                $new_page->cloning_data = array_merge_recursive($new_page->cloning_data, $new_child->cloning_data);
             }
         }
 
@@ -902,9 +902,9 @@ class PageRepository extends EntityRepository
         }
 
         // Finally updating contentset and mainnode
-        foreach ($new_page->cloning_datas['contents'] as $content) {
-            $this->updateRelatedPostCloning($content, $new_page->cloning_datas, $token)
-                    ->updateMainNodePostCloning($content, $new_page->cloning_datas['pages'], $token);
+        foreach ($new_page->cloning_data['contents'] as $content) {
+            $this->updateRelatedPostCloning($content, $new_page->cloning_data, $token)
+                    ->updateMainNodePostCloning($content, $new_page->cloning_data['pages'], $token);
         }
 
         return $new_page;
