@@ -132,7 +132,7 @@ class User implements UserInterface
     /**
      * Whether the api key is enabled (default false)
      * @var Boolean
-     * @Column(type="boolean", name="api_key_enabled")
+     * @Column(type="boolean", name="api_key_enabled", options={"default": false})
      * @fixture(type="boolean")
      * @Serializer\Type('boolean'))
      */
