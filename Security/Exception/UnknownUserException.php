@@ -32,7 +32,7 @@ namespace BackBee\Security\Exception;
  */
 class UnknownUserException extends SecurityException
 {
-    public function __construct($message = 'Unknow user', $code = SecurityException::UNKNOWN_USER)
+    public function __construct($message = 'Unknown user', $code = SecurityException::UNKNOWN_USER)
     {
         parent::__construct($message, $code);
     }
