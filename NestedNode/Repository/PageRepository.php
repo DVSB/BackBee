@@ -913,8 +913,7 @@ class PageRepository extends EntityRepository
     /**
      * Removes page with no contentset for $site
      * @param \BackBuilder\Site\Site $site
-     * @codeCoverageIgnore
-     * @Todo: what if the deleted page has chldren ?
+     * @deprecated since version 0.11
      */
     public function removeEmptyPages(Site $site)
     {

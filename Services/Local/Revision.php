@@ -159,7 +159,6 @@ class Revision extends AbstractServiceLocal
             }
         }
 
-        $this->em->getRepository('\BackBuilder\NestedNode\Page')->removeEmptyPages($this->bbapp->getSite());
         $this->em > flush();
 
         return $result;
