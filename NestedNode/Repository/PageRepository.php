@@ -747,28 +747,164 @@ class PageRepository extends EntityRepository
     }
 
     /**
+     * Copy a page to a new one
+     * @param \BackBuilder\NestedNode\Page      $page           The page to be copied
+     * @param string                            $title          Optional, the title of the copy, by default the title of the page
+     * @param \BackBuilder\NestedNode\Page      $parent         Optional, the parent of the copy, by default the parent of the page
+     * @return \BackBuilder\NestedNode\Page                     The copy of the page
+     * @throws \BackBuilder\Exception\InvalidArgumentException  Occures if the page is deleted
+     */
+    private function copy(Page $page, $title = null, Page $parent = null)
+    {
+        if (Page::STATE_DELETED & $page->getState()) {
+            throw new InvalidArgumentException('Cannot duplicate a deleted page.');
+        }
+
+        // Cloning the page
+        $new_page = clone $page;
+        $new_page->setTitle((null === $title) ? $page->getTitle() : $title)
+                ->setLayout($page->getLayout());
+
+        // Setting the clone as first child of the parent
+        if (null !== $parent) {
+            $new_page = $this->insertNodeAsFirstChildOf($new_page, $parent, $new_page->hasMainSection());
+        }
+
+        // Persisting entities
+        $this->_em->persist($new_page);
+
+        return $new_page;
+    }
+
+    /**
+     * Replace subcontent of ContentSet by their clone if exist
+     * @param \BackBuilder\ClassContent\AClassContent   $content        The cloned content
+     * @param array                                     $cloning_datas  The cloned data array
+     * @param \BackBuilder\Security\Token\BBUserToken   $token          Optional, the BBuser token to allow the update of revisions
+     * @return \BackBuilder\NestedNode\Repository\PageRepository
+     */
+    private function updateRelatedPostCloning(AClassContent $content, array $cloning_datas, BBUserToken $token = null)
+    {
+        if (
+                $content instanceof ContentSet &&
+                true === array_key_exists('pages', $cloning_datas) &&
+                true === array_key_exists('contents', $cloning_datas) &&
+                0 < count($cloning_datas['pages']) &&
+                0 < count($cloning_datas['contents'])
+        ) {
+            // reading copied elements
+            $copied_pages = array_keys($cloning_datas['pages']);
+            $copied_contents = array_keys($cloning_datas['contents']);
+
+            // Updating subcontent if needed
+            foreach ($content as $subcontent) {
+                if (false === $this->_em->contains($subcontent)) {
+                    $subcontent = $this->_em->find(get_class($subcontent), $subcontent->getUid());
+                }
+
+                if (
+                        null !== $subcontent->getMainNode() && 
+                        true === in_array($subcontent->getMainNode()->getUid(), $copied_pages) && 
+                        true === in_array($subcontent->getUid(), $copied_contents)
+                ) {
+                    // Loading draft for content
+                    if (
+                            null !== $token &&
+                            (null !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true))
+                        ) {
+                        $content->setDraft($draft);
+                    }
+                    $content->replaceChildBy($subcontent, $cloning_datas['contents'][$subcontent->getUid()]);
+                }
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Update mainnode of the content if need during clonage
+     * @param \BackBuilder\ClassContent\AClassContent   $content        The cloned content
+     * @param array                                     $cloning_pages  The cloned pages array
+     * @param \BackBuilder\Security\Token\BBUserToken   $token          Optional, the BBuser token to allow the update of revisions
+     * @return \BackBuilder\NestedNode\Repository\PageRepository
+     */
+    private function updateMainNodePostCloning(AClassContent $content, array $cloning_pages, BBUserToken $token = null)
+    {
+        $mainnode = $content->getMainNode();
+
+        if (
+                null !== $mainnode && 
+                0 < count($cloning_pages) && 
+                true === in_array($mainnode->getUid(), array_keys($cloning_pages))
+            ) {
+            // Loading draft for content
+            if (
+                    null !== $token &&
+                    (null !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true))
+                ) {
+                $content->setDraft($draft);
+            }
+            $content->setMainNode($cloning_pages[$mainnode->getUid()]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Duplicate a page and its descendants
+     * @param \BackBuilder\NestedNode\Page  $page               The page to be duplicated
+     * @param string                        $title              Optional, the title of the copy, by default the title of the page
+     * @param \BackBuilder\NestedNode\Page  $parent             Optional, the parent of the copy, by default the parent of the page
+     * @return \BackBuilder\NestedNode\Page                     The copy of the page
+     * @throws \BackBuilder\Exception\InvalidArgumentException  Occures if the page is recursively duplicated in itself
+     */
+    private function duplicateRecursively(Page $page, $title = null, Page $parent = null)
+    {
+        if (null !== $parent && true === $parent->isDescendantOf($page)) {
+            throw new InvalidArgumentException('Cannot recursively duplicate a page in itself');
+        }
+
+        // Storing current children before clonage
+        $children = $this->getDescendants($page, 1);
+
+        // Cloning the page
+        $new_page = $this->copy($page, $title, $parent);
+        $this->_em->flush($new_page);
+
+        // Cloning children
+        foreach (array_reverse($children) as $child) {
+            if (!(Page::STATE_DELETED & $child->getState())) {
+                $new_child = $this->duplicateRecursively($child, null, $new_page);
+                $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
+            }
+        }
+
+        return $new_page;
+    }
+
+    /**
      * Duplicate a page and optionnaly its descendants
-     * @param  \BackBuilder\NestedNode\Page                    $page      the page to duplicate
-     * @param  string                                          $title     optional, the title of the copy, by default the title of the copied page
-     * @param  \BackBuilder\NestedNode\Page                    $parent    optional, the parent of the copy, by default the parent of the copied page
-     * @param  boolean                                         $recursive if true (default) duplicate recursively the descendants of the page
-     * @param \BackBuilder\Security\Token\BBUserToken           the BBuser token to allow the update of revisions
-     * @return \BackBuilder\NestedNode\Page                    the copy of the page
-     * @throws \BackBuilder\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
+     * @param \BackBuilder\NestedNode\Page              $page        The page to be duplicated
+     * @param string                                    $title       Optional, the title of the copy, by default the title of the page
+     * @param \BackBuilder\NestedNode\Page              $parent      Optional, the parent of the copy, by default the parent of the page
+     * @param boolean                                   $recursive   Optional, if true (by default) duplicates recursively the descendants of the page
+     * @param \BackBuilder\Security\Token\BBUserToken   $token       Optional, the BBuser token to allow the update of revisions
+     * @return \BackBuilder\NestedNode\Page                          The copy of the page
+     * @throws \BackBuilder\Exception\InvalidArgumentException       Occures if the page is recursively duplicated in itself
      */
     public function duplicate(Page $page, $title = null, Page $parent = null, $recursive = true, BBUserToken $token = null)
     {
-        $new_page = (true === $recursive) ? $this->copyRecursively($page, $title, $parent) : $this->copy($page, $title, $parent);
+        if (false === $recursive || false === $page->hasMainSection()) {
+            $new_page = $this->copy($page, $title, $parent);
+        } else {
+            // Recursive cloning
+            $new_page = $this->duplicateRecursively($page, $title, $parent, $token);
+        }
 
         // Finally updating contentset and mainnode
-        if (null !== $token) {
-            foreach ($new_page->cloning_datas['contents'] as $content) {
-                $this->updateRelatedPostCloning($content, $token, $new_page->cloning_datas)
-                     ->updateMainNodePostCloning($content, $token, $new_page->cloning_datas['pages'])
-                ;
-            }
-
-            $this->_em->flush();
+        foreach ($new_page->cloning_datas['contents'] as $content) {
+            $this->updateRelatedPostCloning($content, $new_page->cloning_datas, $token)
+                    ->updateMainNodePostCloning($content, $new_page->cloning_datas['pages'], $token);
         }
 
         return $new_page;
@@ -793,6 +929,7 @@ class PageRepository extends EntityRepository
             $this->delete($page);
         }
     }
+
     /**
      * Saves a page with a section and returns it
      * @param \BackBuilder\NestedNode\Page $page
@@ -918,145 +1055,4 @@ class PageRepository extends EntityRepository
         return (null === $max) ? 0 : $max;
     }
 
-    /**
-     * Copy a page to a new one
-     * @param  \BackBuilder\NestedNode\Page                    $page   the page to copy
-     * @param  string                                          $title  optional, the title of the copy, by default the title of the page
-     * @param  \BackBuilder\NestedNode\Page                    $parent optional, the parent of the copy, by default the parent of the page
-     * @return \BackBuilder\NestedNode\Page                    the copy of the page
-     * @throws \BackBuilder\Exception\InvalidArgumentException occures if the page is deleted
-     */
-    private function copy(Page $page, $title = null, Page $parent = null)
-    {
-        if (Page::STATE_DELETED & $page->getState()) {
-            throw new InvalidArgumentException('Cannot duplicate a deleted page');
-        }
-
-        // Cloning the page
-        $new_page = clone $page;
-        $new_page->setTitle(null === $title ? $page->getTitle() : $title);
-
-        // Setting the layout if exists
-        if (null !== $page->getLayout()) {
-            $new_page->setLayout($page->getLayout());
-        }
-
-        // Setting the clone as first child of the parent if exists
-        if (null !== $parent || null !== $page->getParent()) {
-            $parent = (null === $parent) ? $page->getParent() : $parent;
-            $new_page = $this->insertNodeAsFirstChildOf($new_page, $parent);
-        }
-
-        // Persisting entities
-        $this->_em->persist($new_page);
-        $this->_em->flush();
-
-        return $new_page;
-    }
-
-    /**
-     * Copy recursively a page to a new one
-     * @param  \BackBuilder\NestedNode\Page                    $page   the page to copy
-     * @param  string                                          $title  optional, the title of the copy, by default the title of the page
-     * @param  \BackBuilder\NestedNode\Page                    $parent optional, the parent of the copy, by default the parent of the page
-     * @return \BackBuilder\NestedNode\Page                    the copy of the page
-     * @throws \BackBuilder\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
-     */
-    private function copyRecursively(Page $page, $title = null, Page $parent = null)
-    {
-        if (null !== $parent && true === $parent->isDescendantOf($page)) {
-            throw new InvalidArgumentException('Cannot recursively duplicate a page in itself');
-        }
-
-        // Cloning the page
-        $new_page = $this->copy($page, $title, $parent);
-
-        // Storing current children before clonage
-        $children = array();
-        if (false === $page->isLeaf()) {
-            $children = $this->getDescendants($page, 1);
-        }
-        foreach (array_reverse($children) as $child) {
-            if (!(Page::STATE_DELETED & $child->getState())) {
-                $this->_em->refresh($new_page);
-                $new_child = $this->duplicate($child, null, $new_page, true, null);
-                $new_page->getChildren()->add($new_child);
-                $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
-            }
-        }
-        $this->_em->flush();
-
-        return $new_page;
-    }
-
-    /**
-     * Replace subcontents of ContentSet by their clones if exist
-     * @param  \BackBuilder\ClassContent\AClassContent           $content
-     * @param  \BackBuilder\Security\Token\BBUserToken           $token
-     * @param  array                                             $cloning_datas
-     * @return \BackBuilder\NestedNode\Repository\PageRepository
-     */
-    private function updateRelatedPostCloning(AClassContent $content, BBUserToken $token, array $cloning_datas)
-    {
-        if (
-                false === ($content instanceof ContentSet) ||
-                false === array_key_exists('pages', $cloning_datas) ||
-                false === array_key_exists('contents', $cloning_datas) ||
-                0 === count($cloning_datas['pages']) ||
-                0 === count($cloning_datas['contents'])
-        ) {
-            // Nothing to do
-            return $this;
-        }
-
-        // Reading copied elements
-        $copied_pages = array_keys($cloning_datas['pages']);
-        $copied_contents = array_keys($cloning_datas['contents']);
-
-        // Updating subcontent if needed
-        foreach ($content as $subcontent) {
-            if (false === $this->_em->contains($subcontent)) {
-                $subcontent = $this->_em->find(get_class($subcontent), $subcontent->getUid());
-            }
-
-            if (
-                    null === $subcontent->getMainNode() ||
-                    false === in_array($subcontent->getMainNode()->getUid(), $copied_pages) ||
-                    false === in_array($subcontent->getUid(), $copied_contents)
-            ) {
-                continue;
-            }
-
-            // Loading draft for content
-            if (null !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
-                $content->setDraft($draft);
-            }
-
-            $content->replaceChildBy($subcontent, $cloning_datas['contents'][$subcontent->getUid()]);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Update mainnode of the content if need
-     * @param  \BackBuilder\ClassContent\AClassContent           $content
-     * @param  \BackBuilder\Security\Token\BBUserToken           $token
-     * @param  array                                             $cloning_pages
-     * @return \BackBuilder\NestedNode\Repository\PageRepository
-     */
-    private function updateMainNodePostCloning(AClassContent $content, BBUserToken $token, array $cloning_pages)
-    {
-        $mainnode = $content->getMainNode();
-        if (null !== $mainnode && true === in_array($mainnode->getUid(), array_keys($cloning_pages))) {
-            // Loading draft for content
-            if (NULL !== $draft = $this->_em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $token, true)) {
-                $content->setDraft($draft);
-            }
-
-            $content->setMainNode($cloning_pages[$mainnode->getUid()]);
-        }
-
-        return $this;
-    }
 }

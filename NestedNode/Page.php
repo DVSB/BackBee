@@ -403,6 +403,12 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
             'contents' => array()
         );
 
+        if (null !== $this->_contentset && null !== $this->getLayout()) {
+            $this->_contentset = $this->_contentset->createClone($this);
+        } else {
+            $this->_contentset = new ContentSet();
+        }
+
         if (true === $this->hasMainSection()) {
             // Main section has to be cloned also
             $this->setDefaultProperties(null, clone $this->_mainsection, $this->_title, $this->_url, $this->_target);
@@ -411,12 +417,6 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
             $section = $this->getSection();
             $this->setDefaultProperties(null, null, $this->_title, $this->_url, $this->_target);
             $this->setSection($section);
-        }
-
-        if (null !== $this->_contentset && null !== $this->getLayout()) {
-            $this->_contentset = $this->_contentset->createClone($this);
-        } else {
-            $this->_contentset = new ContentSet();
         }
 
         $this->_revisions = new ArrayCollection();
