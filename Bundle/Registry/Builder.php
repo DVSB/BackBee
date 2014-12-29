@@ -34,10 +34,6 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 class Builder
 {
     /**
-     * @var EntityManager
-     */
-    private $em;
-    /**
      * @var boolean
      */
     private $is_registry_entity = false;
