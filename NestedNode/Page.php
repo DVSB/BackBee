@@ -1688,6 +1688,40 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     }
 
     /**
+     * Is this page is an ancestor of the provided one ?
+     * @param \BackBuilder\NestedNode\Page  $page
+     * @param Boolean                       $strict Optional, if TRUE (default) this page is excluded of ancestors list
+     * @return Boolean                      TRUE if this page is an anscestor of provided page, FALSE otherwise
+     */
+    public function isAncestorOf(Page $page, $strict = true)
+    {
+        if (false === $this->hasMainSection()) {
+            return ($this === $page && false === $strict);
+        }
+        
+        return $this->getSection()->isAncestorOf($page->getSection(), $strict) || $page->getParent() === $this;
+    }
+
+    /**
+     * Is this page is a descendant of the provided one ?
+     * @param \BackBuilder\NestedNode\Page  $page
+     * @param Boolean                       $strict Optional, if TRUE (default) this page is excluded of descendants list
+     * @return Boolean                      TRUE if this page is a descendant of provided page, FALSE otherwise
+     */
+    public function isDescendantOf(Page $page, $strict = true)
+    {
+        if ($this === $page) {
+            return !$strict;
+        }
+
+        if (false === $this->hasMainSection()) {
+            return $page === $this->getParent() || $this->getSection()->isDescendantOf($page->getSection());
+        }
+
+        return $this->getSection()->isDescendantOf($page->getSection(), $strict);
+    }
+
+    /**
      * Returns the root page.
      * @return \BackBuilder\NestedNode\Page
      */

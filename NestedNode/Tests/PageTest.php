@@ -496,7 +496,7 @@ class PageTest extends TestCase
         $this->assertEquals($this->page, $this->page->setModified($now));
         $this->assertEquals($now, $this->page->getModified());
     }
-    
+
     /**
      * @covers BackBuilder\NestedNode\Page::getInheritedContensetZoneParams
      */
@@ -863,6 +863,43 @@ class PageTest extends TestCase
         $child = new Page('child');
         $child->setSection($this->page->getSection());
         $this->assertTrue($child->isLeaf());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isAncestorOf()
+     */
+    public function testIsAncestorOf()
+    {
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertFalse($child->isAncestorOf($child));
+        $this->assertTrue($child->isAncestorOf($child, false));
+        $this->assertFalse($child->isAncestorOf($this->page));
+        $this->assertTrue($this->page->isAncestorOf($child));
+        $this->assertFalse($this->page->isAncestorOf($this->page));
+        $this->assertTrue($this->page->isAncestorOf($this->page, false));
+
+        $child2 = new Page('child2');
+        $child2->setSection($this->page->getSection());
+        $this->assertFalse($child->isAncestorOf($child2));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isAncestorOf()
+     */
+    public function testIsDescendantOf()
+    {
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertFalse($child->isDescendantOf($child));
+        $this->assertTrue($child->isDescendantOf($child, false));
+        $this->assertTrue($child->isDescendantOf($this->page));
+        $this->assertFalse($this->page->isDescendantOf($this->page));
+        $this->assertTrue($this->page->isDescendantOf($this->page, false));
+
+        $child2 = new Page('child2');
+        $child2->setSection($this->page->getSection());
+        $this->assertFalse($child->isDescendantOf($child2));
     }
 
     /**
