@@ -25,6 +25,7 @@ use BackBuilder\Tests\TestCase;
 use BackBuilder\Site\Site;
 use BackBuilder\Site\Layout;
 use BackBuilder\NestedNode\Page;
+use BackBuilder\NestedNode\Repository\PageQueryBuilder;
 
 /**
  * @category    BackBuilder
@@ -384,7 +385,7 @@ class PageRepositoryTest extends TestCase
      * @covers \BackBuilder\NestedNode\Repository\PageRepository::getNotDeletedDescendants
      * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOrderingDescendants
      */
-    public function testgetNotDeletedDescendants()
+    public function testGetNotDeletedDescendants()
     {
         $section1 = $this->repo->find('section1');
         $section2 = $this->repo->find('section2');
