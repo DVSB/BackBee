@@ -82,12 +82,12 @@ class ContainerListener
         }
     }
 
-    /**
-     * [loadExternalBundleServices description]
-     * @param  Container $container [description]
-     * @param  [type]    $config    [description]
-     * @return [type]    [description]
-     */
+/**
+ * [loadExternalBundleServices description]
+ * @param  Container $container [description]
+ * @param  [type]    $config    [description]
+ * @return [type]    [description]
+ */
     // private static function loadExternalBundleServices(Container $container, array $config = null)
     // {
     //     if (null !== $config) {

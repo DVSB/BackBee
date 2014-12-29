@@ -50,7 +50,7 @@ class RevisionRepository extends EntityRepository
     {
         $content = $revision->getContent();
 
-        if (NULL === $content || !($content instanceof AClassContent)) {
+        if (null === $content || !($content instanceof AClassContent)) {
             $this->_em->remove($revision);
             throw new ClassContentException('Orphan revision, deleted', ClassContentException::REVISION_ORPHAN);
         }
@@ -188,7 +188,7 @@ class RevisionRepository extends EntityRepository
                 if (is_array($value)) {
                     foreach ($value as &$val) {
                         if ($val instanceof AClassContent) {
-                            if (NULL !== $entity = $this->_em->find(get_class($val), $val->getUid())) {
+                            if (null !== $entity = $this->_em->find(get_class($val), $val->getUid())) {
                                 echo "Subcontent ".get_class($entity)."(".$entity->getUid().") loaded\n";
                                 $val = $entity;
                             }
@@ -196,7 +196,7 @@ class RevisionRepository extends EntityRepository
                     }
                     unset($val);
                 } elseif ($value instanceof AClassContent) {
-                    if (NULL !== $entity = $this->_em->find(get_class($value), $value->getUid())) {
+                    if (null !== $entity = $this->_em->find(get_class($value), $value->getUid())) {
                         echo "Subcontent ".get_class($entity)."(".$entity->getUid().") loaded\n";
                         $value = $entity;
                     }
@@ -214,17 +214,17 @@ class RevisionRepository extends EntityRepository
      * Return the user's draft of a content, optionally checks out a new one if not exists
      * @param  \BackBee\ClassContent\AClassContent $content
      * @param  \BackBee\Security\Token\BBUserToken $token
-     * @param  boolean                                 $checkoutOnMissing If true, checks out a new revision if none was found
+     * @param  boolean                             $checkoutOnMissing If true, checks out a new revision if none was found
      * @return \BackBee\ClassContent\Revision|null
      */
     public function getDraft(AClassContent $content, \BackBee\Security\Token\BBUserToken $token, $checkoutOnMissing = false)
     {
         if (null === $revision = $content->getDraft()) {
             try {
-                if (FALSE === $this->_em->contains($content)) {
+                if (false === $this->_em->contains($content)) {
                     $content = $this->_em->find(get_class($content), $content->getUid());
-                    if (NULL === $content) {
-                        return NULL;
+                    if (null === $content) {
+                        return;
                     }
                 }
                 $q = $this->createQueryBuilder('r')

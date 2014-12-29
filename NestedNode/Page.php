@@ -715,7 +715,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the date of the page
-     * @param  \DateTime                    $date
+     * @param  \DateTime                $date
      * @return \BackBee\NestedNode\Page
      */
     public function setDate(\DateTime $date = null)
@@ -767,7 +767,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the alternate title of the page.
-     * @param  string                       $alttitle
+     * @param  string                   $alttitle
      * @return \BackBee\NestedNode\Page
      */
     public function setAltTitle($alttitle)
@@ -778,7 +778,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
     /**
      * Sets the title of the page.
-     * @param  string                       $title
+     * @param  string                   $title
      * @return \BackBee\NestedNode\Page
      */
     public function setTitle($title)
@@ -790,7 +790,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the URL of the page
-     * @param  string                       $url
+     * @param  string                   $url
      * @return \BackBee\NestedNode\Page
      */
     public function setUrl($url)
@@ -802,7 +802,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the target if a permanent redirect is defined
-     * @param  string                       $target
+     * @param  string                   $target
      * @return \BackBee\NestedNode\Page
      */
     public function setTarget($target)
@@ -814,7 +814,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets a permanent redirect
-     * @param  string                       $redirect
+     * @param  string                   $redirect
      * @return \BackBee\NestedNode\Page
      */
     public function setRedirect($redirect)
@@ -838,7 +838,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the state
-     * @param  int                          $state
+     * @param  int                      $state
      * @return \BackBee\NestedNode\Page
      */
     public function setState($state)
@@ -850,7 +850,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the publishing date
-     * @param  \DateTime                    $publishing
+     * @param  \DateTime                $publishing
      * @return \BackBee\NestedNode\Page
      */
     public function setPublishing($publishing = null)
@@ -862,7 +862,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the archiving date
-     * @param  \DateTime                    $archiving
+     * @param  \DateTime                $archiving
      * @return \BackBee\NestedNode\Page
      */
     public function setArchiving($archiving = null)
@@ -899,7 +899,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns the inherited zone according to the provided ContentSet
      * @param  \BackBee\ClassContent\ContentSet $contentSet
-     * @return \StdClass|NULL                       The inherited zone if found
+     * @return \StdClass|NULL                   The inherited zone if found
      */
     public function getInheritedContensetZoneParams(ContentSet $contentSet)
     {
@@ -1041,7 +1041,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Replaces the ContentSet of the page
      * @param  \BackBee\ClassContent\ContentSet $contentToReplace
      * @param  \BackBee\ClassContent\ContentSet $newContentSet
-     * @param  Boolean                              $checkContentsLinkToParent
+     * @param  Boolean                          $checkContentsLinkToParent
      * @return \BackBee\ClassContent\ContentSet
      */
     public function replaceRootContentSet(ContentSet $contentToReplace, ContentSet $newContentSet, $checkContentsLinkToParent = true)
@@ -1085,10 +1085,10 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Constructs the node from a string or object
-     * @param  mixed                                           $serialized The string representation of the object.
+     * @param  mixed                                       $serialized The string representation of the object.
      * @return \BackBee\NestedNode\ANestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                                    with strict mode, if a property does not exists
+     *                                                                with strict mode, if a property does not exists
      */
     public function unserialize($serialized, $strict = false)
     {
@@ -1163,7 +1163,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns an array of the ascendants
      * @param  \BackBee\NestedNode\Page $page
-     * @param  array                        $breadcrumb
+     * @param  array                    $breadcrumb
      * @return array
      * @deprecated
      */
@@ -1219,7 +1219,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Tells whether getUrl() should return the redirect url or BB5 url
-     * @param  bool                         $useUrlRedirect
+     * @param  bool                     $useUrlRedirect
      * @return \BackBee\NestedNode\Page
      */
     public function setUseUrlRedirect($useUrlRedirect)
@@ -1372,8 +1372,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Assign DateTime object to a property giving a time stamp
-     * @param  string                       $property
-     * @param  int                          $timestamp
+     * @param  string                   $property
+     * @param  int                      $timestamp
      * @return \BackBee\NestedNode\Page
      */
     private function setDateTimeValue($property, $timestamp = null)
@@ -1391,7 +1391,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the inherited content from parent, $default if not found
-     * @param  int                                     $index
+     * @param  int                                 $index
      * @param  \BackBee\ClassContent\AClassContent $default
      * @return \BackBee\ClassContent\AClassContent
      */
@@ -1410,8 +1410,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Creates a new default content to be pushed in layout columns
-     * @param  string                                  $classname
-     * @param  boolean                                 $mainzone
+     * @param  string                              $classname
+     * @param  boolean                             $mainzone
      * @return \BackBee\ClassContent\AClassContent
      */
     private function createNewDefaultContent($classname, $mainzone = false)

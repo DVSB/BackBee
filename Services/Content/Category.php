@@ -22,7 +22,7 @@
 namespace BackBee\Services\Content;
 
 use Symfony\Component\Yaml\Yaml as parserYaml;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 
 /**
  * @category    BackBee
@@ -120,7 +120,7 @@ class Category
 
     /**
      * @codeCoverageIgnore
-     * @param  string                                 $name
+     * @param  string                             $name
      * @return \BackBee\Services\Content\Category
      */
     public function setName($name)
@@ -182,7 +182,7 @@ class Category
 
     /**
      * @codeCoverageIgnore
-     * @param  type                                   $selected
+     * @param  type                               $selected
      * @return \BackBee\Services\Content\Category
      */
     public function setSelected($selected)
@@ -203,7 +203,7 @@ class Category
 
     /**
      * @codeCoverageIgnore
-     * @param  string                                 $label
+     * @param  string                             $label
      * @return \BackBee\Services\Content\Category
      */
     public function setLabel($label)
@@ -349,7 +349,7 @@ class Category
 
     /**
      * Add a new content classname for this category
-     * @param  string                                 $classname
+     * @param  string                             $classname
      * @return \BackBee\Services\Content\Category
      */
     public function addClassname($classname)

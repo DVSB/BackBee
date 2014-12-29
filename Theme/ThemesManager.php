@@ -53,7 +53,7 @@ class ThemesManager extends AThemesManager
     /**
      * Generate a theme object
      *
-     * @param  array                          $theme_config
+     * @param  array                      $theme_config
      * @return \BackBee\Theme\ThemeEntity
      * @throws ThemeException
      */

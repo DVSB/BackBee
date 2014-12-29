@@ -96,7 +96,7 @@ class Route extends sfRoute
      */
     public function getRequirements($startingWith = null)
     {
-        if (NULL === $startingWith) {
+        if (null === $startingWith) {
             return parent::getRequirements();
         }
 

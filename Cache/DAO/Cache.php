@@ -82,17 +82,17 @@ class Cache extends AExtendedCache
 
     /**
      * Class constructor
-     * @param  array                                       $options Initial options for the cache adapter:
-     *                                                              - em \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
-     *                                                              - dbal array Optional, an array of Doctrine connection options among:
-     *                                                              - connection  \Doctrine\DBAL\Connection  Optional, an already initialized database connection
-     *                                                              - proxy_dir   string                     The proxy directory
-     *                                                              - proxy_ns    string                     The namespace for Doctrine proxy
-     *                                                              - charset     string                     Optional, the charset to use
-     *                                                              - collation   string                     Optional, the collation to use
-     *                                                              - ...         mixed                      All the required parameter to open a new connection
-     * @param  string                                      $context An optional cache context
-     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
+     * @param  array                                   $options Initial options for the cache adapter:
+     *                                                          - em \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
+     *                                                          - dbal array Optional, an array of Doctrine connection options among:
+     *                                                          - connection  \Doctrine\DBAL\Connection  Optional, an already initialized database connection
+     *                                                          - proxy_dir   string                     The proxy directory
+     *                                                          - proxy_ns    string                     The namespace for Doctrine proxy
+     *                                                          - charset     string                     Optional, the charset to use
+     *                                                          - collation   string                     Optional, the collation to use
+     *                                                          - ...         mixed                      All the required parameter to open a new connection
+     * @param  string                                  $context An optional cache context
+     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -387,7 +387,7 @@ class Cache extends AExtendedCache
 
     /**
      * Returns the store entity for provided cache id
-     * @param  string                        $id Cache id
+     * @param  string                    $id Cache id
      * @return \BackBee\Cache\DAO\Entity The cache entity or NULL
      * @codeCoverageIgnore
      */

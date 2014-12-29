@@ -27,7 +27,10 @@ use BackBee\ClassContent\Element\file as elementFile;
 use BackBee\ClassContent\Element\text as elementText;
 use BackBee\ClassContent\Element\image as elementImage;
 use BackBee\ClassContent\Exception\ClassContentException;
-use BackBee\Util\File;
+
+use BackBee\Util\Media;
+use BackBee\Utils\File\File;
+use BackBee\Utils\String;
 
 /**
  * Description of Media
@@ -48,7 +51,7 @@ class Media extends AbstractServiceLocal
     public function uploadImage(\Symfony\Component\HttpFoundation\Request $request)
     {
         $uploaded_file = new \stdClass();
-        $uploaded_file->originalname = \BackBee\Util\String::toPath($request->files->get('image')->getClientOriginalName());
+        $uploaded_file->originalname = String::toPath($request->files->get('image')->getClientOriginalName());
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
         $uploaded_file->filename = basename($request->files->get('image')->getRealPath()).'.'.$uploaded_file->extension;
         $uploaded_file->src = base64_encode(file_get_contents($request->files->get('image')->getRealPath()));
@@ -68,7 +71,7 @@ class Media extends AbstractServiceLocal
         }
 
         $uploaded_file = new \stdClass();
-        $uploaded_file->originalname = \BackBee\Util\String::toPath($request->files->get('uploadedmedia')->getClientOriginalName());
+        $uploaded_file->originalname = String::toPath($request->files->get('uploadedmedia')->getClientOriginalName());
         $uploaded_file->extension = pathinfo($uploaded_file->originalname, PATHINFO_EXTENSION);
         $uploaded_file->filename = basename($request->files->get('uploadedmedia')->getRealPath()).'.'.$uploaded_file->extension;
         if (FALSE === is_dir($this->bbapp->getTemporaryDir())) {
@@ -171,8 +174,8 @@ class Media extends AbstractServiceLocal
                 } elseif ($subcontent instanceof elementFile) {
                     $content_image_obj = json_decode($value);
                     if (isset($content_image_obj->filename)) {
-                        $subcontent->originalname = \BackBee\Util\String::toPath($content_image_obj->originalname);
-                        $subcontent->path = \BackBee\Util\Media::getPathFromContent($subcontent);
+                        $subcontent->originalname = String::toPath($content_image_obj->originalname);
+                        $subcontent->path = Media::getPathFromContent($subcontent);
 
                         $src_image = base64_decode($content_image_obj->src);
 

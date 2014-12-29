@@ -21,7 +21,6 @@
 
 namespace BackBee\Validator;
 
-
 /**
  * ArrayValidator's validator
  *

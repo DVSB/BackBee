@@ -322,16 +322,16 @@ class FrontController implements HttpKernelInterface
 
     public function rssAction($uri = null)
     {
-        if (NULL === $this->application) {
+        if (null === $this->application) {
             throw new FrontControllerException('A valid BackBee application is required.', FrontControllerException::INTERNAL_ERROR);
         }
 
-        if (FALSE === $this->application->getContainer()->has('site')) {
+        if (false === $this->application->getContainer()->has('site')) {
             throw new FrontControllerException('A BackBee\Site instance is required.', FrontControllerException::INTERNAL_ERROR);
         }
 
         $site = $this->application->getContainer()->get('site');
-        if (FALSE !== $ext = strrpos($uri, '.')) {
+        if (false !== $ext = strrpos($uri, '.')) {
             $uri = substr($uri, 0, $ext);
         }
 

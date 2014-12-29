@@ -22,7 +22,7 @@
 namespace BackBee\Importer;
 
 use BackBee\ClassContent\AClassContent;
-use BackBee\Util\String;
+use BackBee\Utils\String;
 
 /**
  * @category    BackBee
@@ -69,7 +69,7 @@ abstract class AConverter implements IConverter
     /**
      * Set BackBee Entity Object
      *
-     * @param  Object                           $entity
+     * @param  Object                       $entity
      * @return \BackBee\Importer\AConverter
      */
     public function setBBEntity($entity)
@@ -136,7 +136,7 @@ abstract class AConverter implements IConverter
     /**
      * Set the value of an Element\Text
      * @param  \BackBee\ClassContent\AClassContent                $element
-     * @param  string                                                 $value
+     * @param  string                                             $value
      * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
      */
     protected function _setElementText(AClassContent $element, $value)
@@ -149,9 +149,9 @@ abstract class AConverter implements IConverter
     /**
      * Set the value of an Element\Date
      * @param  \BackBee\ClassContent\AClassContent                $element
-     * @param  string                                                 $value
-     * @param  \DateTimeZone                                          $timezone
-     * @param  string                                                 $format
+     * @param  string                                             $value
+     * @param  \DateTimeZone                                      $timezone
+     * @param  string                                             $format
      * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
      */
     protected function _setElementDate(AClassContent $element, $value, \DateTimeZone $timezone = null, $format = 'Y-m-d H:i:s')

@@ -39,10 +39,10 @@ class keywordRepository extends ClassContentRepository
     /**
      * Do stuf on update by post of the content editing form
      * @param  \BackBee\ClassContent\AClassContent $content
-     * @param  stdClass                                $value
+     * @param  stdClass                            $value
      * @param  \BackBee\ClassContent\AClassContent $parent
      * @return \BackBee\ClassContent\Element\file
-     * @throws ClassContentException                   Occures on invalid content type provided
+     * @throws ClassContentException               Occures on invalid content type provided
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
     {
@@ -70,7 +70,7 @@ class keywordRepository extends ClassContentRepository
     /**
      * Do stuf removing content from the content editing form
      * @param  \BackBee\ClassContent\AClassContent $content
-     * @param  type                                    $value
+     * @param  type                                $value
      * @param  \BackBee\ClassContent\AClassContent $parent
      * @return type
      * @throws ClassContentException

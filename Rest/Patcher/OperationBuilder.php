@@ -20,7 +20,6 @@ namespace BackBee\Rest\Patcher;
  * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /**
  *
  * @category    BackBee
@@ -34,8 +33,8 @@ class OperationBuilder
 
     /**
      *
-     * @param  string                                     $path
-     * @param  mixed                                      $value
+     * @param  string                                 $path
+     * @param  mixed                                  $value
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function test($path, $value)
@@ -51,7 +50,7 @@ class OperationBuilder
 
     /**
      *
-     * @param  string                                     $path
+     * @param  string                                 $path
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function remove($path)
@@ -66,8 +65,8 @@ class OperationBuilder
 
     /**
      *
-     * @param  string                                     $path
-     * @param  mixed                                      $value
+     * @param  string                                 $path
+     * @param  mixed                                  $value
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function add($path, $value)
@@ -83,8 +82,8 @@ class OperationBuilder
 
     /**
      *
-     * @param  string                                     $path
-     * @param  mixed                                      $value
+     * @param  string                                 $path
+     * @param  mixed                                  $value
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function replace($path, $value)
@@ -100,8 +99,8 @@ class OperationBuilder
 
     /**
      *
-     * @param  string                                     $fromPath
-     * @param  mixed                                      $toPath
+     * @param  string                                 $fromPath
+     * @param  mixed                                  $toPath
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function move($fromPath, $toPath)
@@ -117,8 +116,8 @@ class OperationBuilder
 
     /**
      *
-     * @param  string                                     $fromPath
-     * @param  mixed                                      $toPath
+     * @param  string                                 $fromPath
+     * @param  mixed                                  $toPath
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function copy($fromPath, $toPath)

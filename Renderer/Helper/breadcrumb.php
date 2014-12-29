@@ -34,9 +34,9 @@ class breadcrumb extends AHelper
     {
         $application = $this->_renderer->getApplication();
         $ancestors = array();
-        if (NULL !== $application) {
+        if (null !== $application) {
             $em = $application->getEntityManager();
-            if (NULL !== $current = $this->_renderer->getCurrentPage()) {
+            if (null !== $current = $this->_renderer->getCurrentPage()) {
                 $ancestors = $em->getRepository('BackBee\NestedNode\Page')->getAncestors($current);
             } else {
                 $ancestors = array($this->_renderer->getCurrentRoot());

@@ -25,7 +25,7 @@ use BackBee\ClassContent\Repository\ClassContentRepository;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\Element\file as elementFile;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use BackBee\Util\Media;
 use BackBee\BBApplication;
 
@@ -90,8 +90,8 @@ class fileRepository extends ClassContentRepository
     /**
      * Move an uploaded file to the temporary directory and update file content
      * @param  \BackBee\ClassContent\AClassContent                   $file
-     * @param  string                                                    $newfilename
-     * @param  string                                                    $originalname
+     * @param  string                                                $newfilename
+     * @param  string                                                $originalname
      * @return boolean|string
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
@@ -107,7 +107,7 @@ class fileRepository extends ClassContentRepository
 
         $base_dir = $this->_temporarydir;
         $file->originalname = $originalname;
-        $file->path = \BackBee\Util\Media::getPathFromContent($file);
+        $file->path = Media::getPathFromContent($file);
 
         if (null === $file->getDraft()) {
             $base_dir = ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir;
@@ -166,7 +166,7 @@ class fileRepository extends ClassContentRepository
     /**
      * Do stuf on update by post of the content editing form
      * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @param  stdClass                                                  $value
+     * @param  stdClass                                              $value
      * @param  \BackBee\ClassContent\AClassContent                   $parent
      * @return \BackBee\ClassContent\Element\file
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
@@ -207,7 +207,7 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Set the temporary directory
-     * @param  type                                                        $temporary_dir
+     * @param  type                                                    $temporary_dir
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setTemporaryDir($temporary_dir = null)
@@ -219,7 +219,7 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Set the storage directory
-     * @param  type                                                        $storage_dir
+     * @param  type                                                    $storage_dir
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setStorageDir($storage_dir = null)
@@ -231,7 +231,7 @@ class fileRepository extends ClassContentRepository
 
     /**
      * Set the media library directory
-     * @param  type                                                        $media_dir
+     * @param  type                                                    $media_dir
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setMediaDir($media_dir = null)

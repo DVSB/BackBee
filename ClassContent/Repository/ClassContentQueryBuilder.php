@@ -185,7 +185,7 @@ class ClassContentQueryBuilder extends QueryBuilder
 
     public function addTitleLike($expression)
     {
-        if (NULL != $expression) {
+        if (null != $expression) {
             $this->andWhere(
                 $this->expr()->like(
                     'cc._label',

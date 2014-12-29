@@ -373,7 +373,7 @@ class CacheListener implements EventSubscriberInterface
     /**
      * Checks the event and system validity then returns the content target, FALSE otherwise
      * @param  \BackBee\Event\Event $event
-     * @param  boolean                  $check_status
+     * @param  boolean              $check_status
      * @return boolean
      */
     private function checkCacheContentEvent($check_status = true)
@@ -398,7 +398,7 @@ class CacheListener implements EventSubscriberInterface
     /**
      * Checks the event and system validity then returns the page target, FALSE otherwise
      * @param  \BackBee\Event\Event $event
-     * @param  boolean                  $check_status
+     * @param  boolean              $check_status
      * @return boolean
      */
     private function checkCachePageEvent($check_status = true)

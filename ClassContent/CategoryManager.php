@@ -22,9 +22,8 @@
 namespace BackBee\ClassContent;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
-use BackBee\ClassContent\AClassContent;
 use BackBee\IApplication as ApplicationInterface;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 
 /**
  * CategoryManager provides every classcontent categories of the current application
@@ -119,7 +118,8 @@ class CategoryManager
                 if (class_exists($class)) {
                     $this->buildCategoryFromClassContent(new $class());
                 }
-            } catch (ClassNotFoundException $e) { /* nothing to do */ }
+            } catch (ClassNotFoundException $e) { /* nothing to do */
+            }
         }
     }
 

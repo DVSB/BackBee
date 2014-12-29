@@ -76,9 +76,9 @@ class ContentRender
 
     public function initContentObject()
     {
-        if (NULL === $this->content) {
+        if (null === $this->content) {
             $classname = "BackBee\ClassContent\\".$this->name;
-            if (NULL !== $this->uid) {
+            if (null !== $this->uid) {
                 $this->content = $this->bbapp->getEntityManager()->find($classname, $this->uid);
             }
 //            if (NULL !== $content) {
@@ -88,12 +88,12 @@ class ContentRender
 //                    $this->content = $content;
 //                }
 //            }
-            if (NULL === $this->content) {
+            if (null === $this->content) {
                 $this->content = new $classname();
             }
 
             if (null !== $this->bbapp->getBBUserToken()) {
-                if (NULL !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBee\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
+                if (null !== $draft = $this->bbapp->getEntityManager()->getRepository('BackBee\ClassContent\Revision')->getDraft($this->content, $this->bbapp->getBBUserToken())) {
                     $this->content->setDraft($draft);
                 }
             }
@@ -109,7 +109,7 @@ class ContentRender
             $elements = $content->getData();
             foreach ($elements as $key => $item) {
                 if (is_a($content->$key, "BackBee\ClassContent\AClassContent")) {
-                    if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == TRUE && NULL !== ($content->{$key}->getParam('aloha', 'scalar')))) {
+                    if (is_object($content->$key) && ($content->{$key}->getParam('editable', 'boolean') == true && null !== ($content->{$key}->getParam('aloha', 'scalar')))) {
                         $stdClassObj = new \stdClass();
                         $stdClassObj->{$key} = $alohaConf[$content->{$key}->getParam('aloha', 'scalar')];
                         $fields[] = $stdClassObj;
@@ -123,7 +123,7 @@ class ContentRender
 
     public function __construct($name, $bbapp, $category = null, $mode = null, $uid = null)
     {
-        $this->uid = (NULL === $uid) ? uniqid(rand()) : $uid;
+        $this->uid = (null === $uid) ? uniqid(rand()) : $uid;
         $this->name = $name;
         $this->renderer = $bbapp->getRenderer();
         $this->bbapp = $bbapp;
@@ -177,7 +177,7 @@ class ContentRender
 
     /**
      * @codeCoverageIgnore
-     * @param  string                                      $label
+     * @param  string                                  $label
      * @return \BackBee\Services\Content\ContentRender
      */
     public function setLabel($label)

@@ -80,7 +80,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                                $uid
+     * @param  type                            $uid
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setUid($uid)
@@ -101,7 +101,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                                $attribute
+     * @param  type                            $attribute
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setAttribute($attribute)
@@ -122,7 +122,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                                $attrValue
+     * @param  type                            $attrValue
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setAttrValue($attrValue)
@@ -143,7 +143,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  string                              $content
+     * @param  string                          $content
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setContent($content)

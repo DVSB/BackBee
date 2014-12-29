@@ -24,7 +24,7 @@ namespace BackBee\Bundle;
 use BackBee\BBApplication;
 use BackBee\FrontController\FrontController;
 use BackBee\FrontController\Exception\FrontControllerException;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;

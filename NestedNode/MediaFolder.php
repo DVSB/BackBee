@@ -154,7 +154,7 @@ class MediaFolder extends ANestedNode
 
     /**
      * Sets the title.
-     * @param  string                              $title
+     * @param  string                          $title
      * @return \BackBee\NestedNode\MediaFolder
      */
     public function setTitle($title)
@@ -166,7 +166,7 @@ class MediaFolder extends ANestedNode
 
     /**
      * Sets the URL
-     * @param  type                                $url
+     * @param  type                            $url
      * @return \BackBee\NestedNode\MediaFolder
      */
     public function setUrl($url)

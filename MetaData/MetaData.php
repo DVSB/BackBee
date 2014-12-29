@@ -105,7 +105,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Sets the name of the metadata
-     * @param  string                             $name
+     * @param  string                         $name
      * @return \BackBee\MetaData\MetaData
      * @throws \BackBee\Exception\BBException Occurs if $name if not a valid string
      */
@@ -144,10 +144,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Sets the value of the attribute
-     * @param  string                                  $attribute
-     * @param  string                                  $value
+     * @param  string                              $attribute
+     * @param  string                              $value
      * @param  \BackBee\ClassContent\AClassContent $content   Optional, if the attribute is computed
-     *                                                            the content on which apply the scheme
+     *                                                        the content on which apply the scheme
      * @return \BackBee\MetaData\MetaData
      */
     public function setAttribute($attribute, $value, AClassContent $content = null)
@@ -174,10 +174,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Updates the scheme of the attribute
-     * @param  string                                  $attribute
-     * @param  string                                  $scheme
+     * @param  string                              $attribute
+     * @param  string                              $scheme
      * @param  \BackBee\ClassContent\AClassContent $content   Optional, if the attribute is computed
-     *                                                            the content on which apply the scheme
+     *                                                        the content on which apply the scheme
      * @return \BackBee\MetaData\MetaData
      */
     public function updateAttributeScheme($attribute, $scheme, AClassContent $content = null)
@@ -279,7 +279,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                     }
                                     $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$c)));
                                 }
-                                $this->attributes[$attribute] = str_replace($matches[0][$i], join(',', $v), $this->attributes[$attribute]);
+                                $this->attributes[$attribute] = str_replace($matches[0][$i], implode(',', $v), $this->attributes[$attribute]);
                             } else {
                                 $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags($content)));
                                 $this->attributes[$attribute] = str_replace($matches[0][$i], $new_value, $this->attributes[$attribute]);

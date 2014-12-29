@@ -25,10 +25,8 @@ use BackBee\Controller\Controller;
 use BackBee\Rest\Formatter\FormatterInterface;
 use BackBee\Rest\Exception\ValidationException;
 use BackBee\Serializer\SerializerBuilder;
-
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
-
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -145,9 +143,9 @@ abstract class ARestController extends Controller implements RestControllerInter
      *
      * @see JsonResponse::__construct()
      *
-     * @param  mixed   $data
-     * @param  integer $status
-     * @param  array   $headers
+     * @param mixed   $data
+     * @param integer $status
+     * @param array   $headers
      *
      * @return JsonResponse
      */
@@ -220,7 +218,7 @@ abstract class ARestController extends Controller implements RestControllerInter
     protected function createValidationException($field, $value, $message)
     {
         return new ValidationException(new ConstraintViolationList(array(
-            new ConstraintViolation($message, $message, array(), $field, $field, $value)
+            new ConstraintViolation($message, $message, array(), $field, $field, $value),
         )));
     }
 

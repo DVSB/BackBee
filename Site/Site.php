@@ -219,7 +219,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Sets the label of the website
-     * @param  string                 $label
+     * @param  string             $label
      * @return \BackBee\Site\Site
      */
     public function setLabel($label)
@@ -231,7 +231,7 @@ class Site extends AObjectIdentifiable implements IJson
 
     /**
      * Sets the server name
-     * @param  string                 $server_name
+     * @param  string             $server_name
      * @return \BackBee\Site\Site
      */
     public function setServerName($server_name)

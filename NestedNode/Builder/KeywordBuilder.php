@@ -24,7 +24,7 @@ class KeywordBuilder
     /**
      * Create new entity BackBee\NestedNode\KeyWord with $keyword if not exists
      *
-     * @param  string                         $keyword
+     * @param  string                     $keyword
      * @return BackBee\NestedNode\KeyWord
      */
     public function createKeywordIfNotExists($keyword, $do_persist = true)

@@ -23,7 +23,6 @@ namespace BackBee\Rest\Controller;
 
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Security\User;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;

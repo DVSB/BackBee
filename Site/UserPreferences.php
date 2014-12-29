@@ -110,7 +110,7 @@ class UserPreferences
     /**
      * Set the user preferences UID
      * @codeCoverageIgnore
-     * @param  string                            $uid
+     * @param  string                        $uid
      * @return \BackBee\Site\UserPreferences
      */
     public function setUid($uid)
@@ -136,7 +136,7 @@ class UserPreferences
     /**
      * Set the preferences of the user
      *
-     * @param  mixed                             $preferences
+     * @param  mixed                         $preferences
      * @return \BackBee\Site\UserPreferences
      */
     public function setPreferences($preferences)

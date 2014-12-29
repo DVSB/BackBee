@@ -27,7 +27,7 @@ use Doctrine\DBAL\Types\Type;
 
 /**
  * The ObjectHydrator constructs an object graph out of a solr result set.
-  */
+ */
 class RestHydrator
 {
     /**

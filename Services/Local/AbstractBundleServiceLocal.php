@@ -60,7 +60,7 @@ class AbstractBundleServiceLocal extends AbstractServiceLocal
 
     /**
      * Sets the bundle providing services by its id
-     * @param  string                                                 $bundleId
+     * @param  string                                             $bundleId
      * @return \BackBee\Services\Local\AbstractBundleServiceLocal
      * @throws \BackBee\Services\Exception\ServicesException      Occures if the bundle is unknown or invalid
      */

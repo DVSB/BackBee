@@ -21,7 +21,7 @@
 
 namespace BackBee\Services\Local;
 
-use BackBee\Util\String;
+use BackBee\Utils\String;
 use BackBee\Services\Exception\ServicesException;
 
 /**

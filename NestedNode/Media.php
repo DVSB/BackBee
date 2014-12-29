@@ -165,7 +165,7 @@ class Media
 
     /**
      * Sets the title
-     * @param  string                        $title
+     * @param  string                    $title
      * @return \BackBee\NestedNode\Media
      */
     public function setTitle($title)
@@ -177,7 +177,7 @@ class Media
 
     /**
      * Sets the publication date
-     * @param  \DateTime                     $date
+     * @param  \DateTime                 $date
      * @return \BackBee\NestedNode\Media
      */
     public function setDate(\DateTime $date)
@@ -189,7 +189,7 @@ class Media
 
     /**
      * Sets the created date
-     * @param  \DateTime                     $created
+     * @param  \DateTime                 $created
      * @return \BackBee\NestedNode\Media
      */
     public function setCreated(\DateTime $created)
@@ -201,7 +201,7 @@ class Media
 
     /**
      * Sets the last modified date
-     * @param  \DateTime                     $modified
+     * @param  \DateTime                 $modified
      * @return \BackBee\NestedNode\Media
      */
     public function setModified(\DateTime $modified)

@@ -24,7 +24,7 @@ namespace BackBee\Site;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Security\Acl\Domain\AObjectIdentifiable;
 use BackBee\Services\Local\IJson;
-use BackBee\Util\Numeric;
+use BackBee\Utils\Numeric;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -462,7 +462,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Sets the label.
      * @codeCoverageIgnore
-     * @param  string                   $label
+     * @param  string               $label
      * @return \BackBee\Site\Layout
      */
     public function setLabel($label)
@@ -475,7 +475,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Set the filename of the layout
      * @codeCoverageIgnore
-     * @param  string                   $path
+     * @param  string               $path
      * @return \BackBee\Site\Layout
      */
     public function setPath($path)
@@ -488,7 +488,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Sets the data associated to the layout.
      * No validation checks are performed at this step.
-     * @param  mixed                    $data
+     * @param  mixed                $data
      * @return \BackBee\Site\Layout
      */
     public function setData($data)
@@ -510,7 +510,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Sets the data associated to the layout.
      * None validity checks are performed at this step.
-     * @param  mixed                    $data
+     * @param  mixed                $data
      * @return \BackBee\Site\Layout
      */
     public function setDataObject($data)
@@ -525,7 +525,7 @@ class Layout extends AObjectIdentifiable implements IJson
     /**
      * Sets the path to the layout icon.
      * @codeCoverageIgnore
-     * @param  string                   $picpath
+     * @param  string               $picpath
      * @return \BackBee\Site\Layout
      */
     public function setPicPath($picpath)
@@ -550,8 +550,8 @@ class Layout extends AObjectIdentifiable implements IJson
 
     /**
      * Sets one or all parameters
-     * @param  string                   $var    the parameter name to set, if NULL all the parameters array wil be set
-     * @param  mixed                    $values the parameter value or all the parameters if $var is NULL
+     * @param  string               $var    the parameter name to set, if NULL all the parameters array wil be set
+     * @param  mixed                $values the parameter value or all the parameters if $var is NULL
      * @return \BackBee\Site\Layout
      */
     public function setParam($var = null, $values = null)
@@ -644,16 +644,16 @@ class Layout extends AObjectIdentifiable implements IJson
         return json_decode($this->getData(), true);
     }
 
-
     /**
      * Add state
      *
-     * @param \BackBee\Workflow\State $state
+     * @param  \BackBee\Workflow\State $state
      * @return \BackBee\Site\Layout
      */
     public function addState(\BackBee\Workflow\State $state)
     {
         $this->_states[] = $state;
+
         return $this;
     }
     /**

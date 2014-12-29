@@ -112,12 +112,12 @@ class RevisionListener
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
 
-        if (NULL !== $application) {
+        if (null !== $application) {
             $em = $application->getEntityManager();
             $revision->setEntityManager($em)
                     ->setToken($application->getBBUserToken());
 
-            if (NULL == $revision->getContent()) {
+            if (null == $revision->getContent()) {
                 $db = $em->getConnection();
                 $stmt = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?", array($revision->getUid()));
 
@@ -139,10 +139,10 @@ class RevisionListener
     public static function onPrerenderContent(Event $event)
     {
         $dispatcher = $event->getDispatcher();
-        if (NULL === $application = $dispatcher->getApplication()) {
+        if (null === $application = $dispatcher->getApplication()) {
             return;
         }
-        if (NULL === $token = $application->getBBUserToken()) {
+        if (null === $token = $application->getBBUserToken()) {
             return;
         }
 
@@ -157,17 +157,17 @@ class RevisionListener
         }
 
         $em = $application->getEntityManager();
-        if (NULL !== $revision = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token)) {
+        if (null !== $revision = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token)) {
             $content->setDraft($revision);
             $application->debug(sprintf('Revision found for `%s` content and `%s` user', $content->getUid(), $token->getUsername()));
         }
 
         if (false === ($content instanceof ContentSet)) {
             foreach ($content->getData() as $key => $subcontent) {
-                if (NULL === $subcontent) {
+                if (null === $subcontent) {
                     $contenttype = $content->getAcceptedType($key);
                     if (0 === strpos($contenttype, 'BackBee\ClassContent\\')) {
-                        if (NULL === $content->getDraft()) {
+                        if (null === $content->getDraft()) {
                             $revision = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, true);
                             $content->setDraft($revision);
                         }

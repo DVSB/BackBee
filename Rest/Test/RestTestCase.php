@@ -23,7 +23,6 @@ namespace BackBee\Rest\Test;
 
 use BackBee\Security\User;
 use BackBee\Tests\TestCase;
-
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -118,7 +117,7 @@ class RestTestCase extends TestCase
     /**
      *
      * @param  \Symfony\Component\HttpFoundation\Request $request
-     * @param  BackBee\Security\User                 $user
+     * @param  BackBee\Security\User                     $user
      * @return self
      */
     protected static function signRequest(Request $request, User $user = null)
@@ -135,7 +134,7 @@ class RestTestCase extends TestCase
     /**
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  \BackBee\Security\User                 $apiUser
+     * @param  \BackBee\Security\User                     $apiUser
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function sendRequest(Request $request, User $apiUser = null)

@@ -82,7 +82,7 @@ class Entity
 
     /**
      * Sets the cache id
-     * @param  string                        $uid
+     * @param  string                    $uid
      * @return \BackBee\Cache\DAO\Entity
      * @codeCoverageIgnore
      */
@@ -95,7 +95,7 @@ class Entity
 
     /**
      * Sets the data to store
-     * @param  string                        $data
+     * @param  string                    $data
      * @return \BackBee\Cache\DAO\Entity
      * @codeCoverageIgnore
      */
@@ -108,7 +108,7 @@ class Entity
 
     /**
      * Sets the expire date time
-     * @param  \DateTime                     $expire
+     * @param  \DateTime                 $expire
      * @return \BackBee\Cache\DAO\Entity
      * @codeCoverageIgnore
      */
@@ -121,7 +121,7 @@ class Entity
 
     /**
      * Set the associated tag
-     * @param  string                        $tag
+     * @param  string                    $tag
      * @return \BackBee\Cache\DAO\Entity
      * @codeCoverageIgnore
      */

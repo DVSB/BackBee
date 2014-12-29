@@ -31,7 +31,7 @@ use BackBee\Exception\BBException;
 use BackBee\NestedNode\Repository\NestedNodeRepository;
 use BackBee\Site\Site;
 use BackBee\Theme\Theme;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\DependencyInjection\Definition;
@@ -186,7 +186,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Returns the associated theme
-     * @param  boolean                  $force_reload Force to reload the theme if true
+     * @param  boolean              $force_reload Force to reload the theme if true
      * @return \BackBee\Theme\Theme
      */
     public function getTheme($force_reload = false)
@@ -610,8 +610,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 array_unshift($this->_classcontentdir, $this->getRepository().'/ClassContent');
             }
 
-            //array_walk($this->_classcontentdir, array('BackBee\Util\File', 'resolveFilepath'));
-            array_map(array('BackBee\Util\File', 'resolveFilepath'), $this->_classcontentdir);
+            array_map(array('BackBee\Utils\File\File', 'resolveFilepath'), $this->_classcontentdir);
         }
 
         return $this->_classcontentdir;
@@ -619,7 +618,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Push one directory at the end of classcontent dirs
-     * @param  string                     $dir
+     * @param  string                 $dir
      * @return \BackBee\BBApplication
      */
     public function pushClassContentDir($dir)
@@ -636,7 +635,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Prepend one directory at the beginning of classcontent dirs
-     * @param  type                       $dir
+     * @param  type                   $dir
      * @return \BackBee\BBApplication
      */
     public function unshiftClassContentDir($dir)
@@ -680,8 +679,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 }
             }
 
-            //array_walk($this->_resourcedir, array('BackBee\Util\File', 'resolveFilepath'));
-            array_map(array('BackBee\Util\File', 'resolveFilepath'), $this->_resourcedir);
+            array_map(array('BackBee\Utils\File\File', 'resolveFilepath'), $this->_resourcedir);
         }
 
         return $this->_resourcedir;
@@ -689,7 +687,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Push one directory at the end of resources dirs
-     * @param  string                     $dir
+     * @param  string                 $dir
      * @return \BackBee\BBApplication
      */
     public function pushResourceDir($dir)
@@ -706,7 +704,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Prepend one directory at the begining of resources dirs
-     * @param  type                       $dir
+     * @param  type                   $dir
      * @return \BackBee\BBApplication
      */
     public function unshiftResourceDir($dir)
@@ -723,9 +721,9 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
 
     /**
      * Prepend one directory of resources
-     * @param  String                     $dir The new resource directory to add
+     * @param  String                 $dir The new resource directory to add
      * @return \BackBee\BBApplication The current BBApplication
-     * @throws BBException                Occur on invalid path or invalid resource directories
+     * @throws BBException            Occur on invalid path or invalid resource directories
      */
     public function addResourceDir($dir)
     {

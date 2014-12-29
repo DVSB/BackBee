@@ -96,7 +96,7 @@ class ClassContentRepository extends EntityRepository
         if ($results) {
             foreach ($results as $parentContentSet) {
                 /* create draft for the main container */
-                if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($parentContentSet, $userToken, true)) {
+                if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($parentContentSet, $userToken, true)) {
                     $parentContentSet->setDraft($draft);
                 }
                 /* Replace the old ContentSet by the new one */
@@ -662,10 +662,10 @@ class ClassContentRepository extends EntityRepository
     /**
      * Do stuf on update by post of the content editing form
      * @param  \BackBee\ClassContent\AClassContent $content
-     * @param  stdClass                                $value
+     * @param  stdClass                            $value
      * @param  \BackBee\ClassContent\AClassContent $parent
      * @return \BackBee\ClassContent\Element\file
-     * @throws ClassContentException                   Occures on invalid content type provided
+     * @throws ClassContentException               Occures on invalid content type provided
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
     {
@@ -700,7 +700,7 @@ class ClassContentRepository extends EntityRepository
     /**
      * Format a post (place here all other stuffs)
      * @param  \BackBee\ClassContent\AClassContent $content
-     * @param  stdClass                                $value
+     * @param  stdClass                            $value
      * @return string
      */
     public function formatPost(AClassContent $content, $value)
@@ -711,7 +711,7 @@ class ClassContentRepository extends EntityRepository
             case 'BackBee\ClassContent\Element\text':
                 //nettoyage des images => div aloha
                 $pattern = '{<div class=".*aloha-image.*".*>.?<(img[^\>]*).*>.*</div>}si';
-                if (TRUE == preg_match($pattern, $val, $matches)) {
+                if (true == preg_match($pattern, $val, $matches)) {
                     if (2 == count($matches)) {
                         $val = str_replace($matches[0], '<'.$matches[1].'/>', $val);
                     }
@@ -725,7 +725,7 @@ class ClassContentRepository extends EntityRepository
     /**
      * Do stuf removing content from the content editing form
      * @param  \BackBee\ClassContent\AClassContent $content
-     * @param  type                                    $value
+     * @param  type                                $value
      * @param  \BackBee\ClassContent\AClassContent $parent
      * @return type
      * @throws ClassContentException
@@ -751,7 +751,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Set the temporary directory
-     * @param  type                                                        $temporary_dir
+     * @param  type                                                    $temporary_dir
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setTemporaryDir($temporary_dir = null)
@@ -761,7 +761,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Set the storage directory
-     * @param  type                                                        $storage_dir
+     * @param  type                                                    $storage_dir
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setStorageDir($storage_dir = null)
@@ -771,7 +771,7 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Set the media library directory
-     * @param  type                                                        $media_dir
+     * @param  type                                                    $media_dir
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setMediaDir($media_dir = null)
@@ -783,7 +783,7 @@ class ClassContentRepository extends EntityRepository
      * Load content if need, the user's revision is also set
      * @param  \BackBee\ClassContent\AClassContent $content
      * @param  \BackBee\Security\Token\BBUserToken $token
-     * @param  boolean                                 $checkoutOnMissing If true, checks out a new revision if none was found
+     * @param  boolean                             $checkoutOnMissing If true, checks out a new revision if none was found
      * @return \BackBee\ClassContent\AClassContent
      */
     public function load(AClassContent $content, \BackBee\Security\Token\BBUserToken $token = null, $checkoutOnMissing = false)
@@ -909,7 +909,6 @@ class ClassContentRepository extends EntityRepository
             foreach ($parents as $parent) {
                 $parent->unsetSubContent($content);
             }
-
 
             $this->_em->getConnection()->executeQuery(
                 'DELETE FROM indexation WHERE owner_uid = :uid',

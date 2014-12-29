@@ -35,7 +35,7 @@ class Database
     private $_entityFinder;
 
     /**
-     * @param \BackBee\BBApplication  $application
+     * @param \BackBee\BBApplication      $application
      * @param \Doctrine\ORM\EntityManager $em
      */
     public function __construct(BBApplication $application, EntityManager $em = null)

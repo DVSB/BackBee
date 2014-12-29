@@ -20,7 +20,6 @@ namespace BackBee\Util\Resolver;
  * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /**
  * This config directory resolver allows to get every folders in which we can find bootstrap.yml
  * file. It's ordered by the most specific (context + envionment) to the most global.

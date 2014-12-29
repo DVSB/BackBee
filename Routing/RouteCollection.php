@@ -171,8 +171,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     /**
      * Returns $pathinfo with base url of current page
      * If $site is provided, the url will be pointing on the associate domain
-     * @param  string                 $pathinfo
-     * @param  string                 $defaultExt
+     * @param  string             $pathinfo
+     * @param  string             $defaultExt
      * @param  \BackBee\Site\Site $site
      * @return string
      */
@@ -311,7 +311,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      * Returns uri from pathinfo according to site to be reached
      * @param  \Symfony\Component\HttpFoundation\Request $request
      * @param  string                                    $pathinfo
-     * @param  \BackBee\Site\Site                    $site
+     * @param  \BackBee\Site\Site                        $site
      * @return string
      */
     private function getUriForSite(Request $request, $pathinfo, Site $site)

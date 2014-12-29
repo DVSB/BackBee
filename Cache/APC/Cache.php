@@ -59,9 +59,9 @@ class Cache extends AExtendedCache
 
     /**
      * Class constructor
-     * @param  array                                       $options Initial options for the cache adapter: none to be defined
-     * @param  string                                      $context An optional cache context
-     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
+     * @param  array                                   $options Initial options for the cache adapter: none to be defined
+     * @param  string                                  $context An optional cache context
+     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)

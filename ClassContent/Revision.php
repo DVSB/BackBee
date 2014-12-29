@@ -136,7 +136,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the current entity manager to dynamicaly load subrevisions
-     * @param  \Doctrine\ORM\EntityManager        $em
+     * @param  \Doctrine\ORM\EntityManager    $em
      * @return \BackBee\ClassContent\Revision
      */
     public function setEntityManager(\Doctrine\ORM\EntityManager $em = null)
@@ -160,8 +160,8 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Return a subcontent instance by its type and value, FALSE if not found
-     * @param  string                                        $type  The classname of the subcontent
-     * @param  string                                        $value The value of the subcontent (uid)
+     * @param  string                                    $type  The classname of the subcontent
+     * @param  string                                    $value The value of the subcontent (uid)
      * @return \BackBee\ClassContent\AClassContent|FALSE
      */
     protected function _getContentByDataValue($type, $value)
@@ -235,7 +235,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the whole datas of the revision
-     * @param  array                                   $data
+     * @param  array                               $data
      * @return \BackBee\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
@@ -264,7 +264,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the entity target content classname
-     * @param  string                                  $classname
+     * @param  string                              $classname
      * @return \BackBee\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
@@ -278,7 +278,7 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * Sets the owner of the revision
      * @param  \Symfony\Component\Security\Core\User\UserInterface $user
-     * @return \BackBee\ClassContent\AClassContent             the current instance content
+     * @return \BackBee\ClassContent\AClassContent                 the current instance content
      * @codeCoverageIgnore
      */
     public function setOwner(UserInterface $user)
@@ -290,7 +290,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets the comment associated to the revision
-     * @param  string                                  $comment
+     * @param  string                              $comment
      * @return \BackBee\ClassContent\AClassContent the current instance content
      * @codeCoverageIgnore
      */
@@ -313,7 +313,7 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Sets options at the construction of a new revision
-     * @param  mixed                              $options
+     * @param  mixed                          $options
      * @return \BackBee\ClassContent\AContent
      */
     protected function _setOptions($options = null)
@@ -396,7 +396,7 @@ class Revision extends AContent implements \Iterator, \Countable
             return $this->getData($index);
         }
 
-        return NULL;
+        return;
     }
 
     /**
@@ -442,8 +442,8 @@ class Revision extends AContent implements \Iterator, \Countable
     {
         $last = $this->last();
 
-        if (NULL === $last) {
-            return NULL;
+        if (null === $last) {
+            return;
         }
 
         array_pop($this->_data);
@@ -492,8 +492,8 @@ class Revision extends AContent implements \Iterator, \Countable
     {
         $first = $this->first();
 
-        if (NULL === $first) {
-            return NULL;
+        if (null === $first) {
+            return;
         }
 
         array_shift($this->_data);

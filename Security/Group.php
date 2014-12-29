@@ -106,7 +106,7 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  integer                     $id
+     * @param  integer                 $id
      * @return \BackBee\Security\Group
      */
     public function setId($id)
@@ -127,7 +127,7 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  string                      $name
+     * @param  string                  $name
      * @return \BackBee\Security\Group
      */
     public function setName($name)
@@ -148,7 +148,7 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  string                      $identifier
+     * @param  string                  $identifier
      * @return \BackBee\Security\Group
      */
     public function setIdentifier($identifier)

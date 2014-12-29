@@ -247,7 +247,7 @@ class SerializerBuilder
 
     /**
      *
-     * @param  \Metadata\Driver\DriverInterface          $metadataDriver
+     * @param  \Metadata\Driver\DriverInterface      $metadataDriver
      * @return \BackBee\Serializer\SerializerBuilder
      */
     public function setMetadataDriver(DriverInterface $metadataDriver)

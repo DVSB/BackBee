@@ -39,16 +39,16 @@ class Layout extends AbstractServiceLocal
      */
     public function getLayoutsFromSite($siteId = null)
     {
-        if (NULL === $this->bbapp) {
+        if (null === $this->bbapp) {
             throw new ServicesException("None BackBee Application provided", ServicesException::UNDEFINED_APP);
         }
 
         $site = $this->bbapp->getSite();
-        if (NULL === $siteId) {
+        if (null === $siteId) {
             $site = $this->bbapp->getEntityManager()->getRepository('\BackBee\Site\Site')->find($siteId);
         }
 
-        if (NULL === $site) {
+        if (null === $site) {
             throw new ServicesException("Current BackBee Application has to be start with a valid site", ServicesException::UNDEFINED_SITE);
         }
 
@@ -66,7 +66,7 @@ class Layout extends AbstractServiceLocal
      */
     public function getModels()
     {
-        if (NULL === $this->bbapp) {
+        if (null === $this->bbapp) {
             throw new ServicesException("None BackBee Application provided", ServicesException::UNDEFINED_APP);
         }
 
@@ -85,13 +85,13 @@ class Layout extends AbstractServiceLocal
      */
     public function putTemplate($data)
     {
-        if (NULL === $this->bbapp) {
+        if (null === $this->bbapp) {
             throw new ServicesException("None BackBee Application provided", ServicesException::UNDEFINED_APP);
         }
 
         $em = $this->bbapp->getEntityManager();
         $layout = $em->find('\BackBee\Site\Layout', $data['uid']);
-        if (NULL === $layout) {
+        if (null === $layout) {
             $layout = new SiteLayout();
         }
 
@@ -115,14 +115,14 @@ class Layout extends AbstractServiceLocal
      */
     public function getLayoutFromUid($uid)
     {
-        if (NULL === $this->bbapp) {
+        if (null === $this->bbapp) {
             throw new ServicesException("None BackBee Application provided", ServicesException::UNDEFINED_APP);
         }
 
         $em = $this->bbapp->getEntityManager();
         $layout = $em->find('\BackBee\Site\Layout', $uid);
 
-        if (NULL === $layout) {
+        if (null === $layout) {
             throw new ServicesException(sptrinf('Unfound Layout with uid %s', $uid));
         }
 
@@ -135,7 +135,7 @@ class Layout extends AbstractServiceLocal
      */
     public function deleteLayout($uid)
     {
-        if (NULL === $this->bbapp) {
+        if (null === $this->bbapp) {
             throw new ServicesException("None BackBee Application provided", ServicesException::UNDEFINED_APP);
         }
 

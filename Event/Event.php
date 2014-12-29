@@ -140,8 +140,8 @@ class Event extends sfEvent
     /**
      * Returns the current BackBee application
      * @return \BackBee\BBApplication
-     * @throws \BadMethodCallException    Occures if the event dispatcher is not a
-     *                                    BackBee dispatcher
+     * @throws \BadMethodCallException Occures if the event dispatcher is not a
+     *                                 BackBee dispatcher
      */
     public function getApplication()
     {

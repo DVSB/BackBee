@@ -35,10 +35,10 @@ class hasmainnodeonline extends AHelper
 {
     public function __invoke(AClassContent $content = null)
     {
-        if (NULL === $content) {
+        if (null === $content) {
             $content = $this->_renderer->getObject();
         }
 
-        return !(NULL === $this->_renderer->getApplication()->getBBUserToken() && is_object($content->getMainNode()) && !($content->getMainNode()->getState() & Page::STATE_ONLINE));
+        return !(null === $this->_renderer->getApplication()->getBBUserToken() && is_object($content->getMainNode()) && !($content->getMainNode()->getState() & Page::STATE_ONLINE));
     }
 }

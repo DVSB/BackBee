@@ -24,7 +24,7 @@ namespace BackBee\Workflow;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Site\Layout;
 use BackBee\Security\Acl\Domain\AObjectIdentifiable;
-use BackBee\Util\Numeric;
+use BackBee\Utils\Numeric;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
@@ -132,7 +132,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Sets the code
-     * @param  int                                             $code
+     * @param  int                                         $code
      * @return \BackBee\Workflow\State
      * @throws \BackBee\Exception\InvalidArgumentException
      */
@@ -179,7 +179,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Sets the label
-     * @param  type                        $label
+     * @param  type                    $label
      * @return \BackBee\Workflow\State
      * @codeCoverageIgnore
      */
@@ -204,7 +204,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Sets the optional listener classname
-     * @param  string                      $listener
+     * @param  string                  $listener
      * @return \BackBee\Workflow\State
      * @codeCoverageIgnore
      */
@@ -248,10 +248,10 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * Constructs the state from a string or object
-     * @param  mixed                                           $serialized The string representation of the object.
+     * @param  mixed                                       $serialized The string representation of the object.
      * @return \BackBee\Workflow\State
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                                    with strict mode, if a property does not exists
+     *                                                                with strict mode, if a property does not exists
      * @deprecated since version 1.0
      */
     public function unserialize($serialized, $strict = false)

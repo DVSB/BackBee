@@ -79,8 +79,8 @@ class AclManager
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
-     * @param int                                                                                                                $mask
-     * @param type                                                                                                               $strategy
+     * @param int                                                                                                            $mask
+     * @param type                                                                                                           $strategy
      */
     public function updateObjectAce($objectIdentity, $sid, $mask, $strategy = null)
     {
@@ -111,8 +111,8 @@ class AclManager
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
-     * @param int                                                                                                                $mask
-     * @param string|null                                                                                                        $strategy
+     * @param int                                                                                                            $mask
+     * @param string|null                                                                                                    $strategy
      */
     public function updateClassAce($objectIdentity, $sid, $mask, $strategy = null)
     {
@@ -143,8 +143,8 @@ class AclManager
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
-     * @param int                                                                                                                $mask
-     * @param string|null                                                                                                        $strategy
+     * @param int                                                                                                            $mask
+     * @param string|null                                                                                                    $strategy
      */
     public function insertOrUpdateObjectAce($objectIdentity, $sid, $mask, $strategy = null)
     {
@@ -177,8 +177,8 @@ class AclManager
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
-     * @param int                                                                                                                $mask
-     * @param string|null                                                                                                        $strategy
+     * @param int                                                                                                            $mask
+     * @param string|null                                                                                                    $strategy
      */
     public function insertOrUpdateClassAce($objectIdentity, $sid, $mask, $strategy = null)
     {

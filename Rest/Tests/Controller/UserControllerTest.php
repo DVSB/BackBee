@@ -27,7 +27,6 @@ use BackBee\Security\Acl\Permission\MaskBuilder;
 use BackBee\Security\Group;
 use BackBee\Security\Token\UsernamePasswordToken;
 use BackBee\Security\User;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
@@ -400,7 +399,7 @@ class UserControllerTest extends RestTestCase
     /**
      *
      * @param  \Symfony\Component\HttpFoundation\Request $request
-     * @param  BackBee\Security\User                 $user
+     * @param  BackBee\Security\User                     $user
      * @return self
      */
     protected static function signRequest(Request $request, BackBee\Security\User $user = null)
@@ -408,8 +407,6 @@ class UserControllerTest extends RestTestCase
         if (null === $user) {
             $user = $this->user;
         }
-
-
 
         return self;
     }

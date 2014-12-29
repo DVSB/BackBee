@@ -41,7 +41,7 @@ class NestedNodeLRCalculateJob extends AJob
 
     /**
      * Sets the entity manager to use
-     * @param  \Doctrine\ORM\EntityManager                   $em
+     * @param  \Doctrine\ORM\EntityManager               $em
      * @return \BackBee\Job\NestedNodeDetachCalculateJob
      */
     public function setEntityManager($em)

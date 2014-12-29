@@ -76,7 +76,7 @@ class LayoutController extends ARestController
         );
 
         return $this->createJsonResponse(array_values($states), 200, array(
-            'Content-Range' => '0-' . (count($states) - 1) . '/' . count($states)
+            'Content-Range' => '0-'.(count($states) - 1).'/'.count($states),
         ));
     }
 
@@ -95,7 +95,7 @@ class LayoutController extends ARestController
             ->leftJoin('l._states', 'st')
         ;
 
-        if(null !== ($site = $request->attributes->get('site'))) {
+        if (null !== ($site = $request->attributes->get('site'))) {
             $qb->select('l, st, si')
                 ->innerJoin('l._site', 'si', 'WITH', 'si._uid = :site_uid')
                 ->setParameter('site_uid', $site->getUid())
@@ -109,14 +109,13 @@ class LayoutController extends ARestController
         $layouts = $qb->getQuery()->getResult();
 
         $response = $this->createJsonResponse(null, 200, array(
-            'Content-Range' => '0-' . (count($layouts) - 1) . '/' . count($layouts)
+            'Content-Range' => '0-'.(count($layouts) - 1).'/'.count($layouts),
         ));
 
         $response->setContent($this->formatCollection($layouts));
 
         return $response;
     }
-
 
     /**
      * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
@@ -163,7 +162,7 @@ class LayoutController extends ARestController
         $this->getEntityManager()->flush($layout);
 
         return $this->createJsonResponse(null, 201, array(
-            'Location' => ''
+            'Location' => '',
         ));
     }
 

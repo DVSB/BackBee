@@ -54,8 +54,8 @@ class FileSystem extends ATransport
     }
 
     /**
-     * @param  string                                 $host
-     * @param  string                                 $port
+     * @param  string                             $host
+     * @param  string                             $port
      * @return \BackBee\Util\Transport\FileSystem
      * @codeCoverageIgnore
      */
@@ -68,8 +68,8 @@ class FileSystem extends ATransport
      * Tries to change dir to the defined remote path.
      * An error is triggered if failed.
      *
-     * @param  string                                                        $username
-     * @param  string                                                        $password
+     * @param  string                                                    $username
+     * @param  string                                                    $password
      * @return \BackBee\Util\Transport\FileSystem
      * @throws \BackBee\Util\Transport\Exception\AuthenticationException
      */

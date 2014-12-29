@@ -244,7 +244,7 @@ class ManualBBApplication implements ApplicationInterface
     {
     }
 
-   /**
+    /**
      * @return boolean
      */
     public function isOverridedConfig()

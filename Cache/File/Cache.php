@@ -23,7 +23,7 @@ namespace BackBee\Cache\File;
 
 use BackBee\Cache\ACache;
 use BackBee\Cache\Exception\CacheException;
-use BackBee\Util\String;
+use BackBee\Utils\String;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -56,12 +56,12 @@ class Cache extends ACache
 
     /**
      * Class constructor
-     * @param  array                                       $options Initial options for the cache adapter:
-     *                                                              - cachedir string The cache directory
-     * @param  string                                      $context An optional cache context
-     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
+     * @param  array                                   $options Initial options for the cache adapter:
+     *                                                          - cachedir string The cache directory
+     * @param  string                                  $context An optional cache context
+     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the cache directory doesn't exist, can not
-     *                                                             be created or is not writable.
+     *                                                         be created or is not writable.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {

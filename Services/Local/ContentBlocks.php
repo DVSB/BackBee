@@ -24,7 +24,7 @@ namespace BackBee\Services\Local;
 use BackBee\Services\Content\Category;
 use BackBee\Services\Content\ContentRender;
 use BackBee\Services\Exception\ServicesException;
-use BackBee\Util\String;
+use BackBee\Utils\String;
 
 /**
  * RPC services for AClassContent management
@@ -103,7 +103,7 @@ class ContentBlocks extends AbstractServiceLocal
     /**
      * Gets ContentRender for a category
      * @param \BackBee\Services\Content\Category $category
-     * @param array                                  $contents
+     * @param array                              $contents
      */
     private function _getContentsByCategory(Category $category, array &$contents)
     {
@@ -254,7 +254,7 @@ class ContentBlocks extends AbstractServiceLocal
         $contentsList = array();
         $limitInfos = array("start" => (int) $start, "limit" => (int) $limit);
         $orderInfos = array("column" => $order_sort, "dir" => $order_dir);
-        $isCat = (strpos($catName, "contentType") === FALSE) ? true : false; //contentType
+        $isCat = (strpos($catName, "contentType") === false) ? true : false; //contentType
         if ($isCat) {
             $contents = $this->getContentsByCategory(strtolower($catName));
         } else {
@@ -316,7 +316,7 @@ class ContentBlocks extends AbstractServiceLocal
         $em = $this->bbapp->getEntityManager();
         $limitInfos = array("start" => (int) $start, "limit" => (int) $limit);
         $orderInfos = array("column" => $order_sort, "direction" => $order_dir);
-        $isCat = (strpos($catName, "contentType") === FALSE) ? true : false; //contentType_ || categorie
+        $isCat = (strpos($catName, "contentType") === false) ? true : false; //contentType_ || categorie
         if ($isCat) {
             $contents = $this->getContentsByCategory(strtolower($catName));
         } else {
@@ -447,14 +447,14 @@ class ContentBlocks extends AbstractServiceLocal
         $contentTypeClass = "BackBee\ClassContent\\".$contentType;
 
         $em = $this->bbapp->getEntityManager();
-        if (NULL === $contentNode = $em->find($contentTypeClass, $contentUid)) {
+        if (null === $contentNode = $em->find($contentTypeClass, $contentUid)) {
             $contentNode = new $contentTypeClass($contentUid);
         }
 
         $this->isGranted('VIEW', $contentNode);
 
         // Find a draft if exists
-        if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken())) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken())) {
             $contentNode->setDraft($draft);
         }
 
@@ -476,7 +476,7 @@ class ContentBlocks extends AbstractServiceLocal
         $contentTypeClass = "BackBee\ClassContent\\".$contentInfos["contentType"];
 
         $em = $this->bbapp->getEntityManager();
-        if (NULL === $contentNode = $em->find($contentTypeClass, $contentUid)) {
+        if (null === $contentNode = $em->find($contentTypeClass, $contentUid)) {
             $contentNode = new $contentTypeClass($contentUid);
             $em->persist($contentNode);
         }
@@ -484,7 +484,7 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('EDIT', $contentNode);
 
         // Find a draft if exists
-        if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true)) {
+        if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($contentNode, $this->bbapp->getBBUserToken(), true)) {
             $contentNode->setDraft($draft);
         }
 
@@ -547,7 +547,7 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('EDIT', $content);
 
         // Find a draft if exists
-        if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
+        if (null !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken())) {
             $content->setDraft($draft);
         }
 
@@ -571,7 +571,7 @@ class ContentBlocks extends AbstractServiceLocal
                 $result->bb5_form->$key->bb5_value = array();
                 $result->bb5_form->$key->bb5_uid = array();
 
-                if (NULL === $content->$key) {
+                if (null === $content->$key) {
                     $newContent = $content->getAcceptedType($key);
                     $subcontent = new $newContent();
                 }
@@ -582,11 +582,11 @@ class ContentBlocks extends AbstractServiceLocal
                         $result->bb5_form->$key->bb5_uid = null;
                         $result->bb5_form->$key->bb5_type = 'scalar';
                         $result->bb5_form->$key->bb5_fieldset = false;
-                        $result->bb5_form->$key->bb5_isLoaded = (NULL !== $value) ? true : false;
+                        $result->bb5_form->$key->bb5_isLoaded = (null !== $value) ? true : false;
                         $result->bb5_form->$key->bb5_value[] = htmlentities($value, ENT_QUOTES, 'UTF-8');
                     } elseif ($value instanceof \BackBee\ClassContent\AClassContent && false === ($value instanceof \BackBee\ClassContent\ContentSet)) {
                         // Find a draft if exists
-                        if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($value, $this->bbapp->getBBUserToken())) {
+                        if (null !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($value, $this->bbapp->getBBUserToken())) {
                             $value->setDraft($draft);
                         }
 
@@ -645,7 +645,7 @@ class ContentBlocks extends AbstractServiceLocal
 
     private function removeKeyword($id, $content)
     {
-        if (NULL === $id) {
+        if (null === $id) {
             return (0);
         }
         $realKeyword = $this->bbapp->getEntityManager()->find('BackBee\NestedNode\KeyWord', $id);
@@ -682,7 +682,7 @@ class ContentBlocks extends AbstractServiceLocal
         $this->isGranted('EDIT', $content);
 
         // Find a draft, checkout it if not exists
-        if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
+        if (null !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
             $content->setDraft($draft);
         }
 
@@ -738,7 +738,7 @@ class ContentBlocks extends AbstractServiceLocal
                         }
 
                         // Find a draft, checkout it if not exists
-                        if (NULL !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true)) {
+                        if (null !== $draft = $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true)) {
                             $subcontent->setDraft($draft);
                         }
 

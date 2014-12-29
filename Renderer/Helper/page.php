@@ -34,7 +34,7 @@ class page extends AHelper
 
     public function getTarget()
     {
-        if (NULL === $this->_renderer->getApplication()->getBBUserToken()) {
+        if (null === $this->_renderer->getApplication()->getBBUserToken()) {
             return $this->_page->getTarget();
         } else {
             return '_self';

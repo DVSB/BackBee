@@ -2,7 +2,6 @@
 
 namespace BackBee\Security\Context;
 
-
 /**
  * Description of ContextInterface
  *

@@ -37,9 +37,9 @@ class imageRepository extends fileRepository
     /**
      * Move an uploaded file to the temporary directory and update image content
      * @param  \BackBee\ClassContent\AClassContent                   $file
-     * @param  string                                                    $newfilename
-     * @param  string                                                    $originalname
-     * @param  string                                                    $src
+     * @param  string                                                $newfilename
+     * @param  string                                                $originalname
+     * @param  string                                                $src
      * @return boolean|string
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */

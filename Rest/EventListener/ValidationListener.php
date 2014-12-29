@@ -23,7 +23,6 @@ namespace BackBee\Rest\EventListener;
 
 use BackBee\Event\Listener\APathEnabledListener;
 use BackBee\Rest\Exception\ValidationException;
-
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;

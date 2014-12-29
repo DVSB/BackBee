@@ -95,7 +95,7 @@ class MockBBApplication extends BBApplication
      * Mock the merhod returning the base repository directory
      *
      * @return string
-    */
+     */
     public function getBaseRepository()
     {
         return vfsStream::url('repositorydir');

@@ -127,7 +127,7 @@ class BBException extends \Exception
 
     /**
      * Sets the last source file before the exception thrown
-     * @param  string                             $source
+     * @param  string                         $source
      * @return \BackBee\Exception\BBException
      */
     public function setSource($source)
@@ -139,7 +139,7 @@ class BBException extends \Exception
 
     /**
      * Sets the line of the source file where the exception thrown
-     * @param  type                               $seek
+     * @param  type                           $seek
      * @return \BackBee\Exception\BBException
      */
     public function setSeek($seek)

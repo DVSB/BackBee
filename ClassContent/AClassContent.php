@@ -267,8 +267,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Updates a non persistent property value for the current instance
-     * @param  string                                  $var   the name of the property
-     * @param  mixed                                   $value the value of the property
+     * @param  string                              $var   the name of the property
+     * @param  mixed                               $value the value of the property
      * @return \BackBee\ClassContent\AClassContent the current instance
      */
     public function setProperty($var, $value)
@@ -451,10 +451,10 @@ abstract class AClassContent extends AContent
 
     /**
      * Sets options at the construction of a new instance
-     * @param  array                                   $options Initial options for the content:
-     *                                                          - label       the label of the content
-     *                                                          - parameters  a set of parameters for the content
-     *                                                          - default     array default value for datas
+     * @param  array                               $options Initial options for the content:
+     *                                                      - label       the label of the content
+     *                                                      - parameters  a set of parameters for the content
+     *                                                      - default     array default value for datas
      * @return \BackBee\ClassContent\AClassContent
      */
     protected function _setOptions($options = null)
@@ -504,8 +504,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Dynamically adds and sets new property to this content
-     * @param  string                                  $var   the name of the property
-     * @param  mixed                                   $value the value of the property
+     * @param  string                              $var   the name of the property
+     * @param  mixed                               $value the value of the property
      * @return \BackBee\ClassContent\AClassContent The current instance
      */
     protected function _defineProperty($var, $value)
@@ -519,10 +519,10 @@ abstract class AClassContent extends AContent
 
     /**
      * Dynamically adds and sets new element to this content
-     * @param  string                                  $var          the name of the element
-     * @param  string                                  $type         the type
-     * @param  array                                   $options      Initial options for the content (see this constructor)
-     * @param  Boolean                                 $updateAccept dynamically accept or not the type for the new element
+     * @param  string                              $var          the name of the element
+     * @param  string                              $type         the type
+     * @param  array                               $options      Initial options for the content (see this constructor)
+     * @param  Boolean                             $updateAccept dynamically accept or not the type for the new element
      * @return \BackBee\ClassContent\AClassContent The current instance
      */
     protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = true)
@@ -558,9 +558,9 @@ abstract class AClassContent extends AContent
 
     /**
      * Dynamically add and set new parameter to this content
-     * @param  string                                  $var     the name of the element
-     * @param  string                                  $type    the type
-     * @param  array                                   $options Initial options for the parameter (see this constructor)
+     * @param  string                              $var     the name of the element
+     * @param  string                              $type    the type
+     * @param  array                               $options Initial options for the parameter (see this constructor)
      * @return \BackBee\ClassContent\AClassContent The current instance
      */
     protected function _defineParam($var, $type = 'scalar', $options = null)
@@ -583,8 +583,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Adds a new accepted type to the element
-     * @param  string                                  $type the type to accept
-     * @param  string                                  $var  the element
+     * @param  string                              $type the type to accept
+     * @param  string                              $var  the element
      * @return \BackBee\ClassContent\AClassContent The current instance
      */
     protected function _addAcceptedType($type, $var = null)
@@ -611,7 +611,7 @@ abstract class AClassContent extends AContent
     /**
      * Adds a subcontent to the collection.
      * @param  \BackBee\ClassContent\AClassContent $value
-     * @return string                                  the unique identifier of the add subcontent
+     * @return string                              the unique identifier of the add subcontent
      */
     protected function _addSubcontent(AClassContent $value)
     {
@@ -674,8 +674,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Magical function to set value to given element
-     * @param  string                                                       $var   The name of the element
-     * @param  mixed                                                        $value The value to set
+     * @param  string                                                   $var   The name of the element
+     * @param  mixed                                                    $value The value to set
      * @return \BackBee\ClassContent\AClassContent                      The current instance content
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      * @codeCoverageIgnore
@@ -742,7 +742,7 @@ abstract class AClassContent extends AContent
      */
     public function getMaxEntry()
     {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getMaxEntry() : parent::getMaxEntry();
+        return (null !== $this->getDraft()) ? $this->getDraft()->getMaxEntry() : parent::getMaxEntry();
     }
 
     /**
@@ -752,7 +752,7 @@ abstract class AClassContent extends AContent
      */
     public function getMinEntry()
     {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getMinEntry() : parent::getMinEntry();
+        return (null !== $this->getDraft()) ? $this->getDraft()->getMinEntry() : parent::getMinEntry();
     }
 
     /**
@@ -762,7 +762,7 @@ abstract class AClassContent extends AContent
      */
     public function getCreated()
     {
-        return NULL != $this->getDraft() ? $this->getDraft()->getCreated() : parent::getCreated();
+        return null != $this->getDraft() ? $this->getDraft()->getCreated() : parent::getCreated();
     }
 
     /**
@@ -772,7 +772,7 @@ abstract class AClassContent extends AContent
      */
     public function getModified()
     {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getModified() : parent::getModified();
+        return (null !== $this->getDraft()) ? $this->getDraft()->getModified() : parent::getModified();
     }
 
     /**
@@ -782,7 +782,7 @@ abstract class AClassContent extends AContent
      */
     public function getRevision()
     {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getRevision() : parent::getRevision();
+        return (null !== $this->getDraft()) ? $this->getDraft()->getRevision() : parent::getRevision();
     }
 
     /**
@@ -792,20 +792,20 @@ abstract class AClassContent extends AContent
      */
     public function getState()
     {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->getState() : parent::getState();
+        return (null !== $this->getDraft()) ? $this->getDraft()->getState() : parent::getState();
     }
 
     /**
      * Sets one or all parameters
-     * @param  string                                  $var    the parameter name to set, if NULL all the parameters array wil be set
-     * @param  mixed                                   $values the parameter value or all the parameters if $var is NULL
-     * @param  string                                  $type   the optionnal casting type of the value
+     * @param  string                              $var    the parameter name to set, if NULL all the parameters array wil be set
+     * @param  mixed                               $values the parameter value or all the parameters if $var is NULL
+     * @param  string                              $type   the optionnal casting type of the value
      * @return \BackBee\ClassContent\AClassContent The current instance
      * @codeCoverageIgnore
      */
     public function setParam($var = null, $values = null, $type = null)
     {
-        return (NULL !== $this->getDraft()) ? $this->getDraft()->setParam($var, $values, $type) : parent::setParam($var, $values, $type);
+        return (null !== $this->getDraft()) ? $this->getDraft()->setParam($var, $values, $type) : parent::setParam($var, $values, $type);
     }
 
     /**
@@ -850,7 +850,7 @@ abstract class AClassContent extends AContent
      */
     public function getImageName()
     {
-        return str_replace(array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'), array('', '/'), get_class($this)) . '.png';
+        return str_replace(array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'), array('', '/'), get_class($this)).'.png';
     }
 
     /*     * **************************************************************** */
@@ -861,9 +861,9 @@ abstract class AClassContent extends AContent
 
     /**
      * Return the data of this content
-     * @param  string                                                       $var        The element to be return, if NULL, all datas are returned
-     * @param  Boolean                                                      $forceArray Force the return as array
-     * @return mixed                                                        Could be either one or array of scalar, array, AClassContent instance
+     * @param  string                                                   $var        The element to be return, if NULL, all datas are returned
+     * @param  Boolean                                                  $forceArray Force the return as array
+     * @return mixed                                                    Could be either one or array of scalar, array, AClassContent instance
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException     Occurs if the class of a subcontent can not be loaded
      * @codeCoverageIgnore
@@ -947,7 +947,7 @@ abstract class AClassContent extends AContent
      */
     public function unsetSubContent(AClassContent $subContent)
     {
-        if (NULL !== $this->getDraft()) {
+        if (null !== $this->getDraft()) {
             return $this->getDraft()->unsetSubContent($subContent);
         }
 
@@ -986,7 +986,7 @@ abstract class AClassContent extends AContent
      */
     public function updateDraft(Revision $lastCommitted)
     {
-        if (NULL === $revision = $this->getDraft()) {
+        if (null === $revision = $this->getDraft()) {
             throw new ClassContentException('Enable to update: missing draft', ClassContentException::REVISION_MISSING);
         }
 
@@ -1010,7 +1010,7 @@ abstract class AClassContent extends AContent
                 $type = $this->_accept[$key][0];
 
                 if ((0 === strpos($type, 'BackBee\ClassContent')) && ('BackBee\ClassContent\ContentSet' !== $type)) {
-                    if (NULL === $this->getData($key)) {
+                    if (null === $this->getData($key)) {
                         if (class_exists($type)) {
                             $value = array();
                             $value[] = new $type();
@@ -1024,8 +1024,8 @@ abstract class AClassContent extends AContent
 
     /**
      * Returns a subcontent instance by its type and value, FALSE if not found
-     * @param  string                                        $type  The classname of the subcontent
-     * @param  string                                        $value The value of the subcontent (uid)
+     * @param  string                                    $type  The classname of the subcontent
+     * @param  string                                    $value The value of the subcontent (uid)
      * @return \BackBee\ClassContent\AClassContent|FALSE
      */
     protected function _getContentByDataValue($type, $value)
@@ -1074,7 +1074,7 @@ abstract class AClassContent extends AContent
             'properties' => $this->getProperty(),
             'main_node'  => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
             'draft_uid'  => null !== $this->getDraft() ? $this->getDraft()->getUid() : null,
-            'image'      => $this->getImageName()
+            'image'      => $this->getImageName(),
         );
 
         $datas = array_merge(parent::jsonSerialize(), $datas);

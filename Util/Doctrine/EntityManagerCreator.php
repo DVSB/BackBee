@@ -31,6 +31,7 @@ use Doctrine\Common\EventManager;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
+use BackBee\Utils\Collection\Collection;
 
 /**
  * Utility class to create a new Doctrine entity manager
@@ -45,16 +46,16 @@ class EntityManagerCreator
 {
     /**
      * Creates a new Doctrine entity manager
-     * @param  array                                           $options Options provided to get an entity manager, keys should be :
-     *                                                                  - entity_manager \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
-     *                                                                  - connection     \Doctrine\DBAL\Connection    Optional, an already initialized database connection
-     *                                                                  - proxy_dir      string                       The proxy directory
-     *                                                                  - proxy_ns       string                       The namespace for Doctrine proxy
-     *                                                                  - charset        string                       Optional, the charset to use
-     *                                                                  - collation      string                       Optional, the collation to use
-     *                                                                  - ...            mixed                        All the required parameter to open a new connection
-     * @param  \Psr\Log\LoggerInterface                        $logger  Optional logger
-     * @param  \Doctrine\Common\EventManager                   $evm     Optional event manager
+     * @param  array                                       $options Options provided to get an entity manager, keys should be :
+     *                                                              - entity_manager \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
+     *                                                              - connection     \Doctrine\DBAL\Connection    Optional, an already initialized database connection
+     *                                                              - proxy_dir      string                       The proxy directory
+     *                                                              - proxy_ns       string                       The namespace for Doctrine proxy
+     *                                                              - charset        string                       Optional, the charset to use
+     *                                                              - collation      string                       Optional, the collation to use
+     *                                                              - ...            mixed                        All the required parameter to open a new connection
+     * @param  \Psr\Log\LoggerInterface                    $logger  Optional logger
+     * @param  \Doctrine\Common\EventManager               $evm     Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be returned
      */
@@ -231,7 +232,7 @@ class EntityManagerCreator
      */
     private static function _addCustomFunctions(Configuration $config, array $options = array())
     {
-        if (null !== $string_functions = \BackBee\Util\Arrays::get($options, 'orm:entity_managers:default:dql:string_functions')) {
+        if (null !== $string_functions = Collection::get($options, 'orm:entity_managers:default:dql:string_functions')) {
             foreach ($string_functions as $name => $class) {
                 if (true === class_exists($class)) {
                     $config->addCustomStringFunction($name, $class);
@@ -239,7 +240,7 @@ class EntityManagerCreator
             }
         }
 
-        if (null !== $numeric_functions = \BackBee\Util\Arrays::get($options, 'orm:entity_managers:default:dql:numeric_functions')) {
+        if (null !== $numeric_functions = Collection::get($options, 'orm:entity_managers:default:dql:numeric_functions')) {
             foreach ($numeric_functions as $name => $class) {
                 if (true === class_exists($class)) {
                     $config->addCustomNumericFunction($name, $class);
@@ -247,7 +248,7 @@ class EntityManagerCreator
             }
         }
 
-        if (null !== $datetime_functions = \BackBee\Util\Arrays::get($options, 'orm:entity_managers:default:dql:datetime_functions')) {
+        if (null !== $datetime_functions = Collection::get($options, 'orm:entity_managers:default:dql:datetime_functions')) {
             foreach ($datetime_functions as $name => $class) {
                 if (true === class_exists($class)) {
                     $config->addCustomDatetimeFunction($name, $class);
@@ -260,8 +261,8 @@ class EntityManagerCreator
 
     /**
      * Returns the EntityManager provided
-     * @param  \Doctrine\ORM\EntityManager                     $entity_manager
-     * @param  \Doctrine\Common\EventManager                   $evm            Optional event manager
+     * @param  \Doctrine\ORM\EntityManager                 $entity_manager
+     * @param  \Doctrine\Common\EventManager               $evm            Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager is not an EntityManager
      */
@@ -276,9 +277,9 @@ class EntityManagerCreator
 
     /**
      * Returns a new EntityManager with the provided connection
-     * @param  \Doctrine\DBAL\Connection                       $connection
-     * @param  \Doctrine\ORM\Configuration                     $config
-     * @param  \Doctrine\Common\EventManager                   $evm        Optional event manager
+     * @param  \Doctrine\DBAL\Connection                   $connection
+     * @param  \Doctrine\ORM\Configuration                 $config
+     * @param  \Doctrine\Common\EventManager               $evm        Optional event manager
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
@@ -297,8 +298,8 @@ class EntityManagerCreator
 
     /**
      * Returns a new EntityManager with the provided parameters
-     * @param  array                                           $options
-     * @param  \Doctrine\ORM\Configuration                     $config
+     * @param  array                                       $options
+     * @param  \Doctrine\ORM\Configuration                 $config
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
@@ -313,8 +314,8 @@ class EntityManagerCreator
 
     /**
      * Sets the character set for the provided connection
-     * @param  \Doctrine\DBAL\Connection                       $connection
-     * @param  array                                           $options
+     * @param  \Doctrine\DBAL\Connection                   $connection
+     * @param  array                                       $options
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if charset is invalid
      */
     private static function _setConnectionCharset(Connection $connection, array $options = array())
@@ -334,8 +335,8 @@ class EntityManagerCreator
 
     /**
      * Sets the collation for the provided connection
-     * @param  \Doctrine\DBAL\Connection                       $connection
-     * @param  array                                           $options
+     * @param  \Doctrine\DBAL\Connection                   $connection
+     * @param  array                                       $options
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if collation is invalid
      */
     private static function _setConnectionCollation(Connection $connection, array $options = array())

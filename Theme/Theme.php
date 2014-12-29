@@ -23,8 +23,8 @@ namespace BackBee\Theme;
 
 use BackBee\BBApplication;
 use BackBee\Theme\Exception\ThemeException;
-use BackBee\Util\Dir;
-use BackBee\Util\File;
+use BackBee\Utils\File\Dir;
+use BackBee\Utils\File\File;
 use BackBee\Config\Config;
 
 /**
@@ -318,7 +318,7 @@ class Theme extends ThemeConst
      */
     public function getConfig()
     {
-        if (NULL === $this->_config) {
+        if (null === $this->_config) {
             $this->_initConfig();
         }
 

@@ -129,7 +129,7 @@ class ClassContent extends AbstractServiceLocal
         }
         $em = $this->getApplication()->getEntityManager();
         $srzContent = (object) $srzContent;
-        if (FALSE === array_key_exists('uid', $srzContent)) {
+        if (false === array_key_exists('uid', $srzContent)) {
             throw new ServicesException('An uid must be provided');
         }
         $content = $this->getApplication()->getEntityManager()->find('BackBee\ClassContent\\'.$srzContent->type, $srzContent->uid);
@@ -167,7 +167,7 @@ class ClassContent extends AbstractServiceLocal
 
         $srzContent = (object) $srzContent;
 
-        if (FALSE === array_key_exists('uid', $srzContent)) {
+        if (false === array_key_exists('uid', $srzContent)) {
             throw new ServicesException('An uid has to be provided');
         }
         if (array_key_exists($srzContent->uid, $this->_processedContent)) {

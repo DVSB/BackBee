@@ -64,9 +64,9 @@ abstract class ACache
 
     /**
      * Class constructor
-     * @param  array                                       $options An array of options allowing to construct the cache adapter
-     * @param  string                                      $context An optional cache context
-     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
+     * @param  array                                   $options An array of options allowing to construct the cache adapter
+     * @param  string                                  $context An optional cache context
+     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the cache adapter cannot be construct
      * @codeCoverageIgnore
      */
@@ -121,7 +121,7 @@ abstract class ACache
 
     /**
      * Sets the cache logger
-     * @param  \Psr\Log\LoggerInterface  $logger
+     * @param  \Psr\Log\LoggerInterface $logger
      * @return \BackBee\Cache\ACache
      * @codeCoverageIgnore
      */
@@ -154,7 +154,7 @@ abstract class ACache
 
     /**
      * Sets the cache coontext
-     * @param  string                    $context
+     * @param  string                $context
      * @return \BackBee\Cache\ACache
      * @codeCoverageIgnore
      */
@@ -167,7 +167,7 @@ abstract class ACache
 
     /**
      * Sets the cache adapter instance options
-     * @param  array                                       $options
+     * @param  array                                   $options
      * @return \BackBee\Cache\ACache
      * @throws \BackBee\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */

@@ -37,7 +37,7 @@ class Media
     /**
      * Returns the computed storage filename of an element file
      * @param  \BackBee\ClassContent\Element\file          $content
-     * @param  int                                             $folder_size Optional, size in characters of the storing folder
+     * @param  int                                         $folder_size Optional, size in characters of the storing folder
      * @return string
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the provided element file is empty
      */
@@ -66,10 +66,10 @@ class Media
 
     /**
      * Returns the computed storage filename base on an uid
-     * @param  string                                          $uid
-     * @param  string                                          $originalname
-     * @param  int                                             $folder_size
-     * @param  boolean                                         $include_originalname
+     * @param  string                                      $uid
+     * @param  string                                      $originalname
+     * @param  int                                         $folder_size
+     * @param  boolean                                     $include_originalname
      * @return string
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the provided $uid is invalid
      */
@@ -98,13 +98,13 @@ class Media
 
     /**
      * Resizes an image and saves it to the provided file path
-     * @param  string                             $source The filepath of the source image
-     * @param  string                             $dest   The filepath of the target image
-     * @param  int                                $width
-     * @param  int                                $height
-     * @return boolean                            Returns TRUE on success, FALSE on failure
+     * @param  string                         $source The filepath of the source image
+     * @param  string                         $dest   The filepath of the target image
+     * @param  int                            $width
+     * @param  int                            $height
+     * @return boolean                        Returns TRUE on success, FALSE on failure
      * @throws \BackBee\Exception\BBException Occures if gd extension is not loaded
-     * @throws InvalidArgumentException           Occures on unsupported file type or unreadable file source
+     * @throws InvalidArgumentException       Occures on unsupported file type or unreadable file source
      */
     public static function resize($source, $dest, $width, $height)
     {

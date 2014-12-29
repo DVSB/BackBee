@@ -25,7 +25,7 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\AClassContent;
 use BackBee\NestedNode\Page;
 use BackBee\Rewriting\Exception\RewritingException;
-use BackBee\Util\String;
+use BackBee\Utils\String;
 
 /**
  * Utility class to generate page URL according config rules
@@ -140,7 +140,7 @@ class UrlGenerator implements IUrlGenerator
      * Returns the URL of the page
      * @param  \BackBee\NestedNode\Page            $page    The page
      * @param  \BackBee\ClassContent\AClassContent $content The optionnal main content of the page
-     * @return string                                  The URL                                  The generated URL
+     * @return string                              The URL                                  The generated URL
      */
     public function generate(Page $page, AClassContent $content = null, $exceptionOnMissingScheme = true)
     {
@@ -244,7 +244,7 @@ class UrlGenerator implements IUrlGenerator
     /**
      * Checks for the uniqueness of the URL and postfixe it if need
      * @param \BackBee\NestedNode\Page $page The page
-     * @param string                       &$url The reference of the generated URL
+     * @param string                   &$url The reference of the generated URL
      */
     private function checkUniqueness(Page $page, &$url)
     {

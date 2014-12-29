@@ -23,8 +23,8 @@ namespace BackBee\Importer\Connector;
 
 use BackBee\BBApplication;
 use BackBee\Importer\IImporterConnector;
-use BackBee\Util\File;
-use BackBee\Util\Dir;
+use BackBee\Utils\File\File;
+use BackBee\Utils\File\Dir;
 
 /**
  *
@@ -65,7 +65,7 @@ class ZipArchive implements IImporterConnector
     /**
      * Class constructor
      * @param \BackBee\BBApplication $application
-     * @param array                      $config
+     * @param array                  $config
      */
     public function __construct(BBApplication $application, array $config)
     {

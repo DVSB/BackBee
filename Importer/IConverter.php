@@ -48,7 +48,7 @@ interface IConverter
      * Function executed before the import started
      *
      * @param \BackBee\Importer\Importer $importer
-     * @param array                          $config
+     * @param array                      $config
      */
     public function beforeImport(Importer $importer, array $config);
 
@@ -56,13 +56,13 @@ interface IConverter
      * Function executed after each entity fush
      *
      * @param \BackBee\Importer\Importer $importer
-     * @param array                          $entities
+     * @param array                      $entities
      */
     public function afterEntitiesFlush(Importer $importer, array $entities);
 
     /**
      * Returns an existing or new object of BB Entity according to $identifier
-     * @param  string                                 $identifier
+     * @param  string                             $identifier
      * @return BackBee\ClassContent\AClassContent $entity
      */
     public function getBBEntity($identifier);

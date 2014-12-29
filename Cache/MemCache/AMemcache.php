@@ -115,7 +115,7 @@ abstract class AMemcache extends AExtendedCache
     }
     /**
      * Adds a set of servers to the memcache instance pool
-     * @param  array                                       $servers
+     * @param  array                                   $servers
      * @return boolean
      * @throws \BackBee\Cache\Exception\CacheException Occurs if one of the server configurations is not an array
      * @link http://php.net/manual/en/Memcache.addservers.php
@@ -343,8 +343,8 @@ abstract class AMemcache extends AExtendedCache
 
     /**
      * Returns TRUE if the server is already added to Memcached, FALSE otherwise
-     * @param  string                                      $host
-     * @param  int                                         $port
+     * @param  string                                  $host
+     * @param  int                                     $port
      * @return boolean
      * @throws \BackBee\Cache\Exception\CacheException Occurs if none memcached object is not initialized
      * @codeCoverageIgnore
