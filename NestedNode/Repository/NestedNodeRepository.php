@@ -535,8 +535,7 @@ class NestedNodeRepository extends EntityRepository
             throw new InvalidArgumentException('Cannot move node as child of one of its descendants');
         }
 
-        $this->_refreshExistingNode($node)
-                ->_detachFromTree($node)
+        $this->_detachFromTree($node)
                 ->_refreshExistingNode($dest);
 
         $newleft = $this->_getNewLeftFromPosition($dest, $position);
@@ -720,7 +719,7 @@ class NestedNodeRepository extends EntityRepository
      */
     private function shiftRlValues(ANestedNode $node, $first, $delta)
     {
-        if (self::$config['nestedNodeCalculateAsync']) {
+        if (false && self::$config['nestedNodeCalculateAsync']) {
             // $this->shiftRlValuesByJob($target, $first, $delta);
             $this->startDetachedRLValuesJob($node, $first, $delta);
         } else {
