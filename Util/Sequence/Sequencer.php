@@ -1,11 +1,11 @@
 <?php
 
 /*
- * Copyright (c) 2011-2014 Lp digital system
+ * Copyright (c) 2011-2015 Lp digital system
  *
  * This file is part of BackBee.
  *
- * BackBee is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -17,15 +17,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
 namespace BackBee\Util\Sequence;
 
-use BackBee\Exception\InvalidArgumentException;
-use BackBee\Utils\Numeric;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
+
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\Utils\Numeric;
 
 /**
  * Sequence repository

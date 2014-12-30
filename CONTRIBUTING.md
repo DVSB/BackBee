@@ -38,16 +38,31 @@ You can also use plus or minus to describe if you globaly add or remove somethin
 
 For instance, this is a PR valid label: ``[Rest] #42 + Updated & completed PageController tests``.
 
-When you want to take an issue, create your PR prefixed by a [WIP] ("Work in progress") and add a "in progress" label.
+When you want to take an issue, create your PR prefixed by a [WIP]("Work in progress") and add a "in progress" label.
 This way, we know you are working on and we can give you some advices if needed.
 
-When you have finished your PR, you can update the PR label to replace [WIP] by [RFR] ("Ready for review") prefix.
+When you have finished your PR, you can update the PR label to replace [WIP] by [RFR]("Ready for review") prefix.
 
 Consider your PR finished if:
 * You have write a test with a new feature
 * All tests pass
 * The build is all green
 * You (may) have introduced a little documentation
+* Your PR respect project formatting rules (see above)
+
+Formatting
+----------
+
+We use [php-formatter](https://github.com/mmoreram/php-formatter) to
+manage your file headers and the way the use statments should be added to the classes.
+
+Before submit your Pull Request, don't forget to apply this commands:
+
+```sh
+    ~$ php-formatter formatter:header:fix .
+    ~$ php-formatter formatter:use:sort .
+```
+You need to install php-formatter before.
 
 Deciders & mergers
 ------------------
@@ -58,8 +73,8 @@ BackBee have a core team who have rights on repositories.
 
 Actual mergers are @eric-chau and @crouillon, actual deciders are @pasinter, @ndufreche and @fkroockmann.
 
-All the core team is here to help you if you want to improve BackBee, we love contribution :) 
- 
+All the core team is here to help you if you want to improve BackBee, we love contribution :)
+
 
 Thank you!
 

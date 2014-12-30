@@ -1,54 +1,56 @@
 <?php
 
 /*
- * Copyright (c) 2011-2013 Lp digital system
+ * Copyright (c) 2011-2015 Lp digital system
  *
- * This file is part of BackBee5.
+ * This file is part of BackBee.
  *
  * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBee5 is distributed in the hope that it will be useful,
+ * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
 namespace BackBee\Serializer;
 
-use JMS\Serializer\Handler\PhpCollectionHandler;
-use JMS\Serializer\Handler\PropelCollectionHandler;
-use JMS\Serializer\Exception\RuntimeException;
-use Metadata\MetadataFactory;
-use JMS\Serializer\Metadata\Driver\AnnotationDriver;
-use JMS\Serializer\Handler\HandlerRegistry;
-use JMS\Serializer\Construction\UnserializeObjectConstructor;
-use PhpCollection\Map;
-use JMS\Serializer\EventDispatcher\EventDispatcher;
-use JMS\Serializer\Handler\DateHandler;
-use JMS\Serializer\Handler\ArrayCollectionHandler;
-use JMS\Serializer\Construction\ObjectConstructorInterface;
-use JMS\Serializer\EventDispatcher\Subscriber\DoctrineProxySubscriber;
-use JMS\Serializer\Naming\CamelCaseNamingStrategy;
-use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
-use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\FileCacheReader;
-use Metadata\Cache\FileCache;
-use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
+use Doctrine\Common\Annotations\Reader;
+use JMS\Serializer\Construction\ObjectConstructorInterface;
+use JMS\Serializer\Construction\UnserializeObjectConstructor;
+use JMS\Serializer\EventDispatcher\EventDispatcher;
+use JMS\Serializer\EventDispatcher\Subscriber\DoctrineProxySubscriber;
 use JMS\Serializer\Exception\InvalidArgumentException;
-use Metadata\Driver\DriverInterface;
-use JMS\Serializer\XmlSerializationVisitor;
-use JMS\Serializer\XmlDeserializationVisitor;
-use JMS\Serializer\YamlSerializationVisitor;
-use JMS\Serializer\JsonSerializationVisitor;
+use JMS\Serializer\Exception\RuntimeException;
+use JMS\Serializer\Handler\ArrayCollectionHandler;
+use JMS\Serializer\Handler\DateHandler;
+use JMS\Serializer\Handler\HandlerRegistry;
+use JMS\Serializer\Handler\PhpCollectionHandler;
+use JMS\Serializer\Handler\PropelCollectionHandler;
 use JMS\Serializer\JsonDeserializationVisitor;
+use JMS\Serializer\JsonSerializationVisitor;
+use JMS\Serializer\Metadata\Driver\AnnotationDriver;
+use JMS\Serializer\Naming\CamelCaseNamingStrategy;
+use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
+use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
 use JMS\Serializer\Serializer;
+use JMS\Serializer\XmlDeserializationVisitor;
+use JMS\Serializer\XmlSerializationVisitor;
+use JMS\Serializer\YamlSerializationVisitor;
+use Metadata\Cache\FileCache;
+use Metadata\Driver\DriverInterface;
+use Metadata\MetadataFactory;
+use PhpCollection\Map;
 
 /**
  * Builder for serializer instances.

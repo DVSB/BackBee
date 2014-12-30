@@ -1,16 +1,24 @@
-<?php /* <body><pre>
+<?php
 
--------------------------------------------------------------------------------------------
-  CKEditor - Posted Data
+/*
+ * Copyright (c) 2011-2015 Lp digital system
+ *
+ * This file is part of BackBee.
+ *
+ * BackBee5 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBee is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
+ */
 
-  We are sorry, but your Web server does not support the PHP language used in this script.
-
-  Please note that CKEditor can be used with any other server-side language than just PHP.
-  To save the content created with CKEditor you need to read the POST data on the server
-  side and write it to a file or the database.
-
-  Copyright (c) 2003-2013, CKSource - Frederico Knabben. All rights reserved.
-  For licensing, see LICENSE.md or <a href="http://ckeditor.com/license">http://ckeditor.com/license</a>
--------------------------------------------------------------------------------------------
-
-</pre><div style="display:none"></body> */ include "assets/posteddata.php";
+include "assets/posteddata.php";
