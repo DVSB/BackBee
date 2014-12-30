@@ -148,7 +148,7 @@ class PaginationListener extends APathEnabledListener
 
     /**
      *
-     * @param  mixed                                    $controller
+     * @param  mixed                                $controller
      * @return \BackBee\Rest\Mapping\ActionMetadata
      */
     protected function getControllerActionMetadata($controller)

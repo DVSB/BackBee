@@ -126,7 +126,7 @@ class LessParser
                 $editable = (strpos($value, '@') !== false || in_array($attribute, self::$DISABLE_FILEDS)) ? false : true;
                 $widget = (substr($value, 0, 1) == '#') ? 'color' : ((preg_match("/.*[\d]{2}px;$/", $value) > 0) ? 'default' : 'font');
 
-                if (NULL !== ($attrKey = $this->getAttrKey($data, $attribute))) {
+                if (null !== ($attrKey = $this->getAttrKey($data, $attribute))) {
                     $buffer .= $this->toLessAttr($attribute, $data[$attrKey]['value']);
                 } else {
                     $buffer .= $line;

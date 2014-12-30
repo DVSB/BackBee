@@ -41,7 +41,7 @@ class bb5toolbar extends AHelper
 
         $tokenArr = array('token' => $token);
         $params = (!is_null($params) && is_array($params)) ? array_merge($tokenArr, $params) : $tokenArr;
-        $params = array_merge(array('aloha_extraplugins' => ((NULL !== $alohapluginstable) && (isset($alohapluginstable['extraplugins'])) && (NULL !== $alohapluginstable['extraplugins'])) ? $alohapluginstable['extraplugins'] : ''), $params);
+        $params = array_merge(array('aloha_extraplugins' => ((null !== $alohapluginstable) && (isset($alohapluginstable['extraplugins'])) && (null !== $alohapluginstable['extraplugins'])) ? $alohapluginstable['extraplugins'] : ''), $params);
 
         return $this->_renderer->partial('bb5/_toolbars.bb5.phtml', $params);
     }

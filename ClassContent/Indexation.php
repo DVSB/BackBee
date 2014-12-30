@@ -127,7 +127,7 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  string                               $content
+     * @param  string                           $content
      * @return \BackBee\ClassContent\Indexation
      */
     public function setContent($content)
@@ -139,7 +139,7 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  string                               $field
+     * @param  string                           $field
      * @return \BackBee\ClassContent\Indexation
      */
     public function setField($field)
@@ -163,7 +163,7 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  string                               $value
+     * @param  string                           $value
      * @return \BackBee\ClassContent\Indexation
      */
     public function setValue($value)
@@ -175,7 +175,7 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  function                             $callback
+     * @param  function                         $callback
      * @return \BackBee\ClassContent\Indexation
      */
     public function setCallback($callback)

@@ -23,7 +23,7 @@ namespace BackBee\Site\Repository;
 
 use BackBee\BBApplication;
 use BackBee\Site\Layout;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -69,11 +69,11 @@ class LayoutRepository extends EntityRepository
         $width = $clip[2];
         $height = $clip[3];
 
-        if (NULL !== $spansize = preg_replace('/[^0-9]+/', '', $node->getAttribute('class'))) {
+        if (null !== $spansize = preg_replace('/[^0-9]+/', '', $node->getAttribute('class'))) {
             $width = floor($width * $spansize / $gridcolumn);
         }
 
-        if (FALSE !== strpos($node->getAttribute('class'), 'Child')) {
+        if (false !== strpos($node->getAttribute('class'), 'Child')) {
             $height = floor($height / 2);
         }
 
@@ -112,44 +112,44 @@ class LayoutRepository extends EntityRepository
     {
         // Is the layout valid ?
         if (!$layout->isValid()) {
-            return FALSE;
+            return false;
         }
 
         // Is some layout configuration existing ?
-        if (NULL === $app->getConfig()->getSection('layout')) {
-            return FALSE;
+        if (null === $app->getConfig()->getSection('layout')) {
+            return false;
         }
         $layoutconfig = $app->getConfig()->getSection('layout');
 
         // Is some thumbnail configuration existing ?
         if (!isset($layoutconfig['thumbnail'])) {
-            return FALSE;
+            return false;
         }
         $thumbnailconfig = $layoutconfig['thumbnail'];
 
         // Is gd available ?
         if (!function_exists('gd_info')) {
-            return FALSE;
+            return false;
         }
         $gd_info = gd_info();
 
         // Is the selected format supported by gd ?
         if (!isset($thumbnailconfig['format'])) {
-            return FALSE;
+            return false;
         }
-        if (TRUE !== $gd_info[strtoupper($thumbnailconfig['format']).' Support']) {
-            return FALSE;
+        if (true !== $gd_info[strtoupper($thumbnailconfig['format']).' Support']) {
+            return false;
         }
 
         // Is the template file existing ?
         if (!isset($thumbnailconfig['template'])) {
-            return FALSE;
+            return false;
         }
         $templatefile = $thumbnailconfig['template'];
         $thumbnaildir = dirname($templatefile);
         File::resolveFilepath($templatefile, null, array('include_path' => $app->getResourceDir()));
-        if (FALSE === file_exists($templatefile) || false === is_readable($templatefile)) {
-            return FALSE;
+        if (false === file_exists($templatefile) || false === is_readable($templatefile)) {
+            return false;
         }
 
         try {
@@ -159,17 +159,17 @@ class LayoutRepository extends EntityRepository
 
             // Is a background color existing ?
             if (!isset($thumbnailconfig['background']) || !is_array($thumbnailconfig['background']) || 3 != count($thumbnailconfig['background'])) {
-                return FALSE;
+                return false;
             }
             $background = imagecolorallocate($thumbnail, $thumbnailconfig['background'][0], $thumbnailconfig['background'][1], $thumbnailconfig['background'][2]);
 
             // Is a clipping zone existing ?
             if (!isset($thumbnailconfig['clip']) || !is_array($thumbnailconfig['clip']) || 4 != count($thumbnailconfig['clip'])) {
-                return FALSE;
+                return false;
             }
 
             $gridcolumn = 12;
-            if (NULL !== $lessconfig = $app->getConfig()->getSection('less')) {
+            if (null !== $lessconfig = $app->getConfig()->getSection('less')) {
                 if (isset($lessconfig['gridcolumn'])) {
                     $gridcolumn = $lessconfig['gridcolumn'];
                 }
@@ -191,7 +191,7 @@ class LayoutRepository extends EntityRepository
 
             imagepng($thumbnail, File::normalizePath($app->getCurrentResourceDir().'/'.$thumbnailfile));
         } catch (\Exception $e) {
-            return FALSE;
+            return false;
         }
 
         $layout->setPicPath($thumbnailfile);
@@ -204,14 +204,14 @@ class LayoutRepository extends EntityRepository
         $thumbnailfile = $layout->getPicPath();
         File::resolveFilepath($thumbnailfile, null, array('include_path' => $app->getResourceDir()));
 
-        while (TRUE === file_exists($thumbnailfile) && TRUE === is_writable($thumbnailfile)) {
+        while (true === file_exists($thumbnailfile) && true === is_writable($thumbnailfile)) {
             @unlink($thumbnailfile);
 
             $thumbnailfile = $layout->getPicPath();
             File::resolveFilepath($thumbnailfile, null, array('include_path' => $app->getResourceDir()));
         }
 
-        return TRUE;
+        return true;
     }
 
     /**

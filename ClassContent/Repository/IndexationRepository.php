@@ -129,7 +129,7 @@ class IndexationRepository extends EntityRepository
     /**
      * Replaces site-content indexes for an array of contents in a site
      * @param  \BackBee\Site\Site                                    $site
-     * @param  array                                                     $contents An array of AClassContent
+     * @param  array                                                 $contents An array of AClassContent
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     public function replaceIdxSiteContents(Site $site, array $contents)
@@ -142,7 +142,7 @@ class IndexationRepository extends EntityRepository
     /**
      * Removes site-content indexes for an array of contents in a site
      * @param  \BackBee\Site\Site                                    $site
-     * @param  array                                                     $contents An array of AClassContent
+     * @param  array                                                 $contents An array of AClassContent
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     public function removeIdxSiteContents(Site $site, array $contents)
@@ -152,7 +152,7 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replaces content-content indexes for an array of contents
-     * @param  array                                                     $contents An array of AClassContent
+     * @param  array                                                 $contents An array of AClassContent
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     public function replaceIdxContentContents(array $contents)
@@ -176,7 +176,7 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes content-content indexes for an array of contents
-     * @param  array                                                     $contents An array of AClassContent
+     * @param  array                                                 $contents An array of AClassContent
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     public function removeIdxContentContents(array $contents)
@@ -186,8 +186,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replaces or inserts a set of Site-Content indexes
-     * @param  string                                                    $site_uid
-     * @param  array                                                     $content_uids
+     * @param  string                                                $site_uid
+     * @param  array                                                 $content_uids
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     public function replaceIdxSiteContentsUid($site_uid, array $content_uids)
@@ -346,8 +346,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes a set of Site-Content indexes
-     * @param  string                                                    $site_uid
-     * @param  array                                                     $content_uids
+     * @param  string                                                $site_uid
+     * @param  array                                                 $content_uids
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     private function _removeIdxSiteContents($site_uid, array $content_uids)
@@ -368,8 +368,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replaces a set of Site-Content indexes
-     * @param  string                                                    $site_uid
-     * @param  array                                                     $content_uids
+     * @param  string                                                $site_uid
+     * @param  array                                                 $content_uids
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     private function _replaceIdxContentContents(array $parent_uids)
@@ -386,7 +386,7 @@ class IndexationRepository extends EntityRepository
             $insert_children = array();
             foreach ($parent_uids as $parent_uid => $subcontent_uids) {
                 foreach ($subcontent_uids as $subcontent_uid) {
-                    $insert_children[] = sprintf('SELECT "%s", "%s"',$parent_uid, $subcontent_uid);
+                    $insert_children[] = sprintf('SELECT "%s", "%s"', $parent_uid, $subcontent_uid);
                     $insert_children[] = sprintf('SELECT %s, "%s"
                         FROM %s
                         WHERE %s = "%s"', $meta->getColumnName('content_uid'), $subcontent_uid, $meta->getTableName(), $meta->getColumnName('subcontent_uid'), $parent_uid
@@ -407,14 +407,12 @@ class IndexationRepository extends EntityRepository
             }
         }
 
-
-
         return $this;
     }
 
     /**
      * Removes a set of Content-Content indexes
-     * @param  array                                                     $content_uids
+     * @param  array                                                 $content_uids
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     public function _removeIdxContentContents(array $content_uids)
@@ -435,9 +433,9 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Executes an, optionally parameterized, SQL query
-     * @param  string                                                    $query  The SQL query to execute
-     * @param  array                                                     $params The parameters to bind to the query, if any
-     * @param  array                                                     $types  The types the previous parameters are in
+     * @param  string                                                $query  The SQL query to execute
+     * @param  array                                                 $params The parameters to bind to the query, if any
+     * @param  array                                                 $types  The types the previous parameters are in
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
     private function _executeQuery($query, array $params = array(), array $types = array())

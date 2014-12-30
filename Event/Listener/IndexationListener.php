@@ -145,7 +145,7 @@ class IndexationListener implements EventSubscriberInterface
 
     /**
      * Returns the current entity manager
-     * @param  \BackBee\Event\Event    $event
+     * @param  \BackBee\Event\Event        $event
      * @return \Doctrine\ORM\EntityManager
      */
     private static function _getEntityManager(Event $event)
@@ -185,7 +185,7 @@ class IndexationListener implements EventSubscriberInterface
         }
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
-        if (NULL === $application) {
+        if (null === $application) {
             return;
         }
 
@@ -218,7 +218,7 @@ class IndexationListener implements EventSubscriberInterface
                                 continue;
                             }
 
-                            if (NULL !== $value) {
+                            if (null !== $value) {
                                 $value = $value->getData($element);
                                 if ($value instanceof AClassContent && false == $em->contains($value)) {
                                     $value = $em->find(get_class($value), $value->getUid());
@@ -227,16 +227,16 @@ class IndexationListener implements EventSubscriberInterface
                         }
                     }
 
-                    if (NULL !== $callback) {
+                    if (null !== $callback) {
                         $callback = (array) $callback;
                         foreach ($callback as $func) {
                             $value = call_user_func($func, $value);
                         }
                     }
 
-                    if (NULL !== $owner && NULL !== $value) {
+                    if (null !== $owner && null !== $value) {
                         $index = $em->getRepository('BackBee\ClassContent\Indexation')->find(array('_content' => $content, '_field' => $indexedElement[0]));
-                        if (NULL === $index) {
+                        if (null === $index) {
                             $index = new Indexation($content, $indexedElement[0], $owner, $value, serialize($callback));
                             $em->persist($index);
                         }
@@ -250,21 +250,21 @@ class IndexationListener implements EventSubscriberInterface
                     $field = $index->getField();
                     $callback = unserialize($index->getCallback());
 
-                    if (NULL !== $field) {
+                    if (null !== $field) {
                         $tmp = explode('->', $field);
                         $field = array_pop($tmp);
 
                         try {
                             $value = $content->$field;
 
-                            if (NULL !== $callback) {
+                            if (null !== $callback) {
                                 $callback = (array) $callback;
                                 foreach ($callback as $func) {
                                     $value = call_user_func($func, $value);
                                 }
                             }
 
-                            if ($value != $index->getValue() && NULL !== $value) {
+                            if ($value != $index->getValue() && null !== $value) {
                                 $index->setValue($value);
                                 $em->getUnitOfWork()->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index);
                             }

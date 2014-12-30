@@ -21,7 +21,7 @@
 
 namespace BackBee\Event\Listener;
 
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use BackBee\Event\Event;
 use BackBee\Exception\BBException;
 use BackBee\ClassContent\ContentSet;

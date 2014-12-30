@@ -110,7 +110,7 @@ class ExceptionListenerTest extends TestCase
         $this->assertArrayHasKey('property', $response['errors']);
     }
 
-     /**
+    /**
      * @covers ::onKernelException
      */
     public function test_onKernelException_SecurityException()

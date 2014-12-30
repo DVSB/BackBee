@@ -41,7 +41,7 @@ class Revision extends AbstractServiceLocal
      */
     public function getAllDrafts()
     {
-        if (NULL === $token = $this->bbapp->getBBUserToken()) {
+        if (null === $token = $this->bbapp->getBBUserToken()) {
             throw new ServicesException('Authenticated user missing');
         }
 
@@ -63,7 +63,7 @@ class Revision extends AbstractServiceLocal
      */
     public function update()
     {
-        if (NULL === $token = $this->bbapp->getBBUserToken()) {
+        if (null === $token = $this->bbapp->getBBUserToken()) {
             throw new ServicesException('Authenticated user missing', ServicesException::UNAUTHORIZED_USER);
         }
 
@@ -96,7 +96,7 @@ class Revision extends AbstractServiceLocal
      */
     public function commit()
     {
-        if (NULL === $token = $this->bbapp->getBBUserToken()) {
+        if (null === $token = $this->bbapp->getBBUserToken()) {
             throw new ServicesException('Authenticated user missing', ServicesException::UNAUTHORIZED_USER);
         }
 
@@ -133,7 +133,7 @@ class Revision extends AbstractServiceLocal
      */
     public function revert()
     {
-        if (NULL === $token = $this->bbapp->getBBUserToken()) {
+        if (null === $token = $this->bbapp->getBBUserToken()) {
             throw new ServicesException('Authenticated user missing', ServicesException::UNAUTHORIZED_USER);
         }
 

@@ -22,7 +22,7 @@
 namespace BackBee\Command;
 
 use BackBee\Console\ACommand;
-use BackBee\Util\Dir;
+use BackBee\Utils\File\Dir;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

@@ -34,7 +34,7 @@ class partial extends AHelper
     {
         $renderer = $this->_renderer;
 
-        if (NULL !== $renderer) {
+        if (null !== $renderer) {
             return $renderer->partial($template, $params);
         }
 

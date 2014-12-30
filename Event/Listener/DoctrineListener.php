@@ -83,12 +83,12 @@ class DoctrineListener
      */
     protected function _triggerEvent($eventName, $entity, $eventArgs)
     {
-        if (NULL === $this->_application) {
+        if (null === $this->_application) {
             return;
         }
 
         $dispatcher = $this->_application->getEventDispatcher();
-        if (NULL != $dispatcher) {
+        if (null != $dispatcher) {
             $dispatcher->triggerEvent($eventName, $entity, $eventArgs);
         }
     }

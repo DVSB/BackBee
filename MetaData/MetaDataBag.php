@@ -41,7 +41,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Class constructor
-     * @param array                        $definitions
+     * @param array                    $definitions
      * @param \BackBee\NestedNode\Page $page
      * @codeCoverageIgnore
      */
@@ -71,7 +71,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Updates the associated definition of the set of metadata
-     * @param array                        $definitions
+     * @param array                    $definitions
      * @param \BackBee\NestedNode\Page $page
      */
     public function update(array $definitions = null, Page $page = null)
@@ -150,7 +150,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Returns the metadata associated to $name or NULL if it doesn't exist
-     * @param  string                              $name
+     * @param  string                          $name
      * @return \BackBee\MetaData\MetaData|NULL
      */
     public function get($name)
@@ -179,7 +179,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * @param  \stdClass                         $object
+     * @param  \stdClass                     $object
      * @return \BackBee\MetaData\MetaDataBag
      * @deprecated since version 1.0
      */

@@ -172,10 +172,10 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Checks for a valid nonce file according to the WSE
-     * @param  string                                            $digest  The digest string send by the client
-     * @param  string                                            $nonce   The nonce file
-     * @param  string                                            $created The creation date of the nonce
-     * @param  string                                            $secret  The secret (ie password) to be check
+     * @param  string                                        $digest  The digest string send by the client
+     * @param  string                                        $nonce   The nonce file
+     * @param  string                                        $created The creation date of the nonce
+     * @param  string                                        $secret  The secret (ie password) to be check
      * @return boolean
      * @throws \BackBee\Security\Exception\SecurityException
      */
@@ -259,7 +259,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Returns a Registry entry for $nonce
-     * @param  string                       $nonce
+     * @param  string                   $nonce
      * @return \BackBee\Bundle\Registry
      */
     private function getRegistry($nonce)

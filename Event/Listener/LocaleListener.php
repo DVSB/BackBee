@@ -50,7 +50,7 @@ class LocaleListener
         }
 
         $page = $content->getMainNode();
-        if (NULL === $page) {
+        if (null === $page) {
             return;
         }
 
@@ -102,7 +102,7 @@ class LocaleListener
         }
 
         $em = $application->getEntityManager();
-        if (NULL === $maincontent && 0 < count($urlGenerator->getDiscriminators())) {
+        if (null === $maincontent && 0 < count($urlGenerator->getDiscriminators())) {
             $maincontent = $em->getRepository('BackBee\ClassContent\AClassContent')->getLastByMainnode($page, $urlGenerator->getDiscriminators());
         }
 

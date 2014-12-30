@@ -152,8 +152,8 @@ abstract class ATransport
 
     /**
      * Establish a new connection to the remose server
-     * @param  string                                                    $host
-     * @param  string                                                    $port
+     * @param  string                                                $host
+     * @param  string                                                $port
      * @return \BackBee\Util\Transport\ATransport
      * @throws \BackBee\Util\Transport\Exception\ConnectionException Occurs if connection failed
      */
@@ -161,8 +161,8 @@ abstract class ATransport
 
     /**
      * Authenticate on remote server
-     * @param  string                                                        $username
-     * @param  string                                                        $password
+     * @param  string                                                    $username
+     * @param  string                                                    $password
      * @return \BackBee\Util\Transport\ATransport
      * @throws \BackBee\Util\Transport\Exception\AuthenticationException Occurs if authentication failed
      */

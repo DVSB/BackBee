@@ -28,7 +28,6 @@ use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBee\Rest\Patcher\OperationSyntaxValidator;
 use BackBee\Rest\Patcher\RightManager;
-
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -58,7 +57,7 @@ class BundleController extends ARestController
         }
 
         return $this->createJsonResponse($bundles, 200, array(
-            'Content-Range' => '0-' . (count($bundles) - 1) . '/' . count($bundles)
+            'Content-Range' => '0-'.(count($bundles) - 1).'/'.count($bundles),
         ));
     }
 
@@ -102,7 +101,7 @@ class BundleController extends ARestController
         try {
             (new OperationSyntaxValidator())->validate($operations);
         } catch (InvalidOperationSyntaxException $e) {
-            throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
+            throw new BadRequestHttpException('operation invalid syntax: '.$e->getMessage());
         }
 
         $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
@@ -115,7 +114,7 @@ class BundleController extends ARestController
         try {
             $entity_patcher->patch($bundle, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
-            throw new BadRequestHttpException('Invalid patch operation: ' . $e->getMessage());
+            throw new BadRequestHttpException('Invalid patch operation: '.$e->getMessage());
         }
 
         $this->getApplication()->getContainer()->get('config.persistor')->persist(

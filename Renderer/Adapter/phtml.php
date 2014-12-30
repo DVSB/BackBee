@@ -26,7 +26,7 @@ use BackBee\Renderer\ARenderer;
 use BackBee\Renderer\ARendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 
 /**
  * Rendering adapter for phtml templating files

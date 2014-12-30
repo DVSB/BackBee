@@ -57,7 +57,7 @@ class LessTheme
 
     private function copyRec($pathDir, $dest)
     {
-        if (FALSE === is_dir($pathDir)) {
+        if (false === is_dir($pathDir)) {
             throw new \Exception("path: ".$pathDir." is not a directory");
         }
 
@@ -102,7 +102,7 @@ class LessTheme
     {
         $themes = array();
         $pathThemeRoot = self::$lessRootPathTheme;
-        if (FALSE === is_dir($pathThemeRoot)) {
+        if (false === is_dir($pathThemeRoot)) {
             throw new \Exception("path: ".$pathThemeRoot." is not a directory");
         }
 
@@ -125,7 +125,7 @@ class LessTheme
         $pathForNewTheme = self::$lessRootPathTheme.DIRECTORY_SEPARATOR.$theme;
         $pathDefaultTheme = self::$lessRootPathTheme.DIRECTORY_SEPARATOR.'default';
 
-        if (FALSE === is_dir($pathForNewTheme)) {
+        if (false === is_dir($pathForNewTheme)) {
             mkdir($pathForNewTheme, 0777);
         }
 

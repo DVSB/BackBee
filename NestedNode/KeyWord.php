@@ -135,7 +135,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Sets the keyword
-     * @param  string                          $keyWord
+     * @param  string                      $keyWord
      * @return \BackBee\NestedNode\KeyWord
      */
     public function setKeyWord($keyWord)

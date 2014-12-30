@@ -46,7 +46,7 @@ class dateHelper extends AHelper
 
     private function initFormat($format = null)
     {
-        if (NULL === $format) {
+        if (null === $format) {
             $configDate = $this->_renderer->getApplication()->getConfig()->getDateConfig();
 
             if (array_key_exists('format', $configDate)) {
@@ -61,7 +61,7 @@ class dateHelper extends AHelper
 
     private function initCulture($culture = null)
     {
-        if (NULL !== $culture) {
+        if (null !== $culture) {
             $configCulture = $this->_renderer->getApplication()->getConfig()->getCultureConfig();
             if (is_array($configCulture) && array_key_exists('default', $configCulture)) {
                 $this->culture = $configCulture['default'];
@@ -75,7 +75,7 @@ class dateHelper extends AHelper
 
     private function initTimezone($timezone = null)
     {
-        if (NULL === $timezone) {
+        if (null === $timezone) {
             $config = $this->_renderer->getApplication()->getConfig()->getDateConfig();
             if (array_key_exists('timezone', $config)) {
                 $this->timezone = $config['timezone'];
@@ -154,7 +154,7 @@ class dateHelper extends AHelper
      */
     public function __invoke($date = null, $format = null, $timezone = null, $culture = null)
     {
-        if (NULL === $date) {
+        if (null === $date) {
             return '';
         }
 
@@ -165,19 +165,19 @@ class dateHelper extends AHelper
 
     public function getDate($format = null, $timezone = null, $culture = null)
     {
-        if (NULL === $this->date) {
+        if (null === $this->date) {
             return '';
         }
-        if (NULL !== $this->timezone) {
+        if (null !== $this->timezone) {
             $this->date->setTimezone(new \DateTimeZone($this->timezone));
         }
-        if (NULL !== $timezone) {
+        if (null !== $timezone) {
             $this->date->setTimezone($timezone);
         }
 
         //if (NULL !== $culture && self::$CULTURE_FR == $culture)
         //return strftime((NULL !== $format) ? $format: $this->format, $this->date->getTimestamp());
-        $format = (NULL !== $format) ? $format : $this->format;
+        $format = (null !== $format) ? $format : $this->format;
         if (strpos($format, "%") === false) {
             return $this->date->format($format);
         } else {

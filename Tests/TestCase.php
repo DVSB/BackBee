@@ -173,7 +173,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @param  type                       $config
+     * @param  type                   $config
      * @return \BackBee\BBApplication
      */
     public function getBBApp(array $config = null)
@@ -192,7 +192,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     /**
      * Creates a user for the specified group, and authenticates a BBUserToken
-     * @param  string                                  $groupId
+     * @param  string                              $groupId
      * @return \BackBee\Security\Token\BBUserToken
      */
     protected function createAuthUser($groupId, $roles = array())

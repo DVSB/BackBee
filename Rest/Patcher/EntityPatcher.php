@@ -44,7 +44,7 @@ class EntityPatcher implements PatcherInterface
      * EntityPatcher's constructor
      *
      * @param BackBee\Rest\Patcher\RightManager $right_manager the right manager which decide if it's a valid
-     *                                                             patch operation or not
+     *                                                         patch operation or not
      */
     public function __construct(RightManager $manager)
     {

@@ -25,10 +25,8 @@ use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AClassContent;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Routing\RouteCollection;
-use BackBee\Util\File;
-
+use BackBee\Utils\File\File;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -81,7 +79,7 @@ class ClassContentController extends ARestController
         }
 
         return $this->createJsonResponse($categories, 200, [
-            'Content-Range' => '0-' . (count($categories) - 1) . '/' . count($categories)
+            'Content-Range' => '0-'.(count($categories) - 1).'/'.count($categories)
         ]);
     }
 
@@ -117,7 +115,7 @@ class ClassContentController extends ARestController
     /**
      * Returns definition for provided type
      *
-     * @param  string $type
+     * @param string $type
      *
      * @return Symfony\Component\HttpFoundation\Response
      */
@@ -135,7 +133,7 @@ class ClassContentController extends ARestController
      *     - page uid (provide 'page_uid' as query parameter): returns definitions of every classcontent contained
      *     by page's contentset
      *
-     * @param  Resquest $request
+     * @param Resquest $request
      *
      * @return Symfony\Component\HttpFoundation\Response
      */
@@ -153,7 +151,7 @@ class ClassContentController extends ARestController
         }
 
         return $this->createJsonResponse($definitions, 200, [
-            'Content-Range' => '0-' . (count($definitions) - 1) . '/' . count($definitions)
+            'Content-Range' => '0-'.(count($definitions) - 1).'/'.count($definitions)
         ]);
     }
 
@@ -218,8 +216,8 @@ class ClassContentController extends ARestController
     /**
      * Creates classcontent according to provided type
      *
-     * @param  string  $type
-     * @param  Request $request
+     * @param string  $type
+     * @param Request $request
      *
      * @return Symfony\Component\HttpFoundation\Response
      */
@@ -290,7 +288,7 @@ class ClassContentController extends ARestController
     /**
      * Returns complete namespace of classcontent with provided $type
      *
-     * @param  string $type
+     * @param string $type
      *
      * @return string classname associated to provided
      *
@@ -312,7 +310,7 @@ class ClassContentController extends ARestController
     /**
      * Returns provided content definition
      *
-     * @param  AClassContent $content
+     * @param AClassContent $content
      *
      * @return array
      */
@@ -337,7 +335,7 @@ class ClassContentController extends ARestController
     /**
      * Returns definitions of classcontent that belong to provided category name
      *
-     * @param  string $category_name
+     * @param string $category_name
      *
      * @return array
      */
@@ -360,7 +358,7 @@ class ClassContentController extends ARestController
     /**
      * Returns definitions of classcontent contained by provided page contentset
      *
-     * @param  string $page_uid
+     * @param string $page_uid
      *
      * @return array
      */
@@ -374,14 +372,14 @@ class ClassContentController extends ARestController
             ',
             [
                 'page_uid'             => $page_uid,
-                'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'
+                'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet'
             ]
         )->fetchAll();
 
         $definitions = [];
         foreach ($classnames as $classname) {
             $classname = $classname['classname'];
-                $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+            $definitions[] = $this->getDefinitionFromClassContent(new $classname());
         }
 
         return $definitions;
@@ -411,7 +409,7 @@ class ClassContentController extends ARestController
      */
     private function getAllElementDefinitions()
     {
-        $directory = $this->getApplication()->getBBDir() . DIRECTORY_SEPARATOR . 'ClassContent';
+        $directory = $this->getApplication()->getBBDir().DIRECTORY_SEPARATOR.'ClassContent';
         $classnames = array_map(
             function ($path) use ($directory) {
                 return str_replace(
@@ -422,7 +420,7 @@ class ClassContentController extends ARestController
             },
             File::getFilesRecursivelyByExtension($directory, 'yml')
         );
-        $classnames[] = AClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet';
+        $classnames[] = AClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet';
 
         return $this->getDefinitionsFromClassnames($classnames);
     }
@@ -430,7 +428,7 @@ class ClassContentController extends ARestController
     /**
      * Returns every classcontent definitions of provided classnames
      *
-     * @param  array  $classnames
+     * @param array $classnames
      *
      * @return array
      */
@@ -498,14 +496,14 @@ class ClassContentController extends ARestController
     {
         $criterias = array_merge([
             'only_online' => false,
-            'site_uid'    => $this->getApplication()->getSite()->getUid()
+            'site_uid'    => $this->getApplication()->getSite()->getUid(),
         ], $this->getApplication()->getRequest()->query->all());
 
         $criterias['only_online'] = (boolean) $criterias['only_online'];
 
         $order_infos = [
             'column'    => isset($criterias['order_by']) ? $criterias['order_by'] : '_modified',
-            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc'
+            'direction' => isset($criterias['order_direction']) ? $criterias['order_direction'] : 'desc',
         ];
 
         $pagination = ['start' => $start, 'limit' => $count];
@@ -554,7 +552,7 @@ class ClassContentController extends ARestController
     /**
      * Update a single classcontent image url
      *
-     * @param  array  $classcontent the classcontent we want to update its image url
+     * @param array $classcontent the classcontent we want to update its image url
      *
      * @return array
      */
@@ -566,14 +564,13 @@ class ClassContentController extends ARestController
             $image_uri = $classcontent['image'];
             $url_type = RouteCollection::IMAGE_URL;
         } else {
-            $image_filepath = $this->getThumbnailBaseFolderPath() . DIRECTORY_SEPARATOR . $classcontent['image'];
+            $image_filepath = $this->getThumbnailBaseFolderPath().DIRECTORY_SEPARATOR.$classcontent['image'];
             $base_folder = $this->getApplication()->getContainer()->getParameter('classcontent_thumbnail.base_folder');
             if (file_exists($image_filepath) && is_readable($image_filepath)) {
-                $image_uri = $base_folder . '/' . $classcontent['image'];
+                $image_uri = $base_folder.'/'.$classcontent['image'];
             } else {
-                $image_uri = $base_folder . '/' . 'default_thumbnail.png';
+                $image_uri = $base_folder.'/'.'default_thumbnail.png';
             }
-
         }
 
         $classcontent['image'] = $this->getApplication()->getRouting()->getUri($image_uri, null, null, $url_type);
@@ -624,7 +621,7 @@ class ClassContentController extends ARestController
         }
 
         $last_result = $start + $count - 1;
-        $response->headers->set('Content-Range', "$start-$last_result/" . count($collection));
+        $response->headers->set('Content-Range', "$start-$last_result/".count($collection));
 
         return $response;
     }

@@ -23,7 +23,7 @@ namespace BackBee\Rest\Hydration;
 
 /**
  * HydrationException
-  */
+ */
 class HydrationException extends \Exception
 {
     protected $property;

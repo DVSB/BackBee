@@ -22,7 +22,7 @@
 namespace BackBee\Stream\ClassWrapper\Adapter;
 
 use BackBee\Exception\BBException;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use BackBee\Stream\ClassWrapper\AClassWrapper;
 use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -71,16 +71,16 @@ class Yaml extends AClassWrapper
     {
         parent::__construct();
 
-        if (NULL === $this->_autoloader) {
+        if (null === $this->_autoloader) {
             throw new ClassWrapperException('The BackBee autoloader can not be retreived.');
         }
 
         $this->_application = $this->_autoloader->getApplication();
-        if (NULL !== $this->_application) {
+        if (null !== $this->_application) {
             $this->_classcontentdir = $this->_application->getClassContentDir();
         }
 
-        if (NULL === $this->_classcontentdir || 0 == count($this->_classcontentdir)) {
+        if (null === $this->_classcontentdir || 0 == count($this->_classcontentdir)) {
             throw new ClassWrapperException('None ClassContent repository defined.');
         }
     }
@@ -268,7 +268,7 @@ class Yaml extends AClassWrapper
         $classnames = array();
         foreach ($this->_classcontentdir as $repository) {
             foreach ($this->_includeExtensions as $ext) {
-                if (FALSE !== $files = glob($repository.DIRECTORY_SEPARATOR.$pattern.$ext)) {
+                if (false !== $files = glob($repository.DIRECTORY_SEPARATOR.$pattern.$ext)) {
                     foreach ($files as $file) {
                         $classnames[] = $this->namespace.NAMESPACE_SEPARATOR.str_replace(array($repository.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), array('', NAMESPACE_SEPARATOR), $file);
                     }
@@ -277,7 +277,7 @@ class Yaml extends AClassWrapper
         }
 
         if (0 == count($classnames)) {
-            return FALSE;
+            return false;
         }
 
         foreach ($classnames as &$classname) {
@@ -308,7 +308,7 @@ class Yaml extends AClassWrapper
         if (is_file($this->_path) && is_readable($this->_path)) {
             $this->_stat = @stat($this->_path);
 
-            if (NULL !== $this->_cache) {
+            if (null !== $this->_cache) {
                 $expire = new \DateTime();
                 $expire->setTimestamp($this->_stat['mtime']);
                 $this->_data = $this->_cache->load(md5($this->_path), false, $expire);
@@ -328,7 +328,7 @@ class Yaml extends AClassWrapper
                 $this->_data = $this->_buildClass();
                 $opened_path = $this->_path;
 
-                if (NULL !== $this->_cache) {
+                if (null !== $this->_cache) {
                     $this->_cache->save(md5($this->_path), $this->_data);
                 }
 
@@ -356,6 +356,6 @@ class Yaml extends AClassWrapper
             return $this->_stat;
         }
 
-        return NULL;
+        return;
     }
 }

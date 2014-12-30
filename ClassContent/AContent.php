@@ -140,8 +140,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to get value for given element
-     * @param  string                                                       $var The name of the element
-     * @return mixed                                                        The value
+     * @param  string                                                   $var The name of the element
+     * @return mixed                                                    The value
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      */
     public function __get($var)
@@ -155,8 +155,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to set value to given element
-     * @param  string                                                       $var   The name of the element
-     * @param  mixed                                                        $value The value to set
+     * @param  string                                                   $var   The name of the element
+     * @param  mixed                                                    $value The value to set
      * @return \BackBee\ClassContent\AClassContent                      The current instance content
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      */
@@ -195,8 +195,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to check the setting of an element
-     * @param  string                                                       $var The name of the element
-     * @return Boolean                                                      TRUE if an element is set for $var, FALSE otherwise
+     * @param  string                                                   $var The name of the element
+     * @return Boolean                                                  TRUE if an element is set for $var, FALSE otherwise
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      */
     public function __isset($var)
@@ -210,7 +210,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to unset an element
-     * @param  string                                                       $var The name of the element to unset
+     * @param  string                                                   $var The name of the element to unset
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      */
     public function __unset($var)
@@ -345,7 +345,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets the label
-     * @param  string                             $label
+     * @param  string                         $label
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -358,7 +358,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Set the acceptable classname
-     * @param  array                              $accept
+     * @param  array                          $accept
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -371,9 +371,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets one or all parameters
-     * @param  string                             $var    the parameter name to set, if NULL all the parameters array wil be set
-     * @param  mixed                              $values the parameter value or all the parameters if $var is NULL
-     * @param  string                             $type   the optionnal casting type of the value
+     * @param  string                         $var    the parameter name to set, if NULL all the parameters array wil be set
+     * @param  mixed                          $values the parameter value or all the parameters if $var is NULL
+     * @param  string                         $type   the optionnal casting type of the value
      * @return \BackBee\ClassContent\AContent The current instance
      */
     public function setParam($var = null, $values = null, $type = null)
@@ -437,7 +437,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets the maximum number of items for elements
-     * @param  array                              $maxentry
+     * @param  array                          $maxentry
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -450,7 +450,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets the minimum number of items for elements
-     * @param  array                              $minentry
+     * @param  array                          $minentry
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -463,7 +463,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets creation date
-     * @param  \DateTime                          $created Current date time by default
+     * @param  \DateTime                      $created Current date time by default
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -476,7 +476,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets the last modification date
-     * @param  DateTime                           $modified Current date time by default
+     * @param  DateTime                       $modified Current date time by default
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -489,7 +489,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets the revision number
-     * @param  int                                $revision
+     * @param  int                            $revision
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -502,7 +502,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets the state
-     * @param  int                                $state
+     * @param  int                            $state
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -555,8 +555,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Return a subcontent instance by its type and value, FALSE if not found
-     * @param  string                                        $type  The classname of the subcontent
-     * @param  string                                        $value The value of the subcontent (uid)
+     * @param  string                                    $type  The classname of the subcontent
+     * @param  string                                    $value The value of the subcontent (uid)
      * @return \BackBee\ClassContent\AClassContent|FALSE
      */
     protected function _getContentByDataValue($type, $value)
@@ -576,8 +576,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets options at the construction of a new instance
-     * @param  mixed                              $options Initial options for the content:
-     *                                                     - label       the label of the content
+     * @param  mixed                          $options Initial options for the content:
+     *                                                 - label       the label of the content
      * @return \BackBee\ClassContent\AContent
      */
     protected function _setOptions($options = null)
@@ -647,7 +647,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     /**
      * Adds a subcontent to the colection.
      * @param  \BackBee\ClassContent\AClassContent $value
-     * @return string                                  the unique identifier of the add subcontent
+     * @return string                              the unique identifier of the add subcontent
      * @codeCoverageIgnore
      */
     protected function _addSubcontent(AClassContent $value)
@@ -742,9 +742,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Returns the set of data
-     * @param  string                                                       $var        The element to be return, if NULL, all datas are returned
-     * @param  Boolean                                                      $forceArray Force the return as array
-     * @return mixed                                                        Could be either one or array of scalar, array, AClassContent instance
+     * @param  string                                                   $var        The element to be return, if NULL, all datas are returned
+     * @param  Boolean                                                  $forceArray Force the return as array
+     * @return mixed                                                    Could be either one or array of scalar, array, AClassContent instance
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
      * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException     Occurs if the class of a subcontent can not be loaded
      */
@@ -957,11 +957,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Initialized the instance from a serialized string
-     * @param  string                                                       $serialized
-     * @param  Boolean                                                      $strict     If TRUE, all missing or additionnal element will generate an error
+     * @param  string                                                   $serialized
+     * @param  Boolean                                                  $strict     If TRUE, all missing or additionnal element will generate an error
      * @return \BackBee\ClassContent\AClassContent                      The current instance
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
-     *                                                                                 property does not match an element
+     *                                                                             property does not match an element
      */
     public function unserialize($serialized, $strict = false)
     {
@@ -1039,7 +1039,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
                 $this->getAccept()
             ),
             'minentry'   => $this->getMinEntry(),
-            'maxentry'   => $this->getMaxEntry()
+            'maxentry'   => $this->getMaxEntry(),
         );
 
         $datas['elements'] = array();

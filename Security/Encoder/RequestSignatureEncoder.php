@@ -36,13 +36,13 @@ use Symfony\Component\Security\Core\Util\StringUtils;
 class RequestSignatureEncoder
 {
     /**
-     * Checks if the presented signature is valid or not according to token
-     *
-     * @param BBUserToken $token
-     * @param string      $signaturePresented signature we want to check if it's correct
-     *
-     * @return boolean true if signature is valid, else false
-     */
+    * Checks if the presented signature is valid or not according to token
+    *
+    * @param BBUserToken $token
+    * @param string      $signaturePresented signature we want to check if it's correct
+    *
+    * @return boolean true if signature is valid, else false
+    */
    public function isApiSignatureValid(BBUserToken $token, $signaturePresented)
    {
        return StringUtils::equals($this->createSignature($token), $signaturePresented);

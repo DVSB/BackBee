@@ -166,9 +166,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Looks for class definition throw declared wrappers according to the namespace
-     * @param  string                                                           $namespace the namespace's class
-     * @param  string                                                           $classname the class name looked for
-     * @return Boolean                                                          TRUE if the class is found FALSE else
+     * @param  string                                                       $namespace the namespace's class
+     * @param  string                                                       $classname the class name looked for
+     * @return Boolean                                                      TRUE if the class is found FALSE else
      * @throws \BackBee\Stream\ClassWrapper\Exception\ClassWrapperException Occurs when the wrapper can not build PHP code
      * @throws \BackBee\AutoLoader\Exception\SyntaxErrorException           Occurs when the generated PHP code is not valid
      */
@@ -210,9 +210,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Looks for class definition using the PHP 5.3 standards to the namespace
-     * @param  string                                                 $namespace the namespace's class
-     * @param  string                                                 $classname the class name looked for
-     * @return Boolean                                                TRUE if the class is found FALSE else
+     * @param  string                                             $namespace the namespace's class
+     * @param  string                                             $classname the class name looked for
+     * @return Boolean                                            TRUE if the class is found FALSE else
      * @throws \BackBee\AutoLoader\Exception\SyntaxErrorException Occurs when the found PHP code is not valid
      */
     private function _autoloadThrowFilesystem($namespace, $classname)
@@ -262,8 +262,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Returns the namespace and the class name to be found
-     * @param  string                                                      $classpath the absolute class name
-     * @return array                                                       array($namespace, $classname)
+     * @param  string                                                  $classpath the absolute class name
+     * @return array                                                   array($namespace, $classname)
      * @throws \BackBee\AutoLoader\Exception\InvalidNamespaceException Occurs when the namespace is not valid
      * @throws \BackBee\AutoLoader\Exception\InvalidClassnameException Occurs when the class name is not valid
      */
@@ -310,7 +310,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     /**
      * Looks for the class name, call back function for spl_autolad_register()
      * First using the defined wrappers then throw filesystem
-     * @param  string                                                   $classpath
+     * @param  string                                               $classpath
      * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException Occurs when the class can not be found
      */
     public function autoload($classpath)
@@ -409,12 +409,12 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Registers this auloloader
-     * @param  Boolean                            $throw   [optional] This parameter specifies whether
-     *                                                     spl_autoload_register should throw exceptions
-     *                                                     when the autoload_function cannot be registered.
-     * @param  Boolean                            $prepend [optional] If TRUE, spl_autoload_register will
-     *                                                     prepend the autoloader on the autoload stack
-     *                                                     instead of appending it.
+     * @param  Boolean                        $throw   [optional] This parameter specifies whether
+     *                                                 spl_autoload_register should throw exceptions
+     *                                                 when the autoload_function cannot be registered.
+     * @param  Boolean                        $prepend [optional] If TRUE, spl_autoload_register will
+     *                                                 prepend the autoloader on the autoload stack
+     *                                                 instead of appending it.
      * @return \BackBee\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function register($throw = true, $prepend = false)
@@ -426,8 +426,8 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Registers namespace parts to look for class name
-     * @param  string                             $namespace The namespace
-     * @param  string|array                       $paths     One or an array of associated locations
+     * @param  string                         $namespace The namespace
+     * @param  string|array                   $paths     One or an array of associated locations
      * @return \BackBee\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerNamespace($namespace, $paths)
@@ -443,7 +443,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Registers listeners namespace parts to look for class name
-     * @param  string                             $path
+     * @param  string                         $path
      * @return \BackBee\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerListenerNamespace($path)
@@ -459,9 +459,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
 
     /**
      * Registers stream wrappers
-     * @param  string                             $namespace The namespace
-     * @param  string                             $protocol  The wrapper's protocol
-     * @param  string                             $classname The class name implementing the wrapper
+     * @param  string                         $namespace The namespace
+     * @param  string                         $protocol  The wrapper's protocol
+     * @param  string                         $classname The class name implementing the wrapper
      * @return \BackBee\AutoLoader\AutoLoader The current instance of the autoloader class
      */
     public function registerStreamWrapper($namespace, $protocol, $classname)

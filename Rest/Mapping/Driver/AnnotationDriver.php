@@ -22,9 +22,7 @@
 namespace BackBee\Rest\Mapping\Driver;
 
 use BackBee\Rest\Mapping\ActionMetadata;
-
 use Doctrine\Common\Annotations\AnnotationReader;
-
 use Metadata\ClassMetadata;
 use Metadata\Driver\DriverInterface;
 

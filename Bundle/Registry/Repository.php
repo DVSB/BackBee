@@ -23,7 +23,6 @@ namespace BackBee\Bundle\Registry;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
-
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
@@ -38,7 +37,7 @@ class Repository extends EntityRepository
 
     /**
      * Saves the registry entry in DB, persist it if need
-     * @param \BackBee\Bundle\Registry $registry
+     * @param  \BackBee\Bundle\Registry $registry
      * @return \BackBee\Bundle\Registry
      */
     public function save(\BackBee\Bundle\Registry $registry)
@@ -54,24 +53,22 @@ class Repository extends EntityRepository
 
     /**
      * Removes the registry entry from DB
-     * @param \BackBee\Bundle\Registry $registry
+     * @param  \BackBee\Bundle\Registry $registry
      * @return \BackBee\Bundle\Registry
      */
     public function remove(\BackBee\Bundle\Registry $registry)
     {
-        if(\Doctrine\ORM\UnitOfWork::STATE_NEW !== $this->getEntityManager()->getUnitOfWork()->getEntityState($registry)) {
+        if (\Doctrine\ORM\UnitOfWork::STATE_NEW !== $this->getEntityManager()->getUnitOfWork()->getEntityState($registry)) {
             $this->getEntityManager()->remove($registry);
             $this->getEntityManager()->flush($registry);
         }
-
-
 
         return $registry;
     }
 
     /**
      * Removes the registry entry from DB
-     * @param \BackBee\Bundle\Registry $registry
+     * @param  \BackBee\Bundle\Registry $registry
      * @return \BackBee\Bundle\Registry
      */
     public function removeEntity($entity)
@@ -112,7 +109,7 @@ class Repository extends EntityRepository
         $sql = 'SELECT * FROM registry AS r WHERE (r.type = :identifier OR r.scope = :identifier) AND ((r.key = "identifier" AND r.value = :id) OR (r.scope = :id))';
         $query = $this->_em->createNativeQuery($sql, $this->getResultSetMapping());
         $query->setParameters(array('identifier' => $identifier,
-            'id' => $id
+            'id' => $id,
             )
         );
 

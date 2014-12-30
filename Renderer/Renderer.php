@@ -30,8 +30,8 @@ use BackBee\NestedNode\Page;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Routing\RouteCollection;
 use BackBee\Site\Layout;
-use BackBee\Util\File;
-use BackBee\Util\String;
+use BackBee\Utils\File\File;
+use BackBee\Utils\String;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -112,7 +112,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         $this->is_restored = false;
     }
 
-     /**
+    /**
      * Update every helpers and every registered renderer adapters with the right ARenderer;
      * this method is called everytime we clone a renderer
      */
@@ -374,7 +374,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Returns image url
      *
-     * @param string                $pathinfo
+     * @param string            $pathinfo
      * @param BackBee\Site\Site $site
      *
      * @return string image url
@@ -387,7 +387,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Returns image url
      *
-     * @param string                $pathinfo
+     * @param string            $pathinfo
      * @param BackBee\Site\Site $site
      *
      * @return string image url
@@ -400,7 +400,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Returns resource url
      *
-     * @param string                $pathinfo
+     * @param string            $pathinfo
      * @param BackBee\Site\Site $site
      *
      * @return string resource url
@@ -551,7 +551,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     {
         return array(
             'template_directories' => $this->_scriptdir,
-            'layout_directories'   => $this->_layoutdir
+            'layout_directories'   => $this->_layoutdir,
         );
     }
 
@@ -684,25 +684,25 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Generates HTML5 link tag with provided href
      *
-     * @param  string $href
+     * @param string $href
      *
      * @return string
      */
     private function generateStylesheetTag($href)
     {
-        return '<link rel="stylesheet" href="' . $href . '" type="text/css">';
+        return '<link rel="stylesheet" href="'.$href.'" type="text/css">';
     }
 
     /**
      * Generates HTML5 script tag with provided src
      *
-     * @param  string $src
+     * @param string $src
      *
      * @return string
      */
     private function generateJavascriptTag($src)
     {
-        return '<script src="' . $src . '"></script>';
+        return '<script src="'.$src.'"></script>';
     }
 
     /**

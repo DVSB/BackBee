@@ -50,7 +50,7 @@ class LayoutListener
         }
 
         $dispatcher = $event->getDispatcher();
-        if (NULL !== $dispatcher->getApplication()) {
+        if (null !== $dispatcher->getApplication()) {
             if (is_a($event->getEventArgs(), 'Doctrine\ORM\Event\PreUpdateEventArgs')) {
                 if (!$event->getEventArgs()->hasChangedField('_data')) {
                     return;
@@ -91,7 +91,7 @@ class LayoutListener
         }
 
         $dispatcher = $event->getDispatcher();
-        if (NULL !== $dispatcher->getApplication()) {
+        if (null !== $dispatcher->getApplication()) {
             $dispatcher->getApplication()->getEntityManager()
                     ->getRepository('BackBee\Site\Layout')
                     ->removeThumbnail($layout, $dispatcher->getApplication());

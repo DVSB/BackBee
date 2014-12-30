@@ -21,7 +21,7 @@
 
 namespace BackBee\NestedNode;
 
-use BackBee\Util\Numeric;
+use BackBee\Utils\Numeric;
 use BackBee\Security\Acl\Domain\AObjectIdentifiable;
 use BackBee\Exception\InvalidArgumentException;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -261,8 +261,8 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Is this node is an ancestor of the provided one ?
      * @param  \BackBee\NestedNode\ANestedNode $node
-     * @param  Boolean                             $strict Optional, if TRUE (default) this node is excluded of ancestors list
-     * @return Boolean                             TRUE if this node is an anscestor or provided node, FALSE otherwise
+     * @param  Boolean                         $strict Optional, if TRUE (default) this node is excluded of ancestors list
+     * @return Boolean                         TRUE if this node is an anscestor or provided node, FALSE otherwise
      */
     public function isAncestorOf(ANestedNode $node, $strict = true)
     {
@@ -276,8 +276,8 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Is this node is a descendant of the provided one ?
      * @param  \BackBee\NestedNode\ANestedNode $node
-     * @param  Boolean                             $strict Optional, if TRUE (default) this node is excluded of descendants list
-     * @return Boolean                             TRUE if this node is a descendant or provided node, FALSE otherwise
+     * @param  Boolean                         $strict Optional, if TRUE (default) this node is excluded of descendants list
+     * @return Boolean                         TRUE if this node is a descendant or provided node, FALSE otherwise
      */
     public function isDescendantOf(ANestedNode $node, $strict = true)
     {
@@ -335,7 +335,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the left position.
-     * @param  int                                             $leftnode
+     * @param  int                                         $leftnode
      * @return \BackBee\NestedNode\ANestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
@@ -352,7 +352,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the right position.
-     * @param  int                                             $rightnode
+     * @param  int                                         $rightnode
      * @return \BackBee\NestedNode\ANestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
@@ -369,7 +369,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the level.
-     * @param  type                                            $level
+     * @param  type                                        $level
      * @return \BackBee\NestedNode\ANestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
@@ -386,7 +386,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the creation date
-     * @param  \DateTime                           $created
+     * @param  \DateTime                       $created
      * @return \BackBee\NestedNode\ANestedNode
      */
     public function setCreated(\DateTime $created)
@@ -398,7 +398,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the last modified date
-     * @param  \DateTime                           $modified
+     * @param  \DateTime                       $modified
      * @return \BackBee\NestedNode\ANestedNode
      */
     public function setModified($modified)
@@ -442,10 +442,10 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Constructs the node from a string or object
-     * @param  mixed                                           $serialized The string representation of the object.
+     * @param  mixed                                       $serialized The string representation of the object.
      * @return \BackBee\NestedNode\ANestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                                    with strict mode, if a property does not exists
+     *                                                                with strict mode, if a property does not exists
      */
     public function unserialize($serialized, $strict = false)
     {

@@ -21,7 +21,6 @@
 
 namespace BackBee\Services\Local;
 
-
 /**
  * RPC services for User management
  *

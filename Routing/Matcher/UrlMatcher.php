@@ -21,7 +21,7 @@
 
 namespace BackBee\Routing\Matcher;
 
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Matcher\UrlMatcher as sfUrlMatcher;
 
@@ -49,7 +49,7 @@ class UrlMatcher extends sfUrlMatcher
         $status = parent::handleRouteRequirements($pathinfo, $name, $route);
 
         if (self::REQUIREMENT_MATCH == $status[0] && 0 < count($route->getRequirements('HTTP-'))) {
-            if (NULL === $request = $this->getContext()->getRequest()) {
+            if (null === $request = $this->getContext()->getRequest()) {
                 return array(self::REQUIREMENT_MISMATCH, null);
             }
 

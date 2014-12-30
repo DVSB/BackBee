@@ -67,8 +67,8 @@ class BundleControllerBootstrap
      * It will act as the main controller of current controller; it will dispatch
      * resquest to the right protected action method
      *
-     * @param  string                                                         $method
-     * @param  mixed                                                          $args
+     * @param  string                                                     $method
+     * @param  mixed                                                      $args
      * @throws BackBee\FrontController\Exception\FrontControllerException if called action is not available
      */
     public function __call($method, $args)

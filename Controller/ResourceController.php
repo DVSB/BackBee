@@ -23,7 +23,7 @@ namespace BackBee\Controller;
 
 use BackBee\BBApplication;
 use BackBee\FrontController\Exception\FrontControllerException;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use BackBee\Util\MimeType;
 use Symfony\Component\HttpFoundation\Response;
 

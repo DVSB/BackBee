@@ -33,7 +33,7 @@ interface DirectoryInterface
     /**
      * [getDirectories description]
      * @param  BackBeeIApplication $application [description]
-     * @return [type]                  [description]
+     * @return [type]              [description]
      */
     public static function getDirectories(\BackBee\IApplication $application);
 }

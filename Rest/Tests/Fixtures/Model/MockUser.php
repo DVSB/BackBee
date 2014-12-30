@@ -54,7 +54,7 @@ class MockUser
      */
     public $_login = 'userLogin';
 
-     /**
+    /**
      * The password of this user
      * @var string
      * @Column(type="string", name="password")

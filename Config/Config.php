@@ -26,7 +26,7 @@ use BackBee\Config\Exception\InvalidConfigException;
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\DispatchTagEventInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -128,7 +128,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Class constructor
-     * @param string                                     $basedir   The base directory in which look for config files
+     * @param string                                 $basedir   The base directory in which look for config files
      * @param \BackBee\Cache\ACache                  $cache     Optional cache system
      * @param \BackBee\DependencyInjection\Container $container
      */
@@ -331,9 +331,9 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Sets a parameter section
-     * @param  string                     $section
-     * @param  array                      $config
-     * @param  boolean                    $overwrite
+     * @param  string                 $section
+     * @param  array                  $config
+     * @param  boolean                $overwrite
      * @return \BackBee\Config\Config The current config object
      */
     public function setSection($section, array $config, $overwrite = false)
@@ -519,8 +519,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Returns an array of YAML files in the directory
-     * @param  string                                                $basedir
-     * @param  string                                                $basedir The base directory
+     * @param  string                                            $basedir
+     * @param  string                                            $basedir The base directory
      * @return array
      * @throws \BackBee\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
@@ -548,7 +548,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Loads the config files from the base directory
-     * @param  string                                                $basedir The base directory
+     * @param  string                                            $basedir The base directory
      * @throws \BackBee\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
     private function loadFromBaseDir($basedir, $overwrite = false)
@@ -560,7 +560,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Try to parse a yaml config file
-     * @param  string                                               $filename
+     * @param  string                                           $filename
      * @throws \BackBee\Config\Exception\InvalidConfigException Occurs when the file can't be parsed
      */
     private function loadFromFile($filename, $overwrite = false)

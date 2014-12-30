@@ -75,7 +75,7 @@ abstract class ABundle extends AbstractBaseBundle
      * Returns an Entity Manager for the bundle
      * If a valid doctrine configuration is provided, a new connection is established
      * If none doctrine configuration is provided, returns the BBApplication entity manager
-     * @param  array                                         $doctrine_config Connection informations
+     * @param  array                                     $doctrine_config Connection informations
      * @return \Doctrine\ORM\EntityManager
      * @throws \BackBee\Bundle\Exception\BundleException Occure on database connection error
      */

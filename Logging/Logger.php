@@ -226,7 +226,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 }
 
                 $previous = $exception->getPrevious();
-                while (NULL !== $previous) {
+                while (null !== $previous) {
                     // Not logging when not found
                     if ($httpCode !== 404) {
                         $this->error(sprintf('Cause By : Error occurred in file `%s` at line %d with message: %s', $previous->getFile(), $previous->getLine(), $previous->getMessage()));

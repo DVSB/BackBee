@@ -86,7 +86,7 @@ class RenderBackgroud
 
     /**
      * @codeCoverageIgnore
-     * @param  type                                          $cols
+     * @param  type                                      $cols
      * @return \BackBee\Services\Gabarit\RenderBackgroud
      */
     public function setCols($cols)
@@ -107,7 +107,7 @@ class RenderBackgroud
 
     /**
      * @codeCoverageIgnore
-     * @param  type                                          $colWidth
+     * @param  type                                      $colWidth
      * @return \BackBee\Services\Gabarit\RenderBackgroud
      */
     public function setColWidth($colWidth)
@@ -128,7 +128,7 @@ class RenderBackgroud
 
     /**
      * @codeCoverageIgnore
-     * @param  type                                          $gutterWidth
+     * @param  type                                      $gutterWidth
      * @return \BackBee\Services\Gabarit\RenderBackgroud
      */
     public function setGutterWidth($gutterWidth)

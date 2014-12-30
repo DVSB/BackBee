@@ -32,17 +32,17 @@ class authenticatedUser extends AHelper
 {
     public function __invoke($userClassname = null)
     {
-        if (NULL === $application = $this->_renderer->getApplication()) {
-            return NULL;
+        if (null === $application = $this->_renderer->getApplication()) {
+            return;
         }
-        if (NULL === $token = $application->getSecurityContext()->getToken()) {
-            return NULL;
+        if (null === $token = $application->getSecurityContext()->getToken()) {
+            return;
         }
-        if (NULL === $user = $token->getUser()) {
-            return NULL;
+        if (null === $user = $token->getUser()) {
+            return;
         }
-        if (NULL !== $userClassname && !is_a($user, $userClassname)) {
-            return NULL;
+        if (null !== $userClassname && !is_a($user, $userClassname)) {
+            return;
         }
 
         return $user;

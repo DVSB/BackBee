@@ -25,7 +25,7 @@ use BackBee\Config\Persistor\PersistorInterface;
 use BackBee\Exception\BBException;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\IApplication as ApplicationInterface;
-use BackBee\Util\Arrays;
+use BackBee\Utils\Collection\Collection;
 
 /**
  * Persistor allows us to handle with ease persistence of Config settings
@@ -166,10 +166,10 @@ class Persistor
         $default_sections = $this->configurator->getConfigDefaultSections($config);
         $current_sections = $config->getAllRawSections();
 
-        $sections_to_update = array_keys(Arrays::array_diff_assoc_recursive($default_sections, $current_sections));
+        $sections_to_update = array_keys(Collection::array_diff_assoc_recursive($default_sections, $current_sections));
         $sections_to_update = array_unique(array_merge(
             $sections_to_update,
-            array_keys(Arrays::array_diff_assoc_recursive($current_sections, $default_sections))
+            array_keys(Collection::array_diff_assoc_recursive($current_sections, $default_sections))
         ));
 
         $override_site = $config->getRawSection('override_site') ?: array();

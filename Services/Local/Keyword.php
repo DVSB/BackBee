@@ -21,7 +21,6 @@
 
 namespace BackBee\Services\Local;
 
-
 /**
  * @category    BackBee
  * @package     BackBee\Services

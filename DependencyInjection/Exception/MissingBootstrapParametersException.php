@@ -33,7 +33,7 @@ class MissingBootstrapParametersException extends \BackBee\Exception\BBException
      * MissingBootstrapParametersException's constructor
      *
      * @param BackBee\DependencyInjection\Container $container the container created by the container builder
-     *                                                             which raise this exception
+     *                                                         which raise this exception
      */
     public function __construct(array $missing_parameters)
     {

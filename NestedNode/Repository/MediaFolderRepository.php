@@ -70,7 +70,7 @@ class MediaFolderRepository extends NestedNodeRepository
                         continue;
                     }
 
-                    if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($subcontent, $token)) {
+                    if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($subcontent, $token)) {
                         $draft->setContent(null);
                         $draft->setState(Revision::STATE_DELETED);
                     }

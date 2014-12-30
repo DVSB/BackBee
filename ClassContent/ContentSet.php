@@ -133,7 +133,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function clear()
     {
-        if (NULL !== $this->getDraft()) {
+        if (null !== $this->getDraft()) {
             return $this->getDraft()->clear();
         }
 
@@ -149,7 +149,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function count()
     {
-        return (NULL === $this->getDraft()) ? count($this->_data) : $this->getDraft()->count();
+        return (null === $this->getDraft()) ? count($this->_data) : $this->getDraft()->count();
     }
 
     /**
@@ -158,7 +158,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function current()
     {
-        return (NULL === $this->getDraft()) ? $this->getData($this->_index) : $this->getDraft()->current();
+        return (null === $this->getDraft()) ? $this->getData($this->_index) : $this->getDraft()->current();
     }
 
     /**
@@ -184,9 +184,9 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     {
         if ($element instanceof AClassContent) {
             $useIntIndex = (is_bool($useIntIndex)) ? $useIntIndex : false;
-            if (FALSE !== $key = $this->_subcontent->indexOf($element)) {
+            if (false !== $key = $this->_subcontent->indexOf($element)) {
                 foreach ($this->_data as $key => $data) {
-                    if (FALSE !== $index = array_search($element->getUid(), $data, true)) {
+                    if (false !== $index = array_search($element->getUid(), $data, true)) {
                         $index = ($useIntIndex) ? $key : $index;
 
                         return $index;
@@ -194,7 +194,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
                 }
             }
 
-            return FALSE;
+            return false;
         }
 
         return array_search($element, $this->_data, true);
@@ -214,14 +214,14 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
                 $index++;
             }
 
-            return FALSE;
+            return false;
         }
 
         return array_search($element, $this->_data, true);
     }
 
     /**
-     * @param int                                     $index
+     * @param int                                 $index
      * @param \BackBee\ClassContent\AClassContent $contentSet
      */
     public function replaceChildAtBy($index, AClassContent $contentSet)
@@ -250,7 +250,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * @param \BackBee\ClassContent\AClassContent $prevContentSet
      * @param \BackBee\ClassContent\AClassContent $nextContentSet
-     *                                                                Replace prevContentSet by nextContentSet
+     *                                                            Replace prevContentSet by nextContentSet
      */
     public function replaceChildBy(AClassContent $prevContentSet, AClassContent $nextContentSet)
     {
@@ -269,7 +269,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function item($index)
     {
-        if (NULL !== $this->getDraft()) {
+        if (null !== $this->getDraft()) {
             return $this->getDraft()->item($index);
         }
 
@@ -277,7 +277,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             return $this->getData($index);
         }
 
-        return NULL;
+        return;
     }
 
     /**
@@ -286,7 +286,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function key()
     {
-        return (NULL === $this->getDraft()) ? $this->_index : $this->getDraft()->key();
+        return (null === $this->getDraft()) ? $this->_index : $this->getDraft()->key();
     }
 
     /**
@@ -296,7 +296,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function last()
     {
-        return (NULL === $this->getDraft()) ? $this->getData($this->count() - 1) : $this->getDraft()->last();
+        return (null === $this->getDraft()) ? $this->getData($this->count() - 1) : $this->getDraft()->last();
     }
 
     /**
@@ -305,7 +305,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function next()
     {
-        return (NULL === $this->getDraft()) ? $this->getData($this->_index++) : $this->getDraft()->next();
+        return (null === $this->getDraft()) ? $this->getData($this->_index++) : $this->getDraft()->next();
     }
 
     /**
@@ -314,14 +314,14 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function pop()
     {
-        if (NULL !== $this->getDraft()) {
+        if (null !== $this->getDraft()) {
             return $this->getDraft()->pop();
         }
 
         $last = $this->last();
 
-        if (NULL === $last) {
-            return NULL;
+        if (null === $last) {
+            return;
         }
 
         array_pop($this->_data);
@@ -344,7 +344,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function push(AClassContent $var)
     {
-        if (NULL !== $this->getDraft()) {
+        if (null !== $this->getDraft()) {
             return $this->getDraft()->push($var);
         }
 
@@ -369,7 +369,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function rewind()
     {
-        if (NULL === $this->getDraft()) {
+        if (null === $this->getDraft()) {
             $this->_index = 0;
         } else {
             $this->getDraft()->rewind();
@@ -382,13 +382,13 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function shift()
     {
-        if (NULL !== $this->getDraft()) {
+        if (null !== $this->getDraft()) {
             return $this->getDraft()->shift();
         }
 
         $first = $this->first();
-        if (NULL === $first) {
-            return NULL;
+        if (null === $first) {
+            return;
         }
 
         array_shift($this->_data);
@@ -411,7 +411,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function unshift(AClassContent $var)
     {
-        if (NULL !== $this->getDraft()) {
+        if (null !== $this->getDraft()) {
             return $this->getDraft()->unshift($var);
         }
 
@@ -433,7 +433,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function valid()
     {
-        return (NULL === $this->getDraft()) ? isset($this->_data[$this->_index]) : $this->getDraft()->valid();
+        return (null === $this->getDraft()) ? isset($this->_data[$this->_index]) : $this->getDraft()->valid();
     }
 
     /*     * **************************************************************** */
@@ -446,7 +446,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * Return the data of this content
      * @param $var string The element to be return, if NULL, all datas are returned
      * @param $forceArray Boolean Force the return as array
-     * @return mixed                                                    Could be either NULL or one or array of scalar, array, AClassContent instance
+     * @return mixed                                                Could be either NULL or one or array of scalar, array, AClassContent instance
      * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
      */
     public function getData($var = null, $forceArray = false)
@@ -466,11 +466,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Initialized the instance from a serialized string
-     * @param  string                                                       $serialized
-     * @param  Boolean                                                      $strict     If TRUE, all missing or additionnal element will generate an error
+     * @param  string                                                   $serialized
+     * @param  Boolean                                                  $strict     If TRUE, all missing or additionnal element will generate an error
      * @return \BackBee\ClassContent\AClassContent                      The current instance
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
-     *                                                                                 property does not match an element
+     *                                                                             property does not match an element
      */
     public function unserialize($serialized, $strict = false)
     {
@@ -530,12 +530,12 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Sets options at the construction of a new instance
-     * @param  array                                $options Initial options for the content:
-     *                                                       - label       the label of the content
-     *                                                       - maxentry    the maximum number of content accepted
-     *                                                       - minentry    the minimum number of content accepted
-     *                                                       - accept      an array of classname accepted
-     *                                                       - default     array default value for datas
+     * @param  array                            $options Initial options for the content:
+     *                                                   - label       the label of the content
+     *                                                   - maxentry    the maximum number of content accepted
+     *                                                   - minentry    the minimum number of content accepted
+     *                                                   - accept      an array of classname accepted
+     *                                                   - default     array default value for datas
      * @return \BackBee\ClassContent\ContentSet
      */
     protected function _setOptions($options = null)
@@ -571,10 +571,10 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Dynamically adds and sets new element to this content
-     * @param  string                                  $var          the name of the element
-     * @param  string                                  $type         the type
-     * @param  array                                   $options      Initial options for the content (see this constructor)
-     * @param  Boolean                                 $updateAccept dynamically accept or not the type for the new element
+     * @param  string                              $var          the name of the element
+     * @param  string                              $type         the type
+     * @param  array                               $options      Initial options for the content (see this constructor)
+     * @param  Boolean                             $updateAccept dynamically accept or not the type for the new element
      * @return \BackBee\ClassContent\AClassContent The current instance
      * @deprecated since version 1.0
      */
@@ -615,8 +615,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * Adds a new accepted type to the element
-     * @param  string                                  $type the type to accept
-     * @param  string                                  $var  the element
+     * @param  string                              $type the type to accept
+     * @param  string                              $var  the element
      * @return \BackBee\ClassContent\AClassContent The current instance
      */
     protected function _addAcceptedType($type, $var = null)

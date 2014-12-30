@@ -75,7 +75,7 @@ class Page extends AbstractServiceLocal
         $em = $this->bbapp->getEntityManager();
         $page = $em->getRepository('\BackBee\NestedNode\Page')->find($uid);
 
-        if (NULL === $page) {
+        if (null === $page) {
             throw new ServicesException(sprintf('Unable to find page for `%s` uid', $uid));
         }
 
@@ -85,7 +85,7 @@ class Page extends AbstractServiceLocal
     /**
      * Return the serialized form of a page
      * Returns the available workflow states for NestedNode\Page and Site\Layout
-     * @param  string                                          $layout_uid
+     * @param  string                                      $layout_uid
      * @return array
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $layout_uid is invalid
      * @exposed(secured=true)
@@ -112,7 +112,7 @@ class Page extends AbstractServiceLocal
 
     /**
      * Get the page info
-     * @param  string                                                   $page_uid The unique identifier of the page
+     * @param  string                                               $page_uid The unique identifier of the page
      * @return \stdClass
      * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $page_uid is invalid
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
@@ -141,7 +141,7 @@ class Page extends AbstractServiceLocal
 
     /**
      * Updates a page
-     * @param  string                                                   $serialized The serialized page
+     * @param  string                                               $serialized The serialized page
      * @return \stdClass
      * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $serialized is not valid
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
@@ -223,9 +223,9 @@ class Page extends AbstractServiceLocal
 
     /**
      * Returns a part of the site tree
-     * @param  string                                                   $site_uid    The unique identifier of the site
-     * @param  string                                                   $page_uid    The parent uid of the part of the tree
-     * @param  string                                                   $current_uid
+     * @param  string                                               $site_uid    The unique identifier of the site
+     * @param  string                                               $page_uid    The parent uid of the part of the tree
+     * @param  string                                               $current_uid
      * @return \stdClass
      * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $site_uid is not valid
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
@@ -284,8 +284,8 @@ class Page extends AbstractServiceLocal
 
     /**
      * Duplicate the page in the tree
-     * @param  string                                                   $page_uid The unique identifier of the page
-     * @param  string                                                   $title    The title of the clone
+     * @param  string                                               $page_uid The unique identifier of the page
+     * @param  string                                               $title    The title of the clone
      * @return \stdClass
      * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $page_uid is invalid
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
@@ -327,9 +327,9 @@ class Page extends AbstractServiceLocal
 
     /**
      * Moves the page in the tree
-     * @param  string                                                   $page_uid   The unique identifier of the page
-     * @param  string                                                   $parent_uid The unique identifier of the new parent page
-     * @param  string                                                   $next_uid   Optional, the unique identifier of the previous sibling
+     * @param  string                                               $page_uid   The unique identifier of the page
+     * @param  string                                               $parent_uid The unique identifier of the new parent page
+     * @param  string                                               $next_uid   Optional, the unique identifier of the previous sibling
      * @return \stdClass
      * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $page_uid or $parent_uid are invalid
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
@@ -383,8 +383,8 @@ class Page extends AbstractServiceLocal
 
     /**
      * Removes the page off the tree
-     * @param  string                                                   $page_uid The unique identifier of the page
-     * @return \stdClass                                                The serialized parent
+     * @param  string                                               $page_uid The unique identifier of the page
+     * @return \stdClass                                            The serialized parent
      * @throws \BackBee\Exception\InvalidArgumentException          Occurs if $page_uid is invalid or page is root
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
      * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
@@ -417,7 +417,7 @@ class Page extends AbstractServiceLocal
 
     /**
      * Returns the serialize page to edit it
-     * @param  string                                                   $page_uid The unique identifier of the page
+     * @param  string                                               $page_uid The unique identifier of the page
      * @return \stdClass
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
      * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the required permission
@@ -443,14 +443,14 @@ class Page extends AbstractServiceLocal
 
     /**
      * Inserts or updates a Page from the posted BBSelector form
-     * @param  string                                                   $page_uid   The unique identifier of the page
-     * @param  string                                                   $parent_uid The unique identifier of the parent of the page
-     * @param  string                                                   $title      The title
-     * @param  string                                                   $url        The url (currently unused)
-     * @param  string                                                   $target     The target is redirect is defined
-     * @param  string                                                   $redirect   The permananet redirect URL
-     * @param  string                                                   $layout_uid The unique identifier of the layout to use
-     * @param  string                                                   $alttitle   The alternate title bb5 #366
+     * @param  string                                               $page_uid   The unique identifier of the page
+     * @param  string                                               $parent_uid The unique identifier of the parent of the page
+     * @param  string                                               $title      The title
+     * @param  string                                               $url        The url (currently unused)
+     * @param  string                                               $target     The target is redirect is defined
+     * @param  string                                               $redirect   The permananet redirect URL
+     * @param  string                                               $layout_uid The unique identifier of the layout to use
+     * @param  string                                               $alttitle   The alternate title bb5 #366
      * @return \stdClass
      * @throws \BackBee\Exception\InvalidArgumentException          Occurs if the layout is undefined
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
@@ -564,7 +564,7 @@ class Page extends AbstractServiceLocal
         $em = $this->bbapp->getEntityManager();
 
         $root = $em->find('\BackBee\NestedNode\Page', $root_uid);
-        if (NULL !== $root) {
+        if (null !== $root) {
             $page = new \BackBee\NestedNode\Page();
             $page->setTitle($title)
                     ->setSite($root->getSite())
@@ -675,13 +675,13 @@ class Page extends AbstractServiceLocal
         }
 
         $options = array();
-        if (NULL !== $searchField) {
+        if (null !== $searchField) {
             $options['searchField'] = $searchField;
         }
-        if (NULL !== $beforePubdateField && "" !== $beforePubdateField) {
+        if (null !== $beforePubdateField && "" !== $beforePubdateField) {
             $options['beforePubdateField'] = $beforePubdateField;
         }
-        if (NULL !== $afterPubdateField && "" !== $afterPubdateField) {
+        if (null !== $afterPubdateField && "" !== $afterPubdateField) {
             $options['afterPubdateField'] = $afterPubdateField;
         }
         $em = $this->bbapp->getEntityManager();
@@ -700,7 +700,7 @@ class Page extends AbstractServiceLocal
                     $row = new \stdClass();
                     $row->uid = $child->getUid();
                     $row->title = $child->getTitle();
-                    $row->url = NULL === $child->getRedirect() ? $child->getUrl() : $child->getRedirect();
+                    $row->url = null === $child->getRedirect() ? $child->getUrl() : $child->getRedirect();
                     $row->created = $child->getCreated()->format('r');
                     $row->modified = $child->getModified()->format('r');
 
@@ -712,7 +712,7 @@ class Page extends AbstractServiceLocal
                 $row = new \stdClass();
                 $row->uid = $page->getUid();
                 $row->title = $page->getTitle();
-                $row->url = NULL === $page->getRedirect() ? $page->getUrl() : $page->getRedirect();
+                $row->url = null === $page->getRedirect() ? $page->getUrl() : $page->getRedirect();
                 $row->created = $page->getCreated()->format('c');
                 $row->modified = $page->getModified()->format('c');
 

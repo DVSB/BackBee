@@ -60,7 +60,7 @@ class UploadServer extends JsonRPCServer
                 throw new UploadException("Method:".$method." not exposed");
             }
 
-            if (NULL !== $this->_application) {
+            if (null !== $this->_application) {
                 $this->_application->info(sprintf('Handling Upload RPC request `%s::%s`.', $namespaceClass, $method));
             }
             $object = new $namespaceClass();
@@ -69,14 +69,14 @@ class UploadServer extends JsonRPCServer
 
             $content = array(
                 'result' => $result,
-                'error' => NULL,
+                'error' => null,
             );
             $response->setContent(json_encode($content));
         } catch (ForbidenAccessException $e) {
             $response->setStatusCode(403);
-            $content = array('result' => NULL, 'error' => new Error($e));
+            $content = array('result' => null, 'error' => new Error($e));
         } catch (\Exception $e) {
-            $content = array('result' => NULL, 'error' => new Error($e));
+            $content = array('result' => null, 'error' => new Error($e));
         }
 
         return $response;
@@ -109,10 +109,10 @@ class UploadServer extends JsonRPCServer
 
     public function handle(Request $request = null, $request_payload = null)
     {
-        if (NULL === $request && NULL === $this->_application) {
+        if (null === $request && null === $this->_application) {
             return;
         }
-        if (NULL === $request) {
+        if (null === $request) {
             $request = $this->_application->getRequest();
         }
         //utf-8

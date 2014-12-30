@@ -22,8 +22,7 @@
 namespace BackBee\Util\Sequence;
 
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\Util\Numeric;
-
+use BackBee\Utils\Numeric;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -87,8 +86,8 @@ class Sequencer extends EntityRepository
 
     /**
      * Initiate a new sequence with name $name
-     * @param  string $name
-     * @param  int    $first
+     * @param  string                   $name
+     * @param  int                      $first
      * @return int
      * @throws InvalidArgumentException Occures if sequence $name already exists or $first is not a positive integer
      */
@@ -105,7 +104,7 @@ class Sequencer extends EntityRepository
         $query = 'INSERT INTO sequence (name, value) VALUE(:name, :value)';
         $params = array(
             'name'   => $name,
-            'value'  => $first
+            'value'  => $first,
         );
 
         $this->getEntityManager()
@@ -118,11 +117,11 @@ class Sequencer extends EntityRepository
 
     /**
      * Update a sequence with name $name
-     * @param  string                                          $name
-     * @param  int                                             $first
+     * @param  string                   $name
+     * @param  int                      $first
      * @return int
      * @throws InvalidArgumentException Occures if sequence $name doesn't exist
-     *                                                               or $value is not a positive integer
+     *                                        or $value is not a positive integer
      */
     private function update($name, $value = 0)
     {
@@ -137,7 +136,7 @@ class Sequencer extends EntityRepository
         $query = 'UPDATE sequence SET value = :value WHERE name = :name';
         $params = array(
             'name'  => $name,
-            'value' => $value
+            'value' => $value,
         );
 
         $this->getEntityManager()
@@ -165,8 +164,8 @@ class Sequencer extends EntityRepository
 
     /**
      * Update a sequence to $value only if greater than its current value
-     * @param  string                                          $name
-     * @param  int                                             $value
+     * @param  string                   $name
+     * @param  int                      $value
      * @return int
      * @throws InvalidArgumentException Occures if $value is not a positive integer
      */

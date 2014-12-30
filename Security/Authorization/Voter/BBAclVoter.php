@@ -108,7 +108,7 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for nested node object, recursively till root
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \BackBee\NestedNode\ANestedNode                                  $node
+     * @param  \BackBee\NestedNode\ANestedNode                                      $node
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
@@ -126,7 +126,7 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for class content object, recursively till AClassContent
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \BackBee\ClassContent\AClassContent                              $content
+     * @param  \BackBee\ClassContent\AClassContent                                  $content
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */

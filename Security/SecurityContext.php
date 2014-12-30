@@ -401,7 +401,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * Create an encoders factory if need
-     * @param  array                                 $config
+     * @param  array                             $config
      * @return \BackBee\Security\SecurityContext
      */
     private function createEncoderFactory(array $config)

@@ -79,7 +79,7 @@ class UserPreferencesRepository extends EntityRepository
     /**
      * Find the UserPreferences object by uid.
      *
-     * @param  string                            $uid
+     * @param  string                        $uid
      * @param  BackBee\Security\User         $user
      * @return \BackBee\Site\UserPreferences
      */

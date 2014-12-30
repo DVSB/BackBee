@@ -24,7 +24,7 @@ namespace BackBee\Theme;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use BackBee\Theme\Exception\ThemeException;
-use BackBee\Util\Dir;
+use BackBee\Utils\File\Dir;
 
 /**
  * @category    BackBee
@@ -134,7 +134,7 @@ abstract class AThemesManager implements IThemesManager
     /**
      * Return the configuration of the specified theme
      *
-     * @param  string                  $name
+     * @param  string              $name
      * @return BackBee\Theme\Theme
      * @throws ThemeException
      */

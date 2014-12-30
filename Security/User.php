@@ -202,7 +202,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  boolean                    $bool
+     * @param  boolean                $bool
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -217,7 +217,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  string                     $login
+     * @param  string                 $login
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -230,7 +230,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  string                     $password
+     * @param  string                 $password
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -243,7 +243,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  string                     $firstname
+     * @param  string                 $firstname
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -256,7 +256,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  string                     $lastname
+     * @param  string                 $lastname
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -382,7 +382,7 @@ class User implements UserInterface
      */
     public function getSalt()
     {
-        return NULL;
+        return;
     }
 
     /**
@@ -413,7 +413,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  string                     $api_key_public
+     * @param  string                 $api_key_public
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -436,7 +436,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  string                     $api_key_private
+     * @param  string                 $api_key_private
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -459,7 +459,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  bool                       $api_key_enabled
+     * @param  bool                   $api_key_enabled
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */

@@ -42,7 +42,7 @@ class ContainerAlreadyExistsException extends \BackBee\Exception\BBException
      * ContainerAlreadyExistsException's constructor
      *
      * @param BackBee\DependencyInjection\Container $container the container created by the container builder
-     *                                                             which raise this exception
+     *                                                         which raise this exception
      */
     public function __construct(Container $container)
     {

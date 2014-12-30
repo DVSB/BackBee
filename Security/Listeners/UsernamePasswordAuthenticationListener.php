@@ -100,7 +100,7 @@ class UsernamePasswordAuthenticationListener implements ListenerInterface
                 if ('' === $redirect) {
                     $redirect = $request->getPathInfo();
                 }
-                if (NULL !== $qs = $request->getQueryString()) {
+                if (null !== $qs = $request->getQueryString()) {
                     $redirect .= '?'.$qs;
                 }
 

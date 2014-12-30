@@ -27,8 +27,8 @@ use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
-use BackBee\Util\File;
-use BackBee\Util\String;
+use BackBee\Utils\File\File;
+use BackBee\Utils\String;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -133,7 +133,7 @@ abstract class ARenderer implements IRenderer
         if (is_array($config)) {
             if (true === array_key_exists('scriptdir', $config)) {
                 $dirs = (array) $config['scriptdir'];
-                array_walk($dirs, array('\BackBee\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
+                array_walk($dirs, array('\BackBee\Utils\File\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
                 foreach ($dirs as $dir) {
                     if (true === file_exists($dir) && true === is_dir($dir)) {
                         $this->_scriptdir[] = $dir;
@@ -142,7 +142,7 @@ abstract class ARenderer implements IRenderer
 
                 if (true === $this->getApplication()->hasContext()) {
                     $dirs = (array) $config['scriptdir'];
-                    array_walk($dirs, array('\BackBee\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
+                    array_walk($dirs, array('\BackBee\Utils\File\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
                     foreach ($dirs as $dir) {
                         if (true === file_exists($dir) && true === is_dir($dir)) {
                             $this->_scriptdir[] = $dir;
@@ -153,7 +153,7 @@ abstract class ARenderer implements IRenderer
 
             if (true === array_key_exists('layoutdir', $config)) {
                 $dirs = (array) $config['layoutdir'];
-                array_walk($dirs, array('\BackBee\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
+                array_walk($dirs, array('\BackBee\Utils\File\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getRepository()));
                 foreach ($dirs as $dir) {
                     if (true === file_exists($dir) && true === is_dir($dir)) {
                         $this->_layoutdir[] = $dir;
@@ -162,7 +162,7 @@ abstract class ARenderer implements IRenderer
 
                 if (true === $this->getApplication()->hasContext()) {
                     $dirs = (array) $config['layoutdir'];
-                    array_walk($dirs, array('\BackBee\Util\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
+                    array_walk($dirs, array('\BackBee\Utils\File\File', 'resolveFilepath'), array('base_dir' => $this->getApplication()->getBaseRepository()));
                     foreach ($dirs as $dir) {
                         if (true === file_exists($dir) && true === is_dir($dir)) {
                             $this->_layoutdir[] = $dir;
@@ -461,8 +461,8 @@ abstract class ARenderer implements IRenderer
     /**
      * Returns $pathinfo with base url of current page
      * If $site is provided, the url will be pointing on the associate domain
-     * @param  string                 $pathinfo
-     * @param  string                 $defaultExt
+     * @param  string             $pathinfo
+     * @param  string             $defaultExt
      * @param  \BackBee\Site\Site $site
      * @return string
      */
@@ -699,7 +699,7 @@ abstract class ARenderer implements IRenderer
     /**
      * Set the current page
      * @param  BackBee\NestedNode\Page $page
-     * @return ARenderer                   The current renderer
+     * @return ARenderer               The current renderer
      */
     public function setCurrentPage(\BackBee\NestedNode\Page $page = null)
     {
@@ -733,7 +733,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @param  type                            $render
+     * @param  type $render
      * @return self
      */
     public function setRender($render)

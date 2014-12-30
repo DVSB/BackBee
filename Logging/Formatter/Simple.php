@@ -34,7 +34,7 @@ class Simple implements IFormatter
 
     public function __construct($format = null)
     {
-        if (NULL !== $format) {
+        if (null !== $format) {
             $this->_format = $format;
         }
     }

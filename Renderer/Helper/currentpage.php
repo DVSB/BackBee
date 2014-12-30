@@ -34,13 +34,13 @@ class currentpage extends AHelper
 
     public function getCurrentPage()
     {
-        if (NULL === $this->_currentPage) {
+        if (null === $this->_currentPage) {
             $currentpage = $this->_renderer->getCurrentPage();
             if (is_object($currentpage) && (is_a($currentpage, '\BackBee\NestedNode\Page'))) {
                 $this->_currentPage = $currentpage;
             }
 
-            if (NULL === $this->_currentPage) {
+            if (null === $this->_currentPage) {
                 $this->_currentPage = new \BackBee\NestedNode\Page();
             }
         }

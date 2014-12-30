@@ -26,6 +26,7 @@ use BackBee\Services\Less\LessTheme;
 use BackBee\Services\Gabarit\RenderBackgroud;
 use BackBee\Exception\BBException;
 use BackBee\BBApplication;
+use BackBee\Utils\File\File;
 
 /**
  * @category    BackBee
@@ -126,7 +127,7 @@ class Less extends AbstractServiceLocal
             $lessParser = $this->getLessParserObject($this->lessPathTheme.DIRECTORY_SEPARATOR.$theme.DIRECTORY_SEPARATOR.'less'.DIRECTORY_SEPARATOR."admin-variables.less");
         } elseif (null !== $this->bbapp->getTheme()->getIncludePath('less_dir')) {
             $lessfile = 'admin-variables.less';
-            \BackBee\Util\File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
+            File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
             $lessParser = $this->getLessParserObject($lessfile);
         } else {
             $lessParser = $this->getLessParserObject($this->lessPathRoot.DIRECTORY_SEPARATOR."admin-variables.less");
@@ -144,7 +145,7 @@ class Less extends AbstractServiceLocal
             $lessParser = $this->getLessParserObject($this->lessPathTheme.DIRECTORY_SEPARATOR.$theme.DIRECTORY_SEPARATOR.'less'.DIRECTORY_SEPARATOR."admin-variables.less");
         } elseif (null !== $this->bbapp->getTheme()->getIncludePath('less_dir')) {
             $lessfile = 'admin-variables.less';
-            \BackBee\Util\File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
+            File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
             $lessParser = $this->getLessParserObject($lessfile);
         } else {
             $lessParser = $this->getLessParserObject($this->lessPathRoot.DIRECTORY_SEPARATOR."admin-variables.less");
@@ -163,7 +164,7 @@ class Less extends AbstractServiceLocal
     {
         if (null !== $this->bbapp->getTheme()->getIncludePath('less_dir')) {
             $lessfile = 'grid_constant.less';
-            \BackBee\Util\File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
+            File::resolveFilepath($lessfile, null, array('include_path' => $this->bbapp->getTheme()->getIncludePath('less_dir')));
             $lessParser = $this->getLessParserObject($lessfile);
         } else {
             $lessParser = $this->getLessParserObject($this->lessPathRoot.DIRECTORY_SEPARATOR."grid_constant.less");

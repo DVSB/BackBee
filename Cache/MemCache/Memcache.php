@@ -39,12 +39,12 @@ class Memcache extends AMemcache
 {
     /**
      * Class constructor
-     * @param  array                                       $options Initial options for the cache adapter:
-     *                                                              - persistent_id string Optional persistent key
-     *                                                              - servers array The Memcache servers to add
-     *                                                              - options array The Memcache options to set
-     * @param  string                                      $context An optional cache context use as prefix key
-     * @param  \Psr\Log\LoggerInterface                    $logger  An optional logger
+     * @param  array                                   $options Initial options for the cache adapter:
+     *                                                          - persistent_id string Optional persistent key
+     *                                                          - servers array The Memcache servers to add
+     *                                                          - options array The Memcache options to set
+     * @param  string                                  $context An optional cache context use as prefix key
+     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
      * @throws \BackBee\Cache\Exception\CacheException Occurs if Memcache extension is not available.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)

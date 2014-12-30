@@ -36,7 +36,7 @@ class Bundle extends AbstractServiceLocal
      */
     public function findAll()
     {
-        if (NULL === $this->bbapp) {
+        if (null === $this->bbapp) {
             throw new ServicesException("None BackBee Application provided", ServicesException::UNDEFINED_APP);
         }
 

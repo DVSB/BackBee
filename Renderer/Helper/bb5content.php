@@ -196,7 +196,7 @@ class bb5content extends AHelper
 
     /**
      * Adds common BB5 content markups to contents
-     * @param  array                                    $params Optional parameters
+     * @param  array                                $params Optional parameters
      * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addCommonContentMarkup($params = array())
@@ -225,7 +225,7 @@ class bb5content extends AHelper
 
     /**
      * Adds BB5 content markups to contentsets
-     * @param  array                                    $params Optional parameters
+     * @param  array                                $params Optional parameters
      * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addContentSetMarkup($params = array())
@@ -264,7 +264,7 @@ class bb5content extends AHelper
      * Adds draggable and resizable class
      * @todo Add test on autobloc (new forbiddenaction ?)
      * @todo Add test on resizable (new forbiddenaction ?)
-     * @param  array                                    $params
+     * @param  array                                $params
      * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addClassContainerMarkup($params = array())
@@ -289,7 +289,7 @@ class bb5content extends AHelper
 
     /**
      * Adds specific markup to Element\file
-     * @param  array                                    $params Optional parameters
+     * @param  array                                $params Optional parameters
      * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addElementFileMarkup($params = array())
@@ -304,7 +304,7 @@ class bb5content extends AHelper
 
     /**
      * Adds specific Aloha markup on content
-     * @param  array                                    $params Optional parameters
+     * @param  array                                $params Optional parameters
      * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addAlohaMarkup($params = array())
@@ -341,7 +341,7 @@ class bb5content extends AHelper
                             $rteconf = $contentData->getParam("aloha", "scalar");
                             $isEditable = (boolean) $contentData->getParam("editable", "boolean");
 
-                            if (!is_null($rteconf) && $isEditable == TRUE) {
+                            if (!is_null($rteconf) && $isEditable == true) {
                                 $this->_addValueToAttribute('data-rteconf', $rteconf);
                             }
                         }
@@ -397,8 +397,8 @@ class bb5content extends AHelper
 
     /**
      * Adds new values to an attribute, creates it if don't exist
-     * @param  string                                   $key
-     * @param  mixed                                    $value
+     * @param  string                               $key
+     * @param  mixed                                $value
      * @return \BackBee\Renderer\Helper\datacontent
      */
     private function _addValueToAttribute($key, $value = null)

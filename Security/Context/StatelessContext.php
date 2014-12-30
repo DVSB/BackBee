@@ -21,7 +21,7 @@ class StatelessContext extends AbstractContext implements ContextInterface
     public function loadListeners($config)
     {
         $listeners = array();
-        if (!array_key_exists('stateless', $config) || FALSE === $config['stateless']) {
+        if (!array_key_exists('stateless', $config) || false === $config['stateless']) {
             $contextKey = array_key_exists('context', $config) ? $config['context'] : $config['firewall_name'];
             $listeners[] = new ContextListener($this->_context, $this->_context->getUserProviders(), $contextKey, $this->_context->getLogger(), $this->_context->getDispatcher());
         }

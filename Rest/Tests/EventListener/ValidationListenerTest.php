@@ -110,7 +110,7 @@ class ValidationListenerTest extends TestCase
         $this->assertEquals(null, $request->request->get('fieldWithoutRequirements'));
     }
 
-     /**
+    /**
      * @covers ::onKernelController
      * @covers ::setDefaultValues
      * @covers ::validateParams

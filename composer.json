@@ -26,7 +26,8 @@
         "jms/metadata": "1.5.1",
         "respect/validation": "0.7.*@dev",
         "willdurand/jsonp-callback-validator": "~1.0",
-        "symfony/expression-language": "2.5.8"
+        "symfony/expression-language": "2.5.8",
+        "backbee/utils": "1.0.*@dev"
     },
     "autoload": {
         "psr-4": {

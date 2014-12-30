@@ -87,7 +87,7 @@ class MockEntity implements IMock
 
     /**
      * Set numeric code
-     * @param  int                                          $numeric_code
+     * @param  int                                      $numeric_code
      * @return \BackBee\Validator\Tests\Mock\MockEntity
      */
     public function setNumericCode($numeric_code)
@@ -99,7 +99,7 @@ class MockEntity implements IMock
 
     /**
      *  set name
-     * @param  type                                         $name
+     * @param  type                                     $name
      * @return \BackBee\Validator\Tests\Mock\MockEntity
      */
     public function setName($name)

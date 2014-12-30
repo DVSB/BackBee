@@ -60,7 +60,7 @@ class LayoutControllerTest extends RestTestCase
         $this->getEntityManager()->persist($user);
 
         // create site
-        $this->site =( new Site())
+        $this->site = (new Site())
             ->setLabel('Default Site')
         ;
         $this->getEntityManager()->persist($this->site);
@@ -70,7 +70,7 @@ class LayoutControllerTest extends RestTestCase
             ->setLabel('Site layout')
             ->setData("{}")
             ->setSite($this->site)
-            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts')
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts')
         ;
         $this->getEntityManager()->persist($this->siteLayout);
 
@@ -84,15 +84,13 @@ class LayoutControllerTest extends RestTestCase
         $this->getEntityManager()->persist($state);
         $this->siteLayout->addState($state);
 
-
         // create global layout
         $this->globalLayout = (new Layout('global1'))
             ->setLabel('Global layout')
             ->setData("{}")
-            ->setPath($this->getBBApp()->getBaseRepository() . '/Layouts')
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts')
         ;
         $this->getEntityManager()->persist($this->globalLayout);
-
 
         $this->getEntityManager()->flush();
     }
@@ -123,7 +121,6 @@ class LayoutControllerTest extends RestTestCase
 
         $this->assertCount(1, $content);
         $layoutTest = $content[0];
-
 
         $this->assertArrayHasKey('workflow_states', $layoutTest);
         $this->assertCount(2, $layoutTest['workflow_states']);

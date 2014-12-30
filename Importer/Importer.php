@@ -195,7 +195,7 @@ class Importer
 
     /**
      *
-     * @param  array                            $config
+     * @param  array                        $config
      * @return \BackBee\Importer\IConverter
      */
     final protected function initConvertion(array $config)
@@ -216,12 +216,13 @@ class Importer
 
     final protected function getExistingIds($id_label, $table_name, $where_clause)
     {
-        $sql= 'SELECT :id_label FROM :table_name WHERE :where_clause';
+        $sql = 'SELECT :id_label FROM :table_name WHERE :where_clause';
         $statement = $this->_application->getEntityManager()->getConnection()->executeQuery($sql, array('id_label' => $id_label,
             'table_name' => $table_name,
-            'where_clause' => $where_clause
+            'where_clause' => $where_clause,
             )
         );
+
         return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 

@@ -43,10 +43,10 @@ class TransportFactory
 {
     /**
      * Creates a new ATransport instance
-     * @param  array                                  $config An array containing the key 'transport' with the classname to use
-     *                                                        and optional options depending on the transport to start
+     * @param  array                              $config An array containing the key 'transport' with the classname to use
+     *                                                    and optional options depending on the transport to start
      * @return \BackBee\Util\Transport\ATransport
-     * @throws MisconfigurationException              occures if $config is not valid
+     * @throws MisconfigurationException          occures if $config is not valid
      */
     public static function create(array $config)
     {

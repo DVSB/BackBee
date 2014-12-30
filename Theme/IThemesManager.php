@@ -81,7 +81,7 @@ interface IThemesManager
     /**
      * Generate a theme object
      *
-     * @param  array                                  $theme_config
+     * @param  array                              $theme_config
      * @return \BackBee\Theme\PersonalThemeEntity
      * @throws ThemeException
      */

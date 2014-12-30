@@ -82,7 +82,7 @@ class AbstractServiceLocal implements IServiceLocal
         $this->_application = $application;
         $this->_em = $application->getEntityManager();
         $this->_dir = new \stdClass();
-        if (NULL !== $application && null !== $this->identifier) {
+        if (null !== $application && null !== $this->identifier) {
             $this->_dir->bundle = implode(DIRECTORY_SEPARATOR, array($this->application->getBundle($this->identifier)->getResourcesDir(), 'Templates', 'scripts'));
             $this->_dir->bundle .= DIRECTORY_SEPARATOR;
         }
@@ -114,9 +114,9 @@ class AbstractServiceLocal implements IServiceLocal
 
     /**
      * Checks if the attributes are granted against the current token.
-     * @param  mixed                                                    $attributes
-     * @param  mixed|null                                               $object
-     * @return boolean                                                  Return TRUE if current token if granted
+     * @param  mixed                                                $attributes
+     * @param  mixed|null                                           $object
+     * @return boolean                                              Return TRUE if current token if granted
      * @throws \BackBee\Exception\MissingApplicationException       Occurs if none BackBee application is defined
      * @throws \BackBee\Security\Exception\ForbiddenAccessException Occurs if the current token have not the permission
      */

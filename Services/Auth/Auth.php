@@ -42,7 +42,7 @@ class Auth
     public function __construct(BBApplication $application = null)
     {
         try {
-            if (NULL === $application) {
+            if (null === $application) {
                 throw new BBException("You must intanced Auth class with BBApplication object");
             } else {
                 $this->application = $application;

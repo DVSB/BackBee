@@ -75,7 +75,7 @@ class JsonRPCServer
     {
         $self = new self();
 
-        if (NULL === $request_payload) {
+        if (null === $request_payload) {
             $request_payload = json_decode(file_get_contents("php://input"), true);
         }
 
@@ -132,7 +132,7 @@ class JsonRPCServer
             call_user_func_array(array($object, "initService"), array($this->_application));
 
             $dispatcher = null;
-            if (NULL !== $this->_application) {
+            if (null !== $this->_application) {
                 $this->_application->info(sprintf('Handling RPC request `%s::%s`.', get_class($object), $method));
                 $dispatcher = $this->_application->getEventDispatcher();
             }
@@ -142,7 +142,7 @@ class JsonRPCServer
             $this->_checkSecuredAccess()
                     ->_checkRestrictedAccess();
 
-            if (NULL !== $dispatcher) {
+            if (null !== $dispatcher) {
                 $event = new Event($object, array('method' => $method, 'params' => $params));
                 $dispatcher->dispatch($dispatcher->getEventNamePrefix($object).'precall', $event);
                 $params = $event->getArgument('params', $params);
@@ -154,7 +154,7 @@ class JsonRPCServer
 
             $result = call_user_func_array(array($object, $method), $params);
 
-            if (NULL !== $dispatcher && true === isset($event)) {
+            if (null !== $dispatcher && true === isset($event)) {
                 $event->setArgument('result', $result);
                 $dispatcher->dispatch($dispatcher->getEventNamePrefix($object).'postcall', $event);
                 $result = $event->getArgument('result', $result);
@@ -164,21 +164,21 @@ class JsonRPCServer
                 'jsonrpc' => '2.0',
                 'id' => $request_payload['id'],
                 'result' => $result,
-                'error' => NULL,
+                'error' => null,
             );
             if ($this->_application->isDebugMode()) {
                 $content['debug'] = $this->collectProfilerData($request);
             }
         } catch (ForbiddenAccessException $e) {
-            if (NULL !== $this->_application) {
+            if (null !== $this->_application) {
                 $this->_application->warning(sprintf('Forbidden access while handling RPC request `%s::%s`.', get_class($object), $method));
                 $dispatcher = $this->_application->getEventDispatcher();
             }
 
             $response->setStatusCode(403);
-            $content = array('jsonrpc' => '2.0', 'id' => $request_payload['id'], 'result' => NULL, 'error' => new Error($e));
+            $content = array('jsonrpc' => '2.0', 'id' => $request_payload['id'], 'result' => null, 'error' => new Error($e));
         } catch (\Exception $e) {
-            $content = array('jsonrpc' => '2.0', 'id' => $request_payload['id'], 'result' => NULL, 'error' => new Error($e));
+            $content = array('jsonrpc' => '2.0', 'id' => $request_payload['id'], 'result' => null, 'error' => new Error($e));
         }
         $response->setContent(json_encode($content));
 
@@ -195,7 +195,7 @@ class JsonRPCServer
             try {
                 $error = new \stdClass();
                 $error->message = $errMsg;
-                $return = array('jsonrpc' => '2.0', 'result' => NULL, 'error' => $error);
+                $return = array('jsonrpc' => '2.0', 'result' => null, 'error' => $error);
                 $response = new Response();
                 $response->headers->set('content-type', 'application/json');
                 $response->setContent(json_encode($return));

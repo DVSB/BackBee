@@ -23,7 +23,7 @@ namespace BackBee\Importer\Connector;
 
 use BackBee\BBApplication;
 use BackBee\Importer\IImporterConnector;
-use BackBee\Util\File;
+use BackBee\Utils\File\File;
 
 /**
  * @category    BackBee
@@ -48,7 +48,7 @@ class FileSystem implements IImporterConnector
     /**
      * Class constructor
      * @param \BackBee\BBApplication $application
-     * @param array                      $config
+     * @param array                  $config
      */
     public function __construct(BBApplication $application, array $config)
     {

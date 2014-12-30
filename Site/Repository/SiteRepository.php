@@ -45,8 +45,8 @@ class SiteRepository extends EntityRepository
     /**
      * Returns site entity according to custom server_name if it exists in sites_config
      *
-     * @param  string                     $server_name
-     * @param  array                      $sites_config
+     * @param  string                 $server_name
+     * @param  array                  $sites_config
      * @return null|BackBee\Site\Site
      */
     public function findByCustomServerName($server_name, array $sites_config)

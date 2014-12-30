@@ -24,7 +24,6 @@ namespace BackBee\Rest\Controller;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Security\Token\AnonymousToken;
 use BackBee\Security\Token\BBUserToken;
-
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,7 +63,7 @@ class SecurityController extends ARestController
 
         return $this->createJsonResponse(null, 201, array(
             'X-API-KEY'       => $tokenAuthenticated->getUser()->getApiKeyPublic(),
-            'X-API-SIGNATURE' => $tokenAuthenticated->getNonce()
+            'X-API-SIGNATURE' => $tokenAuthenticated->getNonce(),
         ));
     }
 

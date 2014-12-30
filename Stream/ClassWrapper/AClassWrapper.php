@@ -175,7 +175,7 @@ class <classname> extends <extends> <interface>
             }
         }
 
-        if (NULL !== $this->_autoloader && NULL !== $this->_autoloader->getApplication()) {
+        if (null !== $this->_autoloader && null !== $this->_autoloader->getApplication()) {
             $this->_cache = $this->_autoloader->getApplication()->getBootstrapCache();
         }
 

@@ -46,7 +46,7 @@ class SettablePaginator extends Paginator
 
     /**
      * Sets the number of results
-     * @param  int                                          $count
+     * @param  int                                      $count
      * @return \BackBee\Util\Doctrine\SettablePaginator
      */
     public function setCount($count)
@@ -58,7 +58,7 @@ class SettablePaginator extends Paginator
 
     /**
      * Sets the first set of results
-     * @param  array                                        $result
+     * @param  array                                    $result
      * @return \BackBee\Util\Doctrine\SettablePaginator
      */
     public function setResult(array $result)

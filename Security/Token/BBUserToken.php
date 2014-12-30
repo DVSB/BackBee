@@ -105,7 +105,7 @@ class BBUserToken extends AbstractToken
     /**
      * Sets the creation date
      * @codeCoverageIgnore
-     * @param  type                                    $created
+     * @param  type                                $created
      * @return \BackBee\Security\Token\BBUserToken
      */
     public function setCreated($created)
@@ -118,7 +118,7 @@ class BBUserToken extends AbstractToken
     /**
      * Sets the digest
      * @codeCoverageIgnore
-     * @param  type                                    $digest
+     * @param  type                                $digest
      * @return \BackBee\Security\Token\BBUserToken
      */
     public function setDigest($digest)
@@ -131,7 +131,7 @@ class BBUserToken extends AbstractToken
     /**
      * Sets the user's private nonce
      * @codeCoverageIgnore
-     * @param  type                                    $nonce
+     * @param  type                                $nonce
      * @return \BackBee\Security\Token\BBUserToken
      */
     public function setNonce($nonce)
@@ -144,7 +144,7 @@ class BBUserToken extends AbstractToken
     /**
      * Sets the user
      * @codeCoverageIgnore
-     * @param  type                                    $user
+     * @param  type                                $user
      * @return \BackBee\Security\Token\BBUserToken
      */
     public function setUser($user)

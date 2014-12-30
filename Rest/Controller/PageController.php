@@ -34,9 +34,7 @@ use BackBee\Rest\Patcher\OperationSyntaxValidator;
 use BackBee\Rest\Patcher\RightManager;
 use BackBee\Site\Layout;
 use BackBee\Workflow\State;
-
 use Doctrine\ORM\Tools\Pagination\Paginator;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -253,7 +251,7 @@ class PageController extends ARestController
                 ),
                 '',
                 false
-            )
+            ),
         ));
     }
 
@@ -336,7 +334,7 @@ class PageController extends ARestController
         try {
             (new OperationSyntaxValidator())->validate($operations);
         } catch (InvalidOperationSyntaxException $e) {
-            throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
+            throw new BadRequestHttpException('operation invalid syntax: '.$e->getMessage());
         }
 
         $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
@@ -347,7 +345,7 @@ class PageController extends ARestController
         try {
             $entity_patcher->patch($page, $operations);
         } catch (UnauthorizedPatchOperationException $e) {
-            throw new BadRequestHttpException('Invalid patch operation: ' . $e->getMessage());
+            throw new BadRequestHttpException('Invalid patch operation: '.$e->getMessage());
         }
 
         if (true === $page->isOnline(true)) {
@@ -441,7 +439,7 @@ class PageController extends ARestController
                 ),
                 '',
                 false
-            )
+            ),
         ));
     }
 
@@ -458,8 +456,8 @@ class PageController extends ARestController
     /**
      * Returns every pages that contains provided classcontent
      *
-     * @param  string $content_type
-     * @param  string $content_uid
+     * @param string $content_type
+     * @param string $content_uid
      *
      * @return Symfony\Component\HttpFoundation\Response
      */
@@ -483,7 +481,7 @@ class PageController extends ARestController
 
         $response = $this->createResponse($this->formatCollection($pages));
         if (0 < count($pages)) {
-            $response->headers->set('Content-Range', '0-' . (count($pages) - 1) . '/' . count($pages));
+            $response->headers->set('Content-Range', '0-'.(count($pages) - 1).'/'.count($pages));
         }
 
         return $response;
@@ -493,10 +491,10 @@ class PageController extends ARestController
      * Returns pages collection by doing classic selection and by applying filters provided in request
      * query parameters
      *
-     * @param  Request   $request
-     * @param  integer   $start
-     * @param  integer   $count
-     * @param  Page|null $parent
+     * @param Request   $request
+     * @param integer   $start
+     * @param integer   $count
+     * @param Page|null $parent
      *
      * @return Symfony\Component\HttpFoundation\Response
      */

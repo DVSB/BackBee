@@ -77,7 +77,7 @@ class File implements IAppender
         if (is_resource($this->_fhandler)) {
             $log = $this->_formatter->format($event);
 
-            if (FALSE === @fwrite($this->_fhandler, $log)) {
+            if (false === @fwrite($this->_fhandler, $log)) {
                 throw new LoggingException('Unable to write log entry.');
             }
         }
