@@ -134,7 +134,7 @@ class SecurityControllerTest extends TestCase
 
     /**
      * @expectedException \BackBee\Security\Exception\SecurityException
-     * @expectedExceptionMessage Unknow user
+     * @expectedExceptionMessage Unknown user
      *
      * @covers ::firewallAuthenticateAction
      * @covers ::getSecurityContextConfig
