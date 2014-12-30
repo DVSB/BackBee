@@ -118,7 +118,8 @@ class CategoryManager
                 if (class_exists($class)) {
                     $this->buildCategoryFromClassContent(new $class());
                 }
-            } catch (ClassNotFoundException $e) { /* nothing to do */
+            } catch (ClassNotFoundException $e) {
+                // nothing to do
             }
         }
     }
