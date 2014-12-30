@@ -110,14 +110,15 @@ class ClassContentQueryBuilder extends QueryBuilder
     {
         if ($page && !$page->isRoot()) {
             $this->leftJoin('cc._mainnode', 'p')
-               ->andWhere('p._root = :selectedPageRoot')
-               ->andWhere('p._leftnode >= :selectedPageLeftnode')
-               ->andWhere('p._rightnode <= :selectedPageRightnode')
-               ->setParameters(array(
-                    "selectedPageRoot" => $page->getRoot(),
-                    "selectedPageLeftnode" => $page->getLeftnode(),
-                    "selectedPageRightnode" => $page->getRightnode(),
-                ));
+                    ->leftJoin('p._section', 'sp')
+                    ->andWhere('sp._root = :selectedPageRoot')
+                    ->andWhere('sp._leftnode >= :selectedPageLeftnode')
+                    ->andWhere('sp._rightnode <= :selectedPageRightnode')
+                    ->setParameters(array(
+                        "selectedPageRoot" => $page->getSection()->getRoot(),
+                        "selectedPageLeftnode" => $page->getLeftnode(),
+                        "selectedPageRightnode" => $page->getRightnode(),
+            ));
         }
     }
 
