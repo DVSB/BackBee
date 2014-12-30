@@ -1,39 +1,42 @@
 <?php
 
 /*
- * Copyright (c) 2011-2013 Lp digital system
+ * Copyright (c) 2011-2015 Lp digital system
  *
- * This file is part of BackBee5.
+ * This file is part of BackBee.
  *
  * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBee5 is distributed in the hope that it will be useful,
+ * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
 namespace BackBee\Rest\Controller;
 
-use BackBee\Controller\Controller;
-use BackBee\Rest\Formatter\FormatterInterface;
-use BackBee\Rest\Exception\ValidationException;
-use BackBee\Serializer\SerializerBuilder;
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
-use Symfony\Component\HttpFoundation\Response;
+use JMS\Serializer\SerializationContext;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
+
+use BackBee\Controller\Controller;
+use BackBee\Rest\Exception\ValidationException;
+use BackBee\Rest\Formatter\FormatterInterface;
+use BackBee\Serializer\SerializerBuilder;
 
 /**
  * Abstract class for an api controller
