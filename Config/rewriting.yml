@@ -21,5 +21,3 @@ preserve-unicity: true
 scheme:
   _root_   : /
   _default_: $parent/$title
-  _content_:
-    article: $ancestor[1]/$title-$content->permid
