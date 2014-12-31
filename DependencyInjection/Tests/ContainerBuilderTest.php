@@ -147,7 +147,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             implode(DIRECTORY_SEPARATOR, array(
                 $this->application->getBaseDir(),
-                ContainerBuilder::DEFAULT_CACHE_FOLDER_NAME,
+                ContainerBuilder::CACHE_FOLDER_NAME,
             )),
             $container->getParameter('bbapp.cache.dir')
         );
@@ -155,7 +155,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($container->getParameter('bbapp.cache.autogenerate'), '%container.autogenerate%');
 
         $this->assertEquals(
-            $this->application->getRepository().DIRECTORY_SEPARATOR.ContainerBuilder::DEFAULT_DATA_FOLDER_NAME,
+            $this->application->getRepository().DIRECTORY_SEPARATOR.ContainerBuilder::DATA_FOLDER_NAME,
             $container->getParameter('bbapp.data.dir')
         );
 

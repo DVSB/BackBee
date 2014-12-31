@@ -1,3 +1,13 @@
+# renderer configuration
+
 bb_scripts_directory:
     common: %bbapp.base.dir%/Resources/scripts
     form: %bbapp.base.dir%/Form/Templates/scripts
+
+adapter:
+    - BackBee\Renderer\Adapter\Twig
+    - BackBee\Renderer\Adapter\phtml
+
+path:
+    scriptdir: Templates/scripts
+    layoutdir: Layouts
