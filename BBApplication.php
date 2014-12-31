@@ -362,12 +362,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
      */
     public function getBBDir()
     {
-        if (null === $this->_bbdir) {
-            $r = new \ReflectionObject($this);
-            $this->_bbdir = dirname($r->getFileName());
-        }
-
-        return $this->_bbdir;
+        return __DIR__;
     }
 
     /**
