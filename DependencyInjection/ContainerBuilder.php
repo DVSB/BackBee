@@ -49,17 +49,22 @@ class ContainerBuilder
     /**
      * Define default name for data folder
      */
-    const DEFAULT_DATA_FOLDER_NAME = 'Data';
+    const DATA_FOLDER_NAME = 'Data';
 
     /**
      * Define default name for media folder
      */
-    const DEFAULT_MEDIA_FOLDER_NAME = 'Media';
+    const MEDIA_FOLDER_NAME = 'Media';
 
     /**
      * Define default name for cache folder
      */
-    const DEFAULT_CACHE_FOLDER_NAME = 'cache';
+    const CACHE_FOLDER_NAME = 'cache';
+
+    /**
+     * Define default name for log folder
+     */
+    const LOG_FOLDER_NAME = 'log';
 
     /**
      * Define service filename (without extension)
@@ -223,7 +228,7 @@ class ContainerBuilder
         $this->container->setParameter('bbapp.repository.dir', $this->application->getRepository());
 
         // set default cache directory and cache autogenerate value
-        $cache_directory = $this->application->getBaseDir().DIRECTORY_SEPARATOR.self::DEFAULT_CACHE_FOLDER_NAME;
+        $cache_directory = $this->application->getBaseDir().DIRECTORY_SEPARATOR.self::CACHE_FOLDER_NAME;
         if (IApplication::DEFAULT_ENVIRONMENT !== $this->environment) {
             $cache_directory .= DIRECTORY_SEPARATOR.$this->environment;
         }
@@ -231,16 +236,22 @@ class ContainerBuilder
         $this->container->setParameter('bbapp.cache.dir', $cache_directory);
         $this->container->setParameter('bbapp.cache.autogenerate', '%container.autogenerate%');
 
+        // define log directory
+        $this->container->setParameter(
+            'bbapp.log.dir',
+            $this->application->getBaseDir().DIRECTORY_SEPARATOR.self::LOG_FOLDER_NAME
+        );
+
         // define data directory
         $this->container->setParameter(
             'bbapp.data.dir',
-            $this->application->getRepository().DIRECTORY_SEPARATOR.self::DEFAULT_DATA_FOLDER_NAME
+            $this->application->getRepository().DIRECTORY_SEPARATOR.self::DATA_FOLDER_NAME
         );
 
         // define media directory
         $this->container->setParameter(
             'bbapp.media.dir',
-            $this->container->getParameter('bbapp.data.dir').DIRECTORY_SEPARATOR.self::DEFAULT_MEDIA_FOLDER_NAME
+            $this->container->getParameter('bbapp.data.dir').DIRECTORY_SEPARATOR.self::MEDIA_FOLDER_NAME
         );
     }
 
