@@ -51,7 +51,7 @@ class dateHelper extends AHelper
         if (null === $format) {
             $configDate = $this->_renderer->getApplication()->getConfig()->getDateConfig();
 
-            if (array_key_exists('format', $configDate)) {
+            if (is_array($configDate) && array_key_exists('format', $configDate)) {
                 $this->format = $configDate['format'];
             } else {
                 throw new RendererException("Config from date 'format' is incorrect");
