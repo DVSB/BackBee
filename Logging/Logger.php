@@ -95,29 +95,23 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         $this->setLevel(self::ERROR);
 
         if (null !== $this->_application) {
-            if (null !== $loggingConfig = $this->_application->getConfig()->getLoggingConfig()) {
+            if (null !== $config = $this->_application->getConfig()->getLoggingConfig()) {
                 if ($this->_application->isDebugMode()) {
                     error_reporting(E_ALL);
                     $this->setLevel(Logger::DEBUG);
-                } elseif (array_key_exists('level', $loggingConfig)) {
-                    $this->setLevel(strtoupper($loggingConfig['level']));
+                } elseif (array_key_exists('level', $config)) {
+                    $this->setLevel(strtoupper($config['level']));
                 }
 
-                if (array_key_exists('logfile', $loggingConfig)) {
-                    if (false === realpath(dirname($loggingConfig['logfile']))) {
-                        $loggingConfig['logfile'] = $application->getBaseDir().DIRECTORY_SEPARATOR.$loggingConfig['logfile'];
-                    }
-                }
-
-                if (array_key_exists('appender', $loggingConfig)) {
-                    $appenders = (array) $loggingConfig['appender'];
+                if (array_key_exists('appender', $config)) {
+                    $appenders = (array) $config['appender'];
                     foreach ($appenders as $appender) {
-                        $this->addAppender(new $appender($loggingConfig));
+                        $this->addAppender(new $appender($config));
                     }
                 }
 
-                if (array_key_exists('mailto', $loggingConfig)) {
-                    $this->_mailto = $loggingConfig['mailto'];
+                if (array_key_exists('mailto', $config)) {
+                    $this->_mailto = $config['mailto'];
                 }
             }
         }
