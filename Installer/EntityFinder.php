@@ -31,7 +31,7 @@ class EntityFinder
     /**
      * @var array
      */
-    private $_ignoredFolder = array(
+    private $ignoredFolder = [
         '/Resources/',
         '/Ressources/',
         '/Test/',
@@ -45,17 +45,17 @@ class EntityFinder
         '/Renderer/',
         '/Templates/',
         '/helpers/',
-    );
+    ];
 
     /**
      * @var string
      */
-    private $_baseDir;
+    private $baseDir;
 
     /**
      * @var SimpleAnnotationReader
      */
-    private $_annotationReader;
+    private $annotationReader;
 
     /**
      *
@@ -63,7 +63,7 @@ class EntityFinder
      */
     public function __construct($baseDir)
     {
-        $this->_baseDir = $baseDir;
+        $this->baseDir = $baseDir;
     }
 
     /**
@@ -72,7 +72,7 @@ class EntityFinder
      */
     public function getEntities($path)
     {
-        $entities = array();
+        $entities = [];
 
         $Directory = new \RecursiveDirectoryIterator($path);
         $Iterator = new \RecursiveIteratorIterator($Directory);
@@ -80,9 +80,9 @@ class EntityFinder
 
         foreach ($objects as $filename => $object) {
             $file = explode('/', $filename);
-            if (!preg_filter($this->_ignoredFolder, array(), $file)) {
+            if (!preg_filter($this->ignoredFolder, [], $file)) {
                 $namespace = $this->getNamespace($filename);
-                if ($this->_isValidNamespace($namespace)) {
+                if ($this->isValidNamespace($namespace)) {
                     $entities[] = $namespace;
                 }
             }
@@ -99,13 +99,13 @@ class EntityFinder
      */
     public function getExcludePaths($path)
     {
-        $excludePaths = array();
+        $excludePaths = [];
 
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
         $objects = new \RegexIterator($iterator, '/.*(.php)$/', \RecursiveRegexIterator::GET_MATCH);
 
         foreach ($objects as $filename => $object) {
-            if (preg_filter($this->_ignoredFolder, array(), $filename)) {
+            if (preg_filter($this->ignoredFolder, [], $filename)) {
                 $excludePaths[] = dirname($filename);
             }
         }
@@ -115,13 +115,15 @@ class EntityFinder
         return $excludePaths;
     }
 
-    public function parseFiles()
-    {
-    }
-
+    /**
+     * @param string $folder
+     * @return self
+     */
     public function addIgnoredFolder($folder)
     {
-        $this->_ignoredFolder[] = $folder;
+        $this->ignoredFolder[] = $folder;
+
+        return $this;
     }
 
     /**
@@ -130,7 +132,23 @@ class EntityFinder
      */
     public function getNamespace($file)
     {
-        $classname = str_replace(array($this->_baseDir, 'bundle', '.php', '/'), array('', 'Bundle', '', '\\'), $file);
+        $classname = str_replace([
+                $this->baseDir,
+                'bundle',
+                '.php',
+                '/',
+                'backbee',
+            ],
+            [
+                '',
+                'Bundle',
+                '',
+                '\\',
+                '',
+            ],
+            $file
+        );
+        $classname = preg_replace('/\\\\+/', '\\', $classname);
 
         return (strpos($classname, 'BackBee') === false) ? 'BackBee'.$classname : $classname;
     }
@@ -140,11 +158,11 @@ class EntityFinder
      * @param  string $namespace
      * @return bool
      */
-    private function _isValidNamespace($namespace)
+    private function isValidNamespace($namespace)
     {
         return (
-            true === class_exists($namespace) &&
-            $this->_isEntity(new \ReflectionClass($namespace))
+            true === class_exists($namespace)
+            && $this->isEntity(new \ReflectionClass($namespace))
         );
     }
 
@@ -152,22 +170,22 @@ class EntityFinder
      * @param  \ReflectionClass $reflection
      * @return boolean
      */
-    private function _isEntity(\ReflectionClass $reflection)
+    private function isEntity(\ReflectionClass $reflection)
     {
-        return (!is_null($this->_getEntityAnnotation($reflection)));
+        return (!is_null($this->getEntityAnnotation($reflection)));
     }
 
     /**
      * @param  \ReflectionClass $class
      * @return Entity
      */
-    private function _getEntityAnnotation(\ReflectionClass $class)
+    private function getEntityAnnotation(\ReflectionClass $class)
     {
-        if (!$this->_annotationReader) {
-            $this->_annotationReader = new SimpleAnnotationReader();
-            $this->_annotationReader->addNamespace('Doctrine\ORM\Mapping');
+        if (!$this->annotationReader) {
+            $this->annotationReader = new SimpleAnnotationReader();
+            $this->annotationReader->addNamespace('Doctrine\ORM\Mapping');
         }
 
-        return $this->_annotationReader->getClassAnnotation($class, new Entity());
+        return $this->annotationReader->getClassAnnotation($class, new Entity());
     }
 }
