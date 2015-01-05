@@ -22,7 +22,7 @@
 namespace BackBuilder\Renderer;
 
 use BackBuilder\BBApplication;
-use BackBuilder\NestedNode\ANestedNode;
+use BackBuilder\NestedNode\Page;
 use BackBuilder\Renderer\Event\RendererEvent;
 use BackBuilder\Renderer\Exception\RendererException;
 use BackBuilder\Site\Layout;
@@ -726,12 +726,12 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @param  \BackBuilder\NestedNode\ANestedNode $node
+     * @param  \BackBuilder\NestedNode\Page $page
      * @return \BackBuilder\Renderer\ARenderer
      */
-    public function setNode(ANestedNode $node)
+    public function setNode(Page $page)
     {
-        $this->_node = $node;
+        $this->_node = $page;
 
         return $this;
     }

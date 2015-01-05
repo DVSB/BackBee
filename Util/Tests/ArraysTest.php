@@ -124,7 +124,7 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
                 'id' => 5623,
                 'first_name' => 'Peter',
                 'last_name' => 'Doe',
-            ),
+            )
         );
 
         $this->assertEquals(array(
@@ -147,7 +147,7 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
                 'id' => 5623,
                 'first_name' => 'Peter',
                 'last_name' => 'Doe',
-            ),
+            )
                 ), Arrays::array_column($mock));
         $this->assertEquals(array('John', 'Sally', 'Jane', 'Peter'), Arrays::array_column($mock, 'first_name'));
         $this->assertEquals(array(2135 => 'John', 3245 => 'Sally', 5342 => 'Jane', 5623 => 'Peter'), Arrays::array_column($mock, 'first_name', 'id'));
@@ -171,7 +171,8 @@ class ArraysTest extends \PHPUnit_Framework_TestCase
                 'id' => 5623,
                 'first_name' => 'Peter',
                 'last_name' => 'Doe',
-            ),
+            )
                 ), Arrays::array_column($mock, null, 'id'));
     }
+
 }

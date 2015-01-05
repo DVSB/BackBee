@@ -23,7 +23,9 @@ namespace BackBuilder\NestedNode\Tests;
 
 use BackBuilder\ClassContent\ContentSet;
 use BackBuilder\MetaData\MetaDataBag;
+use BackBuilder\NestedNode\Section;
 use BackBuilder\NestedNode\Page;
+use BackBuilder\NestedNode\PageRevision;
 use BackBuilder\Workflow\State;
 use BackBuilder\Site\Layout;
 use BackBuilder\Site\Site;
@@ -37,6 +39,7 @@ use BackBuilder\Tests\TestCase;
  */
 class PageTest extends TestCase
 {
+
     /**
      * @var \Datetime
      */
@@ -49,73 +52,69 @@ class PageTest extends TestCase
 
     /**
      * @covers BackBuilder\NestedNode\Page::__construct
+     * @covers BackBuilder\NestedNode\Page::setDefaultProperties
      */
     public function test__construct()
     {
         $page = new Page();
 
-        $this->assertInstanceOf('BackBuilder\ClassContent\ContentSet', $page->getContentSet());
-        $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $page->getRevisions());
+        $this->assertNotNull($page->getUid());
+        $this->assertEquals(0, $page->getLevel());
+        $this->assertEquals(0, $page->getPosition());
         $this->assertEquals(Page::STATE_HIDDEN, $page->getState());
         $this->assertFalse($page->isStatic());
         $this->assertEquals(Page::DEFAULT_TARGET, $page->getTarget());
-    }
+        $this->assertInstanceOf('\DateTime', $page->getCreated());
+        $this->assertInstanceOf('\DateTime', $page->getModified());
+        $this->assertInstanceOf('BackBuilder\ClassContent\ContentSet', $page->getContentSet());
+        $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $page->getRevisions());
+        $this->assertInstanceOf('BackBuilder\NestedNode\Section', $page->getSection());
+        $this->assertTrue($page->hasMainSection());
+        $this->assertEquals($page->getUid(), $page->getSection()->getUid());
 
-    /**
-     * @covers BackBuilder\NestedNode\Page::__construct
-     */
-    public function test__constructWithOptions()
-    {
+        // test __construct with options
         $this->assertEquals('title', $this->page->getTitle());
         $this->assertEquals('url', $this->page->getUrl());
-
-        $pagef = new Page('test', 'not an array');
-        $this->assertNull($pagef->getTitle());
-        $this->assertNull($pagef->getUrl());
+        $this->assertEquals('root', $this->page->getUid());
+        $this->assertEquals('root', $this->page->getSection()->getUid());
     }
 
     /**
      * @covers BackBuilder\NestedNode\Page::__clone
+     * @covers BackBuilder\NestedNode\Page::setDefaultProperties
      */
     public function test__clone()
     {
         $child = new Page('child', array('title' => 'child', 'url' => 'url'));
-        $child->setRoot($this->page)
-                ->setParent($this->page)
-                ->setLeftnode(2)
-                ->setRightnode(3)
-                ->setState(Page::STATE_ONLINE);
-
+        $revision = new PageRevision();
+        $child->setSection($this->page->getSection())
+                ->setState(Page::STATE_ONLINE)
+                ->getRevisions()
+                ->add($revision);
         $clone = clone $child;
+
         $this->assertNotEquals($child->getContentSet(), $clone->getContentSet());
         $this->assertNotEquals($child->getUid(), $clone->getUid());
-        $this->assertEquals(1, $clone->getLeftnode());
-        $this->assertEquals(2, $clone->getRightnode());
-        $this->assertEquals(0, $clone->getLevel());
-        $this->assertEquals($this->current_time, $clone->getCreated());
-        $this->assertEquals($this->current_time, $clone->getModified());
-        $this->assertNull($clone->getParent());
-        $this->assertEquals($clone, $clone->getRoot());
-        $this->assertEquals(Page::STATE_OFFLINE, $clone->getState());
+        $this->assertEquals(1, $clone->getPosition());
+        $this->assertEquals(1, $clone->getLevel());
+        $this->assertGreaterThanOrEqual($clone->getCreated()->getTimestamp(), $child->getCreated()->getTimestamp());
+        $this->assertGreaterThanOrEqual($clone->getModified()->getTimestamp(), $child->getModified()->getTimestamp());
+        $this->assertNull($clone->getMainSection());
+        $this->assertEquals(Page::STATE_HIDDEN, $clone->getState());
         $this->assertFalse($clone->isStatic());
         $this->assertEquals($child->getTitle(), $clone->getTitle());
         $this->assertEquals($child->getUrl(), $clone->getUrl());
-        $this->assertTrue(is_array($clone->cloning_datas));
-        $this->assertTrue(isset($clone->cloning_datas['pages']));
-        $this->assertTrue(isset($clone->cloning_datas['pages'][$child->getUid()]));
-        $this->assertEquals($clone, $clone->cloning_datas['pages'][$child->getUid()]);
+        $this->assertTrue(is_array($clone->cloning_data));
+        $this->assertTrue(isset($clone->cloning_data['pages']));
+        $this->assertTrue(isset($clone->cloning_data['pages'][$child->getUid()]));
+        $this->assertEquals($clone, $clone->cloning_data['pages'][$child->getUid()]);
+        $this->assertEquals(0, $clone->getRevisions()->count());
 
         $clone2 = clone $this->page;
-        $this->assertEquals($this->page->getLayout(), $clone2->getLayout());
-        $this->assertNotEquals($this->page->getContentSet(), $clone2->getContentSet());
-    }
-
-    /**
-     * @covers BackBuilder\NestedNode\Page::getContentSet
-     */
-    public function testGetContentSet()
-    {
-        $this->assertInstanceOf('BackBuilder\ClassContent\ContentSet', $this->page->getContentSet());
+        $this->assertNotEquals($this->page->getMainSection(), $clone2->getMainSection());
+        $this->assertEquals($clone2->getSection(), $clone2->getMainSection());
+        $this->assertEquals(0, $clone2->getPosition());
+        $this->assertEquals(0, $clone2->getLevel());
     }
 
     /**
@@ -166,14 +165,6 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getRevisions
-     */
-    public function testGetRevisions()
-    {
-        $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $this->page->getRevisions());
-    }
-
-    /**
      * @covers BackBuilder\NestedNode\Page::getData
      */
     public function testGetData()
@@ -189,15 +180,17 @@ class PageTest extends TestCase
     public function testGetParam()
     {
         $params = array(
-            'left' => $this->page->getLeftnode(),
-            'right' => $this->page->getRightnode(),
-            'level' => $this->page->getLevel(),
+            'left' => 1,
+            'right' => 2,
+            'level' => 0,
+            'position' => 0
         );
 
         $this->assertEquals($params, $this->page->getParam());
-        $this->assertEquals($this->page->getLeftnode(), $this->page->getParam('left'));
-        $this->assertEquals($this->page->getRightnode(), $this->page->getParam('right'));
-        $this->assertEquals($this->page->getLevel(), $this->page->getParam('level'));
+        $this->assertEquals(1, $this->page->getParam('left'));
+        $this->assertEquals(2, $this->page->getParam('right'));
+        $this->assertEquals(0, $this->page->getParam('level'));
+        $this->assertEquals(0, $this->page->getParam('position'));
         $this->assertNull($this->page->getParam('unknown'));
     }
 
@@ -459,6 +452,52 @@ class PageTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Page::setLevel
+     */
+    public function testSetLevel()
+    {
+        $this->assertEquals($this->page, $this->page->setLevel(10));
+        $this->assertEquals(10, $this->page->getLevel());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setLevel
+     * @expectedException BackBuilder\Exception\InvalidArgumentException
+     */
+    public function testSetNonNumericLevel()
+    {
+        $this->page->setLevel('test');
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setPosition
+     */
+    public function testSetPosition()
+    {
+        $this->assertEquals($this->page, $this->page->setPosition(10));
+        $this->assertEquals(10, $this->page->getPosition());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setPosition
+     * @expectedException BackBuilder\Exception\InvalidArgumentException
+     */
+    public function testSetNonNumericPosition()
+    {
+        $this->page->setPosition('test');
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setPosition
+     */
+    public function testSetModified()
+    {
+        $now = new \Datetime;
+        $this->assertEquals($this->page, $this->page->setModified($now));
+        $this->assertEquals($now, $this->page->getModified());
+    }
+
+    /**
      * @covers BackBuilder\NestedNode\Page::getInheritedContensetZoneParams
      */
     public function testGetInheritedContensetZoneParams()
@@ -609,14 +648,14 @@ class PageTest extends TestCase
     public function testToArray()
     {
         $expected = array(
-            'id' => 'node_test',
-            'rel' => 'leaf',
-            'uid' => 'test',
-            'rootuid' => 'test',
+            'id' => 'node_root',
+            'rel' => 'folder',
+            'uid' => 'root',
+            'rootuid' => 'root',
             'parentuid' => null,
             'created' => $this->current_time->getTimestamp(),
             'modified' => $this->current_time->getTimestamp(),
-            'isleaf' => true,
+            'isleaf' => false,
             'siteuid' => null,
             'title' => 'title',
             'alttitle' => null,
@@ -630,6 +669,7 @@ class PageTest extends TestCase
             'metadata' => null,
             'layout_uid' => $this->page->getLayout()->getUid(),
             'workflow_state' => null,
+            'section' => true
         );
 
         $this->assertEquals($expected, $this->page->toArray());
@@ -642,14 +682,14 @@ class PageTest extends TestCase
                 ->setWorkflowState(new State(null, array('code' => 1)));
 
         $expected = array(
-            'id' => 'node_test',
-            'rel' => 'leaf',
-            'uid' => 'test',
-            'rootuid' => 'test',
+            'id' => 'node_root',
+            'rel' => 'folder',
+            'uid' => 'root',
+            'rootuid' => 'root',
             'parentuid' => null,
             'created' => $this->current_time->getTimestamp(),
             'modified' => $this->current_time->getTimestamp(),
-            'isleaf' => true,
+            'isleaf' => false,
             'siteuid' => $this->page->getSite()->getUid(),
             'title' => 'title',
             'alttitle' => null,
@@ -663,9 +703,41 @@ class PageTest extends TestCase
             'metadata' => array(),
             'layout_uid' => $this->page->getLayout()->getUid(),
             'workflow_state' => 1,
+            'section' => true
         );
 
         $this->assertEquals($expected, $this->page->toArray());
+
+        $currenttime = new \Datetime();
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+
+        $expected = array(
+            'id' => 'node_child',
+            'rel' => 'leaf',
+            'uid' => 'child',
+            'rootuid' => $this->page->getUid(),
+            'parentuid' => $this->page->getUid(),
+            'created' => $currenttime->getTimestamp(),
+            'modified' => $currenttime->getTimestamp(),
+            'isleaf' => true,
+            'siteuid' => $this->page->getSite()->getUid(),
+            'title' => null,
+            'alttitle' => null,
+            'url' => null,
+            'target' => '_self',
+            'redirect' => null,
+            'state' => Page::STATE_HIDDEN,
+            'date' => null,
+            'publishing' => null,
+            'archiving' => null,
+            'metadata' => null,
+            'layout_uid' => null,
+            'workflow_state' => null,
+            'section' => false
+        );
+
+        $this->assertEquals($expected, $child->toArray());
     }
 
     /**
@@ -686,6 +758,7 @@ class PageTest extends TestCase
                 ->setContentSet($this->page->getContentSet());
 
         $this->assertEquals($this->page, $new_page->unserialize($this->page->serialize()));
+        $this->assertEquals($this->page->getSection(), $new_page->unserialize($this->page->serialize())->getSection());
     }
 
     /**
@@ -725,12 +798,216 @@ class PageTest extends TestCase
     }
 
     /**
+     * @covers BackBuilder\NestedNode\Page::hasMainSection()
+     */
+    public function testHasMainSection()
+    {
+        $this->assertTrue($this->page->hasMainSection());
+
+        $page = new Page();
+        $section = new Section();
+        $page->setSection($section);
+        $this->assertFalse($page->hasMainSection());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setMainSection()
+     */
+    public function testSetMainSection()
+    {
+        $section = new Section('new_section');
+        $section->setLevel(10);
+        $this->page->setMainSection($section);
+
+        $this->assertEquals($section, $this->page->getMainSection());
+        $this->assertEquals($section, $this->page->getSection());
+        $this->assertEquals(0, $this->page->getPosition());
+        $this->assertEquals(10, $this->page->getLevel());
+        $this->assertEquals($this->page, $section->getPage());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setSection()
+     */
+    public function testSetSection()
+    {
+        $section = new Section('new_section');
+        $section->setLevel(10);
+        $this->page->setSection($section);
+
+        $this->assertNull($this->page->getMainSection());
+        $this->assertEquals($section, $this->page->getSection());
+        $this->assertEquals(1, $this->page->getPosition());
+        $this->assertEquals(11, $this->page->getLevel());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getSection()
+     */
+    public function testGetSection()
+    {
+        $this->assertEquals($this->page->getMainSection(), $this->page->getSection());
+
+        $page = new Page('test');
+        $this->assertEquals($page->getMainSection(), $page->getSection());
+        $this->assertEquals('test', $page->getSection()->getUid());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isLeaf()
+     */
+    public function testIsLeaf()
+    {
+        $this->assertFalse($this->page->isLeaf());
+
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertTrue($child->isLeaf());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isAncestorOf()
+     */
+    public function testIsAncestorOf()
+    {
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertFalse($child->isAncestorOf($child));
+        $this->assertTrue($child->isAncestorOf($child, false));
+        $this->assertFalse($child->isAncestorOf($this->page));
+        $this->assertTrue($this->page->isAncestorOf($child));
+        $this->assertFalse($this->page->isAncestorOf($this->page));
+        $this->assertTrue($this->page->isAncestorOf($this->page, false));
+
+        $child2 = new Page('child2');
+        $child2->setSection($this->page->getSection());
+        $this->assertFalse($child->isAncestorOf($child2));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isAncestorOf()
+     */
+    public function testIsDescendantOf()
+    {
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertFalse($child->isDescendantOf($child));
+        $this->assertTrue($child->isDescendantOf($child, false));
+        $this->assertTrue($child->isDescendantOf($this->page));
+        $this->assertFalse($this->page->isDescendantOf($this->page));
+        $this->assertTrue($this->page->isDescendantOf($this->page, false));
+
+        $child2 = new Page('child2');
+        $child2->setSection($this->page->getSection());
+        $this->assertFalse($child->isDescendantOf($child2));
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getRoot()
+     */
+    public function testGetRoot()
+    {
+        $this->assertEquals($this->page, $this->page->getRoot());
+
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertEquals($this->page, $child->getRoot());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::isRoot()
+     */
+    public function testIsRoot()
+    {
+        $this->assertTrue($this->page->isRoot());
+
+        $subsection = new Section('sub-section');
+        $subsection->setRoot($this->page->getSection())
+                ->setParent($this->page->getSection());
+        $child = new Page('child', array('main_section' => $subsection));
+        $this->assertFalse($child->isRoot());
+
+        $subchild = new Page('child');
+        $subchild->setSection($child->getSection());
+        $this->assertFalse($subchild->isRoot());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setParent()
+     */
+    public function testSetParent()
+    {
+        $child1 = new Page('child1');
+        $child1->setSection($this->page->getSection());
+        $child1->setParent($this->page);
+        $this->assertEquals($this->page, $child1->getParent());
+        $this->assertEquals($this->page->getSection(), $child1->getSection());
+
+        $child2 = new Page('child2');
+        $child2->setParent($this->page);
+        $this->assertEquals($this->page, $child2->getParent());
+        $this->assertEquals($this->page->getSection(), $child2->getSection());
+
+        $subsection = new Section('sub-section');
+        $subsection->setParent($this->page->getSection());
+        $child3 = new Page('child3', array('main_section' => $subsection));
+        $child3->setParent($this->page);
+        $this->assertEquals($this->page, $child3->getParent());
+        $this->assertEquals($subsection, $child3->getSection());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::setParent()
+     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     */
+    public function testSetParentWithLeaf()
+    {
+        $child1 = new Page('child1');
+        $child2 = new Page('child2');
+        $child1->setParent($this->page);
+        $child2->setParent($child1);
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getParent()
+     */
+    public function testGetParent()
+    {
+        $this->assertNull($this->page->getParent());
+
+        $subsection = new Section('sub-section');
+        $subsection->setRoot($this->page->getSection())
+                ->setParent($this->page->getSection());
+        $child = new Page('child', array('main_section' => $subsection));
+        $this->assertEquals($this->page, $child->getParent());
+
+        $subchild = new Page('child');
+        $subchild->setSection($child->getSection());
+        $this->assertEquals($child, $subchild->getParent());
+    }
+
+    /**
+     * @covers BackBuilder\NestedNode\Page::getLeftnode()
+     * @covers BackBuilder\NestedNode\Page::getRightnode()
+     */
+    public function testGetNode()
+    {
+        $this->assertEquals(1, $this->page->getLeftnode());
+        $this->assertEquals(2, $this->page->getRightnode());
+
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertEquals(1, $child->getLeftnode());
+        $this->assertEquals(2, $child->getRightnode());
+    }
+
+    /**
      * Sets up the fixture
      */
     public function setUp()
     {
         $this->current_time = new \Datetime();
-        $this->page = new Page('test', array('title' => 'title', 'url' => 'url'));
+        $this->page = new Page('root', array('main_section' => new Section('root'), 'title' => 'title', 'url' => 'url'));
 
         $layout = new Layout();
         $this->page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
@@ -770,4 +1047,5 @@ class PageTest extends TestCase
 
         return $data;
     }
+
 }

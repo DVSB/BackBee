@@ -74,7 +74,9 @@ class LayoutController extends ARestController
             $states['online']
         );
 
-        return $this->createResponse(json_encode(array_values($states)));
+        return $this->createJsonResponse(array_values($states), 200, array(
+            'Content-Range' => '0-' . (count($states) - 1) . '/' . count($states)
+        ));
     }
 
     /**
@@ -92,7 +94,12 @@ class LayoutController extends ARestController
             $layouts = $site->getLayouts();
         }
 
-        return $this->createResponse($this->formatCollection($layouts));
+        $response = $this->createJsonResponse(null, 200, array(
+            'Content-Range' => '0-' . (count($layouts) - 1) . '/' . count($layouts)
+        ));
+        $response->setContent($this->formatCollection($layouts));
+
+        return $response;
     }
 
     /**
@@ -101,10 +108,15 @@ class LayoutController extends ARestController
      */
     public function getAction(Layout $layout)
     {
-        return $this->createResponse($this->formatItem($layout));
+        $response = $this->createJsonResponse();
+        $response->setContent($this->formatItem($layout));
+
+        return $response;
     }
 
     /**
+     * /!\ IMPORTANT: This route is currently disabled in route.yml
+     *
      * @Rest\RequestParam(name="label", requirements={
      *   @Assert\NotBlank()
      * })
@@ -134,7 +146,9 @@ class LayoutController extends ARestController
         $this->getEntityManager()->persist($layout);
         $this->getEntityManager()->flush($layout);
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 201, array(
+            'Location' => ''
+        ));
     }
 
     /**
@@ -163,7 +177,7 @@ class LayoutController extends ARestController
 
         $this->getEntityManager()->flush($layout);
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 
     /**
@@ -178,6 +192,6 @@ class LayoutController extends ARestController
             return $this->createResponse('Internal server error: '.$e->getMessage(), 500);
         }
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 }

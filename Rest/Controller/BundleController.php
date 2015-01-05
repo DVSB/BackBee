@@ -57,7 +57,9 @@ class BundleController extends ARestController
             }
         }
 
-        return $this->createResponse(json_encode($bundles));
+        return $this->createJsonResponse($bundles, 200, array(
+            'Content-Range' => '0-' . (count($bundles) - 1) . '/' . count($bundles)
+        ));
     }
 
     /**
@@ -79,7 +81,7 @@ class BundleController extends ARestController
             }
         }
 
-        return $this->createResponse(json_encode($bundle));
+        return $this->createJsonResponse($bundle);
     }
 
     /**
@@ -123,7 +125,7 @@ class BundleController extends ARestController
                 : false
         );
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 
     /**
@@ -149,7 +151,7 @@ class BundleController extends ARestController
 
         return is_object($response) && $response instanceof Response
             ? $response
-            : $this->createResponse($response)
+            : $this->createJsonResponse($response)
         ;
     }
 

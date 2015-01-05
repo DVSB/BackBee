@@ -66,6 +66,8 @@ EOF
         $bbapp = $this->getContainer()->get('bbapp');
         $em = $this->getContainer()->get('em');
 
+        $this->checkBeforeUpdate();
+
         $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
             $bbapp->getBBDir().'/Bundle',
             $bbapp->getBBDir().'/Cache/DAO',
@@ -96,6 +98,19 @@ EOF
         }
 
         $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
+    }
+
+    private function checkBeforeUpdate()
+    {
+        if (0 <= version_compare(BBApplication::VERSION, '0.11.0')) {
+            $schemaManager = $this->em->getConnection()->getSchemaManager();
+            $pageName = $this->em->getClassMetadata('BackBuilder\NestedNode\Page')->getTableName();
+            $sectionName = $this->em->getClassMetadata('BackBuilder\NestedNode\Section')->getTableName();
+
+            if (false === $schemaManager->tablesExist($sectionName) && true === $schemaManager->tablesExist($pageName)) {
+                throw new BBException(sprintf('Table `%s` does not exist. Perhaps you should launch upgrade:0.10:0.11 command before.', $sectionName));
+            }
+        }
     }
 
     /**

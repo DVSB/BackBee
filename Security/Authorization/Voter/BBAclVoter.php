@@ -22,6 +22,7 @@
 namespace BackBuilder\Security\Authorization\Voter;
 
 use BackBuilder\Bundle\ABundle;
+use BackBuilder\NestedNode\Page;
 use BackBuilder\NestedNode\ANestedNode;
 use BackBuilder\ClassContent\AClassContent;
 use Psr\Log\LoggerInterface;
@@ -69,7 +70,9 @@ class BBAclVoter extends AclVoter
             return self::ACCESS_ABSTAIN;
         }
 
-        if ($object instanceof ANestedNode) {
+        if ($object instanceof Page) {
+            return $this->_voteForPage($token, $object, $attributes);
+        } elseif ($object instanceof ANestedNode) {
             return $this->_voteForNestedNode($token, $object, $attributes);
         } elseif ($object instanceof AClassContent) {
             return $this->_voteForClassContent($token, $object, $attributes);
@@ -100,6 +103,24 @@ class BBAclVoter extends AclVoter
             }
 
             $result = parent::vote($token, $objectIdentity, $attributes);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns the vote for page object, recursively till root
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param  \BackBuilder\NestedNode\Page                                         $page
+     * @param  array                                                                $attributes
+     * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
+     */
+    private function _voteForPage(TokenInterface $token, Page $page, array $attributes)
+    {
+        if (self::ACCESS_DENIED === $result = $this->_vote($token, $page, $attributes)) {
+            if (null !== $page->getParent()) {
+                $result = $this->_voteForPage($token, $page->getParent(), $attributes);
+            }
         }
 
         return $result;
