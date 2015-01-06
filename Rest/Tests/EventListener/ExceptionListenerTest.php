@@ -151,7 +151,7 @@ class ExceptionListenerTest extends TestCase
         );
         $listener->onKernelException($event);
 
-        $this->assertEquals(404, $event->getResponse()->getStatusCode());
+        $this->assertEquals(401, $event->getResponse()->getStatusCode());
 
         $exception = new SecurityException("", SecurityException::INVALID_CREDENTIALS);
         $event = new GetResponseForExceptionEvent(
