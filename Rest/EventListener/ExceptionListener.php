@@ -94,9 +94,6 @@ class ExceptionListener extends APathEnabledListener
 
             switch ($exception->getCode()) {
                 case SecurityException::UNKNOWN_USER:
-                    $statusCode = 404;
-                    break;
-
                 case SecurityException::INVALID_CREDENTIALS:
                 case SecurityException::EXPIRED_AUTH:
                 case SecurityException::EXPIRED_TOKEN:
