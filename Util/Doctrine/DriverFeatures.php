@@ -38,10 +38,19 @@ class DriverFeatures
      * Drivers array supporting REPLACE command
      * @var array
      */
-    static private $_replace_supported_drivers = array(
+    static private $replace_supported_drivers = array(
         'Doctrine\DBAL\Driver\PDOMySql\Driver',
         'Doctrine\DBAL\Driver\Mysqli\Driver',
         'Doctrine\DBAL\Driver\PDOSqlite\Driver',
+    );
+
+    /**
+     * Drivers array supporting multi valuated insertions
+     * @var array
+     */
+    static private $multi_values_drivers = array(
+        'Doctrine\DBAL\Driver\PDOMySql\Driver',
+        'Doctrine\DBAL\Driver\Mysqli\Driver',
     );
 
     /**
@@ -51,6 +60,16 @@ class DriverFeatures
      */
     public static function replaceSupported(Driver $driver)
     {
-        return in_array(get_class($driver), self::$_replace_supported_drivers);
+        return in_array(get_class($driver), self::$replace_supported_drivers);
+    }
+
+    /**
+     * Returns TRUE if the driver support multi valuated nsertions comand
+     * @param  \Doctrine\DBAL\Driver $driver
+     * @return boolean
+     */
+    public static function multiValuesSupported(Driver $driver)
+    {
+        return in_array(get_class($driver), self::$multi_values_drivers);
     }
 }
