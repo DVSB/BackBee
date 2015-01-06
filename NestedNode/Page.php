@@ -1345,7 +1345,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function getSiteUid()
     {
-        return null !== $this->_site ? $this->_site->getUid() : '';
+        return null !== $this->getSection()->getSite() ? $this->getSection()->getSite()->getUid() : '';
     }
 
     /**
@@ -1354,7 +1354,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function getSiteLabel()
     {
-        return null !== $this->_site ? $this->_site->getLabel() : '';
+        return null !== $this->getSection()->getSite() ? $this->getSection()->getSite()->getLabel() : '';
     }
 
     /**
