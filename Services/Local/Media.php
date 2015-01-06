@@ -29,7 +29,6 @@ use BackBee\ClassContent\Element\image as elementImage;
 use BackBee\ClassContent\Element\text as elementText;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\Services\Exception\ServicesException;
-use BackBee\Util\Media;
 use BackBee\Utils\File\File;
 use BackBee\Utils\String;
 
@@ -176,7 +175,7 @@ class Media extends AbstractServiceLocal
                     $content_image_obj = json_decode($value);
                     if (isset($content_image_obj->filename)) {
                         $subcontent->originalname = String::toPath($content_image_obj->originalname);
-                        $subcontent->path = Media::getPathFromContent($subcontent);
+                        $subcontent->path = \BackBee\Util\Media::getPathFromContent($subcontent);
 
                         $src_image = base64_decode($content_image_obj->src);
 
