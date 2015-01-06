@@ -24,6 +24,7 @@ namespace BackBuilder\NestedNode\Tests\Repository;
 use BackBuilder\Tests\TestCase;
 use BackBuilder\NestedNode\Repository\PageQueryBuilder;
 use BackBuilder\NestedNode\Page;
+use BackBuilder\Site\Site;
 
 /**
  * @category    BackBuilder
@@ -56,6 +57,20 @@ class PageQueryBuilderTest extends TestCase
         $this->assertTrue(PageQueryBuilder::hasJoinCriteria(array('_leftnode' => 'fake')));
         $this->assertTrue(PageQueryBuilder::hasJoinCriteria(array('_rightnode' => 'fake')));
         $this->assertTrue(PageQueryBuilder::hasJoinCriteria(array('_site' => 'fake')));
+    }
+
+    /**
+     * @covers \BackBuilder\NestedNode\Repository\PageQueryBuilder::andSiteIs
+     */
+    public function testAndSiteIs()
+    {
+        $site = new Site();
+        $q = $this->repo->createQueryBuilder('p')
+                ->andSiteIs($site);
+
+        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $q);
+        $this->assertEquals('SELECT p FROM BackBuilder\NestedNode\Page p INNER JOIN p._section p_s WHERE p_s._site = :site0', $q->getDql());
+        $this->assertEquals($site, $q->getParameter('site0')->getValue());
     }
 
     /**

@@ -22,6 +22,7 @@
 namespace BackBuilder\NestedNode\Repository;
 
 use BackBuilder\NestedNode\Page;
+use BackBuilder\Site\Site;
 use Doctrine\ORM\QueryBuilder;
 
 /**
@@ -80,6 +81,19 @@ class PageQueryBuilder extends QueryBuilder
         }
 
         return (0 < count(array_intersect(self::$join_criteria, array_keys($criteria))));
+    }
+
+    /**
+     * Add query part to select page by site
+     * @param \BackBuilder\Site\Site $site
+     * @return \BackBuilder\NestedNode\Repository\PageQueryBuilder
+     */
+    public function andSiteIs(Site $site)
+    {
+        $suffix = $this->getSuffix();
+
+        return $this->andWhere($this->getSectionAlias() . '._site = :site' . $suffix)
+                        ->setParameter('site' . $suffix, $site);
     }
 
     /**
