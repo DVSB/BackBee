@@ -209,6 +209,7 @@ class PageController extends ARestController
             $builder->setRoot($parent->getRoot());
             $builder->setSite($parent->getSite());
         } else {
+            $builder->isRoot(true);
             $builder->setSite($this->getApplication()->getSite());
         }
 
@@ -239,7 +240,7 @@ class PageController extends ARestController
             $this->getEntityManager()->persist($page);
 
             $this->getEntityManager()->flush($page);
-            $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
+
         } catch (\Exception $e) {
             return $this->createResponse('Internal server error: '.$e->getMessage(), 500);
         }
@@ -502,35 +503,46 @@ class PageController extends ARestController
      */
     private function doClassicGetCollection(Request $request, $start, $count, Page $parent = null)
     {
-        $qb = $this->getPageRepository()->createQueryBuilder('p');
-        if (null === $parent) {
-            $qb->andSiteIs($this->getApplication()->getSite());
-        } else {
-            $this->granted('VIEW', $parent);
-        }
-
-        $qb = $qb->andParentIs($parent);
-
         $order_by = array();
         if (null !== $request->query->get('order_by', null)) {
             foreach ($request->query->get('order_by') as $key => $value) {
                 if ('_' !== $key[0]) {
-                    $key = '_'.$key;
+                    $key = '_' . $key;
                 }
 
                 $order_by[$key] = $value;
             }
         } else {
-            $order_by['_leftnode'] = 'asc';
+            $order_by = array(
+                '_position' => 'ASC',
+                '_leftnode' => 'ASC',
+            );
         }
 
-        $qb->orderByMultiple($order_by);
+        $state = $request->query->get('state', null);
 
-        if (null !== $state = $request->query->get('state', null)) {
-            $qb->andStateIsIn((array) $state);
+        if (null !== $parent) {
+            $this->granted('VIEW', $parent);
+
+            $qb = $this->getPageRepository()
+                    ->createQueryBuilder('p')
+                    ->andIsDescendantOf($parent, true, 1, $order_by, $count, $start);
+
+            if (null !== $state) {
+                $qb->andStateIsIn((array) $state);
+            }
+
+            $results = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
+        } else {
+            $root = $this->getPageRepository()->getRoot($this->getApplication()->getSite());
+            $state = $request->query->get('state', null);
+            if (null !== $state && false === in_array($root->getState(), (array) $state)) {
+                $results = array();
+            } else {
+                $results = array($root);
+            }
         }
 
-        $results = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
         $count = 0;
         foreach ($results as $row) {
             $count++;
@@ -539,7 +551,7 @@ class PageController extends ARestController
         $result_count = $start + $count - 1; // minus 1 cause $start start at 0 and not 1
         $response = $this->createResponse($this->formatCollection($results));
         if (0 < $count) {
-            $response->headers->set('Content-Range', "$start-$result_count/".count($results));
+            $response->headers->set('Content-Range', "$start-$result_count/" . count($results));
         }
 
         return $response;

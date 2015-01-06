@@ -61,7 +61,7 @@ class PageControllerTest extends RestTestCase
 
         // permissions
         $this->getContainer()->set('site', $this->site);
-        $this->restUser = $this->createAuthUser('page_admin');
+        self::$restUser = $this->createAuthUser('page_admin');
     }
 
     private function getController()
@@ -130,6 +130,7 @@ class PageControllerTest extends RestTestCase
             ->setTitle('Page')
             ->setState(Page::STATE_OFFLINE)
             ->setSite($this->site)
+            ->setLayout($layout)
         ;
         $em->persist($homePage);
 
@@ -161,14 +162,24 @@ class PageControllerTest extends RestTestCase
      */
     public function testPatchAction()
     {
+        $em = $this->getEntityManager();
+        $layout = new Layout();
+
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass())
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts/default.twig')
+        ;
+        $em->persist($layout);
+
         // create page
         $page = (new Page())
             ->setTitle('Page Title')
             ->setState(Page::STATE_OFFLINE)
             ->setSite($this->site)
+                ->setLayout($layout)
         ;
 
-        $em = $this->getEntityManager();
         $em->persist($page);
         $em->flush();
 
@@ -197,12 +208,20 @@ class PageControllerTest extends RestTestCase
      */
     public function testGetCollectionAction()
     {
+        $layout = new Layout();
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass())
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts/default.twig')
+        ;
+
         // create pages
         $homePage = new Page();
         $homePage
             ->setTitle('Home Page')
             ->setState(Page::STATE_ONLINE)
             ->setSite($this->site)
+            ->setLayout($layout)
         ;
 
         $deletedPage = new Page();
@@ -210,6 +229,7 @@ class PageControllerTest extends RestTestCase
             ->setTitle('Deleted')
             ->setState(Page::STATE_DELETED)
             ->setSite($this->site)
+            ->setLayout($layout)
         ;
 
         $offlinePage = new Page();
@@ -217,6 +237,7 @@ class PageControllerTest extends RestTestCase
             ->setTitle('Offline')
             ->setState(Page::STATE_OFFLINE)
             ->setSite($this->site)
+            ->setLayout($layout)
         ;
 
         $onlinePage = new Page();
@@ -224,13 +245,16 @@ class PageControllerTest extends RestTestCase
             ->setTitle('Online')
             ->setState(Page::STATE_ONLINE)
             ->setSite($this->site)
+            ->setLayout($layout)
         ;
         $onlinePage2 = new Page();
         $onlinePage2
             ->setTitle('Online2')
             ->setState(Page::STATE_ONLINE)
             ->setSite($this->site)
+            ->setLayout($layout)
         ;
+        $this->em->persist($layout);
         $this->em->persist($homePage);
         $this->em->persist($deletedPage);
         $this->em->persist($offlinePage);
@@ -241,11 +265,11 @@ class PageControllerTest extends RestTestCase
 
         $repo->insertNodeAsFirstChildOf($deletedPage, $homePage);
         $repo->insertNodeAsFirstChildOf($offlinePage, $homePage);
-        $repo->insertNodeAsFirstChildOf($onlinePage, $homePage);
+        $repo->insertNodeAsFirstChildOf($onlinePage, $homePage, true);
         $repo->insertNodeAsFirstChildOf($onlinePage2, $onlinePage);
 
         $this->em->flush();
-
+        
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage,
             new UserSecurityIdentity('page_admin', 'BackBuilder\Security\Group'),
@@ -266,7 +290,6 @@ class PageControllerTest extends RestTestCase
         $res2 = json_decode($response2->getContent(), true);
         $this->assertInternalType('array', $res2);
         $this->assertCount(3, $res2);
-        // $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
 
         // filter by state = offline
         $response3 = $this->sendRequest(self::requestGet('/rest/1/page', array(
