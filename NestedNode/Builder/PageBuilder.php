@@ -344,6 +344,10 @@ class PageBuilder
     public function isRoot($isRoot = true)
     {
         $this->isRoot = (true === $isRoot);
+        if (true === $this->isRoot) {
+            $this->isSection(true);
+        }
+
         return $this;
     }
 
