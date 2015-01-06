@@ -288,7 +288,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      * The section node.
      * @var \BackBuilder\NestedNode\Section
      * @ManyToOne(targetEntity="BackBuilder\NestedNode\Section", inversedBy="_pages", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="section_uid", referencedColumnName="uid", nullable=false)
+     * @JoinColumn(name="section_uid", referencedColumnName="uid")
      */
     public $_section;
 
