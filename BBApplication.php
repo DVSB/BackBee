@@ -586,7 +586,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     public function getBaseRepository()
     {
         if (null === $this->_base_repository) {
-            $this->_base_repository = $this->getBaseDir().'/'.'repository';
+            $this->_base_repository = $this->getBaseDir().DIRECTORY_SEPARATOR.'repository';
         }
 
         return $this->_base_repository;
@@ -601,8 +601,8 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         if (null === $this->_classcontentdir) {
             $this->_classcontentdir = array();
 
-            array_unshift($this->_classcontentdir, $this->getBaseDir().'/BackBee/ClassContent');
-            array_unshift($this->_classcontentdir, $this->getBaseDir().'/repository/ClassContent');
+            array_unshift($this->_classcontentdir, $this->getBBDir().'/ClassContent');
+            array_unshift($this->_classcontentdir, $this->getBaseRepository().'/ClassContent');
 
             if (true === $this->hasContext()) {
                 array_unshift($this->_classcontentdir, $this->getRepository().'/ClassContent');
