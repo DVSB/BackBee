@@ -184,18 +184,6 @@ class NestedNodeRepositoryTest extends TestCase
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_insertNode
      * @expectedException \BackBuilder\Exception\InvalidArgumentException
      */
-    public function test_insertNodeNotLeaf()
-    {
-        $child1 = $this->repo->find('d-child1');
-        $child2 = $this->repo->find('d-child2');
-
-        $this->repo->insertNodeAsFirstChildOf($child1, $child2);
-    }
-
-    /**
-     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_insertNode
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
-     */
     public function test_insertNodeSameAsParent()
     {
         $child1 = $this->repo->find('d-child1');
@@ -204,10 +192,21 @@ class NestedNodeRepositoryTest extends TestCase
     }
 
     /**
+     * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_insertNode
+     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     */
+    public function test_insertNodeAncestorOfParent()
+    {
+        $child1 = $this->repo->find('d-child1');
+
+        $this->repo->insertNodeAsFirstChildOf($this->root_desc, $child1);
+    }
+
+    /**
      * @covers \BackBuilder\NestedNode\Repository\NestedNodeRepository::_refreshExistingNode
      * @expectedException \BackBuilder\Exception\InvalidArgumentException
      */
-    public function test_refreshExistingNode()
+    public function test_insertNodeInNotManagedParent()
     {
         $child1 = $this->repo->find('d-child1');
         $parent = new MockNestedNode('new-parent');

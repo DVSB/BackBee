@@ -350,7 +350,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($config_base_dir, $config_dump['basedir']);
 
         $this->assertTrue(array_key_exists('raw_parameters', $config_dump));
-        $this->assertEquals(array('test' => $test), $config_dump['raw_parameters']);
+        $this->assertEquals($test, $config_dump['raw_parameters']['test']);
 
         $this->assertTrue(array_key_exists('debug', $config_dump));
         $this->assertEquals($config_debug, $config_dump['debug']);

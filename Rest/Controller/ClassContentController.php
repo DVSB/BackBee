@@ -29,6 +29,7 @@ use BackBuilder\Routing\RouteCollection;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -63,7 +64,7 @@ class ClassContentController extends ARestController
             throw new NotFoundHttpException("No classcontent category exists for id `$id`.");
         }
 
-        return $this->createResponse(json_encode($category));
+        return $this->createJsonResponse($category);
     }
 
     /**
@@ -78,7 +79,9 @@ class ClassContentController extends ARestController
             $categories[] = array_merge(array('id' => $id), $category->jsonSerialize());
         }
 
-        return $this->createResponse(json_encode($categories));
+        return $this->createJsonResponse($categories, 200, array(
+            'Content-Range' => '0-' . (count($categories) - 1) . '/' . count($categories)
+        ));
     }
 
     /**
@@ -101,12 +104,55 @@ class ClassContentController extends ARestController
 
         $classnames = array();
         foreach ($category->getBlocks() as $block) {
-            $classnames[] = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $block->type);
+            $classnames[] = $this->getClassnameByType($block->type);
         }
 
-        return $this->createResponse(json_encode($this->formatClassContentCollection($this->findContentsByCriterias(
-            $classnames, $start, $count
-        ))));
+        $contents = $this->findContentsByCriterias($classnames, $start, $count);
+        $response = $this->createJsonResponse($this->formatClassContentCollection($contents));
+
+        return $this->addContentRangeHeadersToResponse($response, $contents, $start);
+    }
+
+    /**
+     * Returns definition for provided type
+     *
+     * @param  string $type
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    public function getDefinitionAction($type)
+    {
+        $classname = $this->getClassnameByType($type);
+
+        return $this->createJsonResponse($this->getDefinitionFromClassContent(new $classname()));
+    }
+
+    /**
+     * Returns definitions of every declared classcontent in current application; you can also filter it by:
+     *     - category name (provide 'category' as query parameter): returns definitions of every classcontent that
+     *     belong to provided category
+     *     - page uid (provide 'page_uid' as query parameter): returns definitions of every classcontent contained
+     *     by page's contentset
+     *
+     * @param  Resquest $request
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    public function getDefinitionCollectionAction(Request $request)
+    {
+        $definitions = null;
+
+        if (null !== $category = $request->query->get('category', null)) {
+            $definitions = $this->getDefinitionsByCategory($category);
+        } elseif (null !== $page_uid = $request->query->get('page_uid', null)) {
+            $definitions = $this->getDefinitionsByPageUid($page_uid);
+        } else {
+            $definitions = $this->getAllDefinitionsFromCategoryManager();
+        }
+
+        return $this->createJsonResponse($definitions, 200, array(
+            'Content-Range' => '0-' . (count($definitions) - 1) . '/' . count($definitions)
+        ));
     }
 
     /**
@@ -120,11 +166,11 @@ class ClassContentController extends ARestController
      */
     public function getCollectionAction($type, $start, $count)
     {
-        $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $type);
+        $classname = $this->getClassnameByType($type);
+        $contents = $this->findContentsByCriterias((array) $classname, $start, $count);
+        $response = $this->createJsonResponse($this->formatClassContentCollection($contents));
 
-        return $this->createResponse(json_encode($this->formatClassContentCollection($this->findContentsByCriterias(
-            (array) $classname, $start, $count
-        ))));
+        return $this->addContentRangeHeadersToResponse($response, $contents, $start);
     }
 
     /**
@@ -150,20 +196,60 @@ class ClassContentController extends ARestController
             $content->setDraft($draft);
         }
 
-        $content_type = 'application/json';
-        if ('html' === $request->getContentType()) {
+        $response = null;
+        if (in_array('text/html', $request->getAcceptableContentTypes())) {
             if (null !== $this->getEntityFromAttributes('page')) {
                 $this->getApplication()->getRenderer()->getCurrentPage($page);
             }
 
             $mode = $request->query->get('mode', null);
-            $content = $this->getApplication()->getRenderer()->render($content, $mode);
-            $content_type = 'text/html';
+            $response = $this->createResponse(
+                $this->getApplication()->getRenderer()->render($content, $mode), 200, 'text/html'
+            );
         } else {
-            $content = json_encode($this->updateClassContentImageUrl($content->jsonSerialize()));
+            $response = $this->createJsonResponse($this->updateClassContentImageUrl($content->jsonSerialize()));
         }
 
-        return $this->createResponse($content, 200, $content_type);
+        return $response;
+    }
+
+    /**
+     * Creates classcontent according to provided type
+     *
+     * @param  string  $type
+     * @param  Request $request
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    public function postAction($type, Request $request)
+    {
+        $classname = $this->getClassnameByType($type);
+        $content = new $classname();
+
+        $em = $this->getApplication()->getEntityManager();
+        $em->persist($content);
+
+        $draft = $em->getRepository('BackBuilder\ClassContent\Revision')->getDraft(
+            $content,
+            $this->getApplication()->getBBUserToken(),
+            true
+        );
+
+        $content->setDraft($draft);
+        $em->flush();
+
+        return $this->createJsonResponse(null, 201, array(
+            'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
+                'bb.rest.classcontent.get',
+                array(
+                    'version' => $request->attributes->get('version'),
+                    'type'    => $type,
+                    'uid'     => $content->getUid()
+                ),
+                '',
+                false
+            )
+        ));
     }
 
     /**
@@ -186,7 +272,7 @@ class ClassContentController extends ARestController
             throw new BadRequestHttpException("Unable to delete content with type: `$type` and uid: `$uid`");
         }
 
-        return $this->createResponse('', 204);
+        return $this->createJsonResponse(null, 204);
     }
 
     /**
@@ -197,6 +283,124 @@ class ClassContentController extends ARestController
     private function getCategoryManager()
     {
         return $this->getApplication()->getContainer()->get('classcontent.category_manager');
+    }
+
+    /**
+     * Returns complete namespace of classcontent with provided $type
+     *
+     * @param  string $type
+     *
+     * @return string classname associated to provided
+     *
+     * @throws
+     */
+    private function getClassnameByType($type)
+    {
+        $classname = AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $type);
+
+        try {
+            class_exists($classname);
+        } catch (\Exception $e) {
+            throw new NotFoundHttpException("`$type` is not a valid type.");
+        }
+
+        return $classname;
+    }
+
+    /**
+     * Returns provided content definition
+     *
+     * @param  AClassContent $content
+     *
+     * @return array
+     */
+    private function getDefinitionFromClassContent(AClassContent $content)
+    {
+        $definition = $content->jsonSerialize();
+        $definition = $this->updateClassContentImageUrl($definition);
+        unset(
+            $definition['uid'],
+            $definition['state'],
+            $definition['created'],
+            $definition['modified'],
+            $definition['revision'],
+            $definition['elements'],
+            $definition['draft_uid'],
+            $definition['main_node']
+        );
+
+        return $definition;
+    }
+
+    /**
+     * Returns definitions of classcontent that belong to provided category name
+     *
+     * @param  string $category_name
+     *
+     * @return array
+     */
+    private function getDefinitionsByCategory($category_name)
+    {
+        $category = $this->getCategoryManager()->getCategory($category_name);
+        if (null === $category) {
+            throw new NotFoundHttpException("`$category_name` is not a valid classcontent category.");
+        }
+
+        $definitions = array();
+        foreach ($category->getBlocks() as $block) {
+            $classname = $this->getClassnameByType($block->type);
+            $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+        }
+
+        return $definitions;
+    }
+
+    /**
+     * Returns definitions of classcontent contained by provided page contentset
+     *
+     * @param  string $page_uid
+     *
+     * @return array
+     */
+    private function getDefinitionsByPageUid($page_uid)
+    {
+        $classnames = $this->getApplication()->getEntityManager()->getConnection()->executeQuery(
+            'SELECT DISTINCT c.classname
+             FROM idx_content_content icc, content c, page p
+             WHERE p.uid = :page_uid AND p.contentset = icc.content_uid
+             AND icc.subcontent_uid = c.uid AND c.classname != :contentset_classname
+            ',
+            array(
+                'page_uid'             => $page_uid,
+                'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'
+            )
+        )->fetchAll();
+
+        $definitions = array();
+        foreach ($classnames as $classname) {
+            $classname = $classname['classname'];
+                $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+        }
+
+        return $definitions;
+    }
+
+    /**
+     * Returns definitions of every declared classcontent in current application
+     *
+     * @return array
+     */
+    private function getAllDefinitionsFromCategoryManager()
+    {
+        $definitions = array();
+        foreach ($this->getCategoryManager()->getCategories() as $category) {
+            foreach ($category->getBlocks() as $block) {
+                $classname = $this->getClassnameByType($block->type);
+                $definitions[] = $this->getDefinitionFromClassContent(new $classname());
+            }
+        }
+
+        return $definitions;
     }
 
     /**
@@ -211,12 +415,12 @@ class ClassContentController extends ARestController
     private function getClassContentByTypeAndUid($type, $uid)
     {
         $content = null;
-        $classname = 'BackBuilder\ClassContent\\'.str_replace('/', NAMESPACE_SEPARATOR, $type);
+        $classname = $this->getClassnameByType($type);
 
         try {
             $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
         } catch (ClassNotFoundException $e) {
-            throw new NotFoundHttpException("No classcontent (:$classname) found with provided type (:$type)");
+            throw new NotFoundHttpException("No classcontent found with provided type (:$type)");
         }
 
         if (null === $content) {
@@ -281,13 +485,11 @@ class ClassContentController extends ARestController
      *
      * @return array
      */
-    private function formatClassContentCollection(Paginator $paginator = null)
+    private function formatClassContentCollection(Paginator $paginator)
     {
         $contents = array();
-        if (null !== $paginator) {
-            foreach ($paginator as $content) {
-                $contents[] = $content->jsonSerialize();
-            }
+        foreach ($paginator as $content) {
+            $contents[] = $content->jsonSerialize();
         }
 
         return $this->updateClassContentCollectionImageUrl($contents);
@@ -364,5 +566,25 @@ class ClassContentController extends ARestController
         }
 
         return $this->thumbnail_base_directory;
+    }
+
+    /**
+     * Add 'Content-Range' parameters to $response headers
+     *
+     * @param Response  $response   the response object
+     * @param Paginator $collection collection from where we extract Content-Range data
+     * @param integer   $start      the start value
+     */
+    private function addContentRangeHeadersToResponse(Response $response, Paginator $collection, $start)
+    {
+        $count = 0;
+        foreach ($collection as $row) {
+            $count++;
+        }
+
+        $last_result = $start + $count - 1;
+        $response->headers->set('Content-Range', "$start-$last_result/" . count($collection));
+
+        return $response;
     }
 }

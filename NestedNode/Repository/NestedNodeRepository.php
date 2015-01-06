@@ -182,29 +182,29 @@ class NestedNodeRepository extends EntityRepository
      * @param  \BackBuilder\NestedNode\ANestedNode             $node   The node to be inserted
      * @param  \BackBuilder\NestedNode\ANestedNode             $parent The parent node
      * @param int                                           The new left node of the inserted node
-     * @return \BackBuilder\NestedNode\ANestedNode             The inserted node
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the node is not a leaf or $parent is not flushed yet
+     * @return \BackBuilder\NestedNode\ANestedNode          The inserted node
+     * @throws \BackBuilder\Exception\InvalidArgumentException  Occures if $parent is descendant of $node or $parent is not managed yet
      */
     protected function _insertNode(ANestedNode $node, ANestedNode $parent, $new_leftnode)
     {
-        if (false === $node->isLeaf()) {
-            throw new InvalidArgumentException('Only a leaf can be inserted');
+        if ($parent->isDescendantOf($node, false)) {
+            throw new InvalidArgumentException('Cannot insert node in itself or one of its descendants');
         }
 
-        if ($node === $parent) {
-            throw new InvalidArgumentException('Cannot insert node in itself');
+        if (false === $this->_em->contains($parent)) {
+            throw new InvalidArgumentException('Cannot insert in a non managed node');
         }
 
-        $this->_detachOrPersistNode($node)
-                ->_refreshExistingNode($parent);
+        $this->_detachOrPersistNode($node);
 
+        $new_rightnode = $new_leftnode + $node->getWeight() - 1;
         $node->setLeftnode($new_leftnode)
-                ->setRightnode($node->getLeftnode() + 1)
+                ->setRightnode($new_rightnode)
                 ->setLevel($parent->getLevel() + 1)
                 ->setParent($parent)
                 ->setRoot($parent->getRoot());
 
-        $this->shiftRlValues($node, $node->getLeftnode(), 2);
+        $this->shiftRlValues($node, $node->getLeftnode(), $node->getWeight());
 
         $this->_em->refresh($parent);
 
@@ -535,8 +535,7 @@ class NestedNodeRepository extends EntityRepository
             throw new InvalidArgumentException('Cannot move node as child of one of its descendants');
         }
 
-        $this->_refreshExistingNode($node)
-                ->_detachFromTree($node)
+        $this->_detachFromTree($node)
                 ->_refreshExistingNode($dest);
 
         $newleft = $this->_getNewLeftFromPosition($dest, $position);
@@ -720,7 +719,7 @@ class NestedNodeRepository extends EntityRepository
      */
     private function shiftRlValues(ANestedNode $node, $first, $delta)
     {
-        if (self::$config['nestedNodeCalculateAsync']) {
+        if (false && self::$config['nestedNodeCalculateAsync']) {
             // $this->shiftRlValuesByJob($target, $first, $delta);
             $this->startDetachedRLValuesJob($node, $first, $delta);
         } else {
@@ -790,7 +789,7 @@ class NestedNodeRepository extends EntityRepository
     {
         if (true === $this->_em->contains($node)) {
             $this->_em->refresh($node);
-        } elseif (null === $node = $this->find($node->getUid())) {
+        } elseif (null === $this->find($node->getUid())) {
             $this->_em->persist($node);
         }
 

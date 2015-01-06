@@ -404,9 +404,9 @@ abstract class AClassContent extends AContent
         $clone->_mainnode = $this->_mainnode;
 
         if (null !== $origin_page
-                && true === is_array($origin_page->cloning_datas)
-                && true === array_key_exists('contents', $origin_page->cloning_datas)) {
-            $origin_page->cloning_datas['contents'][$this->getUid()] = $clone;
+                && true === is_array($origin_page->cloning_data)
+                && true === array_key_exists('contents', $origin_page->cloning_data)) {
+            $origin_page->cloning_data['contents'][$this->getUid()] = $clone;
         }
 
         if (false === ($this instanceof ContentSet)) {

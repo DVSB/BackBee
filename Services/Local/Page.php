@@ -39,6 +39,12 @@ use BackBuilder\Site\Layout as SiteLayout;
 class Page extends AbstractServiceLocal
 {
     /**
+     * Section entities repository
+     * @var \BackBuilder\NestedNode\Repository\SectionRepository
+     */
+    private $_repo_section;
+
+    /**
      * Page entities repository
      * @var \BackBuilder\NestedNode\Repository\PageRepository
      */
@@ -55,6 +61,9 @@ class Page extends AbstractServiceLocal
 
         $this->_repo = $this->getEntityManager()
                 ->getRepository('\BackBuilder\NestedNode\Page');
+
+        $this->_repo_section = $this->getEntityManager()
+            ->getRepository('\BackBuilder\NestedNode\Section');
     }
 
     /**
@@ -237,10 +246,9 @@ class Page extends AbstractServiceLocal
         if (null === $site = $this->getEntityManager()->find('\BackBuilder\Site\Site', strval($site_uid))) {
             throw new InvalidArgumentException(sprintf('Site with uid `%s` does not exist', $site_uid));
         }
+
         $tree = array();
         if (null === $page = $this->_repo->find(strval($page_uid))) {
-            // @todo strange call to this service with another site
-//$this->isGranted('VIEW', $site);
             $page = $this->_repo->getRoot($site);
             $leaf = new \stdClass();
             $leaf->attr = json_decode($page->serialize());
@@ -251,7 +259,7 @@ class Page extends AbstractServiceLocal
         } else {
             try {
                 $this->isGranted('VIEW', $page);
-                $children = $this->_repo->getNotDeletedDescendants($page, 1, false, array("field" => "leftnode", "sort" => "asc"), true, $firstresult, $maxresult, $having_child);
+                $children = $this->_repo->getNotDeletedDescendants($page, 1, false, array('_position' => 'ASC', '_leftnode' => 'ASC'), true, $firstresult, $maxresult, $having_child);
                 $tree['numresults'] = $children->count();
                 $tree['firstresult'] = $firstresult;
                 $tree['maxresult'] = $maxresult;
@@ -298,10 +306,10 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $page_uid));
         }
 
-// User must have view permission on choosen layout
+        // User must have view permission on choosen layout
         $this->isGranted('VIEW', $page->getLayout());
 
-// User must have create permission on page
+        // User must have create permission on page
         $this->isGranted('CREATE', $page);
 
         if (null !== $page->getParent()) {
@@ -346,20 +354,24 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None page exists with uid `%s`.', $parent_uid));
         }
 
-// User must have edit permission on both page and parent
+        if (true === $parent->getLayout()->getParam('final')) {
+            throw new ServicesException('This page does not accept children');
+        }
+
+        // User must have edit permission on both page and parent
         $this->isGranted('EDIT', $page);
         $this->isGranted('EDIT', $parent);
 
         //User must have view permission on layout for move page
         $this->isGranted('VIEW', $page->getLayout());
 
-// If the page is online, user must have publish permission on it
+        // If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page);
         }
 
         if (null === $next = $this->_repo->find(strval($next_uid))) {
-            $this->_repo->moveAsLastChildOf($page, $parent);
+            $this->_repo->moveAsFirstChildOf($page, $parent);
         } else {
             if (false === $next->getParent()->equals($parent)) {
                 throw new InvalidArgumentException('Previous sibling must have the same parent node');
@@ -369,7 +381,6 @@ class Page extends AbstractServiceLocal
         }
 
         $this->getEntityManager()->flush($page);
-        //$this->_repo->updateHierarchicalDatas($parent, $parent->getLeftnode(), $parent->getLevel());
 
         $leaf = new \stdClass();
         $leaf->attr = new \stdClass();
@@ -400,12 +411,12 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException('Can not remove root page of a site');
         }
 
-// User must have edit permission on parent
+        // User must have edit permission on parent
         $this->isGranted('EDIT', $page->getParent());
-// Add delete permission on parent to
+        // Add delete permission on parent to
         $this->isGranted('DELETE', $page->getParent());
 
-// If the page is online, user must have publish permission on it
+        // If the page is online, user must have publish permission on it
         if ($page->isOnline(true)) {
             $this->isGranted('PUBLISH', $page);
         }
@@ -432,7 +443,7 @@ class Page extends AbstractServiceLocal
             // User must have edit permission on page
             $this->isGranted('EDIT', $page);
 
-// If the page is online, user must have publish permission on it
+            // If the page is online, user must have publish permission on it
             if ($page->isOnline(true)) {
                 $this->isGranted('PUBLISH', $page);
             }
@@ -477,12 +488,16 @@ class Page extends AbstractServiceLocal
                 throw new ServicesException('Impossible to create or move a child page for this layout.');
             }
 
-            $leaf = $this->postBBSelectorForm($page_uid, $parent->getParent()->getUid(), $title, $url, $target, $redirect, $layout_uid, $alttitle, "", true);
+            $leaf = $this->postBBSelectorForm($page_uid, $parent->getParent()->getUid(), $title, $url, $target, $redirect, $layout_uid, $alttitle, "", true, $move_node_uid);
         } else {
             // User must have view permission on choosen layout
             $this->isGranted('VIEW', $layout);
 
             if (null !== $page = $this->_repo->find(strval($page_uid))) {
+                if ($page->hasMainSection() && true === $layout->getParam('final')) {
+                    throw new ServicesException('This page is a section, unable to use the layout: '.$layout->getLabel());
+                }
+
                 $this->isGranted('EDIT', $page);
 
                 // If the page is online, user must have publish permission on it
@@ -493,6 +508,10 @@ class Page extends AbstractServiceLocal
                 //User must have permision of current layout for change this
                 $this->isGranted('VIEW', $page->getLayout());
 
+                if (false === $page->hasMainSection() && true === $layout->getParam('section')) {
+                    $this->_repo->saveWithSection($page);
+                }
+
                 if (null !== $parent && false === $page->getParent()->equals($parent)) {
                     // User must have edit permission on parent
                     $this->isGranted('EDIT', $parent);
@@ -501,17 +520,13 @@ class Page extends AbstractServiceLocal
             } else {
                 $page = new NestedPage();
 
-                $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
-
-                $this->getEntityManager()->persist($page);
+                // User must have create permission on page
+                $this->isGranted('CREATE', $page);
 
                 if (null !== $parent) {
-                    // User must have edit permission on parent
-                    $page->setParent($parent);
-                    $this->isGranted('CREATE', $page);
-                    $this->isGranted('EDIT', $parent);
-
-                    $this->_repo->insertNodeAsFirstChildOf($page, $parent);
+                    $page->setTitle($title);
+                    $page->setLayout($layout);
+                    $this->_repo->insertNodeAsFirstChildOf($page, $parent, $page->getLayout()->getParam('section'));
                 } else {
                     // User must have edit permission on site to add a new root
                     $this->isGranted('CREATE', $page);
@@ -521,13 +536,13 @@ class Page extends AbstractServiceLocal
                 }
             }
 
-            $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle);
+            $this->hydratePageInfosWith($page, $title, $target, $redirect, $layout, $alttitle, $parent);
 
             if (false === $this->getEntityManager()->contains($page)) {
                 $this->getEntityManager()->persist($page);
             }
 
-            $this->getEntityManager()->flush($page);
+            $this->getEntityManager()->flush();
 
             $leaf = new \stdClass();
             $leaf->attr = json_decode($page->serialize());
@@ -547,13 +562,20 @@ class Page extends AbstractServiceLocal
      * @param string     $redirect
      * @param Layout     $layout
      */
-    private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout, $alttitle)
+    private function hydratePageInfosWith(NestedPage $page, $title, $target, $redirect, SiteLayout $layout, $alttitle, NestedPage $parent = null)
     {
         $page->setTitle($title);
         $page->setTarget($target);
         $page->setRedirect('' === $redirect ? null : $redirect);
-        $page->setLayout($layout);
         $page->setAltTitle($alttitle);
+
+        if (null !== $parent) {
+            // User must have edit permission on parent
+            $this->isGranted('EDIT', $parent);
+            $page->setParent($parent);
+        }
+
+        $page->setLayout($layout);
     }
 
     /**
@@ -623,7 +645,7 @@ class Page extends AbstractServiceLocal
             if ($root_uid !== null) {
                 $page = $em->find('\BackBuilder\NestedNode\Page', $root_uid);
 
-                foreach ($em->getRepository('\BackBuilder\NestedNode\Page')->getNotDeletedDescendants($page, 1) as $child) {
+                foreach ($em->getRepository('\BackBuilder\NestedNode\Page')->getNotDeletedDescendants($page, 1, false, array('_position' => 'asc', '_leftnode' => 'asc')) as $child) {
                     $leaf = new \stdClass();
                     $leaf->attr = new \stdClass();
                     $leaf->attr->rel = 'folder';
@@ -694,9 +716,18 @@ class Page extends AbstractServiceLocal
             if ($page_uid !== null) {
                 $page = $em->find('\BackBuilder\NestedNode\Page', $page_uid);
 
-                $nbChildren = $em->getRepository('\BackBuilder\NestedNode\Page')->countChildren($page, $typeField, $options);
-                $pagingInfos = array("start" => (int) $start, "limit" => (int) $limit);
-                foreach ($em->getRepository('\BackBuilder\NestedNode\Page')->getChildren($page, $order_sort, $order_dir, $pagingInfos, $typeField, $options) as $child) {
+                $children = array();
+                $nbChildren = 0;
+                if (false === $page->isLeaf()) {
+                    $qChildren = $em->getRepository('\BackBuilder\NestedNode\Page')
+                                    ->createQueryBuilder('p')
+                                    ->andIsDescendantOf($page, true, 1, array($order_sort => $order_dir), (int) $limit, (int) $start, false)
+                                    ->andSearchCriteria($typeField, $options);
+                    $children = new \Doctrine\ORM\Tools\Pagination\Paginator($qChildren);
+                    $nbChildren = $children->count();
+                }
+
+                foreach ($children as $child) {
                     $row = new \stdClass();
                     $row->uid = $child->getUid();
                     $row->title = $child->getTitle();

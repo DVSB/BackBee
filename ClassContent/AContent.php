@@ -1018,13 +1018,26 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         $datas = array(
             'uid'        => $this->_uid,
             'label'      => $this->_label,
-            'type'       => str_replace(self::CLASSCONTENT_BASE_NAMESPACE, '', get_class($this)),
+            'type'       => str_replace(
+                array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'),
+                array('', '/'),
+                get_class($this)
+            ),
             'state'      => $this->_state,
             'created'    => $this->_created->getTimestamp(),
             'modified'   => $this->_modified->getTimestamp(),
             'revision'   => $this->_revision,
             'parameters' => $this->getParam(),
-            'accept'     => $this->getAccept(),
+            'accept'     => array_map(
+                function ($classname) {
+                    return str_replace(
+                        array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'),
+                        array('', '/'),
+                        $classname
+                    );
+                },
+                $this->getAccept()
+            ),
             'minentry'   => $this->getMinEntry(),
             'maxentry'   => $this->getMaxEntry()
         );

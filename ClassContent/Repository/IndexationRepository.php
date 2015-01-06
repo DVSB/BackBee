@@ -48,7 +48,13 @@ class IndexationRepository extends EntityRepository
      * Is REPLACE command is supported
      * @var boolean
      */
-    private $_replace_supported;
+    private $replace_supported;
+
+    /**
+     * Is multi values insertions command is supported
+     * @var boolean
+     */
+    private $multi_values_supported;
 
     /**
      * Initializes a new EntityRepository
@@ -59,7 +65,8 @@ class IndexationRepository extends EntityRepository
     {
         parent::__construct($em, $class);
 
-        $this->_replace_supported = DriverFeatures::replaceSupported($em->getConnection()->getDriver());
+        $this->replace_supported = DriverFeatures::replaceSupported($em->getConnection()->getDriver());
+        $this->multi_values_supported = DriverFeatures::multiValuesSupported($em->getConnection()->getDriver());
     }
 
     /**
@@ -74,7 +81,7 @@ class IndexationRepository extends EntityRepository
         }
 
         $command = 'REPLACE';
-        if (false === $this->_replace_supported) {
+        if (false === $this->replace_supported) {
             // REPLACE command not supported, remove first then insert
             $this->removeOptContentTable($content);
             $command = 'INSERT';
@@ -194,18 +201,29 @@ class IndexationRepository extends EntityRepository
     {
         if (0 < count($content_uids)) {
             $command = 'REPLACE';
-            if (false === $this->_replace_supported) {
+            if (false === $this->replace_supported) {
                 // REPLACE command not supported, remove first then insert
                 $this->_removeIdxSiteContents($site_uid, $content_uids);
                 $command = 'INSERT';
             }
 
             $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxSiteContent');
-            $query = $command.' INTO '.$meta->getTableName().
-                    ' ('.$meta->getColumnName('site_uid').', '.$meta->getColumnName('content_uid').')'.
-                    ' VALUES ("'.$site_uid.'", "'.implode('"), ("'.$site_uid.'", "', $content_uids).'")';
+            
+            if (false === $this->multi_values_supported) {
+                foreach($content_uids as $content_uid) {
+                    $query = $command.' INTO '.$meta->getTableName().
+                            ' ('.$meta->getColumnName('site_uid').', '.$meta->getColumnName('content_uid').')'.
+                            ' VALUES ("'.$site_uid.'", "'.$content_uid.'")';
 
-            $this->_em->getConnection()->executeQuery($query);
+                    $this->_em->getConnection()->executeQuery($query);                
+                }
+            } else {
+                $query = $command.' INTO '.$meta->getTableName().
+                        ' ('.$meta->getColumnName('site_uid').', '.$meta->getColumnName('content_uid').')'.
+                        ' VALUES ("'.$site_uid.'", "'.implode('"), ("'.$site_uid.'", "', $content_uids).'")';
+
+                $this->_em->getConnection()->executeQuery($query);
+            }
         }
 
         return $this;
@@ -376,7 +394,7 @@ class IndexationRepository extends EntityRepository
     {
         if (0 < count($parent_uids)) {
             $command = 'REPLACE';
-            if (false === $this->_replace_supported) {
+            if (false === $this->replace_supported) {
                 // REPLACE command not supported, remove first then insert
                 $this->_removeIdxContentContents(array_keys($parent_uids));
                 $command = 'INSERT';
@@ -386,18 +404,23 @@ class IndexationRepository extends EntityRepository
             $insert_children = array();
             foreach ($parent_uids as $parent_uid => $subcontent_uids) {
                 foreach ($subcontent_uids as $subcontent_uid) {
-                    $insert_children[] = sprintf('SELECT %s, %s',$parent_uid, $subcontent_uid);
-                    $insert_children[] = sprintf('SELECT %s, %s 
-                        FROM %s 
-                        WHERE %s = %s', $meta->getColumnName('content_uid'), $subcontent_uid, $meta->getTableName(), $meta->getColumnName('subcontent_uid'), $parent_uid
+                    $insert_children[] = sprintf('SELECT "%s", "%s"',$parent_uid, $subcontent_uid);
+                    $insert_children[] = sprintf('SELECT %s, "%s"
+                        FROM %s
+                        WHERE %s = "%s"', $meta->getColumnName('content_uid'), $subcontent_uid, $meta->getTableName(), $meta->getColumnName('subcontent_uid'), $parent_uid
                     );
                 }
             }
 
             if (0 < count($insert_children)) {
-                $query = $command.' INTO '.$meta->getTableName().
-                        ' ('.$meta->getColumnName('content_uid').', '.$meta->getColumnName('subcontent_uid').') '.
-                        implode(' UNION ALL ', $insert_children);
+                $union_all = implode(' UNION ALL ', $insert_children);
+                $query = sprintf('%s INTO %s (%s, %s) %s',
+                    $command,
+                    $meta->getTableName(),
+                    $meta->getColumnName('content_uid'),
+                    $meta->getColumnName('subcontent_uid'),
+                    $union_all
+                );
                 $this->_em->getConnection()->executeQuery($query);
             }
         }

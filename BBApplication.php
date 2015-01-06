@@ -51,7 +51,7 @@ use Symfony\Component\Finder\Finder;
  */
 class BBApplication implements IApplication, DumpableServiceInterface, DumpableServiceProxyInterface
 {
-    const VERSION = '0.10.0';
+    const VERSION = '0.11.0';
 
     /**
      * application's service container

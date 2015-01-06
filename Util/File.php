@@ -93,7 +93,7 @@ class File
      * @param  boolean $removeTrailing Removing trailing separators to the end of path
      * @return string  The normalize file path
      */
-    public static function normalizePath($filepath, $separator = DIRECTORY_SEPARATOR, $removeTrailing = true)
+    public static function normalizePath($filepath, $separator = '/', $removeTrailing = true)
     {
         $schemeMatches = [];
         $scheme = "";

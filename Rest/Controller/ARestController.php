@@ -22,7 +22,7 @@
 namespace BackBuilder\Rest\Controller;
 
 use BackBuilder\Controller\Controller;
-use BackBuilder\Rest\Formatter\IFormatter;
+use BackBuilder\Rest\Formatter\FormatterInterface;
 use BackBuilder\Rest\Exception\ValidationException;
 use BackBuilder\Serializer\SerializerBuilder;
 
@@ -30,6 +30,7 @@ use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -44,7 +45,7 @@ use Symfony\Component\Validator\ConstraintViolationList;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-abstract class ARestController extends Controller implements IRestController, IFormatter
+abstract class ARestController extends Controller implements RestControllerInterface, FormatterInterface
 {
     /**
      *
@@ -67,7 +68,7 @@ abstract class ARestController extends Controller implements IRestController, IF
     /*
      * Default formatter for a collection of objects
      *
-     * Implements BackBuilder\Rest\Formatter\IFormatter::formatCollection($collection)
+     * Implements FormatterInterface::formatCollection($collection)
      */
     public function formatCollection($collection, $format = 'json')
     {
@@ -83,7 +84,7 @@ abstract class ARestController extends Controller implements IRestController, IF
     /**
      * Serializes an object
      *
-     * Implements BackBuilder\Rest\Formatter\IFormatter::formatItem($item)
+     * Implements FormatterInterface::formatItem($item)
      * @param  mixed $item
      * @return array
      */
@@ -137,6 +138,22 @@ abstract class ARestController extends Controller implements IRestController, IF
         }
 
         return $this->getSerializer()->deserialize(json_encode($data), $entityOrClass, 'json',  $context);
+    }
+
+    /**
+     * Create a JsonResponse
+     *
+     * @see JsonResponse::__construct()
+     *
+     * @param  mixed   $data
+     * @param  integer $status
+     * @param  array   $headers
+     *
+     * @return JsonResponse
+     */
+    protected function createJsonResponse($data = null, $status = 200, $headers = array())
+    {
+        return new JsonResponse($data, $status, $headers);
     }
 
     /**
@@ -203,7 +220,7 @@ abstract class ARestController extends Controller implements IRestController, IF
     protected function createValidationException($field, $value, $message)
     {
         return new ValidationException(new ConstraintViolationList(array(
-            new ConstraintViolation($message, $message, array(), $field, $field, $value),
+            new ConstraintViolation($message, $message, array(), $field, $field, $value)
         )));
     }
 

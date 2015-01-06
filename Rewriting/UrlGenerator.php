@@ -255,8 +255,8 @@ class UrlGenerator implements IUrlGenerator
         $existings = array();
         if (1 === preg_match('#(.*)\/$#', $baseurl, $matches)) {
             $baseurl = $matches[1].'-%d/';
-            $existings = $page_repository->createQueryBuilder('p')
-                ->where('p._root = :root')
+            $query = $page_repository->createQueryBuilder('p');
+            $existings = $query->where($query->getSectionAlias() . '._root = :root')
                 ->setParameter('root', $page->getRoot())
                 ->andWhere('p._url LIKE :url')
                 ->setParameter('url', $matches[1].'%/')
@@ -265,7 +265,7 @@ class UrlGenerator implements IUrlGenerator
             ;
         } else {
             $existings = $this->application->getEntityManager()->getConnection()->executeQuery(
-                'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
+                'SELECT p.uid FROM page p INNER JOIN section s ON s.uid = p.section_uid WHERE s.`root_uid` = :root AND p.url REGEXP :regex',
                 array(
                     'root'  => $page->getRoot()->getUid(),
                     'regex' => $url.'(-[0-9]+)?$',

@@ -1,7 +1,19 @@
 {
-    "name": "lp-digital/backbee",
+    "name": "backbee/BackBee",
     "description": "BackBee is the next generation open source CMS",
+    "keywords": ["CMS", "Core", "Content Management", "No backend CMS", "User Management"],
     "type": "backbee-package",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Charles Rouillon",
+            "email": "charles.rouillon@lp-digital.fr"
+        },
+        {
+            "name": "BackBee community",
+            "homepage": "https://github.com/backbee/BackBee/graphs/contributors"
+        }
+    ],
     "extra": {
         "installer-name": "BackBuilder"
     },

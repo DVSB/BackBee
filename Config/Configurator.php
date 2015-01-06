@@ -304,10 +304,12 @@ class Configurator
                 ));
             }
         } catch (DBALException $e) {
-            $expected_error = 1 === preg_match(
-                '#SQLSTATE\[42S02\]: Base table or view not found: 1146 Table \'(\w+).registry\' doesn\'t exist#',
-                $e->getMessage()
-            ); // expected error is if we try to get overrided config in registry on application installation process
+            $expected_error = false;
+            if (null !== $e->getPrevious() && $e->getPrevious() instanceof \PDOException) {
+                // expected error is if we try to get overrided config in registry on application installation process
+                // PDOException has two methods for retrieving information about an error, @see http://php.net/manual/en/class.pdoexception.php
+                $expected_error = ('42S02' === $e->getPrevious()->getCode() || false !== strpos($e->getPrevious()->getMessage(), 'SQLSTATE[42S02]'));
+            }
 
             if (false === $expected_error) {
                 throw $e;
