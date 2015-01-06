@@ -274,12 +274,13 @@ class PageRepository extends EntityRepository
             throw new InvalidArgumentException('Parent page is not a section.');
         }
 
+        $current_parent = $page->getSection();
         $page->setSection($parent->getSection())
                 ->setPosition($position)
                 ->setLevel($parent->getSection()->getLevel() + 1);
 
         if (true === $section) {
-            $page = $this->saveWithSection($page);
+            $page = $this->saveWithSection($page, $current_parent);
         } else {
             $this->shiftPosition($page, 1, true);
         }
@@ -629,6 +630,7 @@ class PageRepository extends EntityRepository
     public function getRoot(Site $site, array $restrictedStates = array())
     {
         $q = $this->createQueryBuilder('p')
+                ->andSiteIs($site)
                 ->andParentIs(null)
                 ->orderby('p._position', 'asc')
                 ->setMaxResults(1);
@@ -637,9 +639,7 @@ class PageRepository extends EntityRepository
             $q->andStateIsIn($restrictedStates);
         }
 
-        return $q->andWhere($q->getSectionAlias() . '._site = :site')
-                        ->setParameter('site', $site)
-                        ->getQuery()->getOneOrNullResult();
+        return $q->getQuery()->getOneOrNullResult();
     }
 
     /**
@@ -934,7 +934,7 @@ class PageRepository extends EntityRepository
      * @param \BackBuilder\NestedNode\Page $page
      * @return \BackBuilder\NestedNode\Page
      */
-    public function saveWithSection(Page $page)
+    public function saveWithSection(Page $page, Section $current_parent = null)
     {
         if (true === $page->hasMainSection()) {
             return $page;
@@ -945,6 +945,11 @@ class PageRepository extends EntityRepository
         }
 
         $parent = $page->getSection();
+        
+        if (null !== $current_parent && $this->_em->getUnitOfWork()->isScheduledForInsert($current_parent)) {
+            $this->_em->detach($current_parent);
+        }
+
         $section = new Section($page->getUid(), array('page' => $page, 'site' => $page->getSite()));
 
         $this->getEntityManager()
