@@ -20,10 +20,6 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "http://gitlab.lp-digital.fr/backbuilder/backbuilderapiclient.git"
-        },
-        {
-            "type": "vcs",
             "url": "https://github.com/eric-chau/installers.git"
         }
     ],
