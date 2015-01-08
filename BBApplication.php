@@ -1072,10 +1072,15 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
         AnnotationRegistry::registerAutoloadNamespaces(array(
             'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/symfony/src/',
             'JMS\Serializer\Annotation' => $this->getVendorDir().'/jms/serializer/src/',
-            'BackBee\Installer\Annotation' => $this->getBaseDir(),
-            'BackBee' => $this->getBaseDir(),
-            //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
         ));
+
+        AnnotationRegistry::registerLoader(function ($classname) {
+            if (0 === strpos($classname, 'BackBee')) {
+                return class_exists($classname);
+            }
+
+            return false;
+        });
 
         // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
         AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
