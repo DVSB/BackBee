@@ -742,7 +742,7 @@ class PageTest extends TestCase
 
     /**
      * @covers BackBuilder\NestedNode\Page::serialize
-     * @covers BackBuilder\NestedNode\Page::_setDateTimeValue
+     * @covers BackBuilder\NestedNode\Page::setDateTimeValue
      */
     public function testUnserialize()
     {

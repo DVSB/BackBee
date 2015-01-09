@@ -292,7 +292,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::dumpDumpableServices
+     * @covers ::dump
      */
     public function testDumpableService()
     {
@@ -366,7 +366,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::dumpDumpableServices
+     * @covers ::dump
      */
     public function testNotDumpableService()
     {

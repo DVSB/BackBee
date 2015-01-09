@@ -43,7 +43,7 @@ class KeyWordTest extends TestCase
     private $keyword;
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::__construct
+     * @covers BackBuilder\NestedNode\KeyWord::__construct
      */
     public function test__construct()
     {
@@ -51,8 +51,8 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::getKeyWord
-     * @covers BackBuilder\NestedNode\MediaFolder::setKeyWord
+     * @covers BackBuilder\NestedNode\KeyWord::getKeyWord
+     * @covers BackBuilder\NestedNode\KeyWord::setKeyWord
      */
     public function testGetAndSetKeyWord()
     {
@@ -61,7 +61,7 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::getData
+     * @covers BackBuilder\NestedNode\KeyWord::getData
      */
     public function testGetData()
     {
@@ -71,7 +71,7 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::getParam
+     * @covers BackBuilder\NestedNode\KeyWord::getParam
      */
     public function testGetParam()
     {
@@ -88,7 +88,7 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::toArray
+     * @covers BackBuilder\NestedNode\KeyWord::toArray
      */
     public function testToArray()
     {
@@ -108,7 +108,7 @@ class KeyWordTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\MediaFolder::toStdObject
+     * @covers BackBuilder\NestedNode\KeyWord::toStdObject
      */
     public function testToStdObject()
     {

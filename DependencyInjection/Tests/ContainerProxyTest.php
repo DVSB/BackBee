@@ -170,7 +170,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
      * @covers ::__construct
      * @covers ::get
      * @covers ::tryLoadDefinitionFromRaw
-     * @covers ::tryRestoreDumpableService
      * @covers ::buildDefinition
      * @covers ::setDefinitionClass
      * @covers ::setDefinitionArguments
@@ -194,7 +193,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
      * @covers ::__construct
      * @covers ::get
      * @covers ::tryLoadDefinitionFromRaw
-     * @covers ::tryRestoreDumpableService
      * @covers ::setDefinitionTags
      * @covers ::setDefinitionMethodCalls
      * @covers ::convertArgument
