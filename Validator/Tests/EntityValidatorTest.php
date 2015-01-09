@@ -94,7 +94,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers BackBuilder\Validator\ArrayValidator::getReflectionClass
+     * @covers BackBuilder\Validator\EntityValidator::getReflectionClass
      * @expectedException InvalidArgumentException
      */
     public function testGetReflectionClassIfEntityIsAnArray()
@@ -103,7 +103,7 @@ class EntityValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers BackBuilder\Validator\ArrayValidator::getReflectionClass
+     * @covers BackBuilder\Validator\EntityValidator::getReflectionClass
      * @expectedException InvalidArgumentException
      */
     public function testGetReflectionClassIfEntityIsNull()

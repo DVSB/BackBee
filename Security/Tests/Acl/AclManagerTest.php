@@ -36,7 +36,7 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBuilder\Acl\AclManager
+ * @coversDefaultClass \BackBuilder\Security\Acl\AclManager
  */
 class AclManagerTest extends TestCase
 {
