@@ -521,6 +521,28 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * {@inheritdoc}
      */
+    public function jsonSerialize($format = self::JSON_DEFAULT_FORMAT)
+    {
+        $data = parent::jsonSerialize($format);
+
+        if (isset($data['elements'])) {
+            $elements = [];
+            foreach ($data['elements'] as $element) {
+                $elements[] = [
+                    'uid' => $element['uid'],
+                    'type' => $element['type'],
+                ];
+            }
+
+            $data['elements'] = $elements;
+        }
+
+        return $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function _initData()
     {
         if (null === $this->getProperty('auto_hydrate')) {

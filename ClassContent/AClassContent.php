@@ -23,11 +23,10 @@
 
 namespace BackBee\ClassContent;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\NestedNode\Page;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Abstract class for content object in BackBee
@@ -1071,24 +1070,28 @@ abstract class AClassContent extends AContent
     /**
      * {@inheritdoc}
      */
-    public function jsonSerialize($verbose = true)
+    public function jsonSerialize($format = self::JSON_DEFAULT_FORMAT)
     {
-        $data = array(
-            'properties' => $this->getProperty(),
-            'main_node'  => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
-            'draft_uid'  => null !== $this->getDraft() ? $this->getDraft()->getUid() : null,
-            'image'      => $this->getImageName(),
-        );
+        $data = parent::jsonSerialize($format);
 
-        $data = array_merge(parent::jsonSerialize($verbose), $data);
-
-        if (null === $data['label']) {
+        if (!isset($data['label'])) {
             $data['label'] = $this->getProperty('name');
         }
 
-        if (false === $verbose) {
-            unset($data['properties']);
+        if (self::JSON_CONCISE_FORMAT === $format) {
+            return $data;
         }
+
+        if (self::JSON_INFO_FORMAT === $format) {
+            unset($data['label']);
+
+            return $data;
+        }
+
+        $data = array_merge([
+            'properties' => $this->getProperty(),
+            'image'      => $this->getImageName(),
+        ], $data);
 
         return $data;
     }

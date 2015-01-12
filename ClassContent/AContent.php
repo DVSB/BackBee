@@ -23,12 +23,12 @@
 
 namespace BackBee\ClassContent;
 
-use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Renderer\IRenderable;
 use BackBee\Security\Acl\Domain\IObjectIdentifiable;
 use BackBee\Util\Parameter;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Abstract class for every content and its revisions in BackBee
@@ -45,6 +45,14 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * BackBee's class content classname must be prefixed by this
      */
     const CLASSCONTENT_BASE_NAMESPACE = 'BackBee\ClassContent\\';
+
+    /**
+     * Supported formats by ::jsonSerialize
+     */
+    const JSON_DEFAULT_FORMAT = 0;
+    const JSON_DEFINITION_FORMAT = 1;
+    const JSON_CONCISE_FORMAT = 2;
+    const JSON_INFO_FORMAT = 3;
 
     /**
      * Unique identifier
@@ -122,6 +130,17 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * @Column(type="integer", name="state")
      */
     protected $_state;
+
+    /**
+     * Formats supported by ::jsonSerialize
+     * @var array
+     */
+    public static $jsonFormats = [
+        'default'    => self::JSON_DEFAULT_FORMAT,
+        'definition' => self::JSON_DEFINITION_FORMAT,
+        'concise'    => self::JSON_CONCISE_FORMAT,
+        'info'       => self::JSON_INFO_FORMAT,
+    ];
 
     /**
      * Class constructor
@@ -686,12 +705,6 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         return $result;
     }
 
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*               Implementation of IObjectIdentifiable                    */
-    /*                                                                        */
-    /*     * **************************************************************** */
-
     /**
      * Returns a unique identifier for this domain object.
      * @return string
@@ -736,12 +749,6 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }
-
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*                   Implementation of IRenderable                        */
-    /*                                                                        */
-    /*     * **************************************************************** */
 
     /**
      * Returns the set of data
@@ -870,7 +877,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             array_unshift($pieces, $type);
         }
 
-        return $this->_getRecursivelyParam($this->_parameters[$var], $pieces);
+        return $this->getRecursivelyParam($this->_parameters[$var], $pieces);
     }
 
     /**
@@ -880,7 +887,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * @param  array $pieces
      * @return mixed
      */
-    private function _getRecursivelyParam($param, array $pieces)
+    private function getRecursivelyParam($param, array $pieces)
     {
         if (0 === count($pieces)) {
             return $param;
@@ -891,7 +898,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             return;
         }
 
-        return $this->_getRecursivelyParam($param[$key], $pieces);
+        return $this->getRecursivelyParam($param[$key], $pieces);
     }
 
     /**
@@ -904,128 +911,33 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         return false;
     }
 
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*                   Implementation of Serializable                       */
-    /*                                                                        */
-    /*     * **************************************************************** */
-
     /**
-     * Return the serialized string of the content
+     * Returns formatted template name
+     *
      * @return string
      */
-    public function serialize()
-    {
-        $serialized = new \stdClass();
-        $serialized->uid = $this->getUid();
-        $serialized->type = ClassUtils::getRealClass($this);
-        $serialized->label = $this->getLabel();
-        $serialized->revision = $this->getRevision();
-        $serialized->state = $this->getState();
-        $serialized->created = $this->getCreated();
-        $serialized->modified = $this->getModified();
-        $serialized->param = $this->_arrayToStdClass($this->getParam());
-
-        if ($this->_getContentInstance() instanceof ContentSet) {
-            $serialized->accept = $this->getAccept();
-            $serialized->maxentry = $this->getMaxEntry();
-            $serialized->minentry = $this->getMinEntry();
-
-            $tmp = array();
-            foreach ($this->getData() as $value) {
-                $tmp[] = ($value instanceof AClassContent) ? $value->getUid() : $value;
-            }
-            $serialized->data = $tmp;
-        } else {
-            $serialized->accept = $this->_arrayToStdClass($this->getAccept());
-            $serialized->maxentry = $this->_arrayToStdClass($this->getMaxEntry());
-            $serialized->minentry = $this->_arrayToStdClass($this->getMinEntry());
-
-            $serialized->data = new \stdClass();
-            foreach ($this->getData() as $key => $value) {
-                if (true === is_array($value)) {
-                    $tmp = array();
-                    foreach ($value as $val) {
-                        $tmp[] = ($val instanceof AClassContent) ? $val->getUid() : $val;
-                    }
-                    $serialized->data->$key = $tmp;
-                } else {
-                    $serialized->data->$key = ($value instanceof AClassContent) ? $value->getUid() : $value;
-                }
-            }
-        }
-
-        return json_encode($serialized);
-    }
-
-    /**
-     * Initialized the instance from a serialized string
-     * @param  string                                                   $serialized
-     * @param  Boolean                                                  $strict     If TRUE, all missing or additionnal element will generate an error
-     * @return \BackBee\ClassContent\AClassContent                      The current instance
-     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
-     *                                                                             property does not match an element
-     */
-    public function unserialize($serialized, $strict = false)
-    {
-        if (false === is_object($serialized)) {
-            $serialized = json_decode($serialized);
-        }
-
-        foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_'.$property;
-
-            if (true === in_array($property, array('_created', '_modified')) || null === $value) {
-                continue;
-            } elseif ("_param" === $property) {
-                foreach ($value as $param => $paramvalue) {
-                    $this->setParam($param, $paramvalue);
-                }
-            } elseif ("_data" === $property) {
-                foreach ($value as $el => $val) {
-                    $this->$el = $val;
-                }
-            } elseif ("_value" === $property) {
-                $this->value = $value;
-            } elseif (false === property_exists($this, $property) && true === $strict) {
-                throw new Exception\UnknownPropertyException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this->_getContentInstance())));
-            }
-        }
-
-        return $this;
-    }
-
     public function getTemplateName()
     {
-        return str_replace(array("BackBee".NAMESPACE_SEPARATOR."ClassContent".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+        return str_replace(
+            ["BackBee".NAMESPACE_SEPARATOR."ClassContent".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
+            ["", DIRECTORY_SEPARATOR],
+            get_class($this)
+        );
     }
 
     /**
+     * Computes an array that contains current content data; it can also lighten result according to
+     * requested format
      *
-     *
-     * @param boolean $return_array define if we return an array or the json_encode of array, default setted at false
-     *
-     * @return string|array
-     * @deprecated since version 1.0
+     * @param  integer $format
+     * @return array
      */
-    public function toJson($return_array = false)
+    public function jsonSerialize($format = self::JSON_DEFAULT_FORMAT)
     {
-        return false === $return_array ? json_encode($this->jsonSerialize()) : $this->jsonSerialize();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize($verbose = true)
-    {
-        $data = array(
+        $data = [
             'uid'        => $this->_uid,
             'label'      => $this->_label,
-            'type'       => str_replace(
-                array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'),
-                array('', '/'),
-                get_class($this)
-            ),
+            'type'       => $this->getShortenClassname($this),
             'state'      => $this->_state,
             'created'    => $this->_created->getTimestamp(),
             'modified'   => $this->_modified->getTimestamp(),
@@ -1033,29 +945,80 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             'parameters' => $this->getParam(),
             'accept'     => array_map(
                 function ($classname) {
-                    return str_replace(
-                        array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'),
-                        array('', '/'),
-                        $classname
-                    );
+                    return str_replace([self::CLASSCONTENT_BASE_NAMESPACE, '\\'], ['', '/'], $classname);
                 },
                 $this->getAccept()
             ),
             'minentry'   => $this->getMinEntry(),
             'maxentry'   => $this->getMaxEntry(),
-        );
+            'elements'   => $this->computeElementsToJson($this->getData()),
+        ];
 
-        $data['elements'] = array();
-        foreach ($this->getData() as $name => $content) {
-            if ($content instanceof AContent) {
-                $data['elements'][$name] = $content->jsonSerialize($verbose);
-            } elseif (is_scalar($content)) {
-                $data['elements'][$name] = $content;
+        return $this->formatJsonData($data, $format);
+    }
+
+    /**
+     * Computes and returns shorten classname of provided content
+     *
+     * @param  AContent $content
+     * @return string
+     */
+    private function getShortenClassname(AContent $content)
+    {
+        return str_replace([self::CLASSCONTENT_BASE_NAMESPACE, '\\'], ['', '/'], get_class($content));
+    }
+
+    /**
+     * Computes elements key for ::jsonSerialize
+     *
+     * @param  array  $elements
+     * @return array
+     */
+    private function computeElementsToJson(array $elements)
+    {
+        $result = [];
+        foreach ($elements as $key => $element) {
+            if ($element instanceof AContent) {
+                $result[$key] = [
+                    'uid'  => $element->getUid(),
+                    'type' => $this->getShortenClassname($element),
+                ];
+            } elseif (is_scalar($element)) {
+                $result[$key] = $element;
+            } elseif (is_array($element)) {
+                $result[$key] = $this->computeElementsToJson($element);
             }
         }
 
-        if (false === $verbose) {
+        return $result;
+    }
+
+    /**
+     * This method will lighten provided data into requested format, if format is equal to 0 this method
+     * won't transform anything
+     *
+     * @param  array   $data
+     * @param  integer $format
+     * @return array
+     */
+    private function formatJsonData(array $data, $format)
+    {
+        if (self::JSON_DEFINITION_FORMAT === $format || self::JSON_CONCISE_FORMAT === $format) {
+            unset($data['state'], $data['created'], $data['modified'], $data['revision']);
+        }
+
+        if (self::JSON_INFO_FORMAT === $format || self::JSON_CONCISE_FORMAT === $format) {
             unset($data['accept'], $data['minentry'], $data['maxentry']);
+        }
+
+        if (self::JSON_DEFINITION_FORMAT === $format || self::JSON_INFO_FORMAT === $format) {
+            unset($data['elements']);
+        }
+
+        if (self::JSON_DEFINITION_FORMAT === $format) {
+            unset($data['uid']);
+        } elseif (self::JSON_INFO_FORMAT === $format) {
+            unset($data['label'], $data['parameters']);
         }
 
         return $data;
