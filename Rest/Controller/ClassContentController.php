@@ -182,7 +182,7 @@ class ClassContentController extends ARestController
         $classname = $this->getClassnameByType($type);
         $content = new $classname();
 
-        $em = $this->getApplication()->getEntityManager();
+        $em = $this->getEntityManager();
         $em->persist($content);
 
         $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft(
@@ -221,9 +221,7 @@ class ClassContentController extends ARestController
         $content = $this->getClassContentByTypeAndUid($type, $uid);
 
         try {
-            $this->getApplication()->getEntityManager()->getRepository('BackBee\ClassContent\AClassContent')
-                ->deleteContent($content)
-            ;
+            $this->getEntityManager()->getRepository('BackBee\ClassContent\AClassContent')->deleteContent($content);
         } catch (\Exception $e) {
             throw new BadRequestHttpException("Unable to delete content with type: `$type` and uid: `$uid`");
         }
@@ -238,7 +236,7 @@ class ClassContentController extends ARestController
      */
     private function getCategoryManager()
     {
-        return $this->getApplication()->getContainer()->get('classcontent.category_manager');
+        return $this->getContainer()->get('classcontent.category_manager');
     }
 
     /**
@@ -278,7 +276,7 @@ class ClassContentController extends ARestController
         $classname = $this->getClassnameByType($type);
 
         try {
-            $content = $this->getApplication()->getEntityManager()->find($classname, $uid);
+            $content = $this->getEntityManager()->find($classname, $uid);
         } catch (ClassNotFoundException $e) {
             throw new NotFoundHttpException("No classcontent found with provided type (:$type)");
         }
@@ -312,17 +310,15 @@ class ClassContentController extends ARestController
      */
     private function getClassContentClassnamesByPageUid($pageUid)
     {
-        $result = $this->getApplication()->getEntityManager()->getConnection()->executeQuery(
+        $result = $this->getEntityManager()->getConnection()->prepare(
             'SELECT DISTINCT c.classname
              FROM idx_content_content icc, content c, page p
              WHERE p.uid = :pageUid AND p.contentset = icc.content_uid
-             AND icc.subcontent_uid = c.uid AND c.classname != :contentset_classname
-            ',
-            [
-                'pageUid'              => $pageUid,
-                'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet',
-            ]
-        )->fetchAll();
+             AND icc.subcontent_uid = c.uid AND c.classname != :contentset_classname'
+        )->execute([
+            'pageUid'              => $pageUid,
+            'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet',
+        ]);
 
         $classnames = [];
         foreach ($result as $classname) {
@@ -429,7 +425,7 @@ class ClassContentController extends ARestController
      */
     private function getClassContentRevision(AClassContent $content)
     {
-        return $this->getApplication()->getEntityManager()->getRepository('BackBee\ClassContent\Revision')
+        return $this->getEntityManager()->getRepository('BackBee\ClassContent\Revision')
             ->getDraft($content, $this->getApplication()->getBBUserToken())
         ;
     }
@@ -448,7 +444,7 @@ class ClassContentController extends ARestController
         $criterias = array_merge([
             'only_online' => false,
             'site_uid'    => $this->getApplication()->getSite()->getUid(),
-        ], $this->getApplication()->getRequest()->query->all());
+        ], $this->getRequest()->query->all());
 
         $criterias['only_online'] = (boolean) $criterias['only_online'];
 
@@ -462,7 +458,7 @@ class ClassContentController extends ARestController
         unset($criterias['order_by']);
         unset($criterias['order_direction']);
 
-        return $this->getApplication()->getEntityManager()
+        return $this->getEntityManager()
             ->getRepository('BackBee\ClassContent\AClassContent')
             ->findContentsBySearch($classnames, $order_infos, $pagination, $criterias)
         ;
@@ -478,7 +474,7 @@ class ClassContentController extends ARestController
     private function getFormatParam()
     {
         $validFormats = array_keys(AClassContent::$jsonFormats);
-        $queryParamsKey = array_keys($this->getApplication()->getContainer()->get('request')->query->all());
+        $queryParamsKey = array_keys($this->getRequest()->query->all());
         $format = ($collection = array_intersect($validFormats, $queryParamsKey))
             ? array_shift($collection)
             : AClassContent::JSON_DEFAULT_FORMAT
@@ -545,11 +541,11 @@ class ClassContentController extends ARestController
             $urlType = RouteCollection::IMAGE_URL;
         } else {
             $image_filepath = $this->getThumbnailBaseFolderPath().DIRECTORY_SEPARATOR.$data['image'];
-            $baseFolder = $this->getApplication()->getContainer()->getParameter('classcontent_thumbnail.base_folder');
+            $baseFolder = $this->getContainer()->getParameter('classcontent_thumbnail.base_folder');
             if (file_exists($image_filepath) && is_readable($image_filepath)) {
-                $imageUri = $baseFolder.'/'.$data['image'];
+                $imageUri = $baseFolder.DIRECTORY_SEPARATOR.$data['image'];
             } else {
-                $imageUri = $baseFolder.'/'.'default_thumbnail.png';
+                $imageUri = $baseFolder.DIRECTORY_SEPARATOR.'default_thumbnail.png';
             }
         }
 
@@ -566,12 +562,12 @@ class ClassContentController extends ARestController
     private function getThumbnailBaseFolderPath()
     {
         if (null === $this->thumbnailBaseDir) {
-            $baseFolder = $this->getApplication()->getContainer()->getParameter('classcontent_thumbnail.base_folder');
+            $baseFolder = $this->getContainer()->getParameter('classcontent_thumbnail.base_folder');
             $this->thumbnailBaseDir = array_map(function ($directory) use ($baseFolder) {
                 return str_replace(
                     DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,
                     DIRECTORY_SEPARATOR,
-                    $directory.'/'.$baseFolder
+                    $directory.DIRECTORY_SEPARATOR.$baseFolder
                 );
             }, $this->getApplication()->getResourceDir());
 
