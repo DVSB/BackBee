@@ -23,12 +23,10 @@
 
 namespace BackBee\Site;
 
+use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Site\Metadata\Metadata;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
-
-use BackBee\Security\Acl\Domain\AObjectIdentifiable;
-use BackBee\Services\Local\IJson;
-use BackBee\Site\Metadata\Metadata;
 
 /**
  * A BackBee website entity
@@ -48,7 +46,7 @@ use BackBee\Site\Metadata\Metadata;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class Site extends AObjectIdentifiable implements IJson
+class Site extends AObjectIdentifiable
 {
     /**
      * The unique identifier of this website.
@@ -255,17 +253,5 @@ class Site extends AObjectIdentifiable implements IJson
         $this->_metadata->add($metadata);
 
         return $this;
-    }
-
-    /**
-     * @see BackBee\Services\Local\IJson::__toJson()
-     */
-    public function __toJson()
-    {
-        $result = new \stdClass();
-        $result->label = $this->getLabel();
-        $result->uid = $this->getUid();
-
-        return $result;
     }
 }

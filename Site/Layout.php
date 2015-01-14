@@ -23,13 +23,11 @@
 
 namespace BackBee\Site;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use JMS\Serializer\Annotation as Serializer;
-
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Security\Acl\Domain\AObjectIdentifiable;
-use BackBee\Services\Local\IJson;
 use BackBee\Utils\Numeric;
+use Doctrine\Common\Collections\ArrayCollection;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * A website layout
@@ -63,7 +61,7 @@ use BackBee\Utils\Numeric;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class Layout extends AObjectIdentifiable implements IJson
+class Layout extends AObjectIdentifiable
 {
     /**
      * The unique identifier.
@@ -566,22 +564,6 @@ class Layout extends AObjectIdentifiable implements IJson
         }
 
         return $this;
-    }
-
-    /**
-     * @see BackBee\Services\Local\IJson::__toJson()
-     */
-    public function __toJson()
-    {
-        $result = new \stdClass();
-        $result->templateLayouts = $this->getDataObject()->templateLayouts;
-        $result->templateTitle = $this->getLabel();
-        $result->path = $this->getPath();
-        $result->picpath = $this->getPicPath();
-        $result->uid = $this->getUid();
-        $result->site = ($this->getSite() !== null) ? $this->getSite()->__toJson() : null;
-
-        return $result;
     }
 
     /**
