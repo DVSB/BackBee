@@ -121,8 +121,8 @@ class BundleLoader
 
         $baseDir = dirname($this->reflectionClasses[$classname]->getFileName());
 
-        if (false === is_dir($baseDir)) {
-            throw new \Exception();
+        if (!is_dir($baseDir)) {
+            throw new \RuntimeException("Invalid bundle `$bundle` base directory, expected `$baseDir` to exist.");
         }
 
         return $baseDir;
@@ -177,9 +177,9 @@ class BundleLoader
      */
     private function buildBundleDefinition($classname, $bundleId, $baseDir)
     {
-        if (false === in_array('BackBee\Bundle\BundleInterface', class_implements($classname))) {
+        if (false === is_subclass_of($classname, 'BackBee\Bundle\BundleInterface')) {
             throw new InvalidArgumentException(
-                "Bundles must implements `BackBee\Bundle\BundleInterface`, `$classname` does not."
+                "Bundles must implement `BackBee\Bundle\BundleInterface`, `$classname` does not."
             );
         }
 
@@ -198,7 +198,7 @@ class BundleLoader
         foreach ($this->bundlesBaseDir as $serviceId => $baseDir) {
             $config = $this->loadAndGetBundleConfigByBaseDir($serviceId, $baseDir);
             $bundleConfig = $config->getSection('bundle');
-            if (isset($bundleConfig['enable']) && false === (boolean) $bundleConfig['enable']) {
+            if (isset($bundleConfig['enable']) && !((boolean) $bundleConfig['enable'])) {
                 continue;
             }
 
@@ -229,7 +229,7 @@ class BundleLoader
 
         $this->loadConfigDefinition($configId, $baseDir);
         $bundleConfig = $this->container->get($configId)->getBundleConfig();
-        if (true === isset($bundleConfig['config_per_site']) && true === $bundleConfig['config_per_site']) {
+        if (isset($bundleConfig['config_per_site']) && true === $bundleConfig['config_per_site']) {
             $definition = $this->container->getDefinition($configId);
             $definition->addTag('config_per_site');
         }
@@ -276,7 +276,7 @@ class BundleLoader
     private function getConfigDirByBundleBaseDir($baseDir)
     {
         $directory = $baseDir.DIRECTORY_SEPARATOR.BundleInterface::CONFIG_DIRECTORY_NAME;
-        if (false === is_dir($directory)) {
+        if (!is_dir($directory)) {
             $directory = $baseDir.DIRECTORY_SEPARATOR.BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
         }
 
