@@ -38,8 +38,8 @@ interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
     /**
      * service id pattern (for bundle and bundle's config)
      */
-    const BUNDLE_SERVICE_ID_PATTERN = 'bundle.%bundle_name%bundle';
-    const CONFIG_SERVICE_ID_PATTERN = 'bundle.%bundle_id%.config';
+    const BUNDLE_SERVICE_ID_PATTERN = 'bundle.%bundle_name%';
+    const CONFIG_SERVICE_ID_PATTERN = '%bundle_service_id%.config';
 
     /**
      * Config directories names
