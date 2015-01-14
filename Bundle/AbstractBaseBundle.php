@@ -47,18 +47,11 @@ abstract class AbstractBaseBundle implements BundleInterface
     private $application;
 
     /**
-     * Bundle loader of current application
-     *
-     * @var BackBee\Bundle\BundleLoader
-     */
-    private $bundle_loader;
-
-    /**
      * Bundle base directory
      *
      * @var string
      */
-    private $base_directory;
+    private $baseDir;
 
     /**
      * Bundle identifier
@@ -66,13 +59,6 @@ abstract class AbstractBaseBundle implements BundleInterface
      * @var string
      */
     private $id;
-
-    /**
-     * Bundle's config identifier
-     *
-     * @var string
-     */
-    private $config_id;
 
     /**
      * Define if this bundle is already started or not
@@ -86,7 +72,7 @@ abstract class AbstractBaseBundle implements BundleInterface
      *
      * @var array
      */
-    private $exposed_actions;
+    private $exposedActions;
 
     /**
      * Indexed by a unique name (controller name + action name), it contains every (controller; action)
@@ -94,27 +80,26 @@ abstract class AbstractBaseBundle implements BundleInterface
      *
      * @var array
      */
-    private $exposed_actions_callbacks;
+    private $exposedActionsCallbacks;
 
     /**
      * AbstractBaseBundle's constructor
      *
      * @param ApplicationInterface $application application to link current bundle with
      */
-    public function __construct(ApplicationInterface $application)
+    public function __construct(ApplicationInterface $application, $id = null, $baseDir = null)
     {
         $this->application = $application;
-        $this->bundle_loader = $this->application->getContainer()->get('bundle.loader');
+        $bundleLoader = $this->application->getContainer()->get('bundle.loader');
 
-        $this->base_directory = $this->bundle_loader->buildBundleBaseDirectoryFromClassname(get_class($this));
-        $this->id = basename($this->base_directory);
+        $this->baseDir = $baseDir ?: $bundleLoader->buildBundleBaseDirectoryFromClassname(get_class($this));
+        $this->id = $id ?: basename($this->baseDir);
 
-        $this->bundle_loader->loadConfigDefinition($this->getConfigServiceId(), $this->base_directory);
+        $bundleLoader->loadConfigDefinition($this->getConfigServiceId(), $this->baseDir);
 
-        $this->exposed_actions = array();
-        $this->exposed_actions_callbacks = array();
+        $this->exposedActions = array();
+        $this->exposedActionsCallbacks = array();
         $this->initBundleExposedActions();
-
         $this->started = false;
     }
 
@@ -131,7 +116,7 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getBaseDirectory()
     {
-        return $this->base_directory;
+        return $this->baseDir;
     }
 
     /**
@@ -171,12 +156,11 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getConfigServiceId()
     {
-        if (null === $this->config_id) {
-            $this->config_id = str_replace('%bundle_id%', $this->id, BundleInterface::CONFIG_SERVICE_ID_PATTERN);
-            $this->config_id = strtolower($this->config_id);
-        }
-
-        return $this->config_id;
+        return strtolower(str_replace(
+            '%bundle_service_id%',
+            str_replace('%bundle_name%', $this->id, BundleInterface::BUNDLE_SERVICE_ID_PATTERN),
+            BundleInterface::CONFIG_SERVICE_ID_PATTERN
+        ));
     }
 
     /**
@@ -186,9 +170,9 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getConfigDirectory()
     {
-        $directory = $this->base_directory.DIRECTORY_SEPARATOR.BundleInterface::CONFIG_DIRECTORY_NAME;
+        $directory = $this->baseDir.DIRECTORY_SEPARATOR.BundleInterface::CONFIG_DIRECTORY_NAME;
         if (false === is_dir($directory)) {
-            $directory = $this->base_directory.DIRECTORY_SEPARATOR.BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
+            $directory = $this->baseDir.DIRECTORY_SEPARATOR.BundleInterface::OLD_CONFIG_DIRECTORY_NAME;
         }
 
         return $directory;
@@ -388,23 +372,23 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     public function getExposedActionsMapping()
     {
-        return $this->exposed_actions;
+        return $this->exposedActions;
     }
 
     /**
      * Returns the associated callback if "controller name/action name" couple is valid
      *
-     * @param string $controller_name the controller name (ex.: BackBee\FrontController\FrontController => front)
-     * @param string $action_name     the action name (ex.:)
+     * @param string $controllerName the controller name (ex.: BackBee\FrontController\FrontController => front)
+     * @param string $actionName     the action name (ex.: FrontController::defaultAction => default)
      *
      * @return callable|null the callback if there is one associated to "controller name/action name" couple, else null
      */
-    public function getExposedActionCallback($controller_name, $action_name)
+    public function getExposedActionCallback($controllerName, $actionName)
     {
-        $unique_name = $controller_name.'_'.$action_name;
+        $uniqueName = $controllerName.'_'.$actionName;
 
-        return array_key_exists($unique_name, $this->exposed_actions_callbacks)
-            ? $this->exposed_actions_callbacks[$unique_name]
+        return array_key_exists($uniqueName, $this->exposedActionsCallbacks)
+            ? $this->exposedActionsCallbacks[$uniqueName]
             : null
         ;
     }
@@ -416,14 +400,14 @@ abstract class AbstractBaseBundle implements BundleInterface
     {
         if (true === $this->isEnabled()) {
             $container = $this->getApplication()->getContainer();
-            foreach ((array) $this->getProperty('exposed_actions') as $controller_id => $actions) {
-                if (false === $container->has($controller_id)) {
+            foreach ((array) $this->getProperty('exposed_actions') as $controllerId => $actions) {
+                if (false === $container->has($controllerId)) {
                     throw new \InvalidArgumentException(
-                        "Exposed controller with id `$controller_id` not found for ".$this->getId()
+                        "Exposed controller with id `$controllerId` not found for ".$this->getId()
                     );
                 }
 
-                $controller = $container->get($controller_id);
+                $controller = $container->get($controllerId);
                 $this->formatAndInjectExposedAction($controller, $actions);
             }
         }
@@ -437,24 +421,24 @@ abstract class AbstractBaseBundle implements BundleInterface
      */
     private function formatAndInjectExposedAction($controller, $actions)
     {
-        $controller_id = explode('\\', get_class($controller));
-        $controller_id = str_replace('controller', '', strtolower(array_pop(($controller_id))));
-        $this->exposed_actions[$controller_id] = array('actions' => array());
+        $controllerId = explode('\\', get_class($controller));
+        $controllerId = str_replace('controller', '', strtolower(array_pop(($controllerId))));
+        $this->exposedActions[$controllerId] = array('actions' => array());
 
         if ($controller instanceof BundleExposedControllerInterface) {
-            $this->exposed_actions[$controller_id]['label'] = $controller->getLabel();
-            $this->exposed_actions[$controller_id]['description'] = $controller->getDescription();
+            $this->exposedActions[$controllerId]['label'] = $controller->getLabel();
+            $this->exposedActions[$controllerId]['description'] = $controller->getDescription();
             array_unshift($actions, 'indexAction');
             $actions = array_unique($actions);
         }
 
         foreach ($actions as $action) {
             if (method_exists($controller, $action)) {
-                $action_id = str_replace('action', '', strtolower($action));
-                $unique_name = $controller_id.'_'.$action_id;
+                $actionId = str_replace('action', '', strtolower($action));
+                $uniqueName = $controllerId.'_'.$actionId;
 
-                $this->exposed_actions_callbacks[$unique_name] = array($controller, $action);
-                $this->exposed_actions[$controller_id]['actions'][] = $action_id;
+                $this->exposedActionsCallbacks[$uniqueName] = array($controller, $action);
+                $this->exposedActions[$controllerId]['actions'][] = $actionId;
             }
         }
     }
