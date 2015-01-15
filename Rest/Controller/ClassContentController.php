@@ -62,7 +62,7 @@ class ClassContentController extends ARestController
     {
         $category = $this->getCategoryManager()->getCategory($id);
         if (null === $category) {
-            throw new NotFoundHttpException("No classcontent category exists for id `$id`.");
+            throw new NotFoundHttpException("Classcontent's category `$id` not found.");
         }
 
         return $this->createJsonResponse($category);

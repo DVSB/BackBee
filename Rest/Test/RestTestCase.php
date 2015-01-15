@@ -50,7 +50,11 @@ class RestTestCase extends TestCase
      */
     protected static function requestPost($uri, array $data = [], $contentType = 'application/json', $sign = false)
     {
-        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'POST']);
+        $request = new Request([], $data, [], [], [], [
+            'REQUEST_URI'    => $uri,
+            'CONTENT_TYPE'   => $contentType,
+            'REQUEST_METHOD' => 'POST',
+        ]);
 
         if ($sign) {
             self::signRequest($request);
@@ -69,7 +73,11 @@ class RestTestCase extends TestCase
      */
     protected static function requestPut($uri, array $data = [], $contentType = 'application/json', $sign = false)
     {
-        $request = new Request([], $data, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PUT']);
+        $request = new Request([], $data, [], [], [], [
+            'REQUEST_URI'    => $uri,
+            'CONTENT_TYPE'   => $contentType,
+            'REQUEST_METHOD' => 'PUT'
+        ]);
 
         if ($sign) {
             self::signRequest($request);
@@ -88,7 +96,11 @@ class RestTestCase extends TestCase
      */
     protected static function requestPatch($uri, array $operations = [], $contentType = 'application/json', $sign = false)
     {
-        $request = new Request([], $operations, [], [], [], ['REQUEST_URI' => $uri, 'CONTENT_TYPE' => $contentType, 'REQUEST_METHOD' => 'PATCH']);
+        $request = new Request([], $operations, [], [], [], [
+            'REQUEST_URI' => $uri,
+            'CONTENT_TYPE' => $contentType,
+            'REQUEST_METHOD' => 'PATCH'
+        ]);
 
         if ($sign) {
             self::signRequest($request);

@@ -287,7 +287,10 @@ class AclController extends ARestController
             $securityIdentity = new UserSecurityIdentity($sid, 'BackBee\Security\Group');
 
             // convert values to booleans
-            $permissions = array_map('BackBee\Utils\String::toBoolean', $permissions);
+            $permissions = array_map(function ($val) {
+                return \BackBee\Utils\String::toBoolean((string) $val);
+            }, $permissions);
+
             // remove false values
             $permissions = array_filter($permissions);
             $permissions = array_keys($permissions);

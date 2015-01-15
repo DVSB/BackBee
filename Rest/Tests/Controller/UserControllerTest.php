@@ -405,7 +405,7 @@ class UserControllerTest extends RestTestCase
      * @param  BackBee\Security\User                     $user
      * @return self
      */
-    protected static function signRequest(Request $request, BackBee\Security\User $user = null)
+    protected static function signRequest(Request $request, User $user = null)
     {
         if (null === $user) {
             $user = $this->user;
