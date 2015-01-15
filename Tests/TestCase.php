@@ -59,15 +59,49 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $BackBee_autoloader = new AutoLoader();
 
         $BackBee_autoloader->setApplication($this->getBBApp())
-                ->register()
-                ->registerNamespace('BackBee\Bundle\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle', 'Tests')))
-                ->registerNamespace('BackBee\Bundle', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'bundle')))
-                ->registerNamespace('BackBee\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Fixtures')))
-                ->registerNamespace('BackBee\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'ClassContent', 'Repositories')))
-                ->registerNamespace('BackBee\Renderer\Helper', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Templates', 'helpers')))
-                ->registerNamespace('BackBee\Event\Listener', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Listeners')))
-                ->registerNamespace('BackBee\Services\Public', implode(DIRECTORY_SEPARATOR, array($this->repository_folder, 'Services', 'Public')))
-                ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, array($this->root_folder, 'vendor', 'doctrine', 'orm', 'tests', 'Doctrine', 'Tests')));
+            ->register()
+            ->registerNamespace('BackBee\Bundle\Tests', implode(DIRECTORY_SEPARATOR, [
+                $this->root_folder,
+                'bundle',
+                'Tests'
+            ]))
+            ->registerNamespace('BackBee\Bundle', implode(DIRECTORY_SEPARATOR, [
+                $this->root_folder,
+                'bundle'
+            ]))
+            ->registerNamespace('BackBee\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, [
+                $this->repository_folder,
+                'Fixtures'
+            ]))
+            ->registerNamespace('BackBee\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, [
+                $this->repository_folder,
+                'ClassContent',
+                'Repositories'
+            ]))
+            ->registerNamespace('BackBee\Renderer\Helper', implode(DIRECTORY_SEPARATOR, [
+                $this->repository_folder,
+                'Templates',
+                'helpers'
+            ]))
+            ->registerNamespace('BackBee\Event\Listener', implode(DIRECTORY_SEPARATOR, [
+                $this->repository_folder,
+                'Listeners'
+            ]))
+            ->registerNamespace('BackBee\Services\Public', implode(DIRECTORY_SEPARATOR, [
+                $this->repository_folder,
+                'Services',
+                'Public'
+            ]))
+            ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, [
+                $this->root_folder,
+                'vendor',
+                'doctrine',
+                'orm',
+                'tests',
+                'Doctrine',
+                'Tests'
+            ]))
+        ;
     }
 
     public function getClassContentDir()
@@ -87,10 +121,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function load($namespace)
     {
         try {
-            if (!file_exists($this->root_folder.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $namespace).'.php')) {
+            $file = $this->root_folder.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $namespace).'.php';
+            if (!file_exists($file)) {
                 throw new \Exception('BackBeeTestUnit could not find file associeted this namespace '.$namespace);
             } else {
-                include_once $this->root_folder.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $namespace).'.php';
+                include_once $file;
             }
         } catch (\Exception $e) {
             echo $e->getMessage();
@@ -206,6 +241,17 @@ class TestCase extends \PHPUnit_Framework_TestCase
         }
 
         return $this->bbapp;
+    }
+
+    /**
+     * Returns application
+     *
+     * @param  array|null $config
+     * @return BackBee\IApplication
+     */
+    public function getApplication(array $config = null)
+    {
+        return $this->getBBApp($config);
     }
 
     public function getContainer()

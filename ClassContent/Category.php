@@ -43,7 +43,7 @@ class Category implements \JsonSerializable
      * Contains many \stdClass which hold informations (label, description, type, visible) about blocks
      * @var array
      */
-    private $blocks;
+    private $blocks = [];
 
     /**
      * Category's contructor

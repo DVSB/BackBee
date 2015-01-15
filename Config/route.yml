@@ -287,7 +287,7 @@ bb.rest.layout.delete:
         _method: DELETE
 
 bb.rest.classcontent.category.get:
-    pattern: /rest/{version}/classcontent/category/{id}
+    pattern: /rest/{version}/classcontent-category/{id}
     defaults:
         _action: getCategoryAction
         _controller: BackBee\Rest\Controller\ClassContentController
@@ -295,7 +295,7 @@ bb.rest.classcontent.category.get:
         _method: GET
 
 bb.rest.classcontent.category.get_collection:
-    pattern: /rest/{version}/classcontent/category
+    pattern: /rest/{version}/classcontent-category
     defaults:
         _action: getCategoryCollectionAction
         _controller: BackBee\Rest\Controller\ClassContentController
