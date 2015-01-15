@@ -23,6 +23,10 @@
 
 namespace BackBee\Rest\Controller;
 
+use BackBee\Controller\Controller;
+use BackBee\Rest\Exception\ValidationException;
+use BackBee\Rest\Formatter\FormatterInterface;
+use BackBee\Serializer\SerializerBuilder;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,11 +36,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
-
-use BackBee\Controller\Controller;
-use BackBee\Rest\Exception\ValidationException;
-use BackBee\Rest\Formatter\FormatterInterface;
-use BackBee\Serializer\SerializerBuilder;
 
 /**
  * Abstract class for an api controller

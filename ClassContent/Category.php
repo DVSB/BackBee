@@ -81,7 +81,7 @@ class Category implements \JsonSerializable
         $block->label = $content->getProperty('name');
         $block->description = $content->getProperty('description');
         $block->type = str_replace(
-            array('BackBee\ClassContent\\', NAMESPACE_SEPARATOR),
+            array(AContent::CLASSCONTENT_BASE_NAMESPACE, NAMESPACE_SEPARATOR),
             array('', '/'),
             get_class($content)
         );

@@ -23,6 +23,8 @@
 
 namespace BackBee\Rest\Controller;
 
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Exception\ValidationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
@@ -30,9 +32,6 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
-
-use BackBee\Rest\Controller\Annotations as Rest;
-use BackBee\Rest\Exception\ValidationException;
 
 /**
  * User Controller
@@ -65,7 +64,7 @@ class AclController extends ARestController
      */
     public function getEntryCollectionAction(Request $request)
     {
-        $aclProvider = $this->getBBapp()->getSecurityContext()->getACLProvider();
+        $aclProvider = $this->getApplication()->getSecurityContext()->getACLProvider();
 
         /* @var $aclProvider \Symfony\Component\Security\Acl\Dbal\AclProvider */
         $aclProvider->findAcls();
@@ -76,10 +75,16 @@ class AclController extends ARestController
         ;
 
         if ($request->request->get('site_uid')) {
-            $site = $this->getApplication()->getEntityManager()->getRepository('BackBee\Site\Site')->find($request->request->get('site_uid'));
+            $site = $this->getEntityManager()->getRepository('BackBee\Site\Site')
+                ->find($request->request->get('site_uid'))
+            ;
 
             if (!$site) {
-                throw $this->createValidationException('site_uid', $request->request->get('site_uid'), 'Site is not valid: '.$request->request->get('site_uid'));
+                throw $this->createValidationException(
+                    'site_uid',
+                    $request->request->get('site_uid'),
+                    'Site is not valid: '.$request->request->get('site_uid')
+                );
             }
 
             $qb->leftJoin('g._site', 's')

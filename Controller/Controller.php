@@ -23,6 +23,7 @@
 
 namespace BackBee\Controller;
 
+use BackBee\IApplication;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
@@ -32,8 +33,6 @@ use Symfony\Component\Form\Forms;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validation;
-
-use BackBee\IApplication;
 
 /**
  * Base Controler
@@ -46,11 +45,15 @@ use BackBee\IApplication;
 class Controller implements ContainerAwareInterface
 {
     /**
-     * Current BackBee application
-     * @var \BackBee\BBApplication
+     * Current application
+     * @var \BackBee\IApplication
      */
-    protected $_application;
+    protected $application;
 
+    /**
+     * Current application's DIC
+     * @var BackBee\DependencyInjection\ContainerInterface
+     */
     protected $container;
 
     /**
@@ -62,13 +65,13 @@ class Controller implements ContainerAwareInterface
     public function __construct(IApplication $application = null)
     {
         if (null !== $application) {
-            $this->_application = $application;
+            $this->application = $application;
             $this->container = $application->getContainer();
         }
     }
 
     /**
-     * Returns current BackBee application
+     * Returns current application
      *
      * @access public
      * @return \BackBee\IApplication
@@ -78,18 +81,22 @@ class Controller implements ContainerAwareInterface
         return $this->container->get('bbapp');
     }
 
+    /**
+     * Application's dependency injection container setters
+     *
+     * @param ContainerInterface|null $container
+     */
     public function setContainer(ContainerInterface $container = null)
     {
         $this->container = $container;
-
-        $this->_application = $this->container->get('bbapp');
+        $this->application = null !== $container ? $this->container->get('bbapp') : null;
     }
 
     /**
      * Returns the application's DIC
      *
      * @access public
-     * @return ContainerBuilder
+     * @return ContainerInterface
      */
     public function getContainer()
     {
@@ -104,7 +111,7 @@ class Controller implements ContainerAwareInterface
      */
     public function getRequest()
     {
-        return $this->_application->getRequest();
+        return $this->application->getRequest();
     }
 
     /**
@@ -113,7 +120,7 @@ class Controller implements ContainerAwareInterface
      */
     public function getEntityManager()
     {
-        return $this->_application->getEntityManager();
+        return $this->application->getEntityManager();
     }
 
     /**
@@ -127,7 +134,8 @@ class Controller implements ContainerAwareInterface
         $formFactory = Forms::createFormFactoryBuilder()
             ->addExtension(new ValidatorExtension($validator))
             ->addExtension(new HttpFoundationExtension())
-            ->getFormFactory();
+            ->getFormFactory()
+        ;
 
         return $formFactory->createBuilder('form', $data);
     }
@@ -184,7 +192,7 @@ class Controller implements ContainerAwareInterface
      */
     public function getValidator()
     {
-        return $this->_application->getValidator();
+        return $this->application->getValidator();
     }
 
     /**
