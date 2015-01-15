@@ -23,11 +23,10 @@
 
 namespace BackBee\Rest\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-
 use BackBee\Controller\Controller;
 use BackBee\Security\Encoder\RequestSignatureEncoder;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Test api key controller

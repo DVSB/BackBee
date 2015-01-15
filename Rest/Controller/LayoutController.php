@@ -23,11 +23,10 @@
 
 namespace BackBee\Rest\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Site\Layout;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @category    BackBee
