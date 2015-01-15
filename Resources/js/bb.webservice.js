@@ -1,4 +1,5 @@
-var bb = (bb) ? bb : {};
+//@ sourceURL=ressources/js/bb.webservice.js
+//var bb = (bb) ? bb : {};
 
 /*Webservice cache Manager
  *
@@ -202,16 +203,12 @@ bb.jquery.extend(bb.webservice, {
             },
             
             success: function(json) {
-                
-                if(useCache){
-                    /*save only if the request return no error*/
-                    if(!json.error){
-                        _that.wsCacheManager.save(bb.jquery.md5(data),json,cacheTags);
-                    }
+                /*save in cache only if the request return no error*/
+                if(!json.error){
+                    _that.wsCacheManager.save(bb.jquery.md5(data),json,cacheTags);
                 }
                 _that._requestSuccess.call(_that, json, options.success, options.error);
             }
-            
            
         });
     }
