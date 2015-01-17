@@ -1,3 +1,4 @@
+//@ sourceURL=ressources/js/FrontApplicationy.js
 /* 
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -713,12 +714,27 @@ bb.frontApplication = (function($,gExport){
                 layoutToolsbar.on("saveLayout",function(){
                     var savedTemplate = self.layoutManager.saveTemplate();
                     var editMode = (-1 != savedTemplate.uid.indexOf('Layout_')) ? "creation" : "edit";
+                    var siteId = _settings.siteId;
                     self.layoutWebservice.request("putTemplate",{
                         params : {
                             data: savedTemplate,
                             saveAsModel : false //enregistrer comme model
                         },
                         success :function(response){
+                            // refresh template list in cache also
+                            self.layoutWebservice.request("getLayoutsFromSite",{
+                                useCache: false,
+                                cacheTags: ["userSession"],
+                                params :{
+                                    siteId:siteId
+                                },
+                                success : function(response){
+                                    self.layoutToolsbar.setAppTemplates(response.result, null);
+                                    if (bb.jquery('#bb5-dialog-treeview')) {
+                                    	bb.jquery('#bb5-dialog-treeview').bbPageBrowser('getContext').layouts = response.result;
+                                    }
+                                }
+                            });
                             self.layoutToolsbar.handleUserTemplateAction(response.result,editMode);
                         },
                         error :function(response){

@@ -827,7 +827,7 @@ abstract class ARenderer implements IRenderer
         $layoutfile = $this->_getLayoutFile($layout);
         File::resolveFilepath($layoutfile, null, array('include_path' => $this->_layoutdir));
 
-        if (false === file_exists($layoutfile)) {
+        if (false === file_exists($layoutfile) && 1 < count($this->_layoutdir)) {
             File::resolveFilepath($layoutfile, null, array('base_dir' => $this->_layoutdir[1]));
         }
 
