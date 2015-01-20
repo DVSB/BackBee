@@ -477,7 +477,7 @@ class ClassContentController extends ARestController
         $queryParamsKey = array_keys($this->getRequest()->query->all());
         $format = ($collection = array_intersect($validFormats, $queryParamsKey))
             ? array_shift($collection)
-            : AClassContent::JSON_DEFAULT_FORMAT
+            : $validFormats[AClassContent::JSON_DEFAULT_FORMAT]
         ;
 
         return AClassContent::$jsonFormats[$format];
