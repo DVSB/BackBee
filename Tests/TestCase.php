@@ -181,6 +181,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function initDb($bbapp)
     {
         $em = $bbapp->getContainer()->get('em');
+
         $em->getConnection()->getConfiguration()->setSQLLogger(null);
         $entityFinder = new EntityFinder($bbapp->getBBDir());
 
@@ -206,7 +207,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         }
 
         $metadata = $em->getMetadataFactory()->getAllMetadata();
+
         $schema = new SchemaTool($em);
+        $schema->dropDatabase();
         $schema->createSchema($metadata);
     }
 

@@ -46,7 +46,7 @@ class AnnotationDriverTest extends TestCase
     {
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces([
-            'Symfony\Component\Validator\Constraint' => $this->getBBApp()->getVendorDir().'/symfony/symfony/src/',
+            'Symfony\Component\Validator\Constraint' => $this->getBBApp()->getVendorDir().'/symfony/validator/',
             'JMS\Serializer\Annotation' => $this->getBBApp()->getVendorDir().'/jms/serializer/src/',
             'BackBee' => $this->getBBApp()->getBaseDir(),
         ]);

@@ -69,7 +69,7 @@ class BodyListenerTest extends TestCase
     }
 
     /**
-     * @expectedException \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
+     * @expectedException \Symfony\Component\Serializer\Exception\UnexpectedValueException
      *
      * @covers ::onRequest
      */
