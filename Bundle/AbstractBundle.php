@@ -30,14 +30,14 @@ use BackBee\Routing\RouteCollection;
 use BackBee\Security\Acl\Domain\IObjectIdentifiable;
 
 /**
- * Abstract base class for BackBee's bundle
+ * Abstract class for BackBee's bundle
  *
  * @category    BackBee
  * @package     BackBee\Bundle
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-abstract class AbstractBaseBundle implements BundleInterface
+abstract class AbstractBundle implements BundleInterface
 {
     /**
      * Application this bundle belongs to
