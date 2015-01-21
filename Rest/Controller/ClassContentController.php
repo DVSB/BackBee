@@ -204,7 +204,8 @@ class ClassContentController extends ARestController
                 ],
                 '',
                 false
-            )
+            ),
+            'BB-RESOURCE-UID' => $content->getUid(),
         ]);
     }
 
