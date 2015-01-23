@@ -23,16 +23,15 @@
 
 namespace BackBee\ClassContent\Repository;
 
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\ResultSetMapping;
-
 use BackBee\BBApplication;
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Util\Doctrine\SettablePaginator;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * AClassContent repository
@@ -939,5 +938,26 @@ class ClassContentRepository extends EntityRepository
             ->executeQuery($sql, array('content_uids' => implode(', ', $content_uids)))
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
+    }
+
+    /**
+     * Returns classcontent if couple (type;uid) is valid
+     *
+     * @param string $type short namespace of a classcontent
+     *                     (full: BackBee\ClassContent\Block\paragraph => short: Block/paragraph)
+     * @param string $uid
+     *
+     * @return AClassContent
+     */
+    public function findOneByTypeAndUid($type, $uid)
+    {
+        $content = null;
+        $classname = AClassContent::getClassnameByContentType($type);
+
+        if (null === $content = $this->findOneBy(['_uid' => $uid])) {
+            throw new \InvalidArgumentException("No `$classname` exists with uid `$uid`.");
+        }
+
+        return $content;
     }
 }

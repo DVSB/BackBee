@@ -122,7 +122,7 @@ class ClassContentController extends ARestController
      */
     public function getCollectionByTypeAction($type, $start, $count)
     {
-        $classname = $this->getClassnameByType($type);
+        $classname = AClassContent::getClassnameByContentType($type);
         $contents = $this->findContentsByCriterias((array) $classname, $start, $count);
         $response = $this->createJsonResponse($this->formatClassContentCollection($contents));
 
@@ -180,7 +180,7 @@ class ClassContentController extends ARestController
      */
     public function postAction($type, Request $request)
     {
-        $classname = $this->getClassnameByType($type);
+        $classname = AClassContent::getClassnameByContentType($type);
         $content = new $classname();
 
         $em = $this->getEntityManager();
@@ -275,7 +275,7 @@ class ClassContentController extends ARestController
     private function getClassContentByTypeAndUid($type, $uid)
     {
         $content = null;
-        $classname = $this->getClassnameByType($type);
+        $classname = AClassContent::getClassnameByContentType($type);
 
         try {
             $content = $this->getEntityManager()->find($classname, $uid);

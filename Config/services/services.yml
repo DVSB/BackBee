@@ -62,6 +62,7 @@ parameters:
     bbapp.config.persistor.class: BackBee\Config\Persistor
     bbapp.bundle.loader.class: BackBee\Bundle\BundleLoader
     bbapp.classcontent.category_manager.class: BackBee\ClassContent\CategoryManager
+    bbapp.classcontent.manager.class: BackBee\ClassContent\ClassContentManager
 
 services:
 
@@ -159,6 +160,10 @@ services:
 
     classcontent.category_manager:
         class:      %bbapp.classcontent.category_manager.class%
+        arguments: [@bbapp]
+
+    classcontent.manager:
+        class:      %bbapp.classcontent.manager.class%
         arguments: [@bbapp]
 
     analytics:

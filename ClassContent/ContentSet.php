@@ -350,7 +350,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             return $this->getDraft()->push($var);
         }
 
-        if ($this->_isAccepted($var)) {
+        if ($this->isAccepted($var)) {
             if (
                     (!$this->_maxentry && !$this->_minentry) ||
                     (is_array($this->_maxentry) && is_array($this->_minentry) && 0 == count($this->_maxentry)) ||
@@ -417,7 +417,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             return $this->getDraft()->unshift($var);
         }
 
-        if ($this->_isAccepted($var)) {
+        if ($this->isAccepted($var)) {
             if (!$this->_maxentry || $this->_maxentry > $this->count()) {
                 array_unshift($this->_data, array($this->_getType($var) => $var->getUid()));
                 if ($this->_subcontent->add($var)) {

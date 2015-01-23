@@ -88,8 +88,6 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
     /**
      * test setProperty
-     *
-     * @coverage \BackBee\ClassContent\AContent::_isAccepted
      */
     public function testAcceptedType()
     {

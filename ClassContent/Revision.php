@@ -467,7 +467,7 @@ class Revision extends AContent implements \Iterator, \Countable
             throw new ClassContentException(sprintf('Can not push in a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
         }
 
-        if ($this->_isAccepted($var)) {
+        if ($this->isAccepted($var)) {
             $this->_data[] = array(get_class($var) => $var->getUid());
         }
 
@@ -512,7 +512,7 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function unshift(AClassContent $var)
     {
-        if ($this->_isAccepted($var)) {
+        if ($this->isAccepted($var)) {
             if (!$this->_maxentry || $this->_maxentry > $this->count()) {
                 array_unshift($this->_data, array($this->_getType($var) => $var->getUid()));
             }

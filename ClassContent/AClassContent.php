@@ -261,7 +261,7 @@ abstract class AClassContent extends AContent
             return $this->_properties;
         }
 
-        if (true === isset($this->_properties[$var])) {
+        if (isset($this->_properties[$var])) {
             return $this->_properties[$var];
         }
 
@@ -406,13 +406,15 @@ abstract class AClassContent extends AContent
         $clone->_parameters = $this->_parameters;
         $clone->_mainnode = $this->_mainnode;
 
-        if (null !== $origin_page
-                && true === is_array($origin_page->cloning_datas)
-                && true === array_key_exists('contents', $origin_page->cloning_datas)) {
+        if (
+            null !== $origin_page
+            && is_array($origin_page->cloning_datas)
+            && array_key_exists('contents', $origin_page->cloning_datas)
+        ) {
             $origin_page->cloning_datas['contents'][$this->getUid()] = $clone;
         }
 
-        if (false === ($this instanceof ContentSet)) {
+        if (!($this instanceof ContentSet)) {
             foreach ($this->_data as $key => $values) {
                 foreach ($values as $type => &$value) {
                     if (is_array($value)) {
@@ -465,17 +467,17 @@ abstract class AClassContent extends AContent
         if (null !== $options) {
             $options = (array) $options;
 
-            if (true === array_key_exists('label', $options)) {
+            if (array_key_exists('label', $options)) {
                 $this->_label = $options['label'];
             }
 
-            if (true === array_key_exists('parameters', $options)) {
+            if (array_key_exists('parameters', $options)) {
                 foreach ($options['parameters'] as $key => $param) {
                     $this->_defineParam($key, $param['type'], $param['options']);
                 }
             }
 
-            if (true === array_key_exists('default', $options)) {
+            if (array_key_exists('default', $options)) {
                 $options['default'] = (array) $options['default'];
                 foreach ($options['default'] as $var => $value) {
                     $this->_data[$var] = array();
@@ -513,7 +515,7 @@ abstract class AClassContent extends AContent
      */
     protected function _defineProperty($var, $value)
     {
-        if (false === array_key_exists($var, $this->_properties)) {
+        if (!array_key_exists($var, $this->_properties)) {
             $this->_properties[$var] = $value;
         }
 
@@ -534,13 +536,13 @@ abstract class AClassContent extends AContent
             $this->_addAcceptedType($type, $var);
         }
 
-        if (false === array_key_exists($var, $this->_data)) {
+        if (!array_key_exists($var, $this->_data)) {
             $this->_data[$var] = array();
             $this->_maxentry[$var] = (!is_null($options) && isset($options['maxentry'])) ? $options['maxentry'] : 1;
             $this->_minentry[$var] = (!is_null($options) && isset($options['minentry'])) ? $options['minentry'] : 0;
 
             $values = array();
-            if (true === is_array($options) && true === array_key_exists('default', $options)) {
+            if (is_array($options) && array_key_exists('default', $options)) {
                 $values = (array) $options['default'];
 
                 if ('scalar' !== $type) {
@@ -569,13 +571,13 @@ abstract class AClassContent extends AContent
     protected function _defineParam($var, $type = 'scalar', $options = null)
     {
         $values = array();
-        if (true === is_array($options) && true === array_key_exists('default', $options)) {
+        if (is_array($options) && array_key_exists('default', $options)) {
             $values[$type] = $options['default'];
         } else {
             $values[$type] = null;
         }
 
-        if (false === array_key_exists($var, $this->_parameters)) {
+        if (!array_key_exists($var, $this->_parameters)) {
             $this->_parameters[$var] = $values;
         }
 
@@ -596,14 +598,14 @@ abstract class AClassContent extends AContent
             return $this;
         }
 
-        if (false === array_key_exists($var, $this->_accept)) {
+        if (!array_key_exists($var, $this->_accept)) {
             $this->_accept[$var] = array();
         }
 
         $types = (array) $type;
         foreach ($types as $type) {
             $type = (NAMESPACE_SEPARATOR === substr($type, 0, 1)) ? substr($type, 1) : $type;
-            if (false === in_array($type, $this->_accept[$var])) {
+            if (!in_array($type, $this->_accept[$var])) {
                 $this->_accept[$var][] = $type;
             }
         }
@@ -618,7 +620,7 @@ abstract class AClassContent extends AContent
      */
     protected function _addSubcontent(AClassContent $value)
     {
-        if (false === $this->_subcontent->indexOf($value)) {
+        if (!$this->_subcontent->indexOf($value)) {
             $this->_subcontent->add($value);
         }
 
@@ -633,7 +635,7 @@ abstract class AClassContent extends AContent
      */
     protected function _removeSubcontent($var)
     {
-        if (true === $this->acceptSubcontent($var)) {
+        if ($this->acceptSubcontent($var)) {
             foreach ($this->_data[$var] as $type => $value) {
                 if (is_array($value)) {
                     $keys = array_keys($value);
@@ -1043,7 +1045,7 @@ abstract class AClassContent extends AContent
      */
     protected function _getContentByDataValue($type, $value)
     {
-        if (true === class_exists($type)) {
+        if (class_exists($type)) {
             $index = 0;
             foreach ($this->_subcontent as $subcontent) {
                 $this->_subcontentmap[$subcontent->getUid()] = $index++;
@@ -1085,18 +1087,16 @@ abstract class AClassContent extends AContent
     {
         $data = parent::jsonSerialize($format);
 
+        if (self::JSON_INFO_FORMAT === $format) {
+            return $data;
+        }
+
         if (!isset($data['label'])) {
             $data['label'] = $this->getProperty('name');
         }
 
         if (self::JSON_CONCISE_FORMAT === $format) {
             $data['image'] = $this->getImageName();
-
-            return $data;
-        }
-
-        if (self::JSON_INFO_FORMAT === $format) {
-            unset($data['label']);
 
             return $data;
         }

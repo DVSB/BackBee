@@ -134,11 +134,6 @@ class MockContent extends AClassContent implements IMock
         return parent::_defineParam($var, $type, $options);
     }
 
-    public function isAccepted($value, $var = null)
-    {
-        return parent::_isAccepted($value, $var);
-    }
-
     public function getImageName()
     {
         return 'foobar';
