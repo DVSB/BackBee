@@ -32,7 +32,7 @@ use BackBee\Cache\CacheValidator;
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\Event\Event;
-use BackBee\IApplication as ApplicationInterface;
+use BackBee\ApplicationInterface;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\ARenderer;
 use BackBee\Renderer\Event\RendererEvent;

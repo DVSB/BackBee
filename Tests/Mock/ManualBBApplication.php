@@ -44,7 +44,7 @@ namespace BackBee\Tests\Mock;
 
 use BackBee\BBApplication;
 use BackBee\Console\Console;
-use BackBee\IApplication as ApplicationInterface;
+use BackBee\ApplicationInterface;
 use BackBee\Site\Site;
 
 /**

@@ -46,7 +46,7 @@ use BackBee\Config\Exception\PersistorListNotFoundException;
 use BackBee\Config\Persistor\PersistorInterface;
 use BackBee\Exception\BBException;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\IApplication as ApplicationInterface;
+use BackBee\ApplicationInterface;
 use BackBee\Utils\Collection\Collection;
 
 /**

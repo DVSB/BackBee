@@ -43,7 +43,7 @@ namespace BackBee\Config\Persistor;
  */
 
 use BackBee\Config\Config;
-use BackBee\IApplication as ApplicationInterface;
+use BackBee\ApplicationInterface;
 
 /**
  *

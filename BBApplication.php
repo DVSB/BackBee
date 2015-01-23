@@ -52,7 +52,7 @@ use BackBee\Utils\File\File;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class BBApplication implements IApplication, DumpableServiceInterface, DumpableServiceProxyInterface
+class BBApplication implements ApplicationInterface, DumpableServiceInterface, DumpableServiceProxyInterface
 {
     const VERSION = '0.12.0-DEV';
 

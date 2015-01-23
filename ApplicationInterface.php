@@ -53,7 +53,7 @@ use BackBee\Site\Site;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
-interface IApplication
+interface ApplicationInterface
 {
     const DEFAULT_CONTEXT = 'default';
     const DEFAULT_ENVIRONMENT = '';

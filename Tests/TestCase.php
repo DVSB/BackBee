@@ -247,7 +247,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * Returns application
      *
      * @param  array|null $config
-     * @return BackBee\IApplication
+     * @return BackBee\ApplicationInterface
      */
     public function getApplication(array $config = null)
     {

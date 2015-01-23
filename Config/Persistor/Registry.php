@@ -44,7 +44,7 @@ namespace BackBee\Config\Persistor;
 
 use BackBee\Bundle\Registry as RegistryEntity;
 use BackBee\Config\Config;
-use BackBee\IApplication as ApplicationInterface;
+use BackBee\ApplicationInterface;
 
 /**
  *

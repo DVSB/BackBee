@@ -25,7 +25,7 @@ namespace BackBee\Bundle;
 
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
-use BackBee\IApplication as ApplicationInterface;
+use BackBee\ApplicationInterface;
 use BackBee\Routing\RouteCollection;
 use BackBee\Security\Acl\Domain\IObjectIdentifiable;
 
@@ -42,7 +42,7 @@ abstract class AbstractBundle implements BundleInterface
     /**
      * Application this bundle belongs to
      *
-     * @var BackBee\IApplication
+     * @var BackBee\ApplicationInterface
      */
     private $application;
 
