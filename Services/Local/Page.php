@@ -482,8 +482,7 @@ class Page extends AbstractServiceLocal
             $parent = $this->_repo->find(strval($move_node_uid));
         }
 
-        $is_final = $parent->getLayout()->getParam('final');
-        if (true === $is_final) {
+        if (null !== $parent && true === $parent->getLayout()->getParam('final')) {
             if (null === $parent->getParent()) {
                 throw new ServicesException('Impossible to create or move a child page for this layout.');
             }
