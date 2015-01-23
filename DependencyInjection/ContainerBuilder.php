@@ -26,15 +26,15 @@ namespace BackBee\DependencyInjection;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
+use BackBee\ApplicationInterface;
 use BackBee\DependencyInjection\Exception\ContainerAlreadyExistsException;
 use BackBee\DependencyInjection\Exception\MissingBootstrapParametersException;
 use BackBee\DependencyInjection\Util\ServiceLoader;
-use BackBee\IApplication;
 use BackBee\Util\Resolver\ConfigDirectory;
 
 /**
  * This class build and hydrate a BackBee\DependencyInjection\Container for any class
- * which implements BackBee\IApplication; it will first hydrate container with application
+ * which implements BackBee\ApplicationInterface; it will first hydrate container with application
  * default value (data directory, repository directory, cache directory, etc.);
  *
  * ContainerBuilder also manage container dump to not reload and parse every xml and yml.
@@ -74,7 +74,7 @@ class ContainerBuilder
     /**
      * Current application which we are building a container for
      *
-     * @var BackBee\IApplication
+     * @var BackBee\ApplicationInterface
      */
     private $application;
 
@@ -109,9 +109,9 @@ class ContainerBuilder
     /**
      * ContainerBuilder's constructor;
      *
-     * @param BackBee\IApplication $application the application we want to build a container for
+     * @param BackBee\ApplicationInterface $application the application we want to build a container for
      */
-    public function __construct(IApplication $application)
+    public function __construct(ApplicationInterface $application)
     {
         $this->application = $application;
         $this->repository_directory = $application->getBaseRepository();
@@ -229,7 +229,7 @@ class ContainerBuilder
 
         // set default cache directory and cache autogenerate value
         $cache_directory = $this->application->getBaseDir().DIRECTORY_SEPARATOR.self::CACHE_FOLDER_NAME;
-        if (IApplication::DEFAULT_ENVIRONMENT !== $this->environment) {
+        if (ApplicationInterface::DEFAULT_ENVIRONMENT !== $this->environment) {
             $cache_directory .= DIRECTORY_SEPARATOR.$this->environment;
         }
 

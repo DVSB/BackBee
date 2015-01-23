@@ -44,8 +44,8 @@ namespace BackBee\Config\Persistor;
 
 use Symfony\Component\Yaml\Yaml;
 
+use BackBee\ApplicationInterface;
 use BackBee\Config\Config;
-use BackBee\IApplication as ApplicationInterface;
 
 /**
  *

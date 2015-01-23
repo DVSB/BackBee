@@ -27,7 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 
-use BackBee\IApplication;
+use BackBee\ApplicationInterface;
 
 /**
  * This implementation uses the '_controller' request attribute to determine
@@ -43,16 +43,16 @@ class ControllerResolver implements ControllerResolverInterface
 {
     /**
      *
-     * @var IApplication
+     * @var ApplicationInterface
      */
     protected $bbapp;
 
     /**
      * Constructor
      *
-     * @param \BackBee\IApplication $bbapp
+     * @param \BackBee\ApplicationInterface $bbapp
      */
-    public function __construct(IApplication $bbapp = null)
+    public function __construct(ApplicationInterface $bbapp = null)
     {
         if (null !== $bbapp) {
             $this->bbapp = $bbapp;

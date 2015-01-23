@@ -23,12 +23,12 @@
 
 namespace BackBee\ClassContent;
 
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Renderer\IRenderable;
 use BackBee\Security\Acl\Domain\IObjectIdentifiable;
 use BackBee\Util\Parameter;
-use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Abstract class for every content and its revisions in BackBee

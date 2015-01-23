@@ -51,7 +51,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
     private $persistor;
 
     /**
-     * @var BackBee\IApplication
+     * @var BackBee\ApplicationInterface
      */
     private $application;
 

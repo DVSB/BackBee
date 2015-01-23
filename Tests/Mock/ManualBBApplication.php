@@ -42,9 +42,9 @@ namespace BackBee\Tests\Mock;
  * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use BackBee\ApplicationInterface;
 use BackBee\BBApplication;
 use BackBee\Console\Console;
-use BackBee\IApplication as ApplicationInterface;
 use BackBee\Site\Site;
 
 /**

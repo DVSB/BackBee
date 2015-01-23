@@ -23,14 +23,15 @@
 
 namespace BackBee\Rest\Controller;
 
-use BackBee\Rest\Controller\Annotations as Rest;
-use BackBee\Security\User;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
+
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Security\User;
 
 /**
  * User Controller

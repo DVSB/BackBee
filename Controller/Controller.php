@@ -23,7 +23,6 @@
 
 namespace BackBee\Controller;
 
-use BackBee\IApplication;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
@@ -33,6 +32,8 @@ use Symfony\Component\Form\Forms;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validation;
+
+use BackBee\ApplicationInterface;
 
 /**
  * Base Controler
@@ -46,7 +47,7 @@ class Controller implements ContainerAwareInterface
 {
     /**
      * Current application
-     * @var \BackBee\IApplication
+     * @var \BackBee\ApplicationInterface
      */
     protected $application;
 
@@ -60,9 +61,9 @@ class Controller implements ContainerAwareInterface
      * Class constructor
      *
      * @access public
-     * @param IApplication $application The current BBapplication
+     * @param ApplicationInterface $application The current BBapplication
      */
-    public function __construct(IApplication $application = null)
+    public function __construct(ApplicationInterface $application = null)
     {
         if (null !== $application) {
             $this->application = $application;
@@ -74,7 +75,7 @@ class Controller implements ContainerAwareInterface
      * Returns current application
      *
      * @access public
-     * @return \BackBee\IApplication
+     * @return \BackBee\ApplicationInterface
      */
     public function getApplication()
     {

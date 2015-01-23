@@ -23,10 +23,11 @@
 
 namespace BackBee\ClassContent;
 
-use BackBee\ClassContent\Exception\ClassContentException;
-use BackBee\NestedNode\Page;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Util\ClassUtils;
+
+use BackBee\ClassContent\Exception\ClassContentException;
+use BackBee\NestedNode\Page;
 
 /**
  * Abstract class for content object in BackBee

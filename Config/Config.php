@@ -97,7 +97,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      * Application's environment
      * @var string
      */
-    protected $environment = \BackBee\IApplication::DEFAULT_ENVIRONMENT;
+    protected $environment = \BackBee\ApplicationInterface::DEFAULT_ENVIRONMENT;
 
     /**
      * Is debug mode enabled

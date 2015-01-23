@@ -44,9 +44,9 @@ namespace BackBee\Config;
 
 use Doctrine\DBAL\DBALException;
 
+use BackBee\ApplicationInterface;
 use BackBee\Config\Exception\InvalidConfigTypeException;
 use BackBee\Event\Event;
-use BackBee\IApplication;
 use BackBee\Util\Resolver\BundleConfigDirectory;
 use BackBee\Util\Resolver\ConfigDirectory;
 
@@ -123,7 +123,7 @@ class Configurator
      *
      * @param boolean $override_config define if we should override config on extend()
      */
-    public function __construct(IApplication $application)
+    public function __construct(ApplicationInterface $application)
     {
         $this->application = $application;
         $this->bb_directory = $application->getBBDir();

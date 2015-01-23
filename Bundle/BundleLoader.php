@@ -23,13 +23,14 @@
 
 namespace BackBee\Bundle;
 
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
+
+use BackBee\ApplicationInterface;
 use BackBee\Config\Config;
 use BackBee\DependencyInjection\Util\ServiceLoader;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\IApplication;
 use BackBee\Util\Resolver\BundleConfigDirectory;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * BundleLoader loads and injects bundles into application and its dependency injection container
@@ -52,7 +53,7 @@ class BundleLoader
     const ROUTE_RECIPE_KEY = 'route';
 
     /**
-     * @var BackBee\IApplication
+     * @var BackBee\ApplicationInterface
      */
     private $application;
 
@@ -72,9 +73,9 @@ class BundleLoader
     private $reflectionClasses;
 
     /**
-     * @param IApplication $application
+     * @param ApplicationInterface $application
      */
-    public function __construct(IApplication $application)
+    public function __construct(ApplicationInterface $application)
     {
         $this->application = $application;
         $this->container = $application->getContainer();

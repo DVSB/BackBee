@@ -54,8 +54,8 @@ interface DirectoryInterface
 {
     /**
      * [getDirectories description]
-     * @param  BackBeeIApplication $application [description]
+     * @param  BackBeeApplicationInterface $application [description]
      * @return [type]              [description]
      */
-    public static function getDirectories(\BackBee\IApplication $application);
+    public static function getDirectories(\BackBee\ApplicationInterface $application);
 }

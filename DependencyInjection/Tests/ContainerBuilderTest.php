@@ -47,7 +47,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * base application
      *
-     * @var BackBee\IApplication
+     * @var BackBee\ApplicationInterface
      */
     private $application;
 

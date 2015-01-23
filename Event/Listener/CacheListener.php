@@ -26,13 +26,13 @@ namespace BackBee\Event\Listener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
+use BackBee\ApplicationInterface;
 use BackBee\Cache\AExtendedCache;
 use BackBee\Cache\CacheIdentifierGenerator;
 use BackBee\Cache\CacheValidator;
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\Event\Event;
-use BackBee\IApplication as ApplicationInterface;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\ARenderer;
 use BackBee\Renderer\Event\RendererEvent;

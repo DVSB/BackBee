@@ -23,17 +23,18 @@
 
 namespace BackBee\Rest\Controller;
 
-use BackBee\AutoLoader\Exception\ClassNotFoundException;
-use BackBee\ClassContent\AClassContent;
-use BackBee\Rest\Controller\Annotations as Rest;
-use BackBee\Routing\RouteCollection;
-use BackBee\Utils\File\File;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
+
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
+use BackBee\ClassContent\AClassContent;
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Routing\RouteCollection;
+use BackBee\Utils\File\File;
 
 /**
  * ClassContent API Controller
