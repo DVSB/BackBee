@@ -23,9 +23,9 @@
 
 namespace BackBee\Config\Tests\Persistor;
 
+use BackBee\ApplicationInterface;
 use BackBee\Config\Config;
 use BackBee\Config\Persistor\PersistorInterface;
-use BackBee\ApplicationInterface;
 
 /**
  * Fake persistor used for test

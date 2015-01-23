@@ -23,13 +23,14 @@
 
 namespace BackBee\Bundle;
 
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
+
+use BackBee\ApplicationInterface;
 use BackBee\Config\Config;
 use BackBee\DependencyInjection\Util\ServiceLoader;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\ApplicationInterface;
 use BackBee\Util\Resolver\BundleConfigDirectory;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * BundleLoader loads and injects bundles into application and its dependency injection container

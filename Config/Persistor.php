@@ -42,11 +42,11 @@ namespace BackBee\Config;
  * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use BackBee\ApplicationInterface;
 use BackBee\Config\Exception\PersistorListNotFoundException;
 use BackBee\Config\Persistor\PersistorInterface;
 use BackBee\Exception\BBException;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\ApplicationInterface;
 use BackBee\Utils\Collection\Collection;
 
 /**

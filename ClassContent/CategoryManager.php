@@ -23,8 +23,8 @@
 
 namespace BackBee\ClassContent;
 
-use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ApplicationInterface;
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\Utils\File\File;
 
 /**

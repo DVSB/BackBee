@@ -44,9 +44,9 @@ namespace BackBee\Config;
 
 use Doctrine\DBAL\DBALException;
 
+use BackBee\ApplicationInterface;
 use BackBee\Config\Exception\InvalidConfigTypeException;
 use BackBee\Event\Event;
-use BackBee\ApplicationInterface;
 use BackBee\Util\Resolver\BundleConfigDirectory;
 use BackBee\Util\Resolver\ConfigDirectory;
 

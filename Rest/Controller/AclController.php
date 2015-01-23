@@ -23,8 +23,6 @@
 
 namespace BackBee\Rest\Controller;
 
-use BackBee\Rest\Controller\Annotations as Rest;
-use BackBee\Rest\Exception\ValidationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
@@ -32,6 +30,9 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
+
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Exception\ValidationException;
 
 /**
  * User Controller

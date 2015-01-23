@@ -26,10 +26,10 @@ namespace BackBee\DependencyInjection;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
+use BackBee\ApplicationInterface;
 use BackBee\DependencyInjection\Exception\ContainerAlreadyExistsException;
 use BackBee\DependencyInjection\Exception\MissingBootstrapParametersException;
 use BackBee\DependencyInjection\Util\ServiceLoader;
-use BackBee\ApplicationInterface;
 use BackBee\Util\Resolver\ConfigDirectory;
 
 /**

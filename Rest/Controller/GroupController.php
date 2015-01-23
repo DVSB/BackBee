@@ -23,11 +23,12 @@
 
 namespace BackBee\Rest\Controller;
 
-use BackBee\Rest\Controller\Annotations as Rest;
-use BackBee\Security\Group;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
+
+use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Security\Group;
 
 /**
  * User Controller

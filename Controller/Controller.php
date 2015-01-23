@@ -23,7 +23,6 @@
 
 namespace BackBee\Controller;
 
-use BackBee\ApplicationInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
@@ -33,6 +32,8 @@ use Symfony\Component\Form\Forms;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validation;
+
+use BackBee\ApplicationInterface;
 
 /**
  * Base Controler

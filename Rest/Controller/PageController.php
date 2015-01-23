@@ -23,6 +23,13 @@
 
 namespace BackBee\Rest\Controller;
 
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Acl\Permission\MaskBuilder;
+use Symfony\Component\Validator\Constraints as Assert;
+
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AClassContent;
 use BackBee\Exception\InvalidArgumentException;
@@ -36,12 +43,6 @@ use BackBee\Rest\Patcher\OperationSyntaxValidator;
 use BackBee\Rest\Patcher\RightManager;
 use BackBee\Site\Layout;
 use BackBee\Workflow\State;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Security\Acl\Permission\MaskBuilder;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Page Controller

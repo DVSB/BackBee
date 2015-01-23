@@ -42,8 +42,8 @@ namespace BackBee\Config\Persistor;
  * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBee\Config\Config;
 use BackBee\ApplicationInterface;
+use BackBee\Config\Config;
 
 /**
  *
