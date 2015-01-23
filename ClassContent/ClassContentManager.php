@@ -187,7 +187,7 @@ class ClassContentManager
      * @param AClassContent $content content we want to get the latest revision
      * @return null|BackBee\ClassContent\Revision
      */
-    public function getRevision(AClassContent $content, $checkoutOnMissing = false)
+    public function getDraft(AClassContent $content, $checkoutOnMissing = false)
     {
         return $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft(
             $content,
@@ -212,7 +212,7 @@ class ClassContentManager
         $content = $this->em->getRepository($classname)->findOneBy(['_uid' => $uid]);
 
         if (true === $hydrateDraft && null !== $this->token) {
-            $content->setDraft($this->getRevision($content, $checkoutOnMissing));
+            $content->setDraft($this->getDraft($content, $checkoutOnMissing));
         }
 
         return $content;
@@ -290,7 +290,7 @@ class ClassContentManager
         if ($content instanceof ContentSet) {
             $content->clear();
             foreach ($elementsData as $data) {
-                $element = $this->findOneByTypeAndUid($data['type'], $data['uid'], true, true);
+                $element = $this->findOneByTypeAndUid($data['type'], $data['uid']);
                 if ($content->isAccepted($element)) {
                     $content->push($element);
                 }
@@ -306,7 +306,7 @@ class ClassContentManager
 
                     $elements = [];
                     foreach ($values as $data) {
-                        $element = $this->findOneByTypeAndUid($data['type'], $data['uid'], true, true);
+                        $element = $this->findOneByTypeAndUid($data['type'], $data['uid']);
                         if ($content->isAccepted($element, $key)) {
                             $elements[] = $element;
                         }

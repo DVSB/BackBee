@@ -340,6 +340,16 @@ bb.rest.classcontent.post:
         type: .+
         _method: POST
 
+bb.rest.classcontent.put:
+    pattern: /rest/{version}/classcontent/{type}/{uid}
+    defaults:
+        _action: putAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: "[a-zA-Z_\/]+"
+        _method: PUT
+
 bb.rest.classcontent.delete:
     pattern: /rest/{version}/classcontent/{type}/{uid}
     defaults:
