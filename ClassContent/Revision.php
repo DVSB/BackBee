@@ -534,21 +534,40 @@ class Revision extends AContent implements \Iterator, \Countable
         return isset($this->_data[$this->_index]);
     }
 
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*                   Implementation of Serializable                       */
-    /*                                                                        */
-    /*     * **************************************************************** */
-
     /**
-     * Return the serialized string of the revision
-     * @return string
+     * {@inheritdoc}
      */
-    public function serialize()
+    public function jsonSerialize()
     {
-        $serialized = json_decode(parent::serialize());
-        $serialized->content = (null === $this->getContent()) ? null : json_decode($this->getContent()->serialize());
+        $sourceData = $this->_getContentInstance()->jsonSerialize(self::JSON_CONCISE_FORMAT);
+        $draftData = parent::jsonSerialize(self::JSON_CONCISE_FORMAT);
+        $draftData['uid'] = $sourceData['uid'];
+        $draftData['type'] = $sourceData['type'];
+        $elements = [];
+        foreach ($sourceData['elements'] as $key => $element) {
+            if ($element !== $draftData['elements'][$key]) {
+                $elements[$key] = [
+                    'current' => $element,
+                    'draft'   => $draftData['elements'][$key],
+                ];
+            }
+        }
 
-        return json_encode($serialized);
+        $draftData['elements'] = $elements;
+
+        $parameters = [];
+        foreach ($sourceData['parameters'] as $key => $parameter) {
+            if ($parameter !== $draftData['parameters'][$key]) {
+                $parameters[$key] = [
+                    'current' => $parameter,
+                    'draft'   => $draftData['parameters'][$key],
+                ];
+            }
+        }
+
+        $draftData['parameters'] = $parameters;
+        $draftData['label'] = $this->_getContentInstance()->getLabel();
+
+        return array_merge(parent::jsonSerialize(self::JSON_INFO_FORMAT), $draftData);
     }
 }

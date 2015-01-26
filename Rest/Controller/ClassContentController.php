@@ -241,6 +241,33 @@ class ClassContentController extends ARestController
     }
 
     /**
+     * ClassContent's draft getter
+     *
+     * @param  string $type type of the class content (ex: Element/text)
+     * @param  string $uid  identifier of the class content
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getDraftAction($type, $uid)
+    {
+        $this->granted('VIEW', $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid));
+
+        return $this->createJsonResponse($this->getClassContentManager()->getDraft($content));
+    }
+
+    /**
+     * Returns all drafts of current user
+     *
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getDraftCollectionAction()
+    {
+        return $this->createJsonResponse($this->getEntityManager()
+            ->getRepository('BackBee\ClassContent\Revision')
+            ->getAllDrafts($this->getApplication()->getBBUserToken())
+        );
+    }
+
+    /**
      * Getter of classcontent category manager
      *
      * @return BackBee\ClassContent\CategoryManager
