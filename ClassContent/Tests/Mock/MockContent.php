@@ -76,6 +76,9 @@ class MockContent extends AClassContent implements IMock
             'body',
             '\BackBee\ClassContent\ContentSet',
             array()
+        )->_defineData(
+            'permid',
+            'scalar'
         )->_defineParam(
             'excludefromautobloc',
             'array',
@@ -134,5 +137,10 @@ class MockContent extends AClassContent implements IMock
     public function isAccepted($value, $var = null)
     {
         return parent::_isAccepted($value, $var);
+    }
+
+    public function getImageName()
+    {
+        return 'foobar';
     }
 }

@@ -34,9 +34,12 @@ use BackBee\Exception\BBException;
  * @package     BackBee\NestedNode\Tests
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
+ *              e.chau <eric.chau@lp-digital.fr>
  */
 class ClassContentTest extends \PHPUnit_Framework_TestCase
 {
+    private $content;
+
     public function setUp()
     {
         $this->content = new MockContent();
@@ -220,5 +223,109 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         } catch (BBException $expected) {
             $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionUptodateException', $expected);
         }
+    }
+
+    public function testJsonSerialize()
+    {
+        $this->assertInstanceOf('JsonSerializable', $this->content);
+
+        $data = $this->content->JsonSerialize();
+
+        $this->assertTrue(is_array($data));
+        $this->assertTrue(isset($data['uid']));
+        $this->assertTrue(isset($data['label']));
+        $this->assertTrue(isset($data['type']));
+        $this->assertTrue(isset($data['state']));
+        $this->assertTrue(isset($data['created']));
+        $this->assertTrue(isset($data['modified']));
+        $this->assertTrue(isset($data['revision']));
+        $this->assertTrue(isset($data['parameters']));
+        $this->assertTrue(isset($data['accept']));
+        $this->assertTrue(isset($data['minentry']));
+        $this->assertTrue(isset($data['maxentry']));
+        $this->assertTrue(isset($data['elements']));
+        $this->assertTrue(isset($data['properties']));
+        $this->assertTrue(isset($data['image']));
+
+        $this->assertTrue(is_array($data['elements']));
+
+        foreach ($data['elements'] as $key => $values) {
+            if (is_object($this->content->$key)) {
+                $this->assertTrue(is_array($values));
+                $this->assertTrue(isset($values['type']));
+                $this->assertTrue(isset($values['uid']));
+            } elseif (is_scalar($this->content->$key)) {
+                $this->assertTrue(is_scalar($values));
+            }
+        }
+
+        $this->assertEquals('foobar', $data['image']);
+    }
+
+    public function testJsonSerializeDefinitionFormat()
+    {
+        $data = $this->content->JsonSerialize(AClassContent::JSON_DEFINITION_FORMAT);
+
+        $this->assertTrue(isset($data['label']));
+        $this->assertTrue(isset($data['type']));
+        $this->assertTrue(isset($data['parameters']));
+        $this->assertTrue(isset($data['accept']));
+        $this->assertTrue(isset($data['minentry']));
+        $this->assertTrue(isset($data['maxentry']));
+        $this->assertTrue(isset($data['properties']));
+        $this->assertTrue(isset($data['image']));
+
+        $this->assertFalse(isset($data['state']));
+        $this->assertFalse(isset($data['created']));
+        $this->assertFalse(isset($data['modified']));
+        $this->assertFalse(isset($data['revision']));
+        $this->assertFalse(isset($data['elements']));
+        $this->assertFalse(isset($data['uid']));
+
+        $this->assertEquals($this->content->getDefaultImageName(), $data['image']);
+    }
+
+    public function testJsonSerializeConciseFormat()
+    {
+        $data = $this->content->JsonSerialize(AClassContent::JSON_CONCISE_FORMAT);
+
+        $this->assertTrue(isset($data['uid']));
+        $this->assertTrue(isset($data['type']));
+        $this->assertTrue(isset($data['label']));
+        $this->assertTrue(isset($data['parameters']));
+        $this->assertTrue(isset($data['elements']));
+        $this->assertTrue(isset($data['image']));
+
+        $this->assertFalse(isset($data['state']));
+        $this->assertFalse(isset($data['accept']));
+        $this->assertFalse(isset($data['created']));
+        $this->assertFalse(isset($data['modified']));
+        $this->assertFalse(isset($data['revision']));
+        $this->assertFalse(isset($data['minentry']));
+        $this->assertFalse(isset($data['maxentry']));
+        $this->assertFalse(isset($data['properties']));
+
+        $this->assertEquals('foobar', $data['image']);
+    }
+
+    public function testJsonSerializeInfoFormat()
+    {
+        $data = $this->content->JsonSerialize(AClassContent::JSON_INFO_FORMAT);
+
+        $this->assertTrue(isset($data['uid']));
+        $this->assertTrue(isset($data['type']));
+        $this->assertTrue(isset($data['state']));
+        $this->assertTrue(isset($data['created']));
+        $this->assertTrue(isset($data['modified']));
+        $this->assertTrue(isset($data['revision']));
+
+        $this->assertFalse(isset($data['label']));
+        $this->assertFalse(isset($data['parameters']));
+        $this->assertFalse(isset($data['elements']));
+        $this->assertFalse(isset($data['image']));
+        $this->assertFalse(isset($data['accept']));
+        $this->assertFalse(isset($data['minentry']));
+        $this->assertFalse(isset($data['maxentry']));
+        $this->assertFalse(isset($data['properties']));
     }
 }

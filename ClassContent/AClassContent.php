@@ -847,13 +847,23 @@ abstract class AClassContent extends AContent
     }
 
     /**
-     * Computes and returns image name from current class content classname
+     * Alias of ::getDefaultImageName but you can override this to return custom image.
      *
      * @return string
      */
     public function getImageName()
     {
-        return str_replace(array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'), array('', '/'), get_class($this)).'.png';
+        return $this->getDefaultImageName();
+    }
+
+    /**
+     * Computes and returns image name of current content.
+     *
+     * @return string
+     */
+    final public function getDefaultImageName()
+    {
+        return str_replace([self::CLASSCONTENT_BASE_NAMESPACE, '\\'], ['', '/'], get_class($this)).'.png';
     }
 
     /*     * **************************************************************** */
@@ -1080,6 +1090,8 @@ abstract class AClassContent extends AContent
         }
 
         if (self::JSON_CONCISE_FORMAT === $format) {
+            $data['image'] = $this->getImageName();
+
             return $data;
         }
 
@@ -1091,7 +1103,10 @@ abstract class AClassContent extends AContent
 
         $data = array_merge([
             'properties' => $this->getProperty(),
-            'image'      => $this->getImageName(),
+            'image'      => self::JSON_DEFINITION_FORMAT === $format
+                ? $this->getDefaultImageName()
+                : $this->getImageName()
+            ,
         ], $data);
 
         return $data;
