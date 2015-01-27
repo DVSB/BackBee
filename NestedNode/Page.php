@@ -1157,8 +1157,6 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
             }
         }
 
-        $this->setSection($this->getSection()->unserialize($serialized, false));
-
         if (true === property_exists($serialized, 'date')) {
             $this->setDateTimeValue('_date', $serialized->date);
         }
