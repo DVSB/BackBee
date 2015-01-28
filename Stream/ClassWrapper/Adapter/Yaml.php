@@ -231,6 +231,7 @@ class Yaml extends AClassWrapper
                             foreach ($datas as $var => $value) {
                                 $values[strtolower($this->_normalizeVar($var))] = $value;
                             }
+
                             $this->$key = $values;
                             break;
                     }

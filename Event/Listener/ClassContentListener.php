@@ -192,22 +192,33 @@ class ClassContentListener
     {
         $content = $event->getTarget();
         if (false === ($content instanceof AClassContent)) {
-            throw new BBException('Enable to commit object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBee\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
+            throw new BBException(
+                'Unable to commit object',
+                BBException::INVALID_ARGUMENT,
+                new \InvalidArgumentException(sprintf(
+                    'Only BackBee\ClassContent\AClassContent can be commit, `%s` received',
+                    get_class($content)
+                ))
+            );
         }
 
         $dispatcher = $event->getDispatcher();
         if (null === $application = $dispatcher->getApplication()) {
-            throw new BBException('Enable to commit object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBee application has to be initialized'));
+            throw new BBException(
+                'Unable to commit object',
+                BBException::MISSING_APPLICATION,
+                new \RuntimeException('BackBee application has to be initialized')
+            );
         }
 
         if (null === $token = $application->getBBUserToken()) {
-            throw new SecurityException('Enable to commit : unauthorized user', SecurityException::UNAUTHORIZED_USER);
+            throw new SecurityException('Unable to commit : unauthorized user', SecurityException::UNAUTHORIZED_USER);
         }
 
         $em = $dispatcher->getApplication()->getEntityManager();
         $content = $em->getRepository(ClassUtils::getRealClass($content))->load($content, $token);
         if (null === $revision = $content->getDraft()) {
-            throw new ClassContentException('Enable to get draft', ClassContentException::REVISION_MISSING);
+            throw new ClassContentException('Unable to get draft', ClassContentException::REVISION_MISSING);
         }
 
         $content->prepareCommitDraft();
@@ -242,7 +253,13 @@ class ClassContentListener
             }
         }
 
-        $application->info(sprintf('`%s(%s)` rev.%d commited by user `%s`.', get_class($content), $content->getUid(), $content->getRevision(), $application->getBBUserToken()->getUsername()));
+        $application->info(sprintf(
+            '`%s(%s)` rev.%d commited by user `%s`.',
+            get_class($content),
+            $content->getUid(),
+            $content->getRevision(),
+            $application->getBBUserToken()->getUsername()
+        ));
     }
 
     /**
@@ -291,14 +308,14 @@ class ClassContentListener
             return;
         }
 
-        self::_setRendermodeParameter($event);
+        self::setRendermodeParameter($event);
     }
 
     /**
      * Dynamically add render modes options to the class
      * @param \BackBee\Event\Event $event
      */
-    private static function _setRendermodeParameter(Event $event)
+    private static function setRendermodeParameter(Event $event)
     {
         $application = $event->getDispatcher()->getApplication();
         if (null === $application) {
@@ -311,26 +328,26 @@ class ClassContentListener
         }
 
         $result = $event->getArgument('result', array());
-        if (false === array_key_exists('rendermode', $result)) {
+        if (!array_key_exists('rendermode', $result)) {
             return;
         }
-        if (false === array_key_exists('array', $result['rendermode'])) {
+        if (!array_key_exists('array', $result['rendermode'])) {
             return;
         }
-        if (false === array_key_exists('options', $result['rendermode']['array'])) {
+        if (!array_key_exists('options', $result['rendermode']['array'])) {
             return;
         }
 
         $params = $event->getArgument('params', array());
-        if (false === array_key_exists('nodeInfos', $params)) {
+        if (!array_key_exists('nodeInfos', $params)) {
             return;
         }
-        if (false === array_key_exists('type', $params['nodeInfos'])) {
+        if (!array_key_exists('type', $params['nodeInfos'])) {
             return;
         }
 
         $classname = '\BackBee\ClassContent\\'.$params['nodeInfos']['type'];
-        if (false === class_exists($classname)) {
+        if (!class_exists($classname)) {
             return;
         }
 

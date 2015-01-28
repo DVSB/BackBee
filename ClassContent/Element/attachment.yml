@@ -4,5 +4,5 @@ attachment:
     name: Attachment
     description: An attachment
   parameters:
-    mimetype: !!scalar
-    authorized: !!array
+    mimetype: ~
+    authorized: ~

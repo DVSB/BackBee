@@ -319,7 +319,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * @param  mixed                          $options
      * @return \BackBee\ClassContent\AContent
      */
-    protected function _setOptions($options = null)
+    protected function setOptions($options = null)
     {
         if ($options instanceof TokenInterface) {
             $this->_owner = UserSecurityIdentity::fromToken($options);

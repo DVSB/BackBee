@@ -23,25 +23,6 @@
 
 namespace BackBee\Rest\Patcher;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 
 /**
@@ -54,16 +35,13 @@ use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 class OperationSyntaxValidator
 {
     /**
-     * [validate description]
-     *
-     * @param array $operations [description]
-     *
+     * @param array $operations
      * @throws InvalidOperationSyntaxException
      */
     public function validate(array $operations)
     {
         foreach ($operations as $operation) {
-            if (false === array_key_exists('op', $operation)) {
+            if (!is_array($operation) || !array_key_exists('op', $operation)) {
                 throw new InvalidOperationSyntaxException('`op` key is missing.');
             }
 
@@ -71,18 +49,18 @@ class OperationSyntaxValidator
                 case PatcherInterface::TEST_OPERATION:
                 case PatcherInterface::ADD_OPERATION:
                 case PatcherInterface::REPLACE_OPERATION:
-                    if (false === isset($operation['path']) || false === isset($operation['value'])) {
+                    if (!isset($operation['path']) || !isset($operation['value'])) {
                         throw new InvalidOperationSyntaxException('`path` and/or `value` key is missing.');
                     }
 
                     break;
                 case PatcherInterface::TEST_OPERATION:
                 case PatcherInterface::TEST_OPERATION:
-                    if (false === isset($operation['from'])) {
+                    if (!isset($operation['from'])) {
                         throw new InvalidOperationSyntaxException('`from` key is missing.');
                     }
                 case PatcherInterface::TEST_OPERATION:
-                    if (false === isset($operation['path'])) {
+                    if (!isset($operation['path'])) {
                         throw new InvalidOperationSyntaxException('`path` key is missing.');
                     }
 

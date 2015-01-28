@@ -24,7 +24,7 @@
 namespace BackBee\ClassContent;
 
 use BackBee\ClassContent\AClassContent;
-use BackBee\IApplication;
+use BackBee\ApplicationInterface;
 use BackBee\Routing\RouteCollection;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Utils\File\File;
@@ -45,9 +45,9 @@ class ClassContentManager
     /**
      * Instantiate a ClassContentManager.
      *
-     * @param IApplication $application
+     * @param ApplicationInterface $application
      */
-    public function __construct(IApplication $application)
+    public function __construct(ApplicationInterface $application)
     {
         $this->application = $application;
         $this->em = $application->getEntityManager();
@@ -82,7 +82,15 @@ class ClassContentManager
             throw new \InvalidArgumentException('Provided data is not valid for ClassContentManager::update.');
         }
 
-        return $this->updateElements($content, $data['elements']);
+        if (isset($data['parameters'])) {
+            $this->updateParameters($content, $data['parameters']);
+        }
+
+        if (isset($data['elements'])) {
+            $this->updateElements($content, $data['elements']);
+        }
+
+        return $this;
     }
 
     /**
@@ -283,7 +291,7 @@ class ClassContentManager
      *
      * @param  AClassContent $content
      * @param  array         $elementsData
-     * @return AClassContent
+     * @return self
      */
     private function updateElements(AClassContent $content, array $elementsData)
     {
@@ -317,6 +325,22 @@ class ClassContentManager
             }
         }
 
-        return $content;
+        return $this;
+    }
+
+    /**
+     * Updates provided content's parameters.
+     *
+     * @param  AClassContent $content
+     * @param  array         $paramsData
+     * @return self
+     */
+    private function updateParameters(AClassContent $content, array $paramsData)
+    {
+        foreach ($paramsData as $key => $param) {
+            $content->setParam($key, $param);
+        }
+
+        return $this;
     }
 }

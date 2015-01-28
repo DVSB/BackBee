@@ -148,15 +148,15 @@ class <classname> extends <extends> <interface>
     public function __construct($uid = NULL, $options = NULL)
     {
         parent::__construct($uid, $options);
-        $this->_initData();
+        $this->initData();
     }
 
-    protected function _initData()
+    protected function initData()
     {
         <defineDatas>
         <defineParam>
         <defineProps>
-        parent::_initData();
+        parent::initData();
     }
 }
 ';
@@ -195,7 +195,7 @@ class <classname> extends <extends> <interface>
     {
         $defineDatas = $this->_extractDatas($this->elements);
 
-        $defineParam = $this->_extractDatas($this->parameters);
+        $defineParam = $this->parameters;
         $defineProps = $this->properties;
 
         $docBlock = '';
@@ -209,13 +209,13 @@ class <classname> extends <extends> <interface>
         }
 
         array_walk($defineDatas, function (&$value, $key) {
-                    $value = "->_defineData('".$key."', '".$value['type']."', ".var_export($value['options'], true).")";
+                    $value = "->defineData('".$key."', '".$value['type']."', ".var_export($value['options'], true).")";
                 });
         array_walk($defineParam, function (&$value, $key) {
-                    $value = "->_defineParam('".$key."', '".$value['type']."', ".var_export($value['options'], true).")";
+                    $value = "->defineParam('".$key."', ".var_export($value, true).")";
                 });
         array_walk($defineProps, function (&$value, $key) {
-                    $value = "->_defineProperty('".$key."', ".var_export($value, true).")";
+                    $value = "->defineProperty('".$key."', ".var_export($value, true).")";
                 });
 
         $phpCode = str_replace(array('<namespace>',

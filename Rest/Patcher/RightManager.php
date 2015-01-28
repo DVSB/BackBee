@@ -23,25 +23,6 @@
 
 namespace BackBee\Rest\Patcher;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use Metadata\MetadataFactoryInterface;
 
 /**
@@ -60,7 +41,7 @@ class RightManager
      *
      * @var \Metadata\MetadataFactoryInterface
      */
-    private $metadata_factory;
+    private $metadataFactory;
 
     /**
      * mapping of entity namespace and properties authorized actions
@@ -72,11 +53,11 @@ class RightManager
     /**
      * RightManager's constructor
      *
-     * @param MetadataFactoryInterface $metadata_factory the factory to use to build authorization mapping
+     * @param MetadataFactoryInterface $metadataFactory the factory to use to build authorization mapping
      */
-    public function __construct(MetadataFactoryInterface $metadata_factory)
+    public function __construct(MetadataFactoryInterface $metadataFactory)
     {
-        $this->metadata_factory = $metadata_factory;
+        $this->metadataFactory = $metadataFactory;
         $this->rights = array();
     }
 
@@ -93,16 +74,16 @@ class RightManager
     {
         $authorized = true;
         $classname = get_class($entity);
-        if (false === array_key_exists($classname, $this->rights)) {
+        if (!array_key_exists($classname, $this->rights)) {
             $this->buildRights($classname);
         }
 
         $attribute = str_replace('/', '', $attribute);
-        if (true === $authorized && false === array_key_exists($attribute, $this->rights[$classname])) {
+        if (true === $authorized && !array_key_exists($attribute, $this->rights[$classname])) {
             $authorized = false;
         }
 
-        if (true === $authorized && false === in_array($operation, $this->rights[$classname][$attribute])) {
+        if (true === $authorized && !in_array($operation, $this->rights[$classname][$attribute])) {
             $authorized = false;
         }
 
@@ -131,35 +112,35 @@ class RightManager
      */
     private function buildRights($classname)
     {
-        $metadatas = $this->metadata_factory->getMetadataForClass($classname);
+        $metadatas = $this->metadataFactory->getMetadataForClass($classname);
         $reflection = new \ReflectionClass($classname);
 
         $this->rights[$classname] = array();
         if (null !== $metadatas) {
-            foreach ($metadatas->propertyMetadata as $property_name => $property_metadata) {
-                $property_name = $this->cleanPropertyName($property_name);
-                $this->rights[$classname][$property_name] = array();
+            foreach ($metadatas->propertyMetadata as $propertyName => $propertyMetadata) {
+                $propertyName = $this->cleanPropertyName($propertyName);
+                $this->rights[$classname][$propertyName] = array();
 
                 if (
-                    false === $property_metadata->readOnly
-                    && $reflection->hasMethod($this->buildProperMethodName('set', $property_name))
+                    false === $propertyMetadata->readOnly
+                    && $reflection->hasMethod($this->buildProperMethodName('set', $propertyName))
                 ) {
-                    $this->rights[$classname][$property_name][] = 'replace';
+                    $this->rights[$classname][$propertyName][] = 'replace';
                 }
             }
         }
     }
 
     /**
-     * This method will replace '_' by '' of $property_name if its first letter is an underscore (_)
+     * This method will replace '_' by '' of $propertyName if its first letter is an underscore (_)
      *
-     * @param string $property_name the property we want to clean
+     * @param string $propertyName the property we want to clean
      *
      * @return string cleaned property name
      */
-    private function cleanPropertyName($property_name)
+    private function cleanPropertyName($propertyName)
     {
-        return preg_replace('#^_([\w_]+)#', '$1', $property_name);
+        return preg_replace('#^_([\w_]+)#', '$1', $propertyName);
     }
 
     /**
@@ -167,17 +148,17 @@ class RightManager
      * and apply ucfirst to every words seperated by an underscore
      *
      * @param string $prefix        the prefix to prepend to the method name (example: 'get', 'set', 'is')
-     * @param string $property_name
+     * @param string $propertyName
      *
      * @return string a valid method name
      */
-    private function buildProperMethodName($prefix, $property_name)
+    private function buildProperMethodName($prefix, $propertyName)
     {
-        $method_name = explode('_', $property_name);
-        $method_name = array_map(function ($str) {
+        $methodName = explode('_', $propertyName);
+        $methodName = array_map(function ($str) {
             return ucfirst($str);
-        }, $method_name);
+        }, $methodName);
 
-        return $prefix.implode('', $method_name);
+        return $prefix.implode('', $methodName);
     }
 }

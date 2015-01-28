@@ -4,4 +4,4 @@ select:
     name: Select
     description: A select input box
   parameters:
-    options: []
+    options: ~

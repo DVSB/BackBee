@@ -184,7 +184,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         $this->_modified = new \DateTime();
         $this->_revision = 0;
 
-        $this->_setOptions($options);
+        $this->setOptions($options);
     }
 
     /**
@@ -447,72 +447,20 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets one or all parameters
-     * @param  string $var    the parameter name to set, if NULL all the parameters array wil be set
-     * @param  mixed  $values the parameter value or all the parameters if $var is NULL
-     * @param  string $type   the optionnal casting type of the value
+     *
+     * @param  string $key   the parameter name to set
+     * @param  mixed  $value the parameter value, if null is passed it will unset provided key parameter
      * @return AContent The current instance
      */
-    public function setParam($var = null, $values = null, $type = null)
+    public function setParam($key, $value = null)
     {
-        if (null === $var) {
-            $this->_parameters = $values;
+        if (null === $value) {
+            unset($this->_parameters[$key]);
         } else {
-            $paths = explode(':', $var);
-            if (1 < count($paths)) {
-                $this->setParameterRecursively($paths, $values, $type);
-            } else {
-                if (null !== $values) {
-                    if (null !== $type) {
-                        $values = array($type => $values);
-                    } elseif (!is_array($values)) {
-                        $values = array($values);
-                    }
-
-                    // A surveiller cette partie pour les revisions
-                    if (
-                        is_array($this->_parameters)
-                        && array_key_exists($var, $this->_parameters)
-                        && is_array($this->_parameters[$var])
-                    ) {
-                        $values = array_replace_recursive($this->_parameters[$var], $values);
-                    }
-                }
-
-                $this->_parameters[$var] = $values;
-            }
+            $this->_parameters[$key] = ['value' => $value];
         }
 
         return $this->_getContentInstance();
-    }
-
-    /**
-     * Setters of parameters with the ':' syntax
-     *
-     * @param array  $paths
-     * @param mixed  $values new value to set
-     * @param string $type   type of the parameter, can be null
-     */
-    private function setParameterRecursively(array $paths, $value, $type)
-    {
-        if (null !== $type) {
-            $path = array_shift($paths);
-            array_unshift($paths, $type);
-            array_unshift($paths, $path);
-            unset($path);
-        }
-
-        $target = &$this->_parameters;
-        foreach ($paths as $path) {
-            if (!array_key_exists($path, $target)) {
-                throw new InvalidArgumentException(
-                    'Invalid path provided for setting parameter value: '.implode(':', $paths)
-                );
-            }
-
-            $target = &$target[$path];
-        }
-
-        $target = $value;
     }
 
     /**
@@ -631,12 +579,6 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function postLoad()
     {
-        if (null !== $this->_getContentInstance()) {
-            $this->_parameters = Parameter::paramsReplaceRecursive(
-                $this->_getContentInstance()->getDefaultParameters(),
-                $this->getParam()
-            );
-        }
     }
 
     /**
@@ -695,16 +637,16 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Sets options at the construction of a new instance
-     * @param  mixed                          $options Initial options for the content:
-     *                                                 - label       the label of the content
-     * @return \BackBee\ClassContent\AContent
+     * @param  mixed $options Initial options for the content:
+     *                            - label: the label of the content
+     * @return self
      */
-    protected function _setOptions($options = null)
+    protected function setOptions($options = null)
     {
         if (null !== $options) {
             $options = (array) $options;
 
-            if (array_key_exists('label', $options)) {
+            if (isset($options['label'])) {
                 $this->setLabel($options['label']);
             }
         }
@@ -748,25 +690,6 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     protected function _removeSubcontent($var)
     {
-        // To be overload by \BackBee\ClassContent\AClassContent
-    }
-
-    /**
-     * Return the serialized string of an array
-     * @param  array  $var
-     * @return string
-     */
-    protected function _arrayToStdClass($var)
-    {
-        $result = new \stdClass();
-
-        if (is_array($var)) {
-            foreach ($var as $key => $value) {
-                $result->$key = $value;
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -928,57 +851,32 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
                 }
             }
         }
-
-        return;
     }
 
     /**
-     * Returns defined parameters
-     * Upgrade of getParam method - parameter $var can follow this pattern:
-     *     rendermode:array:selected
-     * this will return $this->_parameters['rendermode']['array']['selected'] is it exists
-     * @param  string $var  The parameter to be return, if NULL, all parameters are returned
-     * @param  string $type The casting type of the parameter
+     * Returns parameters if requested key exist.
+     *
+     * @param  string $key  The parameter to be return, if NULL, all parameters are returned
      * @return mixed  the parameter value or NULL if unfound
      */
-    public function getParam($var = null, $type = null)
+    public function getParam($key)
     {
-        if (null === $var) {
-            return $this->_parameters;
+        $value = null;
+        if (isset($this->_parameters[$key])) {
+            $value = $this->_parameters[$key];
         }
 
-        $pieces = explode(':', $var);
-        $var = array_shift($pieces);
-        if (!array_key_exists($var, $this->_parameters)) {
-            return;
-        }
-
-        if (null !== $type && is_string($type)) {
-            array_unshift($pieces, $type);
-        }
-
-        return $this->getRecursivelyParam($this->_parameters[$var], $pieces);
+        return $value;
     }
 
     /**
-     * Goes all over the $param and keep looping until $pieces is empty to return
-     * the values user is looking for
-     * @param  mixed $param
-     * @param  array $pieces
-     * @return mixed
+     * Returns all parameters
+     *
+     * @return array
      */
-    private function getRecursivelyParam($param, array $pieces)
+    public function getAllParams()
     {
-        if (0 === count($pieces)) {
-            return $param;
-        }
-
-        $key = array_shift($pieces);
-        if (!isset($param[$key])) {
-            return;
-        }
-
-        return $this->getRecursivelyParam($param[$key], $pieces);
+        return $this->_parameters;
     }
 
     /**
@@ -1022,7 +920,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             'created'    => $this->_created->getTimestamp(),
             'modified'   => $this->_modified->getTimestamp(),
             'revision'   => $this->_revision,
-            'parameters' => $this->getParam(),
+            'parameters' => $this->getAllParams(),
             'accept'     => array_map(
                 function ($classname) {
                     return str_replace([self::CLASSCONTENT_BASE_NAMESPACE, '\\'], ['', '/'], $classname);

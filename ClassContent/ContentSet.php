@@ -44,7 +44,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * Internal position in iterator
      * @var int
      */
-    protected $_index = 0;
+    protected $index = 0;
 
     /**
      * Pages owning this contentset
@@ -61,7 +61,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     {
         parent::__construct($uid, $options);
 
-        $this->_initData();
+        $this->initData();
     }
 
     /**
@@ -140,9 +140,9 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         }
 
         $this->_subcontent->clear();
-        $this->_subcontentmap = array();
+        $this->subcontentmap = array();
         $this->_data = array();
-        $this->_index = 0;
+        $this->index = 0;
     }
 
     /**
@@ -160,7 +160,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function current()
     {
-        return (null === $this->getDraft()) ? $this->getData($this->_index) : $this->getDraft()->current();
+        return (null === $this->getDraft()) ? $this->getData($this->index) : $this->getDraft()->current();
     }
 
     /**
@@ -288,7 +288,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function key()
     {
-        return (null === $this->getDraft()) ? $this->_index : $this->getDraft()->key();
+        return (null === $this->getDraft()) ? $this->index : $this->getDraft()->key();
     }
 
     /**
@@ -307,7 +307,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function next()
     {
-        return (null === $this->getDraft()) ? $this->getData($this->_index++) : $this->getDraft()->next();
+        return (null === $this->getDraft()) ? $this->getData($this->index++) : $this->getDraft()->next();
     }
 
     /**
@@ -328,10 +328,10 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         array_pop($this->_data);
         $content = null;
-        if (isset($this->_subcontentmap[$last->getUid()])) {
-            $content = $this->_subcontent->get($this->_subcontentmap[$last->getUid()]);
+        if (isset($this->subcontentmap[$last->getUid()])) {
+            $content = $this->_subcontent->get($this->subcontentmap[$last->getUid()]);
             $this->_subcontent->removeElement($content);
-            unset($this->_subcontentmap[$last->getUid()]);
+            unset($this->subcontentmap[$last->getUid()]);
         }
 
         $this->rewind();
@@ -358,7 +358,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             ) {
                 $this->_data[] = array($this->_getType($var) => $var->getUid());
                 if ($this->_subcontent->add($var)) {
-                    $this->_subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
+                    $this->subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
                 }
             }
         }
@@ -372,7 +372,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     public function rewind()
     {
         if (null === $this->getDraft()) {
-            $this->_index = 0;
+            $this->index = 0;
         } else {
             $this->getDraft()->rewind();
         }
@@ -395,10 +395,10 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         array_shift($this->_data);
         $content = null;
-        if (isset($this->_subcontentmap[$first->getUid()])) {
-            $content = $this->_subcontent->get($this->_subcontentmap[$first->getUid()]);
+        if (isset($this->subcontentmap[$first->getUid()])) {
+            $content = $this->_subcontent->get($this->subcontentmap[$first->getUid()]);
             $this->_subcontent->removeElement($content);
-            unset($this->_subcontentmap[$first->getUid()]);
+            unset($this->subcontentmap[$first->getUid()]);
         }
 
         $this->rewind();
@@ -421,7 +421,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             if (!$this->_maxentry || $this->_maxentry > $this->count()) {
                 array_unshift($this->_data, array($this->_getType($var) => $var->getUid()));
                 if ($this->_subcontent->add($var)) {
-                    $this->_subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
+                    $this->subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
                 }
             }
         }
@@ -435,7 +435,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function valid()
     {
-        return (null === $this->getDraft()) ? isset($this->_data[$this->_index]) : $this->getDraft()->valid();
+        return (null === $this->getDraft()) ? isset($this->_data[$this->index]) : $this->getDraft()->valid();
     }
 
     /*     * **************************************************************** */
@@ -543,13 +543,13 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * {@inheritdoc}
      */
-    protected function _initData()
+    protected function initData()
     {
         if (null === $this->getProperty('auto_hydrate')) {
             $this->setProperty('auto_hydrate', false);
         }
 
-        parent::_initData();
+        parent::initData();
     }
 
     /**
@@ -562,7 +562,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      *                                                   - default     array default value for datas
      * @return \BackBee\ClassContent\ContentSet
      */
-    protected function _setOptions($options = null)
+    protected function setOptions($options = null)
     {
         if (null !== $options) {
             $options = (array) $options;
@@ -602,7 +602,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * @return \BackBee\ClassContent\AClassContent The current instance
      * @deprecated since version 1.0
      */
-    protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
+    protected function defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
     {
         if (true === $updateAccept) {
             $this->_addAcceptedType($type, $var);
@@ -624,14 +624,14 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * {@inheritdoc}
      */
-    protected function _defineParam($var, $type = 'scalar', $options = null)
+    protected function defineParam($var, array $options = null)
     {
         if ('accept' === $var) {
-            if (true === is_array($options) && true === array_key_exists('default', $options)) {
-                return $this->_addAcceptedType($options['default']);
+            if (null !== $options) {
+                return $this->_addAcceptedType($options['value']);
             }
         } else {
-            parent::_defineParam($var, $type, $options);
+            parent::defineParam($var, $options);
         }
 
         return $this;
