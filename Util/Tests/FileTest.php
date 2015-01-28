@@ -42,7 +42,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('vfs://dircopy', File::normalizePath($path));
         $this->assertEquals('vfs://dircopy/copyfile', File::normalizePath(vfsStream::url('dircopy'.DIRECTORY_SEPARATOR.'copyfile')));
-        $this->assertEquals('vfs:'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'dircopy'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'copyfile', File::normalizePath(vfsStream::url('dircopy//copyfile'), DIRECTORY_SEPARATOR, false));
+        $this->assertEquals('vfs:'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'dircopy'.DIRECTORY_SEPARATOR.'copyfile', File::normalizePath(vfsStream::url('dircopy//copyfile'), DIRECTORY_SEPARATOR, false));
         $this->assertEquals('vfs:////dircopy////copyfile', File::normalizePath(vfsStream::url('dircopy'.DIRECTORY_SEPARATOR.'copyfile'), '////', false));
         $this->assertEquals('vfs:////dircopy////copyfile', File::normalizePath(vfsStream::url('dircopy'.DIRECTORY_SEPARATOR.'copyfile'), '////'));
         $this->assertEquals('vfs:\\\dircopy', File::normalizePath(vfsStream::url('dircopy'), '\\'));
