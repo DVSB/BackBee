@@ -330,6 +330,16 @@ bb.rest.classcontent.get_collection:
         type: .+
         _method: GET
 
+bb.rest.classcontent.put_collection:
+    pattern: /rest/{version}/classcontent
+    defaults:
+        _action: putCollectionAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: "[a-zA-Z_\/]+"
+        _method: PUT
+
 bb.rest.classcontent.post:
     pattern: /rest/{version}/classcontent/{type}
     defaults:
@@ -377,6 +387,14 @@ bb.rest.classcontent.get_draft_collection:
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
         _method: GET
+
+bb.rest.classcontent.patch_draft_collection:
+    pattern: /rest/{version}/classcontent-draft
+    defaults:
+        _action: patchDraftCollectionAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        _method: PATCH
 
 bb.rest.bundle.get_collection:
     pattern: /rest/{version}/bundle

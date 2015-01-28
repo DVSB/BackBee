@@ -556,11 +556,11 @@ class Revision extends AContent implements \Iterator, \Countable
         $draftData['elements'] = $elements;
 
         $parameters = [];
-        foreach ($sourceData['parameters'] as $key => $parameter) {
-            if ($parameter !== $draftData['parameters'][$key]) {
+        foreach ($draftData['parameters'] as $key => $parameter) {
+            if ($parameter['value'] !== $sourceData['parameters'][$key]['value']) {
                 $parameters[$key] = [
-                    'current' => $parameter,
-                    'draft'   => $draftData['parameters'][$key],
+                    'current' => $sourceData['parameters'][$key]['value'],
+                    'draft'   => $parameter['value'],
                 ];
             }
         }

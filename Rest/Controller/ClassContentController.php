@@ -28,13 +28,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AClassContent;
-use BackBee\IApplication;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Routing\RouteCollection;
+use BackBee\Rest\Patcher\EntityPatcher;
+use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
+use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
+use BackBee\Rest\Patcher\OperationSyntaxValidator;
+use BackBee\Rest\Patcher\RightManager;
 use BackBee\Utils\File\File;
 
 /**
@@ -211,13 +216,54 @@ class ClassContentController extends ARestController
      */
     public function putAction($type, $uid, Request $request)
     {
-        $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true, true);
-        $this->granted('EDIT', $content);
-
-        $this->getClassContentManager()->update($content, $request->request->all());
+        $this->updateClassContent($type, $uid, $request->request->all());
         $this->getEntityManager()->flush();
 
         return $this->createJsonResponse(null, 204);
+    }
+
+    /**
+     * Updates collection of classcontent elements and parameters
+     *
+     * @param  Request $request
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function putCollectionAction(Request $request)
+    {
+        $result = [];
+        foreach ($request->request->all() as $data) {
+            if (!isset($data['type']) || !isset($data['uid'])) {
+                throw new BadRequestHttpException("type and/or uid is missing.");
+            }
+
+            try {
+                $content = $this->updateClassContent($data['type'], $data['uid'], $data);
+                $result[] = [
+                    'uid'        => $content->getUid(),
+                    'type'       => $content->getContentType(),
+                    'statusCode' => 200,
+                    'message'    => 'OK',
+                ];
+            } catch (AccessDeniedException $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'type'       => $data['type'],
+                    'statusCode' => 401,
+                    'message'    => $e->getMessage(),
+                ];
+            } catch (\Exception $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'type'       => $data['type'],
+                    'statusCode' => 500,
+                    'message'    => $e->getMessage(),
+                ];
+            }
+        }
+
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse($result);
     }
 
     /**
@@ -261,10 +307,12 @@ class ClassContentController extends ARestController
      */
     public function getDraftCollectionAction()
     {
-        return $this->createJsonResponse($this->getEntityManager()
+        $contents = $this->getEntityManager()
             ->getRepository('BackBee\ClassContent\Revision')
             ->getAllDrafts($this->getApplication()->getBBUserToken())
-        );
+        ;
+
+        return $this->addContentRangeHeadersToResponse($this->createJsonResponse($contents), $contents, 0);
     }
 
     /**
@@ -291,6 +339,21 @@ class ClassContentController extends ARestController
         }
 
         return $this->manager;
+    }
+
+    /**
+     * @param  string $type
+     * @param  string $uid
+     * @param  array $data
+     * @return AClassContent
+     */
+    private function updateClassContent($type, $uid, $data)
+    {
+        $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true, true);
+        $this->granted('EDIT', $content);
+        $this->getClassContentManager()->update($content, $data);
+
+        return $content;
     }
 
     /**
@@ -468,8 +531,9 @@ class ClassContentController extends ARestController
             $count = count($collection->getIterator());
         }
 
-        $last_result = $start + $count - 1;
-        $response->headers->set('Content-Range', "$start-$last_result/".count($collection));
+        $lastResult = $start + $count - 1;
+        $lastResult = $lastResult < 0 ? 0 : $lastResult;
+        $response->headers->set('Content-Range', "$start-$lastResult/".count($collection));
 
         return $response;
     }
