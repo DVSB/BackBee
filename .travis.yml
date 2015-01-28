@@ -1,15 +1,10 @@
 language: php
-php:
-- 5.4
-- 5.5
-- 5.6
-- hhvm-nightly
-matrix:
-allow_failures:
-- php: hhvm-nightly
-install: composer install --prefer-dist --no-interaction
-script:
-- phpunit --coverage-clover=coverage.clover
-after_script:
-- wget https://scrutinizer-ci.com/ocular.phar
-- php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+
+php: [5.4, 5.5, 5.6]
+
+before_script:
+- phpenv config-rm xdebug.ini
+- composer self-update
+- composer install --no-interaction --prefer-source --verbose
+
+script: phpunit
