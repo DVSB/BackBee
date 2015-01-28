@@ -759,6 +759,11 @@ class PageTest extends TestCase
 
         $this->assertEquals($this->page, $new_page->unserialize($this->page->serialize()));
         $this->assertEquals($this->page->getSection(), $new_page->unserialize($this->page->serialize())->getSection());
+        
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertEquals($child, $child->unserialize($child->serialize()));
+        $this->assertEquals($this->page->getSection(), $child->getSection());
     }
 
     /**
