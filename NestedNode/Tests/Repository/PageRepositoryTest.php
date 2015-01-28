@@ -333,13 +333,27 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::getRoot
+     * @ExpectedException \LogicalException
      */
     public function testGetRoot()
     {
         $this->assertEquals($this->root, $this->repo->getRoot($this->root->getSite()));
         $this->assertEquals($this->root, $this->repo->getRoot($this->root->getSite(), array(Page::STATE_HIDDEN)));
+        $this->assertEquals($this->root, $this->repo->getRoot());
         $this->assertNull($this->repo->getRoot($this->root->getSite(), array(Page::STATE_ONLINE)));
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getRoot
+     */
+    public function testGetRootException()
+    {
+        $site = new \BackBee\Site\Site();
+        $site->setLabel('multi site')->setServerName('multi site');
+        $this->getEntityManager()->persist($site);
+        $this->getEntityManager()->flush($site);
+
+        $this->repo->getRoot();
     }
 
     /**

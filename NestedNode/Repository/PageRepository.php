@@ -347,23 +347,31 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Returns the root page for $site
-     * @param  \BackBee\Site\Site            $site             the site to test
-     * @param  array                         $restrictedStates optional, limit to pages having provided states
+     * @param \BackBee\Site\Site $site   optional, the site to test
+     * @param array $restrictedStates        optional, limit to pages having provided states
      * @return \BackBee\NestedNode\Page|NULL
      */
-    public function getRoot(Site $site, array $restrictedStates = array())
+    public function getRoot(Site $site = null, array $restrictedStates = array())
     {
         $q = $this->createQueryBuilder('p')
-            ->andSiteIs($site)
-            ->andParentIs(null)
-            ->setMaxResults(1)
-        ;
+                ->andParentIs(null)
+                ->setMaxResults(1);
+
+        if (null !== $site) {
+            $q->andSiteIs($site);
+        }
 
         if (0 < count($restrictedStates)) {
             $q->andStateIsIn($restrictedStates);
         }
 
-        return $q->getQuery()->getOneOrNullResult();
+        $result = $q->getQuery()->getResult();
+
+        if (count($result) > 1) {
+            new \LogicException('PageRepository getRoot need site parameter because multisite detected', 500);
+        }
+
+        return array_pop($result);
     }
 
     /**
