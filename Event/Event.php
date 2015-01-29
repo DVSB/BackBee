@@ -39,13 +39,13 @@ class Event extends sfEvent
      * The target entity of the event
      * @var mixed
      */
-    protected $_target;
+    protected $target;
 
     /**
      * Optional arguments passed to the event
      * @var mixed
      */
-    protected $_args;
+    protected $args;
 
     /**
      * Class constructor
@@ -54,8 +54,8 @@ class Event extends sfEvent
      */
     public function __construct($target, $eventArgs = null)
     {
-        $this->_target = $target;
-        $this->_args = $eventArgs;
+        $this->target = $target;
+        $this->args = $eventArgs;
     }
 
     /**
@@ -67,17 +67,14 @@ class Event extends sfEvent
      */
     public function getTarget($classname = null)
     {
-        if (null === $classname || true === self::isTargetInstanceOf($classname)) {
-            return $this->_target;
-        }
-
-        $target_type = gettype($this->_target);
-        if ('object' === $target_type) {
-            $target_type = get_class($this->_target);
+        if (null === $classname || true === $this->isTargetInstanceOf($classname)) {
+            return $this->target;
         }
 
         throw new \InvalidArgumentException(sprintf(
-            'Invalid target : waiting `%s`, `%s` provided.', $classname, $this->_target
+            'Invalid target: expected `%s`, `%s` provided.',
+            $classname,
+            'object' === gettype($this->target) ? get_class($this->target) : $this->target
         ));
     }
 
@@ -89,7 +86,7 @@ class Event extends sfEvent
      */
     public function isTargetInstanceOf($classname)
     {
-        return is_object($this->_target) ? is_a($this->_target, $classname) : false;
+        return is_object($this->target) ? $this->target instanceof $classname : false;
     }
 
     /**
@@ -101,7 +98,7 @@ class Event extends sfEvent
     public function getArgument($key, $default = null)
     {
         if ($this->hasArgument($key)) {
-            return $this->_args[$key];
+            return $this->args[$key];
         }
 
         return $default;
@@ -115,7 +112,7 @@ class Event extends sfEvent
      */
     public function setArgument($key, $value)
     {
-        $this->_args[$key] = $value;
+        $this->args[$key] = $value;
 
         return $this;
     }
@@ -127,7 +124,7 @@ class Event extends sfEvent
      */
     public function hasArgument($key)
     {
-        return is_array($this->_args) && array_key_exists($key, $this->_args);
+        return is_array($this->args) && array_key_exists($key, $this->args);
     }
 
     /**
@@ -136,7 +133,7 @@ class Event extends sfEvent
      */
     public function getEventArgs()
     {
-        return $this->_args;
+        return $this->args;
     }
 
     /**

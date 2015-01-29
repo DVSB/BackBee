@@ -546,48 +546,44 @@ class FrontController implements HttpKernelInterface
     {
         $this->dispatch('frontcontroller.request');
 
+        $request = $this->getRequest();
         $controllerResolver = $this->getApplication()->getContainer()->get('controller_resolver');
-        $controller = $controllerResolver->getController($this->getRequest());
+        $controller = $controllerResolver->getController($request);
 
         // logout Event dispatch
         if (
-            null !== $this->getRequest()->get('logout')
-            && true == $this->getRequest()->get('logout')
+            null !== $request->get('logout')
+            && true == $request->get('logout')
             && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')
         ) {
             $this->dispatch('frontcontroller.request.logout');
         }
 
         if (null !== $controller) {
-            $eventName = str_replace('\\', '.', strtolower(get_class($controller[0])));
-            if (0 === strpos($eventName, 'BackBee.')) {
-                $eventName = substr($eventName, 12);
-            }
-
-            if (0 === strpos($eventName, 'frontcontroller.')) {
-                $eventName = substr($eventName, 16);
-            }
-
-            $eventName .= '.pre'.$this->getRequest()->attributes->get('_action');
-            $this->dispatch($eventName.'.pre'.$this->getRequest()->attributes->get('_action'));
+            $dispatcher = $this->application->getEventDispatcher();
 
             // dispatch kernel.controller event
-            $event = new FilterControllerEvent($this, $controller, $this->getRequest(), $type);
-            $this->application->getEventDispatcher()->dispatch(KernelEvents::CONTROLLER, $event);
+            $event = new FilterControllerEvent($this, $controller, $request, $type);
+            $dispatcher->dispatch(KernelEvents::CONTROLLER, $event);
 
             // a listener could have changed the controller
             $controller = $event->getController();
 
+            $eventName = $this->getControllerActionEventName($controller[0], $request->attributes->get('_action'));
+            $dispatcher->dispatch($eventName.'.precall', new Event\PreRequestEvent($request));
+
             // get controller action arguments
-            $actionArguments = $controllerResolver->getArguments(
-                $this->getRequest(), $controller
-            );
+            $actionArguments = $controllerResolver->getArguments($request, $controller);
 
             $response = call_user_func_array($controller, $actionArguments);
+            $dispatcher->dispatch($eventName.'.postcall', new Event\PostResponseEvent($response, $request));
 
             return $response;
         } else {
-            throw new FrontControllerException(sprintf('Unknown action `%s`.', $this->getRequest()->attributes->get('_action')), FrontControllerException::BAD_REQUEST);
+            throw new FrontControllerException(
+                sprintf('Unknown action `%s`.', $request->attributes->get('_action')),
+                FrontControllerException::BAD_REQUEST
+            );
         }
     }
 
@@ -631,5 +627,32 @@ class FrontController implements HttpKernelInterface
         }
 
         return $response;
+    }
+
+    /**
+     * Builds and returns controller's action event name
+     *
+     * @param  object $controller
+     * @param  string $actionName
+     * @return string
+     * @throws \InvalidArgumentException if provided controller is not an object
+     */
+    private function getControllerActionEventName($controller, $actionName)
+    {
+        if (!is_object($controller)) {
+            throw new \InvalidArgumentException('Controller must be type of object, '.gettype($controller).' given.');
+        }
+
+        $eventName = str_replace('\\', '.', strtolower(get_class($controller)));
+
+        if (0 === strpos($eventName, 'backbee.')) {
+            $eventName = str_replace('backbee.', '', $eventName);
+        }
+
+        if (0 === strpos($eventName, 'frontcontroller.')) {
+            $eventName = str_replace('frontcontroller.', '', $eventName);
+        }
+
+        return $eventName.'.'.$actionName;
     }
 }

@@ -36,23 +36,20 @@ use BackBee\Event\Event;
 class RendererEvent extends Event
 {
     /**
-     * [$renderer description]
-     *
-     * @var [type]
+     * @var BackBee\Renderer\Renderer
      */
     private $renderer;
 
     /**
-     * [$render description]
-     *
-     * @var [type]
+     * @var string
      */
     private $render;
 
     /**
-     * [__construct description]
-     * @param ARenderer $renderer [description]
-     * @param [type]    $render   [description]
+     * Create an instance of RendererEvent.
+     *
+     * @param mixed $target
+     * @param mixed $arguments
      */
     public function __construct($target, $arguments = null)
     {
@@ -70,7 +67,7 @@ class RendererEvent extends Event
     /**
      * Getter of current event renderer object
      *
-     * @return [type] [description]
+     * @return BackBee\Renderer\Renderer
      */
     public function getRenderer()
     {
