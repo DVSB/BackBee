@@ -265,6 +265,7 @@ class IndexationRepository extends EntityRepository
                 ->from('content_has_subcontent', 'j');
 
         $index = 0;
+        $method = 'where';
         $atleastone = false;
         foreach ($contents as $content) {
             if (false === ($content instanceof AClassContent)) {
@@ -275,17 +276,26 @@ class IndexationRepository extends EntityRepository
                 continue;
             }
 
-            $q->orWhere('c.'.$meta->getColumnName('subcontent_uid').' = :uid'.$index)
-                    ->setParameter('uid'.$index, $content->getUid());
+            if ($index !== 0) {
+                $method = 'orWhere';
+            }
 
-            $p->orWhere('j.content_uid = :uid'.$index)
-                    ->setParameter('uid'.$index, $content->getUid());
+            $q->{$method}('c.'.$meta->getColumnName('subcontent_uid').' = :uid'.$index)
+              ->setParameter('uid'.$index, $content->getUid());
+
+            $p->{$method}('j.content_uid = :uid'.$index)
+              ->setParameter('uid'.$index, $content->getUid());
 
             $index++;
             $atleastone = true;
         }
 
-        return (true === $atleastone) ? array_unique(array_merge($q->execute()->fetchAll(\PDO::FETCH_COLUMN), $p->execute()->fetchAll(\PDO::FETCH_COLUMN))) : array();
+        return (true === $atleastone) ? array_unique(
+            array_merge(
+                $q->execute()->fetchAll(\PDO::FETCH_COLUMN),
+                $p->execute()->fetchAll(\PDO::FETCH_COLUMN)
+            )
+        ) : array();
     }
 
     /**
