@@ -26,9 +26,12 @@ namespace BackBee\Rest\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
 
 use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Exception\ValidationException;
 use BackBee\Security\Group;
+
 
 /**
  * User Controller
@@ -42,32 +45,19 @@ class GroupController extends ARestController
 {
     /**
      * Get all records
-     *
-     * @Rest\QueryParam(name = "site_uid", description="Site")
      */
     public function getCollectionAction(Request $request)
     {
-        $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('g')
-            ->from('BackBee\Security\Group', 'g')
-        ;
-
-        if ($request->request->get('site_uid')) {
-            $site = $this->getApplication()->getEntityManager()->getRepository('BackBee\Site\Site')->find($request->request->get('site_uid'));
-
-            if (!$site) {
-                throw $this->createValidationException('site_uid', $request->request->get('site_uid'), 'Site is not valid: '.$request->request->get('site_uid'));
-            }
-
-            $qb->leftJoin('g._site', 's')
-                ->andWhere('s._uid = :site_uid')
-                ->setParameter('site_uid', $site->getUid())
-             ;
+        if ($request->request->has('site_uid')) {
+            $site_uid = $request->request->get('site_uid');
+            $this->checkSiteUid($site_uid);
+        } else {
+            $site_uid = $this->getApplication()->getSite()->getUid();
         }
 
-        $groups = $qb->getQuery()->getResult();
+        $groups = $this->getEntityManager()->getRepository('BackBee\Security\Group')->findBy(['_site' => $site_uid]);
 
-        return new Response($this->formatCollection($groups));
+        return new Response($this->formatCollection($groups), 200, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -77,7 +67,7 @@ class GroupController extends ARestController
      */
     public function getAction(Group $group)
     {
-        return new Response($this->formatItem($group));
+        return new Response($this->formatItem($group), 200, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -100,13 +90,6 @@ class GroupController extends ARestController
      *   @Assert\NotBlank(message="Name is required"),
      *   @Assert\Length(max=50, minMessage="Maximum length of name is 50 characters")
      * })
-     * @Rest\RequestParam(name = "identifier", requirements = {
-     *   @Assert\NotBlank(message="Identifier is required"),
-     *   @Assert\Length(max=50, minMessage="Maximum length of identifier is 50 characters")
-     * })
-     * @Rest\RequestParam(name = "site_uid", requirements = {
-     *   @Assert\Length(max=50)
-     * })
      *
      * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
      *
@@ -124,53 +107,52 @@ class GroupController extends ARestController
     /**
      * Create
      *
-     *
      * @Rest\RequestParam(name = "name", requirements = {
      *  @Assert\NotBlank(message="Name is required"),
      *  @Assert\Length(max=50, minMessage="Maximum length of name is 50 characters")
-     * })
-     * @Rest\RequestParam(name = "identifier", requirements = {
-     *  @Assert\NotBlank(message="Identifier is required"),
-     *  @Assert\Length(max=50, minMessage="Maximum length of identifier is 50 characters")
-     * })
-     * @Rest\RequestParam(name = "site_uid", requirements = {
-     *  @Assert\Length(max=50)
      * })
      *
      */
     public function postAction(Request $request)
     {
-        $groupExists = $this->getApplication()
-            ->getEntityManager()
-            ->getRepository('BackBee\Security\Group')
-            ->findBy(['_identifier' => $request->request->get('identifier')])
-        ;
-
-        if ($groupExists) {
-            $response = $this->createResponse()
-                ->setStatusCode(409, sprintf('Group with that identifier already exists: %s', $request->request->get('identifier')))
-            ;
-
-            return $response;
-        }
-
         $group = new Group();
 
-        if ($request->request->get('site_uid')) {
-            $site = $this->getApplication()->getEntityManager()->getRepository('BackBee\Site\Site')->find($request->request->get('site_uid'));
+        if ($request->request->has('site_uid')) {
+            $this->checkSiteUid($request->request->get('site_uid'));
 
-            if (!$site) {
-                throw $this->createValidationException('site_uid', $request->request->get('site_uid'), 'Site is not valid: '.$request->request->get('site_uid'));
-            }
-
-            $group->setSite($site);
+            $site = $this->getEntityManager()->find('BackBee\Site\Site', $request->request->get('site_uid'));
+        } else {
+            $site = $this->getApplication()->getSite();
         }
+
+        $duplicate = $this->getEntityManager()->getRepository('BackBee\Security\Group')->findOneBy([
+            '_name' => $request->request->get('name'),
+            '_site' => $site
+        ]);
+
+        if ($duplicate !== null) {
+            return new Response('', 409);
+        }
+
+        $group->setName($request->request->get('name'));
+        $group->setSite($site);
 
         $group = $this->deserializeEntity($request->request->all(), $group);
 
         $this->getEntityManager()->persist($group);
         $this->getEntityManager()->flush();
 
-        return new Response($this->formatItem($group), 200, array('Content-Type' => 'application/json'));
+        return new Response($this->formatItem($group), 200, ['Content-Type' => 'application/json']);
+    }
+
+    private function checkSiteUid($site_uid)
+    {
+        $site = $this->getEntityManager()->find('BackBee\Site\Site', $site_uid);
+        $validator = Validation::createValidator();
+        $constraint = new Assert\NotNull(['message' => 'Invalid site identifier']);
+        $violations = $validator->validateValue($site, $constraint);
+        if (count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
     }
 }

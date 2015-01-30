@@ -93,7 +93,6 @@ class BBAclVoterTest extends TestCase
         // save user
         $this->group = new Group();
         $this->group->setName('groupName');
-        $this->group->setIdentifier('GROUP_ID');
         $this->getBBApp()->getEntityManager()->persist($this->group);
 
         // valid user
@@ -115,7 +114,7 @@ class BBAclVoterTest extends TestCase
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateClassAce(
             new ObjectIdentity($this->user->getId(), get_class($this->user)),
-            new UserSecurityIdentity($this->group->getIdentifier(), get_class($this->group)),
+            new UserSecurityIdentity($this->group->getObjectIdentifier(), get_class($this->group)),
             MaskBuilder::MASK_EDIT
         );
 
@@ -129,7 +128,7 @@ class BBAclVoterTest extends TestCase
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateClassAce(
             new ObjectIdentity('class', get_class($this->user)),
-            new UserSecurityIdentity($this->group->getIdentifier(), get_class($this->group)),
+            new UserSecurityIdentity($this->group->getObjectIdentifier(), get_class($this->group)),
             MaskBuilder::MASK_EDIT
         );
 

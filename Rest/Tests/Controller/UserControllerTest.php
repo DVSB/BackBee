@@ -59,7 +59,6 @@ class UserControllerTest extends RestTestCase
         // save user
         $group = new Group();
         $group->setName('groupName');
-        $group->setIdentifier('GROUP_ID');
         $bbapp->getEntityManager()->persist($group);
 
         // valid user

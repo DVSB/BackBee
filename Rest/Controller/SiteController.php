@@ -24,6 +24,7 @@
 namespace BackBee\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Site Controller

@@ -110,13 +110,13 @@ class SiteControllerTest extends TestCase
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateObjectAce(
             new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)),
-            new UserSecurityIdentity('super_admin', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($token->getUser()->getGroups()[0]->getId(), 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
         $aclManager->insertOrUpdateObjectAce(
             new ObjectIdentity('class', 'BackBee\Site\Layout'),
-            new UserSecurityIdentity('super_admin', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($token->getUser()->getGroups()[0]->getId(), 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
@@ -145,7 +145,7 @@ class SiteControllerTest extends TestCase
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateObjectAce(
             new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)),
-            new UserSecurityIdentity('editor_layout', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($token->getUser()->getGroups()[0]->getId(), 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
