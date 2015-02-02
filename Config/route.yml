@@ -388,13 +388,23 @@ bb.rest.classcontent.get_draft_collection:
     requirements:
         _method: GET
 
-bb.rest.classcontent.patch_draft_collection:
-    pattern: /rest/{version}/classcontent-draft
+bb.rest.classcontent.put_draft:
+    pattern: /rest/{version}/classcontent-draft/{type}/{uid}
     defaults:
-        _action: patchDraftCollectionAction
+        _action: putDraftAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
-        _method: PATCH
+        uid: \w{32}
+        type: "[a-zA-Z_\/]+"
+        _method: PUT
+
+bb.rest.classcontent.put_draft_collection:
+    pattern: /rest/{version}/classcontent-draft
+    defaults:
+        _action: putDraftCollectionAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        _method: PUT
 
 bb.rest.bundle.get_collection:
     pattern: /rest/{version}/bundle

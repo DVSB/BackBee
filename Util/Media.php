@@ -25,6 +25,7 @@ namespace BackBee\Util;
 
 use BackBee\ClassContent\Element\file as elementFile;
 use BackBee\Exception\InvalidArgumentException;
+use BackBee\Utils\File\File;
 
 /**
  * Set of utility methods to deal with media files

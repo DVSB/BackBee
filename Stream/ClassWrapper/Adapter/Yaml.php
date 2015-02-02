@@ -107,14 +107,17 @@ class Yaml extends AClassWrapper
                     if (isset($value['default'])) {
                         $options['default'] = $value['default'];
                     }
+
                     if (isset($value['label'])) {
                         $options['label'] = $value['label'];
                     }
+
                     if (isset($value['maxentry'])) {
                         $options['maxentry'] = $value['maxentry'];
                     }
+
                     if (isset($value['parameters'])) {
-                        $options['parameters'] = $this->_extractDatas($value['parameters']);
+                        $options['parameters'] = $value['parameters'];
                     }
                 } else {
                     $type = 'array';
@@ -166,8 +169,9 @@ class Yaml extends AClassWrapper
                             $this->extends = $this->_normalizeVar($datas, true);
                             if (substr($this->extends, 0, 1) != NAMESPACE_SEPARATOR) {
                                 $this->extends = NAMESPACE_SEPARATOR.$this->namespace.
-                                        NAMESPACE_SEPARATOR.$this->extends;
+                                    NAMESPACE_SEPARATOR.$this->extends;
                             }
+
                             break;
                         case 'interfaces':
                             $datas = false === is_array($datas) ? array($datas) : $datas;
@@ -192,6 +196,7 @@ class Yaml extends AClassWrapper
                             } else {
                                 $this->interfaces = '';
                             }
+
                             break;
                         case 'repository':
                             if (class_exists($datas)) {
@@ -269,12 +274,16 @@ class Yaml extends AClassWrapper
      */
     public function glob($pattern)
     {
-        $classnames = array();
+        $classnames = [];
         foreach ($this->_classcontentdir as $repository) {
             foreach ($this->_includeExtensions as $ext) {
                 if (false !== $files = glob($repository.DIRECTORY_SEPARATOR.$pattern.$ext)) {
                     foreach ($files as $file) {
-                        $classnames[] = $this->namespace.NAMESPACE_SEPARATOR.str_replace(array($repository.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), array('', NAMESPACE_SEPARATOR), $file);
+                        $classnames[] = $this->namespace.NAMESPACE_SEPARATOR.str_replace(
+                            [$repository.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR],
+                            ['', NAMESPACE_SEPARATOR],
+                            $file
+                        );
                     }
                 }
             }
@@ -304,8 +313,9 @@ class Yaml extends AClassWrapper
 
         $this->classname = basename($path);
         if (dirname($path) && dirname($path) != DIRECTORY_SEPARATOR) {
-            $this->namespace .= NAMESPACE_SEPARATOR.
-                    str_replace(DIRECTORY_SEPARATOR, NAMESPACE_SEPARATOR, dirname($path));
+            $this->namespace .= NAMESPACE_SEPARATOR.str_replace(
+                DIRECTORY_SEPARATOR, NAMESPACE_SEPARATOR, dirname($path)
+            );
         }
 
         $this->_path = $this->_resolveFilePath($path);

@@ -111,7 +111,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
     public function testDefineParam()
     {
-        $defaultParams = $this->content->getDefaultParameters();
+        $defaultParams = $this->content->getDefaultParams();
 
         $this->assertFalse(isset($defaultParams['test_foobar']));
         $this->content->mockedDefineParam('test_foobar', [
@@ -119,7 +119,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
             'value'   => null,
         ]);
 
-        $defaultParams = $this->content->getDefaultParameters();
+        $defaultParams = $this->content->getDefaultParams();
         $this->assertTrue(isset($defaultParams['test_foobar']));
         $this->assertTrue(array_key_exists('value', $defaultParams['test_foobar']));
         $this->assertNull($defaultParams['test_foobar']['value']);
@@ -129,7 +129,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     public function testSetAndGetParam()
     {
         $content = new image();
-        $defaultParams = $content->getDefaultParameters();
+        $defaultParams = $content->getDefaultParams();
 
         foreach ($defaultParams as $param) {
             $this->assertTrue(array_key_exists('value', $param));
@@ -216,43 +216,6 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     }
 
         $this->assertEquals('A date', $this->content->date->value);
-    }
-
-    /**
-     * test prepareCommitDraft
-     *
-     * @coverage \BackBee\ClassContent\AClassContent::prepareCommitDraft
-     */
-    public function prepareCommitDraft()
-    {
-        try {
-            $this->content->prepareCommitDraft();
-            $this->fail('RevisionMissingException not raise');
-        } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionMissingException', $expected);
-        }
-
-        $revision = new Revision();
-        $revision->setContent($this->content);
-        $this->content->setDraft($revision);
-        $revision->setState(Revision::STATE_CONFLICTED);
-
-        $this->assertInstanceOf('BackBee\ClassContent\Element\text', $this->content->getDraft()->getData('title'));
-
-        try {
-            $this->content->prepareCommitDraft();
-            $this->fail('RevisionConflictedException not raise');
-        } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionConflictedException', $expected);
-        }
-
-        $revision->setState('bad case');
-        try {
-            $this->content->prepareCommitDraft();
-            $this->fail('RevisionUptodateException not raise');
-        } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionUptodateException', $expected);
-        }
     }
 
     public function testJsonSerialize()

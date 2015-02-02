@@ -109,63 +109,6 @@ class RevisionRepository extends EntityRepository
         throw new ClassContentException('Content is already up-to-date', ClassContentException::REVISION_UPTODATE);
     }
 
-    /**
-     * Commit user revision
-     * @param  Revision              $revision
-     * @throws ClassContentException Occurs on illegal revision state
-     */
-    public function commit(Revision $revision)
-    {
-        switch ($revision->getState()) {
-            case Revision::STATE_ADDED:
-            case Revision::STATE_MODIFIED:
-                $revision->setRevision($revision->getRevision() + 1)
-                        ->setState(Revision::STATE_COMMITTED);
-
-                return $this->loadSubcontents($revision);
-
-            case Revision::STATE_CONFLICTED:
-                throw new ClassContentException(
-                    'Content is in conflict, resolve or revert it',
-                    ClassContentException::REVISION_CONFLICTED
-                );
-        }
-
-        throw new ClassContentException(
-            sprintf('Content can not be commited (state : %s)', $revision->getState()),
-            ClassContentException::REVISION_UPTODATE
-        );
-    }
-
-    /**
-     * Revert (ie delete) user revision
-     * @param  Revision              $revision
-     * @throws ClassContentException Occurs on illegal revision state
-     */
-    public function revert(Revision $revision)
-    {
-        switch ($revision->getState()) {
-            case Revision::STATE_ADDED:
-            case Revision::STATE_MODIFIED:
-            case Revision::STATE_CONFLICTED:
-                if (null !== $content = $revision->getContent()) {
-                    $content->releaseDraft();
-                    if (AClassContent::STATE_NEW === $content->getState()) {
-                        $this->_em->remove($content);
-                    }
-                }
-
-                $this->_em->remove($revision);
-
-                return $revision;
-        }
-
-        throw new ClassContentException(
-            sprintf('Content can not be reverted (state : %s)', $revision->getState()),
-            ClassContentException::REVISION_UPTODATE
-        );
-    }
-
     public function loadSubcontents(Revision $revision)
     {
         $content = $revision->getContent();
@@ -180,7 +123,6 @@ class RevisionRepository extends EntityRepository
                 }
 
                 $subcontent = $this->_em->find(get_class($subcontent), $subcontent->getUid());
-                echo "Subcontent ".get_class($subcontent)."(".$subcontent->getUid().") loaded\n";
             }
         } else {
             foreach ($revision->getData() as $key => $value) {
@@ -188,7 +130,6 @@ class RevisionRepository extends EntityRepository
                     foreach ($value as &$val) {
                         if ($val instanceof AClassContent) {
                             if (null !== $entity = $this->_em->find(get_class($val), $val->getUid())) {
-                                echo "Subcontent ".get_class($entity)."(".$entity->getUid().") loaded\n";
                                 $val = $entity;
                             }
                         }
@@ -197,7 +138,6 @@ class RevisionRepository extends EntityRepository
                     unset($val);
                 } elseif ($value instanceof AClassContent) {
                     if (null !== $entity = $this->_em->find(get_class($value), $value->getUid())) {
-                        echo "Subcontent ".get_class($entity)."(".$entity->getUid().") loaded\n";
                         $value = $entity;
                     }
                 }
@@ -205,8 +145,6 @@ class RevisionRepository extends EntityRepository
                 $revision->$key = $value;
             }
         }
-
-        $revision->setSubcontentsLoaded(true);
 
         return $revision;
     }

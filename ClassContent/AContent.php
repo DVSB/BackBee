@@ -195,11 +195,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function __get($var)
     {
-        if ($this->_getContentInstance() instanceof ContentSet) {
+        if ($this->getContentInstance() instanceof ContentSet) {
             throw new UnknownPropertyException(sprintf(
                 'Unknown property %s in %s.',
                 $var,
-                ClassUtils::getRealClass($this->_getContentInstance())
+                ClassUtils::getRealClass($this->getContentInstance())
             ));
         }
 
@@ -215,11 +215,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function __set($var, $value)
     {
-        if ($this->_getContentInstance() instanceof ContentSet || !isset($this->_data[$var])) {
+        if ($this->getContentInstance() instanceof ContentSet || !isset($this->_data[$var])) {
             throw new UnknownPropertyException(sprintf(
                 'Unknown property %s in %s.',
                 $var,
-                ClassUtils::getRealClass($this->_getContentInstance())
+                ClassUtils::getRealClass($this->getContentInstance())
             ));
         }
 
@@ -258,7 +258,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         $this->_data[$var] = $val;
         $this->_modified = new \DateTime();
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -269,11 +269,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function __isset($var)
     {
-        if ($this->_getContentInstance() instanceof ContentSet) {
+        if ($this->getContentInstance() instanceof ContentSet) {
             throw new UnknownPropertyException(sprintf(
                 'Unknown property %s in %s.',
                 $var,
-                ClassUtils::getRealClass($this->_getContentInstance())
+                ClassUtils::getRealClass($this->getContentInstance())
             ));
         }
 
@@ -287,11 +287,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function __unset($var)
     {
-        if ($this->_getContentInstance() instanceof ContentSet) {
+        if ($this->getContentInstance() instanceof ContentSet) {
             throw new UnknownPropertyException(sprintf(
                 'Unknown property %s in %s.',
                 $var,
-                ClassUtils::getRealClass($this->_getContentInstance())
+                ClassUtils::getRealClass($this->getContentInstance())
             ));
         }
 
@@ -308,7 +308,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     public function __toString()
     {
         if (false === $this->isElementContent()) {
-            return sprintf('%s(%s)', ClassUtils::getRealClass($this->_getContentInstance()), $this->getUid());
+            return sprintf('%s(%s)', ClassUtils::getRealClass($this->getContentInstance()), $this->getUid());
         }
 
         $string = '';
@@ -429,7 +429,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_label = $label;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -442,11 +442,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_accept = $accept;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
-     * Sets one or all parameters
+     * Sets one parameter.
      *
      * @param  string $key   the parameter name to set
      * @param  mixed  $value the parameter value, if null is passed it will unset provided key parameter
@@ -460,7 +460,22 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             $this->_parameters[$key] = ['value' => $value];
         }
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
+    }
+
+    /**
+     * Sets all parameters.
+     *
+     * @param array $params
+     * @return self
+     */
+    public function setAllParams(array $params)
+    {
+        foreach ($params as $key => $value) {
+            $this->setParam($key, $value);
+        }
+
+        return $this;
     }
 
     /**
@@ -473,7 +488,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_maxentry = $maxentry;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -486,7 +501,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_minentry = $minentry;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -499,7 +514,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_created = null === $created ? new \DateTime() : $created;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -512,7 +527,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_modified = null === $modified ? new \DateTime() : $modified;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -525,7 +540,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_revision = $revision;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -538,7 +553,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_state = $state;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -549,7 +564,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     public function isElementContent()
     {
         return false !== strpos(
-            ClassUtils::getRealClass($this->_getContentInstance()),
+            ClassUtils::getRealClass($this->getContentInstance()),
             self::CLASSCONTENT_BASE_NAMESPACE.'Element\\'
         );
     }
@@ -589,7 +604,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function isAccepted($value, $var = null)
     {
-        if ($this->_getContentInstance() instanceof ContentSet) {
+        if ($this->getContentInstance() instanceof ContentSet) {
             if (!($value instanceof AClassContent)) {
                 return false;
             }
@@ -620,7 +635,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * @param  string                                    $value The value of the subcontent (uid)
      * @return \BackBee\ClassContent\AClassContent|FALSE
      */
-    protected function _getContentByDataValue($type, $value)
+    protected function getContentByDataValue($type, $value)
     {
         return new $type($value);
     }
@@ -630,7 +645,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * @return \BackBee\ClassContent\AClassContent
      * @codeCoverageIgnore
      */
-    protected function _getContentInstance()
+    protected function getContentInstance()
     {
         return $this;
     }
@@ -769,7 +784,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         }
 
         if (!array_key_exists($var, $this->_data)) {
-            if ($this->_getContentInstance() instanceof ContentSet) {
+            if ($this->getContentInstance() instanceof ContentSet) {
                 return;
             } else {
                 throw new UnknownPropertyException(sprintf(
@@ -795,7 +810,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
                     throw new ClassNotFoundException(sprintf('Unknown class content %s.', $type));
                 }
 
-                if (false !== $subcontent = $this->_getContentByDataValue($type, $value)) {
+                if (false !== $subcontent = $this->getContentByDataValue($type, $value)) {
                     $data[] = $subcontent;
                 }
             } else {
@@ -931,6 +946,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             'maxentry'   => $this->getMaxEntry(),
             'elements'   => $this->computeElementsToJson($this->getData()),
         ];
+
+        if (0 === count($data['parameters'])) {
+            $data['parameters'] = new \ArrayObject();
+        }
 
         return $this->formatJsonData($data, $format);
     }

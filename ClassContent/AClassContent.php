@@ -126,19 +126,19 @@ abstract class AClassContent extends AContent
      * The content's properties as defined in yaml file
      * @var array
      */
-    protected $properties = array();
+    protected $properties = [];
 
     /**
      * Default parameters as defined in yaml file
      * @var array
      */
-    protected $defaultParams = array();
+    protected $defaultParams = [];
 
     /**
      * Store the map associating content uid to subcontent index
      * @var array
      */
-    protected $subcontentmap = array();
+    protected $subcontentmap = [];
 
     /**
      * The optionnal personnal draft of this content
@@ -151,6 +151,11 @@ abstract class AClassContent extends AContent
      * @var boolean
      */
     protected $isloaded;
+
+    /**
+     * @var array
+     */
+    protected $defaultOptions = [];
 
     /**
      * Class constructor
@@ -286,7 +291,7 @@ abstract class AClassContent extends AContent
      * @return array
      * @codeCoverageIgnore
      */
-    public function getDefaultParameters()
+    public function getDefaultParams()
     {
         return $this->defaultParams;
     }
@@ -354,15 +359,14 @@ abstract class AClassContent extends AContent
                 $this->_parameters = $revision->getAllParams();
 
                 $this->setRevision($revision->getRevision())
-                        ->setState(AClassContent::STATE_NORMAL)
-                        ->addRevision($revision);
+                    ->setState(AClassContent::STATE_NORMAL)
+                    ->addRevision($revision)
+                ;
 
                 return $this;
-                break;
 
             case Revision::STATE_CONFLICTED:
                 throw new Exception\RevisionConflictedException('Content is in conflict, please resolve or revert it');
-                break;
         }
 
         throw new Exception\RevisionUptodateException(sprintf('Content can not be commited (state : %s)', $revision->getState()));
@@ -448,7 +452,7 @@ abstract class AClassContent extends AContent
      * @return \BackBee\ClassContent\AClassContent
      * @codeCoverageIgnore
      */
-    protected function _getContentInstance()
+    protected function getContentInstance()
     {
         return $this;
     }
@@ -468,12 +472,6 @@ abstract class AClassContent extends AContent
 
             if (isset($options['label'])) {
                 $this->_label = $options['label'];
-            }
-
-            if (isset($options['parameters'])) {
-                foreach ($options['parameters'] as $key => $param) {
-                    $this->defineParam($key, $param);
-                }
             }
 
             if (isset($options['default'])) {
@@ -535,12 +533,16 @@ abstract class AClassContent extends AContent
             $this->_addAcceptedType($type, $var);
         }
 
+        if (null !== $options) {
+            $this->defaultOptions[$var] = $options;
+        }
+
         if (!array_key_exists($var, $this->_data)) {
-            $this->_data[$var] = array();
+            $this->_data[$var] = [];
             $this->_maxentry[$var] = (!is_null($options) && isset($options['maxentry'])) ? $options['maxentry'] : 1;
             $this->_minentry[$var] = (!is_null($options) && isset($options['minentry'])) ? $options['minentry'] : 0;
 
-            $values = array();
+            $values = [];
             if (is_array($options) && array_key_exists('default', $options)) {
                 $values = (array) $options['default'];
 
@@ -1023,40 +1025,12 @@ abstract class AClassContent extends AContent
     }
 
     /**
-     * ??????????????????????????????
-     * Update the instance
-     * @param  Revision              $lastCommitted The last committed revision of the content
-     * @throws ClassContentException Occurs when a data conflict is detected
-     */
-    public function updateDraft(Revision $lastCommitted)
-    {
-        if (null === $revision = $this->getDraft()) {
-            throw new ClassContentException(
-                'Enable to update: missing draft',
-                ClassContentException::REVISION_MISSING
-            );
-        }
-
-        if ($revision->getLabel() != $this->_label) {
-            $revision->setState(Revision::STATE_CONFLICTED);
-            throw new ClassContentException(
-                'Enable to update: conflict appears',
-                ClassContentException::REVISION_CONFLICTED
-            );
-        }
-
-        $this->releaseDraft();
-        foreach ($revision->getData() as $key => $value) {
-        }
-    }
-
-    /**
      * Returns a subcontent instance by its type and value, FALSE if not found
      * @param  string                                    $type  The classname of the subcontent
      * @param  string                                    $value The value of the subcontent (uid)
      * @return \BackBee\ClassContent\AClassContent|FALSE
      */
-    protected function _getContentByDataValue($type, $value)
+    protected function getContentByDataValue($type, $value)
     {
         if (class_exists($type)) {
             $index = 0;
@@ -1110,12 +1084,16 @@ abstract class AClassContent extends AContent
         }
 
         if (self::JSON_DEFINITION_FORMAT === $format) {
-            $data['parameters'] = $this->getDefaultParameters();
+            $data['parameters'] = 0 === count($this->getDefaultParams())
+                ? new \ArrayObject()
+                : $this->getDefaultParams()
+            ;
         }
 
         $data = array_merge([
-            'properties' => $this->getProperty(),
-            'image'      => self::JSON_DEFINITION_FORMAT === $format
+            'defaultOptions' => 0 === count($this->defaultOptions) ? new \ArrayObject() : $this->defaultOptions,
+            'properties'     => $this->getProperty(),
+            'image'          => self::JSON_DEFINITION_FORMAT === $format
                 ? $this->getDefaultImageName()
                 : $this->getImageName()
             ,

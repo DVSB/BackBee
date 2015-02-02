@@ -6,14 +6,6 @@ classcontent.update:
     listeners:
         - [BackBee\Event\Listener\ClassContentListener, onUpdate]
 
-classcontent.commit:
-    listeners:
-        - [BackBee\Event\Listener\ClassContentListener, onCommit]
-
-classcontent.revert:
-    listeners:
-        - [BackBee\Event\Listener\ClassContentListener, onRevert]
-
 classcontent.onflush:
     listeners:
         - [BackBee\Event\Listener\ClassContentListener, onFlushContent]

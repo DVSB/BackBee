@@ -23,12 +23,13 @@
 
 namespace BackBee\ClassContent;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\Element\file as ElementFile;
 use BackBee\ApplicationInterface;
 use BackBee\Routing\RouteCollection;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Utils\File\File;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -79,7 +80,7 @@ class ClassContentManager
     public function update(AClassContent $content, array $data)
     {
         if (!isset($data['parameters']) && !isset($data['elements'])) {
-            throw new \InvalidArgumentException('Provided data is not valid for ClassContentManager::update.');
+            throw new \InvalidArgumentException('Provided data are not valids for ClassContentManager::update.');
         }
 
         if (isset($data['parameters'])) {
@@ -202,6 +203,62 @@ class ClassContentManager
             $this->token ?: $this->application->getBBUserToken(),
             $checkoutOnMissing
         );
+    }
+
+    /**
+     * Computes provided data to define what to commit from given content.
+     *
+     * @param  AClassContent $content
+     * @param  array         $data
+     * @return self
+     */
+    public function commit(AClassContent $content, array $data)
+    {
+        if (!isset($data['parameters']) && !isset($data['elements'])) {
+            throw new \InvalidArgumentException('Provided data are not valids for ClassContentManager::commit.');
+        }
+
+        if (null === $draft = $this->getDraft($content)) {
+            throw new InvalidArgumentException(sprintf(
+                '%s with identifier "%s" has not draft, nothing to commit.',
+                $content->getContentType(),
+                $content->getUid()
+            ));
+        }
+
+        $cleanDraft = clone $draft;
+        $this->prepareDraftForCommit($content, $draft, $data);
+        $this->executeCommit($content, $draft);
+        $this->commitPostProcess($content, $cleanDraft);
+
+        return $this;
+    }
+
+    /**
+     * Computes provided data to define what to revert from given content.
+     *
+     * @param  AClassContent $content
+     * @param  array         $data
+     * @return self
+     */
+    public function revert(AClassContent $content, array $data)
+    {
+        if (!isset($data['parameters']) && !isset($data['elements'])) {
+            throw new \InvalidArgumentException('Provided data are not valids for ClassContentManager::revert.');
+        }
+
+        if (null === $draft = $this->getDraft($content)) {
+            throw new InvalidArgumentException(sprintf(
+                '%s with identifier "%s" has not draft, nothing to revert.',
+                $content->getContentType(),
+                $content->getUid()
+            ));
+        }
+
+        $this->executeRevert($content, $draft, $data);
+        $this->revertPostProcess($content, $draft);
+
+        return $this;
     }
 
     /**
@@ -342,5 +399,172 @@ class ClassContentManager
         }
 
         return $this;
+    }
+
+    /**
+     * Prepares draft for commit.
+     *
+     * @param  AClassContent $content
+     * @param  Revision      $draft
+     * @param  array         $data
+     * @return self
+     */
+    private function prepareDraftForCommit(AClassContent $content, Revision $draft, array $data)
+    {
+        if ($content instanceof ContentSet) {
+            if (!isset($data['elements']) || false === $data['elements']) {
+                $draft->clear();
+                foreach ($content->getData() as $element) {
+                    $draft->push($element);
+                }
+            }
+        } else {
+            foreach ($content->getData() as $key => $element) {
+                if (!isset($data['elements']) || !in_array($key, $data['elements'])) {
+                    $draft->$key = $content->$key;
+                }
+            }
+        }
+
+        if (isset($data['parameters'])) {
+            foreach ($content->getAllParams() as $key => $params) {
+                if (!in_array($key, $data['parameters'])) {
+                    $draft->setParam($key, $content->getParamValue($key));
+                }
+            }
+        }
+
+        if (isset($data['message'])) {
+            $draft->setComment($data['message']);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Executes commit action on content and its draft.
+     *
+     * @param  AClassContent $content
+     * @param  Revision      $draft
+     * @return self
+     */
+    private function executeCommit(AClassContent $content, Revision $draft)
+    {
+        if ($content instanceof ContentSet) {
+            $content->clear();
+            while ($subcontent = $draft->next()) {
+                if ($subcontent instanceof AClassContent) {
+                    $subcontent = $this->em->getRepository(ClassUtils::getRealClass($subcontent))->load($subcontent);
+                    if (null !== $subcontent) {
+                        $content->push($subcontent);
+                    }
+                }
+            }
+        } else {
+            foreach ($draft->getData() as $key => $values) {
+                $values = is_array($values) ? $values : [$values];
+                foreach ($values as &$subcontent) {
+                    if ($subcontent instanceof AClassContent) {
+                        $subcontent = $this->em->getRepository(ClassUtils::getRealClass($subcontent))
+                            ->load($subcontent)
+                        ;
+                    }
+                }
+
+                $content->$key = $values;
+            }
+
+            if ($content instanceof ElementFile) {
+                $this->em->getRepository('BackBee\ClassContent\Element\file')
+                    ->setDirectories($this->application)
+                    ->commitFile($content)
+                ;
+            }
+        }
+
+        $draft->commit();
+        $content->setLabel($draft->getLabel());
+        foreach ($draft->getAllParams() as $key => $params) {
+            $content->setParam($key, $params['value']);
+        }
+
+        $content->setRevision($draft->getRevision())
+            ->setState(AClassContent::STATE_NORMAL)
+            ->addRevision($draft)
+        ;
+
+        return $this;
+    }
+
+    /**
+     * Runs process of post commit.
+     *
+     * @param  AClassContent $content
+     * @param  Revision      $draft
+     * @return self
+     */
+    private function commitPostProcess(AClassContent $content, Revision $draft)
+    {
+        $data = $draft->jsonSerialize();
+        if (0 !== count($data['parameters']) && 0 !== count($data['elements'])) {
+            $draft->setRevision($content->getRevision());
+            $draft->setState(Revision::STATE_MODIFIED);
+            $this->em->persist($draft);
+        }
+    }
+
+    /**
+     * Executes revert action on content and its draft.
+     *
+     * @param  AClassContent $content
+     * @param  Revision      $draft
+     * @param  array         $data
+     * @return self
+     */
+    private function executeRevert(AClassContent $content, Revision $draft, array $data)
+    {
+        if ($content instanceof ContentSet) {
+            if (isset($data['elements']) && true === $data['elements']) {
+                $draft->clear();
+                foreach ($content->getData() as $element) {
+                    $draft->push($element);
+                }
+            }
+        } else {
+            foreach ($content->getData() as $key => $element) {
+                if (isset($data['elements']) && in_array($key, $data['elements'])) {
+                    $draft->$key = $content->$key;
+                }
+            }
+        }
+
+        if (isset($data['parameters'])) {
+            foreach ($content->getDefaultParams() as $key => $params) {
+                if (in_array($key, $data['parameters'])) {
+                    $draft->setParam($key, $content->getParamValue($key));
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Runs revert post action on content and its draft.
+     *
+     * @param  AClassContent $content
+     * @param  Revision      $draft
+     * @return self
+     */
+    private function revertPostProcess(AClassContent $content, Revision $draft)
+    {
+        $data = $draft->jsonSerialize();
+        if (0 === count($data['parameters']) && 0 === count($data['elements'])) {
+            $this->em->remove($draft);
+
+            if (AClassContent::STATE_NEW === $content->getState()) {
+                $this->em->remove($content);
+            }
+        }
     }
 }

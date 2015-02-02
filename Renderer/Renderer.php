@@ -919,7 +919,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             }
 
             $this->assign($this->_object->getData());
-            $this->setParam($this->_object->getParam());
+            $this->setParam($this->_object->getAllParams());
         }
 
         if (null !== $application) {

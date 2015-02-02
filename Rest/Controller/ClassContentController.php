@@ -312,7 +312,68 @@ class ClassContentController extends ARestController
             ->getAllDrafts($this->getApplication()->getBBUserToken())
         ;
 
+        $contents = $this->sortDraftCollection($contents);
+
         return $this->addContentRangeHeadersToResponse($this->createJsonResponse($contents), $contents, 0);
+    }
+
+    /**
+     * Updates a classcontent's draft.
+     *
+     * @param  string $type type of the class content (ex: Element/text)
+     * @param  string $uid  identifier of the class content
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function putDraftAction($type, $uid, Request $request)
+    {
+        $this->updateClassContentDraft($type, $uid, $request->request->all());
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse(null, 204);
+    }
+
+    /**
+     * Updates collection of classcontents' drafts.
+     *
+     * @param  Request $request
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function putDraftCollectionAction(Request $request)
+    {
+        $result = [];
+        foreach ($request->request->all() as $data) {
+            if (!isset($data['type']) || !isset($data['uid'])) {
+                throw new BadRequestHttpException("type and/or uid is missing.");
+            }
+
+            try {
+                $content = $this->updateClassContentDraft($data['type'], $data['uid'], $data);
+                $result[] = [
+                    'uid'        => $content->getUid(),
+                    'type'       => $content->getContentType(),
+                    'statusCode' => 200,
+                    'message'    => 'OK',
+                ];
+            } catch (AccessDeniedException $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'type'       => $data['type'],
+                    'statusCode' => 401,
+                    'message'    => $e->getMessage(),
+                ];
+            } catch (\Exception $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'type'       => $data['type'],
+                    'statusCode' => 500,
+                    'message'    => $e->getMessage(),
+                ];
+            }
+        }
+
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse($result);
     }
 
     /**
@@ -342,6 +403,57 @@ class ClassContentController extends ARestController
     }
 
     /**
+     * Sorts the provided array that contains current logged user's drafts.
+     *
+     * @param  array  $drafts
+     * @return array
+     */
+    private function sortDraftCollection(array $drafts)
+    {
+        $sortedDrafts = [];
+        foreach ($drafts as $draft) {
+            $sortedDrafts[$draft->getContent()->getUid()] = [$draft->getContent()->getUid() => $draft];
+        }
+
+        foreach ($drafts as $draft) {
+            foreach ($draft->getContent()->getData() as $key => $element) {
+                if (
+                    is_object($element)
+                    && $element instanceof AClassContent
+                    && in_array($element->getUid(), array_keys($sortedDrafts))
+                ) {
+                    $elementUid = $element->getUid();
+                    $sortedDrafts[$draft->getContent()->getUid()][$key] = $sortedDrafts[$elementUid][$elementUid];
+                }
+            }
+        }
+
+        $drafts = [];
+        foreach ($sortedDrafts as $key => $data) {
+            if (!array_key_exists($key, $drafts)) {
+                $drafts[$key] = $data;
+            }
+
+            foreach ($data as $elementName => $draft) {
+                if ($key === $elementName) {
+                    continue;
+                }
+
+                if (false === $drafts[$key]) {
+                    $drafts[$draft->getContent()->getUid()] = false;
+                } elseif (isset($sortedDrafts[$draft->getContent()->getUid()])) {
+                    $drafts[$key][$elementName] = $sortedDrafts[$draft->getContent()->getUid()];
+                    $drafts[$draft->getContent()->getUid()] = false;
+                }
+            }
+        }
+
+        return array_filter($drafts);
+    }
+
+    /**
+     * Updates and returns content and its draft according to provided data.
+     *
      * @param  string $type
      * @param  string $uid
      * @param  array $data
@@ -352,6 +464,28 @@ class ClassContentController extends ARestController
         $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true, true);
         $this->granted('EDIT', $content);
         $this->getClassContentManager()->update($content, $data);
+
+        return $content;
+    }
+
+    /**
+     * Commits or reverts content's draft according to provided data.
+     *
+     * @param  string $type
+     * @param  string $uid
+     * @param  array  $data
+     * @return AClassContent
+     */
+    private function updateClassContentDraft($type, $uid, $data)
+    {
+        $this->granted('VIEW', $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid));
+
+        $operation = $data['operation'];
+        if (!in_array($operation, ['commit', 'revert'])) {
+            throw new BadRequestHttpException(sprintf('%s is not a valid operation for update draft.', $operation));
+        }
+
+        $this->getClassContentManager()->$operation($content, $data);
 
         return $content;
     }

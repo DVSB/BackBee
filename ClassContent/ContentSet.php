@@ -460,64 +460,6 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         }
     }
 
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*                   Implementation of Serializable                       */
-    /*                                                                        */
-    /*     * **************************************************************** */
-
-    /**
-     * Initialized the instance from a serialized string
-     * @param  string                                                   $serialized
-     * @param  Boolean                                                  $strict     If TRUE, all missing or additionnal element will generate an error
-     * @return \BackBee\ClassContent\AClassContent                      The current instance
-     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
-     *                                                                             property does not match an element
-     */
-    public function unserialize($serialized, $strict = false)
-    {
-        if (false === is_object($serialized)) {
-            $serialized = json_decode($serialized);
-        }
-
-        foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_'.$property;
-
-            if (true === in_array($property, array('_created', '_modified')) || null === $value) {
-                continue;
-            } elseif ('_param' === $property) {
-                foreach ($value as $param => $paramvalue) {
-                    $this->setParam($param, $paramvalue);
-                }
-            } elseif ('_data' === $property) {
-                $this->clear();
-                foreach ($value as $val) {
-                    $this->push($val);
-                }
-            } elseif (false === property_exists($this, $property) && true === $strict) {
-                throw new Exception\UnknownPropertyException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this->_getContentInstance())));
-            }
-        }
-
-        return $this;
-    }
-
-    public function toJson($return_array = false)
-    {
-        $datas = array('elements' => array());
-
-        foreach ($this->getData() as $content) {
-            $datas['elements'][] = array(
-                'uid'  => $content->getUid(),
-                'type' => str_replace('BackBee\ClassContent\\', '', get_class($content)),
-            );
-        }
-
-        $datas = array_merge(parent::toJson(true), $datas);
-
-        return false === $return_array ? json_encode($datas) : $datas;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -624,14 +566,15 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * {@inheritdoc}
      */
-    protected function defineParam($var, array $options = null)
+    protected function defineParam($var, $options = null)
     {
+        parent::defineParam($var, $options);
+
         if ('accept' === $var) {
             if (null !== $options) {
-                return $this->_addAcceptedType($options['value']);
+                $this->_addAcceptedType($this->getParamValue('accept'));
+                $this->setParam('accept', null);
             }
-        } else {
-            parent::defineParam($var, $options);
         }
 
         return $this;
