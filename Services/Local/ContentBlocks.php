@@ -565,16 +565,12 @@ class ContentBlocks extends AbstractServiceLocal
 
         if (false === ($content instanceof \BackBuilder\ClassContent\ContentSet)) {
             $renderer = $this->bbapp->getRenderer();
+            $content->populateEmptyElement(false);
 
             foreach ($content->getData() as $key => $subcontent) {
                 $result->bb5_form->$key = new \StdClass();
                 $result->bb5_form->$key->bb5_value = array();
                 $result->bb5_form->$key->bb5_uid = array();
-
-                if (NULL === $content->$key) {
-                    $newContent = $content->getAcceptedType($key);
-                    $subcontent = new $newContent();
-                }
 
                 $subcontent = (!is_array($subcontent)) ? array($subcontent) : $subcontent;
                 foreach ($subcontent as $index => $value) {

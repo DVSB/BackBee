@@ -179,7 +179,16 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             if (true === $this->_isAccepted($value, $var)) {
                 $type = $this->_getType($value);
 
-                if (true === is_object($value) && $value instanceof AClassContent) {
+                // Don't set empty element
+                if (
+                        is_object($value) &&
+                        $value->isElementContent() &&
+                        '' === $value->__toString()
+                ) {
+                    $value = null;
+                }
+
+                if ($value instanceof AClassContent) {
                     $value = $this->_addSubcontent($value);
                 }
 
@@ -554,14 +563,44 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
+     * Populates empty elements with new instance of attended content type
+     * @param boolean               $withNewInstance    If TRUE (default) populate with a new instance, 
+     *                                                  if FALSE populate with a descriptive array of a content
+     */
+    public function populateEmptyElement($withNewInstance = true)
+    {
+        if ($this->_getContentInstance() instanceof ContentSet) {
+            return;
+        }
+
+        foreach (array_keys($this->_data) as $var) {
+            if (!empty($this->$var)) {
+                continue;
+            }
+
+            $type = $this->_getContentInstance()->getAcceptedType($var);
+            if (in_array($type, array('scalar', 'array', null))) {
+                continue;
+            }
+
+            if (true === $withNewInstance) {
+                $this->_data[$var] = array(new $type(null, $this->_getContentInstance()->getDefaultOptions($var)));
+            } else {
+                $this->_data[$var] = array(array($type => md5(uniqid('', true))));
+            }
+        }
+    }
+
+    /**
      * Return a subcontent instance by its type and value, FALSE if not found
-     * @param  string                                        $type  The classname of the subcontent
-     * @param  string                                        $value The value of the subcontent (uid)
+     * @param  string                                        $type      The classname of the subcontent
+     * @param  string                                        $value     The value of the subcontent (uid)
+     * @param  array                                         $options   Optional, the contextual options
      * @return \BackBuilder\ClassContent\AClassContent|FALSE
      */
-    protected function _getContentByDataValue($type, $value)
+    protected function _getContentByDataValue($type, $value, $options = null)
     {
-        return new $type($value);
+        return new $type($value, $options);
     }
 
     /**
@@ -782,7 +821,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
                     throw new \BackBuilder\AutoLoader\Exception\ClassNotFoundException(sprintf('Unknown class content %s.', $type));
                 }
 
-                if (false !== $subcontent = $this->_getContentByDataValue($type, $value)) {
+                $defaultOptions = $this->_getContentInstance()->getDefaultOptions($var, array('label' => '', 'aloha' => ''));
+                if (false !== $subcontent = $this->_getContentByDataValue($type, $value, $defaultOptions)) {
                     $data[] = $subcontent;
                 }
             } else {

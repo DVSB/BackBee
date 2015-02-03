@@ -254,8 +254,12 @@ class datacontent extends AHelper
                             $parentClassName = $contentParent->getType();
                             $fakeParent = new $parentClassName();
                             $contentData = $fakeParent->{$elementname};
-                            $rteconf = $contentData->getParam("aloha", "scalar");
-                            $isEditable = (boolean) $contentData->getParam("editable", "boolean");
+                            $rteconf = null;
+                            $isEditable = false;
+                            if (null !== $contentData) {
+                                $rteconf = $contentData->getParam("aloha", "scalar");
+                                $isEditable = (boolean) $contentData->getParam("editable", "boolean");
+                            }
                             if (!is_null($rteconf) && $isEditable == TRUE) {
                                 $this->_addValueToAttribute('data-rteconf', $rteconf);
                             }

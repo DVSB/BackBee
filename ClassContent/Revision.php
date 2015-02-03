@@ -160,19 +160,38 @@ class Revision extends AContent implements \Iterator, \Countable
 
     /**
      * Return a subcontent instance by its type and value, FALSE if not found
-     * @param  string                                        $type  The classname of the subcontent
-     * @param  string                                        $value The value of the subcontent (uid)
+     * @param  string                                        $type      The classname of the subcontent
+     * @param  string                                        $value     The value of the subcontent (uid)
+     * @param  array                                         $options   Optional, the contextual options
      * @return \BackBuilder\ClassContent\AClassContent|FALSE
      */
-    protected function _getContentByDataValue($type, $value)
+    protected function _getContentByDataValue($type, $value, $options = null)
     {
-        $element = new $type($value);
+        $element = new $type($value, $options);
 
         if (null !== $this->_em) {
             $element = $this->_em->getRepository($type)->load($element, $this->_token);
         }
 
         return $element;
+    }
+
+    /**
+     * Returns contextual options defined for $var or all options if $var is null
+     * @param string $var               Optional, an element name
+     * @param array $intersect_with     Optional, filter the returned options with provided keys
+     * @return array|NULL
+     */
+    public function getDefaultOptions($var = null)
+    {
+        if (
+                null !== $this->getContent() &&
+                false === $this->getContent() instanceof ContentSet
+        ) {
+            return $this->getContent()->getDefaultOptions($var);
+        }
+
+        return null;
     }
 
     /*     * **************************************************************** */
@@ -323,6 +342,29 @@ class Revision extends AContent implements \Iterator, \Countable
         }
 
         return $this;
+    }
+
+    /**
+     * Initializes datas on postLoad doctrine event
+     * @codeCoverageIgnore
+     */
+    public function postLoad()
+    {
+        parent::postLoad();
+
+        // For draft automaticaly populates empty elements
+        if (true === $this->isDraft()) {
+            $this->populateEmptyElement(false);
+        }
+    }
+
+    /**
+     * Is this revision a draft? (i.e a not commited or deleted revision with a valid content)
+     * @return boolean
+     */
+    public function isDraft()
+    {
+        return null !== $this->getContent() && false === in_array($this->getState(), array(self::STATE_COMMITTED, self::STATE_DELETED));
     }
 
     /*     * ************************************************************************ */

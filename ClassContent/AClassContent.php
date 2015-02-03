@@ -150,6 +150,12 @@ abstract class AClassContent extends AContent
     protected $_isloaded;
 
     /**
+     * Store contextual options for elements define in yml file
+     * @var array
+     */
+    protected $defaultOptions = [];
+
+    /**
      * Class constructor
      * @param string $uid     The unique identifier of the content
      * @param array  $options Initial options for the content:
@@ -169,6 +175,24 @@ abstract class AClassContent extends AContent
         $this->_state = self::STATE_NEW;
 
         $this->_setOptions($options);
+    }
+
+    /**
+     * Returns contextual options defined for $var or all options if $var is null
+     * @param string $var               Optional, an element name
+     * @param array $intersectWith      Optional, filter the returned options with provided keys
+     * @return array|NULL
+     */
+    public function getDefaultOptions($var = null, array $intersectWith = null)
+    {
+        if (null === $var) {
+            return $this->defaultOptions;
+        }
+
+        if (isset($this->defaultOptions[$var])) {
+            return null === $intersectWith ? $this->defaultOptions[$var] : array_intersect_key($this->defaultOptions[$var], $intersectWith);
+        }
+        return null;
     }
 
     /**
@@ -531,6 +555,7 @@ abstract class AClassContent extends AContent
             $this->_addAcceptedType($type, $var);
         }
 
+        $this->defaultOptions[$var] = $options;
         if (false === array_key_exists($var, $this->_data)) {
             $this->_data[$var] = array();
             $this->_maxentry[$var] = (!is_null($options) && isset($options['maxentry'])) ? $options['maxentry'] : 1;
@@ -960,6 +985,8 @@ abstract class AClassContent extends AContent
                     if (is_array($cValue)) {
                         $contentUid = array_values($cValue);
                         $contentUid = end($contentUid);
+                    } else {
+                        $contentUid = $cValue;
                     }
 
                     if ($subContent->getUid() == $contentUid) {
@@ -1024,13 +1051,14 @@ abstract class AClassContent extends AContent
 
     /**
      * Returns a subcontent instance by its type and value, FALSE if not found
-     * @param  string                                        $type  The classname of the subcontent
-     * @param  string                                        $value The value of the subcontent (uid)
+     * @param  string                                        $type      The classname of the subcontent
+     * @param  string                                        $value     The value of the subcontent (uid)
+     * @param  array                                         $options   Optional, the contextual options
      * @return \BackBuilder\ClassContent\AClassContent|FALSE
      */
-    protected function _getContentByDataValue($type, $value)
+    protected function _getContentByDataValue($type, $value, $options = null)
     {
-        if (true === class_exists($type)) {
+        if (class_exists($type)) {
             $index = 0;
             foreach ($this->_subcontent as $subcontent) {
                 $this->_subcontentmap[$subcontent->getUid()] = $index++;
@@ -1045,16 +1073,22 @@ abstract class AClassContent extends AContent
     }
 
     /**
-     * ??????????????????????????????
+     * Returns the accepted type for the element $var
+     * @param string $var
+     * @return $string
      */
     public function getAcceptedType($var)
     {
-        $accepts = ($this->getAccept());
-        if (isset($accepts[$var]) && !empty($accepts[$var])) {
-            return reset($accepts[$var]);
-        } else {
-            throw new ClassContentException(sprintf('Unknown element %s in %s.', $var, get_class($this)), ClassContentException::UNKNOWN_PROPERTY);
+        if (!isset($this->_accept[$var])) {
+            throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this->_getContentInstance())));
         }
+
+        $type = $this->_accept[$var];
+        while (is_array($type)) {
+            $type = array_shift($type);
+        }
+
+        return $type;
     }
 
     /**
